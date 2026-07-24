@@ -12,6 +12,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.file.domain.model.FileDownload;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -26,6 +27,8 @@ public interface ActivityService {
       String description,
       String executionPeriodInfo,
       String executionPeriodInfoSummary,
+      LocalDate startDate,
+      LocalDate endDate,
       boolean enableReflection,
       int traceAllowedAssociations,
       int feedbackAllowedIterations,
@@ -66,6 +69,8 @@ public interface ActivityService {
       String description,
       String executionPeriodInfo,
       String executionPeriodInfoSummary,
+      LocalDate startDate,
+      LocalDate endDate,
       Integer traceAllowedAssociations,
       Integer feedbackAllowedIterations,
       Boolean enableReflection,

@@ -39,6 +39,7 @@ import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -99,6 +100,8 @@ class ActivityServiceImplTest {
                 "<h3>Objectives</h3><p>Test activity description</p>",
                 "2026",
                 "Short label",
+                LocalDate.parse("2026-06-01"),
+                LocalDate.parse("2030-06-30"),
                 true,
                 -1,
                 -1,
@@ -172,6 +175,8 @@ class ActivityServiceImplTest {
         assertTrue(result.getDescription().isEmpty());
         assertTrue(result.getExecutionPeriodInfo().isEmpty());
         assertTrue(result.getExecutionPeriodInfoSummary().isEmpty());
+        assertTrue(result.getStartDate().isEmpty());
+        assertTrue(result.getEndDate().isEmpty());
       }
     }
 
@@ -224,6 +229,8 @@ class ActivityServiceImplTest {
                     "<p>Nouvelle description</p>",
                     "Avant entretien",
                     "Label court",
+                    LocalDate.parse("2026-06-01"),
+                    LocalDate.parse("2030-06-30"),
                     5,
                     3,
                     false,
@@ -235,6 +242,8 @@ class ActivityServiceImplTest {
             verify(draft).setDescription("<p>Nouvelle description</p>");
             verify(draft).setExecutionPeriodInfo("Avant entretien");
             verify(draft).setExecutionPeriodInfoSummary("Label court");
+            verify(draft).setStartDate(LocalDate.parse("2026-06-01"));
+            verify(draft).setEndDate(LocalDate.parse("2030-06-30"));
             verify(draft).setTraceAllowedAssociations(5);
             verify(draft).setFeedbackAllowedIterations(3);
             verify(draft).setEnableReflection(false);
@@ -248,7 +257,7 @@ class ActivityServiceImplTest {
             BddLogger.then("no field should be updated when null values are passed");
 
             activityService.updateActivityDraft(
-                draftId, null, null, null, null, null, null, null, null, null, null);
+                draftId, null, null, null, null, null, null, null, null, null, null, null, null);
 
             verify(draft, never()).setTitle(any());
             verify(draft, never()).setThematic(any());
@@ -256,6 +265,8 @@ class ActivityServiceImplTest {
             verify(draft, never()).setDescription(any());
             verify(draft, never()).setExecutionPeriodInfo(any());
             verify(draft, never()).setExecutionPeriodInfoSummary(any());
+            verify(draft, never()).setStartDate(any());
+            verify(draft, never()).setEndDate(any());
             verify(draft, never()).setTraceAllowedAssociations(anyInt());
             verify(draft, never()).setFeedbackAllowedIterations(anyInt());
             verify(draft, never()).setEnableReflection(anyBoolean());
@@ -268,7 +279,19 @@ class ActivityServiceImplTest {
             BddLogger.then("only provided fields should be updated");
 
             activityService.updateActivityDraft(
-                draftId, "Titre seul", null, null, null, null, null, null, null, null, null);
+                draftId,
+                "Titre seul",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
 
             verify(draft).setTitle("Titre seul");
             verify(draft, never()).setThematic(any());
@@ -276,6 +299,8 @@ class ActivityServiceImplTest {
             verify(draft, never()).setDescription(any());
             verify(draft, never()).setExecutionPeriodInfo(any());
             verify(draft, never()).setExecutionPeriodInfoSummary(any());
+            verify(draft, never()).setStartDate(any());
+            verify(draft, never()).setEndDate(any());
             verify(draft, never()).setTraceAllowedAssociations(anyInt());
             verify(draft, never()).setFeedbackAllowedIterations(anyInt());
             verify(draft, never()).setEnableReflection(anyBoolean());
@@ -291,7 +316,8 @@ class ActivityServiceImplTest {
 
             ActivityDraft result =
                 activityService.updateActivityDraft(
-                    draftId, "Titre", null, null, null, null, null, null, null, null, null);
+                    draftId, "Titre", null, null, null, null, null, null, null, null, null, null,
+                    null);
 
             assertEquals(savedDraft, result);
           }
@@ -314,7 +340,8 @@ class ActivityServiceImplTest {
                 UserNotAuthorizedException.class,
                 () ->
                     activityService.updateActivityDraft(
-                        draftId, "Titre", null, null, null, null, null, null, null, null, null));
+                        draftId, "Titre", null, null, null, null, null, null, null, null, null,
+                        null, null));
 
             verify(activityDraftRepository, never()).save(any());
           }
@@ -338,7 +365,8 @@ class ActivityServiceImplTest {
               ActivityDraftNotFoundException.class,
               () ->
                   activityService.updateActivityDraft(
-                      draftId, "Titre", null, null, null, null, null, null, null, null, null));
+                      draftId, "Titre", null, null, null, null, null, null, null, null, null, null,
+                      null));
 
           verify(activityDraftRepository, never()).save(any());
         }
@@ -533,11 +561,16 @@ class ActivityServiceImplTest {
             when(draft.getExecutionPeriodInfo()).thenReturn(Optional.empty());
             when(draft.getExecutionPeriodInfoSummary()).thenReturn(Optional.empty());
 
+            when(draft.getStartDate()).thenReturn(Optional.empty());
+            when(draft.getEndDate()).thenReturn(Optional.empty());
+
             Activity result = activityService.publish(draftId);
 
             assertNotNull(result);
             assertTrue(result.getExecutionPeriodInfo().isEmpty());
             assertTrue(result.getExecutionPeriodInfoSummary().isEmpty());
+            assertTrue(result.getStartDate().isEmpty());
+            assertTrue(result.getEndDate().isEmpty());
           }
 
           @Test
@@ -551,6 +584,8 @@ class ActivityServiceImplTest {
             when(draft.getDescription()).thenReturn(Optional.of("<p>Description complète</p>"));
             when(draft.getExecutionPeriodInfo()).thenReturn(Optional.of("Avant entretien"));
             when(draft.getExecutionPeriodInfoSummary()).thenReturn(Optional.of("Label court"));
+            when(draft.getStartDate()).thenReturn(Optional.of(LocalDate.parse("2026-06-01")));
+            when(draft.getEndDate()).thenReturn(Optional.of(LocalDate.parse("2030-06-30")));
             when(draft.isEnableReflection()).thenReturn(false);
             when(draft.getTraceAllowedAssociations()).thenReturn(3);
             when(draft.getFeedbackAllowedIterations()).thenReturn(5);
@@ -565,6 +600,8 @@ class ActivityServiceImplTest {
             assertEquals("<p>Description complète</p>", result.getDescription());
             assertEquals("Avant entretien", result.getExecutionPeriodInfo().get());
             assertEquals("Label court", result.getExecutionPeriodInfoSummary().get());
+            assertEquals(LocalDate.parse("2026-06-01"), result.getStartDate().get());
+            assertEquals(LocalDate.parse("2030-06-30"), result.getEndDate().get());
             assertFalse(result.isEnableReflection());
             assertEquals(3, result.getTraceAllowedAssociations());
             assertEquals(5, result.getFeedbackAllowedIterations());
@@ -665,6 +702,8 @@ class ActivityServiceImplTest {
         when(draft.getDescription()).thenReturn(Optional.of("Nouvelle description"));
         when(draft.getExecutionPeriodInfo()).thenReturn(Optional.of("Nouvelle période"));
         when(draft.getExecutionPeriodInfoSummary()).thenReturn(Optional.of("Nouveau label"));
+        when(draft.getStartDate()).thenReturn(Optional.of(LocalDate.parse("2026-06-01")));
+        when(draft.getEndDate()).thenReturn(Optional.of(LocalDate.parse("2030-06-30")));
         when(draft.getBanner()).thenReturn(Optional.empty());
         when(draft.getLinks()).thenReturn(List.of("https://example.com"));
         when(draft.isEnableReflection()).thenReturn(false);
@@ -707,6 +746,8 @@ class ActivityServiceImplTest {
           verify(existingActivity).setSummary("Nouveau résumé");
           verify(existingActivity).setExecutionPeriodInfo("Nouvelle période");
           verify(existingActivity).setExecutionPeriodInfoSummary("Nouveau label");
+          verify(existingActivity).setStartDate(LocalDate.parse("2026-06-01"));
+          verify(existingActivity).setEndDate(LocalDate.parse("2030-06-30"));
           verify(existingActivity, never()).setBanner(any());
           verify(existingActivity).setLinks(List.of("https://example.com"));
           verify(existingActivity).setStatus(EActivityStatus.PUBLISHED);
@@ -779,6 +820,8 @@ class ActivityServiceImplTest {
           verify(existingActivity).setSummary("Nouveau résumé");
           verify(existingActivity).setExecutionPeriodInfo("Nouvelle période");
           verify(existingActivity).setExecutionPeriodInfoSummary("Nouveau label");
+          verify(existingActivity).setStartDate(LocalDate.parse("2026-06-01"));
+          verify(existingActivity).setEndDate(LocalDate.parse("2030-06-30"));
           verify(existingActivity, never()).setBanner(any());
           verify(existingActivity).setLinks(List.of("https://example.com"));
           verify(existingActivity).setStatus(EActivityStatus.PUBLISHED);
@@ -1123,6 +1166,8 @@ class ActivityServiceImplTest {
                 "Description",
                 "2026",
                 null,
+                null,
+                null,
                 true,
                 -1,
                 -1,
@@ -1178,6 +1223,8 @@ class ActivityServiceImplTest {
             "Summary",
             "Description",
             "2026",
+            null,
+            null,
             null,
             true,
             -1,
@@ -1658,6 +1705,8 @@ class ActivityServiceImplTest {
     when(draft.getDescription()).thenReturn(Optional.of("<p>Description</p>"));
     when(draft.getExecutionPeriodInfo()).thenReturn(Optional.of("2026"));
     when(draft.getExecutionPeriodInfoSummary()).thenReturn(Optional.empty());
+    when(draft.getStartDate()).thenReturn(Optional.empty());
+    when(draft.getEndDate()).thenReturn(Optional.empty());
     when(draft.isEnableReflection()).thenReturn(true);
     when(draft.getTraceAllowedAssociations()).thenReturn(-1);
     when(draft.getFeedbackAllowedIterations()).thenReturn(-1);

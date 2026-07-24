@@ -9,17 +9,23 @@ import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.infrastructure.fixture.ActivityFixture;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.shared.application.adapter.mapper.OptionalMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
+import org.mockito.InjectMocks;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 class ActivityOverviewDtoMapperTest {
 
-  private final ActivityOverviewDtoMapper mapper =
-      Mappers.getMapper(ActivityOverviewDtoMapper.class);
+  @Spy private OptionalMapper optionalMapper = Mappers.getMapper(OptionalMapper.class);
+  @InjectMocks private ActivityOverviewDtoMapperImpl mapper;
 
   @Test
   void shouldMapActivityWithStatusToOverviewDTO() {

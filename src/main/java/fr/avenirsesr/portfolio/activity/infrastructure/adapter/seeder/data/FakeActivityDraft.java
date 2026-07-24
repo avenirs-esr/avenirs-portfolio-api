@@ -1,9 +1,12 @@
 package fr.avenirsesr.portfolio.activity.infrastructure.adapter.seeder.data;
 
+import static java.util.concurrent.TimeUnit.DAYS;
+
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.activity.infrastructure.adapter.model.ActivityDraftEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StaffEntity;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
 import net.datafaker.Faker;
@@ -27,6 +30,8 @@ public class FakeActivityDraft {
             faker.lorem().paragraph(2),
             faker.lorem().sentence(15),
             faker.lorem().sentence(4),
+            faker.date().past(1, DAYS).toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
+            faker.date().future(30, DAYS).toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
             faker.number().numberBetween(0, 10),
             faker.number().numberBetween(0, 10),
             faker.bool().bool(),

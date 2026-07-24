@@ -4,12 +4,13 @@ import static fr.avenirsesr.portfolio.common.validation.domain.constraints.Field
 
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
-import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
+import fr.avenirsesr.portfolio.common.temporal.infrastructure.adapter.model.PeriodEntity;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StaffEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -21,10 +22,12 @@ import lombok.Setter;
 @Table(
     name = "activity",
     indexes = {@Index(name = "idx_activity_thematic", columnList = "thematic")})
+@AttributeOverride(name = "endDate", column = @Column(name = "end_date", nullable = true))
+@AttributeOverride(name = "startDate", column = @Column(name = "start_date", nullable = true))
 @NoArgsConstructor
 @Getter
 @Setter
-public class ActivityEntity extends AvenirsBaseEntity {
+public class ActivityEntity extends PeriodEntity<LocalDate> {
 
   @Column(nullable = false, length = TITLE_LENGTH)
   private String title;
@@ -90,6 +93,8 @@ public class ActivityEntity extends AvenirsBaseEntity {
       String description,
       String executionPeriodInfo,
       String executionPeriodInfoSummary,
+      LocalDate startDate,
+      LocalDate endDate,
       int traceAllowedAssociations,
       int feedbackAllowedIterations,
       boolean enableReflection,
@@ -107,6 +112,8 @@ public class ActivityEntity extends AvenirsBaseEntity {
     this.description = description;
     this.executionPeriodInfo = executionPeriodInfo;
     this.executionPeriodInfoSummary = executionPeriodInfoSummary;
+    this.startDate = startDate;
+    this.endDate = endDate;
     this.traceAllowedAssociations = traceAllowedAssociations;
     this.feedbackAllowedIterations = feedbackAllowedIterations;
     this.enableReflection = enableReflection;
@@ -127,6 +134,8 @@ public class ActivityEntity extends AvenirsBaseEntity {
       String description,
       String executionPeriodInfo,
       String executionPeriodInfoSummary,
+      LocalDate startDate,
+      LocalDate endDate,
       int traceAllowedAssociations,
       int feedbackAllowedIterations,
       boolean enableReflection,
@@ -146,6 +155,8 @@ public class ActivityEntity extends AvenirsBaseEntity {
         description,
         executionPeriodInfo,
         executionPeriodInfoSummary,
+        startDate,
+        endDate,
         traceAllowedAssociations,
         feedbackAllowedIterations,
         enableReflection,

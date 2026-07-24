@@ -16,6 +16,7 @@ import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.fake.FakeStaff;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,6 +39,8 @@ class ActivityMapperTest {
   private final int traceAllowedAssociations = 10;
   private final int feedbackAllowedIterations = 10;
   private final boolean enableRefection = true;
+  private final LocalDate startDate = LocalDate.now();
+  private final LocalDate endDate = LocalDate.now().plusDays(7);
   private final File banner =
       File.create(
           UUID.randomUUID(),
@@ -65,6 +68,8 @@ class ActivityMapperTest {
             description,
             executionPeriodInfo,
             executionPeriodInfoSummary,
+            startDate,
+            endDate,
             enableRefection,
             traceAllowedAssociations,
             feedbackAllowedIterations,

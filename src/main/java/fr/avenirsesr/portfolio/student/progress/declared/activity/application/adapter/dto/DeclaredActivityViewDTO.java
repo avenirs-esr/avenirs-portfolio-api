@@ -25,6 +25,8 @@ public record DeclaredActivityViewDTO(
     String summary,
     String description,
     String executionPeriodInfoSummary,
+    LocalDate optionalStartDate,
+    LocalDate optionalEndDate,
     @Schema(ref = "#/components/schemas/EDeclaredActivityStatus") EDeclaredActivityStatus status,
     LocalDate startDate,
     LocalDate endDate,

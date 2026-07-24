@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.activity.application.adapter.request;
 
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.LocalDate;
 import java.util.List;
 
 @Schema()
@@ -12,6 +13,8 @@ public record ActivityDraftUpdateRequest(
     String description,
     String executionPeriodInfo,
     String executionPeriodInfoSummary,
+    LocalDate startDate,
+    LocalDate endDate,
     Integer traceAllowedAssociations,
     Integer feedbackAllowedIterations,
     Boolean enableReflection,

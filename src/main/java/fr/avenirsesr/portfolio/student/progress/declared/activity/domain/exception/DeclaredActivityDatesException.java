@@ -5,10 +5,10 @@ import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 
 public class DeclaredActivityDatesException extends BusinessException {
   public DeclaredActivityDatesException() {
-    super(EErrorCode.DECLARED_ACTIVITY_DATES);
+    super(EErrorCode.ACTIVITY_DATES);
   }
 
   public DeclaredActivityDatesException(String customMessage) {
-    super(EErrorCode.DECLARED_ACTIVITY_DATES, customMessage);
+    super(EErrorCode.ACTIVITY_DATES, customMessage);
   }
 }

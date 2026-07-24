@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +23,8 @@ public class ActivityDraft extends AvenirsBaseModel {
   private String description;
   private String executionPeriodInfo;
   private String executionPeriodInfoSummary;
+  private LocalDate startDate;
+  private LocalDate endDate;
   private File banner;
   @Getter private List<String> links;
   @Getter private List<File> files;
@@ -43,6 +46,8 @@ public class ActivityDraft extends AvenirsBaseModel {
       String description,
       String executionPeriodInfo,
       String executionPeriodInfoSummary,
+      LocalDate startDate,
+      LocalDate endDate,
       int traceAllowedAssociations,
       int feedbackAllowedIterations,
       boolean enableReflection,
@@ -57,6 +62,8 @@ public class ActivityDraft extends AvenirsBaseModel {
     this.description = description;
     this.executionPeriodInfo = executionPeriodInfo;
     this.executionPeriodInfoSummary = executionPeriodInfoSummary;
+    this.startDate = startDate;
+    this.endDate = endDate;
     this.traceAllowedAssociations = traceAllowedAssociations;
     this.enableReflection = enableReflection;
     this.feedbackAllowedIterations = feedbackAllowedIterations;
@@ -73,6 +80,8 @@ public class ActivityDraft extends AvenirsBaseModel {
         title,
         createdBy,
         EActivityThematic.TRANSVERSAL,
+        null,
+        null,
         null,
         null,
         null,
@@ -96,6 +105,8 @@ public class ActivityDraft extends AvenirsBaseModel {
       String description,
       String executionPeriodInfo,
       String executionPeriodInfoSummary,
+      LocalDate startDate,
+      LocalDate endDate,
       int traceAllowedAssociations,
       int feedbackAllowedIterations,
       boolean enableReflection,
@@ -113,6 +124,8 @@ public class ActivityDraft extends AvenirsBaseModel {
         description,
         executionPeriodInfo,
         executionPeriodInfoSummary,
+        startDate,
+        endDate,
         traceAllowedAssociations,
         feedbackAllowedIterations,
         enableReflection,
@@ -131,6 +144,14 @@ public class ActivityDraft extends AvenirsBaseModel {
 
   public Optional<String> getExecutionPeriodInfo() {
     return Optional.ofNullable(executionPeriodInfo);
+  }
+
+  public Optional<LocalDate> getStartDate() {
+    return Optional.ofNullable(startDate);
+  }
+
+  public Optional<LocalDate> getEndDate() {
+    return Optional.ofNullable(endDate);
   }
 
   public Optional<String> getExecutionPeriodInfoSummary() {

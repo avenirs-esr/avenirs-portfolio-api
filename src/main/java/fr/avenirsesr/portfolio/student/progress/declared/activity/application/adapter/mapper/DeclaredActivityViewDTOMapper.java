@@ -1,13 +1,15 @@
 package fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper;
 
+import fr.avenirsesr.portfolio.shared.application.adapter.mapper.OptionalMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.DeclaredActivityViewDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EDeclaredActivityStatus;
-import java.util.Optional;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring")
+@Mapper(
+    componentModel = "spring",
+    uses = {OptionalMapper.class})
 public interface DeclaredActivityViewDTOMapper {
 
   @Mapping(source = "declaredActivity.activity.id", target = "activityId")
@@ -18,11 +20,11 @@ public interface DeclaredActivityViewDTOMapper {
   @Mapping(
       source = "declaredActivity.activity.executionPeriodInfoSummary",
       target = "executionPeriodInfoSummary")
+  @Mapping(source = "declaredActivity.activity.startDate", target = "optionalStartDate")
+  @Mapping(source = "declaredActivity.activity.endDate", target = "optionalEndDate")
+  @Mapping(source = "declaredActivity.startDate", target = "startDate")
+  @Mapping(source = "declaredActivity.endDate", target = "endDate")
   @Mapping(source = "status", target = "status")
   @Mapping(source = "declaredActivity.valorized", target = "valorized")
   DeclaredActivityViewDTO toDTO(DeclaredActivity declaredActivity, EDeclaredActivityStatus status);
-
-  default String unwrap(Optional<String> value) {
-    return value == null ? null : value.orElse(null);
-  }
 }

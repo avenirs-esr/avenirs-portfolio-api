@@ -10,6 +10,7 @@ import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.fake.FakeStaff;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,6 +27,8 @@ public class ActivityFixture {
   private String description = "<h3>Objectives</h3><p>Default Description</p>";
   private String executionPeriodInfo = "Default Execution Period Info";
   private String executionPeriodInfoSummary = "Short Execution Period Info";
+  private LocalDate startDate = LocalDate.now();
+  private LocalDate endDate = LocalDate.now().plusDays(7);
   private int traceAllowedAssociations = 10;
   private int feedbackAllowedIterations = 10;
   private boolean enableRefection = true;
@@ -80,6 +83,16 @@ public class ActivityFixture {
     return this;
   }
 
+  public ActivityFixture withStartDate(LocalDate startDate) {
+    this.startDate = startDate;
+    return this;
+  }
+
+  public ActivityFixture withEndDate(LocalDate endDate) {
+    this.endDate = endDate;
+    return this;
+  }
+
   public ActivityFixture withTraceAllowedAssociations(int traceAllowedAssociations) {
     this.traceAllowedAssociations = traceAllowedAssociations;
     return this;
@@ -131,6 +144,8 @@ public class ActivityFixture {
         description,
         executionPeriodInfo,
         executionPeriodInfoSummary,
+        startDate,
+        endDate,
         enableRefection,
         traceAllowedAssociations,
         feedbackAllowedIterations,

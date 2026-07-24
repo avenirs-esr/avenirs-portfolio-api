@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.activity.infrastructure.adapter.seeder.data;
 
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -14,6 +15,8 @@ public record ActivityDraftCreationData(
     Optional<String> description,
     Optional<String> executionPeriodInfo,
     Optional<String> executionPeriodInfoSummary,
+    Optional<LocalDate> startDate,
+    Optional<LocalDate> endDate,
     Optional<Integer> traceAllowedAssociations,
     Optional<Integer> feedbackAllowedIterations,
     boolean enableReflection,

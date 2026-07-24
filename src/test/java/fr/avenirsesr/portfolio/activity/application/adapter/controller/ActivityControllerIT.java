@@ -13,6 +13,7 @@ import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.Aven
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
@@ -378,6 +379,8 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                     "<p>Nouvelle description</p>",
                     "Avant entretien",
                     "Label court",
+                    LocalDate.now(),
+                    LocalDate.now().plusDays(7),
                     5,
                     3,
                     false,
@@ -408,7 +411,18 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         String requestBody =
             objectMapper.writeValueAsString(
                 new ActivityDraftUpdateRequest(
-                    "Titre seul mis à jour", null, null, null, null, null, null, null, null, null));
+                    "Titre seul mis à jour",
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null));
 
         webTestClient
             .patch()
@@ -435,7 +449,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         String requestBody =
             objectMapper.writeValueAsString(
                 new ActivityDraftUpdateRequest(
-                    "Titre", null, null, null, null, null, null, null, null, null));
+                    "Titre", null, null, null, null, null, null, null, null, null, null, null));
 
         webTestClient
             .patch()
@@ -462,7 +476,18 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         String requestBody =
             objectMapper.writeValueAsString(
                 new ActivityDraftUpdateRequest(
-                    "Titre étudiant", null, null, null, null, null, null, null, null, null));
+                    "Titre étudiant",
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null));
 
         webTestClient
             .patch()
@@ -486,7 +511,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         String requestBody =
             objectMapper.writeValueAsString(
                 new ActivityDraftUpdateRequest(
-                    "Titre", null, null, null, null, null, null, null, null, null));
+                    "Titre", null, null, null, null, null, null, null, null, null, null, null));
 
         webTestClient
             .patch()
@@ -1671,6 +1696,8 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                 null,
                 null,
                 null,
+                null,
+                null,
                 null));
 
     webTestClient
@@ -1693,6 +1720,8 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                 EActivityThematic.EXPERIENCES,
                 "Un résumé valide pour la publication",
                 "Une consigne valide pour la publication",
+                null,
+                null,
                 null,
                 null,
                 null,

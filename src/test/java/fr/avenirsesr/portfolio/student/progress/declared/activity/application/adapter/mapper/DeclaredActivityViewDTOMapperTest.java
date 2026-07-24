@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.infrastructure.fixture.ActivityFixture;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.shared.application.adapter.mapper.OptionalMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.DeclaredActivityViewDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EDeclaredActivityStatus;
@@ -13,12 +14,17 @@ import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.LocalDate;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
+import org.mockito.InjectMocks;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 class DeclaredActivityViewDTOMapperTest {
 
-  private final DeclaredActivityViewDTOMapper mapper =
-      Mappers.getMapper(DeclaredActivityViewDTOMapper.class);
+  @Spy private OptionalMapper optionalMapper = Mappers.getMapper(OptionalMapper.class);
+  @InjectMocks private DeclaredActivityViewDTOMapperImpl mapper;
 
   @Test
   void shouldMapDeclaredActivityToViewDTO() {

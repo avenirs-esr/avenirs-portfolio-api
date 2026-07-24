@@ -289,6 +289,8 @@ public class ActivityController {
             body.description(),
             body.executionPeriodInfo(),
             body.executionPeriodInfoSummary(),
+            body.startDate(),
+            body.endDate(),
             body.traceAllowedAssociations(),
             body.feedbackAllowedIterations(),
             body.enableReflection(),

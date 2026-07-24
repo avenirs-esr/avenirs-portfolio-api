@@ -80,6 +80,8 @@ public class ActivitySeeder {
                             fakeActivity.getDescription(),
                             fakeActivity.getExecutionPeriodInfo(),
                             Optional.ofNullable(fakeActivity.getExecutionPeriodInfoSummary()),
+                            Optional.ofNullable(fakeActivity.getStartDate()),
+                            Optional.ofNullable(fakeActivity.getEndDate()),
                             new ActivityBannerCreationData(
                                 banner.getFileName(), banner.getFileType(), banner.getSize()),
                             fakeActivity.isEnableReflection(),
@@ -119,6 +121,8 @@ public class ActivitySeeder {
                     data.description(),
                     data.executionPeriodInfo(),
                     data.executionPeriodInfoSummary().orElse(null),
+                    data.startDate().orElse(null),
+                    data.endDate().orElse(null),
                     data.enableReflection(),
                     data.traceAllowedAssociations(),
                     data.feedbackAllowedIterations(),

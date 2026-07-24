@@ -7,6 +7,7 @@ import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValida
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityPresentationData;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityStaffOverviewData;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityWithStudentStatusData;
+import fr.avenirsesr.portfolio.activity.domain.exception.ActivityDatesException;
 import fr.avenirsesr.portfolio.activity.domain.exception.ActivityDraftNotFoundException;
 import fr.avenirsesr.portfolio.activity.domain.exception.ActivityNotFoundException;
 import fr.avenirsesr.portfolio.activity.domain.exception.ActivityUnpublishedException;
@@ -42,6 +43,7 @@ import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -80,6 +82,8 @@ public class ActivityServiceImpl implements ActivityService {
       String description,
       String executionPeriodInfo,
       String executionPeriodInfoSummary,
+      LocalDate startDate,
+      LocalDate endDate,
       boolean enableReflection,
       int traceAllowedAssociations,
       int feedbackAllowedIterations,
@@ -92,6 +96,13 @@ public class ActivityServiceImpl implements ActivityService {
         "executionPeriodInfo", executionPeriodInfo, ACTIVITY_EXECUTION_PERIOD_INFO);
     validateOptionalTextMaxLength(
         "executionPeriodInfoSummary", executionPeriodInfoSummary, TITLE_LENGTH);
+    if ((startDate == null) != (endDate == null)) {
+      throw new ActivityDatesException();
+    }
+
+    if (startDate != null) {
+      validateDateOrder(startDate, endDate);
+    }
 
     var activity =
         Activity.create(
@@ -103,6 +114,8 @@ public class ActivityServiceImpl implements ActivityService {
             description,
             executionPeriodInfo,
             executionPeriodInfoSummary,
+            startDate,
+            endDate,
             enableReflection,
             traceAllowedAssociations,
             feedbackAllowedIterations,
@@ -147,6 +160,8 @@ public class ActivityServiceImpl implements ActivityService {
                 draft.getDescription().orElseThrow(),
                 draft.getExecutionPeriodInfo().orElse(null),
                 draft.getExecutionPeriodInfoSummary().orElse(null),
+                draft.getStartDate().orElse(null),
+                draft.getEndDate().orElse(null),
                 draft.isEnableReflection(),
                 draft.getTraceAllowedAssociations(),
                 draft.getFeedbackAllowedIterations(),
@@ -218,6 +233,8 @@ public class ActivityServiceImpl implements ActivityService {
         syncs.stream().filter(FieldSync::applyIfChanged).map(FieldSync::field).distinct().toList();
 
     activity.setExecutionPeriodInfoSummary(draft.getExecutionPeriodInfoSummary().orElse(null));
+    activity.setStartDate(draft.getStartDate().orElse(null));
+    activity.setEndDate(draft.getEndDate().orElse(null));
 
     if (!hasEnrolledStudents) {
       activity.setTraceAllowedAssociations(draft.getTraceAllowedAssociations());
@@ -416,6 +433,8 @@ public class ActivityServiceImpl implements ActivityService {
       String description,
       String executionPeriodInfo,
       String executionPeriodInfoSummary,
+      LocalDate startDate,
+      LocalDate endDate,
       Integer traceAllowedAssociations,
       Integer feedbackAllowedIterations,
       Boolean enableReflection,
@@ -434,6 +453,12 @@ public class ActivityServiceImpl implements ActivityService {
         "executionPeriodInfo", executionPeriodInfo, ACTIVITY_EXECUTION_PERIOD_INFO);
     validateOptionalTextMaxLength(
         "executionPeriodInfoSummary", executionPeriodInfoSummary, TITLE_LENGTH);
+    if (startDate != null) {
+      validateDateOrder(startDate, endDate);
+    }
+    if ((startDate == null) != (endDate == null)) {
+      throw new ActivityDatesException();
+    }
 
     if (title != null) {
       requireNotBlankAndMaxLength("title", title, TITLE_LENGTH);
@@ -445,6 +470,8 @@ public class ActivityServiceImpl implements ActivityService {
     if (executionPeriodInfo != null) draft.setExecutionPeriodInfo(executionPeriodInfo);
     if (executionPeriodInfoSummary != null)
       draft.setExecutionPeriodInfoSummary(executionPeriodInfoSummary);
+    if (startDate != null) draft.setStartDate(startDate);
+    if (endDate != null) draft.setEndDate(endDate);
 
     if (!hasEnrolledStudents(draft)) {
       if (traceAllowedAssociations != null)
@@ -490,6 +517,8 @@ public class ActivityServiceImpl implements ActivityService {
             activity.getDescription(),
             activity.getExecutionPeriodInfo().orElse(null),
             activity.getExecutionPeriodInfoSummary().orElse(null),
+            activity.getStartDate().orElse(null),
+            activity.getEndDate().orElse(null),
             activity.getTraceAllowedAssociations(),
             activity.getFeedbackAllowedIterations(),
             activity.isEnableReflection(),
