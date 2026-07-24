@@ -40,7 +40,7 @@ public interface DeclaredActivityService {
 
   void deleteAssociations(UUID declaredActivityId, List<UUID> idsToDelete);
 
-  void updateDeclaredActivityDates(UUID declaredActivityId, LocalDate startDate, LocalDate endDate);
+  void updateDeclaredActivity(UUID declaredActivityId, LocalDate startDate, LocalDate endDate);
 
   PagedResult<DeclaredActivity> searchDeclaredActivity(String keyword, PageCriteria pageCriteria);
 
