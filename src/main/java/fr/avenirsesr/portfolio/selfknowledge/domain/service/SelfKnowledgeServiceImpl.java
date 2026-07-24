@@ -37,7 +37,7 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
 
   @Override
   public PagedResult<SelfKnowledgeElement> getSelfKnowledgeElements(
-      UUID selfKnowledgeCategoryId, PageCriteria pageCriteria) {
+      UUID selfKnowledgeCategoryId, PageCriteria pageCriteria, Boolean isValorized) {
     Student student = loggedInUserService.getLoggedInStudent();
 
     selfKnowledgeCategoryRepository
@@ -45,7 +45,7 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
         .orElseThrow(SelfKnowledgeCategoryNotFoundException::new);
 
     return selfKnowledgeElementRepository.findAllByStudentIdAndCategoryId(
-        student.getId(), selfKnowledgeCategoryId, pageCriteria);
+        student.getId(), selfKnowledgeCategoryId, pageCriteria, isValorized);
   }
 
   @Override

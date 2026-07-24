@@ -12,7 +12,7 @@ import java.util.UUID;
 
 public interface SelfKnowledgeService {
   PagedResult<SelfKnowledgeElement> getSelfKnowledgeElements(
-      UUID selfKnowledgeCategoryId, PageCriteria pageCriteria);
+      UUID selfKnowledgeCategoryId, PageCriteria pageCriteria, Boolean isValorized);
 
   SelfKnowledgeElementDetails getSelfKnowledgeElementDetails(UUID selfKnowledgeElementId);
 

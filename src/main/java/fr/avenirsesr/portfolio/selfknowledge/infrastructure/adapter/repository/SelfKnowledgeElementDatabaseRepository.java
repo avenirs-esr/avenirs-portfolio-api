@@ -36,12 +36,16 @@ public class SelfKnowledgeElementDatabaseRepository
 
   @Override
   public PagedResult<SelfKnowledgeElement> findAllByStudentIdAndCategoryId(
-      UUID studentId, UUID selfKnowledgeCategoryId, PageCriteria pageCriteria) {
+      UUID studentId,
+      UUID selfKnowledgeCategoryId,
+      PageCriteria pageCriteria,
+      Boolean isValorized) {
     Specification<SelfKnowledgeElementEntity> spec =
         SelfKnowledgeElementSpecification.hasStudentId(studentId)
             .and(
                 SelfKnowledgeElementSpecification.hasSelfKnowledgeCategoryId(
-                    selfKnowledgeCategoryId));
+                    selfKnowledgeCategoryId))
+            .and(SelfKnowledgeElementSpecification.isValorized(isValorized));
     return findAll(spec, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()));
   }
 
