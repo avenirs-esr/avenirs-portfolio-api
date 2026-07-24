@@ -48,8 +48,9 @@ public class DeclaredSkillProgressDatabaseRepository
 
   @Override
   public PagedResult<DeclaredSkillProgress> findAllByStudent(
-      Student student, PageCriteria pageCriteria, SortCriteria sortCriteria) {
-    var specification = hasStudent(student);
+      Student student, PageCriteria pageCriteria, Boolean isValorized, SortCriteria sortCriteria) {
+    var specification =
+        hasStudent(student).and(DeclaredSkillProgressSpecification.isValorized(isValorized));
     return findAll(
         specification,
         PageRequest.of(

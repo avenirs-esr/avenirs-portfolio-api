@@ -45,14 +45,17 @@ public class DeclaredSkillProgressController {
   public ResponseEntity<PagedResponse<DeclaredSkillProgressDTO>> getDeclaredSkillsProgresses(
       Principal principal,
       @RequestParam(required = false) Integer page,
-      @RequestParam(required = false) Integer pageSize) {
+      @RequestParam(required = false) Integer pageSize,
+      @RequestParam(required = false) Boolean isValorized) {
     var pageCriteria = new PageCriteria(page, pageSize);
     log.debug(
-        "Received request to trace overview of user [{}] (page= {}, fileSize= {})",
+        "Received request to trace overview of user [{}] (page= {}, fileSize= {}, isValorized={})",
         principal.getName(),
         pageCriteria.page(),
-        pageCriteria.pageSize());
-    var result = declaredSkillProgressService.getDeclaredSkillsProgresses(pageCriteria);
+        pageCriteria.pageSize(),
+        isValorized);
+    var result =
+        declaredSkillProgressService.getDeclaredSkillsProgresses(pageCriteria, isValorized);
     return ResponseEntity.ok(
         new PagedResponse<>(
             result.content().stream()

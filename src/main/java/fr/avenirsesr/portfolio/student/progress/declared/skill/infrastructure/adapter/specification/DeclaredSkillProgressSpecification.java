@@ -30,6 +30,15 @@ public class DeclaredSkillProgressSpecification {
     };
   }
 
+  public static Specification<DeclaredSkillProgressEntity> isValorized(Boolean isValorized) {
+    return (root, query, criteriaBuilder) -> {
+      if (isValorized == null) {
+        return criteriaBuilder.conjunction();
+      }
+      return criteriaBuilder.equal(root.get("valorized"), isValorized);
+    };
+  }
+
   public static Sort toSort(SortCriteria sortCriteria) {
     if (sortCriteria == null) {
       return Sort.unsorted();

@@ -14,7 +14,8 @@ import java.util.UUID;
 
 public interface DeclaredSkillProgressService {
 
-  PagedResult<DeclaredSkillProgress> getDeclaredSkillsProgresses(PageCriteria criteria);
+  PagedResult<DeclaredSkillProgress> getDeclaredSkillsProgresses(
+      PageCriteria criteria, Boolean isValorized);
 
   DeclaredSkillProgress createDeclaredSkillProgress(
       UUID declaredSkillId, EExternalSkillType type, EDeclaredSkillLevel level, String reflection);

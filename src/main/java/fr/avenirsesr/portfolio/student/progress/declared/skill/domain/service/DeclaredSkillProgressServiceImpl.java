@@ -59,10 +59,11 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
   private final AssociationSearchHelper associationSearchHelper;
 
   @Override
-  public PagedResult<DeclaredSkillProgress> getDeclaredSkillsProgresses(PageCriteria pageCriteria) {
+  public PagedResult<DeclaredSkillProgress> getDeclaredSkillsProgresses(
+      PageCriteria pageCriteria, Boolean isValorized) {
     Student student = loggedInUserService.getLoggedInStudent();
     return declaredSkillProgressRepository.findAllByStudent(
-        student, pageCriteria, new SortCriteria(ESortField.NAME, ESortOrder.ASC));
+        student, pageCriteria, isValorized, new SortCriteria(ESortField.NAME, ESortOrder.ASC));
   }
 
   @Override
