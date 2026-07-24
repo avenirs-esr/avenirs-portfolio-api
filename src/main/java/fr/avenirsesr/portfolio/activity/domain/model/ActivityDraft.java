@@ -22,7 +22,6 @@ public class ActivityDraft extends AvenirsBaseModel {
   private String summary;
   private String description;
   private String executionPeriodInfo;
-  private String executionPeriodInfoSummary;
   private LocalDate startDate;
   private LocalDate endDate;
   private File banner;
@@ -45,7 +44,6 @@ public class ActivityDraft extends AvenirsBaseModel {
       String summary,
       String description,
       String executionPeriodInfo,
-      String executionPeriodInfoSummary,
       LocalDate startDate,
       LocalDate endDate,
       int traceAllowedAssociations,
@@ -61,7 +59,6 @@ public class ActivityDraft extends AvenirsBaseModel {
     this.summary = summary;
     this.description = description;
     this.executionPeriodInfo = executionPeriodInfo;
-    this.executionPeriodInfoSummary = executionPeriodInfoSummary;
     this.startDate = startDate;
     this.endDate = endDate;
     this.traceAllowedAssociations = traceAllowedAssociations;
@@ -85,7 +82,6 @@ public class ActivityDraft extends AvenirsBaseModel {
         null,
         null,
         null,
-        null,
         DEFAULT_TRACE_ALLOWED_ASSOCIATION,
         DEFAULT_FEEDBACK_ALLOWED_ITERATIONS,
         true,
@@ -104,7 +100,6 @@ public class ActivityDraft extends AvenirsBaseModel {
       String summary,
       String description,
       String executionPeriodInfo,
-      String executionPeriodInfoSummary,
       LocalDate startDate,
       LocalDate endDate,
       int traceAllowedAssociations,
@@ -123,7 +118,6 @@ public class ActivityDraft extends AvenirsBaseModel {
         summary,
         description,
         executionPeriodInfo,
-        executionPeriodInfoSummary,
         startDate,
         endDate,
         traceAllowedAssociations,
@@ -152,10 +146,6 @@ public class ActivityDraft extends AvenirsBaseModel {
 
   public Optional<LocalDate> getEndDate() {
     return Optional.ofNullable(endDate);
-  }
-
-  public Optional<String> getExecutionPeriodInfoSummary() {
-    return Optional.ofNullable(executionPeriodInfoSummary);
   }
 
   public Optional<File> getBanner() {

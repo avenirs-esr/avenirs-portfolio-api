@@ -26,7 +26,6 @@ public class ActivityFixture {
   private String summary = "Default Summary";
   private String description = "<h3>Objectives</h3><p>Default Description</p>";
   private String executionPeriodInfo = "Default Execution Period Info";
-  private String executionPeriodInfoSummary = "Short Execution Period Info";
   private LocalDate startDate = LocalDate.now();
   private LocalDate endDate = LocalDate.now().plusDays(7);
   private int traceAllowedAssociations = 10;
@@ -75,11 +74,6 @@ public class ActivityFixture {
 
   public ActivityFixture withExecutionPeriodInfo(String executionPeriodInfo) {
     this.executionPeriodInfo = executionPeriodInfo;
-    return this;
-  }
-
-  public ActivityFixture withExecutionPeriodInfoSummary(String executionPeriodInfoSummary) {
-    this.executionPeriodInfoSummary = executionPeriodInfoSummary;
     return this;
   }
 
@@ -143,7 +137,6 @@ public class ActivityFixture {
         status,
         description,
         executionPeriodInfo,
-        executionPeriodInfoSummary,
         startDate,
         endDate,
         enableRefection,

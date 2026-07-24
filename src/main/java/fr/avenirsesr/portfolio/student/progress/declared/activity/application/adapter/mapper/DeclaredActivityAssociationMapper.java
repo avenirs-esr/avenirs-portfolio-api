@@ -25,7 +25,6 @@ public interface DeclaredActivityAssociationMapper {
         declaredActivity.getActivity().getThematic(),
         declaredActivity.getActivity().getSummary(),
         declaredActivity.getActivity().getDescription(),
-        declaredActivity.getActivity().getExecutionPeriodInfoSummary().orElse(null),
         declaredActivity.getActivity().getStartDate().orElse(null),
         declaredActivity.getActivity().getEndDate().orElse(null),
         status,

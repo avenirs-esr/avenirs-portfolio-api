@@ -17,9 +17,6 @@ public interface DeclaredActivityViewDTOMapper {
   @Mapping(source = "declaredActivity.activity.thematic", target = "thematic")
   @Mapping(source = "declaredActivity.activity.summary", target = "summary")
   @Mapping(source = "declaredActivity.activity.description", target = "description")
-  @Mapping(
-      source = "declaredActivity.activity.executionPeriodInfoSummary",
-      target = "executionPeriodInfoSummary")
   @Mapping(source = "declaredActivity.activity.startDate", target = "optionalStartDate")
   @Mapping(source = "declaredActivity.activity.endDate", target = "optionalEndDate")
   @Mapping(source = "declaredActivity.startDate", target = "startDate")

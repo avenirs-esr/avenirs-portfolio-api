@@ -95,7 +95,6 @@ class ActivityControllerTest {
                 null,
                 null,
                 null,
-                null,
                 false));
 
     BddLogger.when("getting activities view without thematic");
@@ -131,7 +130,7 @@ class ActivityControllerTest {
     when(activityOverviewDtoMapper.toDTO(data))
         .thenReturn(
             new ActivityOverviewDTO(
-                activity.getId(), AUTHOR, null, null, null, null, null, null, null, false));
+                activity.getId(), AUTHOR, null, null, null, null, null, null, false));
 
     BddLogger.when("getting activities view with thematic");
     var response = controller.getActivitiesView(principal, 0, 10, EActivityThematic.EXPERIENCES);
@@ -187,7 +186,7 @@ class ActivityControllerTest {
     when(activityOverviewDtoMapper.toDTO(data))
         .thenReturn(
             new ActivityOverviewDTO(
-                activity.getId(), AUTHOR, null, null, null, null, null, null, null, false));
+                activity.getId(), AUTHOR, null, null, null, null, null, null, false));
 
     BddLogger.when("getting latest activities view");
     var response = controller.getLatestActivitiesView(principal, 0, 10);
@@ -220,7 +219,7 @@ class ActivityControllerTest {
     when(activityOverviewDtoMapper.toDTO(data))
         .thenReturn(
             new ActivityOverviewDTO(
-                activity.getId(), AUTHOR, null, null, null, null, null, null, null, false));
+                activity.getId(), AUTHOR, null, null, null, null, null, null, false));
 
     BddLogger.when("getting latest activities view");
     var response = controller.getLatestActivitiesView(principal, 0, 10);
@@ -257,11 +256,11 @@ class ActivityControllerTest {
     when(activityOverviewDtoMapper.toDTO(dataList.get(0)))
         .thenReturn(
             new ActivityOverviewDTO(
-                activity.getId(), AUTHOR, null, null, null, null, null, null, null, false));
+                activity.getId(), AUTHOR, null, null, null, null, null, null, false));
     when(activityOverviewDtoMapper.toDTO(dataList.get(1)))
         .thenReturn(
             new ActivityOverviewDTO(
-                activity2.getId(), AUTHOR, null, null, null, null, null, null, null, false));
+                activity2.getId(), AUTHOR, null, null, null, null, null, null, false));
 
     BddLogger.when("getting latest activities view");
     var response = controller.getLatestActivitiesView(principal, 0, 10);

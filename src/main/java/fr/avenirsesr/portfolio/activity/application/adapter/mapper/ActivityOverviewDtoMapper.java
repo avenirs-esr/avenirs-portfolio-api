@@ -17,7 +17,6 @@ public interface ActivityOverviewDtoMapper {
   @Mapping(source = "activity.title", target = "title")
   @Mapping(source = "activity.thematic", target = "thematic")
   @Mapping(source = "activity.summary", target = "summary")
-  @Mapping(source = "activity.executionPeriodInfoSummary", target = "executionPeriodInfoSummary")
   @Mapping(source = "activity.startDate", target = "startDate")
   @Mapping(source = "activity.endDate", target = "endDate")
   @Mapping(source = "activity.author", target = "author")

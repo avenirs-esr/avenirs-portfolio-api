@@ -14,7 +14,6 @@ public record ActivityDraftCreationData(
     Optional<String> summary,
     Optional<String> description,
     Optional<String> executionPeriodInfo,
-    Optional<String> executionPeriodInfoSummary,
     Optional<LocalDate> startDate,
     Optional<LocalDate> endDate,
     Optional<Integer> traceAllowedAssociations,

@@ -378,7 +378,6 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                     "Nouveau summary",
                     "<p>Nouvelle description</p>",
                     "Avant entretien",
-                    "Label court",
                     LocalDate.now(),
                     LocalDate.now().plusDays(7),
                     5,
@@ -421,7 +420,6 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                     null,
                     null,
                     null,
-                    null,
                     null));
 
         webTestClient
@@ -449,7 +447,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         String requestBody =
             objectMapper.writeValueAsString(
                 new ActivityDraftUpdateRequest(
-                    "Titre", null, null, null, null, null, null, null, null, null, null, null));
+                    "Titre", null, null, null, null, null, null, null, null, null, null));
 
         webTestClient
             .patch()
@@ -476,18 +474,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         String requestBody =
             objectMapper.writeValueAsString(
                 new ActivityDraftUpdateRequest(
-                    "Titre étudiant",
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null));
+                    "Titre étudiant", null, null, null, null, null, null, null, null, null, null));
 
         webTestClient
             .patch()
@@ -511,7 +498,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         String requestBody =
             objectMapper.writeValueAsString(
                 new ActivityDraftUpdateRequest(
-                    "Titre", null, null, null, null, null, null, null, null, null, null, null));
+                    "Titre", null, null, null, null, null, null, null, null, null, null));
 
         webTestClient
             .patch()
@@ -1697,7 +1684,6 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                 null,
                 null,
                 null,
-                null,
                 null));
 
     webTestClient
@@ -1720,7 +1706,6 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                 EActivityThematic.EXPERIENCES,
                 "Un résumé valide pour la publication",
                 "Une consigne valide pour la publication",
-                null,
                 null,
                 null,
                 null,

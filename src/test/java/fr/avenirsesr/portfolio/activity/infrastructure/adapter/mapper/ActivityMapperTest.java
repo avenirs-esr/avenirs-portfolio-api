@@ -35,7 +35,6 @@ class ActivityMapperTest {
   private final String summary = "Activity summary";
   private final String description = "<h3>Objectives</h3><p>Test activity description</p>";
   private final String executionPeriodInfo = "2020 - 2022";
-  private final String executionPeriodInfoSummary = "label 2020";
   private final int traceAllowedAssociations = 10;
   private final int feedbackAllowedIterations = 10;
   private final boolean enableRefection = true;
@@ -67,7 +66,6 @@ class ActivityMapperTest {
             EActivityStatus.PUBLISHED,
             description,
             executionPeriodInfo,
-            executionPeriodInfoSummary,
             startDate,
             endDate,
             enableRefection,
@@ -96,7 +94,6 @@ class ActivityMapperTest {
     assertEquals(summary, entity.getSummary());
     assertEquals(description, entity.getDescription());
     assertEquals(executionPeriodInfo, entity.getExecutionPeriodInfo());
-    assertEquals(executionPeriodInfoSummary, entity.getExecutionPeriodInfoSummary());
     assertEquals(traceAllowedAssociations, entity.getTraceAllowedAssociations());
     assertEquals(feedbackAllowedIterations, entity.getFeedbackAllowedIterations());
     assertEquals(enableRefection, entity.isEnableReflection());
@@ -116,7 +113,6 @@ class ActivityMapperTest {
     entity.setSummary(summary);
     entity.setDescription(description);
     entity.setExecutionPeriodInfo(executionPeriodInfo);
-    entity.setExecutionPeriodInfoSummary(executionPeriodInfoSummary);
     entity.setTraceAllowedAssociations(traceAllowedAssociations);
     entity.setFeedbackAllowedIterations(feedbackAllowedIterations);
     entity.setEnableReflection(enableRefection);
@@ -135,7 +131,6 @@ class ActivityMapperTest {
     assertEquals(summary, mappedActivity.getSummary());
     assertEquals(description, mappedActivity.getDescription());
     assertEquals(executionPeriodInfo, mappedActivity.getExecutionPeriodInfo().get());
-    assertEquals(executionPeriodInfoSummary, mappedActivity.getExecutionPeriodInfoSummary().get());
     assertEquals(traceAllowedAssociations, mappedActivity.getTraceAllowedAssociations());
     assertEquals(feedbackAllowedIterations, mappedActivity.getFeedbackAllowedIterations());
     assertEquals(enableRefection, mappedActivity.isEnableReflection());

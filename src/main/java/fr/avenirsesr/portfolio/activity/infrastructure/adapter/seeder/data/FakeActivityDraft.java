@@ -29,7 +29,6 @@ public class FakeActivityDraft {
             faker.lorem().paragraph(2),
             faker.lorem().paragraph(2),
             faker.lorem().sentence(15),
-            faker.lorem().sentence(4),
             faker.date().past(1, DAYS).toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
             faker.date().future(30, DAYS).toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
             faker.number().numberBetween(0, 10),

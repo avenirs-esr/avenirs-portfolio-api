@@ -12,7 +12,6 @@ public record ActivityDraftUpdateRequest(
     String summary,
     String description,
     String executionPeriodInfo,
-    String executionPeriodInfoSummary,
     LocalDate startDate,
     LocalDate endDate,
     Integer traceAllowedAssociations,

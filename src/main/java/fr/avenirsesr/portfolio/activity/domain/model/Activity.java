@@ -32,9 +32,6 @@ public class Activity extends AvenirsBaseModel {
   private String executionPeriodInfo;
 
   @Getter(AccessLevel.NONE)
-  private String executionPeriodInfoSummary;
-
-  @Getter(AccessLevel.NONE)
   private LocalDate startDate;
 
   @Getter(AccessLevel.NONE)
@@ -55,7 +52,6 @@ public class Activity extends AvenirsBaseModel {
       EActivityStatus status,
       String description,
       String executionPeriodInfo,
-      String executionPeriodInfoSummary,
       LocalDate startDate,
       LocalDate endDate,
       boolean enableReflection,
@@ -74,7 +70,6 @@ public class Activity extends AvenirsBaseModel {
     this.status = status;
     this.description = description;
     this.executionPeriodInfo = executionPeriodInfo;
-    this.executionPeriodInfoSummary = executionPeriodInfoSummary;
     this.startDate = startDate;
     this.endDate = endDate;
     this.enableReflection = enableReflection;
@@ -93,7 +88,6 @@ public class Activity extends AvenirsBaseModel {
       String summary,
       String description,
       String executionPeriodInfo,
-      String executionPeriodInfoSummary,
       LocalDate startDate,
       LocalDate endDate,
       boolean enableReflection,
@@ -112,7 +106,6 @@ public class Activity extends AvenirsBaseModel {
         EActivityStatus.PUBLISHED,
         description,
         executionPeriodInfo,
-        executionPeriodInfoSummary,
         startDate,
         endDate,
         enableReflection,
@@ -134,7 +127,6 @@ public class Activity extends AvenirsBaseModel {
       EActivityStatus status,
       String description,
       String executionPeriodInfo,
-      String executionPeriodInfoSummary,
       LocalDate startDate,
       LocalDate endDate,
       boolean enableReflection,
@@ -154,7 +146,6 @@ public class Activity extends AvenirsBaseModel {
         status,
         description,
         executionPeriodInfo,
-        executionPeriodInfoSummary,
         startDate,
         endDate,
         enableReflection,
@@ -165,10 +156,6 @@ public class Activity extends AvenirsBaseModel {
         files,
         createdAt,
         updatedAt);
-  }
-
-  public Optional<String> getExecutionPeriodInfoSummary() {
-    return Optional.ofNullable(executionPeriodInfoSummary);
   }
 
   public Optional<String> getExecutionPeriodInfo() {

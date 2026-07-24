@@ -53,9 +53,6 @@ public class ActivityEntity extends PeriodEntity<LocalDate> {
   @Column(name = "execution_period_info", length = ACTIVITY_EXECUTION_PERIOD_INFO)
   private String executionPeriodInfo;
 
-  @Column(name = "execution_period_info_summary", length = TITLE_LENGTH)
-  private String executionPeriodInfoSummary;
-
   @Column(name = "trace_allowed_associations", nullable = false)
   private int traceAllowedAssociations;
 
@@ -92,7 +89,6 @@ public class ActivityEntity extends PeriodEntity<LocalDate> {
       EActivityStatus status,
       String description,
       String executionPeriodInfo,
-      String executionPeriodInfoSummary,
       LocalDate startDate,
       LocalDate endDate,
       int traceAllowedAssociations,
@@ -111,7 +107,6 @@ public class ActivityEntity extends PeriodEntity<LocalDate> {
     this.status = status;
     this.description = description;
     this.executionPeriodInfo = executionPeriodInfo;
-    this.executionPeriodInfoSummary = executionPeriodInfoSummary;
     this.startDate = startDate;
     this.endDate = endDate;
     this.traceAllowedAssociations = traceAllowedAssociations;
@@ -133,7 +128,6 @@ public class ActivityEntity extends PeriodEntity<LocalDate> {
       EActivityStatus status,
       String description,
       String executionPeriodInfo,
-      String executionPeriodInfoSummary,
       LocalDate startDate,
       LocalDate endDate,
       int traceAllowedAssociations,
@@ -154,7 +148,6 @@ public class ActivityEntity extends PeriodEntity<LocalDate> {
         status,
         description,
         executionPeriodInfo,
-        executionPeriodInfoSummary,
         startDate,
         endDate,
         traceAllowedAssociations,

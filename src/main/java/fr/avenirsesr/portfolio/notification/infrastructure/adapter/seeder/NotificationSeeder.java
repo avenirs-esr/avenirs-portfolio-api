@@ -154,7 +154,6 @@ public class NotificationSeeder {
         null,
         null,
         null,
-        null,
         links);
 
     activityService.publish(draft.getId());

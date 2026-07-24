@@ -81,7 +81,6 @@ public class ActivityServiceImpl implements ActivityService {
       String summary,
       String description,
       String executionPeriodInfo,
-      String executionPeriodInfoSummary,
       LocalDate startDate,
       LocalDate endDate,
       boolean enableReflection,
@@ -94,8 +93,6 @@ public class ActivityServiceImpl implements ActivityService {
     requireNotBlankAndEnrichedMaxLength("description", description, RICH_DESCRIPTION_LENGTH);
     requireNotBlankAndMaxLength(
         "executionPeriodInfo", executionPeriodInfo, ACTIVITY_EXECUTION_PERIOD_INFO);
-    validateOptionalTextMaxLength(
-        "executionPeriodInfoSummary", executionPeriodInfoSummary, TITLE_LENGTH);
     if ((startDate == null) != (endDate == null)) {
       throw new ActivityDatesException();
     }
@@ -113,7 +110,6 @@ public class ActivityServiceImpl implements ActivityService {
             summary,
             description,
             executionPeriodInfo,
-            executionPeriodInfoSummary,
             startDate,
             endDate,
             enableReflection,
@@ -159,7 +155,6 @@ public class ActivityServiceImpl implements ActivityService {
                 draft.getSummary().orElseThrow(),
                 draft.getDescription().orElseThrow(),
                 draft.getExecutionPeriodInfo().orElse(null),
-                draft.getExecutionPeriodInfoSummary().orElse(null),
                 draft.getStartDate().orElse(null),
                 draft.getEndDate().orElse(null),
                 draft.isEnableReflection(),
@@ -232,7 +227,6 @@ public class ActivityServiceImpl implements ActivityService {
     var updatedFields =
         syncs.stream().filter(FieldSync::applyIfChanged).map(FieldSync::field).distinct().toList();
 
-    activity.setExecutionPeriodInfoSummary(draft.getExecutionPeriodInfoSummary().orElse(null));
     activity.setStartDate(draft.getStartDate().orElse(null));
     activity.setEndDate(draft.getEndDate().orElse(null));
 
@@ -432,7 +426,6 @@ public class ActivityServiceImpl implements ActivityService {
       String summary,
       String description,
       String executionPeriodInfo,
-      String executionPeriodInfoSummary,
       LocalDate startDate,
       LocalDate endDate,
       Integer traceAllowedAssociations,
@@ -451,8 +444,6 @@ public class ActivityServiceImpl implements ActivityService {
     validateOptionalTextMaxLength("description", description, RICH_DESCRIPTION_LENGTH);
     validateOptionalTextMaxLength(
         "executionPeriodInfo", executionPeriodInfo, ACTIVITY_EXECUTION_PERIOD_INFO);
-    validateOptionalTextMaxLength(
-        "executionPeriodInfoSummary", executionPeriodInfoSummary, TITLE_LENGTH);
     if (startDate != null) {
       validateDateOrder(startDate, endDate);
     }
@@ -468,8 +459,6 @@ public class ActivityServiceImpl implements ActivityService {
     if (summary != null) draft.setSummary(summary);
     if (description != null) draft.setDescription(description);
     if (executionPeriodInfo != null) draft.setExecutionPeriodInfo(executionPeriodInfo);
-    if (executionPeriodInfoSummary != null)
-      draft.setExecutionPeriodInfoSummary(executionPeriodInfoSummary);
     if (startDate != null) draft.setStartDate(startDate);
     if (endDate != null) draft.setEndDate(endDate);
 
@@ -516,7 +505,6 @@ public class ActivityServiceImpl implements ActivityService {
             activity.getSummary(),
             activity.getDescription(),
             activity.getExecutionPeriodInfo().orElse(null),
-            activity.getExecutionPeriodInfoSummary().orElse(null),
             activity.getStartDate().orElse(null),
             activity.getEndDate().orElse(null),
             activity.getTraceAllowedAssociations(),

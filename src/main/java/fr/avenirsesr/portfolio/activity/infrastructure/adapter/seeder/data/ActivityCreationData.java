@@ -15,7 +15,6 @@ public record ActivityCreationData(
     String summary,
     String description,
     String executionPeriodInfo,
-    Optional<String> executionPeriodInfoSummary,
     Optional<LocalDate> startDate,
     Optional<LocalDate> endDate,
     ActivityBannerCreationData banner,
