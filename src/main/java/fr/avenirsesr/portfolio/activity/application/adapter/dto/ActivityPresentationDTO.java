@@ -22,6 +22,6 @@ public record ActivityPresentationDTO(
     FileDTO banner,
     String summary,
     String description,
-    String executionPeriodInfo,
+    String recommendedCompletionContexts,
     Instant createdAt,
     Instant updatedAt) {}

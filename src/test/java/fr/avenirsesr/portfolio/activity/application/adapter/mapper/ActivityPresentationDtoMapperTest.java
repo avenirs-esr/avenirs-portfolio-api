@@ -40,7 +40,7 @@ class ActivityPresentationDtoMapperTest {
             Optional.empty(),
             activity.getSummary(),
             activity.getDescription(),
-            activity.getExecutionPeriodInfo().orElse(null),
+            activity.getRecommendedCompletionContexts().orElse(null),
             banner,
             activity.getCreatedAt(),
             activity.getUpdatedAt());

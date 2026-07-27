@@ -14,7 +14,7 @@ public record ActivityCreationData(
     EActivityThematic thematic,
     String summary,
     String description,
-    String executionPeriodInfo,
+    String recommendedCompletionContexts,
     Optional<LocalDate> startDate,
     Optional<LocalDate> endDate,
     ActivityBannerCreationData banner,

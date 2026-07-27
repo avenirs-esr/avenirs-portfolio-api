@@ -50,8 +50,10 @@ public class ActivityEntity extends PeriodEntity<LocalDate> {
   @Column(nullable = false, length = RICH_DESCRIPTION_LENGTH)
   private String description;
 
-  @Column(name = "execution_period_info", length = ACTIVITY_EXECUTION_PERIOD_INFO)
-  private String executionPeriodInfo;
+  @Column(
+      name = "recommended_completion_contexts",
+      length = ACTIVITY_RECOMMENDED_COMPLETION_CONTEXTS)
+  private String recommendedCompletionContexts;
 
   @Column(name = "trace_allowed_associations", nullable = false)
   private int traceAllowedAssociations;
@@ -88,7 +90,7 @@ public class ActivityEntity extends PeriodEntity<LocalDate> {
       String summary,
       EActivityStatus status,
       String description,
-      String executionPeriodInfo,
+      String recommendedCompletionContexts,
       LocalDate startDate,
       LocalDate endDate,
       int traceAllowedAssociations,
@@ -106,7 +108,7 @@ public class ActivityEntity extends PeriodEntity<LocalDate> {
     this.summary = summary;
     this.status = status;
     this.description = description;
-    this.executionPeriodInfo = executionPeriodInfo;
+    this.recommendedCompletionContexts = recommendedCompletionContexts;
     this.startDate = startDate;
     this.endDate = endDate;
     this.traceAllowedAssociations = traceAllowedAssociations;
@@ -127,7 +129,7 @@ public class ActivityEntity extends PeriodEntity<LocalDate> {
       String summary,
       EActivityStatus status,
       String description,
-      String executionPeriodInfo,
+      String recommendedCompletionContexts,
       LocalDate startDate,
       LocalDate endDate,
       int traceAllowedAssociations,
@@ -147,7 +149,7 @@ public class ActivityEntity extends PeriodEntity<LocalDate> {
         summary,
         status,
         description,
-        executionPeriodInfo,
+        recommendedCompletionContexts,
         startDate,
         endDate,
         traceAllowedAssociations,

@@ -17,7 +17,7 @@ public interface ActivityPresentationDtoMapper {
         new FileDTO(banner.id().orElse(null), banner.name().orElse(null), baseUrl + banner.url()),
         activityData.summary(),
         activityData.description(),
-        activityData.executionPeriodInfo(),
+        activityData.recommendedCompletionContexts(),
         activityData.createdAt(),
         activityData.updatedAt());
   }

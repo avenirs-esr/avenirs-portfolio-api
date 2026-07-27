@@ -167,7 +167,7 @@ class DeclaredActivityPresentationDTOMapperTest {
         activity.getThematic(),
         activity.getSummary(),
         activity.getDescription(),
-        activity.getExecutionPeriodInfo().orElse(null),
+        activity.getRecommendedCompletionContexts().orElse(null),
         activity.getStartDate().orElse(null),
         activity.getEndDate().orElse(null),
         activity.isEnableReflection(),

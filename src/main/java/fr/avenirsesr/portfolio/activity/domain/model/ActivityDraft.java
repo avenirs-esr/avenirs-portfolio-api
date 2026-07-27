@@ -21,7 +21,7 @@ public class ActivityDraft extends AvenirsBaseModel {
 
   private String summary;
   private String description;
-  private String executionPeriodInfo;
+  private String recommendedCompletionContexts;
   private LocalDate startDate;
   private LocalDate endDate;
   private File banner;
@@ -43,7 +43,7 @@ public class ActivityDraft extends AvenirsBaseModel {
       EActivityThematic thematic,
       String summary,
       String description,
-      String executionPeriodInfo,
+      String recommendedCompletionContexts,
       LocalDate startDate,
       LocalDate endDate,
       int traceAllowedAssociations,
@@ -58,7 +58,7 @@ public class ActivityDraft extends AvenirsBaseModel {
     this.thematic = thematic;
     this.summary = summary;
     this.description = description;
-    this.executionPeriodInfo = executionPeriodInfo;
+    this.recommendedCompletionContexts = recommendedCompletionContexts;
     this.startDate = startDate;
     this.endDate = endDate;
     this.traceAllowedAssociations = traceAllowedAssociations;
@@ -99,7 +99,7 @@ public class ActivityDraft extends AvenirsBaseModel {
       EActivityThematic thematic,
       String summary,
       String description,
-      String executionPeriodInfo,
+      String recommendedCompletionContexts,
       LocalDate startDate,
       LocalDate endDate,
       int traceAllowedAssociations,
@@ -117,7 +117,7 @@ public class ActivityDraft extends AvenirsBaseModel {
         thematic,
         summary,
         description,
-        executionPeriodInfo,
+        recommendedCompletionContexts,
         startDate,
         endDate,
         traceAllowedAssociations,
@@ -136,8 +136,8 @@ public class ActivityDraft extends AvenirsBaseModel {
     return Optional.ofNullable(description);
   }
 
-  public Optional<String> getExecutionPeriodInfo() {
-    return Optional.ofNullable(executionPeriodInfo);
+  public Optional<String> getRecommendedCompletionContexts() {
+    return Optional.ofNullable(recommendedCompletionContexts);
   }
 
   public Optional<LocalDate> getStartDate() {

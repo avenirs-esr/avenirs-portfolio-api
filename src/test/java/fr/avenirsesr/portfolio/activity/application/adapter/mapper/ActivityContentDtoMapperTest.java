@@ -41,7 +41,9 @@ class ActivityContentDtoMapperTest {
     assertEquals(activity.getThematic(), dto.thematic());
     assertEquals(activity.getSummary(), dto.summary());
     assertEquals(activity.getDescription(), dto.description());
-    assertEquals(activity.getExecutionPeriodInfo().orElse(null), dto.executionPeriodInfo());
+    assertEquals(
+        activity.getRecommendedCompletionContexts().orElse(null),
+        dto.recommendedCompletionContexts());
     assertNull(dto.hasEnrolledStudent());
   }
 
@@ -49,7 +51,10 @@ class ActivityContentDtoMapperTest {
   void shouldMapEmptyOptionalFieldsToNull() {
     BddLogger.given("an activity with empty optional fields");
     Activity activity =
-        ActivityFixture.create().withDescription(null).withExecutionPeriodInfo(null).toModel();
+        ActivityFixture.create()
+            .withDescription(null)
+            .withRecommendedCompletionContexts(null)
+            .toModel();
 
     BddLogger.when("mapping to ActivityContentDTO");
     ActivityContentDTO dto = mapper.toDTO(activity);
@@ -57,7 +62,7 @@ class ActivityContentDtoMapperTest {
     BddLogger.then("optional fields should be mapped to null");
     assertNotNull(dto);
     assertNull(dto.description());
-    assertNull(dto.executionPeriodInfo());
+    assertNull(dto.recommendedCompletionContexts());
   }
 
   @Test

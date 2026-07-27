@@ -25,7 +25,7 @@ public class ActivityFixture {
   private EActivityThematic thematic = EActivityThematic.EXPERIENCES;
   private String summary = "Default Summary";
   private String description = "<h3>Objectives</h3><p>Default Description</p>";
-  private String executionPeriodInfo = "Default Execution Period Info";
+  private String recommendedCompletionContexts = "Default Execution Period Info";
   private LocalDate startDate = LocalDate.now();
   private LocalDate endDate = LocalDate.now().plusDays(7);
   private int traceAllowedAssociations = 10;
@@ -72,8 +72,8 @@ public class ActivityFixture {
     return this;
   }
 
-  public ActivityFixture withExecutionPeriodInfo(String executionPeriodInfo) {
-    this.executionPeriodInfo = executionPeriodInfo;
+  public ActivityFixture withRecommendedCompletionContexts(String recommendedCompletionContexts) {
+    this.recommendedCompletionContexts = recommendedCompletionContexts;
     return this;
   }
 
@@ -136,7 +136,7 @@ public class ActivityFixture {
         summary,
         status,
         description,
-        executionPeriodInfo,
+        recommendedCompletionContexts,
         startDate,
         endDate,
         enableRefection,

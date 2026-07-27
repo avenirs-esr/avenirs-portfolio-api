@@ -80,7 +80,7 @@ public class ActivityServiceImpl implements ActivityService {
       EActivityThematic thematic,
       String summary,
       String description,
-      String executionPeriodInfo,
+      String recommendedCompletionContexts,
       LocalDate startDate,
       LocalDate endDate,
       boolean enableReflection,
@@ -92,7 +92,9 @@ public class ActivityServiceImpl implements ActivityService {
     requireNotBlankAndMaxLength("summary", summary, SUMMARY_LENGTH);
     requireNotBlankAndEnrichedMaxLength("description", description, RICH_DESCRIPTION_LENGTH);
     requireNotBlankAndMaxLength(
-        "executionPeriodInfo", executionPeriodInfo, ACTIVITY_EXECUTION_PERIOD_INFO);
+        "recommendedCompletionContexts",
+        recommendedCompletionContexts,
+        ACTIVITY_RECOMMENDED_COMPLETION_CONTEXTS);
     if ((startDate == null) != (endDate == null)) {
       throw new ActivityDatesException();
     }
@@ -109,7 +111,7 @@ public class ActivityServiceImpl implements ActivityService {
             thematic,
             summary,
             description,
-            executionPeriodInfo,
+            recommendedCompletionContexts,
             startDate,
             endDate,
             enableReflection,
@@ -154,7 +156,7 @@ public class ActivityServiceImpl implements ActivityService {
                 draft.getThematic(),
                 draft.getSummary().orElseThrow(),
                 draft.getDescription().orElseThrow(),
-                draft.getExecutionPeriodInfo().orElse(null),
+                draft.getRecommendedCompletionContexts().orElse(null),
                 draft.getStartDate().orElse(null),
                 draft.getEndDate().orElse(null),
                 draft.isEnableReflection(),
@@ -205,10 +207,10 @@ public class ActivityServiceImpl implements ActivityService {
                 draft.getDescription().orElse(null),
                 activity::setDescription),
             new FieldSync<>(
-                EXECUTION_PERIOD,
-                activity.getExecutionPeriodInfo().orElse(null),
-                draft.getExecutionPeriodInfo().orElse(null),
-                activity::setExecutionPeriodInfo),
+                RECOMMENDED_COMPLETION_CONTEXTS,
+                activity.getRecommendedCompletionContexts().orElse(null),
+                draft.getRecommendedCompletionContexts().orElse(null),
+                activity::setRecommendedCompletionContexts),
             new FieldSync<>(
                 THEMATIC, activity.getThematic(), draft.getThematic(), activity::setThematic),
             new FieldSync<>(
@@ -425,7 +427,7 @@ public class ActivityServiceImpl implements ActivityService {
       EActivityThematic thematic,
       String summary,
       String description,
-      String executionPeriodInfo,
+      String recommendedCompletionContexts,
       LocalDate startDate,
       LocalDate endDate,
       Integer traceAllowedAssociations,
@@ -443,7 +445,9 @@ public class ActivityServiceImpl implements ActivityService {
     validateOptionalTextMaxLength("summary", summary, SUMMARY_LENGTH);
     validateOptionalTextMaxLength("description", description, RICH_DESCRIPTION_LENGTH);
     validateOptionalTextMaxLength(
-        "executionPeriodInfo", executionPeriodInfo, ACTIVITY_EXECUTION_PERIOD_INFO);
+        "recommendedCompletionContexts",
+        recommendedCompletionContexts,
+        ACTIVITY_RECOMMENDED_COMPLETION_CONTEXTS);
     if (startDate != null) {
       validateDateOrder(startDate, endDate);
     }
@@ -458,7 +462,8 @@ public class ActivityServiceImpl implements ActivityService {
     if (thematic != null) draft.setThematic(thematic);
     if (summary != null) draft.setSummary(summary);
     if (description != null) draft.setDescription(description);
-    if (executionPeriodInfo != null) draft.setExecutionPeriodInfo(executionPeriodInfo);
+    if (recommendedCompletionContexts != null)
+      draft.setRecommendedCompletionContexts(recommendedCompletionContexts);
     if (startDate != null) draft.setStartDate(startDate);
     if (endDate != null) draft.setEndDate(endDate);
 
@@ -504,7 +509,7 @@ public class ActivityServiceImpl implements ActivityService {
             activity.getThematic(),
             activity.getSummary(),
             activity.getDescription(),
-            activity.getExecutionPeriodInfo().orElse(null),
+            activity.getRecommendedCompletionContexts().orElse(null),
             activity.getStartDate().orElse(null),
             activity.getEndDate().orElse(null),
             activity.getTraceAllowedAssociations(),

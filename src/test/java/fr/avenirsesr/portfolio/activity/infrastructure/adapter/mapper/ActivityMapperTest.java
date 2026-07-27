@@ -34,7 +34,7 @@ class ActivityMapperTest {
   private final EActivityThematic thematic = EActivityThematic.SELF_KNOWLEDGE;
   private final String summary = "Activity summary";
   private final String description = "<h3>Objectives</h3><p>Test activity description</p>";
-  private final String executionPeriodInfo = "2020 - 2022";
+  private final String recommendedCompletionContexts = "2020 - 2022";
   private final int traceAllowedAssociations = 10;
   private final int feedbackAllowedIterations = 10;
   private final boolean enableRefection = true;
@@ -65,7 +65,7 @@ class ActivityMapperTest {
             summary,
             EActivityStatus.PUBLISHED,
             description,
-            executionPeriodInfo,
+            recommendedCompletionContexts,
             startDate,
             endDate,
             enableRefection,
@@ -93,7 +93,7 @@ class ActivityMapperTest {
     assertEquals(thematic, entity.getThematic());
     assertEquals(summary, entity.getSummary());
     assertEquals(description, entity.getDescription());
-    assertEquals(executionPeriodInfo, entity.getExecutionPeriodInfo());
+    assertEquals(recommendedCompletionContexts, entity.getRecommendedCompletionContexts());
     assertEquals(traceAllowedAssociations, entity.getTraceAllowedAssociations());
     assertEquals(feedbackAllowedIterations, entity.getFeedbackAllowedIterations());
     assertEquals(enableRefection, entity.isEnableReflection());
@@ -112,7 +112,7 @@ class ActivityMapperTest {
     entity.setThematic(thematic);
     entity.setSummary(summary);
     entity.setDescription(description);
-    entity.setExecutionPeriodInfo(executionPeriodInfo);
+    entity.setRecommendedCompletionContexts(recommendedCompletionContexts);
     entity.setTraceAllowedAssociations(traceAllowedAssociations);
     entity.setFeedbackAllowedIterations(feedbackAllowedIterations);
     entity.setEnableReflection(enableRefection);
@@ -130,7 +130,8 @@ class ActivityMapperTest {
     assertEquals(thematic, mappedActivity.getThematic());
     assertEquals(summary, mappedActivity.getSummary());
     assertEquals(description, mappedActivity.getDescription());
-    assertEquals(executionPeriodInfo, mappedActivity.getExecutionPeriodInfo().get());
+    assertEquals(
+        recommendedCompletionContexts, mappedActivity.getRecommendedCompletionContexts().get());
     assertEquals(traceAllowedAssociations, mappedActivity.getTraceAllowedAssociations());
     assertEquals(feedbackAllowedIterations, mappedActivity.getFeedbackAllowedIterations());
     assertEquals(enableRefection, mappedActivity.isEnableReflection());

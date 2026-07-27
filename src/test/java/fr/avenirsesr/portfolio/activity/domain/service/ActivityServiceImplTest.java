@@ -114,7 +114,7 @@ class ActivityServiceImplTest {
         assertEquals(
             "<h3>Objectives</h3><p>Test activity description</p>",
             createdActivity.getDescription());
-        assertEquals("2026", createdActivity.getExecutionPeriodInfo().get());
+        assertEquals("2026", createdActivity.getRecommendedCompletionContexts().get());
         assertEquals(links, createdActivity.getLinks());
 
         ArgumentCaptor<Activity> captor = ArgumentCaptor.forClass(Activity.class);
@@ -172,7 +172,7 @@ class ActivityServiceImplTest {
 
         assertTrue(result.getSummary().isEmpty());
         assertTrue(result.getDescription().isEmpty());
-        assertTrue(result.getExecutionPeriodInfo().isEmpty());
+        assertTrue(result.getRecommendedCompletionContexts().isEmpty());
         assertTrue(result.getStartDate().isEmpty());
         assertTrue(result.getEndDate().isEmpty());
       }
@@ -237,7 +237,7 @@ class ActivityServiceImplTest {
             verify(draft).setThematic(EActivityThematic.EXPERIENCES);
             verify(draft).setSummary("Nouveau summary");
             verify(draft).setDescription("<p>Nouvelle description</p>");
-            verify(draft).setExecutionPeriodInfo("Avant entretien");
+            verify(draft).setRecommendedCompletionContexts("Avant entretien");
             verify(draft).setStartDate(LocalDate.parse("2026-06-01"));
             verify(draft).setEndDate(LocalDate.parse("2030-06-30"));
             verify(draft).setTraceAllowedAssociations(5);
@@ -259,7 +259,7 @@ class ActivityServiceImplTest {
             verify(draft, never()).setThematic(any());
             verify(draft, never()).setSummary(any());
             verify(draft, never()).setDescription(any());
-            verify(draft, never()).setExecutionPeriodInfo(any());
+            verify(draft, never()).setRecommendedCompletionContexts(any());
             verify(draft, never()).setStartDate(any());
             verify(draft, never()).setEndDate(any());
             verify(draft, never()).setTraceAllowedAssociations(anyInt());
@@ -280,7 +280,7 @@ class ActivityServiceImplTest {
             verify(draft, never()).setThematic(any());
             verify(draft, never()).setSummary(any());
             verify(draft, never()).setDescription(any());
-            verify(draft, never()).setExecutionPeriodInfo(any());
+            verify(draft, never()).setRecommendedCompletionContexts(any());
             verify(draft, never()).setStartDate(any());
             verify(draft, never()).setEndDate(any());
             verify(draft, never()).setTraceAllowedAssociations(anyInt());
@@ -539,7 +539,7 @@ class ActivityServiceImplTest {
           void thenItShouldMapOptionalFieldsAsEmptyOptionalsWhenNotPresent() {
             BddLogger.then("optional fields should be empty when absent from draft");
 
-            when(draft.getExecutionPeriodInfo()).thenReturn(Optional.empty());
+            when(draft.getRecommendedCompletionContexts()).thenReturn(Optional.empty());
 
             when(draft.getStartDate()).thenReturn(Optional.empty());
             when(draft.getEndDate()).thenReturn(Optional.empty());
@@ -547,7 +547,7 @@ class ActivityServiceImplTest {
             Activity result = activityService.publish(draftId);
 
             assertNotNull(result);
-            assertTrue(result.getExecutionPeriodInfo().isEmpty());
+            assertTrue(result.getRecommendedCompletionContexts().isEmpty());
             assertTrue(result.getStartDate().isEmpty());
             assertTrue(result.getEndDate().isEmpty());
           }
@@ -561,7 +561,8 @@ class ActivityServiceImplTest {
             when(draft.getThematic()).thenReturn(EActivityThematic.SELF_KNOWLEDGE);
             when(draft.getSummary()).thenReturn(Optional.of("Résumé complet"));
             when(draft.getDescription()).thenReturn(Optional.of("<p>Description complète</p>"));
-            when(draft.getExecutionPeriodInfo()).thenReturn(Optional.of("Avant entretien"));
+            when(draft.getRecommendedCompletionContexts())
+                .thenReturn(Optional.of("Avant entretien"));
             when(draft.getStartDate()).thenReturn(Optional.of(LocalDate.parse("2026-06-01")));
             when(draft.getEndDate()).thenReturn(Optional.of(LocalDate.parse("2030-06-30")));
             when(draft.isEnableReflection()).thenReturn(false);
@@ -576,7 +577,7 @@ class ActivityServiceImplTest {
             assertEquals(EActivityThematic.SELF_KNOWLEDGE, result.getThematic());
             assertEquals("Résumé complet", result.getSummary());
             assertEquals("<p>Description complète</p>", result.getDescription());
-            assertEquals("Avant entretien", result.getExecutionPeriodInfo().get());
+            assertEquals("Avant entretien", result.getRecommendedCompletionContexts().get());
             assertEquals(LocalDate.parse("2026-06-01"), result.getStartDate().get());
             assertEquals(LocalDate.parse("2030-06-30"), result.getEndDate().get());
             assertFalse(result.isEnableReflection());
@@ -677,7 +678,7 @@ class ActivityServiceImplTest {
         when(draft.getTitle()).thenReturn("Nouveau titre");
         when(draft.getThematic()).thenReturn(EActivityThematic.EXPERIENCES);
         when(draft.getDescription()).thenReturn(Optional.of("Nouvelle description"));
-        when(draft.getExecutionPeriodInfo()).thenReturn(Optional.of("Nouvelle période"));
+        when(draft.getRecommendedCompletionContexts()).thenReturn(Optional.of("Nouvelle période"));
         when(draft.getStartDate()).thenReturn(Optional.of(LocalDate.parse("2026-06-01")));
         when(draft.getEndDate()).thenReturn(Optional.of(LocalDate.parse("2030-06-30")));
         when(draft.getBanner()).thenReturn(Optional.empty());
@@ -720,7 +721,7 @@ class ActivityServiceImplTest {
           verify(existingActivity).setThematic(EActivityThematic.EXPERIENCES);
           verify(existingActivity).setDescription("Nouvelle description");
           verify(existingActivity).setSummary("Nouveau résumé");
-          verify(existingActivity).setExecutionPeriodInfo("Nouvelle période");
+          verify(existingActivity).setRecommendedCompletionContexts("Nouvelle période");
           verify(existingActivity).setStartDate(LocalDate.parse("2026-06-01"));
           verify(existingActivity).setEndDate(LocalDate.parse("2030-06-30"));
           verify(existingActivity, never()).setBanner(any());
@@ -793,7 +794,7 @@ class ActivityServiceImplTest {
           verify(existingActivity).setThematic(EActivityThematic.EXPERIENCES);
           verify(existingActivity).setDescription("Nouvelle description");
           verify(existingActivity).setSummary("Nouveau résumé");
-          verify(existingActivity).setExecutionPeriodInfo("Nouvelle période");
+          verify(existingActivity).setRecommendedCompletionContexts("Nouvelle période");
           verify(existingActivity).setStartDate(LocalDate.parse("2026-06-01"));
           verify(existingActivity).setEndDate(LocalDate.parse("2030-06-30"));
           verify(existingActivity, never()).setBanner(any());
@@ -837,7 +838,7 @@ class ActivityServiceImplTest {
                   EActivityUpdatableField.ACTIVITY_TITLE,
                   EActivityUpdatableField.SUMMARY,
                   EActivityUpdatableField.DESCRIPTION,
-                  EActivityUpdatableField.EXECUTION_PERIOD,
+                  EActivityUpdatableField.RECOMMENDED_COMPLETION_CONTEXTS,
                   EActivityUpdatableField.THEMATIC,
                   EActivityUpdatableField.FILES_AND_LINKS);
           ActivityModifiedParameters parameters =
@@ -854,7 +855,7 @@ class ActivityServiceImplTest {
             when(existingActivity.getTitle()).thenReturn("Nouveau titre");
             when(existingActivity.getSummary()).thenReturn("Nouveau résumé");
             when(existingActivity.getDescription()).thenReturn("Nouvelle description");
-            when(existingActivity.getExecutionPeriodInfo())
+            when(existingActivity.getRecommendedCompletionContexts())
                 .thenReturn(Optional.of("Nouvelle période"));
             when(existingActivity.getThematic()).thenReturn(EActivityThematic.EXPERIENCES);
             when(existingActivity.getBanner()).thenReturn(Optional.empty());
@@ -1415,7 +1416,7 @@ class ActivityServiceImplTest {
           when(activity.getSummary()).thenReturn("is a test activity");
           when(activity.getDescription())
               .thenReturn("<h3>Objectives</h3><p>Test activity description</p>");
-          when(activity.getExecutionPeriodInfo()).thenReturn(Optional.of("2026"));
+          when(activity.getRecommendedCompletionContexts()).thenReturn(Optional.of("2026"));
           when(activity.getCreatedAt()).thenReturn(Instant.now());
           when(activity.getUpdatedAt()).thenReturn(Instant.now());
           when(banner.getId()).thenReturn(bannerId);
@@ -1430,7 +1431,7 @@ class ActivityServiceImplTest {
           assertEquals(EActivityThematic.EXPERIENCES, result.thematic());
           assertEquals("is a test activity", result.summary());
           assertEquals("<h3>Objectives</h3><p>Test activity description</p>", result.description());
-          assertEquals("2026", result.executionPeriodInfo());
+          assertEquals("2026", result.recommendedCompletionContexts());
           assertTrue(result.banner().id().isPresent());
           assertEquals(bannerId, result.banner().id().get());
           assertEquals("filename.png", result.banner().name().get());
@@ -1675,7 +1676,7 @@ class ActivityServiceImplTest {
     when(draft.getThematic()).thenReturn(EActivityThematic.EXPERIENCES);
     when(draft.getSummary()).thenReturn(Optional.of("Un résumé"));
     when(draft.getDescription()).thenReturn(Optional.of("<p>Description</p>"));
-    when(draft.getExecutionPeriodInfo()).thenReturn(Optional.of("2026"));
+    when(draft.getRecommendedCompletionContexts()).thenReturn(Optional.of("2026"));
     when(draft.getStartDate()).thenReturn(Optional.empty());
     when(draft.getEndDate()).thenReturn(Optional.empty());
     when(draft.isEnableReflection()).thenReturn(true);

@@ -78,7 +78,7 @@ public class ActivitySeeder {
                             fakeActivity.getThematic(),
                             fakeActivity.getSummary(),
                             fakeActivity.getDescription(),
-                            fakeActivity.getExecutionPeriodInfo(),
+                            fakeActivity.getRecommendedCompletionContexts(),
                             Optional.ofNullable(fakeActivity.getStartDate()),
                             Optional.ofNullable(fakeActivity.getEndDate()),
                             new ActivityBannerCreationData(
@@ -118,7 +118,7 @@ public class ActivitySeeder {
                     data.thematic(),
                     data.summary(),
                     data.description(),
-                    data.executionPeriodInfo(),
+                    data.recommendedCompletionContexts(),
                     data.startDate().orElse(null),
                     data.endDate().orElse(null),
                     data.enableReflection(),

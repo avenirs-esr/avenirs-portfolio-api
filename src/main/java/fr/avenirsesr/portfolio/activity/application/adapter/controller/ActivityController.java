@@ -287,7 +287,7 @@ public class ActivityController {
             body.thematic(),
             body.summary(),
             body.description(),
-            body.executionPeriodInfo(),
+            body.recommendedCompletionContexts(),
             body.startDate(),
             body.endDate(),
             body.traceAllowedAssociations(),

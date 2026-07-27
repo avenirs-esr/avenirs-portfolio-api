@@ -121,7 +121,7 @@ public class NotificationSeeder {
     EActivityThematic thematic = null;
     String summary = null;
     String description = null;
-    String executionPeriodInfo = null;
+    String recommendedCompletionContexts = null;
     List<String> links = null;
 
     for (var field : updatedFields) {
@@ -130,8 +130,9 @@ public class NotificationSeeder {
         case THEMATIC -> thematic = nextThematic(draft.getThematic());
         case SUMMARY -> summary = draft.getSummary().orElse("") + " (modifié)";
         case DESCRIPTION -> description = draft.getDescription().orElse("") + " (modifié)";
-        case EXECUTION_PERIOD ->
-            executionPeriodInfo = draft.getExecutionPeriodInfo().orElse("") + " (modifié)";
+        case RECOMMENDED_COMPLETION_CONTEXTS ->
+            recommendedCompletionContexts =
+                draft.getRecommendedCompletionContexts().orElse("") + " (modifié)";
         case FILES_AND_LINKS ->
             links =
                 Stream.concat(draft.getLinks().stream(), Stream.of("https://example.com/modifie"))
@@ -148,7 +149,7 @@ public class NotificationSeeder {
         thematic,
         summary,
         description,
-        executionPeriodInfo,
+        recommendedCompletionContexts,
         null,
         null,
         null,

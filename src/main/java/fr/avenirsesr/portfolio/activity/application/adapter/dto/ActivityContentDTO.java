@@ -26,7 +26,7 @@ public record ActivityContentDTO(
     @Schema(ref = "#/components/schemas/EActivityThematic") EActivityThematic thematic,
     String summary,
     String description,
-    String executionPeriodInfo,
+    String recommendedCompletionContexts,
     LocalDate startDate,
     LocalDate endDate,
     boolean enableReflection,

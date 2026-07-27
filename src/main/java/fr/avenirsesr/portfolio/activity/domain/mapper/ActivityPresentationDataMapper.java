@@ -17,7 +17,7 @@ public interface ActivityPresentationDataMapper {
         Optional.ofNullable(subscribedDeclaredActivity),
         activity.getSummary(),
         activity.getDescription(),
-        activity.getExecutionPeriodInfo().orElse(null),
+        activity.getRecommendedCompletionContexts().orElse(null),
         banner,
         activity.getCreatedAt(),
         activity.getUpdatedAt());
@@ -31,7 +31,7 @@ public interface ActivityPresentationDataMapper {
         Optional.empty(),
         draft.getSummary().orElse(null),
         draft.getDescription().orElse(null),
-        draft.getExecutionPeriodInfo().orElse(null),
+        draft.getRecommendedCompletionContexts().orElse(null),
         banner,
         draft.getCreatedAt(),
         draft.getUpdatedAt());

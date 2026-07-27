@@ -11,7 +11,7 @@ public record ActivityDraftUpdateRequest(
     @Schema(ref = "#/components/schemas/EActivityThematic") EActivityThematic thematic,
     String summary,
     String description,
-    String executionPeriodInfo,
+    String recommendedCompletionContexts,
     LocalDate startDate,
     LocalDate endDate,
     Integer traceAllowedAssociations,

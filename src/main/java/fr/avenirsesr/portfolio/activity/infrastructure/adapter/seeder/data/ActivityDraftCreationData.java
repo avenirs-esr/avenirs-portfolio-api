@@ -13,7 +13,7 @@ public record ActivityDraftCreationData(
     EActivityThematic thematic,
     Optional<String> summary,
     Optional<String> description,
-    Optional<String> executionPeriodInfo,
+    Optional<String> recommendedCompletionContexts,
     Optional<LocalDate> startDate,
     Optional<LocalDate> endDate,
     Optional<Integer> traceAllowedAssociations,

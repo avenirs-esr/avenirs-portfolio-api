@@ -7,5 +7,5 @@ public enum EActivityUpdatableField {
   BANNER,
   SUMMARY,
   DESCRIPTION,
-  EXECUTION_PERIOD,
+  RECOMMENDED_COMPLETION_CONTEXTS,
 }

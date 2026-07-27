@@ -29,7 +29,7 @@ public class Activity extends AvenirsBaseModel {
   private String description;
 
   @Getter(AccessLevel.NONE)
-  private String executionPeriodInfo;
+  private String recommendedCompletionContexts;
 
   @Getter(AccessLevel.NONE)
   private LocalDate startDate;
@@ -51,7 +51,7 @@ public class Activity extends AvenirsBaseModel {
       String summary,
       EActivityStatus status,
       String description,
-      String executionPeriodInfo,
+      String recommendedCompletionContexts,
       LocalDate startDate,
       LocalDate endDate,
       boolean enableReflection,
@@ -69,7 +69,7 @@ public class Activity extends AvenirsBaseModel {
     this.summary = summary;
     this.status = status;
     this.description = description;
-    this.executionPeriodInfo = executionPeriodInfo;
+    this.recommendedCompletionContexts = recommendedCompletionContexts;
     this.startDate = startDate;
     this.endDate = endDate;
     this.enableReflection = enableReflection;
@@ -87,7 +87,7 @@ public class Activity extends AvenirsBaseModel {
       EActivityThematic thematic,
       String summary,
       String description,
-      String executionPeriodInfo,
+      String recommendedCompletionContexts,
       LocalDate startDate,
       LocalDate endDate,
       boolean enableReflection,
@@ -105,7 +105,7 @@ public class Activity extends AvenirsBaseModel {
         summary,
         EActivityStatus.PUBLISHED,
         description,
-        executionPeriodInfo,
+        recommendedCompletionContexts,
         startDate,
         endDate,
         enableReflection,
@@ -126,7 +126,7 @@ public class Activity extends AvenirsBaseModel {
       String summary,
       EActivityStatus status,
       String description,
-      String executionPeriodInfo,
+      String recommendedCompletionContexts,
       LocalDate startDate,
       LocalDate endDate,
       boolean enableReflection,
@@ -145,7 +145,7 @@ public class Activity extends AvenirsBaseModel {
         summary,
         status,
         description,
-        executionPeriodInfo,
+        recommendedCompletionContexts,
         startDate,
         endDate,
         enableReflection,
@@ -158,8 +158,8 @@ public class Activity extends AvenirsBaseModel {
         updatedAt);
   }
 
-  public Optional<String> getExecutionPeriodInfo() {
-    return Optional.ofNullable(executionPeriodInfo);
+  public Optional<String> getRecommendedCompletionContexts() {
+    return Optional.ofNullable(recommendedCompletionContexts);
   }
 
   public Optional<LocalDate> getStartDate() {
