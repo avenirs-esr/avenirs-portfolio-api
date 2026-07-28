@@ -99,13 +99,26 @@ public class AssociationSeeder {
                 DECLARED_ACTIVITY_DECLARED_SKILL,
                 TRACE_DECLARED_EXPERIENCE ->
                 UUID::fromString;
+            case DECLARED_EXPERIENCE_DECLARED_SKILL ->
+                id ->
+                    resolveDynamicIdWithStudentParam(
+                        id,
+                        savedDeclaredExperiences,
+                        experience ->
+                            experience.getStudent() != null
+                                ? experience.getStudent().getId()
+                                : null,
+                        DeclaredExperienceEntity::getId,
+                        declaredExperienceComparator());
           };
 
       Function<String, UUID> mapperId2 =
           switch (data.associationType()) {
             case DECLARED_ACTIVITY_TRACE -> UUID::fromString;
 
-            case DECLARED_ACTIVITY_DECLARED_SKILL, TRACE_DECLARED_SKILL ->
+            case DECLARED_ACTIVITY_DECLARED_SKILL,
+                TRACE_DECLARED_SKILL,
+                DECLARED_EXPERIENCE_DECLARED_SKILL ->
                 id ->
                     resolveDynamicIdWithStudentParam(
                         id,

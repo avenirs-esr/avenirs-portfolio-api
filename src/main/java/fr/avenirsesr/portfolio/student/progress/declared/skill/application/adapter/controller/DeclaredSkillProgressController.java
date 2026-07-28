@@ -208,4 +208,21 @@ public class DeclaredSkillProgressController {
             declaredSkillProgressId, body.idsToAssociate());
     return ResponseEntity.ok(declaredSkillAssociationsDTOMapper.toDTO(newAssociations));
   }
+
+  @PostMapping("/{declaredSkillProgressId}/associate/declared-experiences")
+  public ResponseEntity<DeclaredSkillAssociationsDTO> associateDeclaredSkillWithDeclaredExperiences(
+      Principal principal,
+      @Valid @PathVariable UUID declaredSkillProgressId,
+      @Valid @RequestBody AssociationsCreationRequest body) {
+    log.debug(
+        "Received request to associate declared skill [{}] with declared experiences [{}] by"
+            + " student [{}]",
+        declaredSkillProgressId,
+        body.idsToAssociate(),
+        principal.getName());
+    var newAssociations =
+        declaredSkillProgressService.associateDeclaredSkillWithDeclaredExperiences(
+            declaredSkillProgressId, body.idsToAssociate());
+    return ResponseEntity.ok(declaredSkillAssociationsDTOMapper.toDTO(newAssociations));
+  }
 }
