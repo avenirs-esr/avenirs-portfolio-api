@@ -26,6 +26,7 @@ import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
@@ -46,6 +47,7 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
 
   @Override
   public DeclaredExperience create(
+      UUID experienceId,
       UUID studentId,
       String title,
       EExperienceType experienceType,
@@ -60,6 +62,38 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
       LocalDate endDate) {
     Student student = studentService.getStudentById(studentId);
     return create(
+        experienceId,
+        student,
+        title,
+        experienceType,
+        organization,
+        activitySector,
+        location,
+        description,
+        sourceOfInformation,
+        summary,
+        externalLink,
+        startDate,
+        endDate);
+  }
+
+  @Override
+  public DeclaredExperience create(
+      UUID studentId,
+      String title,
+      EExperienceType experienceType,
+      String organization,
+      String activitySector,
+      String location,
+      String description,
+      String sourceOfInformation,
+      String summary,
+      String externalLink,
+      LocalDate startDate,
+      LocalDate endDate) {
+    Student student = studentService.getStudentById(studentId);
+    return create(
+        UUID.randomUUID(),
         student,
         title,
         experienceType,
@@ -88,6 +122,7 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
       LocalDate startDate,
       LocalDate endDate) {
     return create(
+        UUID.randomUUID(),
         loggedInUserService.getLoggedInStudent(),
         title,
         experienceType,
@@ -103,6 +138,7 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
   }
 
   private DeclaredExperience create(
+      UUID experienceId,
       Student student,
       String title,
       EExperienceType experienceType,
@@ -130,7 +166,10 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
         endDate);
 
     var experience =
-        DeclaredExperience.create(
+        DeclaredExperience.toDomain(
+            experienceId,
+            Instant.now(),
+            Instant.now(),
             student,
             title,
             experienceType,
@@ -142,7 +181,8 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
             summary,
             externalLink,
             startDate,
-            endDate);
+            endDate,
+            false);
 
     experience = experienceRepository.save(experience);
     log.info("{} has been created", experience);

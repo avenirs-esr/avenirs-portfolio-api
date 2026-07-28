@@ -1,5 +1,6 @@
 [
   {
+    "id": "cfbe8082-f1db-4dc6-8111-03f16bff8358",
     "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Backend Developer",
     "experienceType": "PROFESSIONAL",
@@ -14,6 +15,7 @@
     "endDate": null
   },
   {
+    "id": "91685fd9-1206-4634-a542-fe501f982e9d",
     "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "android developer",
     "experienceType": "PROFESSIONAL",
@@ -28,6 +30,7 @@
     "endDate": null
   },
   {
+    "id": "1e25cf76-d8a8-43d3-91eb-913d8734b8b3",
     "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Architecte logiciel",
     "experienceType": "PROFESSIONAL",
@@ -42,6 +45,7 @@
     "endDate": null
   },
   {
+    "id": "005af655-1202-435d-b710-a22903d065f3",
     "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Consultant IT",
     "experienceType": "PROFESSIONAL",
@@ -56,6 +60,7 @@
     "endDate": "2022-12-31"
   },
   {
+    "id": "9693dc05-fe84-424f-9038-da194518373c",
     "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Data Engineer",
     "experienceType": "PROFESSIONAL",
@@ -70,6 +75,7 @@
     "endDate": "2021-02-28"
   },
   {
+    "id": "da14880d-f51a-4bc8-bed6-f4cf888df154",
     "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "DevOps Engineer",
     "experienceType": "PROFESSIONAL",
@@ -84,6 +90,7 @@
     "endDate": "2024-05-30"
   },
   {
+    "id": "a12fb8b6-b24c-4858-ad67-c6c6c7e0e97a",
     "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "analyste fonctionnel",
     "experienceType": "PROFESSIONAL",
