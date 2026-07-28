@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.declaredskill.domain.port.input.DeclaredSkillSync
 import fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.client.ExternalSkillClient;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
+import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.port.input.DeclaredExperienceService;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.service.DeclaredSkillProgressServiceImpl;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.repository.DeclaredSkillProgressDatabaseRepository;
@@ -29,7 +30,9 @@ public class DeclaredSkillProgressServiceConfig {
 
   @Bean
   public DeclaredSkillProgressService declaredSkillProgressService(
-      @Lazy TraceService traceService, @Lazy DeclaredActivityService declaredActivityService) {
+      @Lazy TraceService traceService,
+      @Lazy DeclaredActivityService declaredActivityService,
+      @Lazy DeclaredExperienceService declaredExperienceService) {
     return new DeclaredSkillProgressServiceImpl(
         traceService,
         declaredSkillSyncService,
@@ -38,6 +41,7 @@ public class DeclaredSkillProgressServiceConfig {
         loggedInUserService,
         declaredActivityService,
         associationService,
-        associationSearchHelper);
+        associationSearchHelper,
+        declaredExperienceService);
   }
 }

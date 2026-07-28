@@ -32,6 +32,10 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.De
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
+import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.data.DeclaredExperienceAssociationData;
+import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.exception.DeclaredExperienceNotFoundException;
+import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.DeclaredExperience;
+import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.port.input.DeclaredExperienceService;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.data.DeclaredSkillAssociationCount;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.data.DeclaredSkillAssociationsData;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.data.DeclaredSkillProgressData;
@@ -61,6 +65,7 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
   private final DeclaredActivityService declaredActivityService;
   private final AssociationService associationService;
   private final AssociationSearchHelper associationSearchHelper;
+  private final DeclaredExperienceService declaredExperienceService;
 
   @Override
   public PagedResult<DeclaredSkillProgressData> getDeclaredSkillsProgresses(
@@ -243,6 +248,36 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
   }
 
   @Override
+  public DeclaredSkillAssociationsData associateDeclaredSkillWithDeclaredExperiences(
+      UUID declaredSkillId, List<UUID> declaredExperienceIds) {
+    fetchAndCheckLoggedInStudentAuthorization(declaredSkillId);
+    Student student = loggedInUserService.getLoggedInStudent();
+    var uniqueDeclaredExperienceIds = declaredExperienceIds.stream().distinct().toList();
+    var experiences = declaredExperienceService.findAllByIds(uniqueDeclaredExperienceIds);
+
+    if (!new HashSet<>(experiences.stream().map(DeclaredExperience::getId).toList())
+        .containsAll(uniqueDeclaredExperienceIds)) {
+      throw new DeclaredExperienceNotFoundException();
+    }
+
+    if (!experiences.stream().allMatch(experience -> experience.getStudent().equals(student))) {
+      throw new UserNotAuthorizedException();
+    }
+
+    associationService.createAll(
+        uniqueDeclaredExperienceIds.stream()
+            .map(
+                experienceId ->
+                    new AssociationData(
+                        experienceId,
+                        declaredSkillId,
+                        EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL))
+            .toList());
+
+    return getAssociationsOf(declaredSkillId);
+  }
+
+  @Override
   public void deleteAssociations(UUID declaredSkillProgressId, List<UUID> idsToDelete) {
     var declaredSkillProgress = fetchAndCheckLoggedInStudentAuthorization(declaredSkillProgressId);
 
@@ -289,7 +324,8 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
             DeclaredSkillProgress.class,
             List.of(
                 EAssociationType.TRACE_DECLARED_SKILL,
-                EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL));
+                EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL,
+                EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL));
 
     var traceAssociationIds =
         associations.stream()
@@ -304,9 +340,17 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
             .map(Association::getId1)
             .toList();
 
+    var experienceAssociationIds =
+        associations.stream()
+            .filter(
+                a -> a.getAssociationType() == EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL)
+            .map(Association::getId1)
+            .toList();
+
     var traces = traceService.findAllTracesById(traceAssociationIds);
     var declaredActivities =
         declaredActivityService.findAllDeclaredActivitiesByIds(activityAssociationIds);
+    var declaredExperiences = declaredExperienceService.findAllByIds(experienceAssociationIds);
 
     var activityStatuses = declaredActivityService.getDeclaredActivityStatus(declaredActivities);
 
@@ -336,6 +380,18 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
                   return new DeclaredActivityAssociationData(
                       a.getId(), activity, activityStatuses.get(activity));
                 })
+            .toList(),
+        associations.stream()
+            .filter(
+                a -> a.getAssociationType() == EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL)
+            .map(
+                a ->
+                    new DeclaredExperienceAssociationData(
+                        a.getId(),
+                        declaredExperiences.stream()
+                            .filter(experience -> experience.getId().equals(a.getId1()))
+                            .findAny()
+                            .orElseThrow(DeclaredExperienceNotFoundException::new)))
             .toList());
   }
 

@@ -46,5 +46,8 @@ public interface DeclaredSkillProgressService {
   DeclaredSkillAssociationsData associateDeclaredSkillWithActivities(
       UUID declaredSkillIId, List<UUID> declaredActivityIds);
 
+  DeclaredSkillAssociationsData associateDeclaredSkillWithDeclaredExperiences(
+      UUID declaredSkillId, List<UUID> declaredExperienceIds);
+
   void deleteAssociations(UUID declaredSkillProgressId, List<UUID> idsToDelete);
 }
