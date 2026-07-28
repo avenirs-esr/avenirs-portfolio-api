@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.port.input.DeclaredExperienceService;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.port.output.repository.DeclaredExperienceRepository;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.service.DeclaredExperienceServiceImpl;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import lombok.AllArgsConstructor;
@@ -23,13 +24,16 @@ public class DeclaredExperienceServiceConfig {
   private final StudentService studentService;
 
   @Bean
-  public DeclaredExperienceService declaredExperienceService(@Lazy TraceService traceService) {
+  public DeclaredExperienceService declaredExperienceService(
+      @Lazy TraceService traceService,
+      @Lazy DeclaredSkillProgressService declaredSkillProgressService) {
     return new DeclaredExperienceServiceImpl(
         loggedInUserService,
         associationService,
         associationSearchHelper,
         traceService,
         experienceRepository,
-        studentService);
+        studentService,
+        declaredSkillProgressService);
   }
 }
