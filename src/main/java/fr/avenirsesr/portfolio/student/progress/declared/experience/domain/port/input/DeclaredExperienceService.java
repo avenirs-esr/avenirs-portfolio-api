@@ -86,4 +86,10 @@ public interface DeclaredExperienceService {
       EAssociationContextType contextType,
       String keyword,
       PageCriteria pageCriteria);
+
+  DeclaredExperienceAssociationsData associateDeclaredExperienceWithDeclaredSkills(
+      UUID declaredExperienceId, List<UUID> declaredSkillProgressIds);
+
+  DeclaredExperienceAssociationsData associateDeclaredExperienceWithTraces(
+      UUID declaredExperienceId, List<UUID> traceIds);
 }

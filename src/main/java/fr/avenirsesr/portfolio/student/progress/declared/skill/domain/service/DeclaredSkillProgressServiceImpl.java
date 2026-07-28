@@ -447,7 +447,8 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
     return switch (contextType) {
       case TRACE -> EAssociationType.TRACE_DECLARED_SKILL;
       case DECLARED_ACTIVITY -> EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL;
-      case DECLARED_SKILL, DECLARED_EXPERIENCE -> throw new UnsupportedOperationException();
+      case DECLARED_EXPERIENCE -> EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL;
+      case DECLARED_SKILL -> throw new UnsupportedOperationException();
     };
   }
 }

@@ -8,6 +8,7 @@ import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsCreationRequest;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.application.adapter.dto.DeclaredExperienceAssociationsDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.application.adapter.dto.DeclaredExperienceRequest;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.application.adapter.dto.DeclaredExperienceViewDTO;
@@ -152,6 +153,40 @@ public class DeclaredExperienceController {
 
     var associations = declaredExperienceService.getAssociations(experienceId);
 
+    return ResponseEntity.ok(declaredExperienceMapper.toAssociationsDTO(associations));
+  }
+
+  @PostMapping("/{experienceId}/associate/declared-skills")
+  public ResponseEntity<DeclaredExperienceAssociationsDTO>
+      associateDeclaredExperienceWithDeclaredSkills(
+          Principal principal,
+          @Valid @PathVariable UUID experienceId,
+          @Valid @RequestBody AssociationsCreationRequest body) {
+    log.debug(
+        "Received request to associate declared experience [{}] with declared skills [{}] by"
+            + " student [{}]",
+        experienceId,
+        body.idsToAssociate(),
+        principal.getName());
+    var associations =
+        declaredExperienceService.associateDeclaredExperienceWithDeclaredSkills(
+            experienceId, body.idsToAssociate());
+    return ResponseEntity.ok(declaredExperienceMapper.toAssociationsDTO(associations));
+  }
+
+  @PostMapping("/{experienceId}/associate/traces")
+  public ResponseEntity<DeclaredExperienceAssociationsDTO> associateDeclaredExperienceWithTraces(
+      Principal principal,
+      @Valid @PathVariable UUID experienceId,
+      @Valid @RequestBody AssociationsCreationRequest body) {
+    log.debug(
+        "Received request to associate declared experience [{}] with traces [{}] by student [{}]",
+        experienceId,
+        body.idsToAssociate(),
+        principal.getName());
+    var associations =
+        declaredExperienceService.associateDeclaredExperienceWithTraces(
+            experienceId, body.idsToAssociate());
     return ResponseEntity.ok(declaredExperienceMapper.toAssociationsDTO(associations));
   }
 }

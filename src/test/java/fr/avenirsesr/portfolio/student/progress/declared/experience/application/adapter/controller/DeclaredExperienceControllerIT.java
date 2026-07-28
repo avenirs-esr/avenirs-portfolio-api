@@ -5,10 +5,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.declaredskill.domain.port.output.repository.DeclaredSkillRepository;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +27,7 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
 
   @Autowired private WebTestClient webTestClient;
   @Autowired private ObjectMapper objectMapper;
+  @Autowired private DeclaredSkillRepository declaredSkillRepository;
 
   @Value("${hmac.secret-key}")
   private String secretKey;
@@ -729,5 +733,563 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .isForbidden();
 
     BddLogger.then("it should return forbidden");
+  }
+
+  private String createDeclaredExperienceAs(String payload, String signature) throws Exception {
+    String responseBody =
+        webTestClient
+            .post()
+            .uri(BASE_PATH + "/")
+            .header("X-Signed-Context", payload)
+            .header("X-Context-Kid", secretKey)
+            .header("X-Context-Signature", signature)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(buildCreateExperienceJson())
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    return extractIdFromResponse(responseBody);
+  }
+
+  private UUID createDeclaredSkillProgressAs(int skipIndex, String payload, String signature)
+      throws Exception {
+    UUID declaredSkillId =
+        declaredSkillRepository.findAll().stream()
+            .skip(skipIndex)
+            .findFirst()
+            .orElseThrow()
+            .getId();
+
+    String responseBody =
+        webTestClient
+            .post()
+            .uri("/me/declared/skill-progress")
+            .header("X-Signed-Context", payload)
+            .header("X-Context-Kid", secretKey)
+            .header("X-Context-Signature", signature)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(
+                "{\n"
+                    + "  \"id\": \"%s\",\n".formatted(declaredSkillId)
+                    + "  \"level\": \"BEGINNER\",\n"
+                    + "  \"type\": \"ROME4\"\n"
+                    + "}\n")
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    return UUID.fromString(extractIdFromResponse(responseBody));
+  }
+
+  private UUID createTraceAs(String title, String payload, String signature) throws Exception {
+    String responseBody =
+        webTestClient
+            .post()
+            .uri("/me/traces")
+            .header("X-Signed-Context", payload)
+            .header("X-Context-Kid", secretKey)
+            .header("X-Context-Signature", signature)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(
+                objectMapper.writeValueAsString(
+                    Map.of(
+                        "title", title,
+                        "language", "FRENCH",
+                        "authorType", "PERSONAL")))
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    return UUID.fromString(objectMapper.readTree(responseBody).get("traceId").asText());
+  }
+
+  @Test
+  void shouldAssociateDeclaredExperienceWithDeclaredSkillsSuccessfully() throws Exception {
+    BddLogger.given("a declared experience and two declared skill progresses of the student");
+
+    String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
+    UUID skill1 = createDeclaredSkillProgressAs(10, studentPayload, studentSignature);
+    UUID skill2 = createDeclaredSkillProgressAs(11, studentPayload, studentSignature);
+
+    BddLogger.when(
+        "performing a POST to associate the experience with both declared skill progresses");
+
+    String responseBody =
+        webTestClient
+            .post()
+            .uri(BASE_PATH + "/" + experienceId + "/associate/declared-skills")
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Kid", secretKey)
+            .header("X-Context-Signature", studentSignature)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(
+                objectMapper.writeValueAsString(Map.of("idsToAssociate", List.of(skill1, skill2))))
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    BddLogger.then("it should create both declared skill associations");
+
+    var declaredSkillAssociations =
+        objectMapper.readTree(responseBody).get("declaredSkillAssociations");
+    assertThat(declaredSkillAssociations.isArray()).isTrue();
+    assertThat(declaredSkillAssociations.size()).isEqualTo(2);
+  }
+
+  @Test
+  void shouldReturn404WhenAssociatingDeclaredSkillsWithNonExistentExperience() throws Exception {
+    BddLogger.given("a non-existent declared experience");
+
+    UUID skillId = createDeclaredSkillProgressAs(12, studentPayload, studentSignature);
+
+    BddLogger.when("performing a POST to associate declared skills");
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + notFoundDeclaredExperienceId + "/associate/declared-skills")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(objectMapper.writeValueAsString(Map.of("idsToAssociate", List.of(skillId))))
+        .exchange()
+        .expectStatus()
+        .isNotFound();
+
+    BddLogger.then("it should return 404");
+  }
+
+  @Test
+  void shouldReturn403WhenAssociatingDeclaredSkillsWithOtherStudentExperience() throws Exception {
+    BddLogger.given("a declared experience belonging to another student");
+
+    String otherExperienceId =
+        createDeclaredExperienceAs(otherStudentPayload, otherStudentSignature);
+    UUID skillId = createDeclaredSkillProgressAs(13, studentPayload, studentSignature);
+
+    BddLogger.when("performing a POST to associate declared skills");
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + otherExperienceId + "/associate/declared-skills")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(objectMapper.writeValueAsString(Map.of("idsToAssociate", List.of(skillId))))
+        .exchange()
+        .expectStatus()
+        .isForbidden();
+
+    BddLogger.then("it should return forbidden");
+  }
+
+  @Test
+  void shouldReturn404WhenAssociatingWithNonExistentDeclaredSkill() throws Exception {
+    BddLogger.given("a declared experience and a non-existent declared skill progress id");
+
+    String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
+    UUID nonExistentSkillId = UUID.randomUUID();
+
+    BddLogger.when("performing a POST to associate with a non-existent declared skill");
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + experienceId + "/associate/declared-skills")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(
+            objectMapper.writeValueAsString(Map.of("idsToAssociate", List.of(nonExistentSkillId))))
+        .exchange()
+        .expectStatus()
+        .isNotFound()
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("DECLARED_SKILL_PROGRESS_NOT_FOUND");
+
+    BddLogger.then("it should return 404 for declared skill progress not found");
+  }
+
+  @Test
+  void shouldReturn403WhenAssociatingWithOtherStudentDeclaredSkill() throws Exception {
+    BddLogger.given("a declared skill progress belonging to another student");
+
+    String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
+    UUID otherStudentSkillId = UUID.fromString("72de2a8e-be49-437e-b759-15f8e3a06de3");
+
+    BddLogger.when("performing a POST to associate with the other student's declared skill");
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + experienceId + "/associate/declared-skills")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(
+            objectMapper.writeValueAsString(Map.of("idsToAssociate", List.of(otherStudentSkillId))))
+        .exchange()
+        .expectStatus()
+        .isForbidden()
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("USER_NOT_AUTHORIZED");
+
+    BddLogger.then("it should return forbidden");
+  }
+
+  @Test
+  void shouldHandleEmptyDeclaredSkillListWhenAssociating() throws Exception {
+    BddLogger.given("a declared experience and an empty declared skill list");
+
+    String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
+
+    BddLogger.when("performing a POST with an empty declared skill list");
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + experienceId + "/associate/declared-skills")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(objectMapper.writeValueAsString(Map.of("idsToAssociate", List.of())))
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.declaredSkillAssociations")
+        .isArray()
+        .jsonPath("$.declaredSkillAssociations")
+        .isEmpty();
+
+    BddLogger.then("it should succeed with no association created");
+  }
+
+  @Test
+  void shouldCreateOnlyOneAssociationWhenDeclaredSkillIdIsDuplicatedInRequest() throws Exception {
+    BddLogger.given("a request containing the same declared skill progress id twice");
+
+    String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
+    UUID skillId = createDeclaredSkillProgressAs(14, studentPayload, studentSignature);
+
+    BddLogger.when("performing a POST with the duplicated declared skill id");
+
+    String responseBody =
+        webTestClient
+            .post()
+            .uri(BASE_PATH + "/" + experienceId + "/associate/declared-skills")
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Kid", secretKey)
+            .header("X-Context-Signature", studentSignature)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(
+                objectMapper.writeValueAsString(
+                    Map.of("idsToAssociate", List.of(skillId, skillId))))
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    BddLogger.then("it should create a single association, not two");
+
+    var declaredSkillAssociations =
+        objectMapper.readTree(responseBody).get("declaredSkillAssociations");
+    assertThat(declaredSkillAssociations.size()).isEqualTo(1);
+  }
+
+  @Test
+  void shouldReturn409WhenDeclaredSkillAlreadyAssociated() throws Exception {
+    BddLogger.given("a declared skill progress already associated with the experience");
+
+    String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
+    UUID skillId = createDeclaredSkillProgressAs(15, studentPayload, studentSignature);
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + experienceId + "/associate/declared-skills")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(objectMapper.writeValueAsString(Map.of("idsToAssociate", List.of(skillId))))
+        .exchange()
+        .expectStatus()
+        .isOk();
+
+    BddLogger.when("performing the same association request again");
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + experienceId + "/associate/declared-skills")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(objectMapper.writeValueAsString(Map.of("idsToAssociate", List.of(skillId))))
+        .exchange()
+        .expectStatus()
+        .isEqualTo(409)
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("ASSOCIATION_ALREADY_EXIST");
+
+    BddLogger.then("it should reject the already existing association with a 409 conflict");
+  }
+
+  @Test
+  void shouldAssociateDeclaredExperienceWithTracesSuccessfully() throws Exception {
+    BddLogger.given("a declared experience and two traces of the student");
+
+    String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
+    UUID trace1 = createTraceAs("Trace 1", studentPayload, studentSignature);
+    UUID trace2 = createTraceAs("Trace 2", studentPayload, studentSignature);
+
+    BddLogger.when("performing a POST to associate the experience with both traces");
+
+    String responseBody =
+        webTestClient
+            .post()
+            .uri(BASE_PATH + "/" + experienceId + "/associate/traces")
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Kid", secretKey)
+            .header("X-Context-Signature", studentSignature)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(
+                objectMapper.writeValueAsString(Map.of("idsToAssociate", List.of(trace1, trace2))))
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    BddLogger.then("it should create both trace associations");
+
+    var traceAssociations = objectMapper.readTree(responseBody).get("traceAssociations");
+    assertThat(traceAssociations.isArray()).isTrue();
+    assertThat(traceAssociations.size()).isEqualTo(2);
+  }
+
+  @Test
+  void shouldReturn404WhenAssociatingTracesWithNonExistentExperience() throws Exception {
+    BddLogger.given("a non-existent declared experience");
+
+    UUID traceId = createTraceAs("Trace", studentPayload, studentSignature);
+
+    BddLogger.when("performing a POST to associate traces");
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + notFoundDeclaredExperienceId + "/associate/traces")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(objectMapper.writeValueAsString(Map.of("idsToAssociate", List.of(traceId))))
+        .exchange()
+        .expectStatus()
+        .isNotFound();
+
+    BddLogger.then("it should return 404");
+  }
+
+  @Test
+  void shouldReturn403WhenAssociatingTracesWithOtherStudentExperience() throws Exception {
+    BddLogger.given("a declared experience belonging to another student");
+
+    String otherExperienceId =
+        createDeclaredExperienceAs(otherStudentPayload, otherStudentSignature);
+    UUID traceId = createTraceAs("Trace", studentPayload, studentSignature);
+
+    BddLogger.when("performing a POST to associate traces");
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + otherExperienceId + "/associate/traces")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(objectMapper.writeValueAsString(Map.of("idsToAssociate", List.of(traceId))))
+        .exchange()
+        .expectStatus()
+        .isForbidden();
+
+    BddLogger.then("it should return forbidden");
+  }
+
+  @Test
+  void shouldReturn404WhenAssociatingWithNonExistentTrace() throws Exception {
+    BddLogger.given("a declared experience and a non-existent trace id");
+
+    String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
+    UUID nonExistentTraceId = UUID.randomUUID();
+
+    BddLogger.when("performing a POST to associate with a non-existent trace");
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + experienceId + "/associate/traces")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(
+            objectMapper.writeValueAsString(Map.of("idsToAssociate", List.of(nonExistentTraceId))))
+        .exchange()
+        .expectStatus()
+        .isNotFound()
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("TRACE_NOT_FOUND");
+
+    BddLogger.then("it should return 404 for trace not found");
+  }
+
+  @Test
+  void shouldReturn403WhenAssociatingWithOtherStudentTrace() throws Exception {
+    BddLogger.given("a trace belonging to another student");
+
+    String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
+    UUID otherStudentTraceId =
+        createTraceAs("Other student trace", otherStudentPayload, otherStudentSignature);
+
+    BddLogger.when("performing a POST to associate with the other student's trace");
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + experienceId + "/associate/traces")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(
+            objectMapper.writeValueAsString(Map.of("idsToAssociate", List.of(otherStudentTraceId))))
+        .exchange()
+        .expectStatus()
+        .isForbidden()
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("USER_NOT_AUTHORIZED");
+
+    BddLogger.then("it should return forbidden");
+  }
+
+  @Test
+  void shouldHandleEmptyTraceListWhenAssociating() throws Exception {
+    BddLogger.given("a declared experience and an empty trace list");
+
+    String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
+
+    BddLogger.when("performing a POST with an empty trace list");
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + experienceId + "/associate/traces")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(objectMapper.writeValueAsString(Map.of("idsToAssociate", List.of())))
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.traceAssociations")
+        .isArray()
+        .jsonPath("$.traceAssociations")
+        .isEmpty();
+
+    BddLogger.then("it should succeed with no association created");
+  }
+
+  @Test
+  void shouldCreateOnlyOneAssociationWhenTraceIdIsDuplicatedInRequest() throws Exception {
+    BddLogger.given("a request containing the same trace id twice");
+
+    String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
+    UUID traceId = createTraceAs("Duplicated trace", studentPayload, studentSignature);
+
+    BddLogger.when("performing a POST with the duplicated trace id");
+
+    String responseBody =
+        webTestClient
+            .post()
+            .uri(BASE_PATH + "/" + experienceId + "/associate/traces")
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Kid", secretKey)
+            .header("X-Context-Signature", studentSignature)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(
+                objectMapper.writeValueAsString(
+                    Map.of("idsToAssociate", List.of(traceId, traceId))))
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    BddLogger.then("it should create a single association, not two");
+
+    var traceAssociations = objectMapper.readTree(responseBody).get("traceAssociations");
+    assertThat(traceAssociations.size()).isEqualTo(1);
+  }
+
+  @Test
+  void shouldReturn409WhenTraceAlreadyAssociated() throws Exception {
+    BddLogger.given("a trace already associated with the experience");
+
+    String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
+    UUID traceId = createTraceAs("Already associated trace", studentPayload, studentSignature);
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + experienceId + "/associate/traces")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(objectMapper.writeValueAsString(Map.of("idsToAssociate", List.of(traceId))))
+        .exchange()
+        .expectStatus()
+        .isOk();
+
+    BddLogger.when("performing the same association request again");
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + experienceId + "/associate/traces")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(objectMapper.writeValueAsString(Map.of("idsToAssociate", List.of(traceId))))
+        .exchange()
+        .expectStatus()
+        .isEqualTo(409)
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("ASSOCIATION_ALREADY_EXIST");
+
+    BddLogger.then("it should reject the already existing association with a 409 conflict");
   }
 }
