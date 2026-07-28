@@ -89,7 +89,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.skill.do
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.skill.domain.data,DeclaredSkillAssociationData,0,9,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.skill.domain.data,DeclaredSkillProgressData,0,9,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.skill.domain.data,DeclaredSkillAssociationCount,0,9,0,0,0,1,0,1,0,1
-avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.experience.domain.service,DeclaredExperienceServiceImpl,75,416,9,13,14,96,11,23,6,17
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.experience.domain.service,DeclaredExperienceServiceImpl,75,443,9,13,14,102,11,24,6,18
 avenirs-portfolio-api,fr.avenirsesr.portfolio.association.domain.data,AssociationData,0,12,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.association.domain.data,AssociationSearchResultData,0,15,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.experience.domain.data,DeclaredExperienceAssociationData,0,9,0,0,0,1,0,1,0,1
