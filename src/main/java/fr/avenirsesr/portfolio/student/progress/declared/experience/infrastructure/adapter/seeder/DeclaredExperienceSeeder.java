@@ -50,6 +50,7 @@ public class DeclaredExperienceSeeder {
                   .map(
                       entity ->
                           new DeclaredExperienceCreationData(
+                              entity.getId(),
                               entity.getStudent().getId(),
                               entity.getTitle(),
                               entity.getExperienceType(),
@@ -71,6 +72,7 @@ public class DeclaredExperienceSeeder {
         data -> {
           var experience =
               declaredExperienceService.create(
+                  data.id(),
                   data.studentId(),
                   data.title(),
                   data.experienceType(),

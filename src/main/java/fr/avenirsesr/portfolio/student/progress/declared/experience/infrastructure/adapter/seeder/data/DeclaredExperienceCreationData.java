@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 public record DeclaredExperienceCreationData(
+    UUID id,
     UUID studentId,
     String title,
     EExperienceType experienceType,
