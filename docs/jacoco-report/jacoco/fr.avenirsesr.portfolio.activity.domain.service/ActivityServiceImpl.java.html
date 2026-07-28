@@ -94,7 +94,7 @@ public class ActivityServiceImpl implements ActivityService {
 <span class="fc" id="L94">    requireNotBlankAndMaxLength(</span>
         &quot;recommendedCompletionContexts&quot;,
         recommendedCompletionContexts,
-        ACTIVITY_EXECUTION_PERIOD_INFO);
+        ACTIVITY_RECOMMENDED_COMPLETION_CONTEXTS);
 <span class="pc bpc" id="L98" title="1 of 6 branches missed.">    if ((startDate == null) != (endDate == null)) {</span>
 <span class="nc" id="L99">      throw new ActivityDatesException();</span>
     }
@@ -207,7 +207,7 @@ public class ActivityServiceImpl implements ActivityService {
 <span class="fc" id="L207">                draft.getDescription().orElse(null),</span>
 <span class="fc" id="L208">                activity::setDescription),</span>
             new FieldSync&lt;&gt;(
-                EXECUTION_PERIOD,
+                RECOMMENDED_COMPLETION_CONTEXTS,
 <span class="fc" id="L211">                activity.getRecommendedCompletionContexts().orElse(null),</span>
 <span class="fc" id="L212">                draft.getRecommendedCompletionContexts().orElse(null),</span>
 <span class="fc" id="L213">                activity::setRecommendedCompletionContexts),</span>
@@ -447,7 +447,7 @@ public class ActivityServiceImpl implements ActivityService {
 <span class="fc" id="L447">    validateOptionalTextMaxLength(</span>
         &quot;recommendedCompletionContexts&quot;,
         recommendedCompletionContexts,
-        ACTIVITY_EXECUTION_PERIOD_INFO);
+        ACTIVITY_RECOMMENDED_COMPLETION_CONTEXTS);
 <span class="fc bfc" id="L451" title="All 2 branches covered.">    if (startDate != null) {</span>
 <span class="fc" id="L452">      validateDateOrder(startDate, endDate);</span>
     }
