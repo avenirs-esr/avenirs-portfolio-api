@@ -235,8 +235,30 @@ class TraceControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldReturnTraceOverview() {
-    BddLogger.given("seeded traces");
+  void shouldReturnTraceOverview() throws Exception {
+    BddLogger.given("a newly created trace with an AI use justification");
+
+    CreateTraceDTO dto =
+        new CreateTraceDTO(
+            "Trace overview",
+            ELanguage.FRENCH,
+            ETraceAuthorType.PERSONAL,
+            "Note",
+            "Justification IA",
+            null);
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH)
+        .contentType(APPLICATION_JSON)
+        .bodyValue(objectMapper.writeValueAsString(dto))
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .exchange()
+        .expectStatus()
+        .isCreated();
+
     when("getting trace overview");
 
     webTestClient
@@ -253,13 +275,13 @@ class TraceControllerIT extends ContainerConfigurationTest {
         .jsonPath("$[0].id")
         .exists()
         .jsonPath("$[0].title")
-        .exists()
+        .isEqualTo("Trace overview")
         .jsonPath("$[0].programName")
         .exists()
         .jsonPath("$[0].aiUseJustification")
-        .exists();
+        .isEqualTo("Justification IA");
 
-    BddLogger.then("it should return trace overview");
+    BddLogger.then("it should return the newly created trace first, with its AI use justification");
   }
 
   @Test
