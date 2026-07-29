@@ -9,6 +9,7 @@ import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedRes
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsCreationRequest;
+import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsDeleteRequest;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.application.adapter.dto.DeclaredExperienceAssociationsDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.application.adapter.dto.DeclaredExperienceRequest;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.application.adapter.dto.DeclaredExperienceViewDTO;
@@ -188,5 +189,18 @@ public class DeclaredExperienceController {
         declaredExperienceService.associateDeclaredExperienceWithTraces(
             experienceId, body.idsToAssociate());
     return ResponseEntity.ok(declaredExperienceMapper.toAssociationsDTO(associations));
+  }
+
+  @DeleteMapping("/{experienceId}/associations")
+  public ResponseEntity<Void> deleteDeclaredExperienceAssociations(
+      Principal principal,
+      @Valid @PathVariable UUID experienceId,
+      @Valid @RequestBody AssociationsDeleteRequest body) {
+    log.debug(
+        "Received request to delete declared experience [{}] associations for student [{}]",
+        experienceId,
+        principal.getName());
+    declaredExperienceService.deleteAssociations(experienceId, body.idsToDelete());
+    return ResponseEntity.noContent().build();
   }
 }

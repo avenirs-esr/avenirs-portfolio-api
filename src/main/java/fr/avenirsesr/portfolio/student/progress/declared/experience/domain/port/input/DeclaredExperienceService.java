@@ -92,4 +92,6 @@ public interface DeclaredExperienceService {
 
   DeclaredExperienceAssociationsData associateDeclaredExperienceWithTraces(
       UUID declaredExperienceId, List<UUID> traceIds);
+
+  void deleteAssociations(UUID declaredExperienceId, List<UUID> idsToDelete);
 }

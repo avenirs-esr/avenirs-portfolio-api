@@ -1292,4 +1292,440 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
 
     BddLogger.then("it should reject the already existing association with a 409 conflict");
   }
+
+  private UUID associateExperienceWithTraceAndGetAssociationId(String experienceId, UUID traceId)
+      throws Exception {
+    String responseBody =
+        webTestClient
+            .post()
+            .uri(BASE_PATH + "/" + experienceId + "/associate/traces")
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Kid", secretKey)
+            .header("X-Context-Signature", studentSignature)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(objectMapper.writeValueAsString(Map.of("idsToAssociate", List.of(traceId))))
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    for (JsonNode node : objectMapper.readTree(responseBody).get("traceAssociations")) {
+      if (node.get("trace").get("id").asText().equals(traceId.toString())) {
+        return UUID.fromString(node.get("associationId").asText());
+      }
+    }
+    throw new IllegalStateException("Association not found for trace " + traceId);
+  }
+
+  @Test
+  void shouldDeleteSingleTraceAssociationSuccessfully() throws Exception {
+    BddLogger.given("a declared experience associated with a trace");
+
+    String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
+    UUID traceId = createTraceAs("Trace to unassociate", studentPayload, studentSignature);
+    UUID associationId = associateExperienceWithTraceAndGetAssociationId(experienceId, traceId);
+
+    BddLogger.when("performing a DELETE to unassociate the trace");
+
+    webTestClient
+        .method(HttpMethod.DELETE)
+        .uri(BASE_PATH + "/" + experienceId + "/associations")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(objectMapper.writeValueAsString(Map.of("idsToDelete", List.of(associationId))))
+        .exchange()
+        .expectStatus()
+        .isNoContent();
+
+    BddLogger.then("the trace association should no longer appear on the experience");
+
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/" + experienceId + "/associations")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.traceAssociations")
+        .isEmpty();
+  }
+
+  @Test
+  void shouldDeleteOnlySelectedTraceAssociationsKeepingOthers() throws Exception {
+    BddLogger.given("a declared experience associated with three traces");
+
+    String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
+    UUID trace1 = createTraceAs("Trace to keep 1", studentPayload, studentSignature);
+    UUID trace2 = createTraceAs("Trace to remove", studentPayload, studentSignature);
+    UUID trace3 = createTraceAs("Trace to keep 2", studentPayload, studentSignature);
+
+    UUID association1 = associateExperienceWithTraceAndGetAssociationId(experienceId, trace1);
+    UUID association2 = associateExperienceWithTraceAndGetAssociationId(experienceId, trace2);
+    UUID association3 = associateExperienceWithTraceAndGetAssociationId(experienceId, trace3);
+
+    BddLogger.when("performing a DELETE to unassociate only the middle trace");
+
+    webTestClient
+        .method(HttpMethod.DELETE)
+        .uri(BASE_PATH + "/" + experienceId + "/associations")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(objectMapper.writeValueAsString(Map.of("idsToDelete", List.of(association2))))
+        .exchange()
+        .expectStatus()
+        .isNoContent();
+
+    BddLogger.then("only the remaining two trace associations should be present");
+
+    String responseBody =
+        webTestClient
+            .get()
+            .uri(BASE_PATH + "/" + experienceId + "/associations")
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Kid", secretKey)
+            .header("X-Context-Signature", studentSignature)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    var remainingAssociationIds = new ArrayList<String>();
+    objectMapper
+        .readTree(responseBody)
+        .get("traceAssociations")
+        .forEach(node -> remainingAssociationIds.add(node.get("associationId").asText()));
+
+    assertThat(remainingAssociationIds)
+        .containsExactlyInAnyOrder(association1.toString(), association3.toString());
+  }
+
+  @Test
+  void shouldKeepDeclaredSkillAssociationsWhenDeletingTraceAssociations() throws Exception {
+    BddLogger.given("a declared experience associated with a trace and a declared skill");
+
+    String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
+    UUID traceId = createTraceAs("Trace", studentPayload, studentSignature);
+    UUID skillId = createDeclaredSkillProgressAs(16, studentPayload, studentSignature);
+
+    UUID traceAssociationId =
+        associateExperienceWithTraceAndGetAssociationId(experienceId, traceId);
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + experienceId + "/associate/declared-skills")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(objectMapper.writeValueAsString(Map.of("idsToAssociate", List.of(skillId))))
+        .exchange()
+        .expectStatus()
+        .isOk();
+
+    BddLogger.when("performing a DELETE to unassociate only the trace");
+
+    webTestClient
+        .method(HttpMethod.DELETE)
+        .uri(BASE_PATH + "/" + experienceId + "/associations")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(
+            objectMapper.writeValueAsString(Map.of("idsToDelete", List.of(traceAssociationId))))
+        .exchange()
+        .expectStatus()
+        .isNoContent();
+
+    BddLogger.then("the declared skill association should remain untouched");
+
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/" + experienceId + "/associations")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.traceAssociations")
+        .isEmpty()
+        .jsonPath("$.declaredSkillAssociations")
+        .value(list -> assertThat((List<?>) list).hasSize(1));
+  }
+
+  @Test
+  void shouldKeepOtherExperienceAssociationOfTraceWhenUnassociatingOneExperience()
+      throws Exception {
+    BddLogger.given("a trace associated with two different declared experiences");
+
+    String experience1Id = createDeclaredExperienceAs(studentPayload, studentSignature);
+    String experience2Id = createDeclaredExperienceAs(studentPayload, studentSignature);
+    UUID traceId = createTraceAs("Shared trace", studentPayload, studentSignature);
+
+    UUID association1 = associateExperienceWithTraceAndGetAssociationId(experience1Id, traceId);
+    associateExperienceWithTraceAndGetAssociationId(experience2Id, traceId);
+
+    BddLogger.when("unassociating the trace from the first experience only");
+
+    webTestClient
+        .method(HttpMethod.DELETE)
+        .uri(BASE_PATH + "/" + experience1Id + "/associations")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(objectMapper.writeValueAsString(Map.of("idsToDelete", List.of(association1))))
+        .exchange()
+        .expectStatus()
+        .isNoContent();
+
+    BddLogger.then("the trace should still be associated with the second experience");
+
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/" + experience2Id + "/associations")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.traceAssociations[0].trace.id")
+        .isEqualTo(traceId.toString());
+  }
+
+  @Test
+  void shouldReturn404WhenDeletingAssociationsForNonExistentExperience() throws Exception {
+    BddLogger.given("a non-existent declared experience");
+
+    BddLogger.when("performing a DELETE to delete an association");
+
+    webTestClient
+        .method(HttpMethod.DELETE)
+        .uri(BASE_PATH + "/" + notFoundDeclaredExperienceId + "/associations")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(
+            objectMapper.writeValueAsString(Map.of("idsToDelete", List.of(UUID.randomUUID()))))
+        .exchange()
+        .expectStatus()
+        .isNotFound()
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("DECLARED_EXPERIENCE_NOT_FOUND");
+
+    BddLogger.then("it should return 404");
+  }
+
+  @Test
+  void shouldReturn403WhenDeletingAssociationsForOtherStudentExperience() throws Exception {
+    BddLogger.given("a declared experience belonging to another student");
+
+    String otherExperienceId =
+        createDeclaredExperienceAs(otherStudentPayload, otherStudentSignature);
+
+    BddLogger.when("performing a DELETE to delete an association");
+
+    webTestClient
+        .method(HttpMethod.DELETE)
+        .uri(BASE_PATH + "/" + otherExperienceId + "/associations")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(
+            objectMapper.writeValueAsString(Map.of("idsToDelete", List.of(UUID.randomUUID()))))
+        .exchange()
+        .expectStatus()
+        .isForbidden()
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("USER_NOT_AUTHORIZED");
+
+    BddLogger.then("it should return forbidden");
+  }
+
+  @Test
+  void shouldReturn403WhenAssociationIdDoesNotBelongToExperience() throws Exception {
+    BddLogger.given("a declared experience with no matching association for the given id");
+
+    String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
+
+    BddLogger.when("performing a DELETE with an unknown association id");
+
+    webTestClient
+        .method(HttpMethod.DELETE)
+        .uri(BASE_PATH + "/" + experienceId + "/associations")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(
+            objectMapper.writeValueAsString(Map.of("idsToDelete", List.of(UUID.randomUUID()))))
+        .exchange()
+        .expectStatus()
+        .isForbidden()
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("USER_NOT_AUTHORIZED");
+
+    BddLogger.then("it should return forbidden, since the association does not belong to it");
+  }
+
+  @Test
+  void shouldNotDeleteAnyAssociationWhenRequestMixesValidAndInvalidIds() throws Exception {
+    BddLogger.given("a valid association id and an unknown association id");
+
+    String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
+    UUID traceId = createTraceAs("Trace kept on error", studentPayload, studentSignature);
+    UUID associationId = associateExperienceWithTraceAndGetAssociationId(experienceId, traceId);
+
+    BddLogger.when("performing a DELETE mixing the valid id with an unknown one");
+
+    webTestClient
+        .method(HttpMethod.DELETE)
+        .uri(BASE_PATH + "/" + experienceId + "/associations")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(
+            objectMapper.writeValueAsString(
+                Map.of("idsToDelete", List.of(associationId, UUID.randomUUID()))))
+        .exchange()
+        .expectStatus()
+        .isForbidden();
+
+    BddLogger.then("the valid association should not have been deleted");
+
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/" + experienceId + "/associations")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.traceAssociations[0].associationId")
+        .isEqualTo(associationId.toString());
+  }
+
+  @Test
+  void shouldIgnoreDuplicateAssociationIdsInRequest() throws Exception {
+    BddLogger.given("a request containing the same association id twice");
+
+    String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
+    UUID traceId = createTraceAs("Trace duplicated in delete", studentPayload, studentSignature);
+    UUID associationId = associateExperienceWithTraceAndGetAssociationId(experienceId, traceId);
+
+    BddLogger.when("performing a DELETE with the duplicated association id");
+
+    webTestClient
+        .method(HttpMethod.DELETE)
+        .uri(BASE_PATH + "/" + experienceId + "/associations")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(
+            objectMapper.writeValueAsString(
+                Map.of("idsToDelete", List.of(associationId, associationId))))
+        .exchange()
+        .expectStatus()
+        .isNoContent();
+
+    BddLogger.then("the association should be deleted once, without error");
+
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/" + experienceId + "/associations")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.traceAssociations")
+        .isEmpty();
+  }
+
+  @Test
+  void shouldHandleEmptyAssociationListWhenDeleting() throws Exception {
+    BddLogger.given("a declared experience and an empty association list");
+
+    String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
+
+    BddLogger.when("performing a DELETE with an empty association list");
+
+    webTestClient
+        .method(HttpMethod.DELETE)
+        .uri(BASE_PATH + "/" + experienceId + "/associations")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(objectMapper.writeValueAsString(Map.of("idsToDelete", List.of())))
+        .exchange()
+        .expectStatus()
+        .isNoContent();
+
+    BddLogger.then("it should succeed with no effect");
+  }
+
+  @Test
+  void shouldRemoveAssociationBidirectionallyBetweenTraceAndExperience() throws Exception {
+    BddLogger.given("a declared experience associated with a trace");
+
+    String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
+    UUID traceId = createTraceAs("Bidirectional trace", studentPayload, studentSignature);
+    UUID associationId = associateExperienceWithTraceAndGetAssociationId(experienceId, traceId);
+
+    BddLogger.when("unassociating the trace from the experience");
+
+    webTestClient
+        .method(HttpMethod.DELETE)
+        .uri(BASE_PATH + "/" + experienceId + "/associations")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(objectMapper.writeValueAsString(Map.of("idsToDelete", List.of(associationId))))
+        .exchange()
+        .expectStatus()
+        .isNoContent();
+
+    BddLogger.then("the trace should no longer show the experience in its own associations");
+
+    webTestClient
+        .get()
+        .uri("/me/traces/" + traceId + "/associations")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.declaredExperienceAssociations")
+        .isEmpty();
+  }
 }
