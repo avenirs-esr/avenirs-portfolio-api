@@ -189,5 +189,22 @@ public class DeclaredExperienceController {
 <span class="fc" id="L189">            experienceId, body.idsToAssociate());</span>
 <span class="fc" id="L190">    return ResponseEntity.ok(declaredExperienceMapper.toAssociationsDTO(associations));</span>
   }
+
+  @DeleteMapping(&quot;/{experienceId}/associations&quot;)
+  public ResponseEntity&lt;String&gt; deleteDeclaredExperienceAssociations(
+      Principal principal,
+      @Valid @PathVariable UUID experienceId,
+      @RequestBody List&lt;UUID&gt; associationIds) {
+<span class="fc" id="L198">    log.debug(</span>
+        &quot;Received request to unassociate associations [{}] to declared experience [{}] by&quot;
+            + &quot; student [{}]&quot;,
+        associationIds,
+        experienceId,
+<span class="fc" id="L203">        principal.getName());</span>
+
+<span class="fc" id="L205">    declaredExperienceService.unassociate(experienceId, associationIds);</span>
+
+<span class="fc" id="L207">    return ResponseEntity.ok(&quot;Associations successfully deleted.&quot;);</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
