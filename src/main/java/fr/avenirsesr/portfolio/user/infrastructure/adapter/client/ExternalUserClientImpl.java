@@ -15,10 +15,10 @@ public class ExternalUserClientImpl implements ExternalUserClient {
 
   private final WebClient webClient;
 
-  @Value("${avenirs.interoperability.api-key}")
+  @Value("${avenirs.back-office.api-key}")
   private String apiKey;
 
-  @Value("${avenirs.interoperability.external-user.get-by-eppn}")
+  @Value("${avenirs.back-office.external-user.get-by-eppn}")
   private String getByEppnEndpoint;
 
   public ExternalUserClientImpl(WebClient webClient) {
@@ -47,7 +47,7 @@ public class ExternalUserClientImpl implements ExternalUserClient {
   @Override
   public void activateByEppn(String eppn) {
     try {
-      log.debug("Activating external user in interoperability for eppn {}", eppn);
+      log.debug("Activating external user in back-office for eppn {}", eppn);
 
       webClient
           .patch()
@@ -59,9 +59,7 @@ public class ExternalUserClientImpl implements ExternalUserClient {
 
     } catch (Exception e) {
       log.error(
-          "Failed to activate external user {} in interoperability. Error: {}",
-          eppn,
-          e.getMessage());
+          "Failed to activate external user {} in back-office. Error: {}", eppn, e.getMessage());
       log.debug("Full error details:", e);
       throw e;
     }
