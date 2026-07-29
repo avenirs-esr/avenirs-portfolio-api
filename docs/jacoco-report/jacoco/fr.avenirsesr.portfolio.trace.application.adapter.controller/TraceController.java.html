@@ -301,16 +301,16 @@ public class TraceController {
       Principal principal,
       @PathVariable UUID traceId,
       @RequestParam(required = false, defaultValue = &quot;false&quot;) boolean onlyNotCompleted) {
-<span class="fc" id="L304">    log.debug(</span>
+<span class="nc" id="L304">    log.debug(</span>
         &quot;Received request to get Trace[{}] associations by student [{}]&quot;
             + &quot; (onlyNotCompleted= {})&quot;,
         traceId,
-<span class="fc" id="L308">        principal.getName(),</span>
-<span class="fc" id="L309">        onlyNotCompleted);</span>
+<span class="nc" id="L308">        principal.getName(),</span>
+<span class="nc" id="L309">        onlyNotCompleted);</span>
 
-<span class="fc" id="L311">    var traceAssociations = traceService.getTraceAssociations(traceId, onlyNotCompleted);</span>
+<span class="nc" id="L311">    var traceAssociations = traceService.getTraceAssociations(traceId, onlyNotCompleted);</span>
 
-<span class="fc" id="L313">    return ResponseEntity.ok(traceAssociationsMapper.toDTO(traceAssociations));</span>
+<span class="nc" id="L313">    return ResponseEntity.ok(traceAssociationsMapper.toDTO(traceAssociations));</span>
   }
 
   @DeleteMapping(&quot;/{traceId}/associations&quot;)
