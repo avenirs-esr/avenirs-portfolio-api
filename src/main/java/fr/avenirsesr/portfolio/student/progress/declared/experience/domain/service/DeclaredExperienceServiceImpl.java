@@ -482,6 +482,29 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
     return getAssociations(experience.getId());
   }
 
+  @Override
+  public void deleteAssociations(UUID declaredExperienceId, List<UUID> idsToDelete) {
+    var experience = fetchAndCheckLoggedInStudentAuthorization(declaredExperienceId);
+
+    var associationIds =
+        associationService
+            .getAllOf(
+                experience.getId(),
+                DeclaredExperience.class,
+                List.of(
+                    EAssociationType.TRACE_DECLARED_EXPERIENCE,
+                    EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL))
+            .stream()
+            .map(Association::getId)
+            .toList();
+
+    if (!new HashSet<>(associationIds).containsAll(idsToDelete)) {
+      throw new UserNotAuthorizedException();
+    }
+
+    associationService.deleteAllByIds(idsToDelete);
+  }
+
   private DeclaredExperience fetchAndCheckLoggedInStudentAuthorization(UUID experienceId) {
     Student student = loggedInUserService.getLoggedInStudent();
     var experience =

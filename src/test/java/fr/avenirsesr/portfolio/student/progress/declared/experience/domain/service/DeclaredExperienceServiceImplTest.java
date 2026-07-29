@@ -1674,4 +1674,124 @@ class DeclaredExperienceServiceImplTest {
               service.associateDeclaredExperienceWithTraces(experienceId, List.of(trace.getId())));
     }
   }
+
+  @Nested
+  class WhenDeletingAssociations {
+
+    @Test
+    void deleteAssociations_should_delete_when_associations_belong_to_declaredExperience() {
+      BddLogger.given("a logged-in student and a declared experience with associations");
+
+      UUID experienceId = UUID.randomUUID();
+      UUID associationId1 = UUID.randomUUID();
+      UUID associationId2 = UUID.randomUUID();
+
+      DeclaredExperience experience = mock(DeclaredExperience.class);
+      when(experience.getId()).thenReturn(experienceId);
+      when(experience.getStudent()).thenReturn(student);
+
+      Association association1 = mock(Association.class);
+      when(association1.getId()).thenReturn(associationId1);
+
+      Association association2 = mock(Association.class);
+      when(association2.getId()).thenReturn(associationId2);
+
+      when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+      when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
+      when(associationService.getAllOf(
+              experienceId,
+              DeclaredExperience.class,
+              List.of(
+                  EAssociationType.TRACE_DECLARED_EXPERIENCE,
+                  EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL)))
+          .thenReturn(List.of(association1, association2));
+
+      BddLogger.when("deleteAssociations is called");
+
+      service.deleteAssociations(experienceId, List.of(associationId1));
+
+      BddLogger.then("deleteAllByIds should be called with the given ids");
+
+      verify(associationService).deleteAllByIds(List.of(associationId1));
+    }
+
+    @Test
+    void deleteAssociations_should_throw_when_declaredExperience_not_found() {
+      BddLogger.given("a non-existent declared experience id");
+
+      UUID experienceId = UUID.randomUUID();
+
+      when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+      when(experienceRepository.findById(experienceId)).thenReturn(Optional.empty());
+
+      BddLogger.when("deleteAssociations is called");
+
+      BddLogger.then("it should throw DeclaredExperienceNotFoundException");
+
+      assertThrows(
+          DeclaredExperienceNotFoundException.class,
+          () -> service.deleteAssociations(experienceId, List.of(UUID.randomUUID())));
+
+      verify(associationService, never()).deleteAllByIds(anyList());
+    }
+
+    @Test
+    void deleteAssociations_should_throw_when_experience_belongs_to_other_student() {
+      BddLogger.given("a declared experience belonging to another student");
+
+      UUID experienceId = UUID.randomUUID();
+      Student anotherStudent = StudentFixture.create().toModel();
+
+      DeclaredExperience experience = mock(DeclaredExperience.class);
+      when(experience.getStudent()).thenReturn(anotherStudent);
+
+      when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+      when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
+
+      BddLogger.when("deleteAssociations is called");
+
+      BddLogger.then("it should throw UserNotAuthorizedException");
+
+      assertThrows(
+          UserNotAuthorizedException.class,
+          () -> service.deleteAssociations(experienceId, List.of(UUID.randomUUID())));
+
+      verify(associationService, never()).deleteAllByIds(anyList());
+    }
+
+    @Test
+    void deleteAssociations_should_throw_when_ids_not_associated() {
+      BddLogger.given("a declared experience and an id that is not one of its associations");
+
+      UUID experienceId = UUID.randomUUID();
+      UUID associationId = UUID.randomUUID();
+
+      DeclaredExperience experience = mock(DeclaredExperience.class);
+      when(experience.getId()).thenReturn(experienceId);
+      when(experience.getStudent()).thenReturn(student);
+
+      Association association = mock(Association.class);
+      when(association.getId()).thenReturn(associationId);
+
+      when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+      when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
+      when(associationService.getAllOf(
+              experienceId,
+              DeclaredExperience.class,
+              List.of(
+                  EAssociationType.TRACE_DECLARED_EXPERIENCE,
+                  EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL)))
+          .thenReturn(List.of(association));
+
+      BddLogger.when("deleteAssociations is called with a non associated id");
+
+      BddLogger.then("it should throw UserNotAuthorizedException");
+
+      assertThrows(
+          UserNotAuthorizedException.class,
+          () -> service.deleteAssociations(experienceId, List.of(UUID.randomUUID())));
+
+      verify(associationService, never()).deleteAllByIds(anyList());
+    }
+  }
 }
