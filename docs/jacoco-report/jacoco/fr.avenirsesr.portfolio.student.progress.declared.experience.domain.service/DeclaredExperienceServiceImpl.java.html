@@ -482,23 +482,46 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
 <span class="fc" id="L482">    return getAssociations(experience.getId());</span>
   }
 
-  private DeclaredExperience fetchAndCheckLoggedInStudentAuthorization(UUID experienceId) {
-<span class="fc" id="L486">    Student student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L487">    var experience =</span>
-        experienceRepository
-<span class="fc" id="L489">            .findById(experienceId)</span>
-<span class="fc" id="L490">            .orElseThrow(DeclaredExperienceNotFoundException::new);</span>
-<span class="fc bfc" id="L491" title="All 2 branches covered.">    if (!experience.getStudent().equals(student)) {</span>
-<span class="fc" id="L492">      throw new UserNotAuthorizedException();</span>
+  @Override
+  public void deleteAssociations(UUID declaredExperienceId, List&lt;UUID&gt; idsToDelete) {
+<span class="fc" id="L487">    var experience = fetchAndCheckLoggedInStudentAuthorization(declaredExperienceId);</span>
+
+<span class="fc" id="L489">    var associationIds =</span>
+        associationService
+<span class="fc" id="L491">            .getAllOf(</span>
+<span class="fc" id="L492">                experience.getId(),</span>
+                DeclaredExperience.class,
+<span class="fc" id="L494">                List.of(</span>
+                    EAssociationType.TRACE_DECLARED_EXPERIENCE,
+                    EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL))
+<span class="fc" id="L497">            .stream()</span>
+<span class="fc" id="L498">            .map(Association::getId)</span>
+<span class="fc" id="L499">            .toList();</span>
+
+<span class="fc bfc" id="L501" title="All 2 branches covered.">    if (!new HashSet&lt;&gt;(associationIds).containsAll(idsToDelete)) {</span>
+<span class="fc" id="L502">      throw new UserNotAuthorizedException();</span>
     }
-<span class="fc" id="L494">    return experience;</span>
+
+<span class="fc" id="L505">    associationService.deleteAllByIds(idsToDelete);</span>
+<span class="fc" id="L506">  }</span>
+
+  private DeclaredExperience fetchAndCheckLoggedInStudentAuthorization(UUID experienceId) {
+<span class="fc" id="L509">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L510">    var experience =</span>
+        experienceRepository
+<span class="fc" id="L512">            .findById(experienceId)</span>
+<span class="fc" id="L513">            .orElseThrow(DeclaredExperienceNotFoundException::new);</span>
+<span class="fc bfc" id="L514" title="All 2 branches covered.">    if (!experience.getStudent().equals(student)) {</span>
+<span class="fc" id="L515">      throw new UserNotAuthorizedException();</span>
+    }
+<span class="fc" id="L517">    return experience;</span>
   }
 
   private EAssociationType getAssociationType(EAssociationContextType contextType) {
-<span class="nc bnc" id="L498" title="All 2 branches missed.">    return switch (contextType) {</span>
-<span class="nc" id="L499">      case TRACE -&gt; EAssociationType.TRACE_DECLARED_EXPERIENCE;</span>
+<span class="nc bnc" id="L521" title="All 2 branches missed.">    return switch (contextType) {</span>
+<span class="nc" id="L522">      case TRACE -&gt; EAssociationType.TRACE_DECLARED_EXPERIENCE;</span>
       case DECLARED_ACTIVITY, DECLARED_SKILL, DECLARED_EXPERIENCE -&gt;
-<span class="nc" id="L501">          throw new UnsupportedOperationException();</span>
+<span class="nc" id="L524">          throw new UnsupportedOperationException();</span>
     };
   }
 }

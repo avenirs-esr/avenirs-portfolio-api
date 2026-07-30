@@ -64,57 +64,58 @@ public class StaffServiceImpl implements StaffService {
 <span class="fc" id="L64">  }</span>
 
   @Override
-  public Staff createStaff(UUID userId, String institutionEmail, String bio) {
-<span class="fc" id="L68">    var user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);</span>
-<span class="fc" id="L69">    var staff = Staff.create(user, institutionEmail, bio);</span>
-<span class="fc" id="L70">    staffRepository.save(staff);</span>
-<span class="pc bpc" id="L71" title="1 of 2 branches missed.">    if (user.getEmail() == null) {</span>
-<span class="fc" id="L72">      user.setEmail(institutionEmail);</span>
-<span class="fc" id="L73">      userRepository.save(user);</span>
+  public Staff createStaff(
+      UUID userId, String institutionEmail, UUID institutionId, UUID groupId, String bio) {
+<span class="fc" id="L69">    var user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);</span>
+<span class="fc" id="L70">    var staff = Staff.create(user, institutionEmail, institutionId, groupId, bio);</span>
+<span class="fc" id="L71">    staffRepository.save(staff);</span>
+<span class="pc bpc" id="L72" title="1 of 2 branches missed.">    if (user.getEmail() == null) {</span>
+<span class="fc" id="L73">      user.setEmail(institutionEmail);</span>
+<span class="fc" id="L74">      userRepository.save(user);</span>
     }
-<span class="fc" id="L75">    return staff;</span>
+<span class="fc" id="L76">    return staff;</span>
   }
 
   @Override
   public File uploadProfilePicture(String fileName, String mimeType, long size, byte[] content) {
-<span class="nc" id="L80">    var staff = loggedInUserService.getLoggedInStaff();</span>
-<span class="nc" id="L81">    requireImage(mimeType);</span>
-<span class="nc" id="L82">    var file = fileResourceService.upload(fileName, mimeType, size, content, false);</span>
-<span class="nc" id="L83">    staff.setProfilePicture(file);</span>
-<span class="nc" id="L84">    staffRepository.save(staff);</span>
-<span class="nc" id="L85">    return file;</span>
+<span class="nc" id="L81">    var staff = loggedInUserService.getLoggedInStaff();</span>
+<span class="nc" id="L82">    requireImage(mimeType);</span>
+<span class="nc" id="L83">    var file = fileResourceService.upload(fileName, mimeType, size, content, false);</span>
+<span class="nc" id="L84">    staff.setProfilePicture(file);</span>
+<span class="nc" id="L85">    staffRepository.save(staff);</span>
+<span class="nc" id="L86">    return file;</span>
   }
 
   @Override
   public void deleteProfilePicture() {
-<span class="nc" id="L90">    var staff = loggedInUserService.getLoggedInStaff();</span>
-<span class="nc" id="L91">    staff.getProfilePicture().ifPresent(picture -&gt; fileResourceService.delete(picture.getId()));</span>
-<span class="nc" id="L92">    staff.setProfilePicture(null);</span>
-<span class="nc" id="L93">    staffRepository.save(staff);</span>
-<span class="nc" id="L94">  }</span>
+<span class="nc" id="L91">    var staff = loggedInUserService.getLoggedInStaff();</span>
+<span class="nc" id="L92">    staff.getProfilePicture().ifPresent(picture -&gt; fileResourceService.delete(picture.getId()));</span>
+<span class="nc" id="L93">    staff.setProfilePicture(null);</span>
+<span class="nc" id="L94">    staffRepository.save(staff);</span>
+<span class="nc" id="L95">  }</span>
 
   @Override
   public File uploadCoverPicture(String fileName, String mimeType, long size, byte[] content) {
-<span class="nc" id="L98">    var staff = loggedInUserService.getLoggedInStaff();</span>
-<span class="nc" id="L99">    requireImage(mimeType);</span>
-<span class="nc" id="L100">    var file = fileResourceService.upload(fileName, mimeType, size, content, false);</span>
-<span class="nc" id="L101">    staff.setCoverPicture(file);</span>
-<span class="nc" id="L102">    staffRepository.save(staff);</span>
-<span class="nc" id="L103">    return file;</span>
+<span class="nc" id="L99">    var staff = loggedInUserService.getLoggedInStaff();</span>
+<span class="nc" id="L100">    requireImage(mimeType);</span>
+<span class="nc" id="L101">    var file = fileResourceService.upload(fileName, mimeType, size, content, false);</span>
+<span class="nc" id="L102">    staff.setCoverPicture(file);</span>
+<span class="nc" id="L103">    staffRepository.save(staff);</span>
+<span class="nc" id="L104">    return file;</span>
   }
 
   @Override
   public void deleteCoverPicture() {
-<span class="nc" id="L108">    var staff = loggedInUserService.getLoggedInStaff();</span>
-<span class="nc" id="L109">    staff.getCoverPicture().ifPresent(picture -&gt; fileResourceService.delete(picture.getId()));</span>
-<span class="nc" id="L110">    staff.setCoverPicture(null);</span>
-<span class="nc" id="L111">    staffRepository.save(staff);</span>
-<span class="nc" id="L112">  }</span>
+<span class="nc" id="L109">    var staff = loggedInUserService.getLoggedInStaff();</span>
+<span class="nc" id="L110">    staff.getCoverPicture().ifPresent(picture -&gt; fileResourceService.delete(picture.getId()));</span>
+<span class="nc" id="L111">    staff.setCoverPicture(null);</span>
+<span class="nc" id="L112">    staffRepository.save(staff);</span>
+<span class="nc" id="L113">  }</span>
 
   private void requireImage(String mimeType) {
-<span class="nc bnc" id="L115" title="All 2 branches missed.">    if (!EFileType.fromMimeType(mimeType).isImage()) {</span>
-<span class="nc" id="L116">      throw new FileTypeNotSupportedException();</span>
+<span class="nc bnc" id="L116" title="All 2 branches missed.">    if (!EFileType.fromMimeType(mimeType).isImage()) {</span>
+<span class="nc" id="L117">      throw new FileTypeNotSupportedException();</span>
     }
-<span class="nc" id="L118">  }</span>
+<span class="nc" id="L119">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
