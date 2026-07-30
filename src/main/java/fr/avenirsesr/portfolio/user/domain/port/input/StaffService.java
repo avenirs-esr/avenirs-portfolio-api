@@ -13,7 +13,8 @@ public interface StaffService {
 
   void updateProfile(User user, String bio);
 
-  Staff createStaff(UUID userId, String institutionEmail, String bio);
+  Staff createStaff(
+      UUID userId, String institutionEmail, UUID institutionId, UUID groupId, String bio);
 
   File uploadProfilePicture(String fileName, String mimeType, long size, byte[] content);
 

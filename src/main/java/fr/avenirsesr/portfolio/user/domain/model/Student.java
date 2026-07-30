@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import java.time.Instant;
 import java.util.Optional;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,6 +18,10 @@ public class Student extends AvenirsBaseModel {
 
   @Setter(AccessLevel.NONE)
   private String institutionEmail;
+
+  private UUID institutionId;
+
+  private UUID groupId;
 
   private String bio;
 
@@ -31,6 +36,8 @@ public class Student extends AvenirsBaseModel {
   private Student(
       User user,
       String institutionEmail,
+      UUID institutionId,
+      UUID groupId,
       String bio,
       boolean hasUnseenNotification,
       File coverPicture,
@@ -40,20 +47,34 @@ public class Student extends AvenirsBaseModel {
     super(user.getId(), createdAt, updatedAt);
     this.user = user;
     this.institutionEmail = institutionEmail;
+    this.institutionId = institutionId;
+    this.groupId = groupId;
     this.bio = bio;
     this.hasUnseenNotification = hasUnseenNotification;
     this.coverPicture = coverPicture;
     this.profilePicture = profilePicture;
   }
 
-  public static Student create(User user, String institutionEmail, String bio) {
+  public static Student create(
+      User user, String institutionEmail, UUID institutionId, UUID groupId, String bio) {
     return new Student(
-        user, institutionEmail, bio, false, null, null, Instant.now(), Instant.now());
+        user,
+        institutionEmail,
+        institutionId,
+        groupId,
+        bio,
+        false,
+        null,
+        null,
+        Instant.now(),
+        Instant.now());
   }
 
   public static Student toDomain(
       User user,
       String institutionEmail,
+      UUID institutionId,
+      UUID groupId,
       String bio,
       boolean hasUnseenNotification,
       File coverPicture,
@@ -63,6 +84,8 @@ public class Student extends AvenirsBaseModel {
     return new Student(
         user,
         institutionEmail,
+        institutionId,
+        groupId,
         bio,
         hasUnseenNotification,
         coverPicture,

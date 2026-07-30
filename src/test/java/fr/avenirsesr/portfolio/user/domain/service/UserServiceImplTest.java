@@ -140,7 +140,13 @@ class UserServiceImplTest {
       verify(userPrincipalRepository).saveOrUpdate(savedUser, eppn);
 
       BddLogger.then("it should create the student profile");
-      verify(studentService).createStudent(savedUser.getId(), externalUser.email(), null);
+      verify(studentService)
+          .createStudent(
+              savedUser.getId(),
+              externalUser.email(),
+              externalUser.institutionId(),
+              externalUser.groupId(),
+              null);
       verifyNoInteractions(staffService);
 
       BddLogger.then("it should activate the external user");
@@ -169,7 +175,13 @@ class UserServiceImplTest {
       assertEquals(savedUser, result);
 
       BddLogger.then("it should create the staff profile");
-      verify(staffService).createStaff(savedUser.getId(), externalUser.email(), null);
+      verify(staffService)
+          .createStaff(
+              savedUser.getId(),
+              externalUser.email(),
+              externalUser.institutionId(),
+              externalUser.groupId(),
+              null);
       verifyNoInteractions(studentService);
 
       BddLogger.then("it should activate the external user");
@@ -477,6 +489,16 @@ class UserServiceImplTest {
   }
 
   private ExternalUserDTO externalUser(EUserCategory category, EUserStatus status, String eppn) {
-    return new ExternalUserDTO(eppn, "Lucas", "Tessier", eppn, category, eppn, "PEGASE", status);
+    return new ExternalUserDTO(
+        eppn,
+        "Lucas",
+        "Tessier",
+        eppn,
+        category,
+        eppn,
+        "PEGASE",
+        UUID.randomUUID(),
+        UUID.randomUUID(),
+        status);
   }
 }

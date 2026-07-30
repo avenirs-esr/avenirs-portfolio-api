@@ -14,6 +14,8 @@ public class StudentMapper implements Mapper<StudentEntity, Student> {
     return StudentEntity.of(
         UserMapper.INSTANCE.fromDomain(student.getUser()),
         student.getInstitutionEmail(),
+        student.getInstitutionId(),
+        student.getGroupId(),
         student.getBio(),
         student.isHasUnseenNotification(),
         student.getCoverPicture().map(FileMapper.INSTANCE::fromDomain).orElse(null),
@@ -27,6 +29,8 @@ public class StudentMapper implements Mapper<StudentEntity, Student> {
     return Student.toDomain(
         UserMapper.INSTANCE.toDomain(studentEntity.getUser()),
         studentEntity.getInstitutionEmail(),
+        studentEntity.getInstitutionId(),
+        studentEntity.getGroupId(),
         studentEntity.getBio(),
         studentEntity.isHasUnseenNotification(),
         studentEntity.getCoverPicture() == null
@@ -45,6 +49,8 @@ public class StudentMapper implements Mapper<StudentEntity, Student> {
     return Student.toDomain(
         attributes.contains("user") ? UserMapper.INSTANCE.toDomain(studentEntity.getUser()) : null,
         studentEntity.getInstitutionEmail(),
+        studentEntity.getInstitutionId(),
+        studentEntity.getGroupId(),
         studentEntity.getBio(),
         studentEntity.isHasUnseenNotification(),
         studentEntity.getCoverPicture() == null || !attributes.contains("coverPicture")

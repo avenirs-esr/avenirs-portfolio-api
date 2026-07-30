@@ -208,7 +208,16 @@ class TraceSpecificationIT extends ContainerConfigurationTest {
   private StudentEntity persistStudent(UserEntity u) {
     StudentEntity s =
         StudentEntity.of(
-            u, "student@univ.com", "student", false, null, null, Instant.now(), Instant.now());
+            u,
+            "student@univ.com",
+            null,
+            null,
+            "student",
+            false,
+            null,
+            null,
+            Instant.now(),
+            Instant.now());
     entityManager.persist(s);
     return s;
   }

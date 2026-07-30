@@ -165,8 +165,20 @@ public class UserServiceImpl implements UserService {
             externalUser.eppn());
 
     switch (externalUser.category()) {
-      case STUDENT -> studentService.createStudent(user.getId(), externalUser.email(), null);
-      case STAFF -> staffService.createStaff(user.getId(), externalUser.email(), null);
+      case STUDENT ->
+          studentService.createStudent(
+              user.getId(),
+              externalUser.email(),
+              externalUser.institutionId(),
+              externalUser.groupId(),
+              null);
+      case STAFF ->
+          staffService.createStaff(
+              user.getId(),
+              externalUser.email(),
+              externalUser.institutionId(),
+              externalUser.groupId(),
+              null);
     }
 
     externalUserClient.activateByEppn(externalUser.eppn());

@@ -25,6 +25,8 @@ public class FakeStudent {
         StudentEntity.of(
             user,
             userDataGenerator.with("student-email").email(),
+            null,
+            null,
             studentDataGenerator.with("student-bio").studentDescription(),
             false,
             null,
