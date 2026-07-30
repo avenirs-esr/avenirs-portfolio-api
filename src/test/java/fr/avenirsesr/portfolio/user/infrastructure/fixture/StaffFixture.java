@@ -10,6 +10,8 @@ public class StaffFixture {
   private UUID id;
   private String bio;
   private User user;
+  private UUID institutionId;
+  private UUID groupId;
   private File profilePicture;
   private File coverPicture;
   private boolean hasUnseenNotification;
@@ -60,10 +62,22 @@ public class StaffFixture {
     return this;
   }
 
+  public StaffFixture withInstitutionId(UUID institutionId) {
+    this.institutionId = institutionId;
+    return this;
+  }
+
+  public StaffFixture withGroupId(UUID groupId) {
+    this.groupId = groupId;
+    return this;
+  }
+
   public Staff toModel() {
     return Staff.toDomain(
         user,
         user.getEmail(),
+        institutionId,
+        groupId,
         bio,
         hasUnseenNotification,
         coverPicture,

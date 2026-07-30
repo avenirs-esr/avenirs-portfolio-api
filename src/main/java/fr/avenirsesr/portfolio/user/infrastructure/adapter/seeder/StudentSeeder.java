@@ -59,7 +59,9 @@ public class StudentSeeder {
                           new StudentCreationData(
                               fakeStudent.getUser().getId(),
                               fakeStudent.getBio(),
-                              fakeStudent.getInstitutionEmail()))
+                              fakeStudent.getInstitutionEmail(),
+                              fakeStudent.getInstitutionId(),
+                              fakeStudent.getGroupId()))
                   .toList();
         };
 
@@ -67,7 +69,12 @@ public class StudentSeeder {
     creationData.forEach(
         data -> {
           var student =
-              studentService.createStudent(data.userId(), data.institutionEmail(), data.bio());
+              studentService.createStudent(
+                  data.userId(),
+                  data.institutionEmail(),
+                  data.institutionId(),
+                  data.groupId(),
+                  data.bio());
           students.add(student);
         });
 

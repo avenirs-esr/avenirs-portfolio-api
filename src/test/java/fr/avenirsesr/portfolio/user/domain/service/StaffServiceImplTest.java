@@ -51,6 +51,8 @@ class StaffServiceImplTest {
           Staff.toDomain(
               user,
               "marie@university.com",
+              null,
+              null,
               "My staff bio",
               false,
               null,

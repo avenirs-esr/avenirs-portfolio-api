@@ -37,7 +37,7 @@ class ActivityOverviewDtoMapperTest {
             .withFirstName("firstname")
             .withLastName("Lastname")
             .toModel();
-    var staff = Staff.create(user, "staff@email.com", "bio");
+    var staff = Staff.create(user, "staff@email.com", null, null, "bio");
     Activity activity = ActivityFixture.create().withAuthor(staff).toModel();
     ActivityWithStudentStatusData data =
         new ActivityWithStudentStatusData(activity, true, EDeclaredActivityStatus.SUBSCRIBED);

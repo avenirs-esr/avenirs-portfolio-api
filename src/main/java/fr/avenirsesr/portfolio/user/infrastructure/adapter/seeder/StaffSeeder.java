@@ -52,14 +52,22 @@ public class StaffSeeder {
                           new StaffCreationData(
                               fakeStaff.getUser().getId(),
                               fakeStaff.getInstitutionEmail(),
-                              fakeStaff.getBio()))
+                              fakeStaff.getBio(),
+                              fakeStaff.getInstitutionId(),
+                              fakeStaff.getGroupId()))
                   .toList();
         };
 
     List<Staff> staffs = new ArrayList<>();
     creationData.forEach(
         data -> {
-          var staff = staffService.createStaff(data.userId(), data.institutionEmail(), data.bio());
+          var staff =
+              staffService.createStaff(
+                  data.userId(),
+                  data.institutionEmail(),
+                  data.institutionId(),
+                  data.groupId(),
+                  data.bio());
           staffs.add(staff);
         });
 

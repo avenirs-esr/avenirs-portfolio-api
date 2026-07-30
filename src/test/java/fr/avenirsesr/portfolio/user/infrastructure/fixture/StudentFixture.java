@@ -10,6 +10,8 @@ public class StudentFixture {
   private UUID id;
   private String bio;
   private User user;
+  private UUID institutionId;
+  private UUID groupId;
   private File profilePicture;
   private File coverPicture;
   private boolean hasUnseenNotification;
@@ -60,10 +62,22 @@ public class StudentFixture {
     return this;
   }
 
+  public StudentFixture withInstitutionId(UUID institutionId) {
+    this.institutionId = institutionId;
+    return this;
+  }
+
+  public StudentFixture withGroupId(UUID groupId) {
+    this.groupId = groupId;
+    return this;
+  }
+
   public Student toModel() {
     return Student.toDomain(
         user,
         user.getEmail(),
+        institutionId,
+        groupId,
         bio,
         hasUnseenNotification,
         coverPicture,

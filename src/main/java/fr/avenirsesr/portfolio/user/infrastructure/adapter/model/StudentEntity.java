@@ -27,6 +27,12 @@ public class StudentEntity extends AvenirsBaseEntity {
   @Column(nullable = false, name = "institution_email")
   private String institutionEmail;
 
+  @Column(name = "institution_id")
+  private UUID institutionId;
+
+  @Column(name = "group_id")
+  private UUID groupId;
+
   @Column(length = BIO_LENGTH)
   private String bio;
 
@@ -52,6 +58,8 @@ public class StudentEntity extends AvenirsBaseEntity {
       UUID id,
       UserEntity user,
       String institutionEmail,
+      UUID institutionId,
+      UUID groupId,
       String bio,
       boolean hasUnseenNotification,
       FileEntity coverPicture,
@@ -62,6 +70,8 @@ public class StudentEntity extends AvenirsBaseEntity {
     this.user = user;
     this.bio = bio;
     this.institutionEmail = institutionEmail;
+    this.institutionId = institutionId;
+    this.groupId = groupId;
     this.hasUnseenNotification = hasUnseenNotification;
     this.coverPicture = coverPicture;
     this.profilePicture = profilePicture;
@@ -72,6 +82,8 @@ public class StudentEntity extends AvenirsBaseEntity {
   public static StudentEntity of(
       UserEntity user,
       String institutionEmail,
+      UUID institutionId,
+      UUID groupId,
       String bio,
       boolean hasUnseenNotification,
       FileEntity coverPicture,
@@ -82,6 +94,8 @@ public class StudentEntity extends AvenirsBaseEntity {
         user.getId(),
         user,
         institutionEmail,
+        institutionId,
+        groupId,
         bio,
         hasUnseenNotification,
         coverPicture,
