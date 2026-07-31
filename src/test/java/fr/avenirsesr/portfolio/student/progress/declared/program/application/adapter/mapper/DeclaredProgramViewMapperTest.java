@@ -42,5 +42,6 @@ class DeclaredProgramViewMapperTest {
     assertEquals(EProgramStatus.COMPLETED, dto.status());
     assertEquals("Bachelor of Science", dto.title());
     assertEquals("MIT", dto.organization());
+    assertEquals(program.isValorized(), dto.valorized());
   }
 }
