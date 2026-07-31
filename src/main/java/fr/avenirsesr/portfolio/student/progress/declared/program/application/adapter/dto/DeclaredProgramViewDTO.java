@@ -10,4 +10,5 @@ public record DeclaredProgramViewDTO(
     @Schema(ref = "#/components/schemas/EProgramStatus") EProgramStatus status,
     String title,
     String organization,
-    String result) {}
+    String result,
+    boolean valorized) {}

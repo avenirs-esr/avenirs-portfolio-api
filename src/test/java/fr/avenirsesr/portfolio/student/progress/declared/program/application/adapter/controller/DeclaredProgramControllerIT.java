@@ -330,6 +330,8 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
             .isEqualTo("Acquisition de premières compétences techniques")
             .jsonPath("$.sourceOfInformation")
             .isEqualTo("Conseiller d'orientation")
+            .jsonPath("$.valorized")
+            .isEqualTo(false)
             .jsonPath("$.startDate")
             .isNotEmpty()
             .jsonPath("$.endDate")
