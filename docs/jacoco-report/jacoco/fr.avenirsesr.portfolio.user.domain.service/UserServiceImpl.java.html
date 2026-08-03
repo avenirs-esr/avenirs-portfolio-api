@@ -165,13 +165,25 @@ public class UserServiceImpl implements UserService {
 <span class="fc" id="L165">            externalUser.eppn());</span>
 
 <span class="pc bpc" id="L167" title="1 of 3 branches missed.">    switch (externalUser.category()) {</span>
-<span class="fc" id="L168">      case STUDENT -&gt; studentService.createStudent(user.getId(), externalUser.email(), null);</span>
-<span class="fc" id="L169">      case STAFF -&gt; staffService.createStaff(user.getId(), externalUser.email(), null);</span>
+      case STUDENT -&gt;
+<span class="fc" id="L169">          studentService.createStudent(</span>
+<span class="fc" id="L170">              user.getId(),</span>
+<span class="fc" id="L171">              externalUser.email(),</span>
+<span class="fc" id="L172">              externalUser.institutionId(),</span>
+<span class="fc" id="L173">              externalUser.groupId(),</span>
+              null);
+      case STAFF -&gt;
+<span class="fc" id="L176">          staffService.createStaff(</span>
+<span class="fc" id="L177">              user.getId(),</span>
+<span class="fc" id="L178">              externalUser.email(),</span>
+<span class="fc" id="L179">              externalUser.institutionId(),</span>
+<span class="fc" id="L180">              externalUser.groupId(),</span>
+              null);
     }
 
-<span class="fc" id="L172">    externalUserClient.activateByEppn(externalUser.eppn());</span>
+<span class="fc" id="L184">    externalUserClient.activateByEppn(externalUser.eppn());</span>
 
-<span class="fc" id="L174">    return user;</span>
+<span class="fc" id="L186">    return user;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

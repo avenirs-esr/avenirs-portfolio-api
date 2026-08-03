@@ -81,9 +81,9 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.program.infrastructure.adapter.rep
 avenirs-portfolio-api,fr.avenirsesr.portfolio.program.infrastructure.adapter.repository,SkillDatabaseRepository,0,10,0,0,0,3,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.program.infrastructure.adapter.repository,SkillLevelDatabaseRepository,0,7,0,0,0,2,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.program.infrastructure.adapter.repository,TrainingPathDatabaseRepository,0,10,0,0,0,3,0,1,0,1
-avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.service,UserServiceImpl,72,226,13,14,15,60,13,17,4,10
-avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.service,StudentServiceImpl,115,111,3,3,27,32,10,8,8,7
-avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.service,StaffServiceImpl,109,100,4,2,25,28,10,6,7,6
+avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.service,UserServiceImpl,72,234,13,14,15,68,13,17,4,10
+avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.service,StudentServiceImpl,115,113,3,3,27,32,10,8,8,7
+avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.service,StaffServiceImpl,109,102,4,2,25,28,10,6,7,6
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.skill.domain.data,DeclaredSkillAssociationsData,0,12,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.skill.domain.data,DeclaredSkillProgressDetails,0,9,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.skill.domain.data,DeclaredSkillAssociationData,0,9,0,0,0,1,0,1,0,1
