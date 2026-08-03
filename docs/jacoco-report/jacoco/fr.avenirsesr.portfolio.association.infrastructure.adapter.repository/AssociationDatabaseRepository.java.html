@@ -83,8 +83,8 @@ public class AssociationDatabaseRepository
     }
 
     List&lt;AssociationJpaRepository.AssociationCountRow&gt; rows;
-<span class="pc bpc" id="L86" title="1 of 2 branches missed.">    if (associationType.getKey1().equals(clazz)) {</span>
-<span class="nc" id="L87">      rows = jpaRepository.countGroupedById1(associationType, ids);</span>
+<span class="fc bfc" id="L86" title="All 2 branches covered.">    if (associationType.getKey1().equals(clazz)) {</span>
+<span class="fc" id="L87">      rows = jpaRepository.countGroupedById1(associationType, ids);</span>
 <span class="pc bpc" id="L88" title="1 of 2 branches missed.">    } else if (associationType.getKey2().equals(clazz)) {</span>
 <span class="fc" id="L89">      rows = jpaRepository.countGroupedById2(associationType, ids);</span>
     } else {
