@@ -41,22 +41,22 @@ public class SelfKnowledgeController {
   private final SelfKnowledgeElementDetailsMapper selfKnowledgeElementDetailsMapper;
   private final SelfKnowledgeElementViewMapper selfKnowledgeElementViewMapper;
 
-  @GetMapping("/{selfKnowledgeCategory}/elements")
+  @GetMapping("/elements")
   public ResponseEntity<PagedResponse<SelfKnowledgeElementViewDTO>> getSelfKnowledgeElements(
-      @PathVariable ESelfKnowledgeCategory selfKnowledgeCategory,
+      @RequestParam(required = false) List<ESelfKnowledgeCategory> selfKnowledgeCategories,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize,
       @RequestParam(required = false) Boolean isValorized) {
     log.debug(
-        "Received request to get elements of self knowledge category [{}], with"
+        "Received request to get elements of self knowledge categories [{}], with"
             + " pagination (page={}, pageSize={}, isValorized={})",
-        selfKnowledgeCategory,
+        selfKnowledgeCategories,
         page,
         pageSize,
         isValorized);
     PagedResult<SelfKnowledgeElement> selfKnowledgeElementPagedResult =
         selfKnowledgeService.getSelfKnowledgeElements(
-            selfKnowledgeCategory, new PageCriteria(page, pageSize), isValorized);
+            selfKnowledgeCategories, new PageCriteria(page, pageSize), isValorized);
 
     return ResponseEntity.ok(
         new PagedResponse<>(

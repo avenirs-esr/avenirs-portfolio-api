@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.specificati
 
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.enums.ESelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.model.SelfKnowledgeElementEntity;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -12,12 +13,12 @@ public class SelfKnowledgeElementSpecification {
         studentId == null ? null : cb.equal(root.get("student").get("id"), studentId);
   }
 
-  public static Specification<SelfKnowledgeElementEntity> hasSelfKnowledgeCategory(
-      ESelfKnowledgeCategory selfKnowledgeCategory) {
+  public static Specification<SelfKnowledgeElementEntity> hasSelfKnowledgeCategoryIn(
+      List<ESelfKnowledgeCategory> selfKnowledgeCategories) {
     return (root, query, cb) ->
-        selfKnowledgeCategory == null
+        selfKnowledgeCategories == null || selfKnowledgeCategories.isEmpty()
             ? null
-            : cb.equal(root.get("selfKnowledgeCategory"), selfKnowledgeCategory);
+            : root.get("selfKnowledgeCategory").in(selfKnowledgeCategories);
   }
 
   public static Specification<SelfKnowledgeElementEntity> isValorized(Boolean isValorized) {

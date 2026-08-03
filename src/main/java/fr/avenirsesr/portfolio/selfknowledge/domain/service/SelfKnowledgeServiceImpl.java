@@ -34,13 +34,13 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
 
   @Override
   public PagedResult<SelfKnowledgeElement> getSelfKnowledgeElements(
-      ESelfKnowledgeCategory selfKnowledgeCategory,
+      List<ESelfKnowledgeCategory> selfKnowledgeCategories,
       PageCriteria pageCriteria,
       Boolean isValorized) {
     Student student = loggedInUserService.getLoggedInStudent();
 
-    return selfKnowledgeElementRepository.findAllByStudentIdAndCategory(
-        student.getId(), selfKnowledgeCategory, pageCriteria, isValorized);
+    return selfKnowledgeElementRepository.findAllByStudentIdAndCategories(
+        student.getId(), selfKnowledgeCategories, pageCriteria, isValorized);
   }
 
   @Override
