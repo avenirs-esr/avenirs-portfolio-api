@@ -21,6 +21,8 @@ class DeclaredProgramViewMapperTest {
   void shouldMapDeclaredProgramToViewDTO() {
     BddLogger.given("a declared program");
     Student student = StudentFixture.create().toModel();
+    LocalDate startDate = LocalDate.now().minusYears(4);
+    LocalDate endDate = LocalDate.now().minusYears(1);
     DeclaredProgram program =
         DeclaredProgram.create(
             student,
@@ -30,8 +32,8 @@ class DeclaredProgramViewMapperTest {
             "MIT",
             "Excellent",
             "Transcript",
-            LocalDate.now().minusYears(4),
-            LocalDate.now().minusYears(1));
+            startDate,
+            endDate);
 
     BddLogger.when("mapping to DeclaredProgramViewDTO");
     DeclaredProgramViewDTO dto = mapper.toDTO(program);
@@ -41,7 +43,11 @@ class DeclaredProgramViewMapperTest {
     assertEquals(program.getId(), dto.id());
     assertEquals(EProgramStatus.COMPLETED, dto.status());
     assertEquals("Bachelor of Science", dto.title());
+    assertEquals("Physics degree", dto.description());
     assertEquals("MIT", dto.organization());
+    assertEquals("Excellent", dto.result());
+    assertEquals(startDate, dto.startDate());
+    assertEquals(endDate, dto.endDate());
     assertEquals(program.isValorized(), dto.valorized());
   }
 }
