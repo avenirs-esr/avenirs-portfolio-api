@@ -514,6 +514,7 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
                     uriBuilder
                         .path(BASE_PATH + "/view")
                         .queryParam("experienceType", "PROFESSIONAL")
+                        .queryParam("pageSize", 100)
                         .build())
             .header("X-Signed-Context", studentPayload)
             .header("X-Context-Kid", secretKey)
@@ -543,6 +544,7 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
                     uriBuilder
                         .path(BASE_PATH + "/view")
                         .queryParam("experienceType", "PERSONAL")
+                        .queryParam("pageSize", 100)
                         .build())
             .header("X-Signed-Context", studentPayload)
             .header("X-Context-Kid", secretKey)
