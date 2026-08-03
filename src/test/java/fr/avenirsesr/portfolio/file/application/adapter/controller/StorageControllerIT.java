@@ -35,9 +35,6 @@ class StorageControllerIT extends ContainerConfigurationTest {
   @Autowired private FileRepository fileRepository;
   @Autowired private LoggedInUserService loggedInUserService;
 
-  @Value("${hmac.secret-key}")
-  private String secretKey;
-
   @Value("${user.student.payload}")
   private String studentPayload;
 
@@ -76,7 +73,6 @@ class StorageControllerIT extends ContainerConfigurationTest {
         .get()
         .uri(DEFAULT_PROFILE)
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .exchange()
         .expectStatus()
@@ -99,7 +95,6 @@ class StorageControllerIT extends ContainerConfigurationTest {
         .get()
         .uri(DEFAULT_COVER)
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .exchange()
         .expectStatus()

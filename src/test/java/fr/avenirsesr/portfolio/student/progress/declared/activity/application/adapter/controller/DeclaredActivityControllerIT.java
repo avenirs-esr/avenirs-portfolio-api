@@ -21,9 +21,6 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
   @Autowired private WebTestClient webTestClient;
   @Autowired private ObjectMapper objectMapper;
 
-  @Value("${hmac.secret-key}")
-  private String secretKey;
-
   @Value("${user.student.payload}")
   private String studentPayload;
 
@@ -52,7 +49,6 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
             .post()
             .uri(BASE_PATH + "/subscribe/" + activityId)
             .header("X-Signed-Context", studentPayload)
-            .header("X-Context-Kid", secretKey)
             .header("X-Context-Signature", studentSignature)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue("{}")
@@ -80,7 +76,6 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .get()
         .uri(BASE_PATH)
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .exchange()
         .expectStatus()
@@ -105,7 +100,6 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .get()
         .uri(BASE_PATH + "/" + id)
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .exchange()
         .expectStatus()
@@ -127,7 +121,6 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .get()
         .uri(BASE_PATH + "/" + notFoundId)
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .exchange()
         .expectStatus()
@@ -143,7 +136,6 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .method(HttpMethod.DELETE)
         .uri(BASE_PATH + "/" + id + "/associations")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue("{\"idsToDelete\":[]}")
@@ -177,7 +169,6 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .post()
         .uri(BASE_PATH + "/" + id + "/associate/declared-skills")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(requestBody)
@@ -211,7 +202,6 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .post()
         .uri(BASE_PATH + "/" + notFoundId + "/associate/declared-skills")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(requestBody)
@@ -235,7 +225,6 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
                     .queryParam("pageSize", "8")
                     .build())
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .exchange()
         .expectStatus()
@@ -261,7 +250,6 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
                     .queryParam("pageSize", "8")
                     .build())
         .header("X-Signed-Context", otherStudentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", otherStudentSignature)
         .exchange()
         .expectStatus()

@@ -29,9 +29,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
   @Autowired private ObjectMapper objectMapper;
   @Autowired private DeclaredSkillRepository declaredSkillRepository;
 
-  @Value("${hmac.secret-key}")
-  private String secretKey;
-
   @Value("${user.student.payload}")
   private String studentPayload;
 
@@ -101,7 +98,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .post()
         .uri(BASE_PATH + "/")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(buildCreateExperienceJson())
@@ -126,7 +122,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
             .post()
             .uri(BASE_PATH + "/")
             .header("X-Signed-Context", studentPayload)
-            .header("X-Context-Kid", secretKey)
             .header("X-Context-Signature", studentSignature)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(buildCreateExperienceJson())
@@ -146,7 +141,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .get()
         .uri(BASE_PATH + "/" + createdId)
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .exchange()
         .expectStatus()
@@ -169,7 +163,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .get()
         .uri(BASE_PATH + "/" + notFoundDeclaredExperienceId)
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .exchange()
         .expectStatus()
@@ -187,7 +180,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .get()
         .uri(BASE_PATH + "/view")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .exchange()
         .expectStatus()
@@ -224,7 +216,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
                     .queryParam("pageSize", 5)
                     .build())
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .exchange()
         .expectStatus()
@@ -247,7 +238,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
             .post()
             .uri(BASE_PATH + "/")
             .header("X-Signed-Context", studentPayload)
-            .header("X-Context-Kid", secretKey)
             .header("X-Context-Signature", studentSignature)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(buildCreateExperienceJson())
@@ -282,7 +272,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .put()
         .uri(BASE_PATH + "/" + createdId)
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(updateJson)
@@ -311,7 +300,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
             .post()
             .uri(BASE_PATH + "/")
             .header("X-Signed-Context", studentPayload)
-            .header("X-Context-Kid", secretKey)
             .header("X-Context-Signature", studentSignature)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(buildCreateExperienceJson())
@@ -347,7 +335,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .put()
         .uri(BASE_PATH + "/" + createdId)
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(updateJson)
@@ -371,7 +358,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
             .post()
             .uri(BASE_PATH + "/")
             .header("X-Signed-Context", studentPayload)
-            .header("X-Context-Kid", secretKey)
             .header("X-Context-Signature", studentSignature)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(buildCreateExperienceJson())
@@ -404,7 +390,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .put()
         .uri(BASE_PATH + "/" + createdId)
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(updateJson)
@@ -421,7 +406,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
                 uriBuilder ->
                     uriBuilder.path(BASE_PATH + "/view").queryParam("isValorized", true).build())
             .header("X-Signed-Context", studentPayload)
-            .header("X-Context-Kid", secretKey)
             .header("X-Context-Signature", studentSignature)
             .exchange()
             .expectStatus()
@@ -447,7 +431,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
                 uriBuilder ->
                     uriBuilder.path(BASE_PATH + "/view").queryParam("isValorized", false).build())
             .header("X-Signed-Context", studentPayload)
-            .header("X-Context-Kid", secretKey)
             .header("X-Context-Signature", studentSignature)
             .exchange()
             .expectStatus()
@@ -475,7 +458,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
             .post()
             .uri(BASE_PATH + "/")
             .header("X-Signed-Context", studentPayload)
-            .header("X-Context-Kid", secretKey)
             .header("X-Context-Signature", studentSignature)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(buildCreateExperienceJson("PROFESSIONAL"))
@@ -492,7 +474,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
             .post()
             .uri(BASE_PATH + "/")
             .header("X-Signed-Context", studentPayload)
-            .header("X-Context-Kid", secretKey)
             .header("X-Context-Signature", studentSignature)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(buildCreateExperienceJson("PERSONAL"))
@@ -517,7 +498,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
                         .queryParam("pageSize", 100)
                         .build())
             .header("X-Signed-Context", studentPayload)
-            .header("X-Context-Kid", secretKey)
             .header("X-Context-Signature", studentSignature)
             .exchange()
             .expectStatus()
@@ -547,7 +527,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
                         .queryParam("pageSize", 100)
                         .build())
             .header("X-Signed-Context", studentPayload)
-            .header("X-Context-Kid", secretKey)
             .header("X-Context-Signature", studentSignature)
             .exchange()
             .expectStatus()
@@ -578,7 +557,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .post()
         .uri(BASE_PATH + "/" + experienceId + "/associate/traces")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(objectMapper.writeValueAsString(Map.of("idsToAssociate", List.of(traceId))))
@@ -590,7 +568,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .post()
         .uri(BASE_PATH + "/" + experienceId + "/associate/declared-skills")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(objectMapper.writeValueAsString(Map.of("idsToAssociate", List.of(skillId))))
@@ -607,7 +584,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
                 uriBuilder ->
                     uriBuilder.path(BASE_PATH + "/view").queryParam("pageSize", 100).build())
             .header("X-Signed-Context", studentPayload)
-            .header("X-Context-Kid", secretKey)
             .header("X-Context-Signature", studentSignature)
             .exchange()
             .expectStatus()
@@ -650,7 +626,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .put()
         .uri(BASE_PATH + "/" + notFoundDeclaredExperienceId)
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(buildCreateExperienceJson())
@@ -668,7 +643,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
             .post()
             .uri(BASE_PATH + "/")
             .header("X-Signed-Context", studentPayload)
-            .header("X-Context-Kid", secretKey)
             .header("X-Context-Signature", studentSignature)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(buildCreateExperienceJson())
@@ -703,7 +677,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .put()
         .uri(BASE_PATH + "/" + createdId)
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(invalidUpdateJson)
@@ -721,7 +694,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
             .post()
             .uri(BASE_PATH + "/")
             .header("X-Signed-Context", studentPayload)
-            .header("X-Context-Kid", secretKey)
             .header("X-Context-Signature", studentSignature)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(buildCreateExperienceJson())
@@ -743,7 +715,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .method(HttpMethod.DELETE)
         .uri(BASE_PATH + "/")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(deleteJson)
@@ -763,7 +734,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .get()
         .uri(BASE_PATH + "/" + createdId)
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .exchange()
         .expectStatus()
@@ -782,7 +752,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .method(HttpMethod.DELETE)
         .uri(BASE_PATH + "/")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(deleteJson)
@@ -801,7 +770,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
             .post()
             .uri(BASE_PATH + "/")
             .header("X-Signed-Context", otherStudentPayload)
-            .header("X-Context-Kid", secretKey)
             .header("X-Context-Signature", otherStudentSignature)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(buildCreateExperienceJson())
@@ -823,7 +791,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .method(HttpMethod.DELETE)
         .uri(BASE_PATH + "/")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(deleteJson)
@@ -841,7 +808,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
             .post()
             .uri(BASE_PATH + "/")
             .header("X-Signed-Context", studentPayload)
-            .header("X-Context-Kid", secretKey)
             .header("X-Context-Signature", studentSignature)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(buildCreateExperienceJson())
@@ -860,7 +826,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .get()
         .uri(BASE_PATH + "/" + experienceId + "/associations")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .exchange()
         .expectStatus()
@@ -882,7 +847,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .get()
         .uri(BASE_PATH + "/" + notFoundDeclaredExperienceId + "/associations")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .exchange()
         .expectStatus()
@@ -900,7 +864,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
             .post()
             .uri(BASE_PATH + "/")
             .header("X-Signed-Context", otherStudentPayload)
-            .header("X-Context-Kid", secretKey)
             .header("X-Context-Signature", otherStudentSignature)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(buildCreateExperienceJson())
@@ -919,7 +882,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .get()
         .uri(BASE_PATH + "/" + otherExperienceId + "/associations")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .exchange()
         .expectStatus()
@@ -934,7 +896,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
             .post()
             .uri(BASE_PATH + "/")
             .header("X-Signed-Context", payload)
-            .header("X-Context-Kid", secretKey)
             .header("X-Context-Signature", signature)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(buildCreateExperienceJson())
@@ -948,48 +909,23 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
     return extractIdFromResponse(responseBody);
   }
 
-  private UUID createDeclaredSkillProgressAs(int skipIndex, String payload, String signature)
-      throws Exception {
-    UUID declaredSkillId =
-        declaredSkillRepository.findAll().stream()
-            .skip(skipIndex)
-            .findFirst()
-            .orElseThrow()
-            .getId();
-
-    String responseBody =
-        webTestClient
-            .post()
-            .uri("/me/declared/skill-progress")
-            .header("X-Signed-Context", payload)
-            .header("X-Context-Kid", secretKey)
-            .header("X-Context-Signature", signature)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(
-                "{\n"
-                    + "  \"id\": \"%s\",\n".formatted(declaredSkillId)
-                    + "  \"level\": \"BEGINNER\",\n"
-                    + "  \"type\": \"ROME4\"\n"
-                    + "}\n")
-            .exchange()
-            .expectStatus()
-            .isCreated()
-            .expectBody(String.class)
-            .returnResult()
-            .getResponseBody();
-
-    return UUID.fromString(extractIdFromResponse(responseBody));
-  }
-
   private UUID createAnyAvailableDeclaredSkillProgressAs(String payload, String signature)
       throws Exception {
+    return createAnyAvailableDeclaredSkillProgressAs(List.of(), payload, signature);
+  }
+
+  private UUID createAnyAvailableDeclaredSkillProgressAs(
+      List<UUID> excludedSkillIds, String payload, String signature) throws Exception {
     for (var declaredSkill : declaredSkillRepository.findAll()) {
+      if (excludedSkillIds.contains(declaredSkill.getId())) {
+        continue;
+      }
+
       var result =
           webTestClient
               .post()
               .uri("/me/declared/skill-progress")
               .header("X-Signed-Context", payload)
-              .header("X-Context-Kid", secretKey)
               .header("X-Context-Signature", signature)
               .contentType(MediaType.APPLICATION_JSON)
               .bodyValue(
@@ -1017,7 +953,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
             .post()
             .uri("/me/traces")
             .header("X-Signed-Context", payload)
-            .header("X-Context-Kid", secretKey)
             .header("X-Context-Signature", signature)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(
@@ -1041,8 +976,10 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
     BddLogger.given("a declared experience and two declared skill progresses of the student");
 
     String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
-    UUID skill1 = createDeclaredSkillProgressAs(10, studentPayload, studentSignature);
-    UUID skill2 = createDeclaredSkillProgressAs(11, studentPayload, studentSignature);
+    UUID skill1 = createAnyAvailableDeclaredSkillProgressAs(studentPayload, studentSignature);
+    UUID skill2 =
+        createAnyAvailableDeclaredSkillProgressAs(
+            List.of(skill1), studentPayload, studentSignature);
 
     BddLogger.when(
         "performing a POST to associate the experience with both declared skill progresses");
@@ -1052,7 +989,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
             .post()
             .uri(BASE_PATH + "/" + experienceId + "/associate/declared-skills")
             .header("X-Signed-Context", studentPayload)
-            .header("X-Context-Kid", secretKey)
             .header("X-Context-Signature", studentSignature)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(
@@ -1073,12 +1009,34 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
+  void shouldReturn404WhenAssociatingDeclaredSkillsWithNonExistentExperience() throws Exception {
+    BddLogger.given("a non-existent declared experience");
+
+    UUID skillId = createAnyAvailableDeclaredSkillProgressAs(studentPayload, studentSignature);
+
+    BddLogger.when("performing a POST to associate declared skills");
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + notFoundDeclaredExperienceId + "/associate/declared-skills")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(objectMapper.writeValueAsString(Map.of("idsToAssociate", List.of(skillId))))
+        .exchange()
+        .expectStatus()
+        .isNotFound();
+
+    BddLogger.then("it should return 404");
+  }
+
+  @Test
   void shouldReturn403WhenAssociatingDeclaredSkillsWithOtherStudentExperience() throws Exception {
     BddLogger.given("a declared experience belonging to another student");
 
     String otherExperienceId =
         createDeclaredExperienceAs(otherStudentPayload, otherStudentSignature);
-    UUID skillId = createDeclaredSkillProgressAs(13, studentPayload, studentSignature);
+    UUID skillId = createAnyAvailableDeclaredSkillProgressAs(studentPayload, studentSignature);
 
     BddLogger.when("performing a POST to associate declared skills");
 
@@ -1086,7 +1044,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .post()
         .uri(BASE_PATH + "/" + otherExperienceId + "/associate/declared-skills")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(objectMapper.writeValueAsString(Map.of("idsToAssociate", List.of(skillId))))
@@ -1110,7 +1067,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .post()
         .uri(BASE_PATH + "/" + experienceId + "/associate/declared-skills")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(
@@ -1138,7 +1094,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .post()
         .uri(BASE_PATH + "/" + experienceId + "/associate/declared-skills")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(
@@ -1165,7 +1120,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .post()
         .uri(BASE_PATH + "/" + experienceId + "/associate/declared-skills")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(objectMapper.writeValueAsString(Map.of("idsToAssociate", List.of())))
@@ -1186,7 +1140,7 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
     BddLogger.given("a request containing the same declared skill progress id twice");
 
     String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
-    UUID skillId = createDeclaredSkillProgressAs(14, studentPayload, studentSignature);
+    UUID skillId = createAnyAvailableDeclaredSkillProgressAs(studentPayload, studentSignature);
 
     BddLogger.when("performing a POST with the duplicated declared skill id");
 
@@ -1195,7 +1149,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
             .post()
             .uri(BASE_PATH + "/" + experienceId + "/associate/declared-skills")
             .header("X-Signed-Context", studentPayload)
-            .header("X-Context-Kid", secretKey)
             .header("X-Context-Signature", studentSignature)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(
@@ -1220,13 +1173,12 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
     BddLogger.given("a declared skill progress already associated with the experience");
 
     String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
-    UUID skillId = createDeclaredSkillProgressAs(15, studentPayload, studentSignature);
+    UUID skillId = createAnyAvailableDeclaredSkillProgressAs(studentPayload, studentSignature);
 
     webTestClient
         .post()
         .uri(BASE_PATH + "/" + experienceId + "/associate/declared-skills")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(objectMapper.writeValueAsString(Map.of("idsToAssociate", List.of(skillId))))
@@ -1240,7 +1192,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .post()
         .uri(BASE_PATH + "/" + experienceId + "/associate/declared-skills")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(objectMapper.writeValueAsString(Map.of("idsToAssociate", List.of(skillId))))
@@ -1269,7 +1220,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
             .post()
             .uri(BASE_PATH + "/" + experienceId + "/associate/traces")
             .header("X-Signed-Context", studentPayload)
-            .header("X-Context-Kid", secretKey)
             .header("X-Context-Signature", studentSignature)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(
@@ -1300,7 +1250,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .post()
         .uri(BASE_PATH + "/" + notFoundDeclaredExperienceId + "/associate/traces")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(objectMapper.writeValueAsString(Map.of("idsToAssociate", List.of(traceId))))
@@ -1325,7 +1274,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .post()
         .uri(BASE_PATH + "/" + otherExperienceId + "/associate/traces")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(objectMapper.writeValueAsString(Map.of("idsToAssociate", List.of(traceId))))
@@ -1349,7 +1297,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .post()
         .uri(BASE_PATH + "/" + experienceId + "/associate/traces")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(
@@ -1378,7 +1325,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .post()
         .uri(BASE_PATH + "/" + experienceId + "/associate/traces")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(
@@ -1405,7 +1351,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .post()
         .uri(BASE_PATH + "/" + experienceId + "/associate/traces")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(objectMapper.writeValueAsString(Map.of("idsToAssociate", List.of())))
@@ -1435,7 +1380,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
             .post()
             .uri(BASE_PATH + "/" + experienceId + "/associate/traces")
             .header("X-Signed-Context", studentPayload)
-            .header("X-Context-Kid", secretKey)
             .header("X-Context-Signature", studentSignature)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(
@@ -1465,7 +1409,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .post()
         .uri(BASE_PATH + "/" + experienceId + "/associate/traces")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(objectMapper.writeValueAsString(Map.of("idsToAssociate", List.of(traceId))))
@@ -1479,7 +1422,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .post()
         .uri(BASE_PATH + "/" + experienceId + "/associate/traces")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(objectMapper.writeValueAsString(Map.of("idsToAssociate", List.of(traceId))))
@@ -1500,7 +1442,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
             .post()
             .uri(BASE_PATH + "/" + experienceId + "/associate/traces")
             .header("X-Signed-Context", studentPayload)
-            .header("X-Context-Kid", secretKey)
             .header("X-Context-Signature", studentSignature)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(objectMapper.writeValueAsString(Map.of("idsToAssociate", List.of(traceId))))
@@ -1533,7 +1474,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .method(HttpMethod.DELETE)
         .uri(BASE_PATH + "/" + experienceId + "/associations")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(objectMapper.writeValueAsString(Map.of("idsToDelete", List.of(associationId))))
@@ -1547,7 +1487,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .get()
         .uri(BASE_PATH + "/" + experienceId + "/associations")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .exchange()
         .expectStatus()
@@ -1576,7 +1515,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .method(HttpMethod.DELETE)
         .uri(BASE_PATH + "/" + experienceId + "/associations")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(objectMapper.writeValueAsString(Map.of("idsToDelete", List.of(association2))))
@@ -1591,7 +1529,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
             .get()
             .uri(BASE_PATH + "/" + experienceId + "/associations")
             .header("X-Signed-Context", studentPayload)
-            .header("X-Context-Kid", secretKey)
             .header("X-Context-Signature", studentSignature)
             .exchange()
             .expectStatus()
@@ -1616,7 +1553,7 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
 
     String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
     UUID traceId = createTraceAs("Trace", studentPayload, studentSignature);
-    UUID skillId = createDeclaredSkillProgressAs(16, studentPayload, studentSignature);
+    UUID skillId = createAnyAvailableDeclaredSkillProgressAs(studentPayload, studentSignature);
 
     UUID traceAssociationId =
         associateExperienceWithTraceAndGetAssociationId(experienceId, traceId);
@@ -1625,7 +1562,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .post()
         .uri(BASE_PATH + "/" + experienceId + "/associate/declared-skills")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(objectMapper.writeValueAsString(Map.of("idsToAssociate", List.of(skillId))))
@@ -1639,7 +1575,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .method(HttpMethod.DELETE)
         .uri(BASE_PATH + "/" + experienceId + "/associations")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(
@@ -1654,7 +1589,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .get()
         .uri(BASE_PATH + "/" + experienceId + "/associations")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .exchange()
         .expectStatus()
@@ -1684,7 +1618,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .method(HttpMethod.DELETE)
         .uri(BASE_PATH + "/" + experience1Id + "/associations")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(objectMapper.writeValueAsString(Map.of("idsToDelete", List.of(association1))))
@@ -1698,7 +1631,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .get()
         .uri(BASE_PATH + "/" + experience2Id + "/associations")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .exchange()
         .expectStatus()
@@ -1718,7 +1650,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .method(HttpMethod.DELETE)
         .uri(BASE_PATH + "/" + notFoundDeclaredExperienceId + "/associations")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(
@@ -1746,7 +1677,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .method(HttpMethod.DELETE)
         .uri(BASE_PATH + "/" + otherExperienceId + "/associations")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(
@@ -1773,7 +1703,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .method(HttpMethod.DELETE)
         .uri(BASE_PATH + "/" + experienceId + "/associations")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(
@@ -1802,7 +1731,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .method(HttpMethod.DELETE)
         .uri(BASE_PATH + "/" + experienceId + "/associations")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(
@@ -1818,7 +1746,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .get()
         .uri(BASE_PATH + "/" + experienceId + "/associations")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .exchange()
         .expectStatus()
@@ -1842,7 +1769,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .method(HttpMethod.DELETE)
         .uri(BASE_PATH + "/" + experienceId + "/associations")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(
@@ -1858,7 +1784,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .get()
         .uri(BASE_PATH + "/" + experienceId + "/associations")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .exchange()
         .expectStatus()
@@ -1880,7 +1805,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .method(HttpMethod.DELETE)
         .uri(BASE_PATH + "/" + experienceId + "/associations")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(objectMapper.writeValueAsString(Map.of("idsToDelete", List.of())))
@@ -1905,7 +1829,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .method(HttpMethod.DELETE)
         .uri(BASE_PATH + "/" + experienceId + "/associations")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(objectMapper.writeValueAsString(Map.of("idsToDelete", List.of(associationId))))
@@ -1919,7 +1842,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .get()
         .uri("/me/traces/" + traceId + "/associations")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .exchange()
         .expectStatus()

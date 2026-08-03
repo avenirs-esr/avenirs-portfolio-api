@@ -45,9 +45,6 @@ class ActivityControllerIT extends ContainerConfigurationTest {
   @Autowired private WebTestClient webTestClient;
   @Autowired private ObjectMapper objectMapper;
 
-  @Value("${hmac.secret-key}")
-  private String secretKey;
-
   @Value("${user.student.payload}")
   private String studentPayload;
 
@@ -1346,7 +1343,6 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             .get()
             .uri(LIBRARY_PATH)
             .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, secondStudentPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
             .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, secondStudentSignature)
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
@@ -1760,19 +1756,16 @@ class ActivityControllerIT extends ContainerConfigurationTest {
 
   private void addStudentHeaders(HttpHeaders headers) {
     headers.add(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload);
-    headers.add(AvenirsSecurityHeaders.CONTEXT_KID, secretKey);
     headers.add(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature);
   }
 
   private void addSecondStudentHeaders(HttpHeaders headers) {
     headers.add(AvenirsSecurityHeaders.SIGNED_CONTEXT, secondStudentPayload);
-    headers.add(AvenirsSecurityHeaders.CONTEXT_KID, secretKey);
     headers.add(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, secondStudentSignature);
   }
 
   private void addStaffHeaders(HttpHeaders headers) {
     headers.add(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload);
-    headers.add(AvenirsSecurityHeaders.CONTEXT_KID, secretKey);
     headers.add(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature);
   }
 }

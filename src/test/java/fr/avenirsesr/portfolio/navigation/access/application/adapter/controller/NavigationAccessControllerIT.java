@@ -27,9 +27,6 @@ class NavigationAccessControllerIT extends ContainerConfigurationTest {
 
   @Autowired private WebTestClient webTestClient;
 
-  @Value("${hmac.secret-key}")
-  private String secretKey;
-
   @Value("${user.student.payload}")
   private String studentPayload;
 
@@ -80,7 +77,6 @@ class NavigationAccessControllerIT extends ContainerConfigurationTest {
         .get()
         .uri(BASE_PATH)
         .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
         .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
         .header("Accept-Language", language.getCode())
         .accept(MediaType.APPLICATION_JSON)
@@ -110,7 +106,6 @@ class NavigationAccessControllerIT extends ContainerConfigurationTest {
         .get()
         .uri(BASE_PATH)
         .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, unknownUserPayload)
-        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
         .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, unknownUserSignature)
         .header("Accept-Language", language.getCode())
         .exchange()
@@ -133,7 +128,6 @@ class NavigationAccessControllerIT extends ContainerConfigurationTest {
         .get()
         .uri(BASE_PATH)
         .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
-        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
         .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
         .header("Accept-Language", language.getCode())
         .exchange()
@@ -156,7 +150,6 @@ class NavigationAccessControllerIT extends ContainerConfigurationTest {
         .get()
         .uri(BASE_PATH)
         .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
         .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
         .header("Accept-Language", "invalid_language_code")
         .accept(MediaType.APPLICATION_JSON)
