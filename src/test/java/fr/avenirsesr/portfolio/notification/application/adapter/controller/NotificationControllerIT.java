@@ -32,9 +32,6 @@ public class NotificationControllerIT extends ContainerConfigurationTest {
   @Autowired private NotificationJpaRepository notificationJpaRepository;
   @Autowired private UserJpaRepository userJpaRepository;
 
-  @Value("${hmac.secret-key}")
-  private String secretKey;
-
   @Value("${user.student.payload}")
   private String studentPayload;
 
@@ -111,7 +108,6 @@ public class NotificationControllerIT extends ContainerConfigurationTest {
         .patch()
         .uri(BASE_PATH + "/" + staffNotificationId + "/seen")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .exchange()
         .expectStatus()
@@ -132,7 +128,6 @@ public class NotificationControllerIT extends ContainerConfigurationTest {
         .patch()
         .uri(BASE_PATH + "/" + NOT_FOUND_ID + "/seen")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .exchange()
         .expectStatus()
@@ -150,7 +145,6 @@ public class NotificationControllerIT extends ContainerConfigurationTest {
         .get()
         .uri(BASE_PATH + "/STUDENT")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .accept(MediaType.APPLICATION_JSON)
         .exchange()
@@ -172,7 +166,6 @@ public class NotificationControllerIT extends ContainerConfigurationTest {
         .get()
         .uri(BASE_PATH + "/STAFF")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .accept(MediaType.APPLICATION_JSON)
         .exchange()
@@ -210,7 +203,6 @@ public class NotificationControllerIT extends ContainerConfigurationTest {
         .get()
         .uri(BASE_PATH + "/STAFF")
         .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .accept(MediaType.APPLICATION_JSON)
         .exchange()

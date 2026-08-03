@@ -24,9 +24,6 @@ public class SkillLevelProgressControllerIT extends ContainerConfigurationTest {
 
   @Autowired private ObjectMapper objectMapper;
 
-  @Value("${hmac.secret-key}")
-  private String secretKey;
-
   @Value("${user.student.payload}")
   private String studentPayload;
 
@@ -80,7 +77,6 @@ public class SkillLevelProgressControllerIT extends ContainerConfigurationTest {
                           .build())
               .header("Accept-Language", language.getCode())
               .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-              .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
               .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
               .accept(MediaType.APPLICATION_JSON)
               .exchange()
@@ -109,7 +105,6 @@ public class SkillLevelProgressControllerIT extends ContainerConfigurationTest {
               .uri(BASE_PATH)
               .header("Accept-Language", language.getCode())
               .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-              .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
               .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
               .accept(MediaType.APPLICATION_JSON)
               .exchange()
@@ -138,7 +133,6 @@ public class SkillLevelProgressControllerIT extends ContainerConfigurationTest {
               .uri(BASE_PATH)
               .header("Accept-Language", language.getCode())
               .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, unknownUserPayload)
-              .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
               .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, unknownUserSignature)
               .accept(MediaType.APPLICATION_JSON)
               .exchange()
@@ -167,7 +161,6 @@ public class SkillLevelProgressControllerIT extends ContainerConfigurationTest {
               .uri(uriBuilder -> uriBuilder.path(BASE_PATH).queryParam("sort", "DATE").build())
               .header("Accept-Language", language.getCode())
               .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-              .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
               .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
               .accept(MediaType.APPLICATION_JSON)
               .exchange()
@@ -206,7 +199,6 @@ public class SkillLevelProgressControllerIT extends ContainerConfigurationTest {
               .uri(DETAILS_BASE_PATH, UNKNOWN_SKILL_ID)
               .header("Accept-Language", language.getCode())
               .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-              .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
               .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
               .accept(MediaType.APPLICATION_JSON)
               .exchange()
