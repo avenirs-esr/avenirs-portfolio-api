@@ -40,22 +40,22 @@ public class SelfKnowledgeController {
   private final SelfKnowledgeElementDetailsMapper selfKnowledgeElementDetailsMapper;
   private final SelfKnowledgeElementViewMapper selfKnowledgeElementViewMapper;
 
-  @GetMapping(&quot;/{selfKnowledgeCategoryId}/elements&quot;)
+  @GetMapping(&quot;/elements&quot;)
   public ResponseEntity&lt;PagedResponse&lt;SelfKnowledgeElementViewDTO&gt;&gt; getSelfKnowledgeElements(
-      @PathVariable(&quot;selfKnowledgeCategoryId&quot;) UUID selfKnowledgeCategoryId,
+      @RequestParam(required = false) List&lt;UUID&gt; selfKnowledgeCategoryIds,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize,
       @RequestParam(required = false) Boolean isValorized) {
 <span class="fc" id="L49">    log.debug(</span>
-        &quot;Received request to get elements of self knowledge category [{}], with&quot;
+        &quot;Received request to get elements of self knowledge categories [{}], with&quot;
             + &quot; pagination (page={}, pageSize={}, isValorized={})&quot;,
-        selfKnowledgeCategoryId,
+        selfKnowledgeCategoryIds,
         page,
         pageSize,
         isValorized);
 <span class="fc" id="L56">    PagedResult&lt;SelfKnowledgeElement&gt; selfKnowledgeElementPagedResult =</span>
 <span class="fc" id="L57">        selfKnowledgeService.getSelfKnowledgeElements(</span>
-            selfKnowledgeCategoryId, new PageCriteria(page, pageSize), isValorized);
+            selfKnowledgeCategoryIds, new PageCriteria(page, pageSize), isValorized);
 
 <span class="fc" id="L60">    return ResponseEntity.ok(</span>
         new PagedResponse&lt;&gt;(
