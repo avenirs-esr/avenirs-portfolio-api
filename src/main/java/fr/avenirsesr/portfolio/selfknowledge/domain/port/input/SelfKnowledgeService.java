@@ -10,7 +10,9 @@ import java.util.UUID;
 
 public interface SelfKnowledgeService {
   PagedResult<SelfKnowledgeElement> getSelfKnowledgeElements(
-      ESelfKnowledgeCategory selfKnowledgeCategory, PageCriteria pageCriteria, Boolean isValorized);
+      List<ESelfKnowledgeCategory> selfKnowledgeCategories,
+      PageCriteria pageCriteria,
+      Boolean isValorized);
 
   SelfKnowledgeElementDetails getSelfKnowledgeElementDetails(UUID selfKnowledgeElementId);
 

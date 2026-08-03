@@ -7,12 +7,20 @@ import fr.avenirsesr.portfolio.selfknowledge.application.adapter.dto.SelfKnowled
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeElement;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.fixture.SelfKnowledgeElementFixture;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
+import org.mockito.InjectMocks;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 class SelfKnowledgeElementViewMapperTest {
 
-  private final SelfKnowledgeElementViewMapper mapper =
-      Mappers.getMapper(SelfKnowledgeElementViewMapper.class);
+  @Spy
+  private SelfKnowledgeCategoryMapper selfKnowledgeCategoryMapper =
+      Mappers.getMapper(SelfKnowledgeCategoryMapper.class);
+
+  @InjectMocks private SelfKnowledgeElementViewMapperImpl mapper;
 
   @Test
   void shouldMapSelfKnowledgeElementToViewDTO() {
@@ -29,5 +37,8 @@ class SelfKnowledgeElementViewMapperTest {
     assertEquals(element.getDescription(), dto.description());
     assertEquals(element.getRating(), dto.rating());
     assertEquals(element.isValorized(), dto.valorized());
+    assertNotNull(dto.category());
+    assertEquals(element.getSelfKnowledgeCategory(), dto.category().type());
+    assertEquals(element.getSelfKnowledgeCategory().isMandatory(), dto.category().mandatory());
   }
 }

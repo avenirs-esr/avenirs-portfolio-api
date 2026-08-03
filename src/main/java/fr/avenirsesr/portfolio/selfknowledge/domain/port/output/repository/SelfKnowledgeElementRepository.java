@@ -6,13 +6,14 @@ import fr.avenirsesr.portfolio.common.data.domain.port.output.repository.Generic
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeElement;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.enums.ESelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
+import java.util.List;
 import java.util.UUID;
 
 public interface SelfKnowledgeElementRepository
     extends GenericRepositoryPort<SelfKnowledgeElement> {
-  PagedResult<SelfKnowledgeElement> findAllByStudentIdAndCategory(
+  PagedResult<SelfKnowledgeElement> findAllByStudentIdAndCategories(
       UUID studentId,
-      ESelfKnowledgeCategory selfKnowledgeCategory,
+      List<ESelfKnowledgeCategory> selfKnowledgeCategories,
       PageCriteria pageCriteria,
       Boolean isValorized);
 

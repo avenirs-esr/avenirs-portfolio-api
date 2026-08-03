@@ -275,22 +275,22 @@ class SelfKnowledgeServiceImplTest {
             PagedResult<SelfKnowledgeElement> expectedResult =
                 new PagedResult<>(List.of(selfKnowledgeElement), new PageInfo(0, 8, 1));
 
-            when(selfKnowledgeElementRepository.findAllByStudentIdAndCategory(
-                    student.getId(), selfKnowledgeCategory, pageCriteria, null))
+            when(selfKnowledgeElementRepository.findAllByStudentIdAndCategories(
+                    student.getId(), List.of(selfKnowledgeCategory), pageCriteria, null))
                 .thenReturn(expectedResult);
 
             BddLogger.when("getting self knowledge elements paginated");
             PagedResult<SelfKnowledgeElement> actualResult =
                 selfKnowledgeService.getSelfKnowledgeElements(
-                    selfKnowledgeCategory, pageCriteria, null);
+                    List.of(selfKnowledgeCategory), pageCriteria, null);
 
             BddLogger.then("it should retrieve self knowledge elements paginated");
             assertThat(actualResult).isEqualTo(expectedResult);
 
             verify(loggedInUserService).getLoggedInStudent();
             verify(selfKnowledgeElementRepository)
-                .findAllByStudentIdAndCategory(
-                    student.getId(), selfKnowledgeCategory, pageCriteria, null);
+                .findAllByStudentIdAndCategories(
+                    student.getId(), List.of(selfKnowledgeCategory), pageCriteria, null);
           }
 
           @Test
@@ -298,20 +298,60 @@ class SelfKnowledgeServiceImplTest {
             PagedResult<SelfKnowledgeElement> expectedResult =
                 new PagedResult<>(List.of(selfKnowledgeElement), new PageInfo(0, 8, 1));
 
-            when(selfKnowledgeElementRepository.findAllByStudentIdAndCategory(
-                    student.getId(), selfKnowledgeCategory, pageCriteria, true))
+            when(selfKnowledgeElementRepository.findAllByStudentIdAndCategories(
+                    student.getId(), List.of(selfKnowledgeCategory), pageCriteria, true))
                 .thenReturn(expectedResult);
 
             BddLogger.when("getting self knowledge elements paginated with isValorized=true");
             PagedResult<SelfKnowledgeElement> actualResult =
                 selfKnowledgeService.getSelfKnowledgeElements(
-                    selfKnowledgeCategory, pageCriteria, true);
+                    List.of(selfKnowledgeCategory), pageCriteria, true);
 
             BddLogger.then("it should delegate the isValorized filter to the repository");
             assertThat(actualResult).isEqualTo(expectedResult);
             verify(selfKnowledgeElementRepository)
-                .findAllByStudentIdAndCategory(
-                    student.getId(), selfKnowledgeCategory, pageCriteria, true);
+                .findAllByStudentIdAndCategories(
+                    student.getId(), List.of(selfKnowledgeCategory), pageCriteria, true);
+          }
+
+          @Test
+          void thenItShouldGetSelfKnowledgeElementsForMultipleCategories() {
+            List<ESelfKnowledgeCategory> categories =
+                List.of(selfKnowledgeCategory, ESelfKnowledgeCategory.VALUES);
+            PagedResult<SelfKnowledgeElement> expectedResult =
+                new PagedResult<>(List.of(selfKnowledgeElement), new PageInfo(0, 8, 1));
+
+            when(selfKnowledgeElementRepository.findAllByStudentIdAndCategories(
+                    student.getId(), categories, pageCriteria, null))
+                .thenReturn(expectedResult);
+
+            BddLogger.when("getting self knowledge elements paginated for multiple categories");
+            PagedResult<SelfKnowledgeElement> actualResult =
+                selfKnowledgeService.getSelfKnowledgeElements(categories, pageCriteria, null);
+
+            BddLogger.then("it should delegate the categories filter to the repository");
+            assertThat(actualResult).isEqualTo(expectedResult);
+            verify(selfKnowledgeElementRepository)
+                .findAllByStudentIdAndCategories(student.getId(), categories, pageCriteria, null);
+          }
+
+          @Test
+          void thenItShouldGetSelfKnowledgeElementsWithoutCategoryFilter() {
+            PagedResult<SelfKnowledgeElement> expectedResult =
+                new PagedResult<>(List.of(selfKnowledgeElement), new PageInfo(0, 8, 1));
+
+            when(selfKnowledgeElementRepository.findAllByStudentIdAndCategories(
+                    student.getId(), null, pageCriteria, null))
+                .thenReturn(expectedResult);
+
+            BddLogger.when("getting self knowledge elements paginated without category filter");
+            PagedResult<SelfKnowledgeElement> actualResult =
+                selfKnowledgeService.getSelfKnowledgeElements(null, pageCriteria, null);
+
+            BddLogger.then("it should delegate to the repository without a category filter");
+            assertThat(actualResult).isEqualTo(expectedResult);
+            verify(selfKnowledgeElementRepository)
+                .findAllByStudentIdAndCategories(student.getId(), null, pageCriteria, null);
           }
         }
 
@@ -930,7 +970,7 @@ class SelfKnowledgeServiceImplTest {
               UserNotFoundException.class,
               () ->
                   selfKnowledgeService.getSelfKnowledgeElements(
-                      ESelfKnowledgeCategory.STRENGTHS, new PageCriteria(0, 8), null));
+                      List.of(ESelfKnowledgeCategory.STRENGTHS), new PageCriteria(0, 8), null));
         }
       }
 
@@ -1078,7 +1118,7 @@ class SelfKnowledgeServiceImplTest {
               UserIsNotStudentException.class,
               () ->
                   selfKnowledgeService.getSelfKnowledgeElements(
-                      ESelfKnowledgeCategory.STRENGTHS, new PageCriteria(0, 8), null));
+                      List.of(ESelfKnowledgeCategory.STRENGTHS), new PageCriteria(0, 8), null));
         }
       }
 

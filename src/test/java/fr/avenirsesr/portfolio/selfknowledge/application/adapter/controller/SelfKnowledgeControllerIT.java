@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.AvenirsSecurityHeaders;
+import fr.avenirsesr.portfolio.selfknowledge.domain.model.enums.ESelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
 import java.util.ArrayList;
@@ -61,24 +62,6 @@ class SelfKnowledgeControllerIT extends ContainerConfigurationTest {
 
     JsonNode json = objectMapper.readTree(body);
     return json.get(0).get("type").asText();
-  }
-
-  private String getLinkedCategoryId() throws Exception {
-    String categoryId = getAvailableCategoryId();
-
-    webTestClient
-        .post()
-        .uri(CATEGORIES_BASE_PATH)
-        .contentType(MediaType.APPLICATION_JSON)
-        .bodyValue(objectMapper.writeValueAsString(List.of(categoryId)))
-        .header("Accept-Language", ELanguage.FRENCH.getCode())
-        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
-        .exchange()
-        .expectStatus()
-        .isOk();
-
-    return categoryId;
   }
 
   private String createElement(String categoryId, String title, String description, int rating)
@@ -166,7 +149,7 @@ class SelfKnowledgeControllerIT extends ContainerConfigurationTest {
 
   @Test
   void shouldCreateSelfKnowledgeElement() throws Exception {
-    String categoryId = getLinkedCategoryId();
+    String categoryId = ESelfKnowledgeCategory.STRENGTHS.name();
 
     webTestClient
         .post()
@@ -197,7 +180,7 @@ class SelfKnowledgeControllerIT extends ContainerConfigurationTest {
 
   @Test
   void shouldUpdateSelfKnowledgeElementValorizedFlag() throws Exception {
-    String categoryId = getLinkedCategoryId();
+    String categoryId = ESelfKnowledgeCategory.VALUES.name();
     String elementId = createElement(categoryId, "Test", "Desc", 3);
 
     webTestClient
@@ -228,7 +211,7 @@ class SelfKnowledgeControllerIT extends ContainerConfigurationTest {
 
   @Test
   void shouldFilterSelfKnowledgeElementsByIsValorized() throws Exception {
-    String categoryId = getLinkedCategoryId();
+    String categoryId = ESelfKnowledgeCategory.ASPIRATIONS.name();
     String elementId = createElement(categoryId, "Filter me", "Desc", 3);
 
     webTestClient
@@ -254,7 +237,9 @@ class SelfKnowledgeControllerIT extends ContainerConfigurationTest {
     String valorizedOnlyResponse =
         webTestClient
             .get()
-            .uri(BASE_PATH + "/{categoryId}/elements?isValorized=true", categoryId)
+            .uri(
+                BASE_PATH + "/elements?selfKnowledgeCategories={categoryId}&isValorized=true",
+                categoryId)
             .header("Accept-Language", ELanguage.FRENCH.getCode())
             .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
             .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
@@ -275,7 +260,9 @@ class SelfKnowledgeControllerIT extends ContainerConfigurationTest {
     String nonValorizedOnlyResponse =
         webTestClient
             .get()
-            .uri(BASE_PATH + "/{categoryId}/elements?isValorized=false", categoryId)
+            .uri(
+                BASE_PATH + "/elements?selfKnowledgeCategories={categoryId}&isValorized=false",
+                categoryId)
             .header("Accept-Language", ELanguage.FRENCH.getCode())
             .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
             .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
@@ -295,8 +282,63 @@ class SelfKnowledgeControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
+  void shouldFilterSelfKnowledgeElementsByMultipleCategories() throws Exception {
+    String firstCategory = ESelfKnowledgeCategory.MOTIVATION.name();
+    String secondCategory = ESelfKnowledgeCategory.IMPROVEMENT.name();
+    String firstElementId = createElement(firstCategory, "In first category", "Desc", 3);
+    String secondElementId = createElement(secondCategory, "In second category", "Desc", 2);
+    String otherCategory = ESelfKnowledgeCategory.INTERESTS.name();
+    String otherElementId = createElement(otherCategory, "In other category", "Desc", 1);
+
+    String response =
+        webTestClient
+            .get()
+            .uri(
+                uriBuilder ->
+                    uriBuilder
+                        .path(BASE_PATH + "/elements")
+                        .queryParam("selfKnowledgeCategories", firstCategory, secondCategory)
+                        .build())
+            .header("Accept-Language", ELanguage.FRENCH.getCode())
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    List<String> ids = new ArrayList<>();
+    JsonNode dataNode = objectMapper.readTree(response).get("data");
+    dataNode.forEach(node -> ids.add(node.get("id").asText()));
+
+    assertThat(ids).contains(firstElementId, secondElementId).doesNotContain(otherElementId);
+    assertThat(dataNode.get(0).get("category")).isNotNull();
+    assertThat(dataNode.get(0).get("category").get("type")).isNotNull();
+  }
+
+  @Test
+  void shouldReturn400WhenFilteringByInvalidCategory() {
+    webTestClient
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(BASE_PATH + "/elements")
+                    .queryParam("selfKnowledgeCategories", "NOT_A_CATEGORY")
+                    .build())
+        .header("Accept-Language", ELanguage.FRENCH.getCode())
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .exchange()
+        .expectStatus()
+        .isBadRequest();
+  }
+
+  @Test
   void shouldGetSelfKnowledgeElementDetails() throws Exception {
-    String categoryId = getLinkedCategoryId();
+    String categoryId = ESelfKnowledgeCategory.INSPIRATIONS.name();
     String elementId = createElement(categoryId, "Test", "Desc", 3);
 
     webTestClient
@@ -317,7 +359,7 @@ class SelfKnowledgeControllerIT extends ContainerConfigurationTest {
 
   @Test
   void shouldDeleteSelfKnowledgeElements() throws Exception {
-    String categoryId = getLinkedCategoryId();
+    String categoryId = ESelfKnowledgeCategory.OBLIGATIONS.name();
     String id1 = createElement(categoryId, "E1", "D1", 1);
     String id2 = createElement(categoryId, "E2", "D2", 2);
 

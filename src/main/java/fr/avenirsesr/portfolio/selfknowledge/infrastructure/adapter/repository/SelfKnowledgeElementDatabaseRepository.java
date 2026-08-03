@@ -11,6 +11,7 @@ import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.model.SelfKn
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.specification.SelfKnowledgeElementSpecification;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StudentMapper;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
@@ -34,14 +35,16 @@ public class SelfKnowledgeElementDatabaseRepository
   }
 
   @Override
-  public PagedResult<SelfKnowledgeElement> findAllByStudentIdAndCategory(
+  public PagedResult<SelfKnowledgeElement> findAllByStudentIdAndCategories(
       UUID studentId,
-      ESelfKnowledgeCategory selfKnowledgeCategory,
+      List<ESelfKnowledgeCategory> selfKnowledgeCategories,
       PageCriteria pageCriteria,
       Boolean isValorized) {
     Specification<SelfKnowledgeElementEntity> spec =
         SelfKnowledgeElementSpecification.hasStudentId(studentId)
-            .and(SelfKnowledgeElementSpecification.hasSelfKnowledgeCategory(selfKnowledgeCategory))
+            .and(
+                SelfKnowledgeElementSpecification.hasSelfKnowledgeCategoryIn(
+                    selfKnowledgeCategories))
             .and(SelfKnowledgeElementSpecification.isValorized(isValorized));
     return findAll(spec, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()));
   }
