@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.application.adapter.dto.DeclaredExperienceViewDTO;
+import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.data.DeclaredExperienceAssociationCount;
+import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.data.DeclaredExperienceData;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.enums.EExperienceType;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
@@ -88,5 +90,38 @@ class DeclaredExperienceMapperTest {
 
     BddLogger.then("it should reflect the valorized flag");
     assertTrue(dto.valorized());
+  }
+
+  @Test
+  void shouldMapDeclaredExperienceDataToViewDTOWithAssociationCount() {
+    BddLogger.given("a declared experience with an association count");
+    Student student = StudentFixture.create().toModel();
+    DeclaredExperience experience =
+        DeclaredExperience.create(
+            student,
+            "Software Experience",
+            EExperienceType.PROFESSIONAL,
+            "Tech Corp",
+            "Software",
+            "Paris",
+            "Backend development",
+            "LinkedIn",
+            "Built REST APIs",
+            "https://techcorp.com",
+            LocalDate.now().minusMonths(6),
+            LocalDate.now());
+    DeclaredExperienceData experienceData =
+        new DeclaredExperienceData(experience, new DeclaredExperienceAssociationCount(2, 3));
+
+    BddLogger.when("mapping to DeclaredExperienceViewDTO");
+    DeclaredExperienceViewDTO dto = mapper.toDTO(experienceData);
+
+    BddLogger.then("it should include the mapped association count");
+    assertNotNull(dto);
+    assertEquals(experience.getId(), dto.id());
+    assertEquals(experience.getTitle(), dto.title());
+    assertNotNull(dto.declaredExperienceAssociationCountDTO());
+    assertEquals(2, dto.declaredExperienceAssociationCountDTO().traceAssociationsCount());
+    assertEquals(3, dto.declaredExperienceAssociationCountDTO().declaredSkillAssociationsCount());
   }
 }

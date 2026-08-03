@@ -15,7 +15,9 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.data.DeclaredExperienceAssociationCount;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.data.DeclaredExperienceAssociationsData;
+import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.data.DeclaredExperienceData;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.exception.DeclaredExperienceNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.enums.EExperienceType;
@@ -35,7 +37,10 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -313,13 +318,47 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
   }
 
   @Override
-  public PagedResult<DeclaredExperience> getView(
+  public PagedResult<DeclaredExperienceData> getView(
       PageCriteria pageCriteria, Boolean isValorized, EExperienceType experienceType) {
     Student student = loggedInUserService.getLoggedInStudent();
     log.info("Get experience view by {}", student);
 
-    return experienceRepository.findAllByStudent(
-        student, pageCriteria, isValorized, experienceType);
+    var pagedExperiences =
+        experienceRepository.findAllByStudent(student, pageCriteria, isValorized, experienceType);
+
+    var associationsCountByExperience = getAssociationCounts(pagedExperiences.content());
+
+    return new PagedResult<>(
+        pagedExperiences.content().stream()
+            .map(
+                experience ->
+                    new DeclaredExperienceData(
+                        experience, associationsCountByExperience.get(experience)))
+            .toList(),
+        pagedExperiences.pageInfo());
+  }
+
+  private Map<DeclaredExperience, DeclaredExperienceAssociationCount> getAssociationCounts(
+      List<DeclaredExperience> experiences) {
+    var ids = experiences.stream().map(AvenirsBaseModel::getId).toList();
+
+    var traceAssociationsCountById =
+        associationService.countAllOf(
+            ids, DeclaredExperience.class, EAssociationType.TRACE_DECLARED_EXPERIENCE);
+    var declaredSkillAssociationsCountById =
+        associationService.countAllOf(
+            ids, DeclaredExperience.class, EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL);
+
+    return experiences.stream()
+        .collect(
+            Collectors.toMap(
+                Function.identity(),
+                experience ->
+                    new DeclaredExperienceAssociationCount(
+                        traceAssociationsCountById.getOrDefault(experience.getId(), 0L).intValue(),
+                        declaredSkillAssociationsCountById
+                            .getOrDefault(experience.getId(), 0L)
+                            .intValue())));
   }
 
   @Override

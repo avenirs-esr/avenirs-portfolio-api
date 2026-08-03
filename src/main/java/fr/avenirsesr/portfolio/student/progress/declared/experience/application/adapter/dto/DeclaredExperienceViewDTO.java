@@ -6,7 +6,16 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
 
-@Schema(requiredProperties = {"id", "title", "organization", "startDate", "createdAt", "updatedAt"})
+@Schema(
+    requiredProperties = {
+      "id",
+      "title",
+      "organization",
+      "startDate",
+      "createdAt",
+      "updatedAt",
+      "declaredExperienceAssociationCountDTO"
+    })
 public record DeclaredExperienceViewDTO(
     UUID id,
     String title,
@@ -22,4 +31,5 @@ public record DeclaredExperienceViewDTO(
     LocalDate endDate,
     boolean valorized,
     Instant createdAt,
-    Instant updatedAt) {}
+    Instant updatedAt,
+    DeclaredExperienceAssociationCountDTO declaredExperienceAssociationCountDTO) {}
