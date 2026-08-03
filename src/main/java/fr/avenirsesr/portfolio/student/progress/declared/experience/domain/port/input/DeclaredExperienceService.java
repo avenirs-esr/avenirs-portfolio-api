@@ -73,7 +73,8 @@ public interface DeclaredExperienceService {
 
   DeclaredExperience get(UUID experienceId);
 
-  PagedResult<DeclaredExperience> getView(PageCriteria pageCriteria, Boolean isValorized);
+  PagedResult<DeclaredExperience> getView(
+      PageCriteria pageCriteria, Boolean isValorized, EExperienceType experienceType);
 
   List<DeclaredExperience> findAllByIds(List<UUID> experienceIds);
 
