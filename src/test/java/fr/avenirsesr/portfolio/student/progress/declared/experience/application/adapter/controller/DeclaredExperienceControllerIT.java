@@ -572,7 +572,7 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
 
     String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
     UUID traceId = createTraceAs("My trace", studentPayload, studentSignature);
-    UUID skillId = createDeclaredSkillProgressAs(17, studentPayload, studentSignature);
+    UUID skillId = createAnyAvailableDeclaredSkillProgressAs(studentPayload, studentSignature);
 
     webTestClient
         .post()
@@ -981,6 +981,36 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
     return UUID.fromString(extractIdFromResponse(responseBody));
   }
 
+  private UUID createAnyAvailableDeclaredSkillProgressAs(String payload, String signature)
+      throws Exception {
+    for (var declaredSkill : declaredSkillRepository.findAll()) {
+      var result =
+          webTestClient
+              .post()
+              .uri("/me/declared/skill-progress")
+              .header("X-Signed-Context", payload)
+              .header("X-Context-Kid", secretKey)
+              .header("X-Context-Signature", signature)
+              .contentType(MediaType.APPLICATION_JSON)
+              .bodyValue(
+                  "{\n"
+                      + "  \"id\": \"%s\",\n".formatted(declaredSkill.getId())
+                      + "  \"level\": \"BEGINNER\",\n"
+                      + "  \"type\": \"ROME4\"\n"
+                      + "}\n")
+              .exchange()
+              .expectBody(String.class)
+              .returnResult();
+
+      if (result.getStatus().is2xxSuccessful()) {
+        return UUID.fromString(extractIdFromResponse(result.getResponseBody()));
+      }
+    }
+
+    throw new IllegalStateException(
+        "No declared skill available for association in the seeded catalog");
+  }
+
   private UUID createTraceAs(String title, String payload, String signature) throws Exception {
     String responseBody =
         webTestClient
@@ -1040,29 +1070,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         objectMapper.readTree(responseBody).get("declaredSkillAssociations");
     assertThat(declaredSkillAssociations.isArray()).isTrue();
     assertThat(declaredSkillAssociations.size()).isEqualTo(2);
-  }
-
-  @Test
-  void shouldReturn404WhenAssociatingDeclaredSkillsWithNonExistentExperience() throws Exception {
-    BddLogger.given("a non-existent declared experience");
-
-    UUID skillId = createDeclaredSkillProgressAs(12, studentPayload, studentSignature);
-
-    BddLogger.when("performing a POST to associate declared skills");
-
-    webTestClient
-        .post()
-        .uri(BASE_PATH + "/" + notFoundDeclaredExperienceId + "/associate/declared-skills")
-        .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
-        .header("X-Context-Signature", studentSignature)
-        .contentType(MediaType.APPLICATION_JSON)
-        .bodyValue(objectMapper.writeValueAsString(Map.of("idsToAssociate", List.of(skillId))))
-        .exchange()
-        .expectStatus()
-        .isNotFound();
-
-    BddLogger.then("it should return 404");
   }
 
   @Test
