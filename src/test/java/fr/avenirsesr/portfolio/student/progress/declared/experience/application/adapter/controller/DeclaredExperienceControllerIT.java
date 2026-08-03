@@ -67,6 +67,24 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         + "}\n";
   }
 
+  private String buildCreateExperienceJson(String experienceType) {
+    return "{\n"
+        + "  \"title\": \"My Experience\",\n"
+        + "  \"experienceType\": \""
+        + experienceType
+        + "\",\n"
+        + "  \"organization\": \"ACME Inc\",\n"
+        + "  \"activitySector\": \"IT\",\n"
+        + "  \"location\": \"Paris\",\n"
+        + "  \"description\": \"Some description\",\n"
+        + "  \"sourceOfInformation\": \"SELF_DECLARED\",\n"
+        + "  \"summary\": \"Summary text\",\n"
+        + "  \"externalLink\": \"https://example.com\",\n"
+        + "  \"startDate\": \"2024-01-01\",\n"
+        + "  \"endDate\": \"2024-03-01\"\n"
+        + "}\n";
+  }
+
   private String extractIdFromResponse(String responseBody) throws Exception {
     JsonNode jsonNode = objectMapper.readTree(responseBody);
     return jsonNode.get("id").asText();
@@ -445,6 +463,104 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .get("data")
         .forEach(node -> nonValorizedIds.add(node.get("id").asText()));
     assertThat(nonValorizedIds).doesNotContain(createdId);
+  }
+
+  @Transactional
+  @Test
+  void shouldFilterDeclaredExperienceViewByExperienceType() throws Exception {
+    BddLogger.given("a professional declared experience and a personal declared experience");
+
+    String professionalResponse =
+        webTestClient
+            .post()
+            .uri(BASE_PATH + "/")
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Kid", secretKey)
+            .header("X-Context-Signature", studentSignature)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(buildCreateExperienceJson("PROFESSIONAL"))
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+    String professionalId = extractIdFromResponse(professionalResponse);
+
+    String personalResponse =
+        webTestClient
+            .post()
+            .uri(BASE_PATH + "/")
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Kid", secretKey)
+            .header("X-Context-Signature", studentSignature)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(buildCreateExperienceJson("PERSONAL"))
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+    String personalId = extractIdFromResponse(personalResponse);
+
+    BddLogger.when("performing a GET on /view with experienceType=PROFESSIONAL");
+
+    String professionalOnlyResponse =
+        webTestClient
+            .get()
+            .uri(
+                uriBuilder ->
+                    uriBuilder
+                        .path(BASE_PATH + "/view")
+                        .queryParam("experienceType", "PROFESSIONAL")
+                        .build())
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Kid", secretKey)
+            .header("X-Context-Signature", studentSignature)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    BddLogger.then("it should only contain the professional declared experience");
+    List<String> professionalIds = new ArrayList<>();
+    objectMapper
+        .readTree(professionalOnlyResponse)
+        .get("data")
+        .forEach(node -> professionalIds.add(node.get("id").asText()));
+    assertThat(professionalIds).contains(professionalId).doesNotContain(personalId);
+
+    BddLogger.when("performing a GET on /view with experienceType=PERSONAL");
+
+    String personalOnlyResponse =
+        webTestClient
+            .get()
+            .uri(
+                uriBuilder ->
+                    uriBuilder
+                        .path(BASE_PATH + "/view")
+                        .queryParam("experienceType", "PERSONAL")
+                        .build())
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Kid", secretKey)
+            .header("X-Context-Signature", studentSignature)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    BddLogger.then("it should only contain the personal declared experience");
+    List<String> personalIds = new ArrayList<>();
+    objectMapper
+        .readTree(personalOnlyResponse)
+        .get("data")
+        .forEach(node -> personalIds.add(node.get("id").asText()));
+    assertThat(personalIds).contains(personalId).doesNotContain(professionalId);
   }
 
   @Test

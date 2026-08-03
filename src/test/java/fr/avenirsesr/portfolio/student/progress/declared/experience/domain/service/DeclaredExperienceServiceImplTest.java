@@ -1019,13 +1019,13 @@ class DeclaredExperienceServiceImplTest {
     PagedResult<DeclaredExperience> expected = mock(PagedResult.class);
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedIn);
-    when(experienceRepository.findAllByStudent(loggedIn, criteria, (Boolean) null))
+    when(experienceRepository.findAllByStudent(loggedIn, criteria, null, null))
         .thenReturn(expected);
 
-    PagedResult<DeclaredExperience> result = service.getView(criteria, null);
+    PagedResult<DeclaredExperience> result = service.getView(criteria, null, null);
 
     assertSame(expected, result);
-    verify(experienceRepository).findAllByStudent(loggedIn, criteria, (Boolean) null);
+    verify(experienceRepository).findAllByStudent(loggedIn, criteria, null, null);
   }
 
   @Test
@@ -1035,12 +1035,32 @@ class DeclaredExperienceServiceImplTest {
     PagedResult<DeclaredExperience> expected = mock(PagedResult.class);
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedIn);
-    when(experienceRepository.findAllByStudent(loggedIn, criteria, true)).thenReturn(expected);
+    when(experienceRepository.findAllByStudent(loggedIn, criteria, true, null))
+        .thenReturn(expected);
 
-    PagedResult<DeclaredExperience> result = service.getView(criteria, true);
+    PagedResult<DeclaredExperience> result = service.getView(criteria, true, null);
 
     assertSame(expected, result);
-    verify(experienceRepository).findAllByStudent(loggedIn, criteria, true);
+    verify(experienceRepository).findAllByStudent(loggedIn, criteria, true, null);
+  }
+
+  @Test
+  void getView_shouldDelegateExperienceTypeFilterToRepository() {
+    Student loggedIn = student;
+    PageCriteria criteria = new PageCriteria(1, 8);
+    PagedResult<DeclaredExperience> expected = mock(PagedResult.class);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedIn);
+    when(experienceRepository.findAllByStudent(
+            loggedIn, criteria, null, EExperienceType.PROFESSIONAL))
+        .thenReturn(expected);
+
+    PagedResult<DeclaredExperience> result =
+        service.getView(criteria, null, EExperienceType.PROFESSIONAL);
+
+    assertSame(expected, result);
+    verify(experienceRepository)
+        .findAllByStudent(loggedIn, criteria, null, EExperienceType.PROFESSIONAL);
   }
 
   @Test

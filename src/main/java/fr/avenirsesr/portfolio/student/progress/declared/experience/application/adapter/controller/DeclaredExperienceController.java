@@ -15,6 +15,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.experience.application.
 import fr.avenirsesr.portfolio.student.progress.declared.experience.application.adapter.dto.DeclaredExperienceViewDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.application.adapter.mapper.DeclaredExperienceMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.DeclaredExperience;
+import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.enums.EExperienceType;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.port.input.DeclaredExperienceService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -70,9 +71,13 @@ public class DeclaredExperienceController {
   public ResponseEntity<PagedResponse<DeclaredExperienceViewDTO>> getDeclaredExperienceView(
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize,
-      @RequestParam(required = false) Boolean isValorized) {
+      @RequestParam(required = false) Boolean isValorized,
+      @Parameter(schema = @Schema(ref = "#/components/schemas/EExperienceType"))
+          @RequestParam(required = false)
+          EExperienceType experienceType) {
     PagedResult<DeclaredExperience> pagedExperiences =
-        declaredExperienceService.getView(new PageCriteria(page, pageSize), isValorized);
+        declaredExperienceService.getView(
+            new PageCriteria(page, pageSize), isValorized, experienceType);
 
     return ResponseEntity.ok(
         new PagedResponse<>(

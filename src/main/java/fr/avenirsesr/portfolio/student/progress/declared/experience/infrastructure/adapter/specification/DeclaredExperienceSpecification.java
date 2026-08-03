@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.student.progress.declared.experience.infrastructure.adapter.specification;
 
+import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.enums.EExperienceType;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.infrastructure.adapter.model.DeclaredExperienceEntity;
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Order;
@@ -45,6 +46,16 @@ public class DeclaredExperienceSpecification {
         return criteriaBuilder.conjunction();
       }
       return criteriaBuilder.equal(root.get("valorized"), isValorized);
+    };
+  }
+
+  public static Specification<DeclaredExperienceEntity> hasExperienceType(
+      EExperienceType experienceType) {
+    return (root, query, criteriaBuilder) -> {
+      if (experienceType == null) {
+        return criteriaBuilder.conjunction();
+      }
+      return criteriaBuilder.equal(root.get("experienceType"), experienceType);
     };
   }
 }
