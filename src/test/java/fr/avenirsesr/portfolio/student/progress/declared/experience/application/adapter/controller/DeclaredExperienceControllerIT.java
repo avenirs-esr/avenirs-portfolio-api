@@ -565,6 +565,81 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
     assertThat(personalIds).contains(personalId).doesNotContain(professionalId);
   }
 
+  @Transactional
+  @Test
+  void shouldReturnDeclaredExperienceAssociationCountsInView() throws Exception {
+    BddLogger.given("a declared experience associated with a trace and a declared skill");
+
+    String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
+    UUID traceId = createTraceAs("My trace", studentPayload, studentSignature);
+    UUID skillId = createDeclaredSkillProgressAs(12, studentPayload, studentSignature);
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + experienceId + "/associate/traces")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(objectMapper.writeValueAsString(Map.of("idsToAssociate", List.of(traceId))))
+        .exchange()
+        .expectStatus()
+        .isOk();
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + experienceId + "/associate/declared-skills")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(objectMapper.writeValueAsString(Map.of("idsToAssociate", List.of(skillId))))
+        .exchange()
+        .expectStatus()
+        .isOk();
+
+    BddLogger.when("performing a GET on /view");
+
+    String viewResponse =
+        webTestClient
+            .get()
+            .uri(
+                uriBuilder ->
+                    uriBuilder.path(BASE_PATH + "/view").queryParam("pageSize", 100).build())
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Kid", secretKey)
+            .header("X-Context-Signature", studentSignature)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    BddLogger.then("it should return the correct association counts for the declared experience");
+    JsonNode experienceNode = null;
+    for (JsonNode node : objectMapper.readTree(viewResponse).get("data")) {
+      if (node.get("id").asText().equals(experienceId)) {
+        experienceNode = node;
+        break;
+      }
+    }
+    assertThat(experienceNode).isNotNull();
+    assertThat(experienceNode.get("declaredExperienceAssociationCountDTO")).isNotNull();
+    assertThat(
+            experienceNode
+                .get("declaredExperienceAssociationCountDTO")
+                .get("traceAssociationsCount")
+                .asInt())
+        .isEqualTo(1);
+    assertThat(
+            experienceNode
+                .get("declaredExperienceAssociationCountDTO")
+                .get("declaredSkillAssociationsCount")
+                .asInt())
+        .isEqualTo(1);
+  }
+
   @Test
   void shouldReturnNotFoundWhenUpdatingNonExistingExperience() throws Exception {
     BddLogger.given("a non existing declared experience id");

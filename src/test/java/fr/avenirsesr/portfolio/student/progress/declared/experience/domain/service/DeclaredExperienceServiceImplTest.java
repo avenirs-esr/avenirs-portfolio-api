@@ -9,11 +9,14 @@ import fr.avenirsesr.portfolio.association.domain.model.Association;
 import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.data.DeclaredExperienceAssociationCount;
+import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.data.DeclaredExperienceData;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.exception.DeclaredExperienceNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.enums.EExperienceType;
@@ -1016,51 +1019,48 @@ class DeclaredExperienceServiceImplTest {
   void getView_shouldDelegateToRepositoryAndReturnResult() {
     Student loggedIn = student;
     PageCriteria criteria = new PageCriteria(1, 8);
-    PagedResult<DeclaredExperience> expected = mock(PagedResult.class);
+    DeclaredExperience experience = mock(DeclaredExperience.class);
+    UUID experienceId = UUID.randomUUID();
+    when(experience.getId()).thenReturn(experienceId);
+    PagedResult<DeclaredExperience> repositoryResult =
+        new PagedResult<>(List.of(experience), new PageInfo(1, 8, 1));
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedIn);
-    when(experienceRepository.findAllByStudent(loggedIn, criteria, null, null))
-        .thenReturn(expected);
+    when(experienceRepository.findAllByStudent(loggedIn, criteria, (Boolean) null, null))
+        .thenReturn(repositoryResult);
 
-    PagedResult<DeclaredExperience> result = service.getView(criteria, null, null);
+    PagedResult<DeclaredExperienceData> result = service.getView(criteria, null, null);
 
-    assertSame(expected, result);
-    verify(experienceRepository).findAllByStudent(loggedIn, criteria, null, null);
+    assertSame(repositoryResult.pageInfo(), result.pageInfo());
+    assertEquals(
+        List.of(
+            new DeclaredExperienceData(experience, new DeclaredExperienceAssociationCount(0, 0))),
+        result.content());
+    verify(experienceRepository).findAllByStudent(loggedIn, criteria, (Boolean) null, null);
   }
 
   @Test
   void getView_shouldDelegateIsValorizedFilterToRepository() {
     Student loggedIn = student;
     PageCriteria criteria = new PageCriteria(1, 8);
-    PagedResult<DeclaredExperience> expected = mock(PagedResult.class);
+    DeclaredExperience experience = mock(DeclaredExperience.class);
+    UUID experienceId = UUID.randomUUID();
+    when(experience.getId()).thenReturn(experienceId);
+    PagedResult<DeclaredExperience> repositoryResult =
+        new PagedResult<>(List.of(experience), new PageInfo(1, 8, 1));
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedIn);
     when(experienceRepository.findAllByStudent(loggedIn, criteria, true, null))
-        .thenReturn(expected);
+        .thenReturn(repositoryResult);
 
-    PagedResult<DeclaredExperience> result = service.getView(criteria, true, null);
+    PagedResult<DeclaredExperienceData> result = service.getView(criteria, true, null);
 
-    assertSame(expected, result);
+    assertSame(repositoryResult.pageInfo(), result.pageInfo());
+    assertEquals(
+        List.of(
+            new DeclaredExperienceData(experience, new DeclaredExperienceAssociationCount(0, 0))),
+        result.content());
     verify(experienceRepository).findAllByStudent(loggedIn, criteria, true, null);
-  }
-
-  @Test
-  void getView_shouldDelegateExperienceTypeFilterToRepository() {
-    Student loggedIn = student;
-    PageCriteria criteria = new PageCriteria(1, 8);
-    PagedResult<DeclaredExperience> expected = mock(PagedResult.class);
-
-    when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedIn);
-    when(experienceRepository.findAllByStudent(
-            loggedIn, criteria, null, EExperienceType.PROFESSIONAL))
-        .thenReturn(expected);
-
-    PagedResult<DeclaredExperience> result =
-        service.getView(criteria, null, EExperienceType.PROFESSIONAL);
-
-    assertSame(expected, result);
-    verify(experienceRepository)
-        .findAllByStudent(loggedIn, criteria, null, EExperienceType.PROFESSIONAL);
   }
 
   @Test

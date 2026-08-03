@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.data.DeclaredExperienceAssociationsData;
+import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.data.DeclaredExperienceData;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.enums.EExperienceType;
 import java.time.LocalDate;
@@ -73,7 +74,7 @@ public interface DeclaredExperienceService {
 
   DeclaredExperience get(UUID experienceId);
 
-  PagedResult<DeclaredExperience> getView(
+  PagedResult<DeclaredExperienceData> getView(
       PageCriteria pageCriteria, Boolean isValorized, EExperienceType experienceType);
 
   List<DeclaredExperience> findAllByIds(List<UUID> experienceIds);

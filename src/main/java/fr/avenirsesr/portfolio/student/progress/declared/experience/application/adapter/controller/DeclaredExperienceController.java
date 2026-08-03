@@ -14,6 +14,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.experience.application.
 import fr.avenirsesr.portfolio.student.progress.declared.experience.application.adapter.dto.DeclaredExperienceRequest;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.application.adapter.dto.DeclaredExperienceViewDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.application.adapter.mapper.DeclaredExperienceMapper;
+import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.data.DeclaredExperienceData;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.enums.EExperienceType;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.port.input.DeclaredExperienceService;
@@ -75,7 +76,7 @@ public class DeclaredExperienceController {
       @Parameter(schema = @Schema(ref = "#/components/schemas/EExperienceType"))
           @RequestParam(required = false)
           EExperienceType experienceType) {
-    PagedResult<DeclaredExperience> pagedExperiences =
+    PagedResult<DeclaredExperienceData> pagedExperiences =
         declaredExperienceService.getView(
             new PageCriteria(page, pageSize), isValorized, experienceType);
 
