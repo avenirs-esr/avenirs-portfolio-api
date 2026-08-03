@@ -572,7 +572,7 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
 
     String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
     UUID traceId = createTraceAs("My trace", studentPayload, studentSignature);
-    UUID skillId = createDeclaredSkillProgressAs(12, studentPayload, studentSignature);
+    UUID skillId = createDeclaredSkillProgressAs(17, studentPayload, studentSignature);
 
     webTestClient
         .post()
