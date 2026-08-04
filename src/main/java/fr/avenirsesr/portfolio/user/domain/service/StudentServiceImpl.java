@@ -8,8 +8,7 @@ import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
-import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeCategory;
-import fr.avenirsesr.portfolio.selfknowledge.domain.port.input.SelfKnowledgeService;
+import fr.avenirsesr.portfolio.selfknowledge.domain.model.enums.ESelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.user.domain.data.UserProfileOverviewData;
 import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStudentException;
@@ -27,7 +26,6 @@ import lombok.extern.slf4j.Slf4j;
 public class StudentServiceImpl implements StudentService {
   private StudentRepository studentRepository;
   private UserRepository userRepository;
-  private SelfKnowledgeService selfKnowledgeService;
   private final LoggedInUserService loggedInUserService;
   private final FileResourceService fileResourceService;
 
@@ -78,18 +76,17 @@ public class StudentServiceImpl implements StudentService {
       userRepository.save(user);
     }
     studentRepository.save(student);
-    selfKnowledgeService.initSelfKnowledgeCategoriesMandatory(student);
     return student;
   }
 
   @Override
-  public void addSelfKnowledgeCategories(Student student, List<SelfKnowledgeCategory> categories) {
+  public void addSelfKnowledgeCategories(Student student, List<ESelfKnowledgeCategory> categories) {
     studentRepository.addSelfKnowledgeCategories(student, categories);
   }
 
   @Override
   public void removeSelfKnowledgeCategory(
-      Student student, SelfKnowledgeCategory selfKnowledgeCategory) {
+      Student student, ESelfKnowledgeCategory selfKnowledgeCategory) {
     studentRepository.removeSelfKnowledgeCategory(student, selfKnowledgeCategory);
   }
 

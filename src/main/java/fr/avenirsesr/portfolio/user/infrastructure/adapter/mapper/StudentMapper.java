@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.mapper.Mapper;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.mapper.FileMapper;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
+import java.util.List;
 
 public class StudentMapper implements Mapper<StudentEntity, Student> {
   public static final StudentMapper INSTANCE = new StudentMapper();
@@ -18,6 +19,7 @@ public class StudentMapper implements Mapper<StudentEntity, Student> {
         student.getGroupId(),
         student.getBio(),
         student.isHasUnseenNotification(),
+        student.getSelfKnowledgeCategories(),
         student.getCoverPicture().map(FileMapper.INSTANCE::fromDomain).orElse(null),
         student.getProfilePicture().map(FileMapper.INSTANCE::fromDomain).orElse(null),
         student.getCreatedAt(),
@@ -33,6 +35,9 @@ public class StudentMapper implements Mapper<StudentEntity, Student> {
         studentEntity.getGroupId(),
         studentEntity.getBio(),
         studentEntity.isHasUnseenNotification(),
+        studentEntity.getSelfKnowledgeCategories() == null
+            ? List.of()
+            : studentEntity.getSelfKnowledgeCategories(),
         studentEntity.getCoverPicture() == null
             ? null
             : FileMapper.INSTANCE.toDomain(studentEntity.getCoverPicture()),
@@ -53,6 +58,9 @@ public class StudentMapper implements Mapper<StudentEntity, Student> {
         studentEntity.getGroupId(),
         studentEntity.getBio(),
         studentEntity.isHasUnseenNotification(),
+        studentEntity.getSelfKnowledgeCategories() == null
+            ? List.of()
+            : studentEntity.getSelfKnowledgeCategories(),
         studentEntity.getCoverPicture() == null || !attributes.contains("coverPicture")
             ? null
             : FileMapper.INSTANCE.toDomain(studentEntity.getCoverPicture()),

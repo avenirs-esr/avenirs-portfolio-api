@@ -3,21 +3,22 @@ package fr.avenirsesr.portfolio.selfknowledge.domain.port.input;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.selfknowledge.domain.data.SelfKnowledgeElementDetails;
-import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeElement;
-import fr.avenirsesr.portfolio.selfknowledge.domain.model.enums.ESelfKnowledgeCategoryType;
-import fr.avenirsesr.portfolio.user.domain.model.Student;
+import fr.avenirsesr.portfolio.selfknowledge.domain.model.enums.ESelfKnowledgeCategory;
 import java.util.List;
 import java.util.UUID;
 
 public interface SelfKnowledgeService {
   PagedResult<SelfKnowledgeElement> getSelfKnowledgeElements(
-      UUID selfKnowledgeCategoryId, PageCriteria pageCriteria, Boolean isValorized);
+      ESelfKnowledgeCategory selfKnowledgeCategory, PageCriteria pageCriteria, Boolean isValorized);
 
   SelfKnowledgeElementDetails getSelfKnowledgeElementDetails(UUID selfKnowledgeElementId);
 
   SelfKnowledgeElement createSelfKnowledgeElement(
-      UUID selfKnowledgeCategoryId, String title, String description, Integer rating);
+      ESelfKnowledgeCategory selfKnowledgeCategory,
+      String title,
+      String description,
+      Integer rating);
 
   SelfKnowledgeElement updateSelfKnowledgeElement(
       UUID selfKnowledgeElementId,
@@ -28,23 +29,11 @@ public interface SelfKnowledgeService {
 
   void deleteSelfKnowledgeElements(List<UUID> selfKnowledgeElementIds);
 
-  List<SelfKnowledgeCategory> getSelfKnowledgeCategories();
+  List<ESelfKnowledgeCategory> getSelfKnowledgeCategories();
 
-  void initSelfKnowledgeCategoriesMandatory(Student student);
+  List<ESelfKnowledgeCategory> getSelfKnowledgeCategoriesAvailable();
 
-  List<SelfKnowledgeCategory> getSelfKnowledgeCategoriesAvailable();
+  void addSelfKnowledgeCategories(List<ESelfKnowledgeCategory> categories);
 
-  void addSelfKnowledgeCategories(List<String> categoriesId);
-
-  void removeSelfKnowledgeCategory(UUID categoryId);
-
-  SelfKnowledgeCategory createSelfKnowledgeCategory(
-      UUID id,
-      String title,
-      String description,
-      ESelfKnowledgeCategoryType type,
-      boolean isMandatory);
-
-  SelfKnowledgeCategory updateSelfKnowledgeCategory(
-      UUID categoryId, String title, String description);
+  void removeSelfKnowledgeCategory(ESelfKnowledgeCategory selfKnowledgeCategory);
 }

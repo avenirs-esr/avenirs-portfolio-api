@@ -13,6 +13,7 @@ import fr.avenirsesr.portfolio.selfknowledge.application.adapter.mapper.SelfKnow
 import fr.avenirsesr.portfolio.selfknowledge.application.adapter.mapper.SelfKnowledgeElementViewMapper;
 import fr.avenirsesr.portfolio.selfknowledge.domain.data.SelfKnowledgeElementDetails;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeElement;
+import fr.avenirsesr.portfolio.selfknowledge.domain.model.enums.ESelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.input.SelfKnowledgeService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -40,22 +41,22 @@ public class SelfKnowledgeController {
   private final SelfKnowledgeElementDetailsMapper selfKnowledgeElementDetailsMapper;
   private final SelfKnowledgeElementViewMapper selfKnowledgeElementViewMapper;
 
-  @GetMapping("/{selfKnowledgeCategoryId}/elements")
+  @GetMapping("/{selfKnowledgeCategory}/elements")
   public ResponseEntity<PagedResponse<SelfKnowledgeElementViewDTO>> getSelfKnowledgeElements(
-      @PathVariable("selfKnowledgeCategoryId") UUID selfKnowledgeCategoryId,
+      @PathVariable ESelfKnowledgeCategory selfKnowledgeCategory,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize,
       @RequestParam(required = false) Boolean isValorized) {
     log.debug(
         "Received request to get elements of self knowledge category [{}], with"
             + " pagination (page={}, pageSize={}, isValorized={})",
-        selfKnowledgeCategoryId,
+        selfKnowledgeCategory,
         page,
         pageSize,
         isValorized);
     PagedResult<SelfKnowledgeElement> selfKnowledgeElementPagedResult =
         selfKnowledgeService.getSelfKnowledgeElements(
-            selfKnowledgeCategoryId, new PageCriteria(page, pageSize), isValorized);
+            selfKnowledgeCategory, new PageCriteria(page, pageSize), isValorized);
 
     return ResponseEntity.ok(
         new PagedResponse<>(
@@ -78,18 +79,18 @@ public class SelfKnowledgeController {
         selfKnowledgeElementDetailsMapper.toDTO(selfKnowledgeElement.selfKnowledgeElement()));
   }
 
-  @PostMapping("/{selfKnowledgeCategoryId}/elements")
+  @PostMapping("/{selfKnowledgeCategory}/elements")
   public ResponseEntity<SelfKnowledgeElementViewDTO> createSelfKnowledgeElement(
-      @PathVariable("selfKnowledgeCategoryId") UUID selfKnowledgeCategoryId,
+      @PathVariable("selfKnowledgeCategory") ESelfKnowledgeCategory selfKnowledgeCategory,
       @Valid @RequestBody SelfKnowledgeElementRequest selfKnowledgeElementRequest) {
     log.debug(
         "Received request to create self knowledge element [{}] to category [{}]",
         selfKnowledgeElementRequest,
-        selfKnowledgeCategoryId);
+        selfKnowledgeCategory);
 
     SelfKnowledgeElement selfKnowledgeElement =
         selfKnowledgeService.createSelfKnowledgeElement(
-            selfKnowledgeCategoryId,
+            selfKnowledgeCategory,
             selfKnowledgeElementRequest.title(),
             selfKnowledgeElementRequest.description(),
             selfKnowledgeElementRequest.rating());
@@ -133,7 +134,8 @@ public class SelfKnowledgeController {
   }
 
   @PostMapping("/categories")
-  public ResponseEntity<String> addSelfKnowledgeCategories(@RequestBody List<String> categories) {
+  public ResponseEntity<String> addSelfKnowledgeCategories(
+      @RequestBody List<ESelfKnowledgeCategory> categories) {
     selfKnowledgeService.addSelfKnowledgeCategories(categories);
     return ResponseEntity.ok("Categories successfully associated with user");
   }
@@ -146,9 +148,10 @@ public class SelfKnowledgeController {
             .toList());
   }
 
-  @DeleteMapping("/categories/{categoryId}")
-  public ResponseEntity<String> removeSelfKnowledgeCategory(@PathVariable UUID categoryId) {
-    selfKnowledgeService.removeSelfKnowledgeCategory(categoryId);
+  @DeleteMapping("/categories/{selfKnowledgeCategory}")
+  public ResponseEntity<String> removeSelfKnowledgeCategory(
+      @PathVariable ESelfKnowledgeCategory selfKnowledgeCategory) {
+    selfKnowledgeService.removeSelfKnowledgeCategory(selfKnowledgeCategory);
     return ResponseEntity.ok("Categories successfully deleted");
   }
 }

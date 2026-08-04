@@ -4,6 +4,7 @@ import static fr.avenirsesr.portfolio.common.validation.domain.constraints.Field
 import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.TITLE_LENGTH;
 
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
+import fr.avenirsesr.portfolio.selfknowledge.domain.model.enums.ESelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
@@ -18,9 +19,7 @@ import lombok.Setter;
 @Table(
     name = "self_knowledge_element",
     indexes = {
-      @Index(
-          name = "idx_ske_student_category",
-          columnList = "student_id, self_knowledge_category_id")
+      @Index(name = "idx_ske_student_category", columnList = "student_id, self_knowledge_category")
     })
 @NoArgsConstructor
 @Getter
@@ -42,9 +41,9 @@ public class SelfKnowledgeElementEntity extends AvenirsBaseEntity {
   @Max(5)
   private Integer rating;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "self_knowledge_category_id", nullable = false)
-  private SelfKnowledgeCategoryEntity selfKnowledgeCategory;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "self_knowledge_category", nullable = false)
+  private ESelfKnowledgeCategory selfKnowledgeCategory;
 
   @Column(nullable = false)
   private boolean valorized;
@@ -55,7 +54,7 @@ public class SelfKnowledgeElementEntity extends AvenirsBaseEntity {
       String title,
       String description,
       Integer rating,
-      SelfKnowledgeCategoryEntity selfKnowledgeCategory,
+      ESelfKnowledgeCategory selfKnowledgeCategory,
       boolean valorized,
       Instant createdAt,
       Instant updatedAt) {
@@ -76,7 +75,7 @@ public class SelfKnowledgeElementEntity extends AvenirsBaseEntity {
       String title,
       String description,
       Integer rating,
-      SelfKnowledgeCategoryEntity selfKnowledgeCategory,
+      ESelfKnowledgeCategory selfKnowledgeCategory,
       boolean valorized,
       Instant createdAt,
       Instant updatedAt) {

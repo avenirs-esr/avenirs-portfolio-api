@@ -3,7 +3,10 @@ package fr.avenirsesr.portfolio.user.domain.model;
 import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.file.domain.model.File;
+import fr.avenirsesr.portfolio.selfknowledge.domain.model.enums.ESelfKnowledgeCategory;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -27,6 +30,8 @@ public class Student extends AvenirsBaseModel {
 
   private boolean hasUnseenNotification;
 
+  private List<ESelfKnowledgeCategory> selfKnowledgeCategories;
+
   @Getter(AccessLevel.NONE)
   private File coverPicture;
 
@@ -40,6 +45,7 @@ public class Student extends AvenirsBaseModel {
       UUID groupId,
       String bio,
       boolean hasUnseenNotification,
+      List<ESelfKnowledgeCategory> selfKnowledgeCategories,
       File coverPicture,
       File profilePicture,
       Instant createdAt,
@@ -51,6 +57,7 @@ public class Student extends AvenirsBaseModel {
     this.groupId = groupId;
     this.bio = bio;
     this.hasUnseenNotification = hasUnseenNotification;
+    this.selfKnowledgeCategories = selfKnowledgeCategories;
     this.coverPicture = coverPicture;
     this.profilePicture = profilePicture;
   }
@@ -64,6 +71,7 @@ public class Student extends AvenirsBaseModel {
         groupId,
         bio,
         false,
+        new ArrayList<>(),
         null,
         null,
         Instant.now(),
@@ -77,6 +85,7 @@ public class Student extends AvenirsBaseModel {
       UUID groupId,
       String bio,
       boolean hasUnseenNotification,
+      List<ESelfKnowledgeCategory> selfKnowledgeCategories,
       File coverPicture,
       File profilePicture,
       Instant createdAt,
@@ -88,6 +97,7 @@ public class Student extends AvenirsBaseModel {
         groupId,
         bio,
         hasUnseenNotification,
+        selfKnowledgeCategories,
         coverPicture,
         profilePicture,
         createdAt,

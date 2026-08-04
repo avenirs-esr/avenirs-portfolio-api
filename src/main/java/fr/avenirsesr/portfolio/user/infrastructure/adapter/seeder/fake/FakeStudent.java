@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.user.domain.port.output.seeder.UserDataGenerator;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.time.Instant;
+import java.util.ArrayList;
 
 public class FakeStudent {
   private static final DataGeneratorProvider<StudentDataGenerator> studentDataGenerator =
@@ -29,6 +30,7 @@ public class FakeStudent {
             null,
             studentDataGenerator.with("student-bio").studentDescription(),
             false,
+            new ArrayList<>(),
             null,
             null,
             Instant.now(),

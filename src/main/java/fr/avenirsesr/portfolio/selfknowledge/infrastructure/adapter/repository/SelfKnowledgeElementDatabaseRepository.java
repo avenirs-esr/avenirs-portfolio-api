@@ -3,10 +3,9 @@ package fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.repository;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
-import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeElement;
+import fr.avenirsesr.portfolio.selfknowledge.domain.model.enums.ESelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.output.repository.SelfKnowledgeElementRepository;
-import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.mapper.SelfKnowledgeCategoryMapper;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.mapper.SelfKnowledgeElementMapper;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.model.SelfKnowledgeElementEntity;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.specification.SelfKnowledgeElementSpecification;
@@ -35,25 +34,23 @@ public class SelfKnowledgeElementDatabaseRepository
   }
 
   @Override
-  public PagedResult<SelfKnowledgeElement> findAllByStudentIdAndCategoryId(
+  public PagedResult<SelfKnowledgeElement> findAllByStudentIdAndCategory(
       UUID studentId,
-      UUID selfKnowledgeCategoryId,
+      ESelfKnowledgeCategory selfKnowledgeCategory,
       PageCriteria pageCriteria,
       Boolean isValorized) {
     Specification<SelfKnowledgeElementEntity> spec =
         SelfKnowledgeElementSpecification.hasStudentId(studentId)
-            .and(
-                SelfKnowledgeElementSpecification.hasSelfKnowledgeCategoryId(
-                    selfKnowledgeCategoryId))
+            .and(SelfKnowledgeElementSpecification.hasSelfKnowledgeCategory(selfKnowledgeCategory))
             .and(SelfKnowledgeElementSpecification.isValorized(isValorized));
     return findAll(spec, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()));
   }
 
   @Override
   @Transactional
-  public void deleteAllByStudentAndCategory(Student student, SelfKnowledgeCategory category) {
+  public void deleteAllByStudentAndCategory(
+      Student student, ESelfKnowledgeCategory selfKnowledgeCategory) {
     jpaRepository.deleteByStudentAndSelfKnowledgeCategory(
-        StudentMapper.INSTANCE.fromDomain(student),
-        SelfKnowledgeCategoryMapper.INSTANCE.fromDomain(category));
+        StudentMapper.INSTANCE.fromDomain(student), selfKnowledgeCategory);
   }
 }

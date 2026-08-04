@@ -2,8 +2,11 @@ package fr.avenirsesr.portfolio.user.infrastructure.fixture;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.file.domain.model.File;
+import fr.avenirsesr.portfolio.selfknowledge.domain.model.enums.ESelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class StudentFixture {
@@ -15,6 +18,7 @@ public class StudentFixture {
   private File profilePicture;
   private File coverPicture;
   private boolean hasUnseenNotification;
+  private List<ESelfKnowledgeCategory> selfKnowledgeCategories;
   private Instant createdAt;
   private Instant updatedAt;
 
@@ -23,6 +27,7 @@ public class StudentFixture {
     this.id = user.getId();
     this.bio = "this is my student bio";
     this.hasUnseenNotification = false;
+    this.selfKnowledgeCategories = new ArrayList<>();
     this.createdAt = Instant.now();
     this.updatedAt = Instant.now();
   }
@@ -72,6 +77,12 @@ public class StudentFixture {
     return this;
   }
 
+  public StudentFixture withSelfKnowledgeCategories(
+      List<ESelfKnowledgeCategory> selfKnowledgeCategories) {
+    this.selfKnowledgeCategories = selfKnowledgeCategories;
+    return this;
+  }
+
   public Student toModel() {
     return Student.toDomain(
         user,
@@ -80,6 +91,7 @@ public class StudentFixture {
         groupId,
         bio,
         hasUnseenNotification,
+        selfKnowledgeCategories,
         coverPicture,
         profilePicture,
         createdAt,

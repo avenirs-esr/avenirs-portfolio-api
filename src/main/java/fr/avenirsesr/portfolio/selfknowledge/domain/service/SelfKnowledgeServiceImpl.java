@@ -10,20 +10,18 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.data.SelfKnowledgeElementDetails;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.*;
-import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeElement;
-import fr.avenirsesr.portfolio.selfknowledge.domain.model.enums.ESelfKnowledgeCategoryType;
+import fr.avenirsesr.portfolio.selfknowledge.domain.model.enums.ESelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.input.SelfKnowledgeService;
-import fr.avenirsesr.portfolio.selfknowledge.domain.port.output.repository.SelfKnowledgeCategoryRepository;
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.output.repository.SelfKnowledgeElementRepository;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
+import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,20 +30,17 @@ import lombok.extern.slf4j.Slf4j;
 public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
   private final StudentService studentService;
   private final SelfKnowledgeElementRepository selfKnowledgeElementRepository;
-  private final SelfKnowledgeCategoryRepository selfKnowledgeCategoryRepository;
   private final LoggedInUserService loggedInUserService;
 
   @Override
   public PagedResult<SelfKnowledgeElement> getSelfKnowledgeElements(
-      UUID selfKnowledgeCategoryId, PageCriteria pageCriteria, Boolean isValorized) {
+      ESelfKnowledgeCategory selfKnowledgeCategory,
+      PageCriteria pageCriteria,
+      Boolean isValorized) {
     Student student = loggedInUserService.getLoggedInStudent();
 
-    selfKnowledgeCategoryRepository
-        .findById(selfKnowledgeCategoryId)
-        .orElseThrow(SelfKnowledgeCategoryNotFoundException::new);
-
-    return selfKnowledgeElementRepository.findAllByStudentIdAndCategoryId(
-        student.getId(), selfKnowledgeCategoryId, pageCriteria, isValorized);
+    return selfKnowledgeElementRepository.findAllByStudentIdAndCategory(
+        student.getId(), selfKnowledgeCategory, pageCriteria, isValorized);
   }
 
   @Override
@@ -66,17 +61,15 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
 
   @Override
   public SelfKnowledgeElement createSelfKnowledgeElement(
-      UUID selfKnowledgeCategoryId, String title, String description, Integer rating) {
+      ESelfKnowledgeCategory selfKnowledgeCategory,
+      String title,
+      String description,
+      Integer rating) {
     Student student = loggedInUserService.getLoggedInStudent();
 
     checkTitleField(title);
     checkDescriptionField(description);
     checkRating(rating);
-
-    SelfKnowledgeCategory selfKnowledgeCategory =
-        selfKnowledgeCategoryRepository
-            .findById(selfKnowledgeCategoryId)
-            .orElseThrow(SelfKnowledgeCategoryNotFoundException::new);
 
     SelfKnowledgeElement selfKnowledgeElement =
         SelfKnowledgeElement.create(
@@ -129,8 +122,8 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
       throw new UserNotAuthorizedException();
     }
 
-    List<SelfKnowledgeCategory> categories =
-        selfKnowledgeElements.stream().map(element -> element.getSelfKnowledgeCategory()).toList();
+    List<ESelfKnowledgeCategory> categories =
+        selfKnowledgeElements.stream().map(SelfKnowledgeElement::getSelfKnowledgeCategory).toList();
 
     boolean allEqual = categories.size() <= 1 || categories.stream().distinct().count() == 1;
 
@@ -142,96 +135,48 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
   }
 
   @Override
-  public List<SelfKnowledgeCategory> getSelfKnowledgeCategories() {
+  public List<ESelfKnowledgeCategory> getSelfKnowledgeCategories() {
     Student student = loggedInUserService.getLoggedInStudent();
-    return selfKnowledgeCategoryRepository.findAllByStudent(student).stream()
-        .sorted(Comparator.comparing(c -> c.getType().getOrder()))
+    return Stream.concat(
+            student.getSelfKnowledgeCategories().stream(),
+            Arrays.stream(ESelfKnowledgeCategory.values())
+                .filter(ESelfKnowledgeCategory::isMandatory))
+        .distinct()
+        .sorted(Comparator.comparing(ESelfKnowledgeCategory::getOrder))
         .toList();
   }
 
   @Override
-  public List<SelfKnowledgeCategory> getSelfKnowledgeCategoriesAvailable() {
+  public List<ESelfKnowledgeCategory> getSelfKnowledgeCategoriesAvailable() {
     Student student = loggedInUserService.getLoggedInStudent();
-    return selfKnowledgeCategoryRepository.findAllAvailableByStudent(student).stream()
-        .sorted(Comparator.comparing(c -> c.getType().getOrder()))
+    return Arrays.stream(ESelfKnowledgeCategory.values())
+        .filter(category -> !category.isMandatory())
+        .filter(category -> !student.getSelfKnowledgeCategories().contains(category))
+        .sorted(Comparator.comparing(ESelfKnowledgeCategory::getOrder))
         .toList();
   }
 
   @Override
-  public void addSelfKnowledgeCategories(List<String> categories) {
+  public void addSelfKnowledgeCategories(List<ESelfKnowledgeCategory> categories) {
     Student student = loggedInUserService.getLoggedInStudent();
-    List<UUID> categoryIds = categories.stream().map(UUID::fromString).toList();
-    if (categoryIds.isEmpty()) {
+    if (categories.isEmpty()) {
       throw new SelfKnowledgeCategoryListIsEmptyException();
     }
-    List<SelfKnowledgeCategory> categoriesToAssociate =
-        getAvailableCategoriesToAdd(student, categoryIds);
-    if (categoriesToAssociate.isEmpty()) {
-      throw new SelfKnowledgeCategoryNotFoundException();
+    List<ESelfKnowledgeCategory> available = getSelfKnowledgeCategoriesAvailable();
+    if (!available.containsAll(categories)) {
+      throw new SelfKnowledgeCategoryNotAvailableException();
     }
-    studentService.addSelfKnowledgeCategories(student, categoriesToAssociate);
+    studentService.addSelfKnowledgeCategories(student, categories);
   }
 
   @Override
-  public void initSelfKnowledgeCategoriesMandatory(Student student) {
-    var mandatoryCategories = selfKnowledgeCategoryRepository.findAllMandatory();
-    studentService.addSelfKnowledgeCategories(student, mandatoryCategories);
-  }
-
-  @Override
-  public void removeSelfKnowledgeCategory(UUID categoryId) {
+  public void removeSelfKnowledgeCategory(ESelfKnowledgeCategory selfKnowledgeCategory) {
     Student student = loggedInUserService.getLoggedInStudent();
-    SelfKnowledgeCategory selfKnowledgeCategory =
-        selfKnowledgeCategoryRepository
-            .findById(categoryId)
-            .orElseThrow(SelfKnowledgeCategoryNotFoundException::new);
     if (selfKnowledgeCategory.isMandatory()) {
       throw new SelfKnowledgeCategoryIsMandatoryException();
     }
     selfKnowledgeElementRepository.deleteAllByStudentAndCategory(student, selfKnowledgeCategory);
     studentService.removeSelfKnowledgeCategory(student, selfKnowledgeCategory);
-  }
-
-  @Override
-  public SelfKnowledgeCategory createSelfKnowledgeCategory(
-      UUID id,
-      String title,
-      String description,
-      ESelfKnowledgeCategoryType type,
-      boolean isMandatory) {
-    var category = SelfKnowledgeCategory.create(id, title, description, type, isMandatory);
-    selfKnowledgeCategoryRepository.save(category);
-    return category;
-  }
-
-  @Override
-  public SelfKnowledgeCategory updateSelfKnowledgeCategory(
-      UUID categoryId, String title, String description) {
-    var category =
-        selfKnowledgeCategoryRepository
-            .findById(categoryId)
-            .orElseThrow(SelfKnowledgeCategoryNotFoundException::new);
-    category.setTitle(title);
-    category.setDescription(description);
-    selfKnowledgeCategoryRepository.save(category);
-    return category;
-  }
-
-  private List<SelfKnowledgeCategory> getAvailableCategoriesToAdd(
-      Student student, List<UUID> categoryIds) {
-    List<SelfKnowledgeCategory> availableCategories =
-        selfKnowledgeCategoryRepository.findAllAvailableByStudent(student);
-    Set<UUID> requestedIds = new HashSet<>(categoryIds);
-    Set<UUID> availableIds =
-        availableCategories.stream()
-            .map(SelfKnowledgeCategory::getId)
-            .collect(java.util.stream.Collectors.toSet());
-    if (!availableIds.containsAll(requestedIds)) {
-      throw new SelfKnowledgeCategoryNotAvailableException();
-    }
-    return availableCategories.stream()
-        .filter(category -> requestedIds.contains(category.getId()))
-        .toList();
   }
 
   private static void checkTitleField(String title) {

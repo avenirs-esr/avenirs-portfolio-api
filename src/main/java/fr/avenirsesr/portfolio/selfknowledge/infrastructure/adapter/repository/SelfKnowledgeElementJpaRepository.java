@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.repository;
 
-import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.model.SelfKnowledgeCategoryEntity;
+import fr.avenirsesr.portfolio.selfknowledge.domain.model.enums.ESelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.model.SelfKnowledgeElementEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import java.util.UUID;
@@ -11,5 +11,5 @@ public interface SelfKnowledgeElementJpaRepository
     extends JpaRepository<SelfKnowledgeElementEntity, UUID>,
         JpaSpecificationExecutor<SelfKnowledgeElementEntity> {
   void deleteByStudentAndSelfKnowledgeCategory(
-      StudentEntity student, SelfKnowledgeCategoryEntity category);
+      StudentEntity student, ESelfKnowledgeCategory selfKnowledgeCategory);
 }

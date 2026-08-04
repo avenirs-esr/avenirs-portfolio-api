@@ -5,7 +5,6 @@ import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
-import fr.avenirsesr.portfolio.selfknowledge.domain.port.input.SelfKnowledgeService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
@@ -24,7 +23,6 @@ class StudentServiceImplTest {
 
   @Mock private StudentRepository studentRepository;
   @Mock private UserRepository userRepository;
-  @Mock private SelfKnowledgeService selfKnowledgeService;
   @Mock private LoggedInUserService loggedInUserService;
   @Mock private FileResourceService fileResourceService;
 
@@ -34,11 +32,7 @@ class StudentServiceImplTest {
   void setUp() {
     studentService =
         new StudentServiceImpl(
-            studentRepository,
-            userRepository,
-            selfKnowledgeService,
-            loggedInUserService,
-            fileResourceService);
+            studentRepository, userRepository, loggedInUserService, fileResourceService);
   }
 
   @Nested

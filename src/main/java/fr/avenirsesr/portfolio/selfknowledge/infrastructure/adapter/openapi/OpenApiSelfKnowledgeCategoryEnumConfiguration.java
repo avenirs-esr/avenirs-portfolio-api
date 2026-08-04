@@ -11,7 +11,7 @@ public class OpenApiSelfKnowledgeCategoryEnumConfiguration {
     return openApi -> {
       openApi
           .getComponents()
-          .addSchemas("ESelfKnowledgeCategoryType", SwaggerSchema.selfKnowledgeCategoryTypeSchema);
+          .addSchemas("ESelfKnowledgeCategory", SwaggerSchema.selfKnowledgeCategoryTypeSchema);
     };
   }
 }

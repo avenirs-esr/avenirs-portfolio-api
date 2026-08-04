@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.common.utils.FileReader;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestData;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeElement;
+import fr.avenirsesr.portfolio.selfknowledge.domain.model.enums.ESelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.input.SelfKnowledgeService;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.mapper.SelfKnowledgeElementMapper;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.model.SelfKnowledgeElementEntity;
@@ -47,7 +48,10 @@ public class SelfKnowledgeElementSeeder {
 
           elements.add(
               selfKnowledgeService.createSelfKnowledgeElement(
-                  element.categoryId(), element.title(), element.description(), element.rating()));
+                  ESelfKnowledgeCategory.valueOf(element.category()),
+                  element.title(),
+                  element.description(),
+                  element.rating()));
         });
 
     log.info("✔ {} studentSelfKnowledgeElements created", elements.size());

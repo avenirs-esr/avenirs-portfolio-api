@@ -4,12 +4,12 @@ import static fr.avenirsesr.portfolio.common.validation.domain.constraints.Field
 
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
-import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.model.SelfKnowledgeCategoryEntity;
+import fr.avenirsesr.portfolio.selfknowledge.domain.model.enums.ESelfKnowledgeCategory;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -39,12 +39,9 @@ public class StudentEntity extends AvenirsBaseEntity {
   @Column(name = "has_unseen_notification", nullable = false)
   private boolean hasUnseenNotification;
 
-  @ManyToMany
-  @JoinTable(
-      name = "student_self_knowledge_category",
-      joinColumns = @JoinColumn(name = "student_id"),
-      inverseJoinColumns = @JoinColumn(name = "category_id"))
-  private Set<SelfKnowledgeCategoryEntity> selfKnowledgeCategories = new HashSet<>();
+  @Convert(converter = SelfKnowledgeCategoryListJsonConverter.class)
+  @Column(name = "self_knowledge_categories", columnDefinition = "TEXT")
+  private List<ESelfKnowledgeCategory> selfKnowledgeCategories = new ArrayList<>();
 
   @OneToOne
   @JoinColumn(name = "cover_picture_id")
@@ -62,6 +59,7 @@ public class StudentEntity extends AvenirsBaseEntity {
       UUID groupId,
       String bio,
       boolean hasUnseenNotification,
+      List<ESelfKnowledgeCategory> selfKnowledgeCategories,
       FileEntity coverPicture,
       FileEntity profilePicture,
       Instant createdAt,
@@ -73,6 +71,7 @@ public class StudentEntity extends AvenirsBaseEntity {
     this.institutionId = institutionId;
     this.groupId = groupId;
     this.hasUnseenNotification = hasUnseenNotification;
+    this.selfKnowledgeCategories = selfKnowledgeCategories;
     this.coverPicture = coverPicture;
     this.profilePicture = profilePicture;
     setCreatedAt(createdAt);
@@ -86,6 +85,7 @@ public class StudentEntity extends AvenirsBaseEntity {
       UUID groupId,
       String bio,
       boolean hasUnseenNotification,
+      List<ESelfKnowledgeCategory> selfKnowledgeCategories,
       FileEntity coverPicture,
       FileEntity profilePicture,
       Instant createdAt,
@@ -98,6 +98,7 @@ public class StudentEntity extends AvenirsBaseEntity {
         groupId,
         bio,
         hasUnseenNotification,
+        selfKnowledgeCategories,
         coverPicture,
         profilePicture,
         createdAt,
