@@ -2,30 +2,31 @@
 
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.enums.ESelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.model.SelfKnowledgeElementEntity;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.domain.Specification;
 
-<span class="nc" id="L8">public class SelfKnowledgeElementSpecification {</span>
+<span class="nc" id="L9">public class SelfKnowledgeElementSpecification {</span>
 
   public static Specification&lt;SelfKnowledgeElementEntity&gt; hasStudentId(UUID studentId) {
-<span class="fc" id="L11">    return (root, query, cb) -&gt;</span>
-<span class="pc bpc" id="L12" title="1 of 2 branches missed.">        studentId == null ? null : cb.equal(root.get(&quot;student&quot;).get(&quot;id&quot;), studentId);</span>
+<span class="fc" id="L12">    return (root, query, cb) -&gt;</span>
+<span class="pc bpc" id="L13" title="1 of 2 branches missed.">        studentId == null ? null : cb.equal(root.get(&quot;student&quot;).get(&quot;id&quot;), studentId);</span>
   }
 
-  public static Specification&lt;SelfKnowledgeElementEntity&gt; hasSelfKnowledgeCategory(
-      ESelfKnowledgeCategory selfKnowledgeCategory) {
-<span class="fc" id="L17">    return (root, query, cb) -&gt;</span>
-<span class="pc bpc" id="L18" title="1 of 2 branches missed.">        selfKnowledgeCategory == null</span>
-<span class="nc" id="L19">            ? null</span>
-<span class="fc" id="L20">            : cb.equal(root.get(&quot;selfKnowledgeCategory&quot;), selfKnowledgeCategory);</span>
+  public static Specification&lt;SelfKnowledgeElementEntity&gt; hasSelfKnowledgeCategoryIn(
+      List&lt;ESelfKnowledgeCategory&gt; selfKnowledgeCategories) {
+<span class="fc" id="L18">    return (root, query, cb) -&gt;</span>
+<span class="pc bpc" id="L19" title="2 of 4 branches missed.">        selfKnowledgeCategories == null || selfKnowledgeCategories.isEmpty()</span>
+<span class="nc" id="L20">            ? null</span>
+<span class="fc" id="L21">            : root.get(&quot;selfKnowledgeCategory&quot;).in(selfKnowledgeCategories);</span>
   }
 
   public static Specification&lt;SelfKnowledgeElementEntity&gt; isValorized(Boolean isValorized) {
-<span class="fc" id="L24">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="pc bpc" id="L25" title="1 of 2 branches missed.">      if (isValorized == null) {</span>
-<span class="nc" id="L26">        return criteriaBuilder.conjunction();</span>
+<span class="fc" id="L25">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="fc bfc" id="L26" title="All 2 branches covered.">      if (isValorized == null) {</span>
+<span class="fc" id="L27">        return criteriaBuilder.conjunction();</span>
       }
-<span class="fc" id="L28">      return criteriaBuilder.equal(root.get(&quot;valorized&quot;), isValorized);</span>
+<span class="fc" id="L29">      return criteriaBuilder.equal(root.get(&quot;valorized&quot;), isValorized);</span>
     };
   }
 }
