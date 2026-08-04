@@ -1,31 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SelfKnowledgeElementSpecification.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.specification</a> &gt; <span class="el_source">SelfKnowledgeElementSpecification.java</span></div><h1>SelfKnowledgeElementSpecification.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.specification;
 
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.model.SelfKnowledgeElementEntity;
-import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.domain.Specification;
 
-<span class="nc" id="L8">public class SelfKnowledgeElementSpecification {</span>
+<span class="nc" id="L7">public class SelfKnowledgeElementSpecification {</span>
 
   public static Specification&lt;SelfKnowledgeElementEntity&gt; hasStudentId(UUID studentId) {
-<span class="fc" id="L11">    return (root, query, cb) -&gt;</span>
-<span class="pc bpc" id="L12" title="1 of 2 branches missed.">        studentId == null ? null : cb.equal(root.get(&quot;student&quot;).get(&quot;id&quot;), studentId);</span>
+<span class="fc" id="L10">    return (root, query, cb) -&gt;</span>
+<span class="pc bpc" id="L11" title="1 of 2 branches missed.">        studentId == null ? null : cb.equal(root.get(&quot;student&quot;).get(&quot;id&quot;), studentId);</span>
   }
 
-  public static Specification&lt;SelfKnowledgeElementEntity&gt; hasSelfKnowledgeCategoryIdIn(
-      List&lt;UUID&gt; categoryIds) {
-<span class="fc" id="L17">    return (root, query, cb) -&gt;</span>
-<span class="pc bpc" id="L18" title="2 of 4 branches missed.">        categoryIds == null || categoryIds.isEmpty()</span>
-<span class="nc" id="L19">            ? null</span>
-<span class="fc" id="L20">            : root.get(&quot;selfKnowledgeCategory&quot;).get(&quot;id&quot;).in(categoryIds);</span>
+  public static Specification&lt;SelfKnowledgeElementEntity&gt; hasSelfKnowledgeCategoryId(
+      UUID categoryId) {
+<span class="fc" id="L16">    return (root, query, cb) -&gt;</span>
+<span class="pc bpc" id="L17" title="1 of 2 branches missed.">        categoryId == null</span>
+<span class="nc" id="L18">            ? null</span>
+<span class="fc" id="L19">            : cb.equal(root.get(&quot;selfKnowledgeCategory&quot;).get(&quot;id&quot;), categoryId);</span>
   }
 
   public static Specification&lt;SelfKnowledgeElementEntity&gt; isValorized(Boolean isValorized) {
-<span class="fc" id="L24">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="fc bfc" id="L25" title="All 2 branches covered.">      if (isValorized == null) {</span>
-<span class="fc" id="L26">        return criteriaBuilder.conjunction();</span>
+<span class="fc" id="L23">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="pc bpc" id="L24" title="1 of 2 branches missed.">      if (isValorized == null) {</span>
+<span class="nc" id="L25">        return criteriaBuilder.conjunction();</span>
       }
-<span class="fc" id="L28">      return criteriaBuilder.equal(root.get(&quot;valorized&quot;), isValorized);</span>
+<span class="fc" id="L27">      return criteriaBuilder.equal(root.get(&quot;valorized&quot;), isValorized);</span>
     };
   }
 }
