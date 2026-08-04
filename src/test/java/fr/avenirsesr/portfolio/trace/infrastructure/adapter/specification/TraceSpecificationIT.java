@@ -19,6 +19,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.*;
 import jakarta.transaction.Transactional;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -214,6 +215,7 @@ class TraceSpecificationIT extends ContainerConfigurationTest {
             null,
             "student",
             false,
+            new ArrayList<>(),
             null,
             null,
             Instant.now(),

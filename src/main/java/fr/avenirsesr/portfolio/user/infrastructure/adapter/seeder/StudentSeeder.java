@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.ESeederSource;
 import fr.avenirsesr.portfolio.common.utils.FileReader;
 import fr.avenirsesr.portfolio.common.validation.infrastructure.adapter.utils.ValidationUtils;
-import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.model.SelfKnowledgeCategoryEntity;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
@@ -36,12 +35,6 @@ public class StudentSeeder {
 
   @Transactional
   public List<StudentEntity> seed(List<UserEntity> savedUsers) {
-    return seed(savedUsers, List.of());
-  }
-
-  @Transactional
-  public List<StudentEntity> seed(
-      List<UserEntity> savedUsers, List<SelfKnowledgeCategoryEntity> mandatoryCategories) {
     ValidationUtils.requireNonEmpty(savedUsers, "users cannot be empty");
     log.info("Seeding Students...");
 

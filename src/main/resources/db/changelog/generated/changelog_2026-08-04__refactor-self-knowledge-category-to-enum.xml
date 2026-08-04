@@ -1,0 +1,75 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+        http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet author="iamgreendev" id="refactor-self-knowledge-category-to-enum-1">
+        <dropTable tableName="self_knowledge_element" cascadeConstraints="true"/>
+    </changeSet>
+
+    <changeSet author="iamgreendev" id="refactor-self-knowledge-category-to-enum-2">
+        <dropTable tableName="self_knowledge_category_translation" cascadeConstraints="true"/>
+    </changeSet>
+
+    <changeSet author="iamgreendev" id="refactor-self-knowledge-category-to-enum-3">
+        <dropTable tableName="student_self_knowledge_category" cascadeConstraints="true"/>
+    </changeSet>
+
+    <changeSet author="iamgreendev" id="refactor-self-knowledge-category-to-enum-4">
+        <dropTable tableName="self_knowledge_category" cascadeConstraints="true"/>
+    </changeSet>
+
+    <changeSet author="iamgreendev" id="refactor-self-knowledge-category-to-enum-5">
+        <addColumn tableName="student">
+            <column name="self_knowledge_categories" type="TEXT"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="iamgreendev" id="refactor-self-knowledge-category-to-enum-6">
+        <createTable tableName="self_knowledge_element">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="self_knowledge_elementPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(400)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rating" type="INTEGER"/>
+            <column name="title" type="VARCHAR(80)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="self_knowledge_category" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="valorized" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="student_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="iamgreendev" id="refactor-self-knowledge-category-to-enum-7">
+        <addForeignKeyConstraint baseColumnNames="student_id" baseTableName="self_knowledge_element" constraintName="FKr6psqown1l7yhdcbghetqtd9u" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="student" validate="true"/>
+    </changeSet>
+
+    <changeSet author="iamgreendev" id="refactor-self-knowledge-category-to-enum-8">
+        <createIndex indexName="idx_ske_student_category" tableName="self_knowledge_element">
+            <column name="student_id"/>
+            <column name="self_knowledge_category"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

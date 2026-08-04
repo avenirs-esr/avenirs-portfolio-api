@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.selfknowledge.infrastructure.fixture;
 
-import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeElement;
+import fr.avenirsesr.portfolio.selfknowledge.domain.model.enums.ESelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.Instant;
@@ -15,7 +15,7 @@ public class SelfKnowledgeElementFixture {
   private String title;
   private String description;
   private Integer rating;
-  private SelfKnowledgeCategory selfKnowledgeCategory;
+  private ESelfKnowledgeCategory selfKnowledgeCategory;
   private boolean valorized;
   private Instant createdAt;
   private Instant updatedAt;
@@ -28,7 +28,7 @@ public class SelfKnowledgeElementFixture {
         "J’ai une approche originale des problèmes et j’aime trouver des solutions innovantes dans"
             + " mes projets scolaires et personnels.";
     this.rating = 1;
-    this.selfKnowledgeCategory = SelfKnowledgeCategoryFixture.create().toModel();
+    this.selfKnowledgeCategory = ESelfKnowledgeCategory.STRENGTHS;
     this.valorized = false;
     this.createdAt = Instant.now();
     this.updatedAt = Instant.now();
@@ -72,7 +72,7 @@ public class SelfKnowledgeElementFixture {
   }
 
   public SelfKnowledgeElementFixture withSelfKnowledgeCategory(
-      SelfKnowledgeCategory selfKnowledgeCategory) {
+      ESelfKnowledgeCategory selfKnowledgeCategory) {
     this.selfKnowledgeCategory = selfKnowledgeCategory;
     return this;
   }

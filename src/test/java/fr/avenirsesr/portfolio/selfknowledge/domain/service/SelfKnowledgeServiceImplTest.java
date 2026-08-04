@@ -15,18 +15,14 @@ import fr.avenirsesr.portfolio.selfknowledge.domain.data.SelfKnowledgeElementDet
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCategoryIsMandatoryException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCategoryListIsEmptyException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCategoryNotAvailableException;
-import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCategoryNotFoundException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeElementNotFoundException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeElementsAreNotInSameCategoryException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeInvalidDescriptionException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeInvalidRatingException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeInvalidTitleException;
-import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeElement;
-import fr.avenirsesr.portfolio.selfknowledge.domain.model.enums.ESelfKnowledgeCategoryType;
-import fr.avenirsesr.portfolio.selfknowledge.domain.port.output.repository.SelfKnowledgeCategoryRepository;
+import fr.avenirsesr.portfolio.selfknowledge.domain.model.enums.ESelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.output.repository.SelfKnowledgeElementRepository;
-import fr.avenirsesr.portfolio.selfknowledge.infrastructure.fixture.SelfKnowledgeCategoryFixture;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.fixture.SelfKnowledgeElementFixture;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStudentException;
@@ -48,7 +44,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class SelfKnowledgeServiceImplTest {
 
   @Mock private StudentService studentService;
-  @Mock private SelfKnowledgeCategoryRepository selfKnowledgeCategoryRepository;
   @Mock private SelfKnowledgeElementRepository selfKnowledgeElementRepository;
   @Mock private LoggedInUserService loggedInUserService;
 
@@ -81,30 +76,13 @@ class SelfKnowledgeServiceImplTest {
       @Nested
       class AndSelfKnowledgeCategoriesAssociatedToThisStudent {
 
-        private SelfKnowledgeCategory strengthsCategory;
-        private SelfKnowledgeCategory valuesCategory;
-        private SelfKnowledgeCategory aspirationsCategory;
-        private List<SelfKnowledgeCategory> result;
+        private List<ESelfKnowledgeCategory> result;
 
         @BeforeEach
         void setupAnd() {
           BddLogger.and("self knowledge categories associated to this student");
-
-          strengthsCategory =
-              SelfKnowledgeCategoryFixture.create()
-                  .withType(ESelfKnowledgeCategoryType.STRENGTHS)
-                  .toModel();
-          valuesCategory =
-              SelfKnowledgeCategoryFixture.create()
-                  .withType(ESelfKnowledgeCategoryType.VALUES)
-                  .toModel();
-          aspirationsCategory =
-              SelfKnowledgeCategoryFixture.create()
-                  .withType(ESelfKnowledgeCategoryType.ASPIRATIONS)
-                  .toModel();
-
-          when(selfKnowledgeCategoryRepository.findAllByStudent(eq(student)))
-              .thenReturn(List.of(aspirationsCategory, strengthsCategory, valuesCategory));
+          student.setSelfKnowledgeCategories(
+              List.of(ESelfKnowledgeCategory.INTERESTS, ESelfKnowledgeCategory.MOTIVATION));
         }
 
         @Nested
@@ -117,17 +95,53 @@ class SelfKnowledgeServiceImplTest {
           }
 
           @Test
-          void thenItShouldReturnCategoriesSortedByTypeOrder() {
+          void thenItShouldReturnMandatoryAndStudentCategoriesSortedByOrder() {
             BddLogger.then(
-                "it should return categories sorted by ESelfKnowledgeCategoryType.order");
+                "it should return mandatory categories plus the student's own categories,"
+                    + " sorted by ESelfKnowledgeCategory.order");
 
-            assertThat(result).hasSize(3);
+            assertThat(result)
+                .containsExactly(
+                    ESelfKnowledgeCategory.STRENGTHS,
+                    ESelfKnowledgeCategory.VALUES,
+                    ESelfKnowledgeCategory.ASPIRATIONS,
+                    ESelfKnowledgeCategory.MOTIVATION,
+                    ESelfKnowledgeCategory.INTERESTS);
+          }
+        }
+      }
 
-            assertThat(result.get(0).getType()).isEqualTo(ESelfKnowledgeCategoryType.STRENGTHS);
-            assertThat(result.get(1).getType()).isEqualTo(ESelfKnowledgeCategoryType.VALUES);
-            assertThat(result.get(2).getType()).isEqualTo(ESelfKnowledgeCategoryType.ASPIRATIONS);
+      @Nested
+      class AndAMandatoryCategoryAlreadyChosenByTheStudent {
 
-            verify(selfKnowledgeCategoryRepository).findAllByStudent(eq(student));
+        private List<ESelfKnowledgeCategory> result;
+
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("a mandatory category already present in the student's own categories");
+          student.setSelfKnowledgeCategories(
+              List.of(ESelfKnowledgeCategory.STRENGTHS, ESelfKnowledgeCategory.MOTIVATION));
+        }
+
+        @Nested
+        class WhenGettingSelfKnowledgeCategories {
+
+          @BeforeEach
+          void setupWhen() {
+            BddLogger.when("getting self knowledge categories for the current student");
+            result = selfKnowledgeService.getSelfKnowledgeCategories();
+          }
+
+          @Test
+          void thenItShouldNotReturnDuplicates() {
+            BddLogger.then("it should return the category only once");
+
+            assertThat(result)
+                .containsExactly(
+                    ESelfKnowledgeCategory.STRENGTHS,
+                    ESelfKnowledgeCategory.VALUES,
+                    ESelfKnowledgeCategory.ASPIRATIONS,
+                    ESelfKnowledgeCategory.MOTIVATION);
           }
         }
       }
@@ -135,12 +149,12 @@ class SelfKnowledgeServiceImplTest {
       @Nested
       class AndNoSelfKnowledgeCategoryForThisStudent {
 
-        private List<SelfKnowledgeCategory> result;
+        private List<ESelfKnowledgeCategory> result;
 
         @BeforeEach
         void setupAnd() {
           BddLogger.and("no self knowledge category for this student");
-          when(selfKnowledgeCategoryRepository.findAllByStudent(eq(student))).thenReturn(List.of());
+          student.setSelfKnowledgeCategories(List.of());
         }
 
         @Nested
@@ -153,11 +167,13 @@ class SelfKnowledgeServiceImplTest {
           }
 
           @Test
-          void thenItShouldReturnAnEmptyList() {
-            BddLogger.then("it should return an empty list");
-            assertThat(result).isEmpty();
-
-            verify(selfKnowledgeCategoryRepository).findAllByStudent(eq(student));
+          void thenItShouldReturnOnlyMandatoryCategories() {
+            BddLogger.then("it should return only the mandatory categories");
+            assertThat(result)
+                .containsExactly(
+                    ESelfKnowledgeCategory.STRENGTHS,
+                    ESelfKnowledgeCategory.VALUES,
+                    ESelfKnowledgeCategory.ASPIRATIONS);
           }
         }
       }
@@ -165,25 +181,12 @@ class SelfKnowledgeServiceImplTest {
       @Nested
       class AndAvailableSelfKnowledgeCategoriesForThisStudent {
 
-        private SelfKnowledgeCategory motivationsCategory;
-        private SelfKnowledgeCategory interestsCategory;
-        private List<SelfKnowledgeCategory> result;
+        private List<ESelfKnowledgeCategory> result;
 
         @BeforeEach
         void setupAnd() {
           BddLogger.and("available self knowledge categories for this student");
-
-          motivationsCategory =
-              SelfKnowledgeCategoryFixture.create()
-                  .withType(ESelfKnowledgeCategoryType.MOTIVATION)
-                  .toModel();
-          interestsCategory =
-              SelfKnowledgeCategoryFixture.create()
-                  .withType(ESelfKnowledgeCategoryType.INTERESTS)
-                  .toModel();
-
-          when(selfKnowledgeCategoryRepository.findAllAvailableByStudent(eq(student)))
-              .thenReturn(List.of(interestsCategory, motivationsCategory));
+          student.setSelfKnowledgeCategories(List.of(ESelfKnowledgeCategory.MOTIVATION));
         }
 
         @Nested
@@ -196,16 +199,18 @@ class SelfKnowledgeServiceImplTest {
           }
 
           @Test
-          void thenItShouldReturnAvailableCategoriesSortedByTypeOrder() {
+          void thenItShouldReturnNonMandatoryNotAlreadyChosenCategoriesSortedByOrder() {
             BddLogger.then(
-                "it should return available categories sorted by ESelfKnowledgeCategoryType.order");
+                "it should return non mandatory categories not already chosen by the student,"
+                    + " sorted by ESelfKnowledgeCategory.order");
 
-            assertThat(result).hasSize(2);
-
-            assertThat(result.get(0).getType()).isEqualTo(ESelfKnowledgeCategoryType.MOTIVATION);
-            assertThat(result.get(1).getType()).isEqualTo(ESelfKnowledgeCategoryType.INTERESTS);
-
-            verify(selfKnowledgeCategoryRepository).findAllAvailableByStudent(eq(student));
+            assertThat(result)
+                .containsExactly(
+                    ESelfKnowledgeCategory.IMPROVEMENT,
+                    ESelfKnowledgeCategory.INTERESTS,
+                    ESelfKnowledgeCategory.INSPIRATIONS,
+                    ESelfKnowledgeCategory.OBLIGATIONS,
+                    ESelfKnowledgeCategory.TESTIMONIALS);
           }
         }
       }
@@ -213,13 +218,19 @@ class SelfKnowledgeServiceImplTest {
       @Nested
       class AndNoAvailableSelfKnowledgeCategoryForThisStudent {
 
-        private List<SelfKnowledgeCategory> result;
+        private List<ESelfKnowledgeCategory> result;
 
         @BeforeEach
         void setupAnd() {
           BddLogger.and("no available self knowledge category for this student");
-          when(selfKnowledgeCategoryRepository.findAllAvailableByStudent(eq(student)))
-              .thenReturn(List.of());
+          student.setSelfKnowledgeCategories(
+              List.of(
+                  ESelfKnowledgeCategory.MOTIVATION,
+                  ESelfKnowledgeCategory.IMPROVEMENT,
+                  ESelfKnowledgeCategory.INTERESTS,
+                  ESelfKnowledgeCategory.INSPIRATIONS,
+                  ESelfKnowledgeCategory.OBLIGATIONS,
+                  ESelfKnowledgeCategory.TESTIMONIALS));
         }
 
         @Nested
@@ -235,54 +246,6 @@ class SelfKnowledgeServiceImplTest {
           void thenItShouldReturnAnEmptyList() {
             BddLogger.then("it should return an empty list");
             assertThat(result).isEmpty();
-
-            verify(selfKnowledgeCategoryRepository).findAllAvailableByStudent(eq(student));
-          }
-        }
-      }
-
-      @Nested
-      class AndUnknownCategory {
-
-        private UUID unknownId;
-
-        @BeforeEach
-        void setupAnd() {
-          unknownId = UUID.randomUUID();
-
-          when(selfKnowledgeCategoryRepository.findById(eq(unknownId)))
-              .thenReturn(Optional.empty());
-        }
-
-        @Nested
-        class WhenGettingSelfKnowledgeElementsPaginated {
-
-          @Test
-          void thenItShouldThrowSelfKnowledgeCategoryNotFoundException() {
-            BddLogger.when("getting self knowledge elements paginated with unknown category");
-            BddLogger.then("it should throw SelfKnowledgeCategoryNotFoundException");
-
-            assertThrows(
-                SelfKnowledgeCategoryNotFoundException.class,
-                () ->
-                    selfKnowledgeService.getSelfKnowledgeElements(
-                        unknownId, new PageCriteria(0, 8), null));
-          }
-        }
-
-        @Nested
-        class WhenCreatingSelfKnowledgeElement {
-
-          @Test
-          void thenItShouldThrowSelfKnowledgeCategoryNotFoundException() {
-            BddLogger.when("creating self knowledge element with unknown category");
-            BddLogger.then("it should throw SelfKnowledgeCategoryNotFoundException");
-
-            assertThrows(
-                SelfKnowledgeCategoryNotFoundException.class,
-                () ->
-                    selfKnowledgeService.createSelfKnowledgeElement(
-                        unknownId, "Title", "Description", 1));
           }
         }
       }
@@ -291,9 +254,8 @@ class SelfKnowledgeServiceImplTest {
       class AndSelfKnowledgeElement {
 
         private SelfKnowledgeElement selfKnowledgeElement;
-        private SelfKnowledgeCategory selfKnowledgeCategory;
+        private ESelfKnowledgeCategory selfKnowledgeCategory;
         private UUID selfKnowledgeElementId;
-        private UUID selfKnowledgeCategoryId;
         private PageCriteria pageCriteria;
 
         @BeforeEach
@@ -302,7 +264,6 @@ class SelfKnowledgeServiceImplTest {
               SelfKnowledgeElementFixture.create().withStudent(student).toModel();
           selfKnowledgeCategory = selfKnowledgeElement.getSelfKnowledgeCategory();
           selfKnowledgeElementId = selfKnowledgeElement.getId();
-          selfKnowledgeCategoryId = selfKnowledgeCategory.getId();
           pageCriteria = new PageCriteria(0, 8);
         }
 
@@ -314,25 +275,22 @@ class SelfKnowledgeServiceImplTest {
             PagedResult<SelfKnowledgeElement> expectedResult =
                 new PagedResult<>(List.of(selfKnowledgeElement), new PageInfo(0, 8, 1));
 
-            when(selfKnowledgeCategoryRepository.findById(selfKnowledgeCategoryId))
-                .thenReturn(Optional.of(selfKnowledgeCategory));
-            when(selfKnowledgeElementRepository.findAllByStudentIdAndCategoryId(
-                    student.getId(), selfKnowledgeCategoryId, pageCriteria, null))
+            when(selfKnowledgeElementRepository.findAllByStudentIdAndCategory(
+                    student.getId(), selfKnowledgeCategory, pageCriteria, null))
                 .thenReturn(expectedResult);
 
             BddLogger.when("getting self knowledge elements paginated");
             PagedResult<SelfKnowledgeElement> actualResult =
                 selfKnowledgeService.getSelfKnowledgeElements(
-                    selfKnowledgeCategoryId, pageCriteria, null);
+                    selfKnowledgeCategory, pageCriteria, null);
 
             BddLogger.then("it should retrieve self knowledge elements paginated");
             assertThat(actualResult).isEqualTo(expectedResult);
 
             verify(loggedInUserService).getLoggedInStudent();
-            verify(selfKnowledgeCategoryRepository).findById(selfKnowledgeCategoryId);
             verify(selfKnowledgeElementRepository)
-                .findAllByStudentIdAndCategoryId(
-                    student.getId(), selfKnowledgeCategoryId, pageCriteria, null);
+                .findAllByStudentIdAndCategory(
+                    student.getId(), selfKnowledgeCategory, pageCriteria, null);
           }
 
           @Test
@@ -340,22 +298,20 @@ class SelfKnowledgeServiceImplTest {
             PagedResult<SelfKnowledgeElement> expectedResult =
                 new PagedResult<>(List.of(selfKnowledgeElement), new PageInfo(0, 8, 1));
 
-            when(selfKnowledgeCategoryRepository.findById(selfKnowledgeCategoryId))
-                .thenReturn(Optional.of(selfKnowledgeCategory));
-            when(selfKnowledgeElementRepository.findAllByStudentIdAndCategoryId(
-                    student.getId(), selfKnowledgeCategoryId, pageCriteria, true))
+            when(selfKnowledgeElementRepository.findAllByStudentIdAndCategory(
+                    student.getId(), selfKnowledgeCategory, pageCriteria, true))
                 .thenReturn(expectedResult);
 
             BddLogger.when("getting self knowledge elements paginated with isValorized=true");
             PagedResult<SelfKnowledgeElement> actualResult =
                 selfKnowledgeService.getSelfKnowledgeElements(
-                    selfKnowledgeCategoryId, pageCriteria, true);
+                    selfKnowledgeCategory, pageCriteria, true);
 
             BddLogger.then("it should delegate the isValorized filter to the repository");
             assertThat(actualResult).isEqualTo(expectedResult);
             verify(selfKnowledgeElementRepository)
-                .findAllByStudentIdAndCategoryId(
-                    student.getId(), selfKnowledgeCategoryId, pageCriteria, true);
+                .findAllByStudentIdAndCategory(
+                    student.getId(), selfKnowledgeCategory, pageCriteria, true);
           }
         }
 
@@ -610,25 +566,16 @@ class SelfKnowledgeServiceImplTest {
           void thenItShouldThrowSelfKnowledgeElementsAreNotInSameCategoryException() {
             BddLogger.when("deleting elements from different categories");
 
-            SelfKnowledgeCategory cat1 =
-                SelfKnowledgeCategoryFixture.create()
-                    .withType(ESelfKnowledgeCategoryType.STRENGTHS)
-                    .toModel();
-            SelfKnowledgeCategory cat2 =
-                SelfKnowledgeCategoryFixture.create()
-                    .withType(ESelfKnowledgeCategoryType.VALUES)
-                    .toModel();
-
             SelfKnowledgeElement e1 =
                 SelfKnowledgeElementFixture.create()
                     .withStudent(student)
-                    .withSelfKnowledgeCategory(cat1)
+                    .withSelfKnowledgeCategory(ESelfKnowledgeCategory.STRENGTHS)
                     .toModel();
 
             SelfKnowledgeElement e2 =
                 SelfKnowledgeElementFixture.create()
                     .withStudent(student)
-                    .withSelfKnowledgeCategory(cat2)
+                    .withSelfKnowledgeCategory(ESelfKnowledgeCategory.VALUES)
                     .toModel();
 
             List<UUID> ids = List.of(e1.getId(), e2.getId());
@@ -691,22 +638,18 @@ class SelfKnowledgeServiceImplTest {
 
         @Test
         void thenItShouldCreateSelfKnowledgeElement() {
-          SelfKnowledgeCategory selfKnowledgeCategory =
-              SelfKnowledgeCategoryFixture.create().toModel();
-          UUID selfKnowledgeCategoryId = selfKnowledgeCategory.getId();
+          ESelfKnowledgeCategory selfKnowledgeCategory = ESelfKnowledgeCategory.STRENGTHS;
           String title = "Empathie";
           String description = "J’ai une bonne capacité à écouter et comprendre les autres.";
           Integer rating = 5;
 
-          when(selfKnowledgeCategoryRepository.findById(selfKnowledgeCategoryId))
-              .thenReturn(Optional.of(selfKnowledgeCategory));
           when(selfKnowledgeElementRepository.save(any(SelfKnowledgeElement.class)))
               .thenAnswer(invocation -> invocation.getArgument(0));
 
           BddLogger.when("creating self knowledge element");
           SelfKnowledgeElement result =
               selfKnowledgeService.createSelfKnowledgeElement(
-                  selfKnowledgeCategoryId, title, description, rating);
+                  selfKnowledgeCategory, title, description, rating);
 
           BddLogger.then("it should create self knowledge element");
 
@@ -719,7 +662,6 @@ class SelfKnowledgeServiceImplTest {
           assertThat(result.getSelfKnowledgeCategory()).isEqualTo(selfKnowledgeCategory);
 
           verify(loggedInUserService).getLoggedInStudent();
-          verify(selfKnowledgeCategoryRepository).findById(selfKnowledgeCategoryId);
           verify(selfKnowledgeElementRepository).save(any(SelfKnowledgeElement.class));
         }
       }
@@ -730,8 +672,6 @@ class SelfKnowledgeServiceImplTest {
         @Test
         void thenItShouldThrowSelfKnowledgeInvalidTitleException() {
           BddLogger.when("creating self knowledge element with invalid title");
-          SelfKnowledgeCategory selfKnowledgeCategory =
-              SelfKnowledgeCategoryFixture.create().toModel();
 
           String tooLongTitle = "T".repeat(500);
 
@@ -739,7 +679,7 @@ class SelfKnowledgeServiceImplTest {
               SelfKnowledgeInvalidTitleException.class,
               () ->
                   selfKnowledgeService.createSelfKnowledgeElement(
-                      selfKnowledgeCategory.getId(), tooLongTitle, "Description", 1));
+                      ESelfKnowledgeCategory.STRENGTHS, tooLongTitle, "Description", 1));
 
           verify(selfKnowledgeElementRepository, never()).save(any());
         }
@@ -751,8 +691,6 @@ class SelfKnowledgeServiceImplTest {
         @Test
         void thenItShouldThrowSelfKnowledgeInvalidDescriptionException() {
           BddLogger.when("creating self knowledge element with invalid description");
-          SelfKnowledgeCategory selfKnowledgeCategory =
-              SelfKnowledgeCategoryFixture.create().toModel();
 
           String tooLongDescription = "D".repeat(5000);
 
@@ -760,7 +698,7 @@ class SelfKnowledgeServiceImplTest {
               SelfKnowledgeInvalidDescriptionException.class,
               () ->
                   selfKnowledgeService.createSelfKnowledgeElement(
-                      selfKnowledgeCategory.getId(), "Title", tooLongDescription, 1));
+                      ESelfKnowledgeCategory.STRENGTHS, "Title", tooLongDescription, 1));
 
           verify(selfKnowledgeElementRepository, never()).save(any());
         }
@@ -772,14 +710,12 @@ class SelfKnowledgeServiceImplTest {
         @Test
         void thenItShouldThrowSelfKnowledgeInvalidRatingException() {
           BddLogger.when("creating self knowledge element with invalid rating");
-          SelfKnowledgeCategory selfKnowledgeCategory =
-              SelfKnowledgeCategoryFixture.create().toModel();
 
           assertThrows(
               SelfKnowledgeInvalidRatingException.class,
               () ->
                   selfKnowledgeService.createSelfKnowledgeElement(
-                      selfKnowledgeCategory.getId(), "Title", "Description", -999));
+                      ESelfKnowledgeCategory.STRENGTHS, "Title", "Description", -999));
 
           verify(selfKnowledgeElementRepository, never()).save(any());
         }
@@ -797,33 +733,26 @@ class SelfKnowledgeServiceImplTest {
               SelfKnowledgeCategoryListIsEmptyException.class,
               () -> selfKnowledgeService.addSelfKnowledgeCategories(List.of()));
 
-          verifyNoInteractions(selfKnowledgeCategoryRepository);
+          verifyNoInteractions(studentService);
         }
       }
 
       @Nested
-      class WhenAddingSelfKnowledgeCategoriesAndNoneSelectedFromAvailable {
+      class WhenAddingASelfKnowledgeCategoryThatIsNotAvailable {
 
         @Test
-        void thenItShouldThrowSelfKnowledgeCategoryNotFoundException() {
-          BddLogger.when("adding self knowledge categories but none match the available list");
-          BddLogger.then("it should throw SelfKnowledgeCategoryNotFoundException");
+        void thenItShouldThrowSelfKnowledgeCategoryNotAvailableException() {
+          BddLogger.when(
+              "adding a self knowledge category that is not available (mandatory or already"
+                  + " chosen)");
+          BddLogger.then("it should throw SelfKnowledgeCategoryNotAvailableException");
 
-          SelfKnowledgeCategory strengthsCategory =
-              SelfKnowledgeCategoryFixture.create()
-                  .withType(ESelfKnowledgeCategoryType.STRENGTHS)
-                  .toModel();
-
-          when(selfKnowledgeCategoryRepository.findAllAvailableByStudent(eq(student)))
-              .thenReturn(List.of(strengthsCategory));
-
-          List<String> requestedIdsAsString = List.of(UUID.randomUUID().toString());
+          List<ESelfKnowledgeCategory> requested = List.of(ESelfKnowledgeCategory.STRENGTHS);
 
           assertThrows(
               SelfKnowledgeCategoryNotAvailableException.class,
-              () -> selfKnowledgeService.addSelfKnowledgeCategories(requestedIdsAsString));
+              () -> selfKnowledgeService.addSelfKnowledgeCategories(requested));
 
-          verify(selfKnowledgeCategoryRepository).findAllAvailableByStudent(eq(student));
           verify(studentService, never()).addSelfKnowledgeCategories(any(), anyList());
         }
       }
@@ -831,28 +760,12 @@ class SelfKnowledgeServiceImplTest {
       @Nested
       class AndAValidSelfKnowledgeCategoryList {
 
-        private SelfKnowledgeCategory strengthsCategory;
-        private SelfKnowledgeCategory valuesCategory;
-        private List<String> categoryIdsAsString;
+        private List<ESelfKnowledgeCategory> categories;
 
         @BeforeEach
         void setupAnd() {
-          BddLogger.and("a valid self knowledge category id list for this student");
-
-          strengthsCategory =
-              SelfKnowledgeCategoryFixture.create()
-                  .withType(ESelfKnowledgeCategoryType.STRENGTHS)
-                  .toModel();
-          valuesCategory =
-              SelfKnowledgeCategoryFixture.create()
-                  .withType(ESelfKnowledgeCategoryType.VALUES)
-                  .toModel();
-
-          categoryIdsAsString =
-              List.of(strengthsCategory.getId().toString(), valuesCategory.getId().toString());
-
-          when(selfKnowledgeCategoryRepository.findAllAvailableByStudent(eq(student)))
-              .thenReturn(List.of(strengthsCategory, valuesCategory));
+          BddLogger.and("a valid self knowledge category list for this student");
+          categories = List.of(ESelfKnowledgeCategory.MOTIVATION, ESelfKnowledgeCategory.INTERESTS);
         }
 
         @Nested
@@ -861,19 +774,14 @@ class SelfKnowledgeServiceImplTest {
           @BeforeEach
           void setupWhen() {
             BddLogger.when("adding self knowledge categories to the current student");
-            selfKnowledgeService.addSelfKnowledgeCategories(categoryIdsAsString);
+            selfKnowledgeService.addSelfKnowledgeCategories(categories);
           }
 
           @Test
-          void thenItShouldDelegateToRepositoriesAndAssociateCategories() {
-            BddLogger.then(
-                "it should use available categories and delegate to studentService to"
-                    + " associate them");
+          void thenItShouldDelegateToStudentServiceToAssociateCategories() {
+            BddLogger.then("it should delegate to studentService to associate the categories");
 
-            verify(selfKnowledgeCategoryRepository).findAllAvailableByStudent(eq(student));
-            verify(studentService)
-                .addSelfKnowledgeCategories(
-                    eq(student), eq(List.of(strengthsCategory, valuesCategory)));
+            verify(studentService).addSelfKnowledgeCategories(eq(student), eq(categories));
           }
         }
       }
@@ -881,21 +789,12 @@ class SelfKnowledgeServiceImplTest {
       @Nested
       class AndANonMandatorySelfKnowledgeCategory {
 
-        private SelfKnowledgeCategory removableCategory;
-        private UUID categoryId;
+        private ESelfKnowledgeCategory removableCategory;
 
         @BeforeEach
         void setupAnd() {
           BddLogger.and("a non mandatory self knowledge category linked to this student");
-          removableCategory =
-              SelfKnowledgeCategoryFixture.create()
-                  .withType(ESelfKnowledgeCategoryType.STRENGTHS)
-                  .withMandatory(false)
-                  .toModel();
-          categoryId = removableCategory.getId();
-
-          when(selfKnowledgeCategoryRepository.findById(eq(categoryId)))
-              .thenReturn(Optional.of(removableCategory));
+          removableCategory = ESelfKnowledgeCategory.MOTIVATION;
         }
 
         @Nested
@@ -905,7 +804,7 @@ class SelfKnowledgeServiceImplTest {
           void setupWhen() {
             BddLogger.when(
                 "removing a non mandatory self knowledge category for the current student");
-            selfKnowledgeService.removeSelfKnowledgeCategory(categoryId);
+            selfKnowledgeService.removeSelfKnowledgeCategory(removableCategory);
           }
 
           @Test
@@ -914,35 +813,10 @@ class SelfKnowledgeServiceImplTest {
                 "it should delete all elements for this student and category, then remove the"
                     + " category link for the student");
 
-            verify(selfKnowledgeCategoryRepository).findById(eq(categoryId));
             verify(selfKnowledgeElementRepository)
                 .deleteAllByStudentAndCategory(eq(student), eq(removableCategory));
             verify(studentService).removeSelfKnowledgeCategory(eq(student), eq(removableCategory));
           }
-        }
-      }
-
-      @Nested
-      class WhenRemovingUnknownSelfKnowledgeCategory {
-
-        @Test
-        void thenItShouldThrowSelfKnowledgeCategoryNotFoundException() {
-          BddLogger.when("removing a self knowledge category that does not exist");
-          BddLogger.then("it should throw SelfKnowledgeCategoryNotFoundException");
-
-          UUID unknownId = UUID.randomUUID();
-
-          when(selfKnowledgeCategoryRepository.findById(eq(unknownId)))
-              .thenReturn(Optional.empty());
-
-          assertThrows(
-              SelfKnowledgeCategoryNotFoundException.class,
-              () -> selfKnowledgeService.removeSelfKnowledgeCategory(unknownId));
-
-          verify(selfKnowledgeCategoryRepository).findById(eq(unknownId));
-          verifyNoInteractions(selfKnowledgeElementRepository);
-          verify(studentService, never())
-              .removeSelfKnowledgeCategory(any(), any(SelfKnowledgeCategory.class));
         }
       }
 
@@ -954,21 +828,14 @@ class SelfKnowledgeServiceImplTest {
           BddLogger.when("removing a mandatory self knowledge category");
           BddLogger.then("it should throw SelfKnowledgeCategoryIsMandatoryException");
 
-          UUID categoryId = UUID.randomUUID();
-          SelfKnowledgeCategory mandatoryCategory = mock(SelfKnowledgeCategory.class);
-
-          when(mandatoryCategory.isMandatory()).thenReturn(true);
-          when(selfKnowledgeCategoryRepository.findById(eq(categoryId)))
-              .thenReturn(Optional.of(mandatoryCategory));
-
           assertThrows(
               SelfKnowledgeCategoryIsMandatoryException.class,
-              () -> selfKnowledgeService.removeSelfKnowledgeCategory(categoryId));
+              () ->
+                  selfKnowledgeService.removeSelfKnowledgeCategory(
+                      ESelfKnowledgeCategory.STRENGTHS));
 
-          verify(selfKnowledgeCategoryRepository).findById(eq(categoryId));
           verifyNoInteractions(selfKnowledgeElementRepository);
-          verify(studentService, never())
-              .removeSelfKnowledgeCategory(eq(student), any(SelfKnowledgeCategory.class));
+          verify(studentService, never()).removeSelfKnowledgeCategory(any(), any());
         }
       }
     }
@@ -994,7 +861,6 @@ class SelfKnowledgeServiceImplTest {
               UserNotFoundException.class, () -> selfKnowledgeService.getSelfKnowledgeCategories());
 
           verifyNoInteractions(studentService);
-          verifyNoInteractions(selfKnowledgeCategoryRepository);
         }
       }
 
@@ -1012,7 +878,6 @@ class SelfKnowledgeServiceImplTest {
               () -> selfKnowledgeService.getSelfKnowledgeCategoriesAvailable());
 
           verifyNoInteractions(studentService);
-          verifyNoInteractions(selfKnowledgeCategoryRepository);
         }
       }
 
@@ -1024,19 +889,13 @@ class SelfKnowledgeServiceImplTest {
           BddLogger.when("adding self knowledge categories without logged in user");
           BddLogger.then("it should throw UserNotFoundException");
 
-          SelfKnowledgeCategory category =
-              SelfKnowledgeCategoryFixture.create()
-                  .withType(ESelfKnowledgeCategoryType.STRENGTHS)
-                  .toModel();
-
-          List<String> categoryIdsAsString = List.of(category.getId().toString());
+          List<ESelfKnowledgeCategory> categories = List.of(ESelfKnowledgeCategory.STRENGTHS);
 
           assertThrows(
               UserNotFoundException.class,
-              () -> selfKnowledgeService.addSelfKnowledgeCategories(categoryIdsAsString));
+              () -> selfKnowledgeService.addSelfKnowledgeCategories(categories));
 
           verifyNoInteractions(studentService);
-          verifyNoInteractions(selfKnowledgeCategoryRepository);
         }
       }
 
@@ -1048,14 +907,13 @@ class SelfKnowledgeServiceImplTest {
           BddLogger.when("removing a self knowledge category without logged in user");
           BddLogger.then("it should throw UserNotFoundException");
 
-          UUID categoryId = UUID.randomUUID();
-
           assertThrows(
               UserNotFoundException.class,
-              () -> selfKnowledgeService.removeSelfKnowledgeCategory(categoryId));
+              () ->
+                  selfKnowledgeService.removeSelfKnowledgeCategory(
+                      ESelfKnowledgeCategory.STRENGTHS));
 
           verifyNoInteractions(studentService);
-          verifyNoInteractions(selfKnowledgeCategoryRepository);
           verifyNoInteractions(selfKnowledgeElementRepository);
         }
       }
@@ -1072,7 +930,7 @@ class SelfKnowledgeServiceImplTest {
               UserNotFoundException.class,
               () ->
                   selfKnowledgeService.getSelfKnowledgeElements(
-                      UUID.randomUUID(), new PageCriteria(0, 8), null));
+                      ESelfKnowledgeCategory.STRENGTHS, new PageCriteria(0, 8), null));
         }
       }
 
@@ -1102,7 +960,7 @@ class SelfKnowledgeServiceImplTest {
               UserNotFoundException.class,
               () ->
                   selfKnowledgeService.createSelfKnowledgeElement(
-                      UUID.randomUUID(), "Title", "Description", 1));
+                      ESelfKnowledgeCategory.STRENGTHS, "Title", "Description", 1));
         }
       }
 
@@ -1159,8 +1017,6 @@ class SelfKnowledgeServiceImplTest {
           assertThrows(
               UserIsNotStudentException.class,
               () -> selfKnowledgeService.getSelfKnowledgeCategories());
-
-          verifyNoInteractions(selfKnowledgeCategoryRepository);
         }
       }
 
@@ -1175,8 +1031,6 @@ class SelfKnowledgeServiceImplTest {
           assertThrows(
               UserIsNotStudentException.class,
               () -> selfKnowledgeService.getSelfKnowledgeCategoriesAvailable());
-
-          verifyNoInteractions(selfKnowledgeCategoryRepository);
         }
       }
 
@@ -1188,18 +1042,11 @@ class SelfKnowledgeServiceImplTest {
           BddLogger.when("adding self knowledge categories for a non student user");
           BddLogger.then("it should throw UserIsNotStudentException");
 
-          SelfKnowledgeCategory category =
-              SelfKnowledgeCategoryFixture.create()
-                  .withType(ESelfKnowledgeCategoryType.STRENGTHS)
-                  .toModel();
-
-          List<String> categoryIdsAsString = List.of(category.getId().toString());
+          List<ESelfKnowledgeCategory> categories = List.of(ESelfKnowledgeCategory.STRENGTHS);
 
           assertThrows(
               UserIsNotStudentException.class,
-              () -> selfKnowledgeService.addSelfKnowledgeCategories(categoryIdsAsString));
-
-          verifyNoInteractions(selfKnowledgeCategoryRepository);
+              () -> selfKnowledgeService.addSelfKnowledgeCategories(categories));
         }
       }
 
@@ -1211,14 +1058,11 @@ class SelfKnowledgeServiceImplTest {
           BddLogger.when("removing self knowledge category for a non student user");
           BddLogger.then("it should throw UserIsNotStudentException");
 
-          UUID categoryId = UUID.randomUUID();
-
           assertThrows(
               UserIsNotStudentException.class,
-              () -> selfKnowledgeService.removeSelfKnowledgeCategory(categoryId));
-
-          verifyNoInteractions(selfKnowledgeCategoryRepository);
-          verifyNoInteractions(selfKnowledgeElementRepository);
+              () ->
+                  selfKnowledgeService.removeSelfKnowledgeCategory(
+                      ESelfKnowledgeCategory.STRENGTHS));
         }
       }
 
@@ -1234,7 +1078,7 @@ class SelfKnowledgeServiceImplTest {
               UserIsNotStudentException.class,
               () ->
                   selfKnowledgeService.getSelfKnowledgeElements(
-                      UUID.randomUUID(), new PageCriteria(0, 8), null));
+                      ESelfKnowledgeCategory.STRENGTHS, new PageCriteria(0, 8), null));
         }
       }
 
@@ -1264,7 +1108,7 @@ class SelfKnowledgeServiceImplTest {
               UserIsNotStudentException.class,
               () ->
                   selfKnowledgeService.createSelfKnowledgeElement(
-                      UUID.randomUUID(), "Title", "Description", 1));
+                      ESelfKnowledgeCategory.STRENGTHS, "Title", "Description", 1));
         }
       }
 

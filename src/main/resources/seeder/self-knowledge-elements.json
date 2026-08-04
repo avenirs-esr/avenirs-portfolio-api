@@ -4,211 +4,209 @@
     "title": "Organisation",
     "description": "Je suis capable de bien organiser mon emploi du temps, ce qui m'aide à gérer mes révisions, mes loisirs et mes responsabilités.",
     "rating": null,
-    "categoryId": "8a2e9fb1-5e4d-4af2-b51e-639f18f6b801"
+    "category": "STRENGTHS"
   },
   {
     "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Créativité",
     "description": "J’ai une approche originale des problèmes et j’aime trouver des solutions innovantes dans mes projets scolaires et personnels.",
     "rating": 1,
-    "categoryId": "8a2e9fb1-5e4d-4af2-b51e-639f18f6b801"
+    "category": "STRENGTHS"
   },
   {
     "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Empathie",
     "description": "J’ai une bonne capacité à écouter et comprendre les autres, ce qui me permet de mieux travailler en groupe et d’aider mes camarades.",
     "rating": 2,
-    "categoryId": "8a2e9fb1-5e4d-4af2-b51e-639f18f6b801"
+    "category": "STRENGTHS"
   },
   {
     "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Discipline",
     "description": "Je suis capable de rester concentré sur mes objectifs et de respecter mes engagements, même lorsque la motivation diminue.",
     "rating": 3,
-    "categoryId": "8a2e9fb1-5e4d-4af2-b51e-639f18f6b801"
+    "category": "STRENGTHS"
   },
   {
     "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Leadership",
     "description": "Je prends souvent des initiatives dans les projets de groupe et j'aide à coordonner les efforts des autres pour atteindre nos objectifs.",
     "rating": 4,
-    "categoryId": "8a2e9fb1-5e4d-4af2-b51e-639f18f6b801"
+    "category": "STRENGTHS"
   },
   {
     "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Persévérance",
     "description": "Même quand je rencontre des obstacles, je ne baisse jamais les bras et je trouve des solutions pour continuer.",
     "rating": 5,
-    "categoryId": "8a2e9fb1-5e4d-4af2-b51e-639f18f6b801"
+    "category": "STRENGTHS"
   },
   {
     "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Esprit d'équipe",
     "description": "Je sais travailler en équipe et je suis capable de collaborer efficacement avec mes camarades pour atteindre un objectif commun.",
     "rating": null,
-    "categoryId": "8a2e9fb1-5e4d-4af2-b51e-639f18f6b801"
+    "category": "STRENGTHS"
   },
   {
     "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Communication",
     "description": "Je sais m'exprimer clairement et efficacement, que ce soit à l'oral ou à l'écrit, pour faire passer mes idées.",
     "rating": 1,
-    "categoryId": "8a2e9fb1-5e4d-4af2-b51e-639f18f6b801"
+    "category": "STRENGTHS"
   },
   {
     "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Adaptabilité",
     "description": "Je m'adapte rapidement aux nouvelles situations et je fais preuve de flexibilité face aux changements.",
     "rating": 2,
-    "categoryId": "8a2e9fb1-5e4d-4af2-b51e-639f18f6b801"
+    "category": "STRENGTHS"
   },
   {
     "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Prise d'initiative",
     "description": "Je n'ai pas peur de prendre des initiatives et de proposer des solutions nouvelles dans les projets.",
     "rating": 3,
-    "categoryId": "8a2e9fb1-5e4d-4af2-b51e-639f18f6b801"
+    "category": "STRENGTHS"
   },
-
   {
     "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Honnêteté",
     "description": "Je crois fermement à l’importance de l’intégrité, que ce soit dans mes relations avec les autres ou dans mon travail académique.",
     "rating": null,
-    "categoryId": "e32c1a55-c95b-43e2-907d-1fdb4eaaf62f"
+    "category": "VALUES"
   },
   {
     "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Respect",
     "description": "Je valorise le respect des autres, de leurs opinions et de leur temps, en particulier dans les interactions en groupe ou en classe.",
     "rating": 1,
-    "categoryId": "e32c1a55-c95b-43e2-907d-1fdb4eaaf62f"
+    "category": "VALUES"
   },
   {
     "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Solidarité",
     "description": "J’accorde beaucoup d’importance à aider mes camarades, à participer activement à la vie collective et à soutenir ceux qui en ont besoin.",
     "rating": 2,
-    "categoryId": "e32c1a55-c95b-43e2-907d-1fdb4eaaf62f"
+    "category": "VALUES"
   },
   {
     "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Autonomie",
     "description": "Je tiens à être indépendant dans mes études et mes décisions. Je crois que l’autonomie est essentielle pour mon développement personnel et académique.",
     "rating": 3,
-    "categoryId": "e32c1a55-c95b-43e2-907d-1fdb4eaaf62f"
+    "category": "VALUES"
   },
   {
     "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Responsabilité",
     "description": "Je prends la responsabilité de mes actions et je m'efforce toujours de tenir mes engagements.",
     "rating": 4,
-    "categoryId": "e32c1a55-c95b-43e2-907d-1fdb4eaaf62f"
+    "category": "VALUES"
   },
   {
     "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Équité",
     "description": "Je m’efforce de traiter tout le monde de manière juste et égale, sans discrimination.",
     "rating": 5,
-    "categoryId": "e32c1a55-c95b-43e2-907d-1fdb4eaaf62f"
+    "category": "VALUES"
   },
   {
     "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Liberté",
     "description": "Je valorise ma liberté d’expression et je défends le droit de chacun à penser et à agir selon ses convictions.",
     "rating": null,
-    "categoryId": "e32c1a55-c95b-43e2-907d-1fdb4eaaf62f"
+    "category": "VALUES"
   },
   {
     "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Justice",
     "description": "Je me sens concerné par les questions de justice sociale et je m'engage à défendre l'égalité des droits.",
     "rating": 1,
-    "categoryId": "e32c1a55-c95b-43e2-907d-1fdb4eaaf62f"
+    "category": "VALUES"
   },
   {
     "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Bienveillance",
     "description": "Je veille toujours à agir de manière bienveillante et respectueuse envers les autres, en cherchant à encourager et soutenir.",
     "rating": 2,
-    "categoryId": "e32c1a55-c95b-43e2-907d-1fdb4eaaf62f"
+    "category": "VALUES"
   },
   {
     "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Collaboration",
     "description": "Je crois que le travail collectif permet d'atteindre de meilleurs résultats et je favorise toujours un esprit collaboratif.",
     "rating": 3,
-    "categoryId": "e32c1a55-c95b-43e2-907d-1fdb4eaaf62f"
+    "category": "VALUES"
   },
-
   {
     "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Étudier à l'étranger",
     "description": "J’aimerais pouvoir étudier dans un autre pays pour découvrir une nouvelle culture et améliorer mes compétences linguistiques.",
     "rating": null,
-    "categoryId": "b1d3d8e7-c244-46f3-bc57-0b7c2e653df7"
+    "category": "ASPIRATIONS"
   },
   {
     "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Créer une startup",
     "description": "Je rêve de lancer ma propre entreprise dans le domaine des technologies, en créant une application pour résoudre un problème auquel je suis sensible.",
     "rating": 1,
-    "categoryId": "b1d3d8e7-c244-46f3-bc57-0b7c2e653df7"
+    "category": "ASPIRATIONS"
   },
   {
     "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Faire du bénévolat",
     "description": "Je souhaite m’impliquer davantage dans des actions solidaires, en particulier auprès des jeunes ou des personnes en difficulté.",
     "rating": 2,
-    "categoryId": "b1d3d8e7-c244-46f3-bc57-0b7c2e653df7"
+    "category": "ASPIRATIONS"
   },
   {
     "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Apprendre une nouvelle langue",
     "description": "Je désire apprendre l’espagnol pour pouvoir voyager en Amérique Latine et découvrir les cultures locales tout en me rendant plus compétitif sur le marché du travail.",
     "rating": 3,
-    "categoryId": "b1d3d8e7-c244-46f3-bc57-0b7c2e653df7"
+    "category": "ASPIRATIONS"
   },
   {
     "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Devenir ingénieur",
     "description": "Mon rêve est de devenir ingénieur en informatique et de travailler sur des projets qui allient technologie et impact social.",
     "rating": 4,
-    "categoryId": "b1d3d8e7-c244-46f3-bc57-0b7c2e653df7"
+    "category": "ASPIRATIONS"
   },
   {
     "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Voyager autour du monde",
     "description": "J'ai envie de voyager pour découvrir le monde et m'enrichir des différentes cultures qui existent.",
     "rating": 5,
-    "categoryId": "b1d3d8e7-c244-46f3-bc57-0b7c2e653df7"
+    "category": "ASPIRATIONS"
   },
   {
     "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Faire une thèse",
     "description": "Je souhaite poursuivre mes études et faire une thèse pour contribuer à l'avancement des connaissances dans mon domaine.",
     "rating": null,
-    "categoryId": "b1d3d8e7-c244-46f3-bc57-0b7c2e653df7"
+    "category": "ASPIRATIONS"
   },
   {
     "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Travailler dans une ONG",
     "description": "Je voudrais travailler dans une organisation non gouvernementale pour aider les populations défavorisées et défendre les droits humains.",
     "rating": 1,
-    "categoryId": "b1d3d8e7-c244-46f3-bc57-0b7c2e653df7"
+    "category": "ASPIRATIONS"
   },
   {
     "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Se perfectionner en sport",
     "description": "J’ai l’envie de me perfectionner dans un sport, en particulier le basketball, pour atteindre un niveau professionnel.",
     "rating": 2,
-    "categoryId": "b1d3d8e7-c244-46f3-bc57-0b7c2e653df7"
+    "category": "ASPIRATIONS"
   },
   {
     "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Lancer un projet artistique",
     "description": "J’ai envie de créer un projet artistique autour de la photographie, pour capturer les moments forts de la vie quotidienne.",
     "rating": 3,
-    "categoryId": "b1d3d8e7-c244-46f3-bc57-0b7c2e653df7"
+    "category": "ASPIRATIONS"
   }
 ]

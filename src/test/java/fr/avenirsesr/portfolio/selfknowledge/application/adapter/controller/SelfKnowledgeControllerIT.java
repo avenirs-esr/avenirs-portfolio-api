@@ -60,7 +60,7 @@ class SelfKnowledgeControllerIT extends ContainerConfigurationTest {
             .getResponseBody();
 
     JsonNode json = objectMapper.readTree(body);
-    return json.get(0).get("id").asText();
+    return json.get(0).get("type").asText();
   }
 
   private String getLinkedCategoryId() throws Exception {
@@ -128,9 +128,9 @@ class SelfKnowledgeControllerIT extends ContainerConfigurationTest {
         .expectBody()
         .jsonPath("$")
         .isArray()
-        .jsonPath("$[0].id")
+        .jsonPath("$[0].type")
         .exists()
-        .jsonPath("$[0].title")
+        .jsonPath("$[0].mandatory")
         .exists();
   }
 

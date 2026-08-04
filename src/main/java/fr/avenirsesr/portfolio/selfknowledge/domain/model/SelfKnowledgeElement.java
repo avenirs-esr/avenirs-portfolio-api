@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.selfknowledge.domain.model;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
+import fr.avenirsesr.portfolio.selfknowledge.domain.model.enums.ESelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.Instant;
 import java.util.UUID;
@@ -14,7 +15,7 @@ public class SelfKnowledgeElement extends AvenirsBaseModel {
   private String title;
   private String description;
   private Integer rating;
-  private final SelfKnowledgeCategory selfKnowledgeCategory;
+  private final ESelfKnowledgeCategory selfKnowledgeCategory;
   private boolean valorized;
 
   private SelfKnowledgeElement(
@@ -23,7 +24,7 @@ public class SelfKnowledgeElement extends AvenirsBaseModel {
       String title,
       String description,
       Integer rating,
-      SelfKnowledgeCategory selfKnowledgeCategory,
+      ESelfKnowledgeCategory selfKnowledgeCategory,
       boolean valorized,
       Instant createdAt,
       Instant updatedAt) {
@@ -42,7 +43,7 @@ public class SelfKnowledgeElement extends AvenirsBaseModel {
       String title,
       String description,
       Integer rating,
-      SelfKnowledgeCategory selfKnowledgeCategory) {
+      ESelfKnowledgeCategory selfKnowledgeCategory) {
     return new SelfKnowledgeElement(
         id,
         student,
@@ -61,7 +62,7 @@ public class SelfKnowledgeElement extends AvenirsBaseModel {
       String title,
       String description,
       Integer rating,
-      SelfKnowledgeCategory selfKnowledgeCategory,
+      ESelfKnowledgeCategory selfKnowledgeCategory,
       boolean valorized,
       Instant createdAt,
       Instant updatedAt) {

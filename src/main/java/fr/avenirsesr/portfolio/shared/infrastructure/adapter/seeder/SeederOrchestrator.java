@@ -14,7 +14,6 @@ import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.Institution
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.ProgramSeeder;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.SkillSeeder;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.TrainingPathSeeder;
-import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.seeder.SelfKnowledgeCategorySeeder;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.seeder.SelfKnowledgeElementSeeder;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.seeder.DeclaredActivitySeeder;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.seeder.FeedbackSeeder;
@@ -64,7 +63,6 @@ public class SeederOrchestrator {
   private final StaffSeeder staffSeeder;
   private final UserPhotoSeeder userPhotoSeeder;
 
-  private final SelfKnowledgeCategorySeeder selfKnowledgeCategorySeeder;
   private final SelfKnowledgeElementSeeder selfKnowledgeElementSeeder;
 
   private final DeclaredExperienceSeeder declaredExperienceSeeder;
@@ -98,12 +96,10 @@ public class SeederOrchestrator {
         dependencyChecker.checkAndWait("Interoperability", interoperabilityHealthUrl);
       }
 
-      var savedSelfKnowledgeMandatoryCategories = selfKnowledgeCategorySeeder.seed();
-
       var savedUsers = userSeeder.seed();
 
       var savedStaffs = staffSeeder.seed(savedUsers);
-      var savedStudents = studentSeeder.seed(savedUsers, savedSelfKnowledgeMandatoryCategories);
+      var savedStudents = studentSeeder.seed(savedUsers);
 
       var savedDeclaredExperiences = declaredExperienceSeeder.seed(savedStudents);
 
