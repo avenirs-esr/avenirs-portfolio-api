@@ -3,10 +3,9 @@
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
-import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeElement;
+import fr.avenirsesr.portfolio.selfknowledge.domain.model.enums.ESelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.output.repository.SelfKnowledgeElementRepository;
-import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.mapper.SelfKnowledgeCategoryMapper;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.mapper.SelfKnowledgeElementMapper;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.model.SelfKnowledgeElementEntity;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.specification.SelfKnowledgeElementSpecification;
@@ -26,35 +25,33 @@ public class SelfKnowledgeElementDatabaseRepository
   private final SelfKnowledgeElementJpaRepository jpaRepository;
 
   public SelfKnowledgeElementDatabaseRepository(SelfKnowledgeElementJpaRepository jpaRepository) {
-<span class="fc" id="L29">    super(</span>
+<span class="fc" id="L28">    super(</span>
         jpaRepository,
         jpaRepository,
         SelfKnowledgeElementEntity.class,
         SelfKnowledgeElementMapper.INSTANCE);
-<span class="fc" id="L34">    this.jpaRepository = jpaRepository;</span>
-<span class="fc" id="L35">  }</span>
+<span class="fc" id="L33">    this.jpaRepository = jpaRepository;</span>
+<span class="fc" id="L34">  }</span>
 
   @Override
-  public PagedResult&lt;SelfKnowledgeElement&gt; findAllByStudentIdAndCategoryId(
+  public PagedResult&lt;SelfKnowledgeElement&gt; findAllByStudentIdAndCategory(
       UUID studentId,
-      UUID selfKnowledgeCategoryId,
+      ESelfKnowledgeCategory selfKnowledgeCategory,
       PageCriteria pageCriteria,
       Boolean isValorized) {
-<span class="fc" id="L43">    Specification&lt;SelfKnowledgeElementEntity&gt; spec =</span>
-<span class="fc" id="L44">        SelfKnowledgeElementSpecification.hasStudentId(studentId)</span>
-<span class="fc" id="L45">            .and(</span>
-<span class="fc" id="L46">                SelfKnowledgeElementSpecification.hasSelfKnowledgeCategoryId(</span>
-                    selfKnowledgeCategoryId))
-<span class="fc" id="L48">            .and(SelfKnowledgeElementSpecification.isValorized(isValorized));</span>
-<span class="fc" id="L49">    return findAll(spec, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()));</span>
+<span class="fc" id="L42">    Specification&lt;SelfKnowledgeElementEntity&gt; spec =</span>
+<span class="fc" id="L43">        SelfKnowledgeElementSpecification.hasStudentId(studentId)</span>
+<span class="fc" id="L44">            .and(SelfKnowledgeElementSpecification.hasSelfKnowledgeCategory(selfKnowledgeCategory))</span>
+<span class="fc" id="L45">            .and(SelfKnowledgeElementSpecification.isValorized(isValorized));</span>
+<span class="fc" id="L46">    return findAll(spec, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()));</span>
   }
 
   @Override
   @Transactional
-  public void deleteAllByStudentAndCategory(Student student, SelfKnowledgeCategory category) {
-<span class="nc" id="L55">    jpaRepository.deleteByStudentAndSelfKnowledgeCategory(</span>
-<span class="nc" id="L56">        StudentMapper.INSTANCE.fromDomain(student),</span>
-<span class="nc" id="L57">        SelfKnowledgeCategoryMapper.INSTANCE.fromDomain(category));</span>
-<span class="nc" id="L58">  }</span>
+  public void deleteAllByStudentAndCategory(
+      Student student, ESelfKnowledgeCategory selfKnowledgeCategory) {
+<span class="nc" id="L53">    jpaRepository.deleteByStudentAndSelfKnowledgeCategory(</span>
+<span class="nc" id="L54">        StudentMapper.INSTANCE.fromDomain(student), selfKnowledgeCategory);</span>
+<span class="nc" id="L55">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
