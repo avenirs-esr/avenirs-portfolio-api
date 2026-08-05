@@ -1,4 +1,4 @@
-package fr.avenirsesr.portfolio.association.application.adapter.mapper;
+package fr.avenirsesr.portfolio.student.association.application.adapter.mapper;
 
 import static org.junit.jupiter.api.Assertions.*;
 

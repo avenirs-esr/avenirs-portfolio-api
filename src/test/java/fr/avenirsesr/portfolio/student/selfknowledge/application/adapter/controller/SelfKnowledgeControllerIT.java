@@ -1,4 +1,4 @@
-package fr.avenirsesr.portfolio.selfknowledge.application.adapter.controller;
+package fr.avenirsesr.portfolio.student.selfknowledge.application.adapter.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

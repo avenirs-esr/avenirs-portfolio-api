@@ -1,12 +1,11 @@
-package fr.avenirsesr.portfolio.selfknowledge.application.adapter.mapper;
+package fr.avenirsesr.portfolio.student.selfknowledge.application.adapter.mapper;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.student.selfknowledge.application.adapter.dto.SelfKnowledgeElementDetailsDTO;
-import fr.avenirsesr.portfolio.student.selfknowledge.application.adapter.mapper.SelfKnowledgeElementDetailsMapper;
 import fr.avenirsesr.portfolio.student.selfknowledge.domain.model.SelfKnowledgeElement;
-import fr.avenirsesr.portfolio.selfknowledge.infrastructure.fixture.SelfKnowledgeElementFixture;
+import fr.avenirsesr.portfolio.student.selfknowledge.infrastructure.fixture.SelfKnowledgeElementFixture;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
