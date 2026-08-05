@@ -1,0 +1,13 @@
+package fr.avenirsesr.portfolio.student.selfknowledge.application.adapter.dto;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
+
+@Schema(requiredProperties = {"title", "description", "valorized"})
+public record SelfKnowledgeElementRequest(
+    @Size(max = 80) String title,
+    @Size(max = 400) String description,
+    @Min(1) @Max(5) Integer rating,
+    Boolean valorized) {}

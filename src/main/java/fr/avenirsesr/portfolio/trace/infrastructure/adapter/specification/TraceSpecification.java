@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.adapter.specification;
 
-import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
-import fr.avenirsesr.portfolio.association.infrastructure.adapter.model.AssociationEntity;
+import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
+import fr.avenirsesr.portfolio.student.association.infrastructure.adapter.model.AssociationEntity;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;

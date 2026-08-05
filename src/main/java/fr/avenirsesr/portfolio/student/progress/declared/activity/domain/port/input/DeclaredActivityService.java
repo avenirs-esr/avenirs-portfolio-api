@@ -1,8 +1,8 @@
 package fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input;
 
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
-import fr.avenirsesr.portfolio.association.domain.data.AssociationSearchResultData;
-import fr.avenirsesr.portfolio.association.domain.model.EAssociationContextType;
+import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
+import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityAssociationsData;

@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.service;
 
-import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
-import fr.avenirsesr.portfolio.association.domain.service.AssociationSearchHelper;
+import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
+import fr.avenirsesr.portfolio.student.association.domain.service.AssociationSearchHelper;
 import fr.avenirsesr.portfolio.declaredskill.domain.port.input.DeclaredSkillSyncService;
 import fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.client.ExternalSkillClient;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
