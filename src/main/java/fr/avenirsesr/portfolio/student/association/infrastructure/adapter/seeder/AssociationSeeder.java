@@ -14,7 +14,7 @@ import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig
 import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.model.DeclaredActivityEntity;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.infrastructure.adapter.model.DeclaredExperienceEntity;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.model.DeclaredSkillProgressEntity;
-import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
+import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.model.TraceEntity;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;

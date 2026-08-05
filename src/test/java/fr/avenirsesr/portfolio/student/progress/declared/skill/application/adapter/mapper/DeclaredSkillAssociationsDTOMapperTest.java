@@ -11,7 +11,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.enums.EExperienceType;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.application.adapter.dto.DeclaredSkillAssociationsDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.data.DeclaredSkillAssociationsData;
-import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceOverviewMapper;
+import fr.avenirsesr.portfolio.student.trace.application.adapter.mapper.TraceOverviewMapper;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.LocalDate;

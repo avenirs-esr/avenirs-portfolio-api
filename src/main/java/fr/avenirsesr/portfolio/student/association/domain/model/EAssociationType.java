@@ -3,7 +3,7 @@ package fr.avenirsesr.portfolio.student.association.domain.model;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
-import fr.avenirsesr.portfolio.trace.domain.model.Trace;
+import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;

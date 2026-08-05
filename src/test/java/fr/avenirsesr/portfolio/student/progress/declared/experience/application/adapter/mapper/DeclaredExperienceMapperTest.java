@@ -8,6 +8,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.data.
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.data.DeclaredExperienceData;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.enums.EExperienceType;
+import fr.avenirsesr.portfolio.student.trace.application.adapter.mapper.TraceOverviewMapper;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.Instant;
@@ -24,10 +25,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class DeclaredExperienceMapperTest {
 
   @Spy
-  private fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceOverviewMapper
+  private TraceOverviewMapper
       traceOverviewMapper =
           Mappers.getMapper(
-              fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceOverviewMapper.class);
+              TraceOverviewMapper.class);
 
   @InjectMocks private DeclaredExperienceMapperImpl mapper;
 

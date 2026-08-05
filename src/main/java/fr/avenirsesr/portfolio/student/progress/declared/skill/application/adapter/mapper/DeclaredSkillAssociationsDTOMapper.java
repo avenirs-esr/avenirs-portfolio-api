@@ -4,7 +4,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.application.ad
 import fr.avenirsesr.portfolio.student.progress.declared.experience.application.adapter.mapper.DeclaredExperienceMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.application.adapter.dto.DeclaredSkillAssociationsDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.data.DeclaredSkillAssociationsData;
-import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceOverviewMapper;
+import fr.avenirsesr.portfolio.student.trace.application.adapter.mapper.TraceOverviewMapper;
 import org.mapstruct.Mapper;
 
 @Mapper(
