@@ -15,6 +15,11 @@ import fr.avenirsesr.portfolio.student.selfknowledge.domain.data.SelfKnowledgeEl
 import fr.avenirsesr.portfolio.student.selfknowledge.domain.model.SelfKnowledgeElement;
 import fr.avenirsesr.portfolio.student.selfknowledge.domain.model.enums.ESelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.student.selfknowledge.domain.port.input.SelfKnowledgeService;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
@@ -43,7 +48,12 @@ public class SelfKnowledgeController {
 
   @GetMapping("/elements")
   public ResponseEntity<PagedResponse<SelfKnowledgeElementViewDTO>> getSelfKnowledgeElements(
-      @RequestParam(required = false) List<ESelfKnowledgeCategory> selfKnowledgeCategories,
+      @Parameter(
+              array =
+                  @ArraySchema(
+                      schema = @Schema(ref = "#/components/schemas/ESelfKnowledgeCategory")))
+          @RequestParam(required = false)
+          List<ESelfKnowledgeCategory> selfKnowledgeCategories,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize,
       @RequestParam(required = false) Boolean isValorized) {
@@ -81,7 +91,13 @@ public class SelfKnowledgeController {
 
   @PostMapping("/{selfKnowledgeCategory}/elements")
   public ResponseEntity<SelfKnowledgeElementViewDTO> createSelfKnowledgeElement(
-      @PathVariable("selfKnowledgeCategory") ESelfKnowledgeCategory selfKnowledgeCategory,
+      @Parameter(
+              name = "selfKnowledgeCategory",
+              in = ParameterIn.PATH,
+              required = true,
+              schema = @Schema(ref = "#/components/schemas/ESelfKnowledgeCategory"))
+          @PathVariable("selfKnowledgeCategory")
+          ESelfKnowledgeCategory selfKnowledgeCategory,
       @Valid @RequestBody SelfKnowledgeElementRequest selfKnowledgeElementRequest) {
     log.debug(
         "Received request to create self knowledge element [{}] to category [{}]",
@@ -135,7 +151,15 @@ public class SelfKnowledgeController {
 
   @PostMapping("/categories")
   public ResponseEntity<String> addSelfKnowledgeCategories(
-      @RequestBody List<ESelfKnowledgeCategory> categories) {
+      @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              content =
+                  @Content(
+                      array =
+                          @ArraySchema(
+                              schema =
+                                  @Schema(ref = "#/components/schemas/ESelfKnowledgeCategory"))))
+          @RequestBody
+          List<ESelfKnowledgeCategory> categories) {
     selfKnowledgeService.addSelfKnowledgeCategories(categories);
     return ResponseEntity.ok("Categories successfully associated with user");
   }
@@ -150,7 +174,13 @@ public class SelfKnowledgeController {
 
   @DeleteMapping("/categories/{selfKnowledgeCategory}")
   public ResponseEntity<String> removeSelfKnowledgeCategory(
-      @PathVariable ESelfKnowledgeCategory selfKnowledgeCategory) {
+      @Parameter(
+              name = "selfKnowledgeCategory",
+              in = ParameterIn.PATH,
+              required = true,
+              schema = @Schema(ref = "#/components/schemas/ESelfKnowledgeCategory"))
+          @PathVariable
+          ESelfKnowledgeCategory selfKnowledgeCategory) {
     selfKnowledgeService.removeSelfKnowledgeCategory(selfKnowledgeCategory);
     return ResponseEntity.ok("Categories successfully deleted");
   }
