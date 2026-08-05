@@ -1,8 +1,7 @@
 package fr.avenirsesr.portfolio.student.skill.domain.model;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
-import fr.avenirsesr.portfolio.declaredskill.domain.model.DeclaredSkill;
-import fr.avenirsesr.portfolio.declaredskill.domain.model.enums.EDeclaredSkillLevel;
+import fr.avenirsesr.portfolio.student.skill.domain.model.enums.EDeclaredSkillLevel;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.Instant;
 import java.util.UUID;

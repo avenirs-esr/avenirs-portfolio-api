@@ -4,12 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
-import fr.avenirsesr.portfolio.declaredskill.domain.port.output.repository.DeclaredSkillRepository;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationData;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
+import fr.avenirsesr.portfolio.student.skill.domain.port.output.repository.DeclaredSkillRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

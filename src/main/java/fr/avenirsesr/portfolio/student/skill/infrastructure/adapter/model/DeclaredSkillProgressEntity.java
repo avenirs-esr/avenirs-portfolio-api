@@ -3,8 +3,7 @@ package fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.model;
 import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.RICH_TEXT_LENGTH;
 
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
-import fr.avenirsesr.portfolio.declaredskill.domain.model.enums.EDeclaredSkillLevel;
-import fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.model.DeclaredSkillEntity;
+import fr.avenirsesr.portfolio.student.skill.domain.model.enums.EDeclaredSkillLevel;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import jakarta.persistence.*;
 import java.time.Instant;

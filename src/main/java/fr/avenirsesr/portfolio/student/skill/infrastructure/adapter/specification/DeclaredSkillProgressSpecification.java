@@ -2,8 +2,8 @@ package fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.specificati
 
 import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
-import fr.avenirsesr.portfolio.declaredskill.domain.model.DeclaredSkill;
-import fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.mapper.DeclaredSkillMapper;
+import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkill;
+import fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.mapper.DeclaredSkillMapper;
 import fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.model.DeclaredSkillProgressEntity;
 import java.util.UUID;
 import org.springframework.data.domain.Sort;

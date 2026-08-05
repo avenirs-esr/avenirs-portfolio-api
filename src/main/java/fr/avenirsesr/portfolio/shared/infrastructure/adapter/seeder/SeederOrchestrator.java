@@ -3,7 +3,6 @@ package fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder;
 import fr.avenirsesr.portfolio.common.dependency.domain.port.input.DependencyChecker;
 import fr.avenirsesr.portfolio.common.seeder.domain.model.enums.ESeedMode;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.configuration.SeedingState;
-import fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.seeder.DeclaredSkillSeeder;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.ActivityFileSeeder;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.UserPhotoSeeder;
 import fr.avenirsesr.portfolio.notification.infrastructure.adapter.seeder.NotificationSeeder;
@@ -21,6 +20,7 @@ import fr.avenirsesr.portfolio.student.program.infrastructure.adapter.seeder.Dec
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.seeder.StudentProgressSeeder;
 import fr.avenirsesr.portfolio.student.selfknowledge.infrastructure.adapter.seeder.SelfKnowledgeElementSeeder;
 import fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.seeder.DeclaredSkillProgressSeeder;
+import fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.seeder.DeclaredSkillSeeder;
 import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.seeder.TraceSeeder;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.StaffSeeder;

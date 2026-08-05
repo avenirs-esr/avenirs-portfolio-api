@@ -4,10 +4,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillType;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
-import fr.avenirsesr.portfolio.declaredskill.domain.model.DeclaredSkill;
-import fr.avenirsesr.portfolio.declaredskill.domain.model.enums.EDeclaredSkillLevel;
 import fr.avenirsesr.portfolio.student.skill.application.adapter.dto.DeclaredSkillProgressDTO;
+import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkill;
 import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
+import fr.avenirsesr.portfolio.student.skill.domain.model.enums.EDeclaredSkillLevel;
 import fr.avenirsesr.portfolio.student.trace.application.adapter.mapper.TraceOverviewMapper;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;

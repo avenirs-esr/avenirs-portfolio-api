@@ -2,7 +2,6 @@ package fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.mapper;
 
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.EntityGrapher;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.mapper.Mapper;
-import fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.mapper.DeclaredSkillMapper;
 import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.model.DeclaredSkillProgressEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StudentMapper;

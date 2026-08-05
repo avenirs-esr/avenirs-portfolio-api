@@ -2,9 +2,9 @@ package fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.seeder.fake
 
 import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
-import fr.avenirsesr.portfolio.declaredskill.domain.model.enums.EDeclaredSkillLevel;
-import fr.avenirsesr.portfolio.declaredskill.domain.port.output.seeder.DeclaredSkillProgressDataGenerator;
-import fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.model.DeclaredSkillEntity;
+import fr.avenirsesr.portfolio.student.skill.domain.model.enums.EDeclaredSkillLevel;
+import fr.avenirsesr.portfolio.student.skill.domain.port.output.seeder.DeclaredSkillProgressDataGenerator;
+import fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.model.DeclaredSkillEntity;
 import fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.model.DeclaredSkillProgressEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import java.time.Instant;
