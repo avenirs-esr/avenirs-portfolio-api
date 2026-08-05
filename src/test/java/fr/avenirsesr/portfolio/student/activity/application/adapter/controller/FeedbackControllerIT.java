@@ -608,34 +608,43 @@ public class FeedbackControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldReturnFeedbacksWithCorrectShapeOnExhaustiveListEndpoint() {
-    BddLogger.given("a staff who has authored activities with seeded feedbacks");
+  void shouldReturnFeedbacksWithCorrectShapeOnExhaustiveListEndpoint() throws Exception {
+    BddLogger.given("a staff who has authored a feedback on the seeded activity");
+    // Create the feedback this test asserts on, so it does not depend on what other tests
+    // left in the shared database.
+    String feedbackId = askForFeedbackAndGetId(declaredActivityId);
+
     BddLogger.when("performing a GET on the exhaustive list endpoint for the seeded activity");
     BddLogger.then(
-        "each item in the response has an id, an activity and a student with id, firstName,"
-            + " lastName, email");
+        "the item for that feedback has an id and a student with id, firstName, lastName, email");
 
-    webTestClient
-        .get()
-        .uri(BASE_PATH + "/exhaustive-list/" + ACTIVITY_ID)
-        .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Signature", studentSignature)
-        .exchange()
-        .expectStatus()
-        .isOk()
-        .expectBody()
-        .jsonPath("$[0].feedbackId")
-        .isNotEmpty()
-        .jsonPath("$[0].student")
-        .isNotEmpty()
-        .jsonPath("$[0].student.id")
-        .isNotEmpty()
-        .jsonPath("$[0].student.firstName")
-        .isNotEmpty()
-        .jsonPath("$[0].student.lastName")
-        .isNotEmpty()
-        .jsonPath("$[0].student.email")
-        .isNotEmpty();
+    String response =
+        webTestClient
+            .get()
+            .uri(BASE_PATH + "/exhaustive-list/" + ACTIVITY_ID)
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Signature", studentSignature)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    JsonNode item = null;
+    for (JsonNode node : objectMapper.readTree(response)) {
+      if (feedbackId.equals(node.path("feedbackId").asText())) {
+        item = node;
+        break;
+      }
+    }
+
+    assertThat(item).as("feedback %s in the exhaustive list", feedbackId).isNotNull();
+    JsonNode student = item.path("student");
+    assertThat(student.path("id").asText()).isNotEmpty();
+    assertThat(student.path("firstName").asText()).isNotEmpty();
+    assertThat(student.path("lastName").asText()).isNotEmpty();
+    assertThat(student.path("email").asText()).isNotEmpty();
   }
 
   @Test
