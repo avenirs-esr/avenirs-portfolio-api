@@ -1,9 +1,9 @@
 package fr.avenirsesr.portfolio.student.skill.application.adapter.mapper;
 
 import fr.avenirsesr.portfolio.common.externalskill.application.adapter.dto.ExternalSkillCategoryDTO;
-import fr.avenirsesr.portfolio.declaredskill.application.adapter.dto.DeclaredSkillCategoryDTO;
 import fr.avenirsesr.portfolio.shared.application.adapter.mapper.OptionalMapper;
 import fr.avenirsesr.portfolio.student.skill.application.adapter.dto.DeclaredSkillAssociationCountDTO;
+import fr.avenirsesr.portfolio.student.skill.application.adapter.dto.DeclaredSkillCategoryDTO;
 import fr.avenirsesr.portfolio.student.skill.application.adapter.dto.DeclaredSkillProgressDTO;
 import fr.avenirsesr.portfolio.student.skill.application.adapter.dto.DeclaredSkillProgressDetailsDTO;
 import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillAssociationCount;

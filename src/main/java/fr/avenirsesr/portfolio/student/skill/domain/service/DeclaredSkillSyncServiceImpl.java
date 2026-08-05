@@ -1,0 +1,50 @@
+package fr.avenirsesr.portfolio.student.skill.domain.service;
+
+import fr.avenirsesr.portfolio.common.externalskill.application.adapter.dto.ExternalSkillDTO;
+import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillType;
+import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkill;
+import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillSyncService;
+import fr.avenirsesr.portfolio.student.skill.domain.port.output.repository.DeclaredSkillRepository;
+import fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.client.ExternalSkillClient;
+import java.util.Optional;
+import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@RequiredArgsConstructor
+public class DeclaredSkillSyncServiceImpl implements DeclaredSkillSyncService {
+
+  private final DeclaredSkillRepository declaredSkillRepository;
+  private final ExternalSkillClient externalSkillClient;
+
+  @Override
+  public Optional<DeclaredSkill> getOrCreateFromExternalSkill(UUID id) {
+    Optional<DeclaredSkill> existing = declaredSkillRepository.findById(id);
+
+    if (existing.isPresent()) {
+      log.debug("DeclaredSkill already exists for external skill: {}", id);
+      return existing;
+    }
+
+    log.debug("Fetching external skill from interoperability: {}", id);
+    Optional<ExternalSkillDTO> externalSkillDTO = externalSkillClient.getById(id);
+
+    if (externalSkillDTO.isEmpty()) {
+      log.warn("External skill not found in interoperability: {}", id);
+      return Optional.empty();
+    }
+
+    ExternalSkillDTO dto = externalSkillDTO.get();
+    DeclaredSkill newSkill =
+        DeclaredSkill.create(
+            dto.id(),
+            dto.title(),
+            EExternalSkillType.valueOf(dto.type().name()),
+            dto.pathSegments());
+
+    DeclaredSkill saved = declaredSkillRepository.saveOrGet(newSkill);
+    log.info("Created new DeclaredSkill from external skill: {}", id);
+    return Optional.of(saved);
+  }
+}

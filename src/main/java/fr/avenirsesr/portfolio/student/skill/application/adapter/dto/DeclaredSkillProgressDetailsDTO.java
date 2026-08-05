@@ -1,8 +1,7 @@
 package fr.avenirsesr.portfolio.student.skill.application.adapter.dto;
 
 import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillType;
-import fr.avenirsesr.portfolio.declaredskill.application.adapter.dto.DeclaredSkillCategoryDTO;
-import fr.avenirsesr.portfolio.declaredskill.domain.model.enums.EDeclaredSkillLevel;
+import fr.avenirsesr.portfolio.student.skill.domain.model.enums.EDeclaredSkillLevel;
 import fr.avenirsesr.portfolio.student.trace.application.adapter.dto.TraceOverviewDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
