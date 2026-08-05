@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.seeder.data;
 
-import fr.avenirsesr.portfolio.activity.infrastructure.adapter.model.ActivityEntity;
+import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityEntity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.model.DeclaredActivityEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import java.time.Instant;

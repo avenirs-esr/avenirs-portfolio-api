@@ -4,10 +4,10 @@ import static fr.avenirsesr.portfolio.common.validation.domain.constraints.Field
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateDateOrder;
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateOptionalEnrichedTextMaxLength;
 
-import fr.avenirsesr.portfolio.activity.domain.exception.ActivityUnpublishedException;
-import fr.avenirsesr.portfolio.activity.domain.model.Activity;
-import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityStatus;
-import fr.avenirsesr.portfolio.activity.domain.port.input.ActivityService;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityUnpublishedException;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
+import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.association.domain.data.AssociationData;
 import fr.avenirsesr.portfolio.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.association.domain.exception.MaximumAssociationReachedException;

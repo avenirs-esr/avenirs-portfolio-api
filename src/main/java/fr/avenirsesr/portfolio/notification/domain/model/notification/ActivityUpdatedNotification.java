@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.notification.domain.model.notification;
 
-import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityUpdatableField;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityUpdatableField;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.notification.domain.model.enums.ENotificationType;
 import fr.avenirsesr.portfolio.notification.domain.model.notification.parameters.ActivityModifiedParameters;

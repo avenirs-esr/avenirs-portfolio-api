@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder;
 
-import fr.avenirsesr.portfolio.activity.infrastructure.adapter.seeder.ActivityDraftSeeder;
-import fr.avenirsesr.portfolio.activity.infrastructure.adapter.seeder.ActivitySeeder;
+import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.seeder.ActivityDraftSeeder;
+import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.seeder.ActivitySeeder;
 import fr.avenirsesr.portfolio.association.infrastructure.adapter.seeder.AssociationSeeder;
 import fr.avenirsesr.portfolio.common.dependency.domain.port.input.DependencyChecker;
 import fr.avenirsesr.portfolio.common.seeder.domain.model.enums.ESeedMode;
