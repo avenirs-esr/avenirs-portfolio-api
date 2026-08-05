@@ -1,10 +1,10 @@
 package fr.avenirsesr.portfolio.student.association.domain.service;
 
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
-import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;

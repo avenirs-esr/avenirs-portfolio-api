@@ -1,10 +1,10 @@
 package fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper;
 
+import fr.avenirsesr.portfolio.shared.application.adapter.dto.FileDTO;
+import fr.avenirsesr.portfolio.shared.application.adapter.mapper.OptionalMapper;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityContentDTO;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityDraft;
-import fr.avenirsesr.portfolio.shared.application.adapter.dto.FileDTO;
-import fr.avenirsesr.portfolio.shared.application.adapter.mapper.OptionalMapper;
 import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

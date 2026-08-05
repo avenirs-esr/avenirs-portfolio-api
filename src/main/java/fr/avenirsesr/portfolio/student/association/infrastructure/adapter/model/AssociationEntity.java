@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.student.association.infrastructure.adapter.model;
 
-import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
+import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.UUID;

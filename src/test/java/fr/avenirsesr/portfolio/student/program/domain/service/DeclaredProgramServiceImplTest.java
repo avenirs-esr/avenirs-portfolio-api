@@ -18,7 +18,6 @@ import fr.avenirsesr.portfolio.student.program.domain.exception.DeclaredProgramN
 import fr.avenirsesr.portfolio.student.program.domain.model.DeclaredProgram;
 import fr.avenirsesr.portfolio.student.program.domain.model.enums.EProgramStatus;
 import fr.avenirsesr.portfolio.student.program.domain.port.output.DeclaredProgramRepository;
-import fr.avenirsesr.portfolio.student.program.domain.service.DeclaredProgramServiceImpl;
 import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStudentException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;

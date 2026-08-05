@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.staff.activity.application.adapter.dto;
 
-import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.FileDTO;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
 import java.util.UUID;

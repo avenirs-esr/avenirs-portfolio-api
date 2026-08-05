@@ -1,9 +1,9 @@
 package fr.avenirsesr.portfolio.staff.activity.domain.mapper;
 
+import fr.avenirsesr.portfolio.file.domain.data.FileData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityPresentationData;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityDraft;
-import fr.avenirsesr.portfolio.file.domain.data.FileData;
 import java.util.Optional;
 import java.util.UUID;
 

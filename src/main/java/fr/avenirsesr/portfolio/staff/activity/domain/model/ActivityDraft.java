@@ -1,8 +1,8 @@
 package fr.avenirsesr.portfolio.staff.activity.domain.model;
 
-import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.file.domain.model.File;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import java.time.Instant;
 import java.time.LocalDate;

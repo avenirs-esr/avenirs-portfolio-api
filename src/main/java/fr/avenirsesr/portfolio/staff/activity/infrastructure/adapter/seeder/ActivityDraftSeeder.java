@@ -1,13 +1,6 @@
 package fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.seeder;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityDraft;
-import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
-import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
-import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.mapper.ActivityDraftMapper;
-import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityDraftEntity;
-import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.seeder.data.ActivityDraftCreationData;
-import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.seeder.data.FakeActivityDraft;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
@@ -17,6 +10,13 @@ import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestData;
 import fr.avenirsesr.portfolio.shared.domain.port.input.ClockService;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityDraft;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
+import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
+import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.mapper.ActivityDraftMapper;
+import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityDraftEntity;
+import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.seeder.data.ActivityDraftCreationData;
+import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.seeder.data.FakeActivityDraft;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StaffEntity;
 import jakarta.persistence.EntityManager;

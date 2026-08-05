@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.student.program.application.adapter.dto.DeclaredProgramViewDTO;
-import fr.avenirsesr.portfolio.student.program.application.adapter.mapper.DeclaredProgramViewMapper;
 import fr.avenirsesr.portfolio.student.program.domain.model.DeclaredProgram;
 import fr.avenirsesr.portfolio.student.program.domain.model.enums.EProgramStatus;
 import fr.avenirsesr.portfolio.user.domain.model.Student;

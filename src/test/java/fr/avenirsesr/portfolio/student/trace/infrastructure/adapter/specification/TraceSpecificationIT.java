@@ -13,8 +13,6 @@ import fr.avenirsesr.portfolio.student.trace.domain.model.ETraceStatus;
 import fr.avenirsesr.portfolio.student.trace.domain.model.enums.ETraceAuthorType;
 import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.repository.TraceJpaRepository;
-import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.specification.TraceFilterSpecificationBuilder;
-import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.specification.TraceSpecification;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import jakarta.persistence.EntityManager;

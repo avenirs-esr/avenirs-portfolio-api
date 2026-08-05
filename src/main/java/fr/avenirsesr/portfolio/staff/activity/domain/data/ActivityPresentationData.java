@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.staff.activity.domain.data;
 
-import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.file.domain.data.FileData;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
