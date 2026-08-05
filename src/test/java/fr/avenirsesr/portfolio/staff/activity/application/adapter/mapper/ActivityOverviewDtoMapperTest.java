@@ -1,15 +1,15 @@
-package fr.avenirsesr.portfolio.activity.application.adapter.mapper;
+package fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityOverviewDTO;
-import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.AuthorDTO;
-import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityWithStudentStatusData;
-import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.infrastructure.fixture.ActivityFixture;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.application.adapter.mapper.OptionalMapper;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityOverviewDTO;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.AuthorDTO;
+import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityWithStudentStatusData;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;

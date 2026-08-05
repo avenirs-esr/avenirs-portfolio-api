@@ -416,7 +416,7 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
 
         webTestClient
             .get()
-            .uri(BASE_PATH)
+            .uri(uriBuilder -> uriBuilder.path(BASE_PATH).queryParam("pageSize", 100).build())
             .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
             .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
             .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)

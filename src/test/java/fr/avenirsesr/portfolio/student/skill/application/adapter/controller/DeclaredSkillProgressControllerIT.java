@@ -3,13 +3,13 @@ package fr.avenirsesr.portfolio.student.skill.application.adapter.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fr.avenirsesr.portfolio.student.association.domain.data.AssociationData;
-import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
-import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.declaredskill.domain.port.output.repository.DeclaredSkillRepository;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
+import fr.avenirsesr.portfolio.student.association.domain.data.AssociationData;
+import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
+import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -73,26 +73,7 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
   void shouldFilterDeclaredSkillProgressesByIsValorized() throws Exception {
     BddLogger.given("a declared skill progress marked as valorized");
 
-    var declaredSkill =
-        declaredSkillRepository.findAll().stream().skip(2).findFirst().orElseThrow();
-
-    var createResponse =
-        webTestClient
-            .post()
-            .uri(BASE_PATH)
-            .header("X-Signed-Context", studentPayload)
-            .header("X-Context-Signature", studentSignature)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(buildDeclaredSkillsJson(declaredSkill.getId()))
-            .exchange()
-            .expectStatus()
-            .isCreated()
-            .expectBody(String.class)
-            .returnResult()
-            .getResponseBody();
-
-    UUID createdSkillId =
-        objectMapper.readTree(createResponse).get("id").textValue().transform(UUID::fromString);
+    UUID createdSkillId = createAvailableDeclaredSkillProgress().progressId();
 
     webTestClient
         .put()
@@ -156,37 +137,12 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
 
   @Test
   void shouldCreateDeclaredSkillProgress() throws Exception {
-    var declaredSkill = declaredSkillRepository.findAll().stream().findFirst().orElseThrow();
-    UUID id = declaredSkill.getId();
-
-    webTestClient
-        .post()
-        .uri(BASE_PATH)
-        .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Signature", studentSignature)
-        .contentType(MediaType.APPLICATION_JSON)
-        .bodyValue(buildDeclaredSkillsJson(id))
-        .exchange()
-        .expectStatus()
-        .isCreated();
+    assertThat(createAvailableDeclaredSkillProgress().progressId()).isNotNull();
   }
 
   @Test
   void shouldReturnConflictWhenDeclaredSkillAlreadyExists() throws Exception {
-    var declaredSkill =
-        declaredSkillRepository.findAll().stream().skip(1).findFirst().orElseThrow();
-    UUID id = declaredSkill.getId();
-
-    webTestClient
-        .post()
-        .uri(BASE_PATH)
-        .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Signature", studentSignature)
-        .contentType(MediaType.APPLICATION_JSON)
-        .bodyValue(buildDeclaredSkillsJson(id))
-        .exchange()
-        .expectStatus()
-        .isCreated();
+    UUID id = createAvailableDeclaredSkillProgress().declaredSkillId();
 
     webTestClient
         .post()
@@ -300,6 +256,38 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
         .formatted(id);
   }
 
+  private record CreatedDeclaredSkillProgress(UUID declaredSkillId, UUID progressId) {}
+
+  /**
+   * Creates a declared skill progress on the first declared skill of the catalog that is not
+   * already assigned to the logged-in student. Skills assigned by the seeder, or by tests that ran
+   * earlier against the same database, are skipped so that this helper never returns 409.
+   */
+  private CreatedDeclaredSkillProgress createAvailableDeclaredSkillProgress() throws Exception {
+    for (var declaredSkill : declaredSkillRepository.findAll()) {
+      var result =
+          webTestClient
+              .post()
+              .uri(BASE_PATH)
+              .header("X-Signed-Context", studentPayload)
+              .header("X-Context-Signature", studentSignature)
+              .contentType(MediaType.APPLICATION_JSON)
+              .bodyValue(buildDeclaredSkillsJson(declaredSkill.getId()))
+              .exchange()
+              .expectBody(String.class)
+              .returnResult();
+
+      if (result.getStatus().is2xxSuccessful()) {
+        return new CreatedDeclaredSkillProgress(
+            declaredSkill.getId(),
+            UUID.fromString(objectMapper.readTree(result.getResponseBody()).get("id").asText()));
+      }
+    }
+
+    throw new IllegalStateException(
+        "No declared skill available for the logged-in student in the seeded catalog");
+  }
+
   @Test
   void shouldReturn404WhenGettingAssociationsForNonExistentSkill() throws Exception {
     BddLogger.given("a non-existent declared skill progress ID");
@@ -407,29 +395,7 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
   void shouldReturn404WhenAssociatingWithNonExistentActivities() throws Exception {
     BddLogger.given("a declared skill progress and non-existent activity IDs");
 
-    // First create a declared skill progress
-    var declaredSkill =
-        declaredSkillRepository.findAll().stream().skip(3).findFirst().orElseThrow();
-    UUID id = declaredSkill.getId();
-
-    // Create the declared skill progress
-    var createResponse =
-        webTestClient
-            .post()
-            .uri(BASE_PATH)
-            .header("X-Signed-Context", studentPayload)
-            .header("X-Context-Signature", studentSignature)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(buildDeclaredSkillsJson(id))
-            .exchange()
-            .expectStatus()
-            .isCreated()
-            .expectBody(String.class)
-            .returnResult()
-            .getResponseBody();
-
-    UUID createdSkillId =
-        objectMapper.readTree(createResponse).get("id").textValue().transform(UUID::fromString);
+    UUID createdSkillId = createAvailableDeclaredSkillProgress().progressId();
 
     List<UUID> nonExistentActivityIds = List.of(UUID.randomUUID(), UUID.randomUUID());
 
@@ -459,29 +425,7 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
   void shouldHandleEmptyActivityListWhenAssociating() throws Exception {
     BddLogger.given("a declared skill progress and empty activity list");
 
-    // First create a declared skill progress
-    var declaredSkill =
-        declaredSkillRepository.findAll().stream().skip(4).findFirst().orElseThrow();
-    UUID id = declaredSkill.getId();
-
-    // Create the declared skill progress
-    var createResponse =
-        webTestClient
-            .post()
-            .uri(BASE_PATH)
-            .header("X-Signed-Context", studentPayload)
-            .header("X-Context-Signature", studentSignature)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(buildDeclaredSkillsJson(id))
-            .exchange()
-            .expectStatus()
-            .isCreated()
-            .expectBody(String.class)
-            .returnResult()
-            .getResponseBody();
-
-    UUID createdSkillId =
-        objectMapper.readTree(createResponse).get("id").textValue().transform(UUID::fromString);
+    UUID createdSkillId = createAvailableDeclaredSkillProgress().progressId();
 
     BddLogger.when("performing a POST with empty activity list");
 
@@ -511,24 +455,7 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
     BddLogger.given(
         "a declared skill progress associated with one of the logged-in student's activities");
 
-    var declaredSkill =
-        declaredSkillRepository.findAll().stream().skip(5).findFirst().orElseThrow();
-    var createResponse =
-        webTestClient
-            .post()
-            .uri(BASE_PATH)
-            .header("X-Signed-Context", studentPayload)
-            .header("X-Context-Signature", studentSignature)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(buildDeclaredSkillsJson(declaredSkill.getId()))
-            .exchange()
-            .expectStatus()
-            .isCreated()
-            .expectBody(String.class)
-            .returnResult()
-            .getResponseBody();
-    UUID createdSkillId =
-        objectMapper.readTree(createResponse).get("id").textValue().transform(UUID::fromString);
+    UUID createdSkillId = createAvailableDeclaredSkillProgress().progressId();
 
     var activityListResponse =
         webTestClient
@@ -711,26 +638,7 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
   void shouldReturn404WhenAssociatingWithNonExistentExperiences() throws Exception {
     BddLogger.given("a declared skill progress and non-existent declared experience IDs");
 
-    var declaredSkill =
-        declaredSkillRepository.findAll().stream().skip(7).findFirst().orElseThrow();
-
-    var createResponse =
-        webTestClient
-            .post()
-            .uri(BASE_PATH)
-            .header("X-Signed-Context", studentPayload)
-            .header("X-Context-Signature", studentSignature)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(buildDeclaredSkillsJson(declaredSkill.getId()))
-            .exchange()
-            .expectStatus()
-            .isCreated()
-            .expectBody(String.class)
-            .returnResult()
-            .getResponseBody();
-
-    UUID createdSkillId =
-        objectMapper.readTree(createResponse).get("id").textValue().transform(UUID::fromString);
+    UUID createdSkillId = createAvailableDeclaredSkillProgress().progressId();
 
     List<UUID> nonExistentExperienceIds = List.of(UUID.randomUUID(), UUID.randomUUID());
 
@@ -760,26 +668,7 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
   void shouldHandleEmptyExperienceListWhenAssociating() throws Exception {
     BddLogger.given("a declared skill progress and empty declared experience list");
 
-    var declaredSkill =
-        declaredSkillRepository.findAll().stream().skip(8).findFirst().orElseThrow();
-
-    var createResponse =
-        webTestClient
-            .post()
-            .uri(BASE_PATH)
-            .header("X-Signed-Context", studentPayload)
-            .header("X-Context-Signature", studentSignature)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(buildDeclaredSkillsJson(declaredSkill.getId()))
-            .exchange()
-            .expectStatus()
-            .isCreated()
-            .expectBody(String.class)
-            .returnResult()
-            .getResponseBody();
-
-    UUID createdSkillId =
-        objectMapper.readTree(createResponse).get("id").textValue().transform(UUID::fromString);
+    UUID createdSkillId = createAvailableDeclaredSkillProgress().progressId();
 
     BddLogger.when("performing a POST with empty declared experience list");
 
@@ -808,26 +697,7 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
   void shouldAssociateDeclaredSkillWithDeclaredExperiencesSuccessfully() throws Exception {
     BddLogger.given("a declared skill progress and two declared experiences owned by the student");
 
-    var declaredSkill =
-        declaredSkillRepository.findAll().stream().skip(9).findFirst().orElseThrow();
-
-    var createResponse =
-        webTestClient
-            .post()
-            .uri(BASE_PATH)
-            .header("X-Signed-Context", studentPayload)
-            .header("X-Context-Signature", studentSignature)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(buildDeclaredSkillsJson(declaredSkill.getId()))
-            .exchange()
-            .expectStatus()
-            .isCreated()
-            .expectBody(String.class)
-            .returnResult()
-            .getResponseBody();
-
-    UUID createdSkillId =
-        objectMapper.readTree(createResponse).get("id").textValue().transform(UUID::fromString);
+    UUID createdSkillId = createAvailableDeclaredSkillProgress().progressId();
 
     UUID experienceId1 =
         createDeclaredExperience("Backend Developer", "PROFESSIONAL", "2022-01-10", null);
@@ -923,26 +793,7 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
         "a declared skill progress with a professional and a personal declared experience"
             + " associated, the personal one being associated most recently");
 
-    var declaredSkill =
-        declaredSkillRepository.findAll().stream().skip(6).findFirst().orElseThrow();
-
-    var createSkillResponse =
-        webTestClient
-            .post()
-            .uri(BASE_PATH)
-            .header("X-Signed-Context", studentPayload)
-            .header("X-Context-Signature", studentSignature)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(buildDeclaredSkillsJson(declaredSkill.getId()))
-            .exchange()
-            .expectStatus()
-            .isCreated()
-            .expectBody(String.class)
-            .returnResult()
-            .getResponseBody();
-
-    UUID declaredSkillProgressId =
-        UUID.fromString(objectMapper.readTree(createSkillResponse).get("id").asText());
+    UUID declaredSkillProgressId = createAvailableDeclaredSkillProgress().progressId();
 
     UUID professionalExperienceId =
         createDeclaredExperience("Backend Developer", "PROFESSIONAL", "2022-01-10", null);
