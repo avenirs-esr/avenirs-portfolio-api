@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AssociationSearchHelper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.student.association.domain.service</a> &gt; <span class="el_source">AssociationSearchHelper.java</span></div><h1>AssociationSearchHelper.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.student.association.domain.service;
+
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
+import fr.avenirsesr.portfolio.student.association.domain.model.Association;
+import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
+import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
+public class AssociationSearchHelper {
+  private final AssociationService associationService;
+
+  /**
+   * Shared model for searching for entities that are candidates for association
+   *
+   * @param sourceEntityId ID of the source entity (e.g., id, declaredActivityId)
+   * @param sourceEntityClass class of the source entity (e.g., Trace.class)
+   * @param associationType type of association being searched for
+   * @param associationIdExtractor extractor for the relevant ID from the association (getId1 or
+   *     getId2)
+   * @param searchResults paginated results of the search for candidate entities
+   * @param resultIdExtractor extractor for the ID from the search result
+   * @param resultTitleExtractor extractor for the title from the search result
+   * @param resultCategoryExtractor extractor for the category (thematic, type, etc.) or null
+   * @param additionalDisabledCondition additional condition for disabling (e.g., activity
+   *     completed)
+   * @return paginated results with the disabled flag calculated
+   */
+  public &lt;T&gt; PagedResult&lt;AssociationSearchResultData&gt; searchForAssociation(
+      UUID sourceEntityId,
+      Class&lt;?&gt; sourceEntityClass,
+      EAssociationType associationType,
+      Function&lt;Association, UUID&gt; associationIdExtractor,
+      PagedResult&lt;T&gt; searchResults,
+      Function&lt;T, UUID&gt; resultIdExtractor,
+      Function&lt;T, String&gt; resultTitleExtractor,
+      Function&lt;T, String&gt; resultCategoryExtractor,
+      Predicate&lt;T&gt; additionalDisabledCondition) {
+
+    Set&lt;UUID&gt; alreadyAssociatedIds =
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">        sourceEntityId != null</span>
+            ? associationService
+<span class="fc" id="L50">                .getAllOf(sourceEntityId, sourceEntityClass, List.of(associationType))</span>
+<span class="fc" id="L51">                .stream()</span>
+<span class="fc" id="L52">                .map(associationIdExtractor)</span>
+<span class="fc" id="L53">                .collect(Collectors.toSet())</span>
+<span class="pc" id="L54">            : Set.of();</span>
+
+<span class="fc" id="L56">    var mappedContent =</span>
+<span class="fc" id="L57">        searchResults.content().stream()</span>
+<span class="fc" id="L58">            .map(</span>
+                item -&gt;
+<span class="fc" id="L60">                    new AssociationSearchResultData(</span>
+<span class="fc" id="L61">                        resultIdExtractor.apply(item),</span>
+<span class="fc" id="L62">                        resultTitleExtractor.apply(item),</span>
+<span class="pc bpc" id="L63" title="1 of 2 branches missed.">                        resultCategoryExtractor != null</span>
+<span class="fc" id="L64">                            ? resultCategoryExtractor.apply(item)</span>
+<span class="pc" id="L65">                            : null,</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">                        alreadyAssociatedIds.contains(resultIdExtractor.apply(item))</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">                            || additionalDisabledCondition.test(item)))</span>
+<span class="fc" id="L68">            .toList();</span>
+
+<span class="fc" id="L70">    return new PagedResult&lt;&gt;(mappedContent, searchResults.pageInfo());</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AssociationDatabaseRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.student.association.infrastructure.adapter.repository</a> &gt; <span class="el_source">AssociationDatabaseRepository.java</span></div><h1>AssociationDatabaseRepository.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.student.association.infrastructure.adapter.repository;
+
+import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
+import fr.avenirsesr.portfolio.student.association.domain.data.AssociationData;
+import fr.avenirsesr.portfolio.student.association.domain.model.Association;
+import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
+import fr.avenirsesr.portfolio.student.association.domain.port.output.repository.AssociationRepository;
+import fr.avenirsesr.portfolio.student.association.infrastructure.adapter.mapper.AssociationMapper;
+import fr.avenirsesr.portfolio.student.association.infrastructure.adapter.model.AssociationEntity;
+import fr.avenirsesr.portfolio.student.association.infrastructure.adapter.specification.AssociationSpecification;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public class AssociationDatabaseRepository
+    extends GenericJpaRepositoryAdapter&lt;Association, AssociationEntity&gt;
+    implements AssociationRepository {
+  private final AssociationJpaRepository jpaRepository;
+
+<span class="fc" id="L25">  private static final Sort DEFAULT_SORT = Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;);</span>
+
+  protected AssociationDatabaseRepository(AssociationJpaRepository jpaRepository) {
+<span class="fc" id="L28">    super(jpaRepository, jpaRepository, AssociationEntity.class, AssociationMapper.INSTANCE);</span>
+<span class="fc" id="L29">    this.jpaRepository = jpaRepository;</span>
+<span class="fc" id="L30">  }</span>
+
+  @Override
+  public List&lt;Association&gt; findAllIn(List&lt;AssociationData&gt; associations) {
+<span class="fc" id="L34">    return jpaRepository.findAll(AssociationSpecification.in(associations), DEFAULT_SORT).stream()</span>
+<span class="fc" id="L35">        .map(AssociationMapper.INSTANCE::toDomain)</span>
+<span class="fc" id="L36">        .toList();</span>
+  }
+
+  @Override
+  public List&lt;Association&gt; findAllOf(List&lt;EAssociationType&gt; associationTypes) {
+<span class="nc" id="L41">    return jpaRepository</span>
+<span class="nc" id="L42">        .findAll(AssociationSpecification.withTypeIn(associationTypes), DEFAULT_SORT)</span>
+<span class="nc" id="L43">        .stream()</span>
+<span class="nc" id="L44">        .map(AssociationMapper.INSTANCE::toDomain)</span>
+<span class="nc" id="L45">        .toList();</span>
+  }
+
+  @Override
+  public List&lt;Association&gt; findAllOf(
+      List&lt;UUID&gt; ids, Class&lt;?&gt; clazz, List&lt;EAssociationType&gt; associationTypes) {
+<span class="pc bpc" id="L51" title="1 of 2 branches missed.">    if (ids.isEmpty()) {</span>
+<span class="nc" id="L52">      return List.of();</span>
+    }
+
+<span class="fc" id="L55">    Specification&lt;AssociationEntity&gt; specification = null;</span>
+
+<span class="fc bfc" id="L57" title="All 2 branches covered.">    for (EAssociationType type : associationTypes) {</span>
+<span class="fc" id="L58">      Specification&lt;AssociationEntity&gt; typeSpec =</span>
+<span class="fc" id="L59">          AssociationSpecification.withTypeIn(List.of(type));</span>
+
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">      if (type.getKey1().equals(clazz)) {</span>
+<span class="nc" id="L62">        typeSpec = typeSpec.and(AssociationSpecification.key1In(ids));</span>
+<span class="pc bpc" id="L63" title="1 of 2 branches missed.">      } else if (type.getKey2().equals(clazz)) {</span>
+<span class="fc" id="L64">        typeSpec = typeSpec.and(AssociationSpecification.key2In(ids));</span>
+      } else {
+<span class="nc" id="L66">        throw new IllegalArgumentException(</span>
+            &quot;Class &quot; + clazz + &quot; not compatible with association type &quot; + type);
+      }
+
+<span class="pc bpc" id="L70" title="1 of 2 branches missed.">      specification = specification == null ? typeSpec : specification.or(typeSpec);</span>
+<span class="fc" id="L71">    }</span>
+
+<span class="fc" id="L73">    return jpaRepository.findAll(specification, DEFAULT_SORT).stream()</span>
+<span class="fc" id="L74">        .map(AssociationMapper.INSTANCE::toDomain)</span>
+<span class="fc" id="L75">        .toList();</span>
+  }
+
+  @Override
+  public Map&lt;UUID, Long&gt; countAllOf(
+      List&lt;UUID&gt; ids, Class&lt;?&gt; clazz, EAssociationType associationType) {
+<span class="pc bpc" id="L81" title="1 of 2 branches missed.">    if (ids.isEmpty()) {</span>
+<span class="nc" id="L82">      return Map.of();</span>
+    }
+
+    List&lt;AssociationJpaRepository.AssociationCountRow&gt; rows;
+<span class="fc bfc" id="L86" title="All 2 branches covered.">    if (associationType.getKey1().equals(clazz)) {</span>
+<span class="fc" id="L87">      rows = jpaRepository.countGroupedById1(associationType, ids);</span>
+<span class="pc bpc" id="L88" title="1 of 2 branches missed.">    } else if (associationType.getKey2().equals(clazz)) {</span>
+<span class="fc" id="L89">      rows = jpaRepository.countGroupedById2(associationType, ids);</span>
+    } else {
+<span class="nc" id="L91">      throw new IllegalArgumentException(</span>
+          &quot;Class &quot; + clazz + &quot; not compatible with association type &quot; + associationType);
+    }
+
+<span class="fc" id="L95">    return rows.stream()</span>
+<span class="fc" id="L96">        .collect(</span>
+<span class="fc" id="L97">            Collectors.toMap(</span>
+                AssociationJpaRepository.AssociationCountRow::getSubjectId,
+                AssociationJpaRepository.AssociationCountRow::getTotal));
+  }
+
+  @Override
+  public List&lt;Association&gt; findAllOf(
+      UUID id, Class&lt;?&gt; clazz, List&lt;EAssociationType&gt; associationTypes) {
+<span class="fc" id="L105">    Specification&lt;AssociationEntity&gt; specification = null;</span>
+
+<span class="fc bfc" id="L107" title="All 2 branches covered.">    for (EAssociationType type : associationTypes) {</span>
+<span class="fc" id="L108">      Specification&lt;AssociationEntity&gt; typeSpec =</span>
+<span class="fc" id="L109">          AssociationSpecification.withTypeIn(List.of(type));</span>
+
+<span class="fc bfc" id="L111" title="All 2 branches covered.">      if (type.getKey1().equals(clazz)) {</span>
+<span class="fc" id="L112">        typeSpec = typeSpec.and(AssociationSpecification.key1(id));</span>
+<span class="pc bpc" id="L113" title="1 of 2 branches missed.">      } else if (type.getKey2().equals(clazz)) {</span>
+<span class="fc" id="L114">        typeSpec = typeSpec.and(AssociationSpecification.key2(id));</span>
+      } else {
+<span class="nc" id="L116">        throw new IllegalArgumentException(</span>
+            &quot;Class &quot; + clazz + &quot; not compatible with association type &quot; + type);
+      }
+
+<span class="fc bfc" id="L120" title="All 2 branches covered.">      if (specification == null) {</span>
+<span class="fc" id="L121">        specification = typeSpec;</span>
+      } else {
+<span class="fc" id="L123">        specification = specification.or(typeSpec);</span>
+      }
+<span class="fc" id="L125">    }</span>
+
+<span class="fc" id="L127">    return jpaRepository.findAll(specification, DEFAULT_SORT).stream()</span>
+<span class="fc" id="L128">        .map(AssociationMapper.INSTANCE::toDomain)</span>
+<span class="fc" id="L129">        .toList();</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
