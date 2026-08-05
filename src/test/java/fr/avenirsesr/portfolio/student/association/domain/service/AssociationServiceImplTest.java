@@ -1,4 +1,4 @@
-package fr.avenirsesr.portfolio.association.domain.service;
+package fr.avenirsesr.portfolio.student.association.domain.service;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;

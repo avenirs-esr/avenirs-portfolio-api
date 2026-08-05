@@ -1,4 +1,4 @@
-package fr.avenirsesr.portfolio.association.domain.model;
+package fr.avenirsesr.portfolio.student.association.domain.model;
 
 import static org.junit.jupiter.api.Assertions.*;
 

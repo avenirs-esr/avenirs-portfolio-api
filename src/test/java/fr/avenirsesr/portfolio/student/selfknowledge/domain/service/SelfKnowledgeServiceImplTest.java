@@ -1,4 +1,4 @@
-package fr.avenirsesr.portfolio.selfknowledge.domain.service;
+package fr.avenirsesr.portfolio.student.selfknowledge.domain.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -23,9 +23,8 @@ import fr.avenirsesr.portfolio.student.selfknowledge.domain.exception.SelfKnowle
 import fr.avenirsesr.portfolio.student.selfknowledge.domain.model.SelfKnowledgeElement;
 import fr.avenirsesr.portfolio.student.selfknowledge.domain.model.enums.ESelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.student.selfknowledge.domain.port.output.repository.SelfKnowledgeElementRepository;
-import fr.avenirsesr.portfolio.selfknowledge.infrastructure.fixture.SelfKnowledgeElementFixture;
+import fr.avenirsesr.portfolio.student.selfknowledge.infrastructure.fixture.SelfKnowledgeElementFixture;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
-import fr.avenirsesr.portfolio.student.selfknowledge.domain.service.SelfKnowledgeServiceImpl;
 import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStudentException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;

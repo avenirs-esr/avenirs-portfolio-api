@@ -1,4 +1,4 @@
-package fr.avenirsesr.portfolio.selfknowledge.infrastructure.fixture;
+package fr.avenirsesr.portfolio.student.selfknowledge.infrastructure.fixture;
 
 import fr.avenirsesr.portfolio.student.selfknowledge.domain.model.SelfKnowledgeElement;
 import fr.avenirsesr.portfolio.student.selfknowledge.domain.model.enums.ESelfKnowledgeCategory;
