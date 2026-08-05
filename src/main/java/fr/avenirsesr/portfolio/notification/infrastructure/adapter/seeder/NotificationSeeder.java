@@ -1,10 +1,10 @@
 package fr.avenirsesr.portfolio.notification.infrastructure.adapter.seeder;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
-import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityUpdatableField;
-import fr.avenirsesr.portfolio.activity.domain.port.input.ActivityService;
-import fr.avenirsesr.portfolio.activity.infrastructure.adapter.model.ActivityEntity;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityUpdatableField;
+import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
+import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityEntity;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.ESeederSource;
 import fr.avenirsesr.portfolio.common.utils.FileReader;

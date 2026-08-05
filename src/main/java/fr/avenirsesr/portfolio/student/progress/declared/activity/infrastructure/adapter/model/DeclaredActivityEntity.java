@@ -2,7 +2,7 @@ package fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructur
 
 import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.RICH_TEXT_LENGTH;
 
-import fr.avenirsesr.portfolio.activity.infrastructure.adapter.model.ActivityEntity;
+import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityEntity;
 import fr.avenirsesr.portfolio.common.temporal.infrastructure.adapter.model.PeriodEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import jakarta.persistence.*;

@@ -1,0 +1,24 @@
+package fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper;
+
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityPresentationDTO;
+import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityPresentationData;
+import fr.avenirsesr.portfolio.shared.application.adapter.dto.FileDTO;
+import org.mapstruct.Mapper;
+
+@Mapper(componentModel = "spring")
+public interface ActivityPresentationDtoMapper {
+  default ActivityPresentationDTO toDTO(ActivityPresentationData activityData, String baseUrl) {
+    var banner = activityData.banner();
+    return new ActivityPresentationDTO(
+        activityData.id(),
+        activityData.title(),
+        activityData.thematic(),
+        activityData.subscribedDeclaredActivity().orElse(null),
+        new FileDTO(banner.id().orElse(null), banner.name().orElse(null), baseUrl + banner.url()),
+        activityData.summary(),
+        activityData.description(),
+        activityData.recommendedCompletionContexts(),
+        activityData.createdAt(),
+        activityData.updatedAt());
+  }
+}

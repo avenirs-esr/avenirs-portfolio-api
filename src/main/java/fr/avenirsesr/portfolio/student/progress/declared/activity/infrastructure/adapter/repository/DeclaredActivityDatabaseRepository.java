@@ -2,7 +2,7 @@ package fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructur
 
 import static fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.specification.DeclaredActivitySpecification.hasActivityIdInAndStudent;
 
-import fr.avenirsesr.portfolio.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;

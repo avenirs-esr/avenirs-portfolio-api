@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.notification.domain.model.notification.parameters;
 
-import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityUpdatableField;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityUpdatableField;
 import java.util.ArrayList;
 import java.util.List;
 

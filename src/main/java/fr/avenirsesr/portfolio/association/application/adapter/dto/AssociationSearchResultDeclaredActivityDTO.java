@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.association.application.adapter.dto;
 
-import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.UUID;
 

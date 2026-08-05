@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto;
 
-import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivityContentDTO;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityContentDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EDeclaredActivityStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;

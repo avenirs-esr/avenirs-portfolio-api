@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.seeder;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import fr.avenirsesr.portfolio.activity.infrastructure.adapter.model.ActivityEntity;
+import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityEntity;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;

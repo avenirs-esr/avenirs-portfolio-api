@@ -2,7 +2,7 @@ package fr.avenirsesr.portfolio.association.application.adapter.mapper;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.association.application.adapter.dto.*;
 import fr.avenirsesr.portfolio.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillType;

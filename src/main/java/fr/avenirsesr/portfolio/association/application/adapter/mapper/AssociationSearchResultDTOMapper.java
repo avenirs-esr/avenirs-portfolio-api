@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.association.application.adapter.mapper;
 
-import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.association.application.adapter.dto.AssociationSearchResultDTO;
 import fr.avenirsesr.portfolio.association.application.adapter.dto.AssociationSearchResultDeclaredActivityDTO;
 import fr.avenirsesr.portfolio.association.application.adapter.dto.AssociationSearchResultDeclaredExperienceDTO;
