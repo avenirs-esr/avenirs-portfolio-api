@@ -1,0 +1,34 @@
+package fr.avenirsesr.portfolio.student.activity.domain.port.output.repository;
+
+import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
+import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.domain.port.output.repository.GenericRepositoryPort;
+import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
+import fr.avenirsesr.portfolio.user.domain.model.Student;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+public interface DeclaredActivityRepository extends GenericRepositoryPort<DeclaredActivity> {
+  List<DeclaredActivity> findAllByStudent(Student student, FetchGraph fetchGraph);
+
+  PagedResult<DeclaredActivity> findAllByStudent(
+      Student student, String keyword, PageCriteria pageCriteria, FetchGraph fetchGraph);
+
+  List<DeclaredActivity> findAllByActivityIdAndStudent(
+      List<UUID> activityIds, Student student, FetchGraph fetchGraph);
+
+  List<DeclaredActivity> findAllNotCompletedActivitiesByIds(
+      List<UUID> activityIds, FetchGraph fetchGraph);
+
+  PagedResult<DeclaredActivity> findStudentActivitiesByProgressAndDate(
+      Student student, PageCriteria pageCriteria, FetchGraph fetchGraph);
+
+  Optional<DeclaredActivity> findByActivity(Student student, Activity activity);
+
+  int countByActivity(Activity activity);
+
+  List<DeclaredActivity> findAllByActivity(Activity activity, FetchGraph fetchGraph);
+}

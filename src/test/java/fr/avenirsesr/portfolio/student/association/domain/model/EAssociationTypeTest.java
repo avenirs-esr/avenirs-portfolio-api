@@ -3,10 +3,8 @@ package fr.avenirsesr.portfolio.student.association.domain.model;
 import static org.junit.jupiter.api.Assertions.*;
 
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
-import fr.avenirsesr.portfolio.student.association.domain.model.Association;
-import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
-import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.DeclaredExperience;
-import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
+import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperience;
+import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 

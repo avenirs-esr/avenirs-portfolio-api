@@ -6,7 +6,7 @@ import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGen
 import fr.avenirsesr.portfolio.declaredskill.domain.model.DeclaredSkill;
 import fr.avenirsesr.portfolio.declaredskill.domain.model.enums.EDeclaredSkillLevel;
 import fr.avenirsesr.portfolio.declaredskill.domain.port.output.seeder.DeclaredSkillProgressDataGenerator;
-import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
+import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.Instant;

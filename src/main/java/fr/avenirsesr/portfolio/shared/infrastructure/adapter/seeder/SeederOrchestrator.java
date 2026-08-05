@@ -15,11 +15,11 @@ import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.ProgramSeed
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.SkillSeeder;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.TrainingPathSeeder;
 import fr.avenirsesr.portfolio.student.selfknowledge.infrastructure.adapter.seeder.SelfKnowledgeElementSeeder;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.seeder.DeclaredActivitySeeder;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.seeder.FeedbackSeeder;
-import fr.avenirsesr.portfolio.student.progress.declared.experience.infrastructure.adapter.seeder.DeclaredExperienceSeeder;
-import fr.avenirsesr.portfolio.student.progress.declared.program.infrastructure.adapter.seeder.DeclaredProgramSeeder;
-import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.seeder.DeclaredSkillProgressSeeder;
+import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.seeder.DeclaredActivitySeeder;
+import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.seeder.FeedbackSeeder;
+import fr.avenirsesr.portfolio.student.experience.infrastructure.adapter.seeder.DeclaredExperienceSeeder;
+import fr.avenirsesr.portfolio.student.program.infrastructure.adapter.seeder.DeclaredProgramSeeder;
+import fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.seeder.DeclaredSkillProgressSeeder;
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.seeder.StudentProgressSeeder;
 import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.seeder.TraceSeeder;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
