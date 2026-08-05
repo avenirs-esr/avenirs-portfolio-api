@@ -13,7 +13,7 @@ import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestData;
 import fr.avenirsesr.portfolio.notification.infrastructure.adapter.seeder.data.ActivityUpdatedNotificationCreationData;
 import fr.avenirsesr.portfolio.shared.domain.port.input.ClockService;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.model.DeclaredActivityEntity;
+import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.model.DeclaredActivityEntity;
 import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import java.util.LinkedHashMap;

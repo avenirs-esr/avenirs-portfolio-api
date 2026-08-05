@@ -37,8 +37,8 @@ import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageCons
 import fr.avenirsesr.portfolio.notification.domain.model.notification.ActivityUpdatedNotification;
 import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
+import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
+import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import java.time.Duration;
