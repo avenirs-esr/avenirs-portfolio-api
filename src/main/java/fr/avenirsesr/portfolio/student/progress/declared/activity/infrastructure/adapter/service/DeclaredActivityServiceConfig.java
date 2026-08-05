@@ -1,8 +1,8 @@
 package fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.service;
 
 import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
-import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
-import fr.avenirsesr.portfolio.association.domain.service.AssociationSearchHelper;
+import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
+import fr.avenirsesr.portfolio.student.association.domain.service.AssociationSearchHelper;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.FeedbackService;

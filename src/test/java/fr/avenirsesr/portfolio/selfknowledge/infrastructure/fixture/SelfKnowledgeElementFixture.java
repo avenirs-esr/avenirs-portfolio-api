@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.selfknowledge.infrastructure.fixture;
 
-import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeElement;
-import fr.avenirsesr.portfolio.selfknowledge.domain.model.enums.ESelfKnowledgeCategory;
+import fr.avenirsesr.portfolio.student.selfknowledge.domain.model.SelfKnowledgeElement;
+import fr.avenirsesr.portfolio.student.selfknowledge.domain.model.enums.ESelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.Instant;

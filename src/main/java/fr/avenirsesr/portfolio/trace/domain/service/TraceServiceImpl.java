@@ -7,13 +7,13 @@ import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValida
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateOptionalTextMaxLength;
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateUrl;
 
-import fr.avenirsesr.portfolio.association.domain.data.AssociationData;
-import fr.avenirsesr.portfolio.association.domain.data.AssociationSearchResultData;
-import fr.avenirsesr.portfolio.association.domain.exception.AssociationDoesNotExistException;
-import fr.avenirsesr.portfolio.association.domain.model.Association;
-import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
-import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
-import fr.avenirsesr.portfolio.association.domain.service.AssociationSearchHelper;
+import fr.avenirsesr.portfolio.student.association.domain.data.AssociationData;
+import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
+import fr.avenirsesr.portfolio.student.association.domain.exception.AssociationDoesNotExistException;
+import fr.avenirsesr.portfolio.student.association.domain.model.Association;
+import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
+import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
+import fr.avenirsesr.portfolio.student.association.domain.service.AssociationSearchHelper;
 import fr.avenirsesr.portfolio.common.configuration.domain.model.TraceConfiguration;
 import fr.avenirsesr.portfolio.common.data.domain.model.*;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;

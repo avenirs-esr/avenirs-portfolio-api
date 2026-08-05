@@ -6,9 +6,9 @@ import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValida
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateOptionalTextMaxLength;
 
 import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
-import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
-import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
-import fr.avenirsesr.portfolio.association.domain.utils.AssociationUtils;
+import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
+import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
+import fr.avenirsesr.portfolio.student.association.domain.utils.AssociationUtils;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;

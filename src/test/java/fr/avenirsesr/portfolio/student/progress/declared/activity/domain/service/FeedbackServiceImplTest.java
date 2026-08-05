@@ -9,8 +9,9 @@ import static org.mockito.Mockito.*;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.activity.infrastructure.fixture.ActivityFixture;
-import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
-import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
+import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
+import fr.avenirsesr.portfolio.student.association.domain.model.Association;
+import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
@@ -133,9 +134,9 @@ class FeedbackServiceImplTest {
               UUID.randomUUID(), student, activity, null, reflexion, null, null, null);
 
       var traceAssociation =
-          mock(fr.avenirsesr.portfolio.association.domain.model.Association.class);
+          mock(Association.class);
       var skillAssociation =
-          mock(fr.avenirsesr.portfolio.association.domain.model.Association.class);
+          mock(Association.class);
       Trace trace = mock(Trace.class);
       DeclaredSkillProgress skill = mock(DeclaredSkillProgress.class);
 
@@ -353,9 +354,9 @@ class FeedbackServiceImplTest {
               List.of());
 
       var traceAssociation =
-          mock(fr.avenirsesr.portfolio.association.domain.model.Association.class);
+          mock(Association.class);
       var skillAssociation =
-          mock(fr.avenirsesr.portfolio.association.domain.model.Association.class);
+          mock(Association.class);
       Trace trace = mock(Trace.class);
       DeclaredSkillProgress skill = mock(DeclaredSkillProgress.class);
 

@@ -4,10 +4,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import fr.avenirsesr.portfolio.association.domain.exception.AssociationAlreadyExistException;
-import fr.avenirsesr.portfolio.association.domain.model.Association;
-import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
-import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
+import fr.avenirsesr.portfolio.student.association.domain.exception.AssociationAlreadyExistException;
+import fr.avenirsesr.portfolio.student.association.domain.model.Association;
+import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
+import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
