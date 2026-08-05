@@ -1,8 +1,8 @@
 package fr.avenirsesr.portfolio.student.association.infrastructure.adapter.mapper;
 
+import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.mapper.Mapper;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.infrastructure.adapter.model.AssociationEntity;
-import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.mapper.Mapper;
 
 public class AssociationMapper implements Mapper<AssociationEntity, Association> {
   public static AssociationMapper INSTANCE = new AssociationMapper();

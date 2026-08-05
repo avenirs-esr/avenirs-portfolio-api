@@ -1,15 +1,15 @@
 package fr.avenirsesr.portfolio.student.experience.application.adapter.controller;
 
-import fr.avenirsesr.portfolio.student.association.application.adapter.dto.AssociationSearchResultDeclaredExperienceDTO;
-import fr.avenirsesr.portfolio.student.association.application.adapter.mapper.AssociationSearchResultDTOMapper;
-import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
-import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsCreationRequest;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsDeleteRequest;
+import fr.avenirsesr.portfolio.student.association.application.adapter.dto.AssociationSearchResultDeclaredExperienceDTO;
+import fr.avenirsesr.portfolio.student.association.application.adapter.mapper.AssociationSearchResultDTOMapper;
+import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
+import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.experience.application.adapter.dto.DeclaredExperienceAssociationsDTO;
 import fr.avenirsesr.portfolio.student.experience.application.adapter.dto.DeclaredExperienceRequest;
 import fr.avenirsesr.portfolio.student.experience.application.adapter.dto.DeclaredExperienceViewDTO;

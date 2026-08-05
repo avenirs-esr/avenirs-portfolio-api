@@ -1,6 +1,10 @@
 package fr.avenirsesr.portfolio.student.association.infrastructure.adapter.seeder;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.ESeederSource;
+import fr.avenirsesr.portfolio.common.utils.FileReader;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
+import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.model.DeclaredActivityEntity;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationData;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
@@ -8,10 +12,6 @@ import fr.avenirsesr.portfolio.student.association.domain.port.input.Association
 import fr.avenirsesr.portfolio.student.association.infrastructure.adapter.mapper.AssociationMapper;
 import fr.avenirsesr.portfolio.student.association.infrastructure.adapter.model.AssociationEntity;
 import fr.avenirsesr.portfolio.student.association.infrastructure.adapter.seeder.data.AssociationCreationData;
-import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.ESeederSource;
-import fr.avenirsesr.portfolio.common.utils.FileReader;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
-import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.model.DeclaredActivityEntity;
 import fr.avenirsesr.portfolio.student.experience.infrastructure.adapter.model.DeclaredExperienceEntity;
 import fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.model.DeclaredSkillProgressEntity;
 import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.model.TraceEntity;

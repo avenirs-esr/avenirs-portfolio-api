@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.student.association.infrastructure.adapter.repository;
 
+import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationData;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
@@ -7,7 +8,6 @@ import fr.avenirsesr.portfolio.student.association.domain.port.output.repository
 import fr.avenirsesr.portfolio.student.association.infrastructure.adapter.mapper.AssociationMapper;
 import fr.avenirsesr.portfolio.student.association.infrastructure.adapter.model.AssociationEntity;
 import fr.avenirsesr.portfolio.student.association.infrastructure.adapter.specification.AssociationSpecification;
-import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;

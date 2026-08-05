@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.student.activity.domain.model;
 
-import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.Instant;
 import java.time.LocalDate;

@@ -1,10 +1,10 @@
 package fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.mapper;
 
-import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityDraft;
-import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityDraftEntity;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.EntityGrapher;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.mapper.Mapper;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.mapper.FileMapper;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityDraft;
+import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityDraftEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StaffMapper;
 
 public class ActivityDraftMapper implements Mapper<ActivityDraftEntity, ActivityDraft> {

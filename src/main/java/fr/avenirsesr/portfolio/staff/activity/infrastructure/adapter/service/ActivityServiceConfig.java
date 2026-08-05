@@ -1,13 +1,13 @@
 package fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.service;
 
+import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
+import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
+import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityDraftRepository;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityRepository;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.StaffActivityOverviewRepository;
 import fr.avenirsesr.portfolio.staff.activity.domain.service.ActivityServiceImpl;
-import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
-import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
-import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import lombok.RequiredArgsConstructor;

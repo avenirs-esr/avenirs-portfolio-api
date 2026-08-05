@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.student.trace.application.adapter.dto.TracesSummaryDTO;
-import fr.avenirsesr.portfolio.student.trace.application.adapter.mapper.TracesSummaryMapper;
 import fr.avenirsesr.portfolio.student.trace.domain.data.TracesSummaryData;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;

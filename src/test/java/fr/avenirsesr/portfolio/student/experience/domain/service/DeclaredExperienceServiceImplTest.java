@@ -4,10 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import fr.avenirsesr.portfolio.student.association.domain.exception.AssociationAlreadyExistException;
-import fr.avenirsesr.portfolio.student.association.domain.model.Association;
-import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
-import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
@@ -15,13 +11,16 @@ import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationExce
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.student.association.domain.exception.AssociationAlreadyExistException;
+import fr.avenirsesr.portfolio.student.association.domain.model.Association;
+import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
+import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.experience.domain.data.DeclaredExperienceAssociationCount;
 import fr.avenirsesr.portfolio.student.experience.domain.data.DeclaredExperienceData;
 import fr.avenirsesr.portfolio.student.experience.domain.exception.DeclaredExperienceNotFoundException;
 import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.experience.domain.model.enums.EExperienceType;
 import fr.avenirsesr.portfolio.student.experience.domain.port.output.repository.DeclaredExperienceRepository;
-import fr.avenirsesr.portfolio.student.experience.domain.service.DeclaredExperienceServiceImpl;
 import fr.avenirsesr.portfolio.student.skill.domain.exception.DeclaredSkillProgressNotFoundException;
 import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;

@@ -2,9 +2,9 @@ package fr.avenirsesr.portfolio.activity.infrastructure.adapter.seeder;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityEntity;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
+import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityEntity;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.seeder.ActivitySeeder;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StaffEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;

@@ -6,13 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
-import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.activity.infrastructure.fixture.ActivityFixture;
-import fr.avenirsesr.portfolio.student.activity.domain.service.FeedbackServiceImpl;
-import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
-import fr.avenirsesr.portfolio.student.association.domain.model.Association;
-import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
@@ -20,6 +14,8 @@ import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorize
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackDashboardData;
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackData;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.DeclaredActivityNotFoundException;
@@ -32,6 +28,9 @@ import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStat
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.FeedbackRepository;
+import fr.avenirsesr.portfolio.student.association.domain.model.Association;
+import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
+import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
@@ -134,10 +133,8 @@ class FeedbackServiceImplTest {
           DeclaredActivity.create(
               UUID.randomUUID(), student, activity, null, reflexion, null, null, null);
 
-      var traceAssociation =
-          mock(Association.class);
-      var skillAssociation =
-          mock(Association.class);
+      var traceAssociation = mock(Association.class);
+      var skillAssociation = mock(Association.class);
       Trace trace = mock(Trace.class);
       DeclaredSkillProgress skill = mock(DeclaredSkillProgress.class);
 
@@ -354,10 +351,8 @@ class FeedbackServiceImplTest {
               List.of(),
               List.of());
 
-      var traceAssociation =
-          mock(Association.class);
-      var skillAssociation =
-          mock(Association.class);
+      var traceAssociation = mock(Association.class);
+      var skillAssociation = mock(Association.class);
       Trace trace = mock(Trace.class);
       DeclaredSkillProgress skill = mock(DeclaredSkillProgress.class);
 

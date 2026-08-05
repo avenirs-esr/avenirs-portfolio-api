@@ -5,10 +5,6 @@ import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValida
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateOptionalEnrichedTextMaxLength;
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateOptionalTextMaxLength;
 
-import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
-import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
-import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
-import fr.avenirsesr.portfolio.student.association.domain.utils.AssociationUtils;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
@@ -17,6 +13,7 @@ import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorize
 import fr.avenirsesr.portfolio.notification.domain.model.notification.AskForFeedbackNotification;
 import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackDashboardData;
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackData;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.DeclaredActivityNotFoundException;
@@ -30,6 +27,9 @@ import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivi
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.FeedbackService;
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.FeedbackRepository;
+import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
+import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
+import fr.avenirsesr.portfolio.student.association.domain.utils.AssociationUtils;
 import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;

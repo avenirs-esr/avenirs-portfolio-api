@@ -6,13 +6,12 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 
-import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityContentDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
-import fr.avenirsesr.portfolio.student.activity.application.adapter.controller.FeedbackController;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityContentDTO;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.FeedbackDashboardDTO;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.FeedbackDetailsDTO;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.FeedbackOverviewDTO;

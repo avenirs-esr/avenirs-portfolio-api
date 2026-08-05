@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.student.association.application.adapter.mapper;
 
+import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillType;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.student.association.application.adapter.dto.AssociationSearchResultDTO;
 import fr.avenirsesr.portfolio.student.association.application.adapter.dto.AssociationSearchResultDeclaredActivityDTO;
@@ -7,7 +8,6 @@ import fr.avenirsesr.portfolio.student.association.application.adapter.dto.Assoc
 import fr.avenirsesr.portfolio.student.association.application.adapter.dto.AssociationSearchResultDeclaredSkillIDTO;
 import fr.avenirsesr.portfolio.student.association.application.adapter.dto.AssociationSearchResultTraceDTO;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
-import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillType;
 import fr.avenirsesr.portfolio.student.experience.domain.model.enums.EExperienceType;
 import org.mapstruct.Mapper;
 

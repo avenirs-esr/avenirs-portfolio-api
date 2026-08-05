@@ -11,7 +11,6 @@ import fr.avenirsesr.portfolio.student.association.domain.exception.AssociationD
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.association.domain.port.output.repository.AssociationRepository;
-import fr.avenirsesr.portfolio.student.association.domain.service.AssociationServiceImpl;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;

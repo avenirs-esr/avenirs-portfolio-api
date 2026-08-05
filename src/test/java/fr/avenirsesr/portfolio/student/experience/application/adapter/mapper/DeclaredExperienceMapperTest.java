@@ -25,10 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class DeclaredExperienceMapperTest {
 
   @Spy
-  private TraceOverviewMapper
-      traceOverviewMapper =
-          Mappers.getMapper(
-              TraceOverviewMapper.class);
+  private TraceOverviewMapper traceOverviewMapper = Mappers.getMapper(TraceOverviewMapper.class);
 
   @InjectMocks private DeclaredExperienceMapperImpl mapper;
 

@@ -2,11 +2,11 @@ package fr.avenirsesr.portfolio.activity.application.adapter.mapper;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import fr.avenirsesr.portfolio.activity.infrastructure.fixture.ActivityFixture;
+import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityItemNavigationDTO;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityItemNavigationMapper;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
-import fr.avenirsesr.portfolio.activity.infrastructure.fixture.ActivityFixture;
-import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 

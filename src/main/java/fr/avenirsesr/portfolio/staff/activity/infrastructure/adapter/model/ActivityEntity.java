@@ -2,10 +2,10 @@ package fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model;
 
 import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.*;
 
-import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
-import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.common.temporal.infrastructure.adapter.model.PeriodEntity;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StaffEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;

@@ -3,6 +3,13 @@ package fr.avenirsesr.portfolio.staff.activity.application.adapter.controller;
 import static fr.avenirsesr.portfolio.shared.application.adapter.Utils.extractOrigin;
 import static fr.avenirsesr.portfolio.shared.application.adapter.Utils.readBytes;
 
+import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
+import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
+import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.shared.application.adapter.dto.CreationResponse;
+import fr.avenirsesr.portfolio.shared.application.adapter.dto.FileDTO;
+import fr.avenirsesr.portfolio.shared.application.adapter.mapper.FileDTOMapper;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.*;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.*;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDraftCreationRequest;
@@ -15,13 +22,6 @@ import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityWithStudentSta
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
-import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
-import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
-import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
-import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.shared.application.adapter.dto.CreationResponse;
-import fr.avenirsesr.portfolio.shared.application.adapter.dto.FileDTO;
-import fr.avenirsesr.portfolio.shared.application.adapter.mapper.FileDTOMapper;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Schema;

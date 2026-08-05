@@ -1,5 +1,9 @@
 package fr.avenirsesr.portfolio.staff.activity.domain.port.input;
 
+import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.file.domain.model.File;
+import fr.avenirsesr.portfolio.file.domain.model.FileDownload;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityPresentationData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityStaffOverviewData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityWithStudentStatusData;
@@ -7,10 +11,6 @@ import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityDraft;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
-import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
-import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.file.domain.model.File;
-import fr.avenirsesr.portfolio.file.domain.model.FileDownload;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import java.time.LocalDate;
 import java.util.List;

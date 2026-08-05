@@ -1,12 +1,12 @@
 package fr.avenirsesr.portfolio.student.trace.domain.port.input;
 
-import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.common.data.domain.model.DateFilter;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.file.domain.model.FileDownload;
+import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.trace.domain.data.*;
 import fr.avenirsesr.portfolio.student.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;

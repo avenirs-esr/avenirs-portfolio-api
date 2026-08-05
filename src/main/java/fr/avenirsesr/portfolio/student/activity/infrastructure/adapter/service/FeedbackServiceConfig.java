@@ -1,14 +1,14 @@
 package fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.service;
 
-import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
-import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.FeedbackService;
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.FeedbackRepository;
 import fr.avenirsesr.portfolio.student.activity.domain.service.FeedbackServiceImpl;
+import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
 import lombok.RequiredArgsConstructor;

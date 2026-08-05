@@ -1,9 +1,9 @@
 package fr.avenirsesr.portfolio.student.association.domain.port.output.repository;
 
+import fr.avenirsesr.portfolio.common.data.domain.port.output.repository.GenericRepositoryPort;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationData;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
-import fr.avenirsesr.portfolio.common.data.domain.port.output.repository.GenericRepositoryPort;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;

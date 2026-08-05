@@ -5,14 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDraftCreationRequest;
-import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDraftUpdateRequest;
-import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.AvenirsSecurityHeaders;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDraftCreationRequest;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDraftUpdateRequest;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;

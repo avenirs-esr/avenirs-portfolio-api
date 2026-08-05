@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.student.activity.application.adapter.mapper;
 
-import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityContentDtoMapper;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityContentDtoMapper;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.FeedbackStaffListItemDTO;
 import fr.avenirsesr.portfolio.student.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.user.application.adapter.dto.UserInfoDTO;

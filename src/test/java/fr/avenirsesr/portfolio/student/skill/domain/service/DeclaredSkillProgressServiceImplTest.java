@@ -7,13 +7,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
-import fr.avenirsesr.portfolio.student.association.domain.exception.AssociationAlreadyExistException;
-import fr.avenirsesr.portfolio.student.association.domain.model.Association;
-import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
-import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
-import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
-import fr.avenirsesr.portfolio.student.association.domain.service.AssociationSearchHelper;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
@@ -38,6 +31,13 @@ import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.DeclaredActivityNotFoundException;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
+import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
+import fr.avenirsesr.portfolio.student.association.domain.exception.AssociationAlreadyExistException;
+import fr.avenirsesr.portfolio.student.association.domain.model.Association;
+import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
+import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
+import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
+import fr.avenirsesr.portfolio.student.association.domain.service.AssociationSearchHelper;
 import fr.avenirsesr.portfolio.student.experience.domain.exception.DeclaredExperienceNotFoundException;
 import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.experience.domain.model.enums.EExperienceType;
@@ -49,10 +49,9 @@ import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillProgressDe
 import fr.avenirsesr.portfolio.student.skill.domain.exception.DeclaredSkillProgressNotFoundException;
 import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.skill.domain.port.output.repository.DeclaredSkillProgressRepository;
-import fr.avenirsesr.portfolio.student.skill.domain.service.DeclaredSkillProgressServiceImpl;
-import fr.avenirsesr.portfolio.student.trace.infrastructure.fixture.TraceFixture;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
+import fr.avenirsesr.portfolio.student.trace.infrastructure.fixture.TraceFixture;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.LocalDate;
@@ -1347,8 +1346,7 @@ public class DeclaredSkillProgressServiceImplTest {
             DeclaredSkillProgressFixture.create().withStudent(student).toModel();
         UUID declaredSkillProgressId = declaredSkillProgress.getId();
 
-        Trace trace =
-            TraceFixture.create().toModel();
+        Trace trace = TraceFixture.create().toModel();
         DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
         UUID declaredActivityId = randomUUID();
         when(declaredActivity.getId()).thenReturn(declaredActivityId);

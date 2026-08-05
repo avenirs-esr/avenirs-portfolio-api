@@ -2,12 +2,6 @@ package fr.avenirsesr.portfolio.student.activity.application.adapter.controller;
 
 import static fr.avenirsesr.portfolio.shared.application.adapter.Utils.extractOrigin;
 
-import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.*;
-import fr.avenirsesr.portfolio.student.association.application.adapter.dto.AssociationSearchResultDeclaredActivityDTO;
-import fr.avenirsesr.portfolio.student.association.application.adapter.dto.AssociationSearchResultTraceDTO;
-import fr.avenirsesr.portfolio.student.association.application.adapter.mapper.AssociationSearchResultDTOMapper;
-import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
-import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
@@ -16,11 +10,17 @@ import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsCreati
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsDeleteRequest;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.CreationResponse;
 import fr.avenirsesr.portfolio.shared.application.adapter.mapper.FileDTOMapper;
+import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.*;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.mapper.DeclaredActivityAssociationsDTOMapper;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.mapper.DeclaredActivityDetailsDTOMapper;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.mapper.DeclaredActivityViewDTOMapper;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
+import fr.avenirsesr.portfolio.student.association.application.adapter.dto.AssociationSearchResultDeclaredActivityDTO;
+import fr.avenirsesr.portfolio.student.association.application.adapter.dto.AssociationSearchResultTraceDTO;
+import fr.avenirsesr.portfolio.student.association.application.adapter.mapper.AssociationSearchResultDTOMapper;
+import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
+import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.servlet.http.HttpServletRequest;

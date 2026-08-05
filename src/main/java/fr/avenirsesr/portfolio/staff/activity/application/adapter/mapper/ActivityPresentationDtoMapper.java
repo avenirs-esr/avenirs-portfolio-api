@@ -1,8 +1,8 @@
 package fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper;
 
+import fr.avenirsesr.portfolio.shared.application.adapter.dto.FileDTO;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityPresentationDTO;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityPresentationData;
-import fr.avenirsesr.portfolio.shared.application.adapter.dto.FileDTO;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")

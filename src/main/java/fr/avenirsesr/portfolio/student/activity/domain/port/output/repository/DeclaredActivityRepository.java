@@ -1,10 +1,10 @@
 package fr.avenirsesr.portfolio.student.activity.domain.port.output.repository;
 
-import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.port.output.repository.GenericRepositoryPort;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.List;
