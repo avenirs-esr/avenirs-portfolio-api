@@ -8,7 +8,7 @@ import fr.avenirsesr.portfolio.declaredskill.domain.model.DeclaredSkill;
 import fr.avenirsesr.portfolio.declaredskill.domain.model.enums.EDeclaredSkillLevel;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.application.adapter.dto.DeclaredSkillProgressDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
-import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceOverviewMapper;
+import fr.avenirsesr.portfolio.student.trace.application.adapter.mapper.TraceOverviewMapper;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.util.List;

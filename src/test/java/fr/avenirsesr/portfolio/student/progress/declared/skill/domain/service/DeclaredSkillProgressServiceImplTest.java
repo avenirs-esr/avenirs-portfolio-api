@@ -49,8 +49,9 @@ import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.data.Decla
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.exception.DeclaredSkillProgressNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.output.repository.DeclaredSkillProgressRepository;
-import fr.avenirsesr.portfolio.trace.domain.model.Trace;
-import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
+import fr.avenirsesr.portfolio.student.trace.infrastructure.fixture.TraceFixture;
+import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
+import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.LocalDate;
@@ -1346,7 +1347,7 @@ public class DeclaredSkillProgressServiceImplTest {
         UUID declaredSkillProgressId = declaredSkillProgress.getId();
 
         Trace trace =
-            fr.avenirsesr.portfolio.trace.infrastructure.fixture.TraceFixture.create().toModel();
+            TraceFixture.create().toModel();
         DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
         UUID declaredActivityId = randomUUID();
         when(declaredActivity.getId()).thenReturn(declaredActivityId);

@@ -9,7 +9,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.F
 import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.model.AssociationsJson;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.model.FeedbackEntity;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
-import fr.avenirsesr.portfolio.trace.domain.model.Trace;
+import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.List;
 import java.util.Map;

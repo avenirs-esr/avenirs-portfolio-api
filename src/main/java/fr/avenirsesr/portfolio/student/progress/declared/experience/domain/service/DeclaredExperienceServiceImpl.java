@@ -27,10 +27,10 @@ import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.data.Decla
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.exception.DeclaredSkillProgressNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.input.DeclaredSkillProgressService;
-import fr.avenirsesr.portfolio.trace.domain.data.TraceAssociationData;
-import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
-import fr.avenirsesr.portfolio.trace.domain.model.Trace;
-import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
+import fr.avenirsesr.portfolio.student.trace.domain.data.TraceAssociationData;
+import fr.avenirsesr.portfolio.student.trace.domain.exception.TraceNotFoundException;
+import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
+import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import java.time.Instant;

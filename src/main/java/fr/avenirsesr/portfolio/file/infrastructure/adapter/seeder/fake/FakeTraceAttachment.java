@@ -6,7 +6,7 @@ import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.file.domain.port.output.seeder.FileDataGenerator;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
 import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
-import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
+import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.model.TraceEntity;
 import java.time.Instant;
 import java.util.List;
 

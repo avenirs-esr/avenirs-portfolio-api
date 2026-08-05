@@ -8,7 +8,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.data.
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.data.DeclaredExperienceData;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.application.adapter.mapper.DeclaredSkillProgressMapper;
-import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceOverviewMapper;
+import fr.avenirsesr.portfolio.student.trace.application.adapter.mapper.TraceOverviewMapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

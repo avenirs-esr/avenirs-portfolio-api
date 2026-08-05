@@ -3,7 +3,7 @@ package fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model;
 import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
-import fr.avenirsesr.portfolio.trace.domain.model.Trace;
+import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;

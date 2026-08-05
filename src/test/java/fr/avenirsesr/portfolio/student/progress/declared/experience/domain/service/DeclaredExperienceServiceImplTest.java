@@ -24,10 +24,10 @@ import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.port.
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.exception.DeclaredSkillProgressNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.input.DeclaredSkillProgressService;
-import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
-import fr.avenirsesr.portfolio.trace.domain.model.Trace;
-import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
-import fr.avenirsesr.portfolio.trace.infrastructure.fixture.TraceFixture;
+import fr.avenirsesr.portfolio.student.trace.domain.exception.TraceNotFoundException;
+import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
+import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
+import fr.avenirsesr.portfolio.student.trace.infrastructure.fixture.TraceFixture;
 import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStudentException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;

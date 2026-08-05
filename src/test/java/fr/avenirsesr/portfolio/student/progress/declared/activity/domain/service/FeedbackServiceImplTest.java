@@ -33,8 +33,8 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.ou
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.FeedbackRepository;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.input.DeclaredSkillProgressService;
-import fr.avenirsesr.portfolio.trace.domain.model.Trace;
-import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
+import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
+import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStaffException;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.domain.model.Student;

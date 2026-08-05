@@ -10,7 +10,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.ou
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.FeedbackRepository;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.service.DeclaredActivityServiceImpl;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.input.DeclaredSkillProgressService;
-import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
+import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
