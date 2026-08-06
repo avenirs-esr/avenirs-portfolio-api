@@ -1,0 +1,129 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+        http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!--
+        Traces used to be linked directly to the user table. They are only ever created by
+        students (see TraceServiceImpl), and the student table's id is always equal to the id of
+        its underlying user (StudentEntity.of sets id = user.getId()), so trace.user_id already
+        holds valid student ids: no row data backfill is required, only relinking the column and
+        its constraints.
+    -->
+    <changeSet author="iamgreendev" id="relink-trace-to-student">
+        <dropIndex indexName="idx_trace_user_created" tableName="trace"/>
+        <dropIndex indexName="idx_trace_user_updated" tableName="trace"/>
+
+        <dropForeignKeyConstraint
+                baseTableName="trace"
+                constraintName="FKjiaa32cs961r7ly0idfap9soi"/>
+
+        <renameColumn
+                tableName="trace"
+                oldColumnName="user_id"
+                newColumnName="student_id"
+                columnDataType="UUID"/>
+
+        <addForeignKeyConstraint
+                baseColumnNames="student_id"
+                baseTableName="trace"
+                constraintName="FK_trace_student_id"
+                referencedColumnNames="id"
+                referencedTableName="student"
+                deferrable="false"
+                initiallyDeferred="false"
+                validate="true"/>
+
+        <createIndex indexName="idx_trace_student_created" tableName="trace">
+            <column name="student_id"/>
+            <column name="created_at"/>
+        </createIndex>
+        <createIndex indexName="idx_trace_student_updated" tableName="trace">
+            <column name="student_id"/>
+            <column name="updated_at"/>
+            <column name="created_at"/>
+        </createIndex>
+
+        <rollback>
+            <dropIndex indexName="idx_trace_student_created" tableName="trace"/>
+            <dropIndex indexName="idx_trace_student_updated" tableName="trace"/>
+
+            <dropForeignKeyConstraint baseTableName="trace" constraintName="FK_trace_student_id"/>
+
+            <renameColumn
+                    tableName="trace"
+                    oldColumnName="student_id"
+                    newColumnName="user_id"
+                    columnDataType="UUID"/>
+
+            <addForeignKeyConstraint
+                    baseColumnNames="user_id"
+                    baseTableName="trace"
+                    constraintName="FKjiaa32cs961r7ly0idfap9soi"
+                    referencedColumnNames="id"
+                    referencedTableName="user"
+                    deferrable="false"
+                    initiallyDeferred="false"
+                    validate="true"/>
+
+            <createIndex indexName="idx_trace_user_created" tableName="trace">
+                <column name="user_id"/>
+                <column name="created_at"/>
+            </createIndex>
+            <createIndex indexName="idx_trace_user_updated" tableName="trace">
+                <column name="user_id"/>
+                <column name="updated_at"/>
+                <column name="created_at"/>
+            </createIndex>
+        </rollback>
+    </changeSet>
+
+    <!--
+        feedback.associations stores a JSONB snapshot of each associated trace, keyed by
+        "userId" (see AssociationsJson.TraceSnapshot). Now that traces are relinked to students,
+        the snapshot key must be renamed to "studentId" to match the new FeedbackMapper. The
+        stored id value itself does not change (student.id == user.id), only the JSON key.
+    -->
+    <changeSet author="iamgreendev" id="rename-trace-snapshot-userid-to-studentid-in-feedback-associations">
+        <sql>
+            UPDATE feedback
+            SET associations = jsonb_set(
+                associations,
+                '{traces}',
+                COALESCE(
+                    (
+                        SELECT jsonb_agg((t.elem - 'userId') || jsonb_build_object('studentId', t.elem -> 'userId'))
+                        FROM jsonb_array_elements(associations -> 'traces') AS t(elem)
+                    ),
+                    '[]'::jsonb
+                )
+            )
+            WHERE jsonb_typeof(associations -> 'traces') = 'array';
+        </sql>
+
+        <rollback>
+            <sql>
+                UPDATE feedback
+                SET associations = jsonb_set(
+                    associations,
+                    '{traces}',
+                    COALESCE(
+                        (
+                            SELECT jsonb_agg((t.elem - 'studentId') || jsonb_build_object('userId', t.elem -> 'studentId'))
+                            FROM jsonb_array_elements(associations -> 'traces') AS t(elem)
+                        ),
+                        '[]'::jsonb
+                    )
+                )
+                WHERE jsonb_typeof(associations -> 'traces') = 'array';
+            </sql>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,22 +1,15 @@
 package fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.specification;
 
-import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.association.infrastructure.adapter.model.AssociationEntity;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.model.TraceEntity;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import jakarta.persistence.criteria.*;
 import java.util.UUID;
 import org.springframework.data.jpa.domain.Specification;
 
 public class TraceSpecification {
-  public static Specification<TraceEntity> ofUser(User user) {
-    return (root, query, criteriaBuilder) ->
-        criteriaBuilder.equal(root.get("user"), UserMapper.INSTANCE.fromDomain(user));
-  }
-
   public static Specification<TraceEntity> unassociated() {
     return (root, query, criteriaBuilder) ->
         criteriaBuilder.not(associated().toPredicate(root, query, criteriaBuilder));

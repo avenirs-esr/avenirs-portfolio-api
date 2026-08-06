@@ -1,21 +1,21 @@
 package fr.avenirsesr.portfolio.student.trace.infrastructure.fixture;
 
-import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.student.trace.domain.model.enums.ETraceAuthorType;
 import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.seeder.FakeTrace;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
-import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
+import fr.avenirsesr.portfolio.user.domain.model.Student;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StudentMapper;
+import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.Instant;
 import java.util.UUID;
 
 public class TraceFixture {
 
   private UUID id;
-  private User user;
+  private Student student;
   private String title;
   private Instant createdAt;
   private Instant updatedAt;
@@ -28,17 +28,24 @@ public class TraceFixture {
   private boolean valorized;
 
   private TraceFixture() {
-    var fakeUser = UserFixture.create().toModel();
-    var base = FakeTrace.of(UserMapper.INSTANCE.fromDomain(fakeUser)).toEntity();
+    var fakeStudent = StudentFixture.create().toModel();
+    var base = FakeTrace.of(StudentMapper.INSTANCE.fromDomain(fakeStudent)).toEntity();
     this.id = base.getId();
-    this.user = fakeUser;
+    this.student = fakeStudent;
     this.title = base.getTitle();
     this.createdAt = base.getCreatedAt();
     this.updatedAt = base.getUpdatedAt();
     this.authorType = base.getAuthorType();
     this.valorized = base.isValorized();
     this.attachment =
-        File.create(UUID.randomUUID(), EFileType.PDF, "my fake pdf", 1000L, "fake-url", user, true);
+        File.create(
+            UUID.randomUUID(),
+            EFileType.PDF,
+            "my fake pdf",
+            1000L,
+            "fake-url",
+            student.getUser(),
+            true);
   }
 
   public static TraceFixture create() {
@@ -50,8 +57,8 @@ public class TraceFixture {
     return this;
   }
 
-  public TraceFixture withUser(User user) {
-    this.user = user;
+  public TraceFixture withStudent(Student student) {
+    this.student = student;
     return this;
   }
 
@@ -108,7 +115,7 @@ public class TraceFixture {
   public Trace toModel() {
     return Trace.toDomain(
         id,
-        user,
+        student,
         title,
         authorType,
         aiUseJustification,

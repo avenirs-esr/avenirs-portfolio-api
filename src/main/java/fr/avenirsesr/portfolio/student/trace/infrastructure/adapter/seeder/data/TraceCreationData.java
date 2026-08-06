@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public record TraceCreationData(
     UUID traceId,
-    UUID userId,
+    UUID studentId,
     String title,
     ETraceAuthorType authorType,
     ELanguage language,

@@ -1,7 +1,7 @@
 [
   {
     "traceId": "4453f884-9081-43cb-95c6-d76c2bb59fd7",
-    "userId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
+    "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Compte rendu",
     "authorType": "THIRD_PARTY",
     "language": "FRENCH",
@@ -18,7 +18,7 @@
   },
   {
     "traceId": "f3d22e78-e827-4bae-8831-44168c176198",
-    "userId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
+    "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Rapport de stage – Analyse organisationnelle",
     "authorType": "PERSONAL",
     "language": "FRENCH",
@@ -41,7 +41,7 @@
   },
   {
     "traceId": "54ab9e1c-473d-4227-9c3e-c8c6adad6d88",
-    "userId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
+    "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Rendu de TD – Chimie organique",
     "authorType": "COLLECTIVE",
     "language": "FRENCH",
@@ -58,7 +58,7 @@
   },
   {
     "traceId": "163b8f77-276f-4e96-bc49-e50c53f88d03",
-    "userId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
+    "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Projet tutoré – Audit d’un poste de travail",
     "authorType": "COLLECTIVE",
     "language": "FRENCH",
@@ -87,7 +87,7 @@
   },
   {
     "traceId": "efb1f0ce-e531-49af-8031-949f3d68b354",
-    "userId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
+    "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Rendu final – Mémoire de recherche",
     "authorType": "PERSONAL",
     "language": "FRENCH",
@@ -104,7 +104,7 @@
   },
   {
     "traceId": "4b02b225-998a-4996-be52-8d9b2a5ab327",
-    "userId": "d999193b-1835-43ee-b739-bd3209e95756",
+    "studentId": "d999193b-1835-43ee-b739-bd3209e95756",
     "title": "Rendu final – Mémoire de recherche",
     "authorType": "PERSONAL",
     "language": "FRENCH",
@@ -121,7 +121,7 @@
   },
   {
     "traceId": "3f9d7c52-8a4e-4d1f-b6a1-2c9e7b5f8d13",
-    "userId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
+    "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Bilan fin de projet",
     "authorType": "PERSONAL",
     "language": "FRENCH",
@@ -138,7 +138,7 @@
   },
   {
     "traceId": "ca745573-544c-4c4c-9768-724f02c690a1",
-    "userId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
+    "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Lien vers travaux personnels",
     "authorType": "PERSONAL",
     "language": "FRENCH",

@@ -3,7 +3,7 @@ package fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.seeder;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.student.trace.domain.model.enums.ETraceAuthorType;
 import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.model.TraceEntity;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import java.time.Instant;
 import java.util.Random;
 import java.util.UUID;
@@ -20,12 +20,12 @@ public class FakeTrace {
     this.trace = trace;
   }
 
-  public static FakeTrace of(UserEntity user) {
+  public static FakeTrace of(StudentEntity student) {
     var fakeTrace =
         new FakeTrace(
             TraceEntity.of(
                 UUID.randomUUID(),
-                user,
+                student,
                 "Trace %s".formatted(faker().lorem().word()),
                 ELanguage.FALLBACK,
                 ETraceAuthorType.PERSONAL,

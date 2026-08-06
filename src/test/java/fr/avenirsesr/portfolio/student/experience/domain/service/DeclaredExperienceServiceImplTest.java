@@ -1452,8 +1452,8 @@ class DeclaredExperienceServiceImplTest {
       when(experience.getId()).thenReturn(experienceId);
       when(experience.getStudent()).thenReturn(student);
 
-      Trace trace1 = TraceFixture.create().withUser(student.getUser()).toModel();
-      Trace trace2 = TraceFixture.create().withUser(student.getUser()).toModel();
+      Trace trace1 = TraceFixture.create().withStudent(student).toModel();
+      Trace trace2 = TraceFixture.create().withStudent(student).toModel();
 
       when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
       when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
@@ -1549,7 +1549,7 @@ class DeclaredExperienceServiceImplTest {
       DeclaredExperience experience = mock(DeclaredExperience.class);
       when(experience.getStudent()).thenReturn(student);
 
-      Trace trace1 = TraceFixture.create().withUser(student.getUser()).toModel();
+      Trace trace1 = TraceFixture.create().withStudent(student).toModel();
       UUID missingTraceId = UUID.randomUUID();
 
       when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
@@ -1579,7 +1579,7 @@ class DeclaredExperienceServiceImplTest {
       when(experience.getStudent()).thenReturn(student);
 
       Student anotherStudent = StudentFixture.create().toModel();
-      Trace trace = TraceFixture.create().withUser(anotherStudent.getUser()).toModel();
+      Trace trace = TraceFixture.create().withStudent(anotherStudent).toModel();
 
       when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
       when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
@@ -1636,7 +1636,7 @@ class DeclaredExperienceServiceImplTest {
       when(experience.getId()).thenReturn(experienceId);
       when(experience.getStudent()).thenReturn(student);
 
-      Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
+      Trace trace = TraceFixture.create().withStudent(student).toModel();
 
       when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
       when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
@@ -1676,7 +1676,7 @@ class DeclaredExperienceServiceImplTest {
       when(experience.getId()).thenReturn(experienceId);
       when(experience.getStudent()).thenReturn(student);
 
-      Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
+      Trace trace = TraceFixture.create().withStudent(student).toModel();
 
       when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
       when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));

@@ -22,6 +22,7 @@ import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.student.trace.domain.model.enums.ETraceAuthorType;
 import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.student.trace.infrastructure.fixture.TraceFixture;
+import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.security.Principal;
 import java.util.*;
@@ -50,7 +51,10 @@ class TraceControllerTest {
   void setUp() {
     userId = UUID.randomUUID();
     user = UserFixture.create().withId(userId).toModel();
-    trace = TraceFixture.create().withUser(user).toModel();
+    trace =
+        TraceFixture.create()
+            .withStudent(StudentFixture.create().withUser(user).toModel())
+            .toModel();
     principal = () -> userId.toString();
   }
 

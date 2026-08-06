@@ -41,9 +41,8 @@ import fr.avenirsesr.portfolio.student.trace.domain.port.output.repository.Trace
 import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.client.TraceConfigurationClient;
 import fr.avenirsesr.portfolio.student.trace.infrastructure.fixture.TraceFixture;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
+import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
-import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -66,7 +65,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class TraceServiceImplTest {
 
   @Mock private TraceRepository traceRepository;
-  @Mock private UserService userService;
+  @Mock private StudentService studentService;
   @Mock private DeclaredActivityService declaredActivityService;
   @Mock private DeclaredSkillProgressService declaredSkillProgressService;
   @Mock private DeclaredExperienceService declaredExperienceService;
@@ -110,7 +109,7 @@ class TraceServiceImplTest {
     @BeforeEach
     void setupGiven() {
       BddLogger.given("a connected student");
-      lenient().when(loggedInUserService.getLoggedInUser()).thenReturn(student.getUser());
+      lenient().when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     }
 
     @Nested
@@ -127,18 +126,18 @@ class TraceServiceImplTest {
         List<Trace> traces =
             List.of(
                 TraceFixture.create()
-                    .withUser(student.getUser())
+                    .withStudent(student)
                     .withCreatedAt(Instant.now().minus(83, ChronoUnit.DAYS))
                     .toModel(),
                 TraceFixture.create()
-                    .withUser(student.getUser())
+                    .withStudent(student)
                     .withCreatedAt(Instant.now().minus(84, ChronoUnit.DAYS))
                     .toModel());
 
         var filter = new TraceFilter(false, null, null, null, null);
         var pageCriteria = new PageCriteria(pageNumber, pageSize);
 
-        when(traceRepository.findAll(student.getUser(), null, filter, null, pageCriteria))
+        when(traceRepository.findAll(student, null, filter, null, pageCriteria))
             .thenReturn(
                 new PagedResult<>(traces, new PageInfo(pageNumber, pageSize, totalElement)));
         when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
@@ -161,14 +160,13 @@ class TraceServiceImplTest {
         BddLogger.when("getting traces view with an unassociated trace");
 
         Instant createdAt = Instant.now().minus(10, ChronoUnit.DAYS);
-        Trace trace =
-            TraceFixture.create().withUser(student.getUser()).withCreatedAt(createdAt).toModel();
+        Trace trace = TraceFixture.create().withStudent(student).withCreatedAt(createdAt).toModel();
 
         var filter = new TraceFilter(false, null, null, null, null);
         var pageCriteria = new PageCriteria(0, 8);
 
         when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
-        when(traceRepository.findAll(student.getUser(), null, filter, null, pageCriteria))
+        when(traceRepository.findAll(student, null, filter, null, pageCriteria))
             .thenReturn(new PagedResult<>(List.of(trace), new PageInfo(0, 8, 1)));
         when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
 
@@ -193,13 +191,13 @@ class TraceServiceImplTest {
       void thenItShouldReturnEmptyWillBeDeletedAtWhenTraceIsAssociated() {
         BddLogger.when("getting traces view with an associated trace");
 
-        Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
+        Trace trace = TraceFixture.create().withStudent(student).toModel();
 
         var filter = new TraceFilter(false, null, null, null, null);
         var pageCriteria = new PageCriteria(0, 8);
 
         when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
-        when(traceRepository.findAll(student.getUser(), null, filter, null, pageCriteria))
+        when(traceRepository.findAll(student, null, filter, null, pageCriteria))
             .thenReturn(new PagedResult<>(List.of(trace), new PageInfo(0, 8, 1)));
         when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, true));
 
@@ -224,29 +222,29 @@ class TraceServiceImplTest {
         List<Trace> unassociatedTraces =
             List.of(
                 TraceFixture.create()
-                    .withUser(student.getUser())
+                    .withStudent(student)
                     .withCreatedAt(Instant.now().minus(12, ChronoUnit.DAYS))
                     .toModel(),
                 TraceFixture.create()
-                    .withUser(student.getUser())
+                    .withStudent(student)
                     .withCreatedAt(Instant.now().minus(72, ChronoUnit.DAYS))
                     .toModel(),
                 TraceFixture.create()
-                    .withUser(student.getUser())
+                    .withStudent(student)
                     .withCreatedAt(Instant.now().minus(84, ChronoUnit.DAYS))
                     .toModel(),
                 TraceFixture.create()
-                    .withUser(student.getUser())
+                    .withStudent(student)
                     .withCreatedAt(Instant.now().minus(86, ChronoUnit.DAYS))
                     .toModel());
 
         List<Trace> associatedTraces =
             List.of(
-                TraceFixture.create().withUser(student.getUser()).toModel(),
-                TraceFixture.create().withUser(student.getUser()).toModel());
+                TraceFixture.create().withStudent(student).toModel(),
+                TraceFixture.create().withStudent(student).toModel());
 
-        when(traceRepository.findAll(student.getUser(), false)).thenReturn(unassociatedTraces);
-        when(traceRepository.findAll(student.getUser(), true)).thenReturn(associatedTraces);
+        when(traceRepository.findAll(student, false)).thenReturn(unassociatedTraces);
+        when(traceRepository.findAll(student, true)).thenReturn(associatedTraces);
         when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
 
         TracesSummaryData result = traceService.getTracesSummary();
@@ -283,7 +281,7 @@ class TraceServiceImplTest {
 
         Trace trace = captor.getValue();
 
-        assertEquals(student.getUser(), trace.getUser());
+        assertEquals(student, trace.getStudent());
         assertNotNull(trace.getId());
         assertEquals(title, trace.getTitle());
         assertEquals(language, trace.getLanguage());
@@ -348,7 +346,7 @@ class TraceServiceImplTest {
 
         Trace trace =
             TraceFixture.create()
-                .withUser(student.getUser())
+                .withStudent(student)
                 .withTitle("Test Title")
                 .withLanguage(ELanguage.ENGLISH)
                 .withAuthorType(ETraceAuthorType.PERSONAL)
@@ -375,7 +373,7 @@ class TraceServiceImplTest {
 
         Trace updatedTrace = captor.getValue();
 
-        assertEquals(student.getUser(), updatedTrace.getUser());
+        assertEquals(student, updatedTrace.getStudent());
         assertEquals("Test Title - Updated", updatedTrace.getTitle());
         assertEquals(ELanguage.FRENCH, updatedTrace.getLanguage());
         assertEquals(ETraceAuthorType.COLLECTIVE, updatedTrace.getAuthorType());
@@ -390,10 +388,7 @@ class TraceServiceImplTest {
         BddLogger.when("updating a trace with link");
 
         Trace trace =
-            TraceFixture.create()
-                .withUser(student.getUser())
-                .withLink("https://example.com")
-                .toModel();
+            TraceFixture.create().withStudent(student).withLink("https://example.com").toModel();
 
         when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
         when(traceRepository.save(trace)).thenReturn(trace);
@@ -425,7 +420,7 @@ class TraceServiceImplTest {
 
         Trace trace =
             TraceFixture.create()
-                .withUser(student.getUser())
+                .withStudent(student)
                 .withPersonalNote("Some personal note")
                 .withAiUseJustification("Justified by AI")
                 .toModel();
@@ -460,7 +455,7 @@ class TraceServiceImplTest {
       void thenItShouldReturnDeletableFalseWhenAssociatedTraceIsLocked() {
         BddLogger.when("updating an associated locked trace");
 
-        Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
+        Trace trace = TraceFixture.create().withStudent(student).toModel();
 
         when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
         when(traceRepository.save(trace)).thenReturn(trace);
@@ -479,7 +474,7 @@ class TraceServiceImplTest {
       void thenItShouldReturnDeletableTrueWhenAssociatedTraceIsUnlocked() {
         BddLogger.when("updating an associated unlocked trace");
 
-        Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
+        Trace trace = TraceFixture.create().withStudent(student).toModel();
 
         when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
         when(traceRepository.save(trace)).thenReturn(trace);
@@ -498,8 +493,7 @@ class TraceServiceImplTest {
       void thenItShouldUpdateValorizedFieldToTrue() {
         BddLogger.when("updating a trace and setting valorized to true");
 
-        Trace trace =
-            TraceFixture.create().withUser(student.getUser()).withValorized(false).toModel();
+        Trace trace = TraceFixture.create().withStudent(student).withValorized(false).toModel();
 
         when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
         when(traceRepository.save(trace)).thenReturn(trace);
@@ -527,8 +521,7 @@ class TraceServiceImplTest {
       void thenItShouldUpdateValorizedFieldToFalse() {
         BddLogger.when("updating a trace and setting valorized to false");
 
-        Trace trace =
-            TraceFixture.create().withUser(student.getUser()).withValorized(true).toModel();
+        Trace trace = TraceFixture.create().withStudent(student).withValorized(true).toModel();
 
         when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
         when(traceRepository.save(trace)).thenReturn(trace);
@@ -582,7 +575,8 @@ class TraceServiceImplTest {
       void thenItShouldThrowTraceNotFoundWhenTraceBelongsToAnotherUser() {
         BddLogger.when("updating a trace owned by another user");
 
-        Trace trace = TraceFixture.create().withUser(UserFixture.create().toModel()).toModel();
+        Trace trace =
+            TraceFixture.create().withStudent(StudentFixture.create().toModel()).toModel();
         when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
 
         TraceNotFoundException exception =
@@ -621,7 +615,7 @@ class TraceServiceImplTest {
         List<UUID> traceIds = List.of(traceId);
 
         when(trace.getId()).thenReturn(traceId);
-        when(trace.getUser()).thenReturn(student.getUser());
+        when(trace.getStudent()).thenReturn(student);
         when(trace.getAttachment()).thenReturn(Optional.of(file));
         when(file.getId()).thenReturn(fileId);
 
@@ -650,7 +644,7 @@ class TraceServiceImplTest {
         List<UUID> traceIds = List.of(traceId);
 
         when(trace.getId()).thenReturn(traceId);
-        when(trace.getUser()).thenReturn(student.getUser());
+        when(trace.getStudent()).thenReturn(student);
         when(trace.getAttachment()).thenReturn(Optional.of(file));
         when(file.getId()).thenReturn(fileId);
 
@@ -679,7 +673,7 @@ class TraceServiceImplTest {
         List<UUID> traceIds = List.of(traceId);
 
         when(trace.getId()).thenReturn(traceId);
-        when(trace.getUser()).thenReturn(student.getUser());
+        when(trace.getStudent()).thenReturn(student);
         when(trace.getAttachment()).thenReturn(Optional.of(file));
         when(file.getId()).thenReturn(fileId);
 
@@ -701,7 +695,7 @@ class TraceServiceImplTest {
       void thenItShouldThrowTraceNotFoundWhenOneTraceDoesNotExist() {
         BddLogger.when("deleting traces with one unknown trace");
 
-        Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
+        Trace trace = TraceFixture.create().withStudent(student).toModel();
         UUID missingTraceId = UUID.randomUUID();
 
         List<UUID> traceIds = List.of(trace.getId(), missingTraceId);
@@ -723,9 +717,9 @@ class TraceServiceImplTest {
       void thenItShouldThrowTraceNotFoundWhenOneTraceBelongsToAnotherUser() {
         BddLogger.when("deleting traces with one trace owned by another user");
 
-        Trace ownedTrace = TraceFixture.create().withUser(student.getUser()).toModel();
+        Trace ownedTrace = TraceFixture.create().withStudent(student).toModel();
         Trace otherUserTrace =
-            TraceFixture.create().withUser(UserFixture.create().toModel()).toModel();
+            TraceFixture.create().withStudent(StudentFixture.create().toModel()).toModel();
 
         List<UUID> traceIds = List.of(ownedTrace.getId(), otherUserTrace.getId());
 
@@ -752,7 +746,7 @@ class TraceServiceImplTest {
 
         Trace trace =
             TraceFixture.create()
-                .withUser(student.getUser())
+                .withStudent(student)
                 .withTitle("Trace title")
                 .withLanguage(ELanguage.FRENCH)
                 .withAuthorType(ETraceAuthorType.PERSONAL)
@@ -776,7 +770,7 @@ class TraceServiceImplTest {
       void thenItShouldReturnAssociatedAndNotDeletableTraceDetailWhenAssociationsAreLocked() {
         BddLogger.when("getting trace detail for an associated locked trace");
 
-        Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
+        Trace trace = TraceFixture.create().withStudent(student).toModel();
 
         when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
         when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, true));
@@ -792,7 +786,7 @@ class TraceServiceImplTest {
       void thenItShouldReturnUnassociatedAndDeletableTraceDetailWithoutCheckingAssociations() {
         BddLogger.when("getting trace detail for an unassociated trace");
 
-        Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
+        Trace trace = TraceFixture.create().withStudent(student).toModel();
 
         when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
         when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
@@ -810,7 +804,8 @@ class TraceServiceImplTest {
       void thenItShouldThrowTraceNotFoundWhenTraceBelongsToAnotherUser() {
         BddLogger.when("getting trace detail of another user");
 
-        Trace trace = TraceFixture.create().withUser(UserFixture.create().toModel()).toModel();
+        Trace trace =
+            TraceFixture.create().withStudent(StudentFixture.create().toModel()).toModel();
 
         when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
 
@@ -834,7 +829,7 @@ class TraceServiceImplTest {
         UUID traceId = UUID.randomUUID();
         UUID activityId = UUID.randomUUID();
 
-        Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
+        Trace trace = TraceFixture.create().withStudent(student).withId(traceId).toModel();
 
         Association association = mock(Association.class);
         when(association.getAssociationType()).thenReturn(EAssociationType.DECLARED_ACTIVITY_TRACE);
@@ -864,7 +859,7 @@ class TraceServiceImplTest {
         UUID traceId = UUID.randomUUID();
         UUID activityId = UUID.randomUUID();
 
-        Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
+        Trace trace = TraceFixture.create().withStudent(student).withId(traceId).toModel();
 
         Association association = mock(Association.class);
         when(association.getAssociationType()).thenReturn(EAssociationType.DECLARED_ACTIVITY_TRACE);
@@ -910,7 +905,7 @@ class TraceServiceImplTest {
         UUID traceId = UUID.randomUUID();
         Trace trace =
             TraceFixture.create()
-                .withUser(UserFixture.create().toModel())
+                .withStudent(StudentFixture.create().toModel())
                 .withId(traceId)
                 .toModel();
 
@@ -933,7 +928,7 @@ class TraceServiceImplTest {
         UUID traceId = UUID.randomUUID();
         UUID skillId = UUID.randomUUID();
 
-        Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
+        Trace trace = TraceFixture.create().withStudent(student).withId(traceId).toModel();
 
         DeclaredSkillProgress skill = mock(DeclaredSkillProgress.class);
         when(skill.getId()).thenReturn(skillId);
@@ -962,7 +957,7 @@ class TraceServiceImplTest {
         UUID traceId = UUID.randomUUID();
         UUID skillId = UUID.randomUUID();
 
-        Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
+        Trace trace = TraceFixture.create().withStudent(student).withId(traceId).toModel();
 
         when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
         when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of(skillId)))
@@ -982,7 +977,7 @@ class TraceServiceImplTest {
         UUID traceId = UUID.randomUUID();
         UUID skillId = UUID.randomUUID();
 
-        Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
+        Trace trace = TraceFixture.create().withStudent(student).withId(traceId).toModel();
 
         DeclaredSkillProgress skill = mock(DeclaredSkillProgress.class);
         when(skill.getId()).thenReturn(skillId);
@@ -1010,7 +1005,7 @@ class TraceServiceImplTest {
         UUID traceId = UUID.randomUUID();
         UUID experienceId = UUID.randomUUID();
 
-        Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
+        Trace trace = TraceFixture.create().withStudent(student).withId(traceId).toModel();
 
         DeclaredExperience experience = mock(DeclaredExperience.class);
         when(experience.getId()).thenReturn(experienceId);
@@ -1039,7 +1034,7 @@ class TraceServiceImplTest {
         UUID traceId = UUID.randomUUID();
         UUID experienceId = UUID.randomUUID();
 
-        Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
+        Trace trace = TraceFixture.create().withStudent(student).withId(traceId).toModel();
 
         when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
         when(declaredExperienceService.findAllByIds(List.of(experienceId))).thenReturn(List.of());
@@ -1059,7 +1054,7 @@ class TraceServiceImplTest {
         UUID traceId = UUID.randomUUID();
         UUID experienceId = UUID.randomUUID();
 
-        Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
+        Trace trace = TraceFixture.create().withStudent(student).withId(traceId).toModel();
         DeclaredExperience experience = Mockito.mock(DeclaredExperience.class);
 
         when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
@@ -1089,7 +1084,7 @@ class TraceServiceImplTest {
         UUID associationId2 = UUID.randomUUID();
         List<UUID> idsToDelete = List.of(associationId1, associationId2);
 
-        Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
+        Trace trace = TraceFixture.create().withStudent(student).withId(traceId).toModel();
 
         Association association1 = mock(Association.class);
         when(association1.getId()).thenReturn(associationId1);
@@ -1116,7 +1111,7 @@ class TraceServiceImplTest {
         UUID linkedAssociationId = UUID.randomUUID();
         UUID unlinkedAssociationId = UUID.randomUUID();
 
-        Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
+        Trace trace = TraceFixture.create().withStudent(student).toModel();
 
         Association association = mock(Association.class);
         when(association.getId()).thenReturn(linkedAssociationId);
@@ -1145,7 +1140,7 @@ class TraceServiceImplTest {
         UUID associationId = UUID.randomUUID();
         UUID activityId = UUID.randomUUID();
 
-        Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
+        Trace trace = TraceFixture.create().withStudent(student).withId(traceId).toModel();
 
         Association association = mock(Association.class);
         when(association.getId()).thenReturn(associationId);
@@ -1179,8 +1174,8 @@ class TraceServiceImplTest {
       void thenItShouldReturnLockedDeclaredActivitiesGroupedByTrace() {
         BddLogger.when("getting locked declared activities for traces");
 
-        Trace firstTrace = TraceFixture.create().withUser(student.getUser()).toModel();
-        Trace secondTrace = TraceFixture.create().withUser(student.getUser()).toModel();
+        Trace firstTrace = TraceFixture.create().withStudent(student).toModel();
+        Trace secondTrace = TraceFixture.create().withStudent(student).toModel();
 
         UUID firstDeclaredActivityId = UUID.randomUUID();
         UUID secondDeclaredActivityId = UUID.randomUUID();
@@ -1265,7 +1260,7 @@ class TraceServiceImplTest {
         BddLogger.when(
             "getting locked declared activities for traces without declared activity association");
 
-        Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
+        Trace trace = TraceFixture.create().withStudent(student).toModel();
         List<UUID> traceIds = List.of(trace.getId());
 
         when(traceRepository.findAllById(traceIds)).thenReturn(List.of(trace));
@@ -1294,7 +1289,7 @@ class TraceServiceImplTest {
       void thenItShouldThrowTraceNotFoundWhenOneTraceDoesNotExist() {
         BddLogger.when("getting locked declared activities with one unknown trace");
 
-        Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
+        Trace trace = TraceFixture.create().withStudent(student).toModel();
         UUID missingTraceId = UUID.randomUUID();
         List<UUID> traceIds = List.of(trace.getId(), missingTraceId);
 
@@ -1312,9 +1307,9 @@ class TraceServiceImplTest {
       void thenItShouldThrowTraceNotFoundWhenOneTraceBelongsToAnotherUser() {
         BddLogger.when("getting locked declared activities with one trace owned by another user");
 
-        Trace ownedTrace = TraceFixture.create().withUser(student.getUser()).toModel();
+        Trace ownedTrace = TraceFixture.create().withStudent(student).toModel();
         Trace otherUserTrace =
-            TraceFixture.create().withUser(UserFixture.create().toModel()).toModel();
+            TraceFixture.create().withStudent(StudentFixture.create().toModel()).toModel();
 
         List<UUID> traceIds = List.of(ownedTrace.getId(), otherUserTrace.getId());
 

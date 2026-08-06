@@ -47,7 +47,8 @@ import fr.avenirsesr.portfolio.student.trace.domain.model.enums.ETraceAuthorType
 import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.student.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.client.TraceConfigurationClient;
-import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
+import fr.avenirsesr.portfolio.user.domain.model.Student;
+import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -61,7 +62,7 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 public class TraceServiceImpl implements TraceService {
   private final TraceRepository traceRepository;
-  private final UserService userService;
+  private final StudentService studentService;
   private final DeclaredActivityService declaredActivityService;
   private final DeclaredSkillProgressService declaredSkillProgressService;
   private final DeclaredExperienceService declaredExperienceService;
@@ -89,18 +90,18 @@ public class TraceServiceImpl implements TraceService {
 
   @Override
   public List<Trace> lastTracesOf() {
-    User loggedInUser = loggedInUserService.getLoggedInUser();
-    return traceRepository.findLastsOf(loggedInUser, MAX_TRACES_OVERVIEW);
+    Student loggedInStudent = loggedInUserService.getLoggedInStudent();
+    return traceRepository.findLastsOf(loggedInStudent, MAX_TRACES_OVERVIEW);
   }
 
   @Override
   public PagedResult<TraceViewData> getTracesView(
       String keyword, TraceFilter filter, DateFilter dateFilter, PageCriteria pageCriteria) {
-    User loggedInUser = loggedInUserService.getLoggedInUser();
+    Student loggedInStudent = loggedInUserService.getLoggedInStudent();
     var config = traceConfigurationClient.getTraceConfiguration();
 
     PagedResult<Trace> pagedResult =
-        traceRepository.findAll(loggedInUser, keyword, filter, dateFilter, pageCriteria);
+        traceRepository.findAll(loggedInStudent, keyword, filter, dateFilter, pageCriteria);
 
     List<Trace> traces = pagedResult.content();
 
@@ -141,7 +142,7 @@ public class TraceServiceImpl implements TraceService {
 
   @Override
   public void deleteAllByIds(List<UUID> traceIds) {
-    User loggedInUser = loggedInUserService.getLoggedInUser();
+    Student loggedInStudent = loggedInUserService.getLoggedInStudent();
 
     var traces = traceRepository.findAllById(traceIds);
 
@@ -149,7 +150,7 @@ public class TraceServiceImpl implements TraceService {
       throw new TraceNotFoundException();
     }
 
-    traces.forEach(trace -> checkIfUserIsAuthorizedOnTrace(loggedInUser, trace));
+    traces.forEach(trace -> checkIfStudentIsAuthorizedOnTrace(loggedInStudent, trace));
 
     var traceIdsToDelete = traces.stream().map(Trace::getId).toList();
 
@@ -184,9 +185,9 @@ public class TraceServiceImpl implements TraceService {
 
   @Override
   public TracesSummaryData getTracesSummary() {
-    User loggedInUser = loggedInUserService.getLoggedInUser();
-    List<Trace> associatedTraces = traceRepository.findAll(loggedInUser, true);
-    List<Trace> unassociatedTraces = traceRepository.findAll(loggedInUser, false);
+    Student loggedInStudent = loggedInUserService.getLoggedInStudent();
+    List<Trace> associatedTraces = traceRepository.findAll(loggedInStudent, true);
+    List<Trace> unassociatedTraces = traceRepository.findAll(loggedInStudent, false);
     TraceConfiguration traceConfiguration = traceConfigurationClient.getTraceConfiguration();
 
     int criticalCount =
@@ -217,9 +218,9 @@ public class TraceServiceImpl implements TraceService {
 
   @Override
   public TraceDetailData getTraceDetail(UUID id) {
-    User loggedInUser = loggedInUserService.getLoggedInUser();
+    Student loggedInStudent = loggedInUserService.getLoggedInStudent();
     Trace trace = traceRepository.findById(id).orElseThrow(TraceNotFoundException::new);
-    checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);
+    checkIfStudentIsAuthorizedOnTrace(loggedInStudent, trace);
     var isTraceAssociated = traceRepository.isAssociated(List.of(trace)).get(trace);
     return buildTraceDetailData(trace, isTraceAssociated);
   }
@@ -242,10 +243,10 @@ public class TraceServiceImpl implements TraceService {
 
   @Override
   public TraceAssociationsData getTraceAssociations(UUID traceId, boolean onlyNotCompleted) {
-    var userLoggedIn = loggedInUserService.getLoggedInUser();
+    var studentLoggedIn = loggedInUserService.getLoggedInStudent();
     var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
 
-    checkIfUserIsAuthorizedOnTrace(userLoggedIn, trace);
+    checkIfStudentIsAuthorizedOnTrace(studentLoggedIn, trace);
 
     var associations =
         associationService.getAllOf(
@@ -299,7 +300,7 @@ public class TraceServiceImpl implements TraceService {
   @Override
   public Trace createTrace(
       UUID traceId,
-      UUID userId,
+      UUID studentId,
       String title,
       ELanguage language,
       ETraceAuthorType authorType,
@@ -309,7 +310,7 @@ public class TraceServiceImpl implements TraceService {
       boolean valorized) {
     return createTrace(
         traceId,
-        userService.getUser(userId),
+        studentService.getStudentById(studentId),
         title,
         language,
         authorType,
@@ -327,10 +328,10 @@ public class TraceServiceImpl implements TraceService {
       String personalNote,
       String aiJustification,
       String link) {
-    User loggedInUser = loggedInUserService.getLoggedInUser();
+    Student loggedInStudent = loggedInUserService.getLoggedInStudent();
     return createTrace(
         UUID.randomUUID(),
-        loggedInUser,
+        loggedInStudent,
         title,
         language,
         authorType,
@@ -342,7 +343,7 @@ public class TraceServiceImpl implements TraceService {
 
   private Trace createTrace(
       UUID traceId,
-      User user,
+      Student student,
       String title,
       ELanguage language,
       ETraceAuthorType authorType,
@@ -355,7 +356,15 @@ public class TraceServiceImpl implements TraceService {
     validateUrl(link);
     var trace =
         Trace.create(
-            traceId, user, title, language, authorType, aiJustification, personalNote, link, null);
+            traceId,
+            student,
+            title,
+            language,
+            authorType,
+            aiJustification,
+            personalNote,
+            link,
+            null);
     trace.setValorized(valorized);
 
     return traceRepository.save(trace);
@@ -371,9 +380,9 @@ public class TraceServiceImpl implements TraceService {
       String aiJustification,
       String link,
       boolean valorized) {
-    User loggedInUser = loggedInUserService.getLoggedInUser();
+    Student loggedInStudent = loggedInUserService.getLoggedInStudent();
     var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
-    checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);
+    checkIfStudentIsAuthorizedOnTrace(loggedInStudent, trace);
 
     trace.setTitle(title);
     trace.setLanguage(language);
@@ -419,9 +428,9 @@ public class TraceServiceImpl implements TraceService {
 
   @Override
   public TraceAssociationsData associateTraceWithActivities(UUID traceId, List<UUID> activityIds) {
-    User loggedInUser = loggedInUserService.getLoggedInUser();
+    Student loggedInStudent = loggedInUserService.getLoggedInStudent();
     var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
-    checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);
+    checkIfStudentIsAuthorizedOnTrace(loggedInStudent, trace);
 
     var activities = declaredActivityService.findAllDeclaredActivitiesByIds(activityIds);
 
@@ -430,7 +439,7 @@ public class TraceServiceImpl implements TraceService {
       throw new DeclaredActivityNotFoundException();
     }
 
-    if (!activities.stream().allMatch(a -> a.getStudent().getUser().equals(loggedInUser))) {
+    if (!activities.stream().allMatch(a -> a.getStudent().equals(loggedInStudent))) {
       throw new UserNotAuthorizedException();
     }
 
@@ -482,9 +491,9 @@ public class TraceServiceImpl implements TraceService {
 
   @Override
   public TraceAssociationsData associateTraceWithDeclaredSkill(UUID traceId, List<UUID> skillIds) {
-    User loggedInUser = loggedInUserService.getLoggedInUser();
+    Student loggedInStudent = loggedInUserService.getLoggedInStudent();
     var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
-    checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);
+    checkIfStudentIsAuthorizedOnTrace(loggedInStudent, trace);
 
     var declaredSkills = declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(skillIds);
 
@@ -493,7 +502,7 @@ public class TraceServiceImpl implements TraceService {
       throw new DeclaredSkillProgressNotFoundException();
     }
 
-    if (!declaredSkills.stream().allMatch(a -> a.getStudent().getUser().equals(loggedInUser))) {
+    if (!declaredSkills.stream().allMatch(a -> a.getStudent().equals(loggedInStudent))) {
       throw new UserNotAuthorizedException();
     }
 
@@ -510,9 +519,9 @@ public class TraceServiceImpl implements TraceService {
   @Override
   public TraceAssociationsData associateTraceWithDeclaredExperience(
       UUID traceId, List<UUID> experienceIds) {
-    User loggedInUser = loggedInUserService.getLoggedInUser();
+    Student loggedInStudent = loggedInUserService.getLoggedInStudent();
     var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
-    checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);
+    checkIfStudentIsAuthorizedOnTrace(loggedInStudent, trace);
 
     var declaredExperiences = declaredExperienceService.findAllByIds(experienceIds);
 
@@ -521,8 +530,7 @@ public class TraceServiceImpl implements TraceService {
       throw new DeclaredExperienceNotFoundException();
     }
 
-    if (!declaredExperiences.stream()
-        .allMatch(a -> a.getStudent().getUser().equals(loggedInUser))) {
+    if (!declaredExperiences.stream().allMatch(a -> a.getStudent().equals(loggedInStudent))) {
       throw new UserNotAuthorizedException();
     }
 
@@ -539,10 +547,10 @@ public class TraceServiceImpl implements TraceService {
 
   @Override
   public void unassociate(UUID traceId, List<UUID> associationIds) {
-    User loggedInUser = loggedInUserService.getLoggedInUser();
+    Student loggedInStudent = loggedInUserService.getLoggedInStudent();
     Trace trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
 
-    checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);
+    checkIfStudentIsAuthorizedOnTrace(loggedInStudent, trace);
 
     List<Association> associationList =
         associationService
@@ -641,7 +649,8 @@ public class TraceServiceImpl implements TraceService {
     }
 
     traces.forEach(
-        trace -> checkIfUserIsAuthorizedOnTrace(loggedInUserService.getLoggedInUser(), trace));
+        trace ->
+            checkIfStudentIsAuthorizedOnTrace(loggedInUserService.getLoggedInStudent(), trace));
 
     Map<UUID, List<UUID>> associatedDeclaredActivityIdsByTraceId =
         getAssociatedDeclaredActivityIdsByTraceId(traceIds);
@@ -691,16 +700,16 @@ public class TraceServiceImpl implements TraceService {
         .toList();
   }
 
-  private void checkIfUserIsAuthorizedOnTrace(User user, Trace trace) {
-    if (!trace.getUser().equals(user)) {
-      throw new TraceNotFoundException("%s does not own this %s".formatted(user, trace));
+  private void checkIfStudentIsAuthorizedOnTrace(Student student, Trace trace) {
+    if (!trace.getStudent().equals(student)) {
+      throw new TraceNotFoundException("%s does not own this %s".formatted(student, trace));
     }
   }
 
   private void checkTraceOwnership(UUID traceId) {
-    var loggedInUser = loggedInUserService.getLoggedInUser();
+    var loggedInStudent = loggedInUserService.getLoggedInStudent();
     var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
-    checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);
+    checkIfStudentIsAuthorizedOnTrace(loggedInStudent, trace);
   }
 
   private Map<UUID, List<UUID>> getAssociatedDeclaredActivityIdsByTraceId(List<UUID> traceIds) {
@@ -748,9 +757,9 @@ public class TraceServiceImpl implements TraceService {
   @Override
   public File uploadAttachment(
       UUID traceId, String fileName, String mimeType, long size, byte[] content) {
-    var loggedInUser = loggedInUserService.getLoggedInUser();
+    var loggedInStudent = loggedInUserService.getLoggedInStudent();
     var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
-    checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);
+    checkIfStudentIsAuthorizedOnTrace(loggedInStudent, trace);
     if (trace.getLink().isPresent()) {
       throw new InvalidTraceTypeException();
     }
@@ -763,9 +772,9 @@ public class TraceServiceImpl implements TraceService {
 
   @Override
   public FileDownload downloadAttachment(UUID traceId) {
-    var loggedInUser = loggedInUserService.getLoggedInUser();
+    var loggedInStudent = loggedInUserService.getLoggedInStudent();
     var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
-    checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);
+    checkIfStudentIsAuthorizedOnTrace(loggedInStudent, trace);
     if (trace.getLink().isPresent()) {
       throw new InvalidTraceTypeException();
     }

@@ -11,7 +11,7 @@ public record AssociationsJson(
     List<TraceSnapshot> traces, List<DeclaredSkillProgressSnapshot> declaredSkillProgresses) {
   public record TraceSnapshot(
       UUID id,
-      UUID userId,
+      UUID studentId,
       UUID attachmentId,
       String title,
       ELanguage language,

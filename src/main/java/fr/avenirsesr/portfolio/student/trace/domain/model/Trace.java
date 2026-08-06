@@ -1,10 +1,10 @@
 package fr.avenirsesr.portfolio.student.trace.domain.model;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
-import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.student.trace.domain.model.enums.ETraceAuthorType;
+import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
@@ -15,7 +15,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Trace extends AvenirsBaseModel {
-  private final User user;
+  private final Student student;
   private String title;
   private ETraceAuthorType authorType;
   private ELanguage language;
@@ -35,7 +35,7 @@ public class Trace extends AvenirsBaseModel {
 
   private Trace(
       UUID id,
-      User user,
+      Student student,
       String title,
       ELanguage language,
       ETraceAuthorType authorType,
@@ -47,7 +47,7 @@ public class Trace extends AvenirsBaseModel {
       Instant createdAt,
       Instant updatedAt) {
     super(id, createdAt, updatedAt);
-    this.user = user;
+    this.student = student;
     this.title = title;
     this.language = language;
     this.authorType = authorType;
@@ -60,7 +60,7 @@ public class Trace extends AvenirsBaseModel {
 
   public static Trace create(
       UUID id,
-      User user,
+      Student student,
       String title,
       ELanguage language,
       ETraceAuthorType authorType,
@@ -71,7 +71,7 @@ public class Trace extends AvenirsBaseModel {
 
     return new Trace(
         id,
-        user,
+        student,
         title,
         language,
         authorType,
@@ -86,7 +86,7 @@ public class Trace extends AvenirsBaseModel {
 
   public static Trace toDomain(
       UUID id,
-      User user,
+      Student student,
       String title,
       ETraceAuthorType authorType,
       String aiUseJustification,
@@ -99,7 +99,7 @@ public class Trace extends AvenirsBaseModel {
       boolean valorized) {
     return new Trace(
         id,
-        user,
+        student,
         title,
         language,
         authorType,
