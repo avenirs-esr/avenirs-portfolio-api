@@ -19,8 +19,6 @@ public interface TraceService {
 
   List<Trace> findAllTracesById(List<UUID> ids);
 
-  String programNameOfTrace(Trace trace);
-
   List<Trace> lastTracesOf();
 
   PagedResult<TraceViewData> getTracesView(

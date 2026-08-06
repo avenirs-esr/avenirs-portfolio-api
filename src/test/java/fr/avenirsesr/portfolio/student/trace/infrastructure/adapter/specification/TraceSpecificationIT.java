@@ -9,7 +9,6 @@ import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.student.trace.domain.filter.ETraceFilterKey;
-import fr.avenirsesr.portfolio.student.trace.domain.model.ETraceStatus;
 import fr.avenirsesr.portfolio.student.trace.domain.model.enums.ETraceAuthorType;
 import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.repository.TraceJpaRepository;
@@ -171,13 +170,9 @@ class TraceSpecificationIT extends ContainerConfigurationTest {
         builder.getSpecification(ETraceFilterKey.FILE_TYPE, List.of(EFileType.PDF));
     Specification<TraceEntity> skillSpec =
         builder.getSpecification(ETraceFilterKey.SKILL, List.of(UUID.randomUUID()));
-    Specification<TraceEntity> statusSpec =
-        builder.getSpecification(
-            ETraceFilterKey.STATUS, List.of(ETraceStatus.ASSOCIATED_EVALUATED));
 
     assertThat(fileTypeSpec.toPredicate(root, query, cb)).isNull();
     assertThat(skillSpec.toPredicate(root, query, cb)).isNull();
-    assertThat(statusSpec.toPredicate(root, query, cb)).isNull();
   }
 
   @Test

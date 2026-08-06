@@ -13,7 +13,6 @@ import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
-import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.DeclaredActivityAlreadyFinishedException;
@@ -134,7 +133,7 @@ class TraceServiceImplTest {
                     .withCreatedAt(Instant.now().minus(84, ChronoUnit.DAYS))
                     .toModel());
 
-        var filter = new TraceFilter(false, null, null, null, null);
+        var filter = new TraceFilter(false, null, null, null);
         var pageCriteria = new PageCriteria(pageNumber, pageSize);
 
         when(traceRepository.findAll(student, null, filter, null, pageCriteria))
@@ -162,7 +161,7 @@ class TraceServiceImplTest {
         Instant createdAt = Instant.now().minus(10, ChronoUnit.DAYS);
         Trace trace = TraceFixture.create().withStudent(student).withCreatedAt(createdAt).toModel();
 
-        var filter = new TraceFilter(false, null, null, null, null);
+        var filter = new TraceFilter(false, null, null, null);
         var pageCriteria = new PageCriteria(0, 8);
 
         when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
@@ -193,7 +192,7 @@ class TraceServiceImplTest {
 
         Trace trace = TraceFixture.create().withStudent(student).toModel();
 
-        var filter = new TraceFilter(false, null, null, null, null);
+        var filter = new TraceFilter(false, null, null, null);
         var pageCriteria = new PageCriteria(0, 8);
 
         when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
@@ -762,7 +761,6 @@ class TraceServiceImplTest {
         assertEquals(trace.getId(), result.id());
         assertEquals("Trace title", result.title());
         assertTrue(result.isAssociated());
-        assertEquals(EPortfolioType.LIFE_PROJECT.name(), result.programName());
         assertEquals(ETraceAuthorType.PERSONAL, result.authorType());
       }
 

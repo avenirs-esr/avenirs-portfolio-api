@@ -1008,7 +1008,6 @@ class DeclaredActivityServiceImplTest {
     assertThat(traceFilterCaptor.getValue().isAssociated()).isTrue();
     assertThat(traceFilterCaptor.getValue().fileTypes()).isNull();
     assertThat(traceFilterCaptor.getValue().skillIds()).isNull();
-    assertThat(traceFilterCaptor.getValue().statuses()).isNull();
   }
 
   @Test

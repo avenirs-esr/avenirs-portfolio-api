@@ -1,0 +1,75 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="bilelbanelhaq" id="1780000000000-1">
+        <dropForeignKeyConstraint baseTableName="skill_translation" constraintName="FK487nr9gqeb3reepdasuccwetv"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq" id="1780000000000-2">
+        <dropForeignKeyConstraint baseTableName="skill_level_progress" constraintName="FKedbx4lwc4vqlweeuky0s9mehd"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq" id="1780000000000-3">
+        <dropForeignKeyConstraint baseTableName="student_progress" constraintName="FKl0cwsyxx6m6x6ooi0wmg07w5r"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq" id="1780000000000-4">
+        <dropForeignKeyConstraint baseTableName="program_translation" constraintName="FK7c2whuc7h5wqfnqorwx18hqn2"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq" id="1780000000000-5">
+        <dropForeignKeyConstraint baseTableName="institution_translation" constraintName="FK886t77iwh1kd2u7kg6qj05qb6"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq" id="1780000000000-6">
+        <dropForeignKeyConstraint baseTableName="student_progress" constraintName="FKf00dj5ykgbp98o1hbers080ng"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq" id="1780000000000-7">
+        <dropForeignKeyConstraint baseTableName="program" constraintName="FKfr6h2e2bsg8m0csg2ncuidaxu"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq" id="1780000000000-8">
+        <dropForeignKeyConstraint baseTableName="skill_level" constraintName="FKk8yy30pvpxxp3etl7olmfesh6"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq" id="1780000000000-9">
+        <dropForeignKeyConstraint baseTableName="skill_level_translation" constraintName="FKly0dy24x3guv0oe3ral98bl7a"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq" id="1780000000000-10">
+        <dropForeignKeyConstraint baseTableName="skill_level_progress" constraintName="FKpuxo8yqtpxf4xnlov8pjekrhb"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq" id="1780000000000-11">
+        <dropForeignKeyConstraint baseTableName="skill_level" constraintName="FKtnmlenq49a032lwndrt8cjlja"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq" id="1780000000000-12">
+        <dropForeignKeyConstraint baseTableName="skill_level_progress" constraintName="FKtp2mnaou0le35lk8u5bl00jlo"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq" id="1780000000000-13">
+        <dropForeignKeyConstraint baseTableName="training_path" constraintName="FKvino95hm6kcqvaaqjueb9obe"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq" id="1780000000000-14">
+        <dropTable tableName="skill_level_progress"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq" id="1780000000000-15">
+        <dropTable tableName="student_progress"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq" id="1780000000000-16">
+        <dropTable tableName="skill_level_translation"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq" id="1780000000000-17">
+        <dropTable tableName="skill_level"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq" id="1780000000000-18">
+        <dropTable tableName="training_path"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq" id="1780000000000-19">
+        <dropTable tableName="program_translation"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq" id="1780000000000-20">
+        <dropTable tableName="program"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq" id="1780000000000-21">
+        <dropTable tableName="skill_translation"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq" id="1780000000000-22">
+        <dropTable tableName="skill"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq" id="1780000000000-23">
+        <dropTable tableName="institution_translation"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq" id="1780000000000-24">
+        <dropTable tableName="institution"/>
+    </changeSet>
+</databaseChangeLog>

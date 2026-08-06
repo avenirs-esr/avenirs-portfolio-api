@@ -14,7 +14,6 @@ import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorize
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.file.domain.model.FileDownload;
 import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
-import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityAssociationData;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.DeclaredActivityAlreadyFinishedException;
@@ -81,11 +80,6 @@ public class TraceServiceImpl implements TraceService {
   @Override
   public List<Trace> findAllTracesById(List<UUID> ids) {
     return traceRepository.findAllById(ids);
-  }
-
-  @Override
-  public String programNameOfTrace(Trace trace) {
-    return EPortfolioType.LIFE_PROJECT.name();
   }
 
   @Override
@@ -230,7 +224,6 @@ public class TraceServiceImpl implements TraceService {
         trace.getId(),
         trace.getTitle(),
         isAssociated,
-        programNameOfTrace(trace),
         trace.getAuthorType(),
         trace.getAiUseJustification().orElse(null),
         trace.getPersonalNote().orElse(null),

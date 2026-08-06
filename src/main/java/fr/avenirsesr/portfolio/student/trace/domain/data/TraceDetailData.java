@@ -10,7 +10,6 @@ public record TraceDetailData(
     UUID id,
     String title,
     boolean isAssociated,
-    String programName,
     ETraceAuthorType authorType,
     String aiUseJustification,
     String personalNote,

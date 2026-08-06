@@ -10,7 +10,6 @@ import java.util.UUID;
     requiredProperties = {
       "id",
       "title",
-      "programName",
       "authorType",
       "aiUseJustification",
       "personalNote",
@@ -23,7 +22,6 @@ public record TraceDetailDTO(
     UUID id,
     String title,
     boolean isAssociated,
-    String programName,
     @Schema(ref = "#/components/schemas/ETraceAuthorType") ETraceAuthorType authorType,
     String aiUseJustification,
     String personalNote,
