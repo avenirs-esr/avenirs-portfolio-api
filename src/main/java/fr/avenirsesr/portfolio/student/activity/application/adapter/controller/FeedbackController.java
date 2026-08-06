@@ -26,6 +26,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -46,6 +47,7 @@ public class FeedbackController {
   private final StudentFeedbackItemListDTOMapper studentFeedbackItemListDTOMapper;
   private final FeedbackOverviewDTOMapper feedbackOverviewDTOMapper;
 
+  @PreAuthorize("hasAuthority('feedback:request:read:assigned')")
   @GetMapping
   public ResponseEntity<PagedResponse<FeedbackStaffListItemDTO>> getStaffFeedbacks(
       Principal principal,
@@ -71,6 +73,7 @@ public class FeedbackController {
             PageInfoDTO.fromDomain(result.pageInfo())));
   }
 
+  @PreAuthorize("hasAuthority('feedback:history:read:contextual')")
   @GetMapping("/exhaustive-list/{activityId}")
   public ResponseEntity<List<StudentFeedbackItemListDTO>> getFeedbacksByActivity(
       Principal principal, @PathVariable UUID activityId) {
@@ -84,6 +87,7 @@ public class FeedbackController {
             .toList());
   }
 
+  @PreAuthorize("hasAnyAuthority('feedback:received:read:own','feedback:request:read:assigned')")
   @GetMapping("/{userCategory}/{feedbackId}")
   public ResponseEntity<FeedbackDetailsDTO> getFeedbackDetails(
       Principal principal,
@@ -99,6 +103,7 @@ public class FeedbackController {
             feedbackService.getFeedbackDetails(feedbackId, userCategory)));
   }
 
+  @PreAuthorize("hasAuthority('feedback:request:respond:assigned')")
   @PutMapping("/{feedbackId}")
   public ResponseEntity<Void> updateFeedback(
       Principal principal,
@@ -110,6 +115,7 @@ public class FeedbackController {
     return ResponseEntity.noContent().build();
   }
 
+  @PreAuthorize("hasAuthority('feedback:request:create:own')")
   @PostMapping("/{declaredActivityId}/ask-for-feedback")
   public ResponseEntity<FeedbackDetailsDTO> askForFeedback(
       Principal principal, @Valid @PathVariable UUID declaredActivityId) {
@@ -121,6 +127,7 @@ public class FeedbackController {
         .body(feedbackDetailsDTOMapper.toDTO(feedbackService.createFeedback(declaredActivityId)));
   }
 
+  @PreAuthorize("hasAuthority('feedback:dashboard:read:contextual')")
   @GetMapping("/dashboard")
   public ResponseEntity<FeedbackDashboardDTO> getFeedbackDashboard(
       Principal principal, @RequestParam(required = false) UUID activityId) {
@@ -137,6 +144,7 @@ public class FeedbackController {
             dashboard.totalFeedbacks()));
   }
 
+  @PreAuthorize("hasAuthority('feedback:history:read:contextual')")
   @GetMapping("/{declaredActivityId}/history")
   public ResponseEntity<List<FeedbackOverviewDTO>> getFeedbackHistory(
       Principal principal, @PathVariable UUID declaredActivityId) {
@@ -150,6 +158,7 @@ public class FeedbackController {
             .toList());
   }
 
+  @PreAuthorize("hasAuthority('feedback:request:respond:assigned')")
   @PostMapping("/{feedbackId}/submit")
   public ResponseEntity<Void> submitFeedback(
       Principal principal, @Valid @PathVariable UUID feedbackId) {

@@ -35,6 +35,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -51,6 +52,7 @@ public class ActivityController {
   private final ActivityStaffOverviewDtoMapper activityStaffOverviewDtoMapper;
   private final FileDTOMapper fileDTOMapper;
 
+  @PreAuthorize("hasAuthority('activity:read:contextual')")
   @GetMapping("/{activityStatus}/{activityId}/presentation")
   public ResponseEntity<ActivityPresentationDTO> getActivityPresentation(
       HttpServletRequest request,
@@ -71,6 +73,7 @@ public class ActivityController {
     return ResponseEntity.ok(dto);
   }
 
+  @PreAuthorize("hasAuthority('activity:document:read:contextual')")
   @GetMapping("/{activityStatus}/{activityId}/content")
   public ResponseEntity<ActivityContentDTO> getActivityContent(
       HttpServletRequest request,
@@ -103,6 +106,7 @@ public class ActivityController {
     return ResponseEntity.ok(dto);
   }
 
+  @PreAuthorize("hasAuthority('activity:read:contextual')")
   @GetMapping("/staff/working-space")
   public ResponseEntity<PagedResponse<ActivityStaffOverviewDTO>> getStaffActivityWorkingSpace(
       Principal principal,
@@ -129,6 +133,7 @@ public class ActivityController {
     return ResponseEntity.ok(viewResponse);
   }
 
+  @PreAuthorize("hasAuthority('activity:library:staff:read')")
   @GetMapping("/staff/library")
   public ResponseEntity<PagedResponse<ActivityStaffOverviewDTO>> getStaffActivityLibrary(
       Principal principal,
@@ -155,6 +160,7 @@ public class ActivityController {
     return ResponseEntity.ok(viewResponse);
   }
 
+  @PreAuthorize("hasAuthority('activity:catalog:read:contextual')")
   @GetMapping
   public ResponseEntity<PagedResponse<ActivityOverviewDTO>> getActivitiesView(
       Principal principal,
@@ -181,6 +187,7 @@ public class ActivityController {
     return ResponseEntity.ok(viewResponse);
   }
 
+  @PreAuthorize("hasAuthority('activity:catalog:read:contextual')")
   @GetMapping("/latest")
   public ResponseEntity<PagedResponse<ActivityOverviewDTO>> getLatestActivitiesView(
       Principal principal,
@@ -204,12 +211,14 @@ public class ActivityController {
     return ResponseEntity.ok(viewResponse);
   }
 
+  @PreAuthorize("hasAuthority('activity:catalog:read:contextual')")
   @GetMapping("/navigation")
   public ResponseEntity<List<ActivityNavigationDTO>> getActivityNavigation() {
     return ResponseEntity.ok(
         activityNavigationMapper.toDTO(activityService.getActivityNavigation()));
   }
 
+  @PreAuthorize("hasAuthority('activity:create')")
   @PostMapping("/create-draft/{activityId}")
   public ResponseEntity<ActivityDraftCreationResponse> createDraftFromActivity(
       Principal principal, @PathVariable UUID activityId) {
@@ -222,6 +231,7 @@ public class ActivityController {
     return ResponseEntity.ok(new ActivityDraftCreationResponse(draft.getId()));
   }
 
+  @PreAuthorize("hasAuthority('activity:create')")
   @PostMapping("/draft")
   public ResponseEntity<ActivityDraftCreationResponse> createActivityDraft(
       Principal principal, @RequestBody ActivityDraftCreationRequest body) {
@@ -234,6 +244,7 @@ public class ActivityController {
     return ResponseEntity.ok(new ActivityDraftCreationResponse(draft.getId()));
   }
 
+  @PreAuthorize("hasAuthority('activity:create')")
   @PostMapping("/publish/{activityDraftId}")
   public ResponseEntity<CreationResponse> publishActivityDraft(
       Principal principal, @PathVariable UUID activityDraftId) {
@@ -246,6 +257,7 @@ public class ActivityController {
     return ResponseEntity.ok(new CreationResponse(activity.getId()));
   }
 
+  @PreAuthorize("hasAuthority('activity:published:update:contextual')")
   @PostMapping("/unpublish/{activityId}")
   public ResponseEntity<Void> unpublishActivity(
       Principal principal, @PathVariable UUID activityId) {
@@ -256,6 +268,7 @@ public class ActivityController {
     return ResponseEntity.noContent().build();
   }
 
+  @PreAuthorize("hasAuthority('activity:delete')")
   @DeleteMapping("/draft/{activityDraftId}")
   public ResponseEntity<String> deleteActivityDraft(
       Principal principal, @PathVariable UUID activityDraftId) {
@@ -269,6 +282,7 @@ public class ActivityController {
     return ResponseEntity.ok("Activity draft successfully deleted");
   }
 
+  @PreAuthorize("hasAuthority('activity:update')")
   @PatchMapping("/{activityDraftId}")
   public ResponseEntity<ActivityDraftUpdateResponse> updateActivityDraft(
       Principal principal,
@@ -297,6 +311,7 @@ public class ActivityController {
     return ResponseEntity.ok(new ActivityDraftUpdateResponse(draft.getId()));
   }
 
+  @PreAuthorize("hasAuthority('activity:update')")
   @PostMapping(
       value = "/draft/{activityDraftId}/banner",
       consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -320,6 +335,7 @@ public class ActivityController {
         .body(fileDTOMapper.toFileDTO(uploaded, extractOrigin(request)));
   }
 
+  @PreAuthorize("hasAuthority('activity:update')")
   @DeleteMapping("/draft/{activityDraftId}/banner")
   public ResponseEntity<Void> deleteDraftBanner(
       Principal principal, @PathVariable UUID activityDraftId) {
@@ -331,6 +347,7 @@ public class ActivityController {
     return ResponseEntity.noContent().build();
   }
 
+  @PreAuthorize("hasAuthority('activity:update')")
   @PostMapping(
       value = "/draft/{activityDraftId}/files",
       consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -354,6 +371,7 @@ public class ActivityController {
         .body(fileDTOMapper.toFileDTO(uploaded, extractOrigin(request)));
   }
 
+  @PreAuthorize("hasAuthority('activity:update')")
   @DeleteMapping("/draft/{activityDraftId}/files/{fileId}")
   public ResponseEntity<Void> deleteDraftFile(
       Principal principal, @PathVariable UUID activityDraftId, @PathVariable UUID fileId) {
@@ -369,6 +387,7 @@ public class ActivityController {
   @GetMapping(
       value = "/{activityId}/files/{fileId}/download",
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  @PreAuthorize("hasAuthority('activity:document:download:contextual')")
   public ResponseEntity<byte[]> downloadActivityFile(
       Principal principal, @PathVariable UUID activityId, @PathVariable UUID fileId) {
     log.debug(

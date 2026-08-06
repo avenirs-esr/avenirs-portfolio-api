@@ -29,6 +29,7 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -41,6 +42,7 @@ public class DeclaredSkillProgressController {
   private final DeclaredSkillAssociationsDTOMapper declaredSkillAssociationsDTOMapper;
   private final AssociationSearchResultDTOMapper associationSearchResultDTOMapper;
 
+  @PreAuthorize("hasAuthority('declared-skill:list:own')")
   @GetMapping()
   public ResponseEntity<PagedResponse<DeclaredSkillProgressDTO>> getDeclaredSkillsProgresses(
       Principal principal,
@@ -64,6 +66,7 @@ public class DeclaredSkillProgressController {
             PageInfoDTO.fromDomain(result.pageInfo())));
   }
 
+  @PreAuthorize("hasAuthority('declared-skill:create:own')")
   @PostMapping()
   public ResponseEntity<DeclaredSkillProgressDTO> createDeclaredSkillProgress(
       Principal principal, @RequestBody AddDeclaredSkillDTO declaredSkill) {
@@ -79,6 +82,7 @@ public class DeclaredSkillProgressController {
         .body(declaredSkillProgressMapper.toDeclaredSkillProgressDTO(declaredSkillProgress));
   }
 
+  @PreAuthorize("hasAuthority('declared-skill:update:own')")
   @PutMapping("/{declaredSkillProgressId}")
   public ResponseEntity<DeclaredSkillProgressDTO> updateDeclaredSkillProgress(
       Principal principal,
@@ -96,6 +100,7 @@ public class DeclaredSkillProgressController {
         declaredSkillProgressMapper.toDeclaredSkillProgressDTO(declaredSkillProgress));
   }
 
+  @PreAuthorize("hasAuthority('declared-skill:list:own')")
   @GetMapping("/{declaredSkillProgressId}")
   public ResponseEntity<DeclaredSkillProgressDetailsDTO> getDeclaredSkillProgressDetails(
       Principal principal, @PathVariable UUID declaredSkillProgressId) {
@@ -111,6 +116,7 @@ public class DeclaredSkillProgressController {
             declaredSkillProgressDetails));
   }
 
+  @PreAuthorize("hasAuthority('declared-skill:delete:own')")
   @DeleteMapping("/{declaredSkillProgressId}")
   public ResponseEntity<String> deleteDeclaredSkillProgress(
       @PathVariable UUID declaredSkillProgressId) {
@@ -118,6 +124,7 @@ public class DeclaredSkillProgressController {
     return ResponseEntity.ok("Declared skill progress successfully deleted");
   }
 
+  @PreAuthorize("hasAuthority('declared-skill:delete:own')")
   @DeleteMapping()
   public ResponseEntity<String> deleteDeclaredSkillProgresses(
       @RequestBody List<UUID> declaredSkillProgressIds) {
@@ -125,6 +132,7 @@ public class DeclaredSkillProgressController {
     return ResponseEntity.ok("Declared skill progresses successfully deleted");
   }
 
+  @PreAuthorize("hasAuthority('declared-skill:association:manage:own')")
   @PostMapping("/{declaredSkillProgressId}/unassociate/traces")
   public ResponseEntity<String> unassociateTraces(
       Principal principal,
@@ -133,6 +141,7 @@ public class DeclaredSkillProgressController {
     return ResponseEntity.status(410).build();
   }
 
+  @PreAuthorize("hasAuthority('declared-skill:association:manage:own')")
   @GetMapping("/search-for-association")
   public ResponseEntity<PagedResponse<AssociationSearchResultDeclaredSkillIDTO>>
       searchDeclaredSkillsForAssociation(
@@ -168,6 +177,7 @@ public class DeclaredSkillProgressController {
             PageInfoDTO.fromDomain(pagedResult.pageInfo())));
   }
 
+  @PreAuthorize("hasAuthority('declared-skill:list:own')")
   @GetMapping("/{declaredSkillProgressId}/associations")
   public ResponseEntity<DeclaredSkillAssociationsDTO> getDeclaredSkillWithDeclaredActivities(
       Principal principal, @Valid @PathVariable UUID declaredSkillProgressId) {
@@ -179,6 +189,7 @@ public class DeclaredSkillProgressController {
     return ResponseEntity.ok(declaredSkillAssociationsDTOMapper.toDTO(newAssociations));
   }
 
+  @PreAuthorize("hasAuthority('declared-skill:association:manage:own')")
   @DeleteMapping("/{declaredSkillProgressId}/associations")
   public ResponseEntity<Void> deleteDeclaredSkillAssociations(
       Principal principal,
@@ -192,6 +203,7 @@ public class DeclaredSkillProgressController {
     return ResponseEntity.noContent().build();
   }
 
+  @PreAuthorize("hasAuthority('declared-skill:association:manage:own')")
   @PostMapping("/{declaredSkillProgressId}/associate/declared-activities")
   public ResponseEntity<DeclaredSkillAssociationsDTO> associateDeclaredSkillWithDeclaredActivities(
       Principal principal,
@@ -209,6 +221,7 @@ public class DeclaredSkillProgressController {
     return ResponseEntity.ok(declaredSkillAssociationsDTOMapper.toDTO(newAssociations));
   }
 
+  @PreAuthorize("hasAuthority('declared-skill:association:manage:own')")
   @PostMapping("/{declaredSkillProgressId}/associate/declared-experiences")
   public ResponseEntity<DeclaredSkillAssociationsDTO> associateDeclaredSkillWithDeclaredExperiences(
       Principal principal,

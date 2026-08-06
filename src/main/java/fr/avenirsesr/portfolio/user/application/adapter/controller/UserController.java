@@ -26,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -49,6 +50,7 @@ public class UserController {
   private final ProfileOverviewMapper profileOverviewMapper;
   private final FileDtoMapper fileDtoMapper;
 
+  @PreAuthorize("hasAuthority('profile:read:own')")
   @GetMapping("/{userCategory}/overview")
   public ResponseEntity<ProfileOverviewDTO> getProfile(
       HttpServletRequest request,
@@ -70,6 +72,7 @@ public class UserController {
     return ResponseEntity.ok(profileOverviewMapper.userDomainToDto(overview, baseUrl));
   }
 
+  @PreAuthorize("hasAuthority('profile:read:own')")
   @GetMapping("/{userCategory}/quick-links")
   public ResponseEntity<QuickLinksDTO> getQuickLinks(
       @Valid
@@ -91,6 +94,7 @@ public class UserController {
             data.notificationEnabled()));
   }
 
+  @PreAuthorize("hasAuthority('profile:update:own')")
   @PutMapping("/{userCategory}/update")
   public ResponseEntity<String> updateProfile(
       Principal principal,
@@ -108,6 +112,7 @@ public class UserController {
     return ResponseEntity.noContent().build();
   }
 
+  @PreAuthorize("hasAuthority('profile:update:own')")
   @PatchMapping("/preferences/notification")
   public ResponseEntity<String> updateNotificationPreferences(
       Principal principal, @RequestBody NotificationPreferencesRequest request) {
@@ -120,6 +125,7 @@ public class UserController {
   @PostMapping(
       value = "/{userCategory}/profile-picture",
       consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  @PreAuthorize("hasAuthority('profile:update:own')")
   public ResponseEntity<FileDTO> uploadProfilePicture(
       Principal principal,
       @PathVariable
@@ -141,6 +147,7 @@ public class UserController {
     return ResponseEntity.status(HttpStatus.CREATED).body(fileDtoMapper.fromDomain(uploaded));
   }
 
+  @PreAuthorize("hasAuthority('profile:update:own')")
   @DeleteMapping("/{userCategory}/profile-picture")
   public ResponseEntity<Void> deleteProfilePicture(
       Principal principal,
@@ -159,6 +166,7 @@ public class UserController {
   @PostMapping(
       value = "/{userCategory}/cover-picture",
       consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  @PreAuthorize("hasAuthority('profile:update:own')")
   public ResponseEntity<FileDTO> uploadCoverPicture(
       Principal principal,
       @PathVariable
@@ -180,6 +188,7 @@ public class UserController {
     return ResponseEntity.status(HttpStatus.CREATED).body(fileDtoMapper.fromDomain(uploaded));
   }
 
+  @PreAuthorize("hasAuthority('profile:update:own')")
   @DeleteMapping("/{userCategory}/cover-picture")
   public ResponseEntity<Void> deleteCoverPicture(
       Principal principal,

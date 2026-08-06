@@ -41,6 +41,12 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
   @Value("${user.student.signature}")
   private String studentSignature;
 
+  @Value("${user.no-permission.payload}")
+  private String noPermissionPayload;
+
+  @Value("${user.no-permission.signature}")
+  private String noPermissionSignature;
+
   @Value("${external-skill.not-found-id}")
   private String notFoundExternalSkillId;
 
@@ -858,5 +864,41 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
     assertThat(oldest.get("experienceType").asText()).isEqualTo("PROFESSIONAL");
     assertThat(oldest.get("startDate").asText()).isEqualTo("2022-01-10");
     assertThat(oldest.get("endDate").isNull()).isTrue();
+  }
+
+  @Test
+  void shouldReturn403WhenGettingDeclaredSkillProgressesWithoutPermission() {
+    BddLogger.given("an authenticated user without the declared-skill:list:own permission");
+    BddLogger.when("performing a GET on " + BASE_PATH);
+    BddLogger.then("it should return 403");
+
+    webTestClient
+        .get()
+        .uri(BASE_PATH)
+        .header("X-Signed-Context", noPermissionPayload)
+        .header("X-Context-Signature", noPermissionSignature)
+        .exchange()
+        .expectStatus()
+        .isForbidden();
+  }
+
+  @Test
+  void shouldReturn403WhenCreatingDeclaredSkillProgressWithoutPermission() throws Exception {
+    BddLogger.given("an authenticated user without the declared-skill:create:own permission");
+    BddLogger.when("performing a POST on " + BASE_PATH);
+    BddLogger.then("it should return 403");
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH)
+        .header("X-Signed-Context", noPermissionPayload)
+        .header("X-Context-Signature", noPermissionSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(
+            objectMapper.writeValueAsString(
+                Map.of("id", UUID.randomUUID().toString(), "type", "ROME4")))
+        .exchange()
+        .expectStatus()
+        .isForbidden();
   }
 }

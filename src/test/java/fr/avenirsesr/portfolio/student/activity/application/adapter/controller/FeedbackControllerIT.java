@@ -42,6 +42,12 @@ public class FeedbackControllerIT extends ContainerConfigurationTest {
   @Value("${user.staff.signature}")
   private String staffSignature;
 
+  @Value("${user.no-permission.payload}")
+  private String noPermissionPayload;
+
+  @Value("${user.no-permission.signature}")
+  private String noPermissionSignature;
+
   private final String notFoundId = "00000000-0000-0000-0000-000000000000";
   private String declaredActivityId;
 
@@ -939,5 +945,38 @@ public class FeedbackControllerIT extends ContainerConfigurationTest {
         .exchange()
         .expectStatus()
         .isUnauthorized();
+  }
+
+  @Test
+  void shouldReturn403WhenAskingForFeedbackWithoutPermission() {
+    BddLogger.given("an authenticated user without the feedback:request:create:own permission");
+    BddLogger.when("asking for feedback on a declared activity");
+    BddLogger.then("it should return 403");
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + declaredActivityId + "/ask-for-feedback")
+        .header("X-Signed-Context", noPermissionPayload)
+        .header("X-Context-Signature", noPermissionSignature)
+        .exchange()
+        .expectStatus()
+        .isForbidden();
+  }
+
+  @Test
+  void shouldReturn403WhenGettingFeedbackDashboardWithoutPermission() {
+    BddLogger.given(
+        "an authenticated user without the feedback:dashboard:read:contextual permission");
+    BddLogger.when("getting the feedback dashboard");
+    BddLogger.then("it should return 403");
+
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/dashboard")
+        .header("X-Signed-Context", noPermissionPayload)
+        .header("X-Context-Signature", noPermissionSignature)
+        .exchange()
+        .expectStatus()
+        .isForbidden();
   }
 }

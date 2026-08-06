@@ -28,6 +28,7 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -39,6 +40,7 @@ public class DeclaredExperienceController {
   private final DeclaredExperienceMapper declaredExperienceMapper;
   private final AssociationSearchResultDTOMapper associationSearchResultDTOMapper;
 
+  @PreAuthorize("hasAuthority('declared-experience:create:own')")
   @PostMapping("/")
   public ResponseEntity<DeclaredExperienceViewDTO> createDeclaredExperience(
       @Valid @RequestBody DeclaredExperienceRequest request) {
@@ -60,6 +62,7 @@ public class DeclaredExperienceController {
         .body(declaredExperienceMapper.toDTO(experience));
   }
 
+  @PreAuthorize("hasAuthority('declared-experience:list:own')")
   @GetMapping("/{experienceId}")
   public ResponseEntity<DeclaredExperienceViewDTO> getDeclaredExperience(
       @Valid @PathVariable UUID experienceId) {
@@ -68,6 +71,7 @@ public class DeclaredExperienceController {
     return ResponseEntity.ok(declaredExperienceMapper.toDTO(experience));
   }
 
+  @PreAuthorize("hasAuthority('declared-experience:list:own')")
   @GetMapping("/view")
   public ResponseEntity<PagedResponse<DeclaredExperienceViewDTO>> getDeclaredExperienceView(
       @RequestParam(required = false) Integer page,
@@ -86,6 +90,7 @@ public class DeclaredExperienceController {
             PageInfoDTO.fromDomain(pagedExperiences.pageInfo())));
   }
 
+  @PreAuthorize("hasAuthority('declared-experience:update:own')")
   @PutMapping("/{experienceId}")
   public ResponseEntity<DeclaredExperienceViewDTO> updateDeclaredExperience(
       @Valid @PathVariable UUID experienceId,
@@ -109,12 +114,14 @@ public class DeclaredExperienceController {
     return ResponseEntity.ok(declaredExperienceMapper.toDTO(experience));
   }
 
+  @PreAuthorize("hasAuthority('declared-experience:delete:own')")
   @DeleteMapping("/")
   public ResponseEntity<String> deleteDeclaredExperiences(@RequestBody List<UUID> experienceIds) {
     declaredExperienceService.delete(experienceIds);
     return ResponseEntity.ok("Declared experiences successfully deleted");
   }
 
+  @PreAuthorize("hasAuthority('declared-experience:list:own')")
   @GetMapping("/search-for-association")
   public ResponseEntity<PagedResponse<AssociationSearchResultDeclaredExperienceDTO>>
       searchDeclaredExperiencesForAssociation(
@@ -150,6 +157,7 @@ public class DeclaredExperienceController {
             PageInfoDTO.fromDomain(pagedResult.pageInfo())));
   }
 
+  @PreAuthorize("hasAuthority('declared-experience:list:own')")
   @GetMapping("/{experienceId}/associations")
   public ResponseEntity<DeclaredExperienceAssociationsDTO> getDeclaredExperienceAssociations(
       Principal principal, @PathVariable UUID experienceId) {
@@ -163,6 +171,7 @@ public class DeclaredExperienceController {
     return ResponseEntity.ok(declaredExperienceMapper.toAssociationsDTO(associations));
   }
 
+  @PreAuthorize("hasAuthority('declared-experience:association:manage:own')")
   @PostMapping("/{experienceId}/associate/declared-skills")
   public ResponseEntity<DeclaredExperienceAssociationsDTO>
       associateDeclaredExperienceWithDeclaredSkills(
@@ -181,6 +190,7 @@ public class DeclaredExperienceController {
     return ResponseEntity.ok(declaredExperienceMapper.toAssociationsDTO(associations));
   }
 
+  @PreAuthorize("hasAuthority('declared-experience:association:manage:own')")
   @PostMapping("/{experienceId}/associate/traces")
   public ResponseEntity<DeclaredExperienceAssociationsDTO> associateDeclaredExperienceWithTraces(
       Principal principal,
@@ -197,6 +207,7 @@ public class DeclaredExperienceController {
     return ResponseEntity.ok(declaredExperienceMapper.toAssociationsDTO(associations));
   }
 
+  @PreAuthorize("hasAuthority('declared-experience:association:manage:own')")
   @DeleteMapping("/{experienceId}/associations")
   public ResponseEntity<Void> deleteDeclaredExperienceAssociations(
       Principal principal,
