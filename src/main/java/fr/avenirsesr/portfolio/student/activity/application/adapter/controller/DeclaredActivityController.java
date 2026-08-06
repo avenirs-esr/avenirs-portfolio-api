@@ -34,6 +34,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -57,6 +58,7 @@ public class DeclaredActivityController {
   private final AssociationSearchResultDTOMapper associationSearchResultDTOMapper;
   private final FileDTOMapper fileDTOMapper;
 
+  @PreAuthorize("hasAuthority('declared-activity:list:own')")
   @GetMapping
   public ResponseEntity<PagedResponse<DeclaredActivityViewDTO>> getDeclaredActivitiesView(
       Principal principal,
@@ -89,6 +91,7 @@ public class DeclaredActivityController {
     return ResponseEntity.ok(viewResponse);
   }
 
+  @PreAuthorize("hasAuthority('activity:register:own')")
   @PostMapping("/subscribe/{activityId}")
   public ResponseEntity<CreationResponse> subscribeActivity(
       @Valid @PathVariable UUID activityId,
@@ -107,6 +110,7 @@ public class DeclaredActivityController {
         .body(new CreationResponse(declaredActivity.getId()));
   }
 
+  @PreAuthorize("hasAuthority('activity:register:own')")
   @DeleteMapping("/unsubscribe")
   public ResponseEntity<String> unsubscribeActivitiesProgresses(
       @RequestBody List<UUID> activityIds) {
@@ -116,6 +120,7 @@ public class DeclaredActivityController {
     return ResponseEntity.ok("Declared activities successfully unsubscribed");
   }
 
+  @PreAuthorize("hasAuthority('declared-activity:update:own')")
   @PutMapping("/finish/{declaredActivityId}")
   public ResponseEntity<Void> finish(
       Principal principal, @Valid @PathVariable UUID declaredActivityId) {
@@ -127,6 +132,7 @@ public class DeclaredActivityController {
     return ResponseEntity.noContent().build();
   }
 
+  @PreAuthorize("hasAuthority('declared-activity:update:own')")
   @PutMapping("/{activityId}/reflection")
   public ResponseEntity<String> updateReflection(
       @PathVariable("activityId") UUID activityId,
@@ -136,6 +142,7 @@ public class DeclaredActivityController {
     return ResponseEntity.ok("Declared activities successfully updated");
   }
 
+  @PreAuthorize("hasAuthority('activity:read:contextual')")
   @GetMapping("/{declaredActivityId}")
   public ResponseEntity<DeclaredActivityDetailsDTO> getDeclaredActivityDetails(
       HttpServletRequest request,
@@ -157,6 +164,7 @@ public class DeclaredActivityController {
                 details.declaredActivity().getActivity().getFiles(), baseUrl)));
   }
 
+  @PreAuthorize("hasAuthority('declared-activity:list:own')")
   @GetMapping("/{declaredActivityId}/associations")
   public ResponseEntity<DeclaredActivityAssociationsDTO> getDeclaredActivityAssociations(
       Principal principal, @Valid @PathVariable UUID declaredActivityId) {
@@ -169,6 +177,7 @@ public class DeclaredActivityController {
             declaredActivityService.getDeclaredActivityAssociations(declaredActivityId)));
   }
 
+  @PreAuthorize("hasAuthority('declared-activity:association:manage:own')")
   @DeleteMapping("/{declaredActivityId}/associations")
   public ResponseEntity<String> deleteDeclaredActivityAssociations(
       Principal principal,
@@ -182,6 +191,7 @@ public class DeclaredActivityController {
     return ResponseEntity.ok("Declared activities associations successfully deleted");
   }
 
+  @PreAuthorize("hasAuthority('declared-activity:update:own')")
   @PatchMapping("/{declaredActivityId}")
   public ResponseEntity<String> updateDeclaredActivity(
       @Valid @RequestBody DeclaredActivityUpdateRequest declaredActivityUpdateRequest,
@@ -194,6 +204,7 @@ public class DeclaredActivityController {
     return ResponseEntity.ok("Declared activity successfully updated");
   }
 
+  @PreAuthorize("hasAuthority('trace:association:manage:own')")
   @PostMapping("/{declaredActivityId}/associate/traces")
   public ResponseEntity<DeclaredActivityAssociationsDTO> associateActivityWithTraces(
       Principal principal,
@@ -210,6 +221,7 @@ public class DeclaredActivityController {
     return ResponseEntity.ok(declaredActivityAssociationsDTOMapper.toDTO(newAssociations));
   }
 
+  @PreAuthorize("hasAuthority('declared-skill:association:manage:own')")
   @PostMapping("/{declaredActivityId}/associate/declared-skills")
   public ResponseEntity<DeclaredActivityAssociationsDTO> associateActivityWithDeclaredSkills(
       Principal principal,
@@ -227,6 +239,7 @@ public class DeclaredActivityController {
     return ResponseEntity.ok(declaredActivityAssociationsDTOMapper.toDTO(newAssociations));
   }
 
+  @PreAuthorize("hasAuthority('declared-activity:list:own')")
   @GetMapping("/search-for-association")
   public ResponseEntity<PagedResponse<AssociationSearchResultDeclaredActivityDTO>>
       searchDeclaredActivitiesForAssociation(
@@ -262,6 +275,7 @@ public class DeclaredActivityController {
             PageInfoDTO.fromDomain(pagedResult.pageInfo())));
   }
 
+  @PreAuthorize("hasAuthority('trace:association:manage:own')")
   @GetMapping("/{declaredActivityId}/search-for-association/traces")
   public ResponseEntity<PagedResponse<AssociationSearchResultTraceDTO>> searchTracesForAssociation(
       Principal principal,

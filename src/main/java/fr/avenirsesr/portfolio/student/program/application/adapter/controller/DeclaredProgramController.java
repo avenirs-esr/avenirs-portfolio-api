@@ -18,6 +18,7 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -29,6 +30,7 @@ public class DeclaredProgramController {
   private final DeclaredProgramViewMapper declaredProgramViewMapper;
   private final DeclaredProgramDetailedMapper declaredProgramDetailedMapper;
 
+  @PreAuthorize("hasAuthority('declared-program:list:own')")
   @GetMapping
   public ResponseEntity<PagedResponse<DeclaredProgramViewDTO>> getDeclaredPrograms(
       @RequestParam(required = false) Integer page,
@@ -51,6 +53,7 @@ public class DeclaredProgramController {
             PageInfoDTO.fromDomain(declaredProgramPagedResult.pageInfo())));
   }
 
+  @PreAuthorize("hasAuthority('declared-program:create:own')")
   @PostMapping
   public ResponseEntity<DeclaredProgramViewDTO> createDeclaredProgram(
       @Valid @RequestBody DeclaredProgramRequestDTO declaredProgramRequestDTO) {
@@ -67,6 +70,7 @@ public class DeclaredProgramController {
         .body(declaredProgramViewMapper.toDTO(declaredProgram));
   }
 
+  @PreAuthorize("hasAuthority('declared-program:update:own')")
   @PutMapping("/{declaredProgramId}")
   public ResponseEntity<DeclaredProgramDetailedDTO> updateDeclaredProgram(
       @Valid @PathVariable("declaredProgramId") UUID declaredProgramId,
@@ -85,6 +89,7 @@ public class DeclaredProgramController {
     return ResponseEntity.ok(declaredProgramDetailedMapper.toDTO(declaredProgram));
   }
 
+  @PreAuthorize("hasAuthority('declared-program:list:own')")
   @GetMapping("/{declaredProgramId}")
   public ResponseEntity<DeclaredProgramDetailedDTO> getDeclaredProgram(
       @PathVariable("declaredProgramId") UUID declaredProgramId) {
@@ -92,6 +97,7 @@ public class DeclaredProgramController {
     return ResponseEntity.ok(declaredProgramDetailedMapper.toDTO(declaredProgram));
   }
 
+  @PreAuthorize("hasAuthority('declared-program:delete:own')")
   @DeleteMapping
   public ResponseEntity<String> deleteDeclaredProgram(@RequestBody List<UUID> declaredProgramIds) {
     declaredProgramService.delete(declaredProgramIds);

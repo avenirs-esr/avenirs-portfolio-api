@@ -41,6 +41,12 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
   @Value("${user.second.student.signature}")
   private String otherStudentSignature;
 
+  @Value("${user.no-permission.payload}")
+  private String noPermissionPayload;
+
+  @Value("${user.no-permission.signature}")
+  private String noPermissionSignature;
+
   private final String notFoundDeclaredExperienceId = "00000000-0000-0000-0000-000000000000";
 
   @BeforeAll
@@ -1849,5 +1855,39 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .expectBody()
         .jsonPath("$.declaredExperienceAssociations")
         .isEmpty();
+  }
+
+  @Test
+  void shouldReturn403WhenCreatingDeclaredExperienceWithoutPermission() {
+    BddLogger.given("an authenticated user without the declared-experience:create:own permission");
+    BddLogger.when("performing a POST on " + BASE_PATH);
+    BddLogger.then("it should return 403");
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/")
+        .header("X-Signed-Context", noPermissionPayload)
+        .header("X-Context-Signature", noPermissionSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(buildCreateExperienceJson())
+        .exchange()
+        .expectStatus()
+        .isForbidden();
+  }
+
+  @Test
+  void shouldReturn403WhenGettingDeclaredExperienceViewWithoutPermission() {
+    BddLogger.given("an authenticated user without the declared-experience:list:own permission");
+    BddLogger.when("performing a GET on " + BASE_PATH + "/view");
+    BddLogger.then("it should return 403");
+
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/view")
+        .header("X-Signed-Context", noPermissionPayload)
+        .header("X-Context-Signature", noPermissionSignature)
+        .exchange()
+        .expectStatus()
+        .isForbidden();
   }
 }

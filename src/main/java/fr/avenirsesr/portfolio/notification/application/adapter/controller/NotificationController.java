@@ -15,6 +15,7 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,6 +31,7 @@ public class NotificationController {
 
   private final NotificationService notificationService;
 
+  @PreAuthorize("hasAuthority('notification:read:own')")
   @GetMapping("/{userCategory}")
   public ResponseEntity<PagedResponse<NotificationDTO>> getNotifications(
       Principal principal,
@@ -55,6 +57,7 @@ public class NotificationController {
             PageInfoDTO.fromDomain(result.pageInfo())));
   }
 
+  @PreAuthorize("hasAuthority('notification:update:own')")
   @PatchMapping("/{id}/seen")
   public ResponseEntity<Void> markAsSeen(Principal principal, @PathVariable UUID id) {
     log.debug(

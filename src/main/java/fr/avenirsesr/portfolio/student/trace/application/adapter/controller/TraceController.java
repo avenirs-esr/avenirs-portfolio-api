@@ -35,6 +35,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -53,6 +54,7 @@ public class TraceController {
   private final AssociationSearchResultDTOMapper associationSearchResultDTOMapper;
   private final FileDtoMapper fileDtoMapper;
 
+  @PreAuthorize("hasAuthority('trace:list:own')")
   @GetMapping("/overview")
   public ResponseEntity<List<TraceOverviewDTO>> getTraceOverview(Principal principal) {
     log.debug("Received request to trace overview of user [{}]", principal.getName());
@@ -63,6 +65,7 @@ public class TraceController {
     return ResponseEntity.ok(response);
   }
 
+  @PreAuthorize("hasAuthority('trace:list:own')")
   @PostMapping("/view")
   public ResponseEntity<PagedResponse<TraceViewDTO>> tracesView(
       Principal principal,
@@ -90,6 +93,7 @@ public class TraceController {
     return ResponseEntity.ok(tracesViewResponse);
   }
 
+  @PreAuthorize("hasAuthority('trace:delete:own')")
   @DeleteMapping()
   public ResponseEntity<String> deleteTraces(
       Principal principal, @RequestBody List<UUID> tracesIds) {
@@ -100,6 +104,7 @@ public class TraceController {
     return ResponseEntity.ok("Resource successfully deleted.");
   }
 
+  @PreAuthorize("hasAuthority('trace:list:own')")
   @GetMapping("/summary")
   public ResponseEntity<TracesSummaryDTO> getTracesSummary(Principal principal) {
     log.debug("Received request to get trace summary of user [{}]", principal.getName());
@@ -109,6 +114,7 @@ public class TraceController {
     return ResponseEntity.ok(tracesSummaryMapper.toDTO(summary));
   }
 
+  @PreAuthorize("hasAuthority('trace:list:own')")
   @GetMapping("/{traceId}/detail")
   public ResponseEntity<TraceDetailDTO> getTraceDetail(
       Principal principal, @PathVariable UUID traceId) {
@@ -120,6 +126,7 @@ public class TraceController {
     return ResponseEntity.ok(traceDetailMapper.toDTO(traceDetail));
   }
 
+  @PreAuthorize("hasAuthority('trace:association:manage:own')")
   @GetMapping("/{traceId}/search-for-association/declared-activities")
   public ResponseEntity<PagedResponse<AssociationSearchResultDeclaredActivityDTO>>
       searchDeclaredActivityForAssociation(
@@ -151,6 +158,7 @@ public class TraceController {
     return ResponseEntity.ok(response);
   }
 
+  @PreAuthorize("hasAuthority('trace:association:manage:own')")
   @GetMapping("/{traceId}/search-for-association/declared-skills")
   public ResponseEntity<PagedResponse<AssociationSearchResultDeclaredSkillIDTO>>
       searchDeclaredSkillForAssociation(
@@ -182,6 +190,7 @@ public class TraceController {
     return ResponseEntity.ok(response);
   }
 
+  @PreAuthorize("hasAuthority('trace:association:manage:own')")
   @GetMapping("/{traceId}/search-for-association/declared-experiences")
   public ResponseEntity<PagedResponse<AssociationSearchResultDeclaredExperienceDTO>>
       searchDeclaredExperienceForAssociation(
@@ -213,6 +222,7 @@ public class TraceController {
     return ResponseEntity.ok(response);
   }
 
+  @PreAuthorize("hasAuthority('trace:create:own')")
   @PostMapping
   public ResponseEntity<TracesCreationResponse> createTrace(
       Principal principal, @Valid @RequestBody CreateTraceDTO createTraceDTO) {
@@ -230,6 +240,7 @@ public class TraceController {
         .body(new TracesCreationResponse(trace.getId()));
   }
 
+  @PreAuthorize("hasAuthority('trace:update:own')")
   @PutMapping("/{traceId}")
   public ResponseEntity<TraceDetailDTO> updateTrace(
       Principal principal,
@@ -250,6 +261,7 @@ public class TraceController {
     return ResponseEntity.ok(traceDetailMapper.toDTO(trace));
   }
 
+  @PreAuthorize("hasAuthority('trace:association:manage:own')")
   @PostMapping("/{traceId}/associate/activities")
   public ResponseEntity<TraceAssociationsDTO> associateTraceWithActivities(
       Principal principal,
@@ -265,6 +277,7 @@ public class TraceController {
     return ResponseEntity.ok(traceAssociationsMapper.toDTO(traceAssociations));
   }
 
+  @PreAuthorize("hasAuthority('trace:association:manage:own')")
   @PostMapping("/{traceId}/associate/declared-skill")
   public ResponseEntity<TraceAssociationsDTO> associateTraceWithDeclaredSkill(
       Principal principal,
@@ -280,6 +293,7 @@ public class TraceController {
     return ResponseEntity.ok(traceAssociationsMapper.toDTO(traceAssociations));
   }
 
+  @PreAuthorize("hasAuthority('trace:association:manage:own')")
   @PostMapping("/{traceId}/associate/declared-experiences")
   public ResponseEntity<TraceAssociationsDTO> associateTraceWithDeclaredExperiences(
       Principal principal,
@@ -295,6 +309,7 @@ public class TraceController {
     return ResponseEntity.ok(traceAssociationsMapper.toDTO(traceAssociations));
   }
 
+  @PreAuthorize("hasAuthority('trace:list:own')")
   @GetMapping("/{traceId}/associations")
   public ResponseEntity<TraceAssociationsDTO> getTraceAssociations(
       Principal principal,
@@ -312,6 +327,7 @@ public class TraceController {
     return ResponseEntity.ok(traceAssociationsMapper.toDTO(traceAssociations));
   }
 
+  @PreAuthorize("hasAuthority('trace:association:manage:own')")
   @DeleteMapping("/{traceId}/associations")
   public ResponseEntity<String> deleteTraceAssociations(
       Principal principal,
@@ -328,6 +344,7 @@ public class TraceController {
     return ResponseEntity.ok("Associations successfully deleted.");
   }
 
+  @PreAuthorize("hasAuthority('trace:list:own')")
   @PostMapping("/locked-declared-activities")
   public ResponseEntity<List<TraceLockedDeclaredActivitiesDTO>> getLockedDeclaredActivities(
       Principal principal, @RequestBody List<UUID> traceIds) {
@@ -341,6 +358,7 @@ public class TraceController {
             traceService.getLockedDeclaredActivities(traceIds)));
   }
 
+  @PreAuthorize("hasAuthority('trace:update:own')")
   @PostMapping(value = "/{traceId}/attachment", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<FileDTO> uploadAttachment(
       Principal principal, @PathVariable UUID traceId, @RequestParam("file") MultipartFile file) {
@@ -358,6 +376,7 @@ public class TraceController {
     return ResponseEntity.status(HttpStatus.CREATED).body(fileDtoMapper.fromDomain(uploaded));
   }
 
+  @PreAuthorize("hasAuthority('trace:list:own')")
   @GetMapping(
       value = "/{traceId}/attachment/download",
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)

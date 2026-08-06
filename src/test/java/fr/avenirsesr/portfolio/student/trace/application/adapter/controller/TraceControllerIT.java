@@ -56,6 +56,12 @@ class TraceControllerIT extends ContainerConfigurationTest {
   @Value("${user.student.signature}")
   private String studentSignature;
 
+  @Value("${user.no-permission.payload}")
+  private String noPermissionPayload;
+
+  @Value("${user.no-permission.signature}")
+  private String noPermissionSignature;
+
   @BeforeAll
   void setup(@Autowired SeederRunner seederRunner) {
     seederRunner.run();
@@ -943,5 +949,72 @@ class TraceControllerIT extends ContainerConfigurationTest {
         .isNotFound();
 
     BddLogger.then("it should return 404");
+  }
+
+  @Test
+  void shouldReturn403WhenGettingTraceOverviewWithoutPermission() {
+    BddLogger.given("an authenticated user without the trace:list:own permission");
+
+    when("getting trace overview");
+
+    webTestClient
+        .get()
+        .uri(OVERVIEW_BASE_PATH)
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, noPermissionPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, noPermissionSignature)
+        .accept(APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isForbidden();
+
+    BddLogger.then("it should return 403");
+  }
+
+  @Test
+  void shouldReturn403WhenCreatingTraceWithoutPermission() throws Exception {
+    BddLogger.given("an authenticated user without the trace:create:own permission");
+
+    CreateTraceDTO dto =
+        new CreateTraceDTO(
+            "Trace overview",
+            ELanguage.FRENCH,
+            ETraceAuthorType.PERSONAL,
+            "Note",
+            "Justification IA",
+            null);
+
+    when("creating a trace");
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH)
+        .contentType(APPLICATION_JSON)
+        .bodyValue(objectMapper.writeValueAsString(dto))
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, noPermissionPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, noPermissionSignature)
+        .exchange()
+        .expectStatus()
+        .isForbidden();
+
+    BddLogger.then("it should return 403");
+  }
+
+  @Test
+  void shouldReturn403WhenGettingTracesSummaryWithoutPermission() {
+    BddLogger.given("an authenticated user without the trace:list:own permission");
+
+    when("getting traces summary");
+
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/summary")
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, noPermissionPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, noPermissionSignature)
+        .accept(APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isForbidden();
+
+    BddLogger.then("it should return 403");
   }
 }

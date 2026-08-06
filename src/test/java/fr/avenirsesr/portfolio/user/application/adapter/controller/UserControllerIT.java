@@ -39,6 +39,12 @@ public class UserControllerIT extends ContainerConfigurationTest {
   @Value("${user.unknown.signature}")
   private String unknownSignature;
 
+  @Value("${user.no-permission.payload}")
+  private String noPermissionPayload;
+
+  @Value("${user.no-permission.signature}")
+  private String noPermissionSignature;
+
   @BeforeAll
   void setup(@Autowired SeederRunner seederRunner) {
     seederRunner.run();
@@ -220,9 +226,20 @@ public class UserControllerIT extends ContainerConfigurationTest {
 
     @Test
     void shouldGetStudentQuickLinks() {
-      BddLogger.given("the /me/users/STUDENT/quick-links endpoint");
+      BddLogger.given(
+          "the /me/users/STUDENT/quick-links endpoint, after the student has read their"
+              + " notifications");
       BddLogger.when("performing a GET as a student");
       BddLogger.then("it should return the student quick links data");
+
+      webTestClient
+          .get()
+          .uri("/me/notifications/STUDENT")
+          .header("X-Signed-Context", studentPayload)
+          .header("X-Context-Signature", studentSignature)
+          .exchange()
+          .expectStatus()
+          .isOk();
 
       webTestClient
           .get()
@@ -371,5 +388,41 @@ public class UserControllerIT extends ContainerConfigurationTest {
     String origin = ReflectionTestUtils.invokeMethod(Utils.class, "extractOrigin", request);
 
     assertThat(origin).isNull();
+  }
+
+  @Test
+  void shouldReturn403WhenGettingProfileWithoutPermission() {
+    BddLogger.given("an authenticated user without the profile:read:own permission");
+    BddLogger.when("performing a GET on /me/users/STUDENT/overview");
+    BddLogger.then("it should return 403");
+
+    webTestClient
+        .get()
+        .uri("/me/users/STUDENT/overview")
+        .header("X-Signed-Context", noPermissionPayload)
+        .header("X-Context-Signature", noPermissionSignature)
+        .exchange()
+        .expectStatus()
+        .isForbidden();
+  }
+
+  @Test
+  void shouldReturn403WhenUpdatingProfileWithoutPermission() throws Exception {
+    BddLogger.given("an authenticated user without the profile:update:own permission");
+    String payloadJson = loadJson("user/mock-update-user.json");
+
+    BddLogger.when("performing a PUT on /me/users/STUDENT/update");
+    BddLogger.then("it should return 403");
+
+    webTestClient
+        .put()
+        .uri("/me/users/STUDENT/update")
+        .header("X-Signed-Context", noPermissionPayload)
+        .header("X-Context-Signature", noPermissionSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(payloadJson)
+        .exchange()
+        .expectStatus()
+        .isForbidden();
   }
 }

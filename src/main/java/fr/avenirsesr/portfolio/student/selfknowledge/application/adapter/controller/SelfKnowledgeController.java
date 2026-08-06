@@ -26,6 +26,7 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -46,6 +47,7 @@ public class SelfKnowledgeController {
   private final SelfKnowledgeElementDetailsMapper selfKnowledgeElementDetailsMapper;
   private final SelfKnowledgeElementViewMapper selfKnowledgeElementViewMapper;
 
+  @PreAuthorize("hasAuthority('self-knowledge:list:own')")
   @GetMapping("/elements")
   public ResponseEntity<PagedResponse<SelfKnowledgeElementViewDTO>> getSelfKnowledgeElements(
       @Parameter(
@@ -76,6 +78,7 @@ public class SelfKnowledgeController {
             PageInfoDTO.fromDomain(selfKnowledgeElementPagedResult.pageInfo())));
   }
 
+  @PreAuthorize("hasAuthority('self-knowledge:list:own')")
   @GetMapping("/element/{selfKnowledgeElementId}")
   public ResponseEntity<SelfKnowledgeElementDetailsDTO> getSelfKnowledgeElementDetails(
       @PathVariable("selfKnowledgeElementId") UUID selfKnowledgeElementId) {
@@ -89,6 +92,7 @@ public class SelfKnowledgeController {
         selfKnowledgeElementDetailsMapper.toDTO(selfKnowledgeElement.selfKnowledgeElement()));
   }
 
+  @PreAuthorize("hasAuthority('self-knowledge:create:own')")
   @PostMapping("/{selfKnowledgeCategory}/elements")
   public ResponseEntity<SelfKnowledgeElementViewDTO> createSelfKnowledgeElement(
       @Parameter(
@@ -113,6 +117,7 @@ public class SelfKnowledgeController {
     return ResponseEntity.ok(selfKnowledgeElementViewMapper.toDTO(selfKnowledgeElement));
   }
 
+  @PreAuthorize("hasAuthority('self-knowledge:update:own')")
   @PutMapping("/element/{selfKnowledgeElementId}")
   public ResponseEntity<SelfKnowledgeElementViewDTO> updateSelfKnowledgeElement(
       @PathVariable("selfKnowledgeElementId") UUID selfKnowledgeElementId,
@@ -133,6 +138,7 @@ public class SelfKnowledgeController {
     return ResponseEntity.ok(selfKnowledgeElementViewMapper.toDTO(selfKnowledgeElement));
   }
 
+  @PreAuthorize("hasAuthority('self-knowledge:delete:own')")
   @DeleteMapping("/elements")
   public ResponseEntity<String> deleteSelfKnowledgeElements(
       @RequestBody List<UUID> selfKnowledgeElementIds) {
@@ -141,6 +147,7 @@ public class SelfKnowledgeController {
     return ResponseEntity.ok("Self knowledge elements successfully deleted");
   }
 
+  @PreAuthorize("hasAuthority('self-knowledge:list:own')")
   @GetMapping("/categories")
   public ResponseEntity<List<SelfKnowledgeCategoryDTO>> getSelfKnowledgeCategories() {
     return ResponseEntity.ok(
@@ -149,6 +156,7 @@ public class SelfKnowledgeController {
             .toList());
   }
 
+  @PreAuthorize("hasAuthority('self-knowledge:create:own')")
   @PostMapping("/categories")
   public ResponseEntity<String> addSelfKnowledgeCategories(
       @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -164,6 +172,7 @@ public class SelfKnowledgeController {
     return ResponseEntity.ok("Categories successfully associated with user");
   }
 
+  @PreAuthorize("hasAuthority('self-knowledge:list:own')")
   @GetMapping("/categories/available")
   public ResponseEntity<List<SelfKnowledgeCategoryDTO>> getSelfKnowledgeCategoriesAvailable() {
     return ResponseEntity.ok(
@@ -172,6 +181,7 @@ public class SelfKnowledgeController {
             .toList());
   }
 
+  @PreAuthorize("hasAuthority('self-knowledge:delete:own')")
   @DeleteMapping("/categories/{selfKnowledgeCategory}")
   public ResponseEntity<String> removeSelfKnowledgeCategory(
       @Parameter(

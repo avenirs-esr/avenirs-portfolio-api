@@ -63,6 +63,12 @@ class ActivityControllerIT extends ContainerConfigurationTest {
   @Value("${user.staff.signature}")
   private String staffSignature;
 
+  @Value("${user.no-permission.payload}")
+  private String noPermissionPayload;
+
+  @Value("${user.no-permission.signature}")
+  private String noPermissionSignature;
+
   @BeforeAll
   void setup(@Autowired SeederRunner seederRunner) {
     seederRunner.run();
@@ -331,7 +337,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
 
       @Test
       void thenItShouldReturn403WhenUserIsNotStaff() throws Exception {
-        BddLogger.then("it should return 403 with USER_IS_NOT_STAFF error code");
+        BddLogger.then("it should return 403 with ACCESS_DENIED error code");
 
         String requestBody =
             objectMapper.writeValueAsString(new ActivityDraftCreationRequest("Brouillon étudiant"));
@@ -348,7 +354,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             .isForbidden()
             .expectBody()
             .jsonPath("$.code")
-            .isEqualTo("USER_IS_NOT_STAFF_EXCEPTION");
+            .isEqualTo("ACCESS_DENIED");
       }
     }
 
@@ -466,7 +472,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         BddLogger.and("given an existing activity draft and a student account");
         UUID draftId = createDraftAndGetId("Brouillon accès refusé");
 
-        BddLogger.then("it should return 403 with USER_IS_NOT_STAFF error code");
+        BddLogger.then("it should return 403 with ACCESS_DENIED error code");
 
         String requestBody =
             objectMapper.writeValueAsString(
@@ -485,7 +491,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             .isForbidden()
             .expectBody()
             .jsonPath("$.code")
-            .isEqualTo("USER_IS_NOT_STAFF_EXCEPTION");
+            .isEqualTo("ACCESS_DENIED");
       }
 
       @Test
@@ -684,7 +690,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         UUID draftId = createDraftAndGetId("Brouillon publication refusée");
         fillDraftWithSummaryAndDescription(draftId);
 
-        BddLogger.then("it should return 403 with USER_IS_NOT_STAFF error code");
+        BddLogger.then("it should return 403 with ACCESS_DENIED error code");
 
         webTestClient
             .post()
@@ -696,7 +702,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             .isForbidden()
             .expectBody()
             .jsonPath("$.code")
-            .isEqualTo("USER_IS_NOT_STAFF_EXCEPTION");
+            .isEqualTo("ACCESS_DENIED");
       }
 
       @Test
@@ -899,7 +905,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         BddLogger.and("given an existing published activity and a student (non-staff) account");
         UUID activityId = publishNewActivity("Activité dépublication refusée");
 
-        BddLogger.then("it should return 403 with USER_IS_NOT_STAFF error code");
+        BddLogger.then("it should return 403 with ACCESS_DENIED error code");
 
         webTestClient
             .post()
@@ -911,7 +917,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             .isForbidden()
             .expectBody()
             .jsonPath("$.code")
-            .isEqualTo("USER_IS_NOT_STAFF_EXCEPTION");
+            .isEqualTo("ACCESS_DENIED");
       }
 
       @Test
@@ -1337,7 +1343,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       @Test
       void thenItShouldReturn403WhenUserIsNotStaff() {
         BddLogger.and("given a student account");
-        BddLogger.then("it should return 403 with USER_IS_NOT_STAFF error code");
+        BddLogger.then("it should return 403 with ACCESS_DENIED error code");
 
         webTestClient
             .get()
@@ -1350,7 +1356,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             .isForbidden()
             .expectBody()
             .jsonPath("$.code")
-            .isEqualTo("USER_IS_NOT_STAFF_EXCEPTION");
+            .isEqualTo("ACCESS_DENIED");
       }
     }
 
@@ -1591,7 +1597,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         BddLogger.and("given an existing published activity and a student (non-staff) account");
         UUID activityId = publishNewActivity("Activité édition refusée");
 
-        BddLogger.then("it should return 403 with USER_IS_NOT_STAFF error code");
+        BddLogger.then("it should return 403 with ACCESS_DENIED error code");
 
         webTestClient
             .post()
@@ -1603,7 +1609,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             .isForbidden()
             .expectBody()
             .jsonPath("$.code")
-            .isEqualTo("USER_IS_NOT_STAFF_EXCEPTION");
+            .isEqualTo("ACCESS_DENIED");
       }
 
       @Test
@@ -1767,5 +1773,40 @@ class ActivityControllerIT extends ContainerConfigurationTest {
   private void addStaffHeaders(HttpHeaders headers) {
     headers.add(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload);
     headers.add(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature);
+  }
+
+  private void addNoPermissionHeaders(HttpHeaders headers) {
+    headers.add(AvenirsSecurityHeaders.SIGNED_CONTEXT, noPermissionPayload);
+    headers.add(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, noPermissionSignature);
+  }
+
+  @Test
+  void shouldReturn403WhenGettingStaffLibraryWithoutPermission() {
+    BddLogger.given("an authenticated user without the activity:library:staff:read permission");
+    BddLogger.when("performing a GET on " + LIBRARY_PATH);
+    BddLogger.then("it should return 403");
+
+    webTestClient
+        .get()
+        .uri(LIBRARY_PATH)
+        .headers(this::addNoPermissionHeaders)
+        .exchange()
+        .expectStatus()
+        .isForbidden();
+  }
+
+  @Test
+  void shouldReturn403WhenGettingStaffWorkingSpaceWithoutPermission() {
+    BddLogger.given("an authenticated user without the activity:read:contextual permission");
+    BddLogger.when("performing a GET on " + WORKING_SPACE_PATH);
+    BddLogger.then("it should return 403");
+
+    webTestClient
+        .get()
+        .uri(WORKING_SPACE_PATH)
+        .headers(this::addNoPermissionHeaders)
+        .exchange()
+        .expectStatus()
+        .isForbidden();
   }
 }

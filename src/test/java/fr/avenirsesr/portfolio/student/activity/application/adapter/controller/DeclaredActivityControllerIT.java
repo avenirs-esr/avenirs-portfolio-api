@@ -33,6 +33,12 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
   @Value("${user.second.student.signature}")
   private String otherStudentSignature;
 
+  @Value("${user.no-permission.payload}")
+  private String noPermissionPayload;
+
+  @Value("${user.no-permission.signature}")
+  private String noPermissionSignature;
+
   private final String activityId = "3f7c9a2e-5d44-4b7a-9c6f-2a6e8e91b1a1";
   private final String notFoundId = "00000000-0000-0000-0000-000000000000";
   private String declaredActivityId;
@@ -251,6 +257,25 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
                     .build())
         .header("X-Signed-Context", otherStudentPayload)
         .header("X-Context-Signature", otherStudentSignature)
+        .exchange()
+        .expectStatus()
+        .isForbidden();
+
+    BddLogger.then("it should return 403");
+  }
+
+  @Test
+  void shouldReturn403WhenSubscribingToActivityWithoutPermission() {
+    BddLogger.given("an authenticated user without the activity:register:own permission");
+
+    BddLogger.when("subscribing to an activity");
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/subscribe/" + activityId)
+        .header("X-Signed-Context", noPermissionPayload)
+        .header("X-Context-Signature", noPermissionSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue("{}")
         .exchange()
         .expectStatus()
         .isForbidden();
