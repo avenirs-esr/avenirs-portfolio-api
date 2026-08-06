@@ -508,7 +508,7 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
 <span class="fc" id="L508">      throw new TraceNotFoundException();</span>
     }
 
-<span class="fc bfc" id="L511" title="All 2 branches covered.">    if (!traces.stream().allMatch(trace -&gt; trace.getUser().equals(student.getUser()))) {</span>
+<span class="fc bfc" id="L511" title="All 2 branches covered.">    if (!traces.stream().allMatch(trace -&gt; trace.getStudent().equals(student))) {</span>
 <span class="fc" id="L512">      throw new UserNotAuthorizedException();</span>
     }
 
