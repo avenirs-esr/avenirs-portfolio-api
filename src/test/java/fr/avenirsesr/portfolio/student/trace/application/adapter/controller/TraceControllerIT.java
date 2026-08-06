@@ -265,8 +265,6 @@ class TraceControllerIT extends ContainerConfigurationTest {
         .exists()
         .jsonPath("$[0].title")
         .isEqualTo("Trace overview")
-        .jsonPath("$[0].programName")
-        .exists()
         .jsonPath("$[0].aiUseJustification")
         .isEqualTo("Justification IA");
 
@@ -295,8 +293,6 @@ class TraceControllerIT extends ContainerConfigurationTest {
         .jsonPath("$.title")
         .exists()
         .jsonPath("$.isAssociated")
-        .exists()
-        .jsonPath("$.programName")
         .exists()
         .jsonPath("$.authorType")
         .exists()
@@ -351,7 +347,7 @@ class TraceControllerIT extends ContainerConfigurationTest {
 
     when("requesting traces view filtered by isValorized=true");
 
-    TraceFilter valorizedFilter = new TraceFilter(null, null, null, null, true);
+    TraceFilter valorizedFilter = new TraceFilter(null, null, null, true);
 
     webTestClient
         .post()
@@ -373,7 +369,7 @@ class TraceControllerIT extends ContainerConfigurationTest {
 
     when("requesting traces view filtered by isValorized=false");
 
-    TraceFilter notValorizedFilter = new TraceFilter(null, null, null, null, false);
+    TraceFilter notValorizedFilter = new TraceFilter(null, null, null, false);
 
     webTestClient
         .post()

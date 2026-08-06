@@ -6,10 +6,6 @@ import fr.avenirsesr.portfolio.common.seeder.infrastructure.configuration.Seedin
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.ActivityFileSeeder;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.UserPhotoSeeder;
 import fr.avenirsesr.portfolio.notification.infrastructure.adapter.seeder.NotificationSeeder;
-import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.InstitutionSeeder;
-import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.ProgramSeeder;
-import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.SkillSeeder;
-import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.TrainingPathSeeder;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.seeder.ActivityDraftSeeder;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.seeder.ActivitySeeder;
 import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.seeder.DeclaredActivitySeeder;
@@ -17,7 +13,6 @@ import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.seeder.Fe
 import fr.avenirsesr.portfolio.student.association.infrastructure.adapter.seeder.AssociationSeeder;
 import fr.avenirsesr.portfolio.student.experience.infrastructure.adapter.seeder.DeclaredExperienceSeeder;
 import fr.avenirsesr.portfolio.student.program.infrastructure.adapter.seeder.DeclaredProgramSeeder;
-import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.seeder.StudentProgressSeeder;
 import fr.avenirsesr.portfolio.student.selfknowledge.infrastructure.adapter.seeder.SelfKnowledgeElementSeeder;
 import fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.seeder.DeclaredSkillProgressSeeder;
 import fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.seeder.DeclaredSkillSeeder;
@@ -69,12 +64,6 @@ public class SeederOrchestrator {
   private final DeclaredSkillProgressSeeder declaredSkillProgressSeeder;
   private final DeclaredProgramSeeder declaredProgramSeeder;
 
-  private final InstitutionSeeder institutionSeeder;
-  private final ProgramSeeder programSeeder;
-  private final TrainingPathSeeder trainingPathSeeder;
-  private final SkillSeeder skillSeeder;
-  private final StudentProgressSeeder studentProgressSeeder;
-
   private final TraceSeeder traceSeeder;
   private final ActivityDraftSeeder activityDraftSeeder;
   private final ActivitySeeder activitySeeder;
@@ -107,15 +96,6 @@ public class SeederOrchestrator {
       var savedDeclaredSkills = declaredSkillSeeder.seed();
       var savedDeclaredSkillProgresses =
           declaredSkillProgressSeeder.seed(savedStudents, savedDeclaredSkills);
-
-      var savedInstitutions = institutionSeeder.seed();
-      var savedPrograms = programSeeder.seed(savedInstitutions);
-
-      var savedSkillLevels = skillSeeder.seed(savedPrograms);
-
-      var savedTrainingPaths = trainingPathSeeder.seed(savedPrograms, savedSkillLevels);
-
-      studentProgressSeeder.seed(savedTrainingPaths, savedStudents, savedSkillLevels);
 
       var savedTraces = traceSeeder.seed(savedStudents);
 

@@ -58,10 +58,7 @@ public class TraceController {
     log.debug("Received request to trace overview of user [{}]", principal.getName());
     List<Trace> traces = traceService.lastTracesOf();
 
-    List<TraceOverviewDTO> response =
-        traces.stream()
-            .map(trace -> traceOverviewMapper.toDTO(trace, traceService.programNameOfTrace(trace)))
-            .toList();
+    List<TraceOverviewDTO> response = traces.stream().map(traceOverviewMapper::toDTO).toList();
 
     return ResponseEntity.ok(response);
   }

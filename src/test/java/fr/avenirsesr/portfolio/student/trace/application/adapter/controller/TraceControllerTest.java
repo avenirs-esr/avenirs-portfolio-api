@@ -62,13 +62,11 @@ class TraceControllerTest {
   void shouldReturnTraceOverviewForUser() {
     BddLogger.given("a TraceController");
     when(traceService.lastTracesOf()).thenReturn(List.of(trace));
-    when(traceService.programNameOfTrace(trace)).thenReturn("Program Name");
-    when(traceOverviewMapper.toDTO(trace, "Program Name"))
+    when(traceOverviewMapper.toDTO(trace))
         .thenReturn(
             new TraceOverviewDTO(
                 trace.getId(),
                 trace.getTitle(),
-                "Program Name",
                 ETraceAuthorType.PERSONAL,
                 "Some justification for ia use",
                 null,
@@ -87,10 +85,8 @@ class TraceControllerTest {
     TraceOverviewDTO dto = body.getFirst();
     assertEquals(trace.getId(), dto.id());
     assertEquals(trace.getTitle(), dto.title());
-    assertEquals("Program Name", dto.programName());
 
     verify(traceService).lastTracesOf();
-    verify(traceService).programNameOfTrace(trace);
   }
 
   @Test
