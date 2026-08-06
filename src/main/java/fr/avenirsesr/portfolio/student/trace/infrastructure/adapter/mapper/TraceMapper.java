@@ -5,7 +5,7 @@ import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.mapper.Mapper;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.mapper.FileMapper;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.model.TraceEntity;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StudentMapper;
 
 public class TraceMapper implements Mapper<TraceEntity, Trace> {
   public static final TraceMapper INSTANCE = new TraceMapper();
@@ -14,7 +14,7 @@ public class TraceMapper implements Mapper<TraceEntity, Trace> {
   public TraceEntity fromDomain(Trace trace) {
     return TraceEntity.of(
         trace.getId(),
-        UserMapper.INSTANCE.fromDomain(trace.getUser()),
+        StudentMapper.INSTANCE.fromDomain(trace.getStudent()),
         trace.getTitle(),
         trace.getLanguage(),
         trace.getAuthorType(),
@@ -31,7 +31,7 @@ public class TraceMapper implements Mapper<TraceEntity, Trace> {
   public Trace toDomain(TraceEntity traceEntity) {
     return Trace.toDomain(
         traceEntity.getId(),
-        UserMapper.INSTANCE.toDomain(traceEntity.getUser()),
+        StudentMapper.INSTANCE.toDomain(traceEntity.getStudent()),
         traceEntity.getTitle(),
         traceEntity.getAuthorType(),
         traceEntity.getAiUseJustification(),
@@ -51,7 +51,9 @@ public class TraceMapper implements Mapper<TraceEntity, Trace> {
     var attributes = graph.attributes();
     return Trace.toDomain(
         traceEntity.getId(),
-        attributes.contains("user") ? UserMapper.INSTANCE.toDomain(traceEntity.getUser()) : null,
+        attributes.contains("student")
+            ? StudentMapper.INSTANCE.toDomain(traceEntity.getStudent())
+            : null,
         traceEntity.getTitle(),
         traceEntity.getAuthorType(),
         traceEntity.getAiUseJustification(),

@@ -42,7 +42,7 @@ public interface TraceService {
 
   Trace createTrace(
       UUID traceId,
-      UUID userId,
+      UUID studentId,
       String title,
       ELanguage language,
       ETraceAuthorType authorType,

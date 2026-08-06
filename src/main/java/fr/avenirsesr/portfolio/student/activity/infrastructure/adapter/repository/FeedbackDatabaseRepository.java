@@ -4,7 +4,6 @@ import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import fr.avenirsesr.portfolio.file.domain.model.File;
@@ -24,12 +23,11 @@ import fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.repository.D
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StudentMapper;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.repository.StudentJpaRepository;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.repository.UserJpaRepository;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -40,20 +38,17 @@ public class FeedbackDatabaseRepository
     extends GenericJpaRepositoryAdapter<Feedback, FeedbackEntity> implements FeedbackRepository {
 
   private final FeedbackJpaRepository jpaRepository;
-  private final UserJpaRepository userJpaRepository;
   private final FileJpaRepository fileJpaRepository;
   private final StudentJpaRepository studentJpaRepository;
   private final DeclaredSkillJpaRepository declaredSkillJpaRepository;
 
   public FeedbackDatabaseRepository(
       FeedbackJpaRepository jpaRepository,
-      UserJpaRepository userJpaRepository,
       FileJpaRepository fileJpaRepository,
       StudentJpaRepository studentJpaRepository,
       DeclaredSkillJpaRepository declaredSkillJpaRepository) {
     super(jpaRepository, jpaRepository, FeedbackEntity.class, FeedbackMapper.INSTANCE);
     this.jpaRepository = jpaRepository;
-    this.userJpaRepository = userJpaRepository;
     this.fileJpaRepository = fileJpaRepository;
     this.studentJpaRepository = studentJpaRepository;
     this.declaredSkillJpaRepository = declaredSkillJpaRepository;
@@ -184,22 +179,11 @@ public class FeedbackDatabaseRepository
   private Feedback toDomainWithDependencies(FeedbackEntity entity) {
     AssociationsJson associations = entity.getAssociations();
 
-    Map<UUID, User> users = resolveUsers(associations);
     Map<UUID, File> files = resolveFiles(associations);
     Map<UUID, Student> students = resolveStudents(associations);
     Map<UUID, DeclaredSkill> skills = resolveSkills(associations);
 
-    return FeedbackMapper.INSTANCE.toDomain(entity, users, files, students, skills);
-  }
-
-  private Map<UUID, User> resolveUsers(AssociationsJson associations) {
-    Set<UUID> ids =
-        associations.traces().stream()
-            .map(AssociationsJson.TraceSnapshot::userId)
-            .collect(Collectors.toSet());
-
-    return userJpaRepository.findAllById(ids).stream()
-        .collect(Collectors.toMap(AvenirsBaseEntity::getId, UserMapper.INSTANCE::toDomain));
+    return FeedbackMapper.INSTANCE.toDomain(entity, files, students, skills);
   }
 
   private Map<UUID, File> resolveFiles(AssociationsJson associations) {
@@ -217,8 +201,10 @@ public class FeedbackDatabaseRepository
 
   private Map<UUID, Student> resolveStudents(AssociationsJson associations) {
     Set<UUID> ids =
-        associations.declaredSkillProgresses().stream()
-            .map(AssociationsJson.DeclaredSkillProgressSnapshot::studentId)
+        Stream.concat(
+                associations.traces().stream().map(AssociationsJson.TraceSnapshot::studentId),
+                associations.declaredSkillProgresses().stream()
+                    .map(AssociationsJson.DeclaredSkillProgressSnapshot::studentId))
             .collect(Collectors.toSet());
 
     return studentJpaRepository.findAllById(ids).stream()

@@ -12,7 +12,7 @@ import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.student.trace.domain.service.TraceServiceImpl;
 import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.client.TraceConfigurationClient;
 import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.repository.TraceDatabaseRepository;
-import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
+import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,7 +21,7 @@ import org.springframework.context.annotation.Configuration;
 @AllArgsConstructor
 public class TraceServiceConfig {
   private final TraceDatabaseRepository traceRepository;
-  private final UserService userService;
+  private final StudentService studentService;
   private final DeclaredActivityService declaredActivityService;
   private final DeclaredSkillProgressService declaredSkillProgressService;
   private final DeclaredExperienceService declaredExperienceService;
@@ -36,7 +36,7 @@ public class TraceServiceConfig {
   public TraceService traceService() {
     return new TraceServiceImpl(
         traceRepository,
-        userService,
+        studentService,
         declaredActivityService,
         declaredSkillProgressService,
         declaredExperienceService,

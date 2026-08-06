@@ -1,6 +1,5 @@
 package fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.mapper;
 
-import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.EntityGrapher;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.mapper.Mapper;
 import fr.avenirsesr.portfolio.file.domain.model.File;
@@ -40,7 +39,7 @@ public class FeedbackMapper implements Mapper<FeedbackEntity, Feedback> {
                 t ->
                     new AssociationsJson.TraceSnapshot(
                         t.getId(),
-                        t.getUser().getId(),
+                        t.getStudent().getId(),
                         t.getAttachment().map(File::getId).orElse(null),
                         t.getTitle(),
                         t.getLanguage(),
@@ -72,19 +71,17 @@ public class FeedbackMapper implements Mapper<FeedbackEntity, Feedback> {
   @Override
   public Feedback toDomain(FeedbackEntity entity) {
     throw new UnsupportedOperationException(
-        "FeedbackMapper.toDomain requiers ths objects User, File, Student and DeclaredSkill loaded."
-            + " Use toDomain(entity, users, files, students, skills).");
+        "FeedbackMapper.toDomain requiers ths objects File, Student and DeclaredSkill loaded."
+            + " Use toDomain(entity, files, students, skills).");
   }
 
   @Override
   public Feedback toDomain(FeedbackEntity entity, EntityGrapher<?> graph) {
-    throw new UnsupportedOperationException(
-        "Use toDomain(entity, users, files, students, skills).");
+    throw new UnsupportedOperationException("Use toDomain(entity, files, students, skills).");
   }
 
   public Feedback toDomain(
       FeedbackEntity entity,
-      Map<UUID, User> users,
       Map<UUID, File> files,
       Map<UUID, Student> students,
       Map<UUID, DeclaredSkill> skills) {
@@ -97,7 +94,7 @@ public class FeedbackMapper implements Mapper<FeedbackEntity, Feedback> {
                 snap ->
                     Trace.toDomain(
                         snap.id(),
-                        users.get(snap.userId()),
+                        students.get(snap.studentId()),
                         snap.title(),
                         snap.authorType(),
                         snap.aiUseJustification(),

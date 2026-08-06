@@ -19,7 +19,8 @@ import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.mapper.Trace
 import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.seeder.data.TraceAttachementCreationData;
 import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.seeder.data.TraceCreationData;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
+import fr.avenirsesr.portfolio.user.domain.model.Student;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -58,8 +59,8 @@ public class TraceSeeder {
   }
 
   @Transactional
-  public List<TraceEntity> seed(List<UserEntity> users) {
-    ValidationUtils.requireNonEmpty(users, "users cannot be empty");
+  public List<TraceEntity> seed(List<StudentEntity> students) {
+    ValidationUtils.requireNonEmpty(students, "students cannot be empty");
 
     log.info("Seeding Traces...");
 
@@ -67,7 +68,7 @@ public class TraceSeeder {
         switch (seederSource) {
           case CSV ->
               fileReader.readJSON(PATH_FILE, new TypeReference<List<TraceCreationData>>() {});
-          case FAKER -> buildFakeTraces(users);
+          case FAKER -> buildFakeTraces(students);
         };
 
     List<Trace> traces = new ArrayList<>();
@@ -77,7 +78,7 @@ public class TraceSeeder {
           var trace =
               traceService.createTrace(
                   data.traceId(),
-                  data.userId(),
+                  data.studentId(),
                   data.title(),
                   data.language(),
                   data.authorType(),
@@ -88,7 +89,8 @@ public class TraceSeeder {
           traces.add(trace);
 
           RequestContext.set(
-              new RequestData(Optional.ofNullable(trace.getUser()), ELanguage.FRENCH));
+              new RequestData(
+                  Optional.ofNullable(trace.getStudent()).map(Student::getUser), ELanguage.FRENCH));
           data.attachements()
               .forEach(
                   attachment -> {
@@ -108,15 +110,15 @@ public class TraceSeeder {
     return traces.stream().map(TraceMapper.INSTANCE::fromDomain).toList();
   }
 
-  private List<TraceCreationData> buildFakeTraces(List<UserEntity> users) {
+  private List<TraceCreationData> buildFakeTraces(List<StudentEntity> students) {
     return IntStream.range(0, SeederConfig.TRACES_NB_MAX)
-        .mapToObj(i -> users.get(new Random().nextInt(users.size())))
-        .map(u -> FakeTrace.of(u).toEntity())
+        .mapToObj(i -> students.get(new Random().nextInt(students.size())))
+        .map(s -> FakeTrace.of(s).toEntity())
         .map(
             entity ->
                 new TraceCreationData(
                     entity.getId(),
-                    entity.getUser().getId(),
+                    entity.getStudent().getId(),
                     entity.getTitle(),
                     entity.getAuthorType(),
                     entity.getLanguage(),

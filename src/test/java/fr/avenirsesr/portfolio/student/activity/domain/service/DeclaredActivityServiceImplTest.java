@@ -1607,7 +1607,7 @@ class DeclaredActivityServiceImplTest {
 
     Trace trace = mock(Trace.class);
     when(trace.getId()).thenReturn(traceId);
-    when(trace.getUser()).thenReturn(student.getUser());
+    when(trace.getStudent()).thenReturn(student);
 
     Association existingAssociation = mock(Association.class);
 

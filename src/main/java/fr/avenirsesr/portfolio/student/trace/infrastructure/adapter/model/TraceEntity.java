@@ -6,7 +6,7 @@ import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsB
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
 import fr.avenirsesr.portfolio.student.trace.domain.model.enums.ETraceAuthorType;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import java.time.Instant;
@@ -19,16 +19,16 @@ import lombok.Setter;
 @Table(
     name = "trace",
     indexes = {
-      @Index(name = "idx_trace_user_created", columnList = "user_id, created_at"),
-      @Index(name = "idx_trace_user_updated", columnList = "user_id, updated_at, created_at")
+      @Index(name = "idx_trace_student_created", columnList = "student_id, created_at"),
+      @Index(name = "idx_trace_student_updated", columnList = "student_id, updated_at, created_at")
     })
 @NoArgsConstructor
 @Getter
 @Setter
 public class TraceEntity extends AvenirsBaseEntity {
   @ManyToOne(optional = false)
-  @JoinColumn(name = "user_id", nullable = false)
-  private UserEntity user;
+  @JoinColumn(name = "student_id", nullable = false)
+  private StudentEntity student;
 
   @Column(nullable = false, length = TITLE_LENGTH)
   private String title;
@@ -62,7 +62,7 @@ public class TraceEntity extends AvenirsBaseEntity {
 
   private TraceEntity(
       UUID id,
-      UserEntity user,
+      StudentEntity student,
       String title,
       ELanguage language,
       ETraceAuthorType authorType,
@@ -76,7 +76,7 @@ public class TraceEntity extends AvenirsBaseEntity {
     this.setId(id);
     this.setCreatedAt(createdAt);
     this.setUpdatedAt(updatedAt);
-    this.user = user;
+    this.student = student;
     this.title = title;
     this.language = language;
     this.authorType = authorType;
@@ -89,7 +89,7 @@ public class TraceEntity extends AvenirsBaseEntity {
 
   public static TraceEntity of(
       UUID id,
-      UserEntity user,
+      StudentEntity student,
       String title,
       ELanguage language,
       ETraceAuthorType authorType,
@@ -102,7 +102,7 @@ public class TraceEntity extends AvenirsBaseEntity {
       Instant updatedAt) {
     return new TraceEntity(
         id,
-        user,
+        student,
         title,
         language,
         authorType,

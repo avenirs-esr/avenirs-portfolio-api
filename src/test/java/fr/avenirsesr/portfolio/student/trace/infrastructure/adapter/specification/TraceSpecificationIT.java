@@ -61,9 +61,9 @@ class TraceSpecificationIT extends ContainerConfigurationTest {
         builder.getSpecification(ETraceFilterKey.FILE_TYPE, List.of());
 
     List<TraceEntity> resultNull =
-        traceJpaRepository.findAll(ofTestUser(user.getId()).and(specNull));
+        traceJpaRepository.findAll(ofTestStudent(student.getId()).and(specNull));
     List<TraceEntity> resultEmpty =
-        traceJpaRepository.findAll(ofTestUser(user.getId()).and(specEmpty));
+        traceJpaRepository.findAll(ofTestStudent(student.getId()).and(specEmpty));
 
     assertThat(resultNull).extracting(TraceEntity::getId).contains(t1.getId(), t2.getId());
     assertThat(resultEmpty).extracting(TraceEntity::getId).contains(t1.getId(), t2.getId());
@@ -87,7 +87,8 @@ class TraceSpecificationIT extends ContainerConfigurationTest {
 
     List<TraceEntity> result =
         traceJpaRepository.findAll(
-            ofTestUser(user.getId()).and(TraceSpecification.search("java", ELanguage.FRENCH)));
+            ofTestStudent(student.getId())
+                .and(TraceSpecification.search("java", ELanguage.FRENCH)));
 
     assertThat(result).extracting(TraceEntity::getId).contains(byTitle.getId());
     assertThat(result).extracting(TraceEntity::getId).contains(byAiUse.getId());
@@ -105,10 +106,10 @@ class TraceSpecificationIT extends ContainerConfigurationTest {
 
     List<TraceEntity> resultNull =
         traceJpaRepository.findAll(
-            ofTestUser(user.getId()).and(TraceSpecification.search(null, ELanguage.FRENCH)));
+            ofTestStudent(student.getId()).and(TraceSpecification.search(null, ELanguage.FRENCH)));
     List<TraceEntity> resultBlank =
         traceJpaRepository.findAll(
-            ofTestUser(user.getId()).and(TraceSpecification.search("   ", ELanguage.FRENCH)));
+            ofTestStudent(student.getId()).and(TraceSpecification.search("   ", ELanguage.FRENCH)));
 
     assertThat(resultNull).extracting(TraceEntity::getId).contains(t1.getId(), t2.getId());
     assertThat(resultBlank).extracting(TraceEntity::getId).contains(t1.getId(), t2.getId());
@@ -136,10 +137,10 @@ class TraceSpecificationIT extends ContainerConfigurationTest {
 
     List<TraceEntity> valorizedResult =
         traceJpaRepository.findAll(
-            ofTestUser(user.getId()).and(TraceSpecification.valorized(true)));
+            ofTestStudent(student.getId()).and(TraceSpecification.valorized(true)));
     List<TraceEntity> notValorizedResult =
         traceJpaRepository.findAll(
-            ofTestUser(user.getId()).and(TraceSpecification.valorized(false)));
+            ofTestStudent(student.getId()).and(TraceSpecification.valorized(false)));
 
     assertThat(valorizedResult).extracting(TraceEntity::getId).contains(valorized.getId());
     assertThat(valorizedResult).extracting(TraceEntity::getId).doesNotContain(notValorized.getId());
@@ -188,8 +189,8 @@ class TraceSpecificationIT extends ContainerConfigurationTest {
     assertThat(spec).isNull();
   }
 
-  private Specification<TraceEntity> ofTestUser(UUID userId) {
-    return (root, query, cb) -> cb.equal(root.get("user").get("id"), userId);
+  private Specification<TraceEntity> ofTestStudent(UUID studentId) {
+    return (root, query, cb) -> cb.equal(root.get("student").get("id"), studentId);
   }
 
   private UserEntity persistUser() {
@@ -228,7 +229,7 @@ class TraceSpecificationIT extends ContainerConfigurationTest {
     TraceEntity trace =
         TraceEntity.of(
             UUID.randomUUID(),
-            user,
+            student,
             title,
             ELanguage.FRENCH,
             ETraceAuthorType.PERSONAL,

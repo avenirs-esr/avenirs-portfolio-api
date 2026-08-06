@@ -271,7 +271,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
       throw new TraceNotFoundException();
     }
 
-    if (!traces.stream().allMatch(trace -> trace.getUser().equals(student.getUser()))) {
+    if (!traces.stream().allMatch(trace -> trace.getStudent().equals(student))) {
       throw new UserNotAuthorizedException();
     }
 
