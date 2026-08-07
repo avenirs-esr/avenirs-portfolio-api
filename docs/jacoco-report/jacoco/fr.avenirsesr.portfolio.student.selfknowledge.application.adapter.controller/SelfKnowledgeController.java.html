@@ -26,6 +26,7 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,7 +37,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-<span class="fc" id="L39">@Slf4j</span>
+<span class="fc" id="L40">@Slf4j</span>
 @AllArgsConstructor
 @RestController
 @RequestMapping(&quot;/me/self-knowledge&quot;)
@@ -46,6 +47,7 @@ public class SelfKnowledgeController {
   private final SelfKnowledgeElementDetailsMapper selfKnowledgeElementDetailsMapper;
   private final SelfKnowledgeElementViewMapper selfKnowledgeElementViewMapper;
 
+  @PreAuthorize(&quot;hasAuthority('self-knowledge:list:own')&quot;)
   @GetMapping(&quot;/elements&quot;)
   public ResponseEntity&lt;PagedResponse&lt;SelfKnowledgeElementViewDTO&gt;&gt; getSelfKnowledgeElements(
       @Parameter(
@@ -57,38 +59,40 @@ public class SelfKnowledgeController {
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize,
       @RequestParam(required = false) Boolean isValorized) {
-<span class="fc" id="L60">    log.debug(</span>
+<span class="fc" id="L62">    log.debug(</span>
         &quot;Received request to get elements of self knowledge categories [{}], with&quot;
             + &quot; pagination (page={}, pageSize={}, isValorized={})&quot;,
         selfKnowledgeCategories,
         page,
         pageSize,
         isValorized);
-<span class="fc" id="L67">    PagedResult&lt;SelfKnowledgeElement&gt; selfKnowledgeElementPagedResult =</span>
-<span class="fc" id="L68">        selfKnowledgeService.getSelfKnowledgeElements(</span>
+<span class="fc" id="L69">    PagedResult&lt;SelfKnowledgeElement&gt; selfKnowledgeElementPagedResult =</span>
+<span class="fc" id="L70">        selfKnowledgeService.getSelfKnowledgeElements(</span>
             selfKnowledgeCategories, new PageCriteria(page, pageSize), isValorized);
 
-<span class="fc" id="L71">    return ResponseEntity.ok(</span>
+<span class="fc" id="L73">    return ResponseEntity.ok(</span>
         new PagedResponse&lt;&gt;(
-<span class="fc" id="L73">            selfKnowledgeElementPagedResult.content().stream()</span>
-<span class="fc" id="L74">                .map(selfKnowledgeElementViewMapper::toDTO)</span>
-<span class="fc" id="L75">                .toList(),</span>
-<span class="fc" id="L76">            PageInfoDTO.fromDomain(selfKnowledgeElementPagedResult.pageInfo())));</span>
+<span class="fc" id="L75">            selfKnowledgeElementPagedResult.content().stream()</span>
+<span class="fc" id="L76">                .map(selfKnowledgeElementViewMapper::toDTO)</span>
+<span class="fc" id="L77">                .toList(),</span>
+<span class="fc" id="L78">            PageInfoDTO.fromDomain(selfKnowledgeElementPagedResult.pageInfo())));</span>
   }
 
+  @PreAuthorize(&quot;hasAuthority('self-knowledge:list:own')&quot;)
   @GetMapping(&quot;/element/{selfKnowledgeElementId}&quot;)
   public ResponseEntity&lt;SelfKnowledgeElementDetailsDTO&gt; getSelfKnowledgeElementDetails(
       @PathVariable(&quot;selfKnowledgeElementId&quot;) UUID selfKnowledgeElementId) {
-<span class="fc" id="L82">    log.debug(</span>
+<span class="fc" id="L85">    log.debug(</span>
         &quot;Received request to get self knowledge element [{}] details&quot;, selfKnowledgeElementId);
 
-<span class="fc" id="L85">    SelfKnowledgeElementDetails selfKnowledgeElement =</span>
-<span class="fc" id="L86">        selfKnowledgeService.getSelfKnowledgeElementDetails(selfKnowledgeElementId);</span>
+<span class="fc" id="L88">    SelfKnowledgeElementDetails selfKnowledgeElement =</span>
+<span class="fc" id="L89">        selfKnowledgeService.getSelfKnowledgeElementDetails(selfKnowledgeElementId);</span>
 
-<span class="fc" id="L88">    return ResponseEntity.ok(</span>
-<span class="fc" id="L89">        selfKnowledgeElementDetailsMapper.toDTO(selfKnowledgeElement.selfKnowledgeElement()));</span>
+<span class="fc" id="L91">    return ResponseEntity.ok(</span>
+<span class="fc" id="L92">        selfKnowledgeElementDetailsMapper.toDTO(selfKnowledgeElement.selfKnowledgeElement()));</span>
   }
 
+  @PreAuthorize(&quot;hasAuthority('self-knowledge:create:own')&quot;)
   @PostMapping(&quot;/{selfKnowledgeCategory}/elements&quot;)
   public ResponseEntity&lt;SelfKnowledgeElementViewDTO&gt; createSelfKnowledgeElement(
       @Parameter(
@@ -99,56 +103,60 @@ public class SelfKnowledgeController {
           @PathVariable(&quot;selfKnowledgeCategory&quot;)
           ESelfKnowledgeCategory selfKnowledgeCategory,
       @Valid @RequestBody SelfKnowledgeElementRequest selfKnowledgeElementRequest) {
-<span class="fc" id="L102">    log.debug(</span>
+<span class="fc" id="L106">    log.debug(</span>
         &quot;Received request to create self knowledge element [{}] to category [{}]&quot;,
         selfKnowledgeElementRequest,
         selfKnowledgeCategory);
 
-<span class="fc" id="L107">    SelfKnowledgeElement selfKnowledgeElement =</span>
-<span class="fc" id="L108">        selfKnowledgeService.createSelfKnowledgeElement(</span>
+<span class="fc" id="L111">    SelfKnowledgeElement selfKnowledgeElement =</span>
+<span class="fc" id="L112">        selfKnowledgeService.createSelfKnowledgeElement(</span>
             selfKnowledgeCategory,
-<span class="fc" id="L110">            selfKnowledgeElementRequest.title(),</span>
-<span class="fc" id="L111">            selfKnowledgeElementRequest.description(),</span>
-<span class="fc" id="L112">            selfKnowledgeElementRequest.rating());</span>
-<span class="fc" id="L113">    return ResponseEntity.ok(selfKnowledgeElementViewMapper.toDTO(selfKnowledgeElement));</span>
+<span class="fc" id="L114">            selfKnowledgeElementRequest.title(),</span>
+<span class="fc" id="L115">            selfKnowledgeElementRequest.description(),</span>
+<span class="fc" id="L116">            selfKnowledgeElementRequest.rating());</span>
+<span class="fc" id="L117">    return ResponseEntity.ok(selfKnowledgeElementViewMapper.toDTO(selfKnowledgeElement));</span>
   }
 
+  @PreAuthorize(&quot;hasAuthority('self-knowledge:update:own')&quot;)
   @PutMapping(&quot;/element/{selfKnowledgeElementId}&quot;)
   public ResponseEntity&lt;SelfKnowledgeElementViewDTO&gt; updateSelfKnowledgeElement(
       @PathVariable(&quot;selfKnowledgeElementId&quot;) UUID selfKnowledgeElementId,
       @Valid @RequestBody SelfKnowledgeElementRequest selfKnowledgeElementRequest) {
-<span class="fc" id="L120">    log.debug(</span>
+<span class="fc" id="L125">    log.debug(</span>
         &quot;Received request to update self knowledge element [{}] with infos [{}]&quot;,
         selfKnowledgeElementId,
         selfKnowledgeElementRequest);
 
-<span class="fc" id="L125">    SelfKnowledgeElement selfKnowledgeElement =</span>
-<span class="fc" id="L126">        selfKnowledgeService.updateSelfKnowledgeElement(</span>
+<span class="fc" id="L130">    SelfKnowledgeElement selfKnowledgeElement =</span>
+<span class="fc" id="L131">        selfKnowledgeService.updateSelfKnowledgeElement(</span>
             selfKnowledgeElementId,
-<span class="fc" id="L128">            selfKnowledgeElementRequest.title(),</span>
-<span class="fc" id="L129">            selfKnowledgeElementRequest.description(),</span>
-<span class="fc" id="L130">            selfKnowledgeElementRequest.rating(),</span>
-<span class="fc" id="L131">            selfKnowledgeElementRequest.valorized());</span>
+<span class="fc" id="L133">            selfKnowledgeElementRequest.title(),</span>
+<span class="fc" id="L134">            selfKnowledgeElementRequest.description(),</span>
+<span class="fc" id="L135">            selfKnowledgeElementRequest.rating(),</span>
+<span class="fc" id="L136">            selfKnowledgeElementRequest.valorized());</span>
 
-<span class="fc" id="L133">    return ResponseEntity.ok(selfKnowledgeElementViewMapper.toDTO(selfKnowledgeElement));</span>
+<span class="fc" id="L138">    return ResponseEntity.ok(selfKnowledgeElementViewMapper.toDTO(selfKnowledgeElement));</span>
   }
 
+  @PreAuthorize(&quot;hasAuthority('self-knowledge:delete:own')&quot;)
   @DeleteMapping(&quot;/elements&quot;)
   public ResponseEntity&lt;String&gt; deleteSelfKnowledgeElements(
       @RequestBody List&lt;UUID&gt; selfKnowledgeElementIds) {
-<span class="fc" id="L139">    log.debug(&quot;Received request to delete self knowledge elements [{}]&quot;, selfKnowledgeElementIds);</span>
-<span class="fc" id="L140">    selfKnowledgeService.deleteSelfKnowledgeElements(selfKnowledgeElementIds);</span>
-<span class="fc" id="L141">    return ResponseEntity.ok(&quot;Self knowledge elements successfully deleted&quot;);</span>
+<span class="fc" id="L145">    log.debug(&quot;Received request to delete self knowledge elements [{}]&quot;, selfKnowledgeElementIds);</span>
+<span class="fc" id="L146">    selfKnowledgeService.deleteSelfKnowledgeElements(selfKnowledgeElementIds);</span>
+<span class="fc" id="L147">    return ResponseEntity.ok(&quot;Self knowledge elements successfully deleted&quot;);</span>
   }
 
+  @PreAuthorize(&quot;hasAuthority('self-knowledge:list:own')&quot;)
   @GetMapping(&quot;/categories&quot;)
   public ResponseEntity&lt;List&lt;SelfKnowledgeCategoryDTO&gt;&gt; getSelfKnowledgeCategories() {
-<span class="fc" id="L146">    return ResponseEntity.ok(</span>
-<span class="fc" id="L147">        selfKnowledgeService.getSelfKnowledgeCategories().stream()</span>
-<span class="fc" id="L148">            .map(selfKnowledgeCategoryMapper::toSelfKnowledgeCategoryDTO)</span>
-<span class="fc" id="L149">            .toList());</span>
+<span class="fc" id="L153">    return ResponseEntity.ok(</span>
+<span class="fc" id="L154">        selfKnowledgeService.getSelfKnowledgeCategories().stream()</span>
+<span class="fc" id="L155">            .map(selfKnowledgeCategoryMapper::toSelfKnowledgeCategoryDTO)</span>
+<span class="fc" id="L156">            .toList());</span>
   }
 
+  @PreAuthorize(&quot;hasAuthority('self-knowledge:create:own')&quot;)
   @PostMapping(&quot;/categories&quot;)
   public ResponseEntity&lt;String&gt; addSelfKnowledgeCategories(
       @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -160,18 +168,20 @@ public class SelfKnowledgeController {
                                   @Schema(ref = &quot;#/components/schemas/ESelfKnowledgeCategory&quot;))))
           @RequestBody
           List&lt;ESelfKnowledgeCategory&gt; categories) {
-<span class="fc" id="L163">    selfKnowledgeService.addSelfKnowledgeCategories(categories);</span>
-<span class="fc" id="L164">    return ResponseEntity.ok(&quot;Categories successfully associated with user&quot;);</span>
+<span class="fc" id="L171">    selfKnowledgeService.addSelfKnowledgeCategories(categories);</span>
+<span class="fc" id="L172">    return ResponseEntity.ok(&quot;Categories successfully associated with user&quot;);</span>
   }
 
+  @PreAuthorize(&quot;hasAuthority('self-knowledge:list:own')&quot;)
   @GetMapping(&quot;/categories/available&quot;)
   public ResponseEntity&lt;List&lt;SelfKnowledgeCategoryDTO&gt;&gt; getSelfKnowledgeCategoriesAvailable() {
-<span class="fc" id="L169">    return ResponseEntity.ok(</span>
-<span class="fc" id="L170">        selfKnowledgeService.getSelfKnowledgeCategoriesAvailable().stream()</span>
-<span class="fc" id="L171">            .map(selfKnowledgeCategoryMapper::toSelfKnowledgeCategoryDTO)</span>
-<span class="fc" id="L172">            .toList());</span>
+<span class="fc" id="L178">    return ResponseEntity.ok(</span>
+<span class="fc" id="L179">        selfKnowledgeService.getSelfKnowledgeCategoriesAvailable().stream()</span>
+<span class="fc" id="L180">            .map(selfKnowledgeCategoryMapper::toSelfKnowledgeCategoryDTO)</span>
+<span class="fc" id="L181">            .toList());</span>
   }
 
+  @PreAuthorize(&quot;hasAuthority('self-knowledge:delete:own')&quot;)
   @DeleteMapping(&quot;/categories/{selfKnowledgeCategory}&quot;)
   public ResponseEntity&lt;String&gt; removeSelfKnowledgeCategory(
       @Parameter(
@@ -181,8 +191,8 @@ public class SelfKnowledgeController {
               schema = @Schema(ref = &quot;#/components/schemas/ESelfKnowledgeCategory&quot;))
           @PathVariable
           ESelfKnowledgeCategory selfKnowledgeCategory) {
-<span class="nc" id="L184">    selfKnowledgeService.removeSelfKnowledgeCategory(selfKnowledgeCategory);</span>
-<span class="nc" id="L185">    return ResponseEntity.ok(&quot;Categories successfully deleted&quot;);</span>
+<span class="nc" id="L194">    selfKnowledgeService.removeSelfKnowledgeCategory(selfKnowledgeCategory);</span>
+<span class="nc" id="L195">    return ResponseEntity.ok(&quot;Categories successfully deleted&quot;);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -15,6 +15,7 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,13 +24,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-<span class="fc" id="L26">@Slf4j</span>
+<span class="fc" id="L27">@Slf4j</span>
 @AllArgsConstructor
 @RequestMapping(&quot;/me/notifications&quot;)
 public class NotificationController {
 
   private final NotificationService notificationService;
 
+  @PreAuthorize(&quot;hasAuthority('notification:read:own')&quot;)
   @GetMapping(&quot;/{userCategory}&quot;)
   public ResponseEntity&lt;PagedResponse&lt;NotificationDTO&gt;&gt; getNotifications(
       Principal principal,
@@ -40,27 +42,28 @@ public class NotificationController {
           EUserCategory userCategory,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize) {
-<span class="fc" id="L43">    var pageCriteria = new PageCriteria(page, pageSize);</span>
-<span class="fc" id="L44">    log.debug(</span>
+<span class="fc" id="L45">    var pageCriteria = new PageCriteria(page, pageSize);</span>
+<span class="fc" id="L46">    log.debug(</span>
         &quot;Received request to get notifications for user [{}] (userCategory={}, page={},&quot;
             + &quot; pageSize={})&quot;,
-<span class="fc" id="L47">        principal.getName(),</span>
+<span class="fc" id="L49">        principal.getName(),</span>
         userCategory,
-<span class="fc" id="L49">        pageCriteria.page(),</span>
-<span class="fc" id="L50">        pageCriteria.pageSize());</span>
-<span class="fc" id="L51">    var result = notificationService.getNotifications(userCategory, pageCriteria);</span>
-<span class="fc" id="L52">    return ResponseEntity.ok(</span>
+<span class="fc" id="L51">        pageCriteria.page(),</span>
+<span class="fc" id="L52">        pageCriteria.pageSize());</span>
+<span class="fc" id="L53">    var result = notificationService.getNotifications(userCategory, pageCriteria);</span>
+<span class="fc" id="L54">    return ResponseEntity.ok(</span>
         new PagedResponse&lt;&gt;(
-<span class="fc" id="L54">            result.content().stream().map(NotificationResponseMapper.INSTANCE::toDTO).toList(),</span>
-<span class="fc" id="L55">            PageInfoDTO.fromDomain(result.pageInfo())));</span>
+<span class="fc" id="L56">            result.content().stream().map(NotificationResponseMapper.INSTANCE::toDTO).toList(),</span>
+<span class="fc" id="L57">            PageInfoDTO.fromDomain(result.pageInfo())));</span>
   }
 
+  @PreAuthorize(&quot;hasAuthority('notification:update:own')&quot;)
   @PatchMapping(&quot;/{id}/seen&quot;)
   public ResponseEntity&lt;Void&gt; markAsSeen(Principal principal, @PathVariable UUID id) {
-<span class="fc" id="L60">    log.debug(</span>
-<span class="fc" id="L61">        &quot;Received request to mark notification [{}] as seen by user [{}]&quot;, id, principal.getName());</span>
-<span class="fc" id="L62">    notificationService.markAsSeen(id);</span>
-<span class="fc" id="L63">    return ResponseEntity.noContent().build();</span>
+<span class="fc" id="L63">    log.debug(</span>
+<span class="fc" id="L64">        &quot;Received request to mark notification [{}] as seen by user [{}]&quot;, id, principal.getName());</span>
+<span class="fc" id="L65">    notificationService.markAsSeen(id);</span>
+<span class="fc" id="L66">    return ResponseEntity.noContent().build();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
