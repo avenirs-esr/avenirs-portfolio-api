@@ -26,7 +26,7 @@ public interface Utils {
 
   static byte[] readBytes(MultipartFile file) {
     try {
-<span class="nc" id="L29">      return file.getBytes();</span>
+<span class="fc" id="L29">      return file.getBytes();</span>
 <span class="nc" id="L30">    } catch (IOException e) {</span>
 <span class="nc" id="L31">      throw new FileStorageException(&quot;Failed to read uploaded file&quot;, e);</span>
     }

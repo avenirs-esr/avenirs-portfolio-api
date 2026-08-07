@@ -48,33 +48,45 @@ public class FileResourceServiceImpl implements FileResourceService {
   }
 
   @Override
+  public File copy(UUID fileId) {
+<span class="fc" id="L52">    var source = fileRepository.findById(fileId).orElseThrow(FileNotFoundException::new);</span>
+<span class="fc" id="L53">    var content = fileStorageService.get(source.getUri());</span>
+<span class="fc" id="L54">    return upload(</span>
+<span class="fc" id="L55">        source.getFileName(),</span>
+<span class="fc" id="L56">        source.getFileType().getMimeType(),</span>
+<span class="fc" id="L57">        source.getSize(),</span>
+        content,
+<span class="fc" id="L59">        source.isRestricted());</span>
+  }
+
+  @Override
   public File get(UUID fileId) {
-<span class="nc" id="L52">    return fileRepository.findById(fileId).orElseThrow(FileNotFoundException::new);</span>
+<span class="nc" id="L64">    return fileRepository.findById(fileId).orElseThrow(FileNotFoundException::new);</span>
   }
 
   @Override
   public FileResource fetchContent(UUID fileId) {
-<span class="nc" id="L57">    var file = fileRepository.findById(fileId).orElseThrow(FileNotFoundException::new);</span>
-<span class="nc bnc" id="L58" title="All 2 branches missed.">    if (file.isRestricted()) {</span>
-<span class="nc" id="L59">      throw new FileNotFoundException();</span>
+<span class="nc" id="L69">    var file = fileRepository.findById(fileId).orElseThrow(FileNotFoundException::new);</span>
+<span class="nc bnc" id="L70" title="All 2 branches missed.">    if (file.isRestricted()) {</span>
+<span class="nc" id="L71">      throw new FileNotFoundException();</span>
     }
-<span class="nc" id="L61">    byte[] content = fileStorageService.get(file.getUri());</span>
-<span class="nc" id="L62">    return new FileResource(</span>
-<span class="nc" id="L63">        file.getId(), file.getFileName(), file.getFileType(), file.getSize(), content);</span>
+<span class="nc" id="L73">    byte[] content = fileStorageService.get(file.getUri());</span>
+<span class="nc" id="L74">    return new FileResource(</span>
+<span class="nc" id="L75">        file.getId(), file.getFileName(), file.getFileType(), file.getSize(), content);</span>
   }
 
   @Override
   public FileDownload download(UUID fileId) {
-<span class="nc" id="L68">    var file = fileRepository.findById(fileId).orElseThrow(FileNotFoundException::new);</span>
-<span class="nc" id="L69">    return new FileDownload(file.getFileName(), fileStorageService.get(file.getUri()));</span>
+<span class="nc" id="L80">    var file = fileRepository.findById(fileId).orElseThrow(FileNotFoundException::new);</span>
+<span class="nc" id="L81">    return new FileDownload(file.getFileName(), fileStorageService.get(file.getUri()));</span>
   }
 
   @Override
   public void delete(UUID fileId) {
-<span class="nc" id="L74">    var file = fileRepository.findById(fileId).orElseThrow(FileNotFoundException::new);</span>
-<span class="nc" id="L75">    fileStorageService.deleteByPath(file.getUri());</span>
-<span class="nc" id="L76">    fileRepository.removeFromDatabase(file);</span>
-<span class="nc" id="L77">    log.info(&quot;File deleted: {}&quot;, file);</span>
-<span class="nc" id="L78">  }</span>
+<span class="nc" id="L86">    var file = fileRepository.findById(fileId).orElseThrow(FileNotFoundException::new);</span>
+<span class="nc" id="L87">    fileStorageService.deleteByPath(file.getUri());</span>
+<span class="nc" id="L88">    fileRepository.removeFromDatabase(file);</span>
+<span class="nc" id="L89">    log.info(&quot;File deleted: {}&quot;, file);</span>
+<span class="nc" id="L90">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

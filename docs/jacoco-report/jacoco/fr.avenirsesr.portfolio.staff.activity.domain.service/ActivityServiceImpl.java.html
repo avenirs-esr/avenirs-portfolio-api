@@ -295,8 +295,8 @@ public class ActivityServiceImpl implements ActivityService {
 <span class="fc" id="L295">    var staff = loggedInUserService.getLoggedInStaff();</span>
 <span class="fc" id="L296">    var draft =</span>
 <span class="fc" id="L297">        activityDraftRepository.findById(id).orElseThrow(ActivityDraftNotFoundException::new);</span>
-<span class="pc bpc" id="L298" title="1 of 2 branches missed.">    if (!draft.getAuthor().equals(staff)) {</span>
-<span class="nc" id="L299">      throw new UserNotAuthorizedException();</span>
+<span class="fc bfc" id="L298" title="All 2 branches covered.">    if (!draft.getAuthor().equals(staff)) {</span>
+<span class="fc" id="L299">      throw new UserNotAuthorizedException();</span>
     }
 <span class="fc" id="L301">    return draft;</span>
   }
@@ -318,11 +318,11 @@ public class ActivityServiceImpl implements ActivityService {
       }
       case DRAFT -&gt; {
 <span class="fc" id="L320">        var draft =</span>
-<span class="nc" id="L321">            activityDraftRepository.findById(id).orElseThrow(ActivityDraftNotFoundException::new);</span>
-<span class="nc" id="L322">        yield ActivityPresentationDataMapper.toData(</span>
+<span class="fc" id="L321">            activityDraftRepository.findById(id).orElseThrow(ActivityDraftNotFoundException::new);</span>
+<span class="fc" id="L322">        yield ActivityPresentationDataMapper.toData(</span>
             draft,
-<span class="nc" id="L324">            FileDataMapper.mapFileData(</span>
-<span class="nc" id="L325">                draft.getBanner(), FileStorageConstants.DEFAULT_COVER_FILE_URL));</span>
+<span class="fc" id="L324">            FileDataMapper.mapFileData(</span>
+<span class="fc" id="L325">                draft.getBanner(), FileStorageConstants.DEFAULT_COVER_FILE_URL));</span>
       }
     };
   }
@@ -530,92 +530,129 @@ public class ActivityServiceImpl implements ActivityService {
 <span class="fc" id="L530">    return savedDraft;</span>
   }
 
+  @Override
+  public ActivityDraft duplicateActivity(UUID activityId) {
+<span class="fc" id="L535">    var staff = loggedInUserService.getLoggedInStaff();</span>
+<span class="fc" id="L536">    var activity =</span>
+<span class="fc" id="L537">        activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);</span>
+
+<span class="fc" id="L539">    var now = Instant.now();</span>
+    var duplicate =
+<span class="fc" id="L541">        ActivityDraft.toDomain(</span>
+<span class="fc" id="L542">            UUID.randomUUID(),</span>
+            now,
+            now,
+<span class="fc" id="L545">            activity.getTitle(),</span>
+            staff,
+<span class="fc" id="L547">            activity.getThematic(),</span>
+<span class="fc" id="L548">            activity.getSummary(),</span>
+<span class="fc" id="L549">            activity.getDescription(),</span>
+<span class="fc" id="L550">            activity.getRecommendedCompletionContexts().orElse(null),</span>
+<span class="fc" id="L551">            activity.getStartDate().orElse(null),</span>
+<span class="fc" id="L552">            activity.getEndDate().orElse(null),</span>
+<span class="fc" id="L553">            activity.getTraceAllowedAssociations(),</span>
+<span class="fc" id="L554">            activity.getFeedbackAllowedIterations(),</span>
+<span class="fc" id="L555">            activity.isEnableReflection(),</span>
+            activity
+<span class="fc" id="L557">                .getBanner()</span>
+<span class="fc" id="L558">                .map(banner -&gt; fileResourceService.copy(banner.getId()))</span>
+<span class="fc" id="L559">                .orElse(null),</span>
+<span class="fc" id="L560">            activity.getLinks(),</span>
+<span class="fc" id="L561">            activity.getFiles().stream()</span>
+<span class="fc" id="L562">                .map(file -&gt; fileResourceService.copy(file.getId()))</span>
+<span class="fc" id="L563">                .toList());</span>
+
+<span class="fc" id="L565">    var savedDuplicate = activityDraftRepository.save(duplicate);</span>
+<span class="fc" id="L566">    log.info(&quot;Duplicated activity {} into draft {}&quot;, activityId, savedDuplicate.getId());</span>
+<span class="fc" id="L567">    return savedDuplicate;</span>
+  }
+
   private boolean hasEnrolledStudents(Activity activity) {
-<span class="fc bfc" id="L534" title="All 2 branches covered.">    return declaredActivityService.countEnrolledStudents(activity) &gt; 0;</span>
+<span class="fc bfc" id="L571" title="All 2 branches covered.">    return declaredActivityService.countEnrolledStudents(activity) &gt; 0;</span>
   }
 
   @Override
   public Boolean hasEnrolledStudents(ActivityDraft draft) {
-<span class="fc" id="L539">    return activityRepository.findById(draft.getId()).map(this::hasEnrolledStudents).orElse(false);</span>
+<span class="fc" id="L576">    return activityRepository.findById(draft.getId()).map(this::hasEnrolledStudents).orElse(false);</span>
   }
 
   @Override
   public File uploadDraftBanner(
       UUID activityDraftId, String fileName, String mimeType, long size, byte[] content) {
-<span class="nc" id="L545">    var draft = getOwnedDraft(activityDraftId);</span>
-<span class="nc bnc" id="L546" title="All 2 branches missed.">    if (!EFileType.fromMimeType(mimeType).isImage()) {</span>
-<span class="nc" id="L547">      throw new FileTypeNotSupportedException();</span>
+<span class="fc" id="L582">    var draft = getOwnedDraft(activityDraftId);</span>
+<span class="pc bpc" id="L583" title="1 of 2 branches missed.">    if (!EFileType.fromMimeType(mimeType).isImage()) {</span>
+<span class="nc" id="L584">      throw new FileTypeNotSupportedException();</span>
     }
-<span class="nc" id="L549">    var file = fileResourceService.upload(fileName, mimeType, size, content, false);</span>
-<span class="nc" id="L550">    draft.setBanner(file);</span>
-<span class="nc" id="L551">    activityDraftRepository.save(draft);</span>
-<span class="nc" id="L552">    return file;</span>
+<span class="fc" id="L586">    var file = fileResourceService.upload(fileName, mimeType, size, content, false);</span>
+<span class="fc" id="L587">    draft.setBanner(file);</span>
+<span class="fc" id="L588">    activityDraftRepository.save(draft);</span>
+<span class="fc" id="L589">    return file;</span>
   }
 
   @Override
   public void deleteDraftBanner(UUID activityDraftId) {
-<span class="nc" id="L557">    var draft = getOwnedDraft(activityDraftId);</span>
-<span class="nc" id="L558">    draft.getBanner().ifPresent(banner -&gt; fileResourceService.delete(banner.getId()));</span>
-<span class="nc" id="L559">    draft.setBanner(null);</span>
-<span class="nc" id="L560">    activityDraftRepository.save(draft);</span>
-<span class="nc" id="L561">  }</span>
+<span class="nc" id="L594">    var draft = getOwnedDraft(activityDraftId);</span>
+<span class="nc" id="L595">    draft.getBanner().ifPresent(banner -&gt; fileResourceService.delete(banner.getId()));</span>
+<span class="nc" id="L596">    draft.setBanner(null);</span>
+<span class="nc" id="L597">    activityDraftRepository.save(draft);</span>
+<span class="nc" id="L598">  }</span>
 
   @Override
   public File addDraftFile(
       UUID activityDraftId, String fileName, String mimeType, long size, byte[] content) {
-<span class="fc" id="L566">    var draft = getOwnedDraft(activityDraftId);</span>
-<span class="fc bfc" id="L567" title="All 2 branches covered.">    if (!ALLOWED_DRAFT_FILE_TYPES.contains(EFileType.fromMimeType(mimeType))) {</span>
-<span class="fc" id="L568">      throw new FileTypeNotSupportedException();</span>
+<span class="fc" id="L603">    var draft = getOwnedDraft(activityDraftId);</span>
+<span class="fc bfc" id="L604" title="All 2 branches covered.">    if (!ALLOWED_DRAFT_FILE_TYPES.contains(EFileType.fromMimeType(mimeType))) {</span>
+<span class="fc" id="L605">      throw new FileTypeNotSupportedException();</span>
     }
-<span class="fc" id="L570">    var file = fileResourceService.upload(fileName, mimeType, size, content, true);</span>
-<span class="fc" id="L571">    draft.addFile(file);</span>
-<span class="fc" id="L572">    activityDraftRepository.save(draft);</span>
-<span class="fc" id="L573">    return file;</span>
+<span class="fc" id="L607">    var file = fileResourceService.upload(fileName, mimeType, size, content, true);</span>
+<span class="fc" id="L608">    draft.addFile(file);</span>
+<span class="fc" id="L609">    activityDraftRepository.save(draft);</span>
+<span class="fc" id="L610">    return file;</span>
   }
 
   @Override
   public void deleteDraftFile(UUID activityDraftId, UUID fileId) {
-<span class="nc" id="L578">    var draft = getOwnedDraft(activityDraftId);</span>
-<span class="nc bnc" id="L579" title="All 2 branches missed.">    if (draft.getFiles().stream().noneMatch(file -&gt; file.getId().equals(fileId))) {</span>
-<span class="nc" id="L580">      throw new FileNotFoundException();</span>
+<span class="nc" id="L615">    var draft = getOwnedDraft(activityDraftId);</span>
+<span class="nc bnc" id="L616" title="All 2 branches missed.">    if (draft.getFiles().stream().noneMatch(file -&gt; file.getId().equals(fileId))) {</span>
+<span class="nc" id="L617">      throw new FileNotFoundException();</span>
     }
-<span class="nc" id="L582">    fileResourceService.delete(fileId);</span>
-<span class="nc" id="L583">    draft.removeFile(fileId);</span>
-<span class="nc" id="L584">    activityDraftRepository.save(draft);</span>
-<span class="nc" id="L585">  }</span>
+<span class="nc" id="L619">    fileResourceService.delete(fileId);</span>
+<span class="nc" id="L620">    draft.removeFile(fileId);</span>
+<span class="nc" id="L621">    activityDraftRepository.save(draft);</span>
+<span class="nc" id="L622">  }</span>
 
   @Override
   public FileDownload downloadActivityFile(UUID activityId, UUID fileId) {
-<span class="nc" id="L589">    var loggedInUser = loggedInUserService.getLoggedInUser();</span>
-<span class="nc" id="L590">    var activity =</span>
-<span class="nc" id="L591">        activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);</span>
+<span class="nc" id="L626">    var loggedInUser = loggedInUserService.getLoggedInUser();</span>
+<span class="nc" id="L627">    var activity =</span>
+<span class="nc" id="L628">        activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);</span>
 
-<span class="nc" id="L593">    boolean isAuthor = activity.getAuthor().getUser().equals(loggedInUser);</span>
-<span class="nc" id="L594">    boolean isEnrolledStudent =</span>
+<span class="nc" id="L630">    boolean isAuthor = activity.getAuthor().getUser().equals(loggedInUser);</span>
+<span class="nc" id="L631">    boolean isEnrolledStudent =</span>
         studentRepository
-<span class="nc" id="L596">            .findById(loggedInUser.getId())</span>
-<span class="nc" id="L597">            .map(student -&gt; declaredActivityService.isEnrolled(activity, student))</span>
-<span class="nc" id="L598">            .orElse(false);</span>
+<span class="nc" id="L633">            .findById(loggedInUser.getId())</span>
+<span class="nc" id="L634">            .map(student -&gt; declaredActivityService.isEnrolled(activity, student))</span>
+<span class="nc" id="L635">            .orElse(false);</span>
 
-<span class="nc bnc" id="L600" title="All 4 branches missed.">    if (!isAuthor &amp;&amp; !isEnrolledStudent) {</span>
-<span class="nc" id="L601">      throw new UserNotAuthorizedException();</span>
+<span class="nc bnc" id="L637" title="All 4 branches missed.">    if (!isAuthor &amp;&amp; !isEnrolledStudent) {</span>
+<span class="nc" id="L638">      throw new UserNotAuthorizedException();</span>
     }
-<span class="nc bnc" id="L603" title="All 2 branches missed.">    if (activity.getFiles().stream().noneMatch(file -&gt; file.getId().equals(fileId))) {</span>
-<span class="nc" id="L604">      throw new FileNotFoundException();</span>
+<span class="nc bnc" id="L640" title="All 2 branches missed.">    if (activity.getFiles().stream().noneMatch(file -&gt; file.getId().equals(fileId))) {</span>
+<span class="nc" id="L641">      throw new FileNotFoundException();</span>
     }
-<span class="nc" id="L606">    return fileResourceService.download(fileId);</span>
+<span class="nc" id="L643">    return fileResourceService.download(fileId);</span>
   }
 
   private ActivityDraft getOwnedDraft(UUID activityDraftId) {
-<span class="fc" id="L610">    var staff = loggedInUserService.getLoggedInStaff();</span>
-<span class="fc" id="L611">    var draft =</span>
+<span class="fc" id="L647">    var staff = loggedInUserService.getLoggedInStaff();</span>
+<span class="fc" id="L648">    var draft =</span>
         activityDraftRepository
-<span class="fc" id="L613">            .findById(activityDraftId)</span>
-<span class="fc" id="L614">            .orElseThrow(ActivityDraftNotFoundException::new);</span>
-<span class="fc bfc" id="L615" title="All 2 branches covered.">    if (!draft.getAuthor().equals(staff)) {</span>
-<span class="fc" id="L616">      throw new ActivityDraftNotFoundException();</span>
+<span class="fc" id="L650">            .findById(activityDraftId)</span>
+<span class="fc" id="L651">            .orElseThrow(ActivityDraftNotFoundException::new);</span>
+<span class="fc bfc" id="L652" title="All 2 branches covered.">    if (!draft.getAuthor().equals(staff)) {</span>
+<span class="fc" id="L653">      throw new ActivityDraftNotFoundException();</span>
     }
-<span class="fc" id="L618">    return draft;</span>
+<span class="fc" id="L655">    return draft;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
