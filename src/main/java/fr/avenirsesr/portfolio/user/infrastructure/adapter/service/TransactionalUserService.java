@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.user.infrastructure.adapter.service;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.file.domain.model.File;
+import fr.avenirsesr.portfolio.user.domain.data.LoggedInUserData;
 import fr.avenirsesr.portfolio.user.domain.data.UserQuickLinksData;
 import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
 import java.util.UUID;
@@ -17,6 +18,11 @@ public class TransactionalUserService implements UserService {
   @Override
   public User getUser(UUID id) {
     return delegate.getUser(id);
+  }
+
+  @Override
+  public LoggedInUserData getMe() {
+    return delegate.getMe();
   }
 
   @Override
