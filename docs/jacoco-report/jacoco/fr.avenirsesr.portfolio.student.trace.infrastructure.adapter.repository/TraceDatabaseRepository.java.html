@@ -3,6 +3,8 @@
 import fr.avenirsesr.portfolio.common.data.domain.model.DateFilter;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.domain.model.User;
+import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.specification.DateFilterSpecificationBuilder;
 import fr.avenirsesr.portfolio.common.language.infrastructure.adapter.utils.TranslationUtil;
 import fr.avenirsesr.portfolio.student.trace.domain.filter.TraceFilter;
@@ -12,8 +14,6 @@ import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.mapper.Trace
 import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.specification.TraceFilterSpecificationBuilder;
 import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.specification.TraceSpecification;
-import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.repository.GenericUserJpaRepositoryAdapter;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -28,7 +28,7 @@ import org.springframework.stereotype.Repository;
 <span class="fc" id="L28">@Slf4j</span>
 @Repository
 @SQLRestriction(&quot;deleted_at IS NULL&quot;)
-public class TraceDatabaseRepository extends GenericUserJpaRepositoryAdapter&lt;Trace, TraceEntity&gt;
+public class TraceDatabaseRepository extends GenericJpaRepositoryAdapter&lt;Trace, TraceEntity&gt;
     implements TraceRepository {
   private final TraceJpaRepository jpaRepository;
 
@@ -38,9 +38,9 @@ public class TraceDatabaseRepository extends GenericUserJpaRepositoryAdapter&lt;
 <span class="fc" id="L38">  }</span>
 
   @Override
-  public List&lt;Trace&gt; findLastsOf(Student student, int limit) {
+  public List&lt;Trace&gt; findLastsOf(User user, int limit) {
 <span class="fc" id="L42">    return findAll(</span>
-<span class="fc" id="L43">            hasStudent(student),</span>
+<span class="fc" id="L43">            TraceSpecification.ofUser(user),</span>
 <span class="fc" id="L44">            PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;)))</span>
 <span class="fc" id="L45">        .content();</span>
   }
@@ -69,13 +69,13 @@ public class TraceDatabaseRepository extends GenericUserJpaRepositoryAdapter&lt;
 
   @Override
   public PagedResult&lt;Trace&gt; findAll(
-      Student student,
+      User user,
       String keyword,
       TraceFilter filter,
       DateFilter dateFilter,
       PageCriteria pageCriteria) {
 
-<span class="fc" id="L78">    Specification&lt;TraceEntity&gt; specification = hasStudent(student);</span>
+<span class="fc" id="L78">    Specification&lt;TraceEntity&gt; specification = TraceSpecification.ofUser(user);</span>
 
 <span class="fc" id="L80">    var filterSpecification = new TraceFilterSpecificationBuilder().build(filter.toMap());</span>
 <span class="pc bpc" id="L81" title="1 of 2 branches missed.">    if (filterSpecification.isPresent()) {</span>
@@ -106,8 +106,8 @@ public class TraceDatabaseRepository extends GenericUserJpaRepositoryAdapter&lt;
   }
 
   @Override
-  public List&lt;Trace&gt; findAll(Student student, boolean isAssociated) {
-<span class="nc" id="L110">    Specification&lt;TraceEntity&gt; specification = hasStudent(student);</span>
+  public List&lt;Trace&gt; findAll(User user, boolean isAssociated) {
+<span class="nc" id="L110">    Specification&lt;TraceEntity&gt; specification = TraceSpecification.ofUser(user);</span>
 
 <span class="nc" id="L112">    specification =</span>
 <span class="nc" id="L113">        specification.and(</span>
