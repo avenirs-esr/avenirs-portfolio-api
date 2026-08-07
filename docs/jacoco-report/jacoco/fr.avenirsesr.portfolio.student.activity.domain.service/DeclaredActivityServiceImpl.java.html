@@ -271,7 +271,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
 <span class="nc" id="L271">      throw new TraceNotFoundException();</span>
     }
 
-<span class="pc bpc" id="L274" title="1 of 2 branches missed.">    if (!traces.stream().allMatch(trace -&gt; trace.getUser().equals(student.getUser()))) {</span>
+<span class="pc bpc" id="L274" title="1 of 2 branches missed.">    if (!traces.stream().allMatch(trace -&gt; trace.getStudent().equals(student))) {</span>
 <span class="nc" id="L275">      throw new UserNotAuthorizedException();</span>
     }
 
@@ -338,7 +338,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
         associationType,
 <span class="fc" id="L339">        associationType.idExtractorFor(Trace.class),</span>
 <span class="fc" id="L340">        traceService.getTracesView(</span>
-            keyword, new TraceFilter(isAssociated, null, null, null, null), null, pageCriteria),
+            keyword, new TraceFilter(isAssociated, null, null, null), null, pageCriteria),
         TraceViewData::id,
         TraceViewData::title,
         null,
