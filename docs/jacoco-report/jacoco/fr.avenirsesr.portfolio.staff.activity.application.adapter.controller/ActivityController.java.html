@@ -218,7 +218,7 @@ public class ActivityController {
 <span class="fc" id="L218">        activityNavigationMapper.toDTO(activityService.getActivityNavigation()));</span>
   }
 
-  @PreAuthorize(&quot;hasAuthority('activity:national:create')&quot;)
+  @PreAuthorize(&quot;hasAuthority('activity:create')&quot;)
   @PostMapping(&quot;/create-draft/{activityId}&quot;)
   public ResponseEntity&lt;ActivityDraftCreationResponse&gt; createDraftFromActivity(
       Principal principal, @PathVariable UUID activityId) {
@@ -231,7 +231,7 @@ public class ActivityController {
 <span class="fc" id="L231">    return ResponseEntity.ok(new ActivityDraftCreationResponse(draft.getId()));</span>
   }
 
-  @PreAuthorize(&quot;hasAuthority('activity:national:create')&quot;)
+  @PreAuthorize(&quot;hasAuthority('activity:create')&quot;)
   @PostMapping(&quot;/draft&quot;)
   public ResponseEntity&lt;ActivityDraftCreationResponse&gt; createActivityDraft(
       Principal principal, @RequestBody ActivityDraftCreationRequest body) {
@@ -244,7 +244,7 @@ public class ActivityController {
 <span class="fc" id="L244">    return ResponseEntity.ok(new ActivityDraftCreationResponse(draft.getId()));</span>
   }
 
-  @PreAuthorize(&quot;hasAuthority('activity:national:create')&quot;)
+  @PreAuthorize(&quot;hasAuthority('activity:create')&quot;)
   @PostMapping(&quot;/publish/{activityDraftId}&quot;)
   public ResponseEntity&lt;CreationResponse&gt; publishActivityDraft(
       Principal principal, @PathVariable UUID activityDraftId) {
@@ -268,7 +268,7 @@ public class ActivityController {
 <span class="fc" id="L268">    return ResponseEntity.noContent().build();</span>
   }
 
-  @PreAuthorize(&quot;hasAuthority('activity:national:delete')&quot;)
+  @PreAuthorize(&quot;hasAuthority('activity:delete')&quot;)
   @DeleteMapping(&quot;/draft/{activityDraftId}&quot;)
   public ResponseEntity&lt;String&gt; deleteActivityDraft(
       Principal principal, @PathVariable UUID activityDraftId) {
@@ -282,7 +282,7 @@ public class ActivityController {
 <span class="nc" id="L282">    return ResponseEntity.ok(&quot;Activity draft successfully deleted&quot;);</span>
   }
 
-  @PreAuthorize(&quot;hasAuthority('activity:national:update')&quot;)
+  @PreAuthorize(&quot;hasAuthority('activity:update')&quot;)
   @PatchMapping(&quot;/{activityDraftId}&quot;)
   public ResponseEntity&lt;ActivityDraftUpdateResponse&gt; updateActivityDraft(
       Principal principal,
@@ -311,7 +311,7 @@ public class ActivityController {
 <span class="fc" id="L311">    return ResponseEntity.ok(new ActivityDraftUpdateResponse(draft.getId()));</span>
   }
 
-  @PreAuthorize(&quot;hasAuthority('activity:national:update')&quot;)
+  @PreAuthorize(&quot;hasAuthority('activity:update')&quot;)
   @PostMapping(
       value = &quot;/draft/{activityDraftId}/banner&quot;,
       consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -335,7 +335,7 @@ public class ActivityController {
 <span class="nc" id="L335">        .body(fileDTOMapper.toFileDTO(uploaded, extractOrigin(request)));</span>
   }
 
-  @PreAuthorize(&quot;hasAuthority('activity:national:update')&quot;)
+  @PreAuthorize(&quot;hasAuthority('activity:update')&quot;)
   @DeleteMapping(&quot;/draft/{activityDraftId}/banner&quot;)
   public ResponseEntity&lt;Void&gt; deleteDraftBanner(
       Principal principal, @PathVariable UUID activityDraftId) {
@@ -347,7 +347,7 @@ public class ActivityController {
 <span class="nc" id="L347">    return ResponseEntity.noContent().build();</span>
   }
 
-  @PreAuthorize(&quot;hasAuthority('activity:national:update')&quot;)
+  @PreAuthorize(&quot;hasAuthority('activity:update')&quot;)
   @PostMapping(
       value = &quot;/draft/{activityDraftId}/files&quot;,
       consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -371,7 +371,7 @@ public class ActivityController {
 <span class="nc" id="L371">        .body(fileDTOMapper.toFileDTO(uploaded, extractOrigin(request)));</span>
   }
 
-  @PreAuthorize(&quot;hasAuthority('activity:national:update')&quot;)
+  @PreAuthorize(&quot;hasAuthority('activity:update')&quot;)
   @DeleteMapping(&quot;/draft/{activityDraftId}/files/{fileId}&quot;)
   public ResponseEntity&lt;Void&gt; deleteDraftFile(
       Principal principal, @PathVariable UUID activityDraftId, @PathVariable UUID fileId) {
