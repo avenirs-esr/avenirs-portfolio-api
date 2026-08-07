@@ -10,6 +10,7 @@ import fr.avenirsesr.portfolio.common.user.domain.model.enums.EUserStatus;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.notification.domain.port.output.repository.NotificationRepository;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.user.domain.data.LoggedInUserData;
 import fr.avenirsesr.portfolio.user.domain.data.UserQuickLinksData;
 import fr.avenirsesr.portfolio.user.domain.port.input.StaffService;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
@@ -41,6 +42,12 @@ public class UserServiceImpl implements UserService {
               log.error("User {} not found", id);
               return new UserNotFoundException();
             });
+  }
+
+  @Override
+  public LoggedInUserData getMe() {
+    var user = loggedInUserService.getLoggedInUser();
+    return new LoggedInUserData(user.getFirstName(), user.getLastName());
   }
 
   @Override

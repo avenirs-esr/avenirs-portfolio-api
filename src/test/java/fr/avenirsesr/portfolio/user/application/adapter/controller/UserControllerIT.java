@@ -7,6 +7,8 @@ import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.application.adapter.Utils;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
+import java.util.Collections;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -50,9 +52,57 @@ public class UserControllerIT extends ContainerConfigurationTest {
     seederRunner.run();
   }
 
+  @Nested
+  class GetMe {
+
+    @Test
+    void shouldGetStudentMe() {
+      BddLogger.given("the /me endpoint");
+      BddLogger.when("performing a GET as a student");
+      BddLogger.then("it should return the student's firstname, lastname and roles");
+
+      webTestClient
+          .get()
+          .uri("/me")
+          .header("X-Signed-Context", studentPayload)
+          .header("X-Context-Signature", studentSignature)
+          .exchange()
+          .expectStatus()
+          .isOk()
+          .expectBody()
+          .jsonPath("$.firstname")
+          .exists()
+          .jsonPath("$.lastname")
+          .exists()
+          .jsonPath("$.roles")
+          .isArray()
+          .jsonPath("$.roles")
+          .value(Matchers.hasItem("STUDENT"));
+    }
+
+    @Test
+    void shouldGetMeWithEmptyRolesForUserWithoutPermission() {
+      BddLogger.given("the /me endpoint");
+      BddLogger.when("performing a GET as a user without any authority");
+      BddLogger.then("it should return an empty roles list");
+
+      webTestClient
+          .get()
+          .uri("/me")
+          .header("X-Signed-Context", noPermissionPayload)
+          .header("X-Context-Signature", noPermissionSignature)
+          .exchange()
+          .expectStatus()
+          .isOk()
+          .expectBody()
+          .jsonPath("$.roles")
+          .isEqualTo(Collections.emptyList());
+    }
+  }
+
   @Test
   void shouldUpdateStudentProfileSuccessfully() throws Exception {
-    BddLogger.given("the /me/users/STUDENT/update endpoint");
+    BddLogger.given("the /me/STUDENT/update endpoint");
     String payloadJson = loadJson("user/mock-update-user.json");
 
     BddLogger.when("performing a PUT");
@@ -60,7 +110,7 @@ public class UserControllerIT extends ContainerConfigurationTest {
 
     webTestClient
         .put()
-        .uri("/me/users/STUDENT/update")
+        .uri("/me/STUDENT/update")
         .header("X-Signed-Context", studentPayload)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
@@ -72,7 +122,7 @@ public class UserControllerIT extends ContainerConfigurationTest {
 
   @Test
   void shouldUpdateStaffProfileSuccessfully() throws Exception {
-    BddLogger.given("the /me/users/STAFF/update endpoint");
+    BddLogger.given("the /me/STAFF/update endpoint");
     String payloadJson = loadJson("user/mock-update-user.json");
 
     BddLogger.when("performing a PUT");
@@ -80,7 +130,7 @@ public class UserControllerIT extends ContainerConfigurationTest {
 
     webTestClient
         .put()
-        .uri("/me/users/STAFF/update")
+        .uri("/me/STAFF/update")
         .header("X-Signed-Context", staffPayload)
         .header("X-Context-Signature", staffSignature)
         .contentType(MediaType.APPLICATION_JSON)
@@ -92,7 +142,7 @@ public class UserControllerIT extends ContainerConfigurationTest {
 
   @Test
   void shouldFailOnUpdateStaffProfileWithEmail() throws Exception {
-    BddLogger.given("the /me/users/STAFF/update endpoint");
+    BddLogger.given("the /me/STAFF/update endpoint");
     String payloadJson = loadJson("user/mock-update-user-with-email.json");
 
     BddLogger.when("performing a PUT");
@@ -100,7 +150,7 @@ public class UserControllerIT extends ContainerConfigurationTest {
 
     webTestClient
         .put()
-        .uri("/me/users/STAFF/update")
+        .uri("/me/STAFF/update")
         .header("X-Signed-Context", staffPayload)
         .header("X-Context-Signature", staffSignature)
         .contentType(MediaType.APPLICATION_JSON)
@@ -112,13 +162,13 @@ public class UserControllerIT extends ContainerConfigurationTest {
 
   @Test
   void shouldReturnNotFoundForUnknownUser() {
-    BddLogger.given("the /me/users/STUDENT/overview endpoint");
+    BddLogger.given("the /me/STUDENT/overview endpoint");
     BddLogger.when("performing a GET with an unknown user");
     BddLogger.then("it should return a 404");
 
     webTestClient
         .get()
-        .uri("/me/users/STUDENT/overview")
+        .uri("/me/STUDENT/overview")
         .header("X-Signed-Context", unknownPayload)
         .header("X-Context-Signature", unknownSignature)
         .exchange()
@@ -131,13 +181,13 @@ public class UserControllerIT extends ContainerConfigurationTest {
 
   @Test
   void shouldGetStudentProfile() {
-    BddLogger.given("the /me/users/STUDENT/overview endpoint");
+    BddLogger.given("the /me/STUDENT/overview endpoint");
     BddLogger.when("performing a GET");
     BddLogger.then("it should return the student profile");
 
     webTestClient
         .get()
-        .uri("/me/users/STUDENT/overview")
+        .uri("/me/STUDENT/overview")
         .header("X-Signed-Context", studentPayload)
         .header("X-Context-Signature", studentSignature)
         .exchange()
@@ -152,13 +202,13 @@ public class UserControllerIT extends ContainerConfigurationTest {
 
   @Test
   void shouldGetStaffProfile() {
-    BddLogger.given("the /me/users/STAFF/overview endpoint");
+    BddLogger.given("the /me/STAFF/overview endpoint");
     BddLogger.when("performing a GET");
     BddLogger.then("it should return the staff profile");
 
     webTestClient
         .get()
-        .uri("/me/users/STAFF/overview")
+        .uri("/me/STAFF/overview")
         .header("X-Signed-Context", staffPayload)
         .header("X-Context-Signature", staffSignature)
         .exchange()
@@ -172,7 +222,7 @@ public class UserControllerIT extends ContainerConfigurationTest {
     request.setScheme("http");
     request.setServerName("localhost");
     request.setServerPort(10000);
-    request.setRequestURI("/me/users/STUDENT/overview");
+    request.setRequestURI("/me/STUDENT/overview");
     request.addHeader("Referer", "https://front.example.com:8443/some/page");
 
     String origin = ReflectionTestUtils.invokeMethod(Utils.class, "extractOrigin", request);
@@ -186,7 +236,7 @@ public class UserControllerIT extends ContainerConfigurationTest {
     request.setScheme("http");
     request.setServerName("localhost");
     request.setServerPort(10000);
-    request.setRequestURI("/me/users/STUDENT/overview");
+    request.setRequestURI("/me/STUDENT/overview");
     request.addHeader("Referer", "https://front.example.com/some/page");
 
     String origin = ReflectionTestUtils.invokeMethod(Utils.class, "extractOrigin", request);
@@ -200,7 +250,7 @@ public class UserControllerIT extends ContainerConfigurationTest {
     request.setScheme("http");
     request.setServerName("localhost");
     request.setServerPort(10000);
-    request.setRequestURI("/me/users/STUDENT/overview");
+    request.setRequestURI("/me/STUDENT/overview");
     request.addHeader("Referer", "/relative/path");
 
     String origin = ReflectionTestUtils.invokeMethod(Utils.class, "extractOrigin", request);
@@ -214,7 +264,7 @@ public class UserControllerIT extends ContainerConfigurationTest {
     request.setScheme("http");
     request.setServerName("localhost");
     request.setServerPort(10000);
-    request.setRequestURI("/me/users/STUDENT/overview");
+    request.setRequestURI("/me/STUDENT/overview");
 
     String origin = ReflectionTestUtils.invokeMethod(Utils.class, "extractOrigin", request);
 
@@ -227,7 +277,7 @@ public class UserControllerIT extends ContainerConfigurationTest {
     @Test
     void shouldGetStudentQuickLinks() {
       BddLogger.given(
-          "the /me/users/STUDENT/quick-links endpoint, after the student has read their"
+          "the /me/STUDENT/quick-links endpoint, after the student has read their"
               + " notifications");
       BddLogger.when("performing a GET as a student");
       BddLogger.then("it should return the student quick links data");
@@ -243,7 +293,7 @@ public class UserControllerIT extends ContainerConfigurationTest {
 
       webTestClient
           .get()
-          .uri("/me/users/STUDENT/quick-links")
+          .uri("/me/STUDENT/quick-links")
           .header("X-Signed-Context", studentPayload)
           .header("X-Context-Signature", studentSignature)
           .exchange()
@@ -266,13 +316,13 @@ public class UserControllerIT extends ContainerConfigurationTest {
 
     @Test
     void shouldGetStaffQuickLinks() {
-      BddLogger.given("the /me/users/STAFF/quick-links endpoint");
+      BddLogger.given("the /me/STAFF/quick-links endpoint");
       BddLogger.when("performing a GET as a staff member");
       BddLogger.then("it should return the staff quick links data");
 
       webTestClient
           .get()
-          .uri("/me/users/STAFF/quick-links")
+          .uri("/me/STAFF/quick-links")
           .header("X-Signed-Context", staffPayload)
           .header("X-Context-Signature", staffSignature)
           .exchange()
@@ -291,13 +341,13 @@ public class UserControllerIT extends ContainerConfigurationTest {
 
     @Test
     void shouldReturnUnauthorizedForUnknownUserOnQuickLinks() {
-      BddLogger.given("the /me/users/STUDENT/quick-links endpoint");
+      BddLogger.given("the /me/STUDENT/quick-links endpoint");
       BddLogger.when("performing a GET with an unknown user");
       BddLogger.then("it should return 401");
 
       webTestClient
           .get()
-          .uri("/me/users/STUDENT/quick-links")
+          .uri("/me/STUDENT/quick-links")
           .header("X-Signed-Context", unknownPayload)
           .header("X-Context-Signature", unknownSignature)
           .exchange()
@@ -314,7 +364,7 @@ public class UserControllerIT extends ContainerConfigurationTest {
 
     @Test
     void shouldUpdateNotificationPreferencesForStudent() throws Exception {
-      BddLogger.given("the /me/users/preferences/notification endpoint");
+      BddLogger.given("the /me/preferences/notification endpoint");
       String payloadJson = loadJson("user/mock-update-notification-preferences.json");
 
       BddLogger.when("performing a PATCH as a student");
@@ -322,7 +372,7 @@ public class UserControllerIT extends ContainerConfigurationTest {
 
       webTestClient
           .patch()
-          .uri("/me/users/preferences/notification")
+          .uri("/me/preferences/notification")
           .header("X-Signed-Context", studentPayload)
           .header("X-Context-Signature", studentSignature)
           .contentType(MediaType.APPLICATION_JSON)
@@ -334,7 +384,7 @@ public class UserControllerIT extends ContainerConfigurationTest {
 
     @Test
     void shouldUpdateNotificationPreferencesForStaff() throws Exception {
-      BddLogger.given("the /me/users/preferences/notification endpoint");
+      BddLogger.given("the /me/preferences/notification endpoint");
       String payloadJson = loadJson("user/mock-update-notification-preferences.json");
 
       BddLogger.when("performing a PATCH as a staff member");
@@ -342,7 +392,7 @@ public class UserControllerIT extends ContainerConfigurationTest {
 
       webTestClient
           .patch()
-          .uri("/me/users/preferences/notification")
+          .uri("/me/preferences/notification")
           .header("X-Signed-Context", staffPayload)
           .header("X-Context-Signature", staffSignature)
           .contentType(MediaType.APPLICATION_JSON)
@@ -354,7 +404,7 @@ public class UserControllerIT extends ContainerConfigurationTest {
 
     @Test
     void shouldReturnUnauthorizedForUnknownUser() throws Exception {
-      BddLogger.given("the /me/users/preferences/notification endpoint");
+      BddLogger.given("the /me/preferences/notification endpoint");
       String payloadJson = loadJson("user/mock-update-notification-preferences.json");
 
       BddLogger.when("performing a PATCH with an unknown user");
@@ -362,7 +412,7 @@ public class UserControllerIT extends ContainerConfigurationTest {
 
       webTestClient
           .patch()
-          .uri("/me/users/preferences/notification")
+          .uri("/me/preferences/notification")
           .header("X-Signed-Context", unknownPayload)
           .header("X-Context-Signature", unknownSignature)
           .contentType(MediaType.APPLICATION_JSON)
@@ -382,7 +432,7 @@ public class UserControllerIT extends ContainerConfigurationTest {
     request.setScheme("http");
     request.setServerName("localhost");
     request.setServerPort(10000);
-    request.setRequestURI("/me/users/STUDENT/overview");
+    request.setRequestURI("/me/STUDENT/overview");
     request.addHeader("Referer", "ht!tp://bad");
 
     String origin = ReflectionTestUtils.invokeMethod(Utils.class, "extractOrigin", request);
@@ -393,12 +443,12 @@ public class UserControllerIT extends ContainerConfigurationTest {
   @Test
   void shouldReturn403WhenGettingProfileWithoutPermission() {
     BddLogger.given("an authenticated user without the profile:read:own permission");
-    BddLogger.when("performing a GET on /me/users/STUDENT/overview");
+    BddLogger.when("performing a GET on /me/STUDENT/overview");
     BddLogger.then("it should return 403");
 
     webTestClient
         .get()
-        .uri("/me/users/STUDENT/overview")
+        .uri("/me/STUDENT/overview")
         .header("X-Signed-Context", noPermissionPayload)
         .header("X-Context-Signature", noPermissionSignature)
         .exchange()
@@ -411,12 +461,12 @@ public class UserControllerIT extends ContainerConfigurationTest {
     BddLogger.given("an authenticated user without the profile:update:own permission");
     String payloadJson = loadJson("user/mock-update-user.json");
 
-    BddLogger.when("performing a PUT on /me/users/STUDENT/update");
+    BddLogger.when("performing a PUT on /me/STUDENT/update");
     BddLogger.then("it should return 403");
 
     webTestClient
         .put()
-        .uri("/me/users/STUDENT/update")
+        .uri("/me/STUDENT/update")
         .header("X-Signed-Context", noPermissionPayload)
         .header("X-Context-Signature", noPermissionSignature)
         .contentType(MediaType.APPLICATION_JSON)
