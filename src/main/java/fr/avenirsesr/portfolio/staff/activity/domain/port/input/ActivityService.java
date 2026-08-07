@@ -76,6 +76,8 @@ public interface ActivityService {
 
   ActivityDraft createDraftFromActivity(UUID activityId);
 
+  ActivityDraft duplicateActivity(UUID activityId);
+
   Boolean hasEnrolledStudents(ActivityDraft draft);
 
   File uploadDraftBanner(

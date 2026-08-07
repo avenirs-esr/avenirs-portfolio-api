@@ -530,6 +530,43 @@ public class ActivityServiceImpl implements ActivityService {
     return savedDraft;
   }
 
+  @Override
+  public ActivityDraft duplicateActivity(UUID activityId) {
+    var staff = loggedInUserService.getLoggedInStaff();
+    var activity =
+        activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);
+
+    var now = Instant.now();
+    var duplicate =
+        ActivityDraft.toDomain(
+            UUID.randomUUID(),
+            now,
+            now,
+            activity.getTitle(),
+            staff,
+            activity.getThematic(),
+            activity.getSummary(),
+            activity.getDescription(),
+            activity.getRecommendedCompletionContexts().orElse(null),
+            activity.getStartDate().orElse(null),
+            activity.getEndDate().orElse(null),
+            activity.getTraceAllowedAssociations(),
+            activity.getFeedbackAllowedIterations(),
+            activity.isEnableReflection(),
+            activity
+                .getBanner()
+                .map(banner -> fileResourceService.copy(banner.getId()))
+                .orElse(null),
+            activity.getLinks(),
+            activity.getFiles().stream()
+                .map(file -> fileResourceService.copy(file.getId()))
+                .toList());
+
+    var savedDuplicate = activityDraftRepository.save(duplicate);
+    log.info("Duplicated activity {} into draft {}", activityId, savedDuplicate.getId());
+    return savedDuplicate;
+  }
+
   private boolean hasEnrolledStudents(Activity activity) {
     return declaredActivityService.countEnrolledStudents(activity) > 0;
   }

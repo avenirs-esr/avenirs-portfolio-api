@@ -48,6 +48,18 @@ public class FileResourceServiceImpl implements FileResourceService {
   }
 
   @Override
+  public File copy(UUID fileId) {
+    var source = fileRepository.findById(fileId).orElseThrow(FileNotFoundException::new);
+    var content = fileStorageService.get(source.getUri());
+    return upload(
+        source.getFileName(),
+        source.getFileType().getMimeType(),
+        source.getSize(),
+        content,
+        source.isRestricted());
+  }
+
+  @Override
   public File get(UUID fileId) {
     return fileRepository.findById(fileId).orElseThrow(FileNotFoundException::new);
   }

@@ -1667,6 +1667,183 @@ class ActivityServiceImplTest {
             .findAllStaffOverview(EActivityThematic.EXPERIENCES, pageCriteria);
       }
     }
+
+    @Nested
+    class WhenDuplicatingAnActivity {
+
+      UUID activityId;
+      Staff loggedInStaff;
+      Staff originalAuthor;
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("duplicating an activity");
+        activityId = UUID.randomUUID();
+        loggedInStaff = mock(Staff.class);
+        originalAuthor = mock(Staff.class);
+        when(loggedInUserService.getLoggedInStaff()).thenReturn(loggedInStaff);
+      }
+
+      @Nested
+      class AndTheActivityExists {
+
+        Activity activity;
+
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("the activity exists and belongs to another staff");
+          activity = anActivity(null, List.of());
+          when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
+          when(activityDraftRepository.save(any()))
+              .thenAnswer(invocation -> invocation.getArgument(0));
+        }
+
+        @Test
+        void thenItShouldSaveANewDraftWithANewIdAndTheLoggedInStaffAsAuthor() {
+          BddLogger.then("a brand new draft owned by the logged-in staff should be saved");
+
+          ActivityDraft result = activityService.duplicateActivity(activityId);
+
+          assertNotEquals(activityId, result.getId());
+          assertEquals(loggedInStaff, result.getAuthor());
+          verify(activityDraftRepository).save(result);
+        }
+
+        @Test
+        void thenItShouldCopyEveryActivityField() {
+          BddLogger.then("the draft should hold the same content as the source activity");
+
+          ActivityDraft result = activityService.duplicateActivity(activityId);
+
+          assertEquals("Activité à dupliquer", result.getTitle());
+          assertEquals(EActivityThematic.EXPERIENCES, result.getThematic());
+          assertEquals("Un résumé", result.getSummary().orElseThrow());
+          assertEquals("<p>Une description</p>", result.getDescription().orElseThrow());
+          assertEquals("2026", result.getRecommendedCompletionContexts().orElseThrow());
+          assertEquals(LocalDate.parse("2026-06-01"), result.getStartDate().orElseThrow());
+          assertEquals(LocalDate.parse("2026-06-30"), result.getEndDate().orElseThrow());
+          assertEquals(3, result.getTraceAllowedAssociations());
+          assertEquals(2, result.getFeedbackAllowedIterations());
+          assertTrue(result.isEnableReflection());
+          assertEquals(List.of("https://example.com"), result.getLinks());
+        }
+
+        @Test
+        void thenItShouldResetCreationAndUpdateDates() {
+          BddLogger.then("the draft dates should be refreshed instead of copied");
+
+          Instant beforeDuplication = Instant.now();
+          ActivityDraft result = activityService.duplicateActivity(activityId);
+
+          assertFalse(result.getCreatedAt().isBefore(beforeDuplication));
+          assertFalse(result.getUpdatedAt().isBefore(beforeDuplication));
+        }
+
+        @Test
+        void thenItShouldLeaveTheSourceActivityUntouched() {
+          BddLogger.then("the source activity should stay published and never be saved");
+
+          activityService.duplicateActivity(activityId);
+
+          assertEquals(EActivityStatus.PUBLISHED, activity.getStatus());
+          verify(activityRepository, never()).save(any());
+          verifyNoInteractions(declaredActivityService);
+        }
+
+        @Test
+        void thenItShouldNotRequireTheLoggedInStaffToBeTheAuthor() {
+          BddLogger.then("any staff should be allowed to duplicate the activity");
+
+          assertDoesNotThrow(() -> activityService.duplicateActivity(activityId));
+        }
+      }
+
+      @Nested
+      class AndTheActivityHasABannerAndFiles {
+
+        File banner;
+        File attachment;
+        File copiedBanner;
+        File copiedAttachment;
+
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("the activity has a banner and an attached file");
+          banner = aFile();
+          attachment = aFile();
+          copiedBanner = mock(File.class);
+          copiedAttachment = mock(File.class);
+
+          when(activityRepository.findById(activityId))
+              .thenReturn(Optional.of(anActivity(banner, List.of(attachment))));
+          when(activityDraftRepository.save(any()))
+              .thenAnswer(invocation -> invocation.getArgument(0));
+          when(fileResourceService.copy(banner.getId())).thenReturn(copiedBanner);
+          when(fileResourceService.copy(attachment.getId())).thenReturn(copiedAttachment);
+        }
+
+        @Test
+        void thenItShouldCopyThemInsteadOfSharingTheSourceOnes() {
+          BddLogger.then("the draft should reference copies instead of the source files");
+
+          ActivityDraft result = activityService.duplicateActivity(activityId);
+
+          assertEquals(copiedBanner, result.getBanner().orElseThrow());
+          assertEquals(List.of(copiedAttachment), result.getFiles());
+          verify(fileResourceService).copy(banner.getId());
+          verify(fileResourceService).copy(attachment.getId());
+        }
+      }
+
+      @Nested
+      class AndTheActivityDoesNotExist {
+
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("the activity does not exist");
+          when(activityRepository.findById(activityId)).thenReturn(Optional.empty());
+        }
+
+        @Test
+        void thenItShouldThrowActivityNotFoundException() {
+          BddLogger.then("the service should throw ActivityNotFoundException");
+
+          assertThrows(
+              ActivityNotFoundException.class, () -> activityService.duplicateActivity(activityId));
+
+          verify(activityDraftRepository, never()).save(any());
+          verifyNoInteractions(fileResourceService);
+        }
+      }
+
+      private Activity anActivity(File banner, List<File> files) {
+        return Activity.toDomain(
+            activityId,
+            originalAuthor,
+            "Activité à dupliquer",
+            EActivityThematic.EXPERIENCES,
+            "Un résumé",
+            EActivityStatus.PUBLISHED,
+            "<p>Une description</p>",
+            "2026",
+            LocalDate.parse("2026-06-01"),
+            LocalDate.parse("2026-06-30"),
+            true,
+            3,
+            2,
+            banner,
+            List.of("https://example.com"),
+            files,
+            Instant.parse("2020-01-01T00:00:00Z"),
+            Instant.parse("2021-01-01T00:00:00Z"));
+      }
+
+      private File aFile() {
+        File file = mock(File.class);
+        when(file.getId()).thenReturn(UUID.randomUUID());
+        return file;
+      }
+    }
   }
 
   private void mockPublishableDraft(

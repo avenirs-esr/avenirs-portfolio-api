@@ -784,6 +784,26 @@ class ActivityControllerTest {
     assertEquals(draftId, response.getBody().draftId());
   }
 
+  @Test
+  void shouldDuplicateActivityAndReturnTheNewDraftId() {
+    BddLogger.given("an existing activity");
+    UUID activityId = UUID.randomUUID();
+    UUID duplicateId = UUID.randomUUID();
+    ActivityDraft duplicate = mock(ActivityDraft.class);
+    when(duplicate.getId()).thenReturn(duplicateId);
+    when(activityService.duplicateActivity(activityId)).thenReturn(duplicate);
+
+    BddLogger.when("duplicating that activity");
+    ResponseEntity<ActivityDraftCreationResponse> response =
+        controller.duplicateActivity(principal, activityId);
+
+    BddLogger.then("it should return the id of the newly created draft");
+    assertEquals(200, response.getStatusCode().value());
+    assertNotNull(response.getBody());
+    assertEquals(duplicateId, response.getBody().draftId());
+    assertNotEquals(activityId, response.getBody().draftId());
+  }
+
   private HttpServletRequest createMockRequest() {
     HttpServletRequest request = mock(HttpServletRequest.class);
     lenient().when(request.getScheme()).thenReturn("https");
