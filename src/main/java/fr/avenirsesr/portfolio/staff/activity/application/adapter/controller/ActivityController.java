@@ -231,6 +231,19 @@ public class ActivityController {
     return ResponseEntity.ok(new ActivityDraftCreationResponse(draft.getId()));
   }
 
+  @PreAuthorize("hasAuthority('activity:duplicate')")
+  @PostMapping("/duplicate/{activityId}")
+  public ResponseEntity<ActivityDraftCreationResponse> duplicateActivity(
+      Principal principal, @PathVariable UUID activityId) {
+    log.debug(
+        "Received request to duplicate activity [{}] by user [{}]",
+        activityId,
+        principal.getName());
+
+    var duplicate = activityService.duplicateActivity(activityId);
+    return ResponseEntity.ok(new ActivityDraftCreationResponse(duplicate.getId()));
+  }
+
   @PreAuthorize("hasAuthority('activity:create')")
   @PostMapping("/draft")
   public ResponseEntity<ActivityDraftCreationResponse> createActivityDraft(

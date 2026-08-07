@@ -8,6 +8,8 @@ import java.util.UUID;
 public interface FileResourceService {
   File upload(String fileName, String mimeType, long size, byte[] content, boolean isRestricted);
 
+  File copy(UUID fileId);
+
   File get(UUID fileId);
 
   FileResource fetchContent(UUID fileId);

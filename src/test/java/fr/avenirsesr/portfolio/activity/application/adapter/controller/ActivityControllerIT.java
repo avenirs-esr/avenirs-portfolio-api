@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.activity.application.adapter.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -22,9 +23,12 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.reactive.function.BodyInserters;
 
 class ActivityControllerIT extends ContainerConfigurationTest {
 
@@ -40,6 +44,10 @@ class ActivityControllerIT extends ContainerConfigurationTest {
   private static final String UNPUBLISH_PATH = BASE_PATH + "/unpublish/{activityId}";
   private static final String CONTENT_PATH = BASE_PATH + "/{activityStatus}/{activityId}/content";
   private static final String CREATE_DRAFT_PATH = BASE_PATH + "/create-draft/{activityId}";
+  private static final String DUPLICATE_PATH = BASE_PATH + "/duplicate/{activityId}";
+  private static final String DRAFT_BANNER_PATH = BASE_PATH + "/draft/{draftId}/banner";
+  private static final String STATUS_PRESENTATION_PATH =
+      BASE_PATH + "/{activityStatus}/{activityId}/presentation";
   private static final String SUBSCRIBE_PATH = "/me/activity-progress/subscribe/{activityId}";
 
   @Autowired private WebTestClient webTestClient;
@@ -1626,6 +1634,205 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             .isUnauthorized();
       }
     }
+
+    @Nested
+    class WhenDuplicatingActivity {
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("performing a POST on " + DUPLICATE_PATH);
+      }
+
+      @Test
+      void thenItShouldCreateANewDraftWithANewIdAndTheSameContent() throws Exception {
+        BddLogger.and("given an existing published activity");
+        UUID activityId = publishNewActivity("Activité à dupliquer");
+
+        BddLogger.then("it should create a draft with a new id holding the same content");
+
+        UUID duplicateId = duplicateActivityAsStaff(activityId);
+        assertNotEquals(activityId, duplicateId);
+
+        webTestClient
+            .get()
+            .uri(CONTENT_PATH, "DRAFT", duplicateId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.title")
+            .isEqualTo("Activité à dupliquer")
+            .jsonPath("$.summary")
+            .isEqualTo("Un résumé valide pour la publication")
+            .jsonPath("$.description")
+            .isEqualTo("Une consigne valide pour la publication")
+            .jsonPath("$.thematic")
+            .isEqualTo(EActivityThematic.EXPERIENCES.name());
+      }
+
+      @Test
+      void thenItShouldLeaveTheSourceActivityPublished() throws Exception {
+        BddLogger.and("given an existing published activity");
+        UUID activityId = publishNewActivity("Activité dupliquée toujours publiée");
+
+        duplicateActivityAsStaff(activityId);
+
+        BddLogger.then("the source activity should still be PUBLISHED");
+
+        String body =
+            webTestClient
+                .get()
+                .uri(
+                    uriBuilder ->
+                        uriBuilder
+                            .path(WORKING_SPACE_PATH)
+                            .queryParam("page", "0")
+                            .queryParam("pageSize", "100")
+                            .build())
+                .headers(ActivityControllerIT.this::addStaffHeaders)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(String.class)
+                .returnResult()
+                .getResponseBody();
+
+        JsonNode data = objectMapper.readTree(body).get("data");
+        boolean found = false;
+
+        for (JsonNode item : data) {
+          if (activityId.toString().equals(item.get("activityId").asText())) {
+            assertEquals("PUBLISHED", item.get("activityStatus").asText());
+            found = true;
+            break;
+          }
+        }
+
+        assertTrue(found, "The source activity should still appear in the staff working space");
+      }
+
+      @Test
+      void thenItShouldSetTheDuplicatingStaffAsAuthorOfTheDraft() throws Exception {
+        BddLogger.and("given an activity published by another staff");
+        UUID activityId = publishNewActivity("Activité dupliquée par un autre personnel");
+
+        BddLogger.then("the draft should belong to the staff who asked for the duplication");
+
+        String body =
+            webTestClient
+                .post()
+                .uri(DUPLICATE_PATH, activityId)
+                .headers(ActivityControllerIT.this::addStudentHeaders)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(String.class)
+                .returnResult()
+                .getResponseBody();
+
+        UUID duplicateId = UUID.fromString(objectMapper.readTree(body).get("draftId").asText());
+
+        webTestClient
+            .get()
+            .uri(CONTENT_PATH, "DRAFT", duplicateId)
+            .headers(ActivityControllerIT.this::addStudentHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk();
+
+        BddLogger.and("the staff who authored the source activity should not own the draft");
+
+        webTestClient
+            .get()
+            .uri(CONTENT_PATH, "DRAFT", duplicateId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isForbidden();
+      }
+
+      @Test
+      void thenItShouldGiveEachDuplicateItsOwnBanner() throws Exception {
+        BddLogger.and("given a published activity holding a banner");
+        UUID draftId = createDraftAndGetId("Activité dupliquée avec bannière");
+        fillDraftWithSummaryAndDescription(draftId);
+        uploadDraftBanner(draftId);
+        UUID activityId = publishDraft(draftId);
+        UUID sourceBannerId = bannerIdOf("PUBLISHED", activityId);
+
+        BddLogger.then("two successive duplications should each own a distinct banner");
+
+        UUID firstDuplicateId = duplicateActivityAsStaff(activityId);
+        UUID secondDuplicateId = duplicateActivityAsStaff(activityId);
+
+        UUID firstBannerId = bannerIdOf("DRAFT", firstDuplicateId);
+        UUID secondBannerId = bannerIdOf("DRAFT", secondDuplicateId);
+
+        assertNotEquals(sourceBannerId, firstBannerId);
+        assertNotEquals(sourceBannerId, secondBannerId);
+        assertNotEquals(firstBannerId, secondBannerId);
+      }
+
+      @Test
+      void thenItShouldReturn404WhenActivityNotFound() {
+        BddLogger.and("given a non-existent activity id");
+        UUID unknownId = UUID.randomUUID();
+
+        BddLogger.then("it should return 404 with ACTIVITY_NOT_FOUND error code");
+
+        webTestClient
+            .post()
+            .uri(DUPLICATE_PATH, unknownId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isNotFound()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("ACTIVITY_NOT_FOUND");
+      }
+
+      @Test
+      void thenItShouldReturn403WhenUserIsNotStaff() throws Exception {
+        BddLogger.and("given an existing published activity and a student (non-staff) account");
+        UUID activityId = publishNewActivity("Activité duplication refusée");
+
+        BddLogger.then("it should return 403 with ACCESS_DENIED error code");
+
+        webTestClient
+            .post()
+            .uri(DUPLICATE_PATH, activityId)
+            .headers(ActivityControllerIT.this::addSecondStudentHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isForbidden()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("ACCESS_DENIED");
+      }
+
+      @Test
+      void thenItShouldReturn401WhenNotAuthenticated() {
+        BddLogger.and("given a non-authenticated request");
+        BddLogger.then("it should return 401");
+
+        webTestClient
+            .post()
+            .uri(DUPLICATE_PATH, UUID.randomUUID())
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isUnauthorized();
+      }
+    }
   }
 
   private UUID getFirstActivityIdFromOverview() throws Exception {
@@ -1732,6 +1939,10 @@ class ActivityControllerIT extends ContainerConfigurationTest {
     UUID draftId = createDraftAndGetId(title);
     fillDraftWithSummaryAndDescription(draftId);
 
+    return publishDraft(draftId);
+  }
+
+  private UUID publishDraft(UUID draftId) throws Exception {
     String body =
         webTestClient
             .post()
@@ -1746,6 +1957,67 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             .getResponseBody();
 
     return UUID.fromString(objectMapper.readTree(body).get("createdItemId").asText());
+  }
+
+  private UUID duplicateActivityAsStaff(UUID activityId) throws Exception {
+    String body =
+        webTestClient
+            .post()
+            .uri(DUPLICATE_PATH, activityId)
+            .headers(this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    return UUID.fromString(objectMapper.readTree(body).get("draftId").asText());
+  }
+
+  private void uploadDraftBanner(UUID draftId) {
+    var builder = new MultipartBodyBuilder();
+    builder
+        .part(
+            "file",
+            new ByteArrayResource(new byte[] {1, 2, 3}) {
+              @Override
+              public String getFilename() {
+                return "banniere.png";
+              }
+            })
+        .contentType(MediaType.IMAGE_PNG);
+
+    webTestClient
+        .post()
+        .uri(DRAFT_BANNER_PATH, draftId)
+        .headers(this::addStaffHeaders)
+        .contentType(MediaType.MULTIPART_FORM_DATA)
+        .body(BodyInserters.fromMultipartData(builder.build()))
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isCreated();
+  }
+
+  private UUID bannerIdOf(String activityStatus, UUID activityId) throws Exception {
+    String body =
+        webTestClient
+            .get()
+            .uri(STATUS_PRESENTATION_PATH, activityStatus, activityId)
+            .headers(this::addStudentHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    JsonNode banner = objectMapper.readTree(body).get("banner");
+    assertTrue(banner != null && banner.hasNonNull("id"), "Expected a banner on " + activityId);
+    return UUID.fromString(banner.get("id").asText());
   }
 
   private void subscribeStudentToActivity(UUID activityId) {
