@@ -77,16 +77,16 @@ public class FileResourceServiceImpl implements FileResourceService {
 
   @Override
   public FileDownload download(UUID fileId) {
-<span class="fc" id="L80">    var file = fileRepository.findById(fileId).orElseThrow(FileNotFoundException::new);</span>
-<span class="fc" id="L81">    return new FileDownload(file.getFileName(), fileStorageService.get(file.getUri()));</span>
+<span class="nc" id="L80">    var file = fileRepository.findById(fileId).orElseThrow(FileNotFoundException::new);</span>
+<span class="nc" id="L81">    return new FileDownload(file.getFileName(), fileStorageService.get(file.getUri()));</span>
   }
 
   @Override
   public void delete(UUID fileId) {
-<span class="fc" id="L86">    var file = fileRepository.findById(fileId).orElseThrow(FileNotFoundException::new);</span>
-<span class="fc" id="L87">    fileStorageService.deleteByPath(file.getUri());</span>
-<span class="fc" id="L88">    fileRepository.removeFromDatabase(file);</span>
-<span class="fc" id="L89">    log.info(&quot;File deleted: {}&quot;, file);</span>
-<span class="fc" id="L90">  }</span>
+<span class="nc" id="L86">    var file = fileRepository.findById(fileId).orElseThrow(FileNotFoundException::new);</span>
+<span class="nc" id="L87">    fileStorageService.deleteByPath(file.getUri());</span>
+<span class="nc" id="L88">    fileRepository.removeFromDatabase(file);</span>
+<span class="nc" id="L89">    log.info(&quot;File deleted: {}&quot;, file);</span>
+<span class="nc" id="L90">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

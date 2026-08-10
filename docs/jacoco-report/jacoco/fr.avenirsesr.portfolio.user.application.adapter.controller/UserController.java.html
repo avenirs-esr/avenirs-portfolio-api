@@ -4,8 +4,10 @@ import static fr.avenirsesr.portfolio.shared.application.adapter.Utils.extractOr
 import static fr.avenirsesr.portfolio.shared.application.adapter.Utils.readBytes;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
+import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.HmacAuthenticationToken;
 import fr.avenirsesr.portfolio.file.application.adapter.dto.FileDTO;
 import fr.avenirsesr.portfolio.file.application.adapter.mapper.FileDtoMapper;
+import fr.avenirsesr.portfolio.user.application.adapter.dto.LoggedInUserDTO;
 import fr.avenirsesr.portfolio.user.application.adapter.dto.ProfileOverviewDTO;
 import fr.avenirsesr.portfolio.user.application.adapter.dto.QuickLinksDTO;
 import fr.avenirsesr.portfolio.user.application.adapter.mapper.ProfileOverviewMapper;
@@ -39,16 +41,23 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-<span class="fc" id="L42">@Slf4j</span>
+<span class="fc" id="L44">@Slf4j</span>
 @AllArgsConstructor
 @RestController
-@RequestMapping(&quot;/me/users&quot;)
+@RequestMapping(&quot;/me&quot;)
 public class UserController {
   private final UserService userService;
   private final StudentService studentService;
   private final StaffService staffService;
   private final ProfileOverviewMapper profileOverviewMapper;
   private final FileDtoMapper fileDtoMapper;
+
+  @GetMapping
+  public ResponseEntity&lt;LoggedInUserDTO&gt; getMe(HmacAuthenticationToken authentication) {
+<span class="fc" id="L57">    var me = userService.getMe();</span>
+<span class="fc" id="L58">    return ResponseEntity.ok(</span>
+<span class="fc" id="L59">        new LoggedInUserDTO(me.firstname(), me.lastname(), authentication.getRoles()));</span>
+  }
 
   @PreAuthorize(&quot;hasAuthority('profile:read:own')&quot;)
   @GetMapping(&quot;/{userCategory}/overview&quot;)
@@ -62,14 +71,14 @@ public class UserController {
               schema = @Schema(ref = &quot;#/components/schemas/EUserCategory&quot;))
           @PathVariable
           EUserCategory userCategory) {
-<span class="fc" id="L65">    UserProfileOverviewData overview =</span>
-<span class="fc bfc" id="L66" title="All 2 branches covered.">        switch (userCategory) {</span>
-<span class="fc" id="L67">          case STUDENT -&gt; studentService.getStudentProfile();</span>
-<span class="fc" id="L68">          case STAFF -&gt; staffService.getStaffProfile();</span>
+<span class="fc" id="L74">    UserProfileOverviewData overview =</span>
+<span class="fc bfc" id="L75" title="All 2 branches covered.">        switch (userCategory) {</span>
+<span class="fc" id="L76">          case STUDENT -&gt; studentService.getStudentProfile();</span>
+<span class="fc" id="L77">          case STAFF -&gt; staffService.getStaffProfile();</span>
         };
 
-<span class="fc" id="L71">    String baseUrl = extractOrigin(request);</span>
-<span class="fc" id="L72">    return ResponseEntity.ok(profileOverviewMapper.userDomainToDto(overview, baseUrl));</span>
+<span class="fc" id="L80">    String baseUrl = extractOrigin(request);</span>
+<span class="fc" id="L81">    return ResponseEntity.ok(profileOverviewMapper.userDomainToDto(overview, baseUrl));</span>
   }
 
   @PreAuthorize(&quot;hasAuthority('profile:read:own')&quot;)
@@ -83,15 +92,15 @@ public class UserController {
               schema = @Schema(ref = &quot;#/components/schemas/EUserCategory&quot;))
           @PathVariable
           EUserCategory userCategory) {
-<span class="fc" id="L86">    var data = userService.getQuickLinks(userCategory);</span>
-<span class="fc" id="L87">    return ResponseEntity.ok(</span>
+<span class="fc" id="L95">    var data = userService.getQuickLinks(userCategory);</span>
+<span class="fc" id="L96">    return ResponseEntity.ok(</span>
         new QuickLinksDTO(
-<span class="fc" id="L89">            data.userId(),</span>
-<span class="fc" id="L90">            data.firstname(),</span>
-<span class="fc" id="L91">            data.lastname(),</span>
-<span class="fc" id="L92">            data.hasUnseenNotification(),</span>
-<span class="fc" id="L93">            data.unreadNotifications(),</span>
-<span class="fc" id="L94">            data.notificationEnabled()));</span>
+<span class="fc" id="L98">            data.userId(),</span>
+<span class="fc" id="L99">            data.firstname(),</span>
+<span class="fc" id="L100">            data.lastname(),</span>
+<span class="fc" id="L101">            data.hasUnseenNotification(),</span>
+<span class="fc" id="L102">            data.unreadNotifications(),</span>
+<span class="fc" id="L103">            data.notificationEnabled()));</span>
   }
 
   @PreAuthorize(&quot;hasAuthority('profile:update:own')&quot;)
@@ -107,19 +116,19 @@ public class UserController {
           @PathVariable
           EUserCategory userCategory,
       @RequestBody ProfileUpdateRequest request) {
-<span class="fc" id="L110">    log.debug(&quot;Received request to update profile of user [{}]&quot;, principal.getName());</span>
-<span class="fc" id="L111">    userService.updateProfile(userCategory, request.getEmail(), request.getBio());</span>
-<span class="fc" id="L112">    return ResponseEntity.noContent().build();</span>
+<span class="fc" id="L119">    log.debug(&quot;Received request to update profile of user [{}]&quot;, principal.getName());</span>
+<span class="fc" id="L120">    userService.updateProfile(userCategory, request.getEmail(), request.getBio());</span>
+<span class="fc" id="L121">    return ResponseEntity.noContent().build();</span>
   }
 
   @PreAuthorize(&quot;hasAuthority('profile:update:own')&quot;)
   @PatchMapping(&quot;/preferences/notification&quot;)
   public ResponseEntity&lt;String&gt; updateNotificationPreferences(
       Principal principal, @RequestBody NotificationPreferencesRequest request) {
-<span class="fc" id="L119">    log.debug(</span>
-<span class="fc" id="L120">        &quot;Received request to update notification preferences of user [{}]&quot;, principal.getName());</span>
-<span class="fc" id="L121">    userService.updateNotificationPreferences(request.notificationEnabled());</span>
-<span class="fc" id="L122">    return ResponseEntity.noContent().build();</span>
+<span class="fc" id="L128">    log.debug(</span>
+<span class="fc" id="L129">        &quot;Received request to update notification preferences of user [{}]&quot;, principal.getName());</span>
+<span class="fc" id="L130">    userService.updateNotificationPreferences(request.notificationEnabled());</span>
+<span class="fc" id="L131">    return ResponseEntity.noContent().build();</span>
   }
 
   @PostMapping(
@@ -136,15 +145,15 @@ public class UserController {
               schema = @Schema(ref = &quot;#/components/schemas/EUserCategory&quot;))
           EUserCategory userCategory,
       @RequestParam(&quot;file&quot;) MultipartFile file) {
-<span class="nc" id="L139">    log.debug(&quot;Received request to upload profile picture of user [{}]&quot;, principal.getName());</span>
-<span class="nc" id="L140">    var uploaded =</span>
-<span class="nc" id="L141">        userService.uploadProfilePicture(</span>
+<span class="nc" id="L148">    log.debug(&quot;Received request to upload profile picture of user [{}]&quot;, principal.getName());</span>
+<span class="nc" id="L149">    var uploaded =</span>
+<span class="nc" id="L150">        userService.uploadProfilePicture(</span>
             userCategory,
-<span class="nc" id="L143">            file.getOriginalFilename(),</span>
-<span class="nc" id="L144">            file.getContentType(),</span>
-<span class="nc" id="L145">            file.getSize(),</span>
-<span class="nc" id="L146">            readBytes(file));</span>
-<span class="nc" id="L147">    return ResponseEntity.status(HttpStatus.CREATED).body(fileDtoMapper.fromDomain(uploaded));</span>
+<span class="nc" id="L152">            file.getOriginalFilename(),</span>
+<span class="nc" id="L153">            file.getContentType(),</span>
+<span class="nc" id="L154">            file.getSize(),</span>
+<span class="nc" id="L155">            readBytes(file));</span>
+<span class="nc" id="L156">    return ResponseEntity.status(HttpStatus.CREATED).body(fileDtoMapper.fromDomain(uploaded));</span>
   }
 
   @PreAuthorize(&quot;hasAuthority('profile:update:own')&quot;)
@@ -158,9 +167,9 @@ public class UserController {
               required = true,
               schema = @Schema(ref = &quot;#/components/schemas/EUserCategory&quot;))
           EUserCategory userCategory) {
-<span class="nc" id="L161">    log.debug(&quot;Received request to delete profile picture of user [{}]&quot;, principal.getName());</span>
-<span class="nc" id="L162">    userService.deleteProfilePicture(userCategory);</span>
-<span class="nc" id="L163">    return ResponseEntity.noContent().build();</span>
+<span class="nc" id="L170">    log.debug(&quot;Received request to delete profile picture of user [{}]&quot;, principal.getName());</span>
+<span class="nc" id="L171">    userService.deleteProfilePicture(userCategory);</span>
+<span class="nc" id="L172">    return ResponseEntity.noContent().build();</span>
   }
 
   @PostMapping(
@@ -177,15 +186,15 @@ public class UserController {
               schema = @Schema(ref = &quot;#/components/schemas/EUserCategory&quot;))
           EUserCategory userCategory,
       @RequestParam(&quot;file&quot;) MultipartFile file) {
-<span class="nc" id="L180">    log.debug(&quot;Received request to upload cover picture of user [{}]&quot;, principal.getName());</span>
-<span class="nc" id="L181">    var uploaded =</span>
-<span class="nc" id="L182">        userService.uploadCoverPicture(</span>
+<span class="nc" id="L189">    log.debug(&quot;Received request to upload cover picture of user [{}]&quot;, principal.getName());</span>
+<span class="nc" id="L190">    var uploaded =</span>
+<span class="nc" id="L191">        userService.uploadCoverPicture(</span>
             userCategory,
-<span class="nc" id="L184">            file.getOriginalFilename(),</span>
-<span class="nc" id="L185">            file.getContentType(),</span>
-<span class="nc" id="L186">            file.getSize(),</span>
-<span class="nc" id="L187">            readBytes(file));</span>
-<span class="nc" id="L188">    return ResponseEntity.status(HttpStatus.CREATED).body(fileDtoMapper.fromDomain(uploaded));</span>
+<span class="nc" id="L193">            file.getOriginalFilename(),</span>
+<span class="nc" id="L194">            file.getContentType(),</span>
+<span class="nc" id="L195">            file.getSize(),</span>
+<span class="nc" id="L196">            readBytes(file));</span>
+<span class="nc" id="L197">    return ResponseEntity.status(HttpStatus.CREATED).body(fileDtoMapper.fromDomain(uploaded));</span>
   }
 
   @PreAuthorize(&quot;hasAuthority('profile:update:own')&quot;)
@@ -199,9 +208,9 @@ public class UserController {
               required = true,
               schema = @Schema(ref = &quot;#/components/schemas/EUserCategory&quot;))
           EUserCategory userCategory) {
-<span class="nc" id="L202">    log.debug(&quot;Received request to delete cover picture of user [{}]&quot;, principal.getName());</span>
-<span class="nc" id="L203">    userService.deleteCoverPicture(userCategory);</span>
-<span class="nc" id="L204">    return ResponseEntity.noContent().build();</span>
+<span class="nc" id="L211">    log.debug(&quot;Received request to delete cover picture of user [{}]&quot;, principal.getName());</span>
+<span class="nc" id="L212">    userService.deleteCoverPicture(userCategory);</span>
+<span class="nc" id="L213">    return ResponseEntity.noContent().build();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
