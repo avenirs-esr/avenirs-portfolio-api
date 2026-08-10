@@ -42,6 +42,7 @@ class FeedbackOverviewDTOMapperTest {
             EFeedbackStatus.NEW,
             1,
             List.of(),
+            List.of(),
             List.of());
 
     BddLogger.when("mapping to FeedbackOverviewDTO");
@@ -87,6 +88,7 @@ class FeedbackOverviewDTOMapperTest {
             EFeedbackStatus.SUBMITTED,
             1,
             List.of(),
+            List.of(),
             List.of());
 
     BddLogger.when("mapping to FeedbackOverviewDTO");
@@ -121,6 +123,7 @@ class FeedbackOverviewDTOMapperTest {
             null,
             EFeedbackStatus.NEW,
             1,
+            List.of(),
             List.of(),
             List.of());
 

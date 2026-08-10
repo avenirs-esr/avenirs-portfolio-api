@@ -1,0 +1,51 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+        http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet author="iamgreendev" id="feedback-attachments-create-table">
+        <createTable tableName="feedback_attachments">
+            <column name="feedback_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <rollback>
+            <dropTable tableName="feedback_attachments"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="iamgreendev" id="feedback-attachments-add-fks">
+        <addForeignKeyConstraint
+                baseTableName="feedback_attachments"
+                baseColumnNames="feedback_id"
+                constraintName="FK_feedback_attachments_feedback"
+                referencedTableName="feedback"
+                referencedColumnNames="id"/>
+        <addForeignKeyConstraint
+                baseTableName="feedback_attachments"
+                baseColumnNames="file_id"
+                constraintName="FK_feedback_attachments_file"
+                referencedTableName="file"
+                referencedColumnNames="id"/>
+
+        <rollback>
+            <dropForeignKeyConstraint
+                    baseTableName="feedback_attachments"
+                    constraintName="FK_feedback_attachments_feedback"/>
+            <dropForeignKeyConstraint
+                    baseTableName="feedback_attachments"
+                    constraintName="FK_feedback_attachments_file"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

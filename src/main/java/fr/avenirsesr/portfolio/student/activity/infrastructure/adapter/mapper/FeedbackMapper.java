@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.mapper;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.EntityGrapher;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.mapper.Mapper;
 import fr.avenirsesr.portfolio.file.domain.model.File;
+import fr.avenirsesr.portfolio.file.infrastructure.adapter.mapper.FileMapper;
 import fr.avenirsesr.portfolio.student.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.model.AssociationsJson;
 import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.model.FeedbackEntity;
@@ -27,7 +28,8 @@ public class FeedbackMapper implements Mapper<FeedbackEntity, Feedback> {
             feedback.getFeedback().orElse(null),
             feedback.getStatus(),
             feedback.getIteration(),
-            buildAssociations(feedback));
+            buildAssociations(feedback),
+            feedback.getAttachments().stream().map(FileMapper.INSTANCE::fromDomain).toList());
     entity.setId(feedback.getId());
     return entity;
   }
@@ -132,6 +134,7 @@ public class FeedbackMapper implements Mapper<FeedbackEntity, Feedback> {
         entity.getStatus(),
         entity.getIteration(),
         traces,
-        progresses);
+        progresses,
+        entity.getAttachments().stream().map(FileMapper.INSTANCE::toDomain).toList());
   }
 }

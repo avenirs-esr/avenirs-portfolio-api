@@ -101,6 +101,7 @@ class DeclaredActivityPresentationDTOMapperTest {
             EFeedbackStatus.NEW,
             1,
             List.of(),
+            List.of(),
             List.of());
 
     FeedbackData feedbackData2 =
@@ -113,6 +114,7 @@ class DeclaredActivityPresentationDTOMapperTest {
             "Mon retour",
             EFeedbackStatus.SUBMITTED,
             2,
+            List.of(),
             List.of(),
             List.of());
 

@@ -7,19 +7,27 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
+import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.BodyInserters;
 
 public class FeedbackControllerIT extends ContainerConfigurationTest {
 
   private static final String BASE_PATH = "/me/activity-progress/feedbacks";
   private static final String ACTIVITY_BASE_PATH = "/me/activity-progress";
   private static final String ACTIVITY_ID = "9a12e6b4-8c3f-4d22-bf55-6d4c1f2a7e33";
+  private static final String ATTACHMENT_FILE_NAME = "retour.pdf";
+  private static final String ATTACHMENT_CONTENT = "Contenu du retour du staff";
 
   @Autowired private WebTestClient webTestClient;
   @Autowired private ObjectMapper objectMapper;
@@ -978,5 +986,393 @@ public class FeedbackControllerIT extends ContainerConfigurationTest {
         .exchange()
         .expectStatus()
         .isForbidden();
+  }
+
+  // ── POST /{feedbackId}/attachments ──────────────────────────────────
+
+  private BodyInserters.MultipartInserter attachmentBody() {
+    var builder = new MultipartBodyBuilder();
+    builder
+        .part(
+            "file",
+            new ByteArrayResource(ATTACHMENT_CONTENT.getBytes(StandardCharsets.UTF_8)) {
+              @Override
+              public String getFilename() {
+                return ATTACHMENT_FILE_NAME;
+              }
+            })
+        .contentType(MediaType.APPLICATION_PDF);
+    return BodyInserters.fromMultipartData(builder.build());
+  }
+
+  private String uploadAttachmentAndGetId(String feedbackId) throws Exception {
+    String body =
+        webTestClient
+            .post()
+            .uri(attachmentsPath(feedbackId))
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Signature", studentSignature)
+            .contentType(MediaType.MULTIPART_FORM_DATA)
+            .body(attachmentBody())
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+    return objectMapper.readTree(body).get("id").asText();
+  }
+
+  private String attachmentsPath(String feedbackId) {
+    return BASE_PATH + "/" + feedbackId + "/attachments";
+  }
+
+  @Test
+  @Transactional
+  void shouldUploadAnAttachmentWhenTheStaffIsTheAuthorOfTheActivity() throws Exception {
+    BddLogger.given("a feedback assigned to the staff author of the activity");
+    String feedbackId = askForFeedbackAndGetId(declaredActivityId);
+
+    BddLogger.when("the staff author uploads a file on the feedback");
+    BddLogger.then("201 CREATED is returned with the uploaded file description");
+
+    webTestClient
+        .post()
+        .uri(attachmentsPath(feedbackId))
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.MULTIPART_FORM_DATA)
+        .body(attachmentBody())
+        .exchange()
+        .expectStatus()
+        .isCreated()
+        .expectBody()
+        .jsonPath("$.id")
+        .isNotEmpty()
+        .jsonPath("$.fileName")
+        .isEqualTo(ATTACHMENT_FILE_NAME)
+        .jsonPath("$.fileType")
+        .isEqualTo("PDF")
+        .jsonPath("$.fileSize")
+        .isEqualTo(ATTACHMENT_CONTENT.getBytes(StandardCharsets.UTF_8).length)
+        .jsonPath("$.uploadedAt")
+        .isNotEmpty();
+  }
+
+  @Test
+  @Transactional
+  void shouldReturn403WhenUploadingAnAttachmentAsAStaffWhoIsNotTheAuthor() throws Exception {
+    BddLogger.given("a feedback on an activity authored by another staff");
+    String feedbackId = askForFeedbackAndGetId(declaredActivityId);
+
+    BddLogger.when("a staff who is not the author uploads a file on the feedback");
+    BddLogger.then("403 Forbidden is returned");
+
+    webTestClient
+        .post()
+        .uri(attachmentsPath(feedbackId))
+        .header("X-Signed-Context", staffPayload)
+        .header("X-Context-Signature", staffSignature)
+        .contentType(MediaType.MULTIPART_FORM_DATA)
+        .body(attachmentBody())
+        .exchange()
+        .expectStatus()
+        .isForbidden();
+  }
+
+  @Test
+  void shouldReturn404WhenUploadingAnAttachmentOnANonExistentFeedback() {
+    BddLogger.given("a non-existent feedback ID");
+    BddLogger.when("the staff uploads a file on it");
+    BddLogger.then("404 Not Found is returned");
+
+    webTestClient
+        .post()
+        .uri(attachmentsPath(notFoundId))
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.MULTIPART_FORM_DATA)
+        .body(attachmentBody())
+        .exchange()
+        .expectStatus()
+        .isNotFound()
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("FEEDBACK_NOT_FOUND");
+  }
+
+  @Test
+  void shouldReturn401WhenNotAuthenticatedOnUploadAttachment() {
+    BddLogger.given("the POST /me/activity-progress/feedbacks/{feedbackId}/attachments endpoint");
+    BddLogger.when("uploading a file without authentication headers");
+    BddLogger.then("401 Unauthorized is returned");
+
+    webTestClient
+        .post()
+        .uri(attachmentsPath(notFoundId))
+        .contentType(MediaType.MULTIPART_FORM_DATA)
+        .body(attachmentBody())
+        .exchange()
+        .expectStatus()
+        .isUnauthorized();
+  }
+
+  @Test
+  void shouldReturn403WhenUploadingAnAttachmentWithoutPermission() {
+    BddLogger.given(
+        "an authenticated user without the feedback:request:respond:assigned permission");
+    BddLogger.when("uploading a file on a feedback");
+    BddLogger.then("403 Forbidden is returned");
+
+    webTestClient
+        .post()
+        .uri(attachmentsPath(notFoundId))
+        .header("X-Signed-Context", noPermissionPayload)
+        .header("X-Context-Signature", noPermissionSignature)
+        .contentType(MediaType.MULTIPART_FORM_DATA)
+        .body(attachmentBody())
+        .exchange()
+        .expectStatus()
+        .isForbidden();
+  }
+
+  @Test
+  @Transactional
+  void shouldExposeTheUploadedAttachmentToTheStaffAuthorInTheFeedbackDetails() throws Exception {
+    BddLogger.given("a feedback with an attachment uploaded by the staff author");
+    String feedbackId = askForFeedbackAndGetId(declaredActivityId);
+    String attachmentId = uploadAttachmentAndGetId(feedbackId);
+
+    BddLogger.when("the staff author fetches the feedback details");
+    BddLogger.then("the attachment is listed in the details");
+
+    webTestClient
+        .get()
+        .uri(feedbackPath("STAFF", feedbackId))
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.attachments")
+        .isArray()
+        .jsonPath("$.attachments[?(@.id == '" + attachmentId + "')]")
+        .exists();
+
+    // Fetching the details as staff moved the feedback to IN_PROCESS: submit it so that the
+    // next test can ask for feedback again on the same declared activity.
+    updateFeedbackWithText(feedbackId, "Retour avec pièce jointe.");
+    submitFeedback(feedbackId);
+  }
+
+  @Test
+  @Transactional
+  void shouldHideTheAttachmentsFromTheStudentUntilTheFeedbackIsSubmitted() throws Exception {
+    BddLogger.given("a feedback with an attachment that has not been submitted yet");
+    String feedbackId = askForFeedbackAndGetId(declaredActivityId);
+    String attachmentId = uploadAttachmentAndGetId(feedbackId);
+
+    BddLogger.when("the student fetches the feedback details before submission");
+    BddLogger.then("no attachment is exposed");
+
+    webTestClient
+        .get()
+        .uri(feedbackPath("STUDENT", feedbackId))
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.attachments")
+        .isEmpty();
+
+    BddLogger.when("the staff author submits the feedback");
+    updateFeedbackWithText(feedbackId, "Retour avec pièce jointe.");
+    submitFeedback(feedbackId);
+
+    BddLogger.then("the attachment becomes visible to the student");
+
+    webTestClient
+        .get()
+        .uri(feedbackPath("STUDENT", feedbackId))
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.attachments[?(@.id == '" + attachmentId + "')]")
+        .exists();
+  }
+
+  // ── GET /{feedbackId}/attachments/{attachmentId}/download ───────────
+
+  @Test
+  @Transactional
+  void shouldDownloadTheAttachmentWhenTheStaffIsTheAuthorOfTheActivity() throws Exception {
+    BddLogger.given("a feedback with an attachment uploaded by the staff author");
+    String feedbackId = askForFeedbackAndGetId(declaredActivityId);
+    String attachmentId = uploadAttachmentAndGetId(feedbackId);
+
+    BddLogger.when("the staff author downloads the attachment");
+    BddLogger.then("200 OK is returned with the file content as an attachment");
+
+    webTestClient
+        .get()
+        .uri(attachmentsPath(feedbackId) + "/" + attachmentId + "/download")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectHeader()
+        .valueEquals(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"retour.pdf\"")
+        .expectBody(byte[].class)
+        .isEqualTo(ATTACHMENT_CONTENT.getBytes(StandardCharsets.UTF_8));
+  }
+
+  @Test
+  @Transactional
+  void shouldReturn403WhenDownloadingTheAttachmentAsAnUnrelatedUser() throws Exception {
+    BddLogger.given("a feedback with an attachment belonging to another student");
+    String feedbackId = askForFeedbackAndGetId(declaredActivityId);
+    String attachmentId = uploadAttachmentAndGetId(feedbackId);
+
+    BddLogger.when("another student downloads the attachment");
+    BddLogger.then("403 Forbidden is returned");
+
+    webTestClient
+        .get()
+        .uri(attachmentsPath(feedbackId) + "/" + attachmentId + "/download")
+        .header("X-Signed-Context", otherStudentPayload)
+        .header("X-Context-Signature", otherStudentSignature)
+        .exchange()
+        .expectStatus()
+        .isForbidden();
+  }
+
+  @Test
+  @Transactional
+  void shouldReturn404WhenDownloadingAFileThatIsNotAnAttachmentOfTheFeedback() throws Exception {
+    BddLogger.given("a feedback and a file ID that is not one of its attachments");
+    String feedbackId = askForFeedbackAndGetId(declaredActivityId);
+
+    BddLogger.when("the staff author downloads that file");
+    BddLogger.then("404 Not Found is returned with FILE_NOT_FOUND code");
+
+    webTestClient
+        .get()
+        .uri(attachmentsPath(feedbackId) + "/" + UUID.randomUUID() + "/download")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isNotFound()
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("FILE_NOT_FOUND");
+  }
+
+  @Test
+  void shouldReturn401WhenNotAuthenticatedOnDownloadAttachment() {
+    BddLogger.given("the attachment download endpoint");
+    BddLogger.when("downloading without authentication headers");
+    BddLogger.then("401 Unauthorized is returned");
+
+    webTestClient
+        .get()
+        .uri(attachmentsPath(notFoundId) + "/" + notFoundId + "/download")
+        .exchange()
+        .expectStatus()
+        .isUnauthorized();
+  }
+
+  // ── DELETE /{feedbackId}/attachments/{attachmentId} ─────────────────
+
+  @Test
+  @Transactional
+  void shouldDeleteTheAttachmentWhenTheStaffIsTheAuthorOfTheActivity() throws Exception {
+    BddLogger.given("a feedback with an attachment uploaded by the staff author");
+    String feedbackId = askForFeedbackAndGetId(declaredActivityId);
+    String attachmentId = uploadAttachmentAndGetId(feedbackId);
+
+    BddLogger.when("the staff author deletes the attachment");
+    BddLogger.then("204 No Content is returned and the attachment is no longer downloadable");
+
+    webTestClient
+        .delete()
+        .uri(attachmentsPath(feedbackId) + "/" + attachmentId)
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isNoContent();
+
+    webTestClient
+        .get()
+        .uri(attachmentsPath(feedbackId) + "/" + attachmentId + "/download")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isNotFound();
+  }
+
+  @Test
+  @Transactional
+  void shouldReturn404WhenDeletingAFileThatIsNotAnAttachmentOfTheFeedback() throws Exception {
+    BddLogger.given("a feedback and a file ID that is not one of its attachments");
+    String feedbackId = askForFeedbackAndGetId(declaredActivityId);
+
+    BddLogger.when("the staff author deletes that file");
+    BddLogger.then("404 Not Found is returned with FILE_NOT_FOUND code");
+
+    webTestClient
+        .delete()
+        .uri(attachmentsPath(feedbackId) + "/" + UUID.randomUUID())
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isNotFound()
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("FILE_NOT_FOUND");
+  }
+
+  @Test
+  @Transactional
+  void shouldReturn403WhenDeletingAnAttachmentAsAStaffWhoIsNotTheAuthor() throws Exception {
+    BddLogger.given("a feedback with an attachment on an activity authored by another staff");
+    String feedbackId = askForFeedbackAndGetId(declaredActivityId);
+    String attachmentId = uploadAttachmentAndGetId(feedbackId);
+
+    BddLogger.when("a staff who is not the author deletes the attachment");
+    BddLogger.then("403 Forbidden is returned");
+
+    webTestClient
+        .delete()
+        .uri(attachmentsPath(feedbackId) + "/" + attachmentId)
+        .header("X-Signed-Context", staffPayload)
+        .header("X-Context-Signature", staffSignature)
+        .exchange()
+        .expectStatus()
+        .isForbidden();
+  }
+
+  @Test
+  void shouldReturn401WhenNotAuthenticatedOnDeleteAttachment() {
+    BddLogger.given("the attachment deletion endpoint");
+    BddLogger.when("deleting without authentication headers");
+    BddLogger.then("401 Unauthorized is returned");
+
+    webTestClient
+        .delete()
+        .uri(attachmentsPath(notFoundId) + "/" + notFoundId)
+        .exchange()
+        .expectStatus()
+        .isUnauthorized();
   }
 }

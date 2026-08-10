@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.student.activity.application.adapter.dto;
 
+import fr.avenirsesr.portfolio.file.application.adapter.dto.FileDTO;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityContentDTO;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.skill.application.adapter.dto.DeclaredSkillProgressDTO;
@@ -30,5 +31,6 @@ public record FeedbackDetailsDTO(
     @Schema(ref = "#/components/schemas/EFeedbackStatus") EFeedbackStatus status,
     List<TraceDetailDTO> associatedTraces,
     List<DeclaredSkillProgressDTO> associatedDeclaredSkills,
+    List<FileDTO> attachments,
     Instant createdAt,
     Instant updatedAt) {}

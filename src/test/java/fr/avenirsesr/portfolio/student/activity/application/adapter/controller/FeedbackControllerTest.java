@@ -11,6 +11,11 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.file.application.adapter.dto.FileDTO;
+import fr.avenirsesr.portfolio.file.application.adapter.mapper.FileDtoMapper;
+import fr.avenirsesr.portfolio.file.domain.model.File;
+import fr.avenirsesr.portfolio.file.domain.model.FileDownload;
+import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityContentDTO;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.FeedbackDashboardDTO;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.FeedbackDetailsDTO;
@@ -27,6 +32,7 @@ import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackData;
 import fr.avenirsesr.portfolio.student.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.FeedbackService;
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.time.Instant;
 import java.util.List;
@@ -38,8 +44,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
 
 @ExtendWith(MockitoExtension.class)
 class FeedbackControllerTest {
@@ -49,6 +58,7 @@ class FeedbackControllerTest {
   @Mock private FeedbackStaffListItemDTOMapper feedbackStaffListItemDTOMapper;
   @Mock private StudentFeedbackItemListDTOMapper studentFeedbackItemListDTOMapper;
   @Mock private FeedbackOverviewDTOMapper feedbackOverviewDTOMapper;
+  @Mock private FileDtoMapper fileDtoMapper;
 
   @InjectMocks private FeedbackController controller;
 
@@ -77,6 +87,7 @@ class FeedbackControllerTest {
               "Ma réflexion",
               null,
               EFeedbackStatus.NEW,
+              List.of(),
               List.of(),
               List.of(),
               Instant.now(),
@@ -138,6 +149,7 @@ class FeedbackControllerTest {
               null,
               null,
               EFeedbackStatus.NEW,
+              List.of(),
               List.of(),
               List.of(),
               Instant.now(),
@@ -572,6 +584,152 @@ class FeedbackControllerTest {
 
       BddLogger.then("The service is called exactly once with the correct declaredActivityId");
       verify(feedbackService, times(1)).getFeedbackHistory(declaredActivityId);
+      verifyNoMoreInteractions(feedbackService);
+    }
+  }
+
+  @Nested
+  class UploadAttachment {
+
+    private MockMultipartFile multipartFile() {
+      return new MockMultipartFile(
+          "file", "retour.pdf", "application/pdf", "content".getBytes(StandardCharsets.UTF_8));
+    }
+
+    @Test
+    void should_return_201_with_the_mapped_file_dto() {
+      BddLogger.given("A feedback ID and a file uploaded by the staff author");
+
+      UUID feedbackId = UUID.randomUUID();
+      MockMultipartFile file = multipartFile();
+      File uploaded = mock(File.class);
+      FileDTO expectedDto =
+          new FileDTO(
+              UUID.randomUUID(), "retour.pdf", EFileType.PDF, file.getSize(), "url", Instant.now());
+
+      when(feedbackService.uploadAttachment(
+              eq(feedbackId),
+              eq("retour.pdf"),
+              eq("application/pdf"),
+              eq(file.getSize()),
+              any(byte[].class)))
+          .thenReturn(uploaded);
+      when(fileDtoMapper.fromDomain(uploaded)).thenReturn(expectedDto);
+
+      BddLogger.when("uploadAttachment is called");
+      ResponseEntity<FileDTO> response = controller.uploadAttachment(principal, feedbackId, file);
+
+      BddLogger.then("201 CREATED is returned with the mapped FileDTO");
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+      assertThat(response.getBody()).isEqualTo(expectedDto);
+
+      verify(fileDtoMapper).fromDomain(uploaded);
+    }
+
+    @Test
+    void should_delegate_to_service_with_the_file_metadata() {
+      BddLogger.given("A feedback ID and an uploaded file");
+
+      UUID feedbackId = UUID.randomUUID();
+      MockMultipartFile file = multipartFile();
+
+      BddLogger.when("uploadAttachment is called");
+      controller.uploadAttachment(principal, feedbackId, file);
+
+      BddLogger.then("The service is called once with the file name, mime type, size and content");
+      verify(feedbackService, times(1))
+          .uploadAttachment(
+              feedbackId,
+              "retour.pdf",
+              "application/pdf",
+              file.getSize(),
+              "content".getBytes(StandardCharsets.UTF_8));
+      verifyNoMoreInteractions(feedbackService);
+    }
+  }
+
+  @Nested
+  class DeleteAttachment {
+
+    @Test
+    void should_return_204_no_content() {
+      BddLogger.given("A feedback ID and one of its attachment IDs");
+
+      UUID feedbackId = UUID.randomUUID();
+      UUID attachmentId = UUID.randomUUID();
+      doNothing().when(feedbackService).deleteAttachment(feedbackId, attachmentId);
+
+      BddLogger.when("deleteAttachment is called");
+      ResponseEntity<Void> response =
+          controller.deleteAttachment(principal, feedbackId, attachmentId);
+
+      BddLogger.then("204 No Content is returned with no body");
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+      assertThat(response.getBody()).isNull();
+
+      verify(feedbackService).deleteAttachment(feedbackId, attachmentId);
+    }
+
+    @Test
+    void should_delegate_to_service_with_correct_feedback_and_attachment_ids() {
+      BddLogger.given("A feedback ID and an attachment ID");
+
+      UUID feedbackId = UUID.randomUUID();
+      UUID attachmentId = UUID.randomUUID();
+
+      BddLogger.when("deleteAttachment is called");
+      controller.deleteAttachment(principal, feedbackId, attachmentId);
+
+      BddLogger.then("The service is called exactly once with both IDs");
+      verify(feedbackService, times(1)).deleteAttachment(feedbackId, attachmentId);
+      verifyNoMoreInteractions(feedbackService);
+    }
+  }
+
+  @Nested
+  class DownloadAttachment {
+
+    @Test
+    void should_return_200_with_the_file_content_and_content_disposition_header() {
+      BddLogger.given("A feedback ID and one of its attachment IDs");
+
+      UUID feedbackId = UUID.randomUUID();
+      UUID attachmentId = UUID.randomUUID();
+      byte[] content = "content".getBytes(StandardCharsets.UTF_8);
+
+      when(feedbackService.downloadAttachment(feedbackId, attachmentId))
+          .thenReturn(new FileDownload("retour.pdf", content));
+
+      BddLogger.when("downloadAttachment is called");
+      ResponseEntity<byte[]> response =
+          controller.downloadAttachment(principal, feedbackId, attachmentId);
+
+      BddLogger.then("200 OK is returned with the file content as an octet stream");
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+      assertThat(response.getBody()).isEqualTo(content);
+      assertThat(response.getHeaders().getContentType())
+          .isEqualTo(MediaType.APPLICATION_OCTET_STREAM);
+      assertThat(response.getHeaders().getFirst(HttpHeaders.CONTENT_DISPOSITION))
+          .isEqualTo("attachment; filename=\"retour.pdf\"");
+
+      verify(feedbackService).downloadAttachment(feedbackId, attachmentId);
+    }
+
+    @Test
+    void should_delegate_to_service_with_correct_feedback_and_attachment_ids() {
+      BddLogger.given("A feedback ID and an attachment ID");
+
+      UUID feedbackId = UUID.randomUUID();
+      UUID attachmentId = UUID.randomUUID();
+
+      when(feedbackService.downloadAttachment(feedbackId, attachmentId))
+          .thenReturn(new FileDownload("retour.pdf", new byte[0]));
+
+      BddLogger.when("downloadAttachment is called");
+      controller.downloadAttachment(principal, feedbackId, attachmentId);
+
+      BddLogger.then("The service is called exactly once with both IDs");
+      verify(feedbackService, times(1)).downloadAttachment(feedbackId, attachmentId);
       verifyNoMoreInteractions(feedbackService);
     }
   }
