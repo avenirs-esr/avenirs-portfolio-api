@@ -100,8 +100,9 @@ class UserServiceImplTest {
     void shouldReturnUserWhenUserPrincipalExists() {
       String eppn = "lucas.tessier@university.com";
 
-      BddLogger.given("an existing user principal for the eppn");
+      BddLogger.given("an existing user principal for the eppn with a matching student record");
       when(userPrincipalRepository.findByEppn(eppn)).thenReturn(Optional.of(loggedUser));
+      when(studentService.existsById(loggedUser.getId())).thenReturn(true);
 
       BddLogger.when("getting the user by eppn");
       User result = userService.getUserByEppn(eppn);
@@ -110,6 +111,55 @@ class UserServiceImplTest {
       assertEquals(loggedUser, result);
       verify(userPrincipalRepository).findByEppn(eppn);
       verifyNoInteractions(externalUserClient);
+    }
+
+    @Test
+    void shouldReconcileCategoryRecordWhenUserPrincipalExistsWithoutStudentOrStaffRecord() {
+      String eppn = "lucas.tessier@university.com";
+      ExternalUserDTO externalUser = externalUser(EUserCategory.STUDENT, EUserStatus.ACTIVE, eppn);
+
+      BddLogger.given("an existing user principal for the eppn with no student or staff record");
+      when(userPrincipalRepository.findByEppn(eppn)).thenReturn(Optional.of(loggedUser));
+      when(studentService.existsById(loggedUser.getId())).thenReturn(false);
+      when(staffService.existsById(loggedUser.getId())).thenReturn(false);
+      when(externalUserClient.getByEppn(eppn)).thenReturn(Optional.of(externalUser));
+
+      BddLogger.when("getting the user by eppn");
+      User result = userService.getUserByEppn(eppn);
+
+      BddLogger.then("it should return the matching user");
+      assertEquals(loggedUser, result);
+
+      BddLogger.then("it should create the missing student profile");
+      verify(studentService)
+          .createStudent(
+              loggedUser.getId(),
+              externalUser.email(),
+              externalUser.institutionId(),
+              externalUser.groupId(),
+              null);
+    }
+
+    @Test
+    void
+        shouldSkipReconciliationWhenUserPrincipalExistsWithoutStudentOrStaffRecordAndNoExternalUser() {
+      String eppn = "lucas.tessier@university.com";
+
+      BddLogger.given(
+          "an existing user principal for the eppn with no student or staff record and no"
+              + " matching external user");
+      when(userPrincipalRepository.findByEppn(eppn)).thenReturn(Optional.of(loggedUser));
+      when(studentService.existsById(loggedUser.getId())).thenReturn(false);
+      when(staffService.existsById(loggedUser.getId())).thenReturn(false);
+      when(externalUserClient.getByEppn(eppn)).thenReturn(Optional.empty());
+
+      BddLogger.when("getting the user by eppn");
+      User result = userService.getUserByEppn(eppn);
+
+      BddLogger.then("it should return the matching user without reconciling");
+      assertEquals(loggedUser, result);
+      verify(studentService, never()).createStudent(any(), any(), any(), any(), any());
+      verify(staffService, never()).createStaff(any(), any(), any(), any(), any());
     }
 
     @Test

@@ -41,6 +41,11 @@ public class StudentServiceImpl implements StudentService {
   }
 
   @Override
+  public boolean existsById(UUID studentId) {
+    return studentRepository.findById(studentId).isPresent();
+  }
+
+  @Override
   public UserProfileOverviewData getStudentProfile() {
     var student = loggedInUserService.getLoggedInStudent();
 

@@ -11,6 +11,8 @@ import java.util.UUID;
 public interface StudentService {
   Student getStudentById(UUID studentId);
 
+  boolean existsById(UUID studentId);
+
   UserProfileOverviewData getStudentProfile();
 
   void updateProfile(User user, String bio);
