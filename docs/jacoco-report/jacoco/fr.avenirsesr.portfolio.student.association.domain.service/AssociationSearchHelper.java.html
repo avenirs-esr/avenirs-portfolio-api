@@ -60,9 +60,9 @@ public class AssociationSearchHelper {
 <span class="fc" id="L60">                    new AssociationSearchResultData(</span>
 <span class="fc" id="L61">                        resultIdExtractor.apply(item),</span>
 <span class="fc" id="L62">                        resultTitleExtractor.apply(item),</span>
-<span class="pc bpc" id="L63" title="1 of 2 branches missed.">                        resultCategoryExtractor != null</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">                        resultCategoryExtractor != null</span>
 <span class="fc" id="L64">                            ? resultCategoryExtractor.apply(item)</span>
-<span class="pc" id="L65">                            : null,</span>
+<span class="fc" id="L65">                            : null,</span>
 <span class="fc bfc" id="L66" title="All 2 branches covered.">                        alreadyAssociatedIds.contains(resultIdExtractor.apply(item))</span>
 <span class="fc bfc" id="L67" title="All 2 branches covered.">                            || additionalDisabledCondition.test(item)))</span>
 <span class="fc" id="L68">            .toList();</span>

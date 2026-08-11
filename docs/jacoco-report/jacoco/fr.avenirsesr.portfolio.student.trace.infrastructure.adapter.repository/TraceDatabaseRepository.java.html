@@ -47,8 +47,8 @@ public class TraceDatabaseRepository extends GenericUserJpaRepositoryAdapter&lt;
 
   @Override
   public Map&lt;Trace, Boolean&gt; isAssociated(List&lt;Trace&gt; traces) {
-<span class="pc bpc" id="L50" title="2 of 4 branches missed.">    if (traces == null || traces.isEmpty()) {</span>
-<span class="nc" id="L51">      return Map.of();</span>
+<span class="pc bpc" id="L50" title="1 of 4 branches missed.">    if (traces == null || traces.isEmpty()) {</span>
+<span class="fc" id="L51">      return Map.of();</span>
     }
 
 <span class="fc" id="L54">    var associatedIds =</span>
@@ -78,21 +78,21 @@ public class TraceDatabaseRepository extends GenericUserJpaRepositoryAdapter&lt;
 <span class="fc" id="L78">    Specification&lt;TraceEntity&gt; specification = hasStudent(student);</span>
 
 <span class="fc" id="L80">    var filterSpecification = new TraceFilterSpecificationBuilder().build(filter.toMap());</span>
-<span class="pc bpc" id="L81" title="1 of 2 branches missed.">    if (filterSpecification.isPresent()) {</span>
+<span class="fc bfc" id="L81" title="All 2 branches covered.">    if (filterSpecification.isPresent()) {</span>
 <span class="fc" id="L82">      specification = specification.and(filterSpecification.get());</span>
     }
 
-<span class="pc bpc" id="L85" title="1 of 2 branches missed.">    if (dateFilter != null) {</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">    if (dateFilter != null) {</span>
 <span class="fc" id="L86">      var dateFilterSpecification =</span>
 <span class="fc" id="L87">          new DateFilterSpecificationBuilder&lt;TraceEntity&gt;().build(dateFilter.toMap());</span>
 <span class="pc bpc" id="L88" title="1 of 2 branches missed.">      if (dateFilterSpecification.isPresent())</span>
 <span class="nc" id="L89">        specification = specification.and(dateFilterSpecification.get());</span>
     }
 
-<span class="pc bpc" id="L92" title="1 of 2 branches missed.">    if (keyword != null) {</span>
-<span class="nc" id="L93">      specification =</span>
-<span class="nc" id="L94">          specification.and(</span>
-<span class="nc" id="L95">              TraceSpecification.search(keyword, TranslationUtil.getRequestLanguage()));</span>
+<span class="fc bfc" id="L92" title="All 2 branches covered.">    if (keyword != null) {</span>
+<span class="fc" id="L93">      specification =</span>
+<span class="fc" id="L94">          specification.and(</span>
+<span class="fc" id="L95">              TraceSpecification.search(keyword, TranslationUtil.getRequestLanguage()));</span>
     }
 
     Sort sort =

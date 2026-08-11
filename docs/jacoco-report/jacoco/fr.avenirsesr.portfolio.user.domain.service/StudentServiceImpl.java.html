@@ -41,100 +41,95 @@ public class StudentServiceImpl implements StudentService {
   }
 
   @Override
-  public boolean existsById(UUID studentId) {
-<span class="fc" id="L45">    return studentRepository.findById(studentId).isPresent();</span>
-  }
-
-  @Override
   public UserProfileOverviewData getStudentProfile() {
-<span class="fc" id="L50">    var student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L45">    var student = loggedInUserService.getLoggedInStudent();</span>
 
-<span class="fc" id="L52">    return new UserProfileOverviewData(</span>
-<span class="fc" id="L53">        student.getId(),</span>
-<span class="fc" id="L54">        student.getUser().getFirstName(),</span>
-<span class="fc" id="L55">        student.getUser().getLastName(),</span>
-<span class="fc" id="L56">        student.getUser().getEmail(),</span>
-<span class="fc" id="L57">        student.getBio(),</span>
-<span class="fc" id="L58">        FileDataMapper.mapFileData(</span>
-<span class="fc" id="L59">            student.getCoverPicture(), FileStorageConstants.DEFAULT_COVER_FILE_URL),</span>
-<span class="fc" id="L60">        FileDataMapper.mapFileData(</span>
-<span class="fc" id="L61">            student.getProfilePicture(), FileStorageConstants.DEFAULT_PROFILE_FILE_URL));</span>
+<span class="fc" id="L47">    return new UserProfileOverviewData(</span>
+<span class="fc" id="L48">        student.getId(),</span>
+<span class="fc" id="L49">        student.getUser().getFirstName(),</span>
+<span class="fc" id="L50">        student.getUser().getLastName(),</span>
+<span class="fc" id="L51">        student.getUser().getEmail(),</span>
+<span class="fc" id="L52">        student.getBio(),</span>
+<span class="fc" id="L53">        FileDataMapper.mapFileData(</span>
+<span class="fc" id="L54">            student.getCoverPicture(), FileStorageConstants.DEFAULT_COVER_FILE_URL),</span>
+<span class="fc" id="L55">        FileDataMapper.mapFileData(</span>
+<span class="fc" id="L56">            student.getProfilePicture(), FileStorageConstants.DEFAULT_PROFILE_FILE_URL));</span>
   }
 
   @Override
   public void updateProfile(User user, String bio) {
-<span class="fc" id="L66">    var student =</span>
-<span class="fc" id="L67">        studentRepository.findById(user.getId()).orElseThrow(UserIsNotStudentException::new);</span>
+<span class="fc" id="L61">    var student =</span>
+<span class="fc" id="L62">        studentRepository.findById(user.getId()).orElseThrow(UserIsNotStudentException::new);</span>
 
-<span class="pc bpc" id="L69" title="1 of 2 branches missed.">    if (bio != null) student.setBio(bio);</span>
+<span class="pc bpc" id="L64" title="1 of 2 branches missed.">    if (bio != null) student.setBio(bio);</span>
 
-<span class="fc" id="L71">    studentRepository.save(student);</span>
-<span class="fc" id="L72">  }</span>
+<span class="fc" id="L66">    studentRepository.save(student);</span>
+<span class="fc" id="L67">  }</span>
 
   @Override
   public Student createStudent(
       UUID userId, String institutionEmail, UUID institutionId, UUID groupId, String bio) {
-<span class="fc" id="L77">    var user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);</span>
-<span class="fc" id="L78">    var student = Student.create(user, institutionEmail, institutionId, groupId, bio);</span>
-<span class="fc bfc" id="L79" title="All 2 branches covered.">    if (user.getEmail() == null) {</span>
-<span class="fc" id="L80">      user.setEmail(institutionEmail);</span>
-<span class="fc" id="L81">      userRepository.save(user);</span>
+<span class="fc" id="L72">    var user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);</span>
+<span class="fc" id="L73">    var student = Student.create(user, institutionEmail, institutionId, groupId, bio);</span>
+<span class="fc bfc" id="L74" title="All 2 branches covered.">    if (user.getEmail() == null) {</span>
+<span class="fc" id="L75">      user.setEmail(institutionEmail);</span>
+<span class="fc" id="L76">      userRepository.save(user);</span>
     }
-<span class="fc" id="L83">    studentRepository.save(student);</span>
-<span class="fc" id="L84">    return student;</span>
+<span class="fc" id="L78">    studentRepository.save(student);</span>
+<span class="fc" id="L79">    return student;</span>
   }
 
   @Override
   public void addSelfKnowledgeCategories(Student student, List&lt;ESelfKnowledgeCategory&gt; categories) {
-<span class="fc" id="L89">    studentRepository.addSelfKnowledgeCategories(student, categories);</span>
-<span class="fc" id="L90">  }</span>
+<span class="fc" id="L84">    studentRepository.addSelfKnowledgeCategories(student, categories);</span>
+<span class="fc" id="L85">  }</span>
 
   @Override
   public void removeSelfKnowledgeCategory(
       Student student, ESelfKnowledgeCategory selfKnowledgeCategory) {
-<span class="nc" id="L95">    studentRepository.removeSelfKnowledgeCategory(student, selfKnowledgeCategory);</span>
-<span class="nc" id="L96">  }</span>
+<span class="nc" id="L90">    studentRepository.removeSelfKnowledgeCategory(student, selfKnowledgeCategory);</span>
+<span class="nc" id="L91">  }</span>
 
   @Override
   public File uploadProfilePicture(String fileName, String mimeType, long size, byte[] content) {
-<span class="nc" id="L100">    var student = loggedInUserService.getLoggedInStudent();</span>
-<span class="nc" id="L101">    requireImage(mimeType);</span>
-<span class="nc" id="L102">    var file = fileResourceService.upload(fileName, mimeType, size, content, false);</span>
-<span class="nc" id="L103">    student.setProfilePicture(file);</span>
-<span class="nc" id="L104">    studentRepository.save(student);</span>
-<span class="nc" id="L105">    return file;</span>
+<span class="nc" id="L95">    var student = loggedInUserService.getLoggedInStudent();</span>
+<span class="nc" id="L96">    requireImage(mimeType);</span>
+<span class="nc" id="L97">    var file = fileResourceService.upload(fileName, mimeType, size, content, false);</span>
+<span class="nc" id="L98">    student.setProfilePicture(file);</span>
+<span class="nc" id="L99">    studentRepository.save(student);</span>
+<span class="nc" id="L100">    return file;</span>
   }
 
   @Override
   public void deleteProfilePicture() {
-<span class="nc" id="L110">    var student = loggedInUserService.getLoggedInStudent();</span>
-<span class="nc" id="L111">    student.getProfilePicture().ifPresent(picture -&gt; fileResourceService.delete(picture.getId()));</span>
-<span class="nc" id="L112">    student.setProfilePicture(null);</span>
-<span class="nc" id="L113">    studentRepository.save(student);</span>
-<span class="nc" id="L114">  }</span>
+<span class="nc" id="L105">    var student = loggedInUserService.getLoggedInStudent();</span>
+<span class="nc" id="L106">    student.getProfilePicture().ifPresent(picture -&gt; fileResourceService.delete(picture.getId()));</span>
+<span class="nc" id="L107">    student.setProfilePicture(null);</span>
+<span class="nc" id="L108">    studentRepository.save(student);</span>
+<span class="nc" id="L109">  }</span>
 
   @Override
   public File uploadCoverPicture(String fileName, String mimeType, long size, byte[] content) {
-<span class="nc" id="L118">    var student = loggedInUserService.getLoggedInStudent();</span>
-<span class="nc" id="L119">    requireImage(mimeType);</span>
-<span class="nc" id="L120">    var file = fileResourceService.upload(fileName, mimeType, size, content, false);</span>
-<span class="nc" id="L121">    student.setCoverPicture(file);</span>
-<span class="nc" id="L122">    studentRepository.save(student);</span>
-<span class="nc" id="L123">    return file;</span>
+<span class="nc" id="L113">    var student = loggedInUserService.getLoggedInStudent();</span>
+<span class="nc" id="L114">    requireImage(mimeType);</span>
+<span class="nc" id="L115">    var file = fileResourceService.upload(fileName, mimeType, size, content, false);</span>
+<span class="nc" id="L116">    student.setCoverPicture(file);</span>
+<span class="nc" id="L117">    studentRepository.save(student);</span>
+<span class="nc" id="L118">    return file;</span>
   }
 
   @Override
   public void deleteCoverPicture() {
-<span class="nc" id="L128">    var student = loggedInUserService.getLoggedInStudent();</span>
-<span class="nc" id="L129">    student.getCoverPicture().ifPresent(picture -&gt; fileResourceService.delete(picture.getId()));</span>
-<span class="nc" id="L130">    student.setCoverPicture(null);</span>
-<span class="nc" id="L131">    studentRepository.save(student);</span>
-<span class="nc" id="L132">  }</span>
+<span class="nc" id="L123">    var student = loggedInUserService.getLoggedInStudent();</span>
+<span class="nc" id="L124">    student.getCoverPicture().ifPresent(picture -&gt; fileResourceService.delete(picture.getId()));</span>
+<span class="nc" id="L125">    student.setCoverPicture(null);</span>
+<span class="nc" id="L126">    studentRepository.save(student);</span>
+<span class="nc" id="L127">  }</span>
 
   private void requireImage(String mimeType) {
-<span class="nc bnc" id="L135" title="All 2 branches missed.">    if (!EFileType.fromMimeType(mimeType).isImage()) {</span>
-<span class="nc" id="L136">      throw new FileTypeNotSupportedException();</span>
+<span class="nc bnc" id="L130" title="All 2 branches missed.">    if (!EFileType.fromMimeType(mimeType).isImage()) {</span>
+<span class="nc" id="L131">      throw new FileTypeNotSupportedException();</span>
     }
-<span class="nc" id="L138">  }</span>
+<span class="nc" id="L133">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
