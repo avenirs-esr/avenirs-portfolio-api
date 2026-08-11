@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsCreationRequest;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsDeleteRequest;
 import fr.avenirsesr.portfolio.student.association.application.adapter.dto.AssociationSearchResultDeclaredExperienceDTO;
+import fr.avenirsesr.portfolio.student.association.application.adapter.dto.AssociationSearchResultTraceDTO;
 import fr.avenirsesr.portfolio.student.association.application.adapter.mapper.AssociationSearchResultDTOMapper;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
@@ -219,5 +220,38 @@ public class DeclaredExperienceController {
         principal.getName());
     declaredExperienceService.deleteAssociations(experienceId, body.idsToDelete());
     return ResponseEntity.noContent().build();
+  }
+
+  @PreAuthorize("hasAuthority('trace:association:manage:own')")
+  @GetMapping("/{experienceId}/search-for-association/traces")
+  public ResponseEntity<PagedResponse<AssociationSearchResultTraceDTO>>
+      searchTracesForAssociationWithDeclaredExperience(
+          Principal principal,
+          @Valid @PathVariable UUID experienceId,
+          @RequestParam(required = false) Boolean isAssociated,
+          @RequestParam(required = false) String keyword,
+          @RequestParam(required = false) Integer page,
+          @RequestParam(required = false) Integer pageSize) {
+    var pageCriteria = new PageCriteria(page, pageSize);
+    log.debug(
+        "Received request to search traces for association with declared experience [{}] by"
+            + " student [{}] (isAssociated={}, keyword={}, page={}, pageSize={})",
+        experienceId,
+        principal.getName(),
+        isAssociated,
+        keyword,
+        pageCriteria.page(),
+        pageCriteria.pageSize());
+
+    PagedResult<AssociationSearchResultData> pagedResult =
+        declaredExperienceService.searchTracesForAssociation(
+            experienceId, keyword, pageCriteria, isAssociated);
+
+    return ResponseEntity.ok(
+        new PagedResponse<>(
+            pagedResult.content().stream()
+                .map(associationSearchResultDTOMapper::toTraceDTO)
+                .toList(),
+            PageInfoDTO.fromDomain(pagedResult.pageInfo())));
   }
 }

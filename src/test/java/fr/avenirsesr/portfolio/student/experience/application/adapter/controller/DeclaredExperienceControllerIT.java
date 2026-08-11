@@ -4,10 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.avenirsesr.portfolio.common.configuration.domain.model.TraceConfiguration;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
 import fr.avenirsesr.portfolio.student.skill.domain.port.output.repository.DeclaredSkillRepository;
+import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.client.TraceConfigurationClient;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +18,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -24,6 +29,19 @@ import org.springframework.transaction.annotation.Transactional;
 public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
 
   private static final String BASE_PATH = "/me/declared/experiences";
+
+  @TestConfiguration
+  static class TestConfig {
+
+    @Bean
+    @Primary
+    public TraceConfigurationClient traceConfigurationClient() {
+      TraceConfigurationClient mock = org.mockito.Mockito.mock(TraceConfigurationClient.class);
+      TraceConfiguration mockConfig = new TraceConfiguration(30, 7, 3);
+      org.mockito.Mockito.when(mock.getTraceConfiguration()).thenReturn(mockConfig);
+      return mock;
+    }
+  }
 
   @Autowired private WebTestClient webTestClient;
   @Autowired private ObjectMapper objectMapper;
@@ -1889,5 +1907,167 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .exchange()
         .expectStatus()
         .isForbidden();
+  }
+
+  @Test
+  void shouldSearchTracesForAssociation() throws Exception {
+    BddLogger.given("a declared experience and a trace of the student");
+
+    String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
+    createTraceAs("Trace for association search", studentPayload, studentSignature);
+
+    BddLogger.when("searching traces for association with the experience");
+
+    webTestClient
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(BASE_PATH + "/" + experienceId + "/search-for-association/traces")
+                    .queryParam("page", "0")
+                    .queryParam("pageSize", "8")
+                    .build())
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.data")
+        .isArray()
+        .jsonPath("$.data[0].id")
+        .exists()
+        .jsonPath("$.data[0].title")
+        .exists()
+        .jsonPath("$.data[0].disabled")
+        .exists()
+        .jsonPath("$.page.page")
+        .isEqualTo(0)
+        .jsonPath("$.page.pageSize")
+        .isEqualTo(8);
+
+    BddLogger.then("it should return paged results with correct structure");
+  }
+
+  @Test
+  void shouldFilterTracesForAssociationByKeyword() throws Exception {
+    BddLogger.given("a declared experience and a keyword matching no trace");
+
+    String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
+    createTraceAs("Some trace title", studentPayload, studentSignature);
+
+    BddLogger.when("searching with a keyword that matches nothing");
+
+    webTestClient
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(BASE_PATH + "/" + experienceId + "/search-for-association/traces")
+                    .queryParam("keyword", "zzzzzznonexistent")
+                    .queryParam("page", "0")
+                    .queryParam("pageSize", "8")
+                    .build())
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.data")
+        .isArray()
+        .jsonPath("$.data.length()")
+        .isEqualTo(0);
+
+    BddLogger.then("it should return empty results");
+  }
+
+  @Test
+  void shouldMarkAlreadyAssociatedTraceAsDisabledWhenSearchingForAssociation() throws Exception {
+    BddLogger.given("a declared experience already associated with a trace");
+
+    String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
+    UUID traceId =
+        createTraceAs("Trace already associated for search", studentPayload, studentSignature);
+    associateExperienceWithTraceAndGetAssociationId(experienceId, traceId);
+
+    BddLogger.when("searching traces for association filtered on that trace's title");
+
+    webTestClient
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(BASE_PATH + "/" + experienceId + "/search-for-association/traces")
+                    .queryParam("keyword", "Trace already associated for search")
+                    .queryParam("page", "0")
+                    .queryParam("pageSize", "8")
+                    .build())
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.data[0].id")
+        .isEqualTo(traceId.toString())
+        .jsonPath("$.data[0].disabled")
+        .isEqualTo(true);
+
+    BddLogger.then("it should mark the already associated trace as disabled");
+  }
+
+  @Test
+  void shouldReturn404WhenSearchingTracesForNonExistentDeclaredExperience() {
+    BddLogger.given("a non-existent declared experience");
+
+    BddLogger.when("searching traces for association");
+
+    webTestClient
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(
+                        BASE_PATH
+                            + "/"
+                            + notFoundDeclaredExperienceId
+                            + "/search-for-association/traces")
+                    .queryParam("page", "0")
+                    .queryParam("pageSize", "8")
+                    .build())
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isNotFound();
+
+    BddLogger.then("it should return 404");
+  }
+
+  @Test
+  void shouldReturn403WhenSearchingTracesForOtherStudentDeclaredExperience() throws Exception {
+    BddLogger.given("a declared experience belonging to another student");
+
+    String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
+
+    BddLogger.when("another student searches traces for association with that experience");
+
+    webTestClient
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(BASE_PATH + "/" + experienceId + "/search-for-association/traces")
+                    .queryParam("page", "0")
+                    .queryParam("pageSize", "8")
+                    .build())
+        .header("X-Signed-Context", otherStudentPayload)
+        .header("X-Context-Signature", otherStudentSignature)
+        .exchange()
+        .expectStatus()
+        .isForbidden();
+
+    BddLogger.then("it should return 403");
   }
 }
