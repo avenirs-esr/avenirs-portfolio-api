@@ -9,6 +9,8 @@ import java.util.UUID;
 public interface StaffService {
   Staff getStaffById(UUID id);
 
+  boolean existsById(UUID id);
+
   UserProfileOverviewData getStaffProfile();
 
   void updateProfile(User user, String bio);

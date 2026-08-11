@@ -39,6 +39,11 @@ public class StaffServiceImpl implements StaffService {
   }
 
   @Override
+  public boolean existsById(UUID id) {
+    return staffRepository.findById(id).isPresent();
+  }
+
+  @Override
   public UserProfileOverviewData getStaffProfile() {
     var staff = loggedInUserService.getLoggedInStaff();
 

@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
+import fr.avenirsesr.portfolio.common.user.application.adapter.dto.ExternalUserDTO;
 import fr.avenirsesr.portfolio.common.user.domain.exceptions.ExternalUserNotFoundException;
 import fr.avenirsesr.portfolio.common.user.domain.model.enums.EUserStatus;
 import fr.avenirsesr.portfolio.file.domain.model.File;
@@ -54,7 +55,31 @@ public class UserServiceImpl implements UserService {
   public User getUserByEppn(String eppn) {
     return userPrincipalRepository
         .findByEppn(eppn)
+        .map(user -> reconcileCategoryRecord(user, eppn))
         .orElseGet(() -> createUserFromExternalUser(eppn));
+  }
+
+  private User reconcileCategoryRecord(User user, String eppn) {
+    if (studentService.existsById(user.getId()) || staffService.existsById(user.getId())) {
+      return user;
+    }
+
+    var externalUser = externalUserClient.getByEppn(eppn);
+    if (externalUser.isEmpty()) {
+      log.debug(
+          "User {} ({}) has no matching Student/Staff record and no external directory entry,"
+              + " skipping reconciliation",
+          user.getId(),
+          eppn);
+      return user;
+    }
+
+    log.warn(
+        "User {} ({}) has no matching Student/Staff record, reconciling from external directory",
+        user.getId(),
+        eppn);
+    provisionCategoryRecord(user.getId(), externalUser.get());
+    return user;
   }
 
   @Override
@@ -171,25 +196,29 @@ public class UserServiceImpl implements UserService {
             externalUser.email(),
             externalUser.eppn());
 
+    provisionCategoryRecord(user.getId(), externalUser);
+
+    externalUserClient.activateByEppn(externalUser.eppn());
+
+    return user;
+  }
+
+  private void provisionCategoryRecord(UUID userId, ExternalUserDTO externalUser) {
     switch (externalUser.category()) {
       case STUDENT ->
           studentService.createStudent(
-              user.getId(),
+              userId,
               externalUser.email(),
               externalUser.institutionId(),
               externalUser.groupId(),
               null);
       case STAFF ->
           staffService.createStaff(
-              user.getId(),
+              userId,
               externalUser.email(),
               externalUser.institutionId(),
               externalUser.groupId(),
               null);
     }
-
-    externalUserClient.activateByEppn(externalUser.eppn());
-
-    return user;
   }
 }
