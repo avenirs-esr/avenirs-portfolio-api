@@ -95,5 +95,8 @@ public interface DeclaredExperienceService {
   DeclaredExperienceAssociationsData associateDeclaredExperienceWithTraces(
       UUID declaredExperienceId, List<UUID> traceIds);
 
+  PagedResult<AssociationSearchResultData> searchTracesForAssociation(
+      UUID declaredExperienceId, String keyword, PageCriteria pageCriteria, Boolean isAssociated);
+
   void deleteAssociations(UUID declaredExperienceId, List<UUID> idsToDelete);
 }

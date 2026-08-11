@@ -28,7 +28,9 @@ import fr.avenirsesr.portfolio.student.skill.domain.exception.DeclaredSkillProgr
 import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.student.trace.domain.data.TraceAssociationData;
+import fr.avenirsesr.portfolio.student.trace.domain.data.TraceViewData;
 import fr.avenirsesr.portfolio.student.trace.domain.exception.TraceNotFoundException;
+import fr.avenirsesr.portfolio.student.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
@@ -521,6 +523,24 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
             .toList());
 
     return getAssociations(experience.getId());
+  }
+
+  @Override
+  public PagedResult<AssociationSearchResultData> searchTracesForAssociation(
+      UUID declaredExperienceId, String keyword, PageCriteria pageCriteria, Boolean isAssociated) {
+    fetchAndCheckLoggedInStudentAuthorization(declaredExperienceId);
+    var associationType = EAssociationType.TRACE_DECLARED_EXPERIENCE;
+    return associationSearchHelper.searchForAssociation(
+        declaredExperienceId,
+        DeclaredExperience.class,
+        associationType,
+        associationType.idExtractorFor(Trace.class),
+        traceService.getTracesView(
+            keyword, new TraceFilter(isAssociated, null, null, null), null, pageCriteria),
+        TraceViewData::id,
+        TraceViewData::title,
+        null,
+        trace -> false);
   }
 
   @Override

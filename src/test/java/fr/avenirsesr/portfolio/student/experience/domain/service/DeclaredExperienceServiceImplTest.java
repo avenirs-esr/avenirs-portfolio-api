@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.student.experience.domain.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -11,10 +12,12 @@ import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationExce
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.exception.AssociationAlreadyExistException;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
+import fr.avenirsesr.portfolio.student.association.domain.service.AssociationSearchHelper;
 import fr.avenirsesr.portfolio.student.experience.domain.data.DeclaredExperienceAssociationCount;
 import fr.avenirsesr.portfolio.student.experience.domain.data.DeclaredExperienceData;
 import fr.avenirsesr.portfolio.student.experience.domain.exception.DeclaredExperienceNotFoundException;
@@ -25,6 +28,7 @@ import fr.avenirsesr.portfolio.student.skill.domain.exception.DeclaredSkillProgr
 import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.student.trace.domain.exception.TraceNotFoundException;
+import fr.avenirsesr.portfolio.student.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.student.trace.infrastructure.fixture.TraceFixture;
@@ -40,6 +44,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -49,6 +54,7 @@ class DeclaredExperienceServiceImplTest {
 
   @Mock private LoggedInUserService loggedInUserService;
   @Mock private AssociationService associationService;
+  @Mock private AssociationSearchHelper associationSearchHelper;
   @Mock private TraceService traceService;
   @Mock private DeclaredExperienceRepository experienceRepository;
   @Mock private StudentService studentService;
@@ -1692,6 +1698,133 @@ class DeclaredExperienceServiceImplTest {
           AssociationAlreadyExistException.class,
           () ->
               service.associateDeclaredExperienceWithTraces(experienceId, List.of(trace.getId())));
+    }
+  }
+
+  @Nested
+  class WhenSearchingTracesForAssociation {
+
+    @Test
+    void searchTracesForAssociation_should_return_search_results() {
+      BddLogger.given("A logged-in student and a declared experience owned by him");
+
+      UUID experienceId = UUID.randomUUID();
+      DeclaredExperience experience = mock(DeclaredExperience.class);
+      when(experience.getStudent()).thenReturn(student);
+
+      var pageCriteria = new PageCriteria(0, 10);
+      var pageInfo = new PageInfo(0, 10, 0);
+
+      when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+      when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
+
+      when(associationSearchHelper.searchForAssociation(
+              eq(experienceId),
+              eq(DeclaredExperience.class),
+              eq(EAssociationType.TRACE_DECLARED_EXPERIENCE),
+              any(),
+              any(),
+              any(),
+              any(),
+              any(),
+              any()))
+          .thenReturn(new PagedResult<>(List.of(), pageInfo));
+
+      BddLogger.when("searchTracesForAssociation is called");
+      PagedResult<AssociationSearchResultData> result =
+          service.searchTracesForAssociation(experienceId, null, pageCriteria, null);
+
+      BddLogger.then("The result is empty");
+      assertThat(result.content()).isEmpty();
+      assertThat(result.pageInfo()).isEqualTo(pageInfo);
+    }
+
+    @Test
+    void
+        searchTracesForAssociation_should_throw_DeclaredExperienceNotFoundException_when_not_found() {
+      BddLogger.given("A logged-in student and a non-existent declared experience");
+
+      UUID experienceId = UUID.randomUUID();
+
+      when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+      when(experienceRepository.findById(experienceId)).thenReturn(Optional.empty());
+
+      BddLogger.when("searchTracesForAssociation is called");
+
+      BddLogger.then("A DeclaredExperienceNotFoundException is thrown");
+      assertThrows(
+          DeclaredExperienceNotFoundException.class,
+          () ->
+              service.searchTracesForAssociation(
+                  experienceId, null, new PageCriteria(0, 10), null));
+
+      verify(traceService, never()).getTracesView(any(), any(), any(), any());
+    }
+
+    @Test
+    void
+        searchTracesForAssociation_should_throw_UserNotAuthorizedException_when_belonging_to_another_student() {
+      BddLogger.given("A logged-in student and a declared experience belonging to another student");
+
+      UUID experienceId = UUID.randomUUID();
+      Student anotherStudent = StudentFixture.create().toModel();
+      DeclaredExperience experience = mock(DeclaredExperience.class);
+
+      when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+      when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
+      when(experience.getStudent()).thenReturn(anotherStudent);
+
+      BddLogger.when("searchTracesForAssociation is called");
+
+      BddLogger.then("A UserNotAuthorizedException is thrown");
+      assertThrows(
+          UserNotAuthorizedException.class,
+          () ->
+              service.searchTracesForAssociation(
+                  experienceId, null, new PageCriteria(0, 10), null));
+
+      verify(traceService, never()).getTracesView(any(), any(), any(), any());
+    }
+
+    @Test
+    void searchTracesForAssociation_should_pass_isAssociated_filter_and_keyword_to_traceService() {
+      BddLogger.given("A logged-in student and a declared experience owned by him");
+
+      UUID experienceId = UUID.randomUUID();
+      DeclaredExperience experience = mock(DeclaredExperience.class);
+      when(experience.getStudent()).thenReturn(student);
+
+      when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+      when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
+
+      var pageCriteria = new PageCriteria(1, 5);
+
+      when(associationSearchHelper.searchForAssociation(
+              eq(experienceId),
+              eq(DeclaredExperience.class),
+              eq(EAssociationType.TRACE_DECLARED_EXPERIENCE),
+              any(),
+              any(),
+              any(),
+              any(),
+              any(),
+              any()))
+          .thenReturn(new PagedResult<>(List.of(), new PageInfo(1, 5, 0)));
+
+      BddLogger.when(
+          "searchTracesForAssociation is called with keyword='java' and isAssociated=true");
+      service.searchTracesForAssociation(experienceId, "java", pageCriteria, true);
+
+      BddLogger.then(
+          "traceService.getTracesView is called with the keyword, isAssociated=true in the"
+              + " filter, null dateFilter and correct pageCriteria");
+      var traceFilterCaptor = ArgumentCaptor.forClass(TraceFilter.class);
+      verify(traceService)
+          .getTracesView(eq("java"), traceFilterCaptor.capture(), eq(null), eq(pageCriteria));
+
+      assertThat(traceFilterCaptor.getValue().isAssociated()).isTrue();
+      assertThat(traceFilterCaptor.getValue().fileTypes()).isNull();
+      assertThat(traceFilterCaptor.getValue().skillIds()).isNull();
     }
   }
 
