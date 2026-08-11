@@ -22,9 +22,9 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.domain.data,TracesSu
 avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.application.adapter.controller,SeedingAdminController,88,0,14,0,22,0,9,0,2,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.domain.filter,ETraceFilterKey,0,27,0,0,0,5,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.domain.filter,TraceFilter,0,60,0,8,0,9,0,6,0,2
-avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.service,UserServiceImpl,72,246,13,14,15,70,13,18,4,11
-avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.service,StaffServiceImpl,109,102,4,2,25,28,10,6,7,6
-avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.service,StudentServiceImpl,123,101,3,3,29,29,11,7,9,6
+avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.service,UserServiceImpl,72,304,13,20,15,82,13,24,4,14
+avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.service,StaffServiceImpl,109,108,4,2,25,29,10,7,7,7
+avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.service,StudentServiceImpl,123,107,3,3,29,30,11,8,9,7
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.association.domain.service,AssociationServiceImpl,2,110,1,7,1,25,1,11,0,8
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.association.domain.service,AssociationSearchHelper,2,68,2,6,0,19,2,4,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.association.infrastructure.adapter.specification,AssociationSpecification,15,135,3,7,3,24,6,13,3,11
