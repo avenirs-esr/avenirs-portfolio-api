@@ -77,7 +77,7 @@ public class UserControllerIT extends ContainerConfigurationTest {
           .jsonPath("$.roles")
           .isArray()
           .jsonPath("$.roles")
-          .value(Matchers.hasItem("STUDENT"));
+          .value(Matchers.hasItem("ROLE_STUDENT"));
     }
 
     @Test

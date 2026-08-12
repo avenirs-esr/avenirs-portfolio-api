@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.user.infrastructure.adapter.openapi;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
+import fr.avenirsesr.portfolio.common.security.accesscontrol.domain.model.enums.ERole;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EContextType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
@@ -20,4 +21,10 @@ public final class SwaggerSchema {
           .name("EUserCategory")
           ._enum(Arrays.stream(EUserCategory.values()).map(Enum::name).toList())
           .description("Enum for user category");
+
+  public static final Schema<String> roleSchema =
+      new StringSchema()
+          .name("ERole")
+          ._enum(Arrays.stream(ERole.values()).map(Enum::name).toList())
+          .description("Enum for user role");
 }

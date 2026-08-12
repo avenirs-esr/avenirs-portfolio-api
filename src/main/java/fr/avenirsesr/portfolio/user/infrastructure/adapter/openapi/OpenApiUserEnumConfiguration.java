@@ -12,7 +12,8 @@ public class OpenApiUserEnumConfiguration {
       openApi
           .getComponents()
           .addSchemas("EContextType", SwaggerSchema.userContextSchema)
-          .addSchemas("EUserCategory", SwaggerSchema.userCategorySchema);
+          .addSchemas("EUserCategory", SwaggerSchema.userCategorySchema)
+          .addSchemas("ERole", SwaggerSchema.roleSchema);
     };
   }
 }
