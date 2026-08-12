@@ -4,6 +4,7 @@ import static fr.avenirsesr.portfolio.shared.application.adapter.Utils.extractOr
 import static fr.avenirsesr.portfolio.shared.application.adapter.Utils.readBytes;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
+import fr.avenirsesr.portfolio.common.security.accesscontrol.domain.model.enums.ERole;
 import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.HmacAuthenticationToken;
 import fr.avenirsesr.portfolio.file.application.adapter.dto.FileDTO;
 import fr.avenirsesr.portfolio.file.application.adapter.mapper.FileDtoMapper;
@@ -23,6 +24,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.security.Principal;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -55,8 +58,11 @@ public class UserController {
   @GetMapping
   public ResponseEntity<LoggedInUserDTO> getMe(HmacAuthenticationToken authentication) {
     var me = userService.getMe();
-    return ResponseEntity.ok(
-        new LoggedInUserDTO(me.firstname(), me.lastname(), authentication.getRoles()));
+    Set<ERole> roles =
+        authentication.getRoles().stream()
+            .map(role -> ERole.valueOf("ROLE_" + role))
+            .collect(Collectors.toSet());
+    return ResponseEntity.ok(new LoggedInUserDTO(me.firstname(), me.lastname(), roles));
   }
 
   @PreAuthorize("hasAuthority('profile:read:own')")
