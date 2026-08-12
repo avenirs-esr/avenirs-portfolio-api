@@ -39,83 +39,88 @@ public class StaffServiceImpl implements StaffService {
   }
 
   @Override
-  public UserProfileOverviewData getStaffProfile() {
-<span class="fc" id="L43">    var staff = loggedInUserService.getLoggedInStaff();</span>
+  public boolean existsById(UUID id) {
+<span class="fc" id="L43">    return staffRepository.findById(id).isPresent();</span>
+  }
 
-<span class="fc" id="L45">    return new UserProfileOverviewData(</span>
-<span class="fc" id="L46">        staff.getId(),</span>
-<span class="fc" id="L47">        staff.getUser().getFirstName(),</span>
-<span class="fc" id="L48">        staff.getUser().getLastName(),</span>
-<span class="fc" id="L49">        staff.getInstitutionEmail(),</span>
-<span class="fc" id="L50">        staff.getBio(),</span>
-<span class="fc" id="L51">        FileDataMapper.mapFileData(</span>
-<span class="fc" id="L52">            staff.getCoverPicture(), FileStorageConstants.DEFAULT_COVER_FILE_URL),</span>
-<span class="fc" id="L53">        FileDataMapper.mapFileData(</span>
-<span class="fc" id="L54">            staff.getProfilePicture(), FileStorageConstants.DEFAULT_PROFILE_FILE_URL));</span>
+  @Override
+  public UserProfileOverviewData getStaffProfile() {
+<span class="fc" id="L48">    var staff = loggedInUserService.getLoggedInStaff();</span>
+
+<span class="fc" id="L50">    return new UserProfileOverviewData(</span>
+<span class="fc" id="L51">        staff.getId(),</span>
+<span class="fc" id="L52">        staff.getUser().getFirstName(),</span>
+<span class="fc" id="L53">        staff.getUser().getLastName(),</span>
+<span class="fc" id="L54">        staff.getInstitutionEmail(),</span>
+<span class="fc" id="L55">        staff.getBio(),</span>
+<span class="fc" id="L56">        FileDataMapper.mapFileData(</span>
+<span class="fc" id="L57">            staff.getCoverPicture(), FileStorageConstants.DEFAULT_COVER_FILE_URL),</span>
+<span class="fc" id="L58">        FileDataMapper.mapFileData(</span>
+<span class="fc" id="L59">            staff.getProfilePicture(), FileStorageConstants.DEFAULT_PROFILE_FILE_URL));</span>
   }
 
   @Override
   public void updateProfile(User user, String bio) {
-<span class="fc" id="L59">    var staff = staffRepository.findById(user.getId()).orElseThrow(UserIsNotStaffException::new);</span>
+<span class="fc" id="L64">    var staff = staffRepository.findById(user.getId()).orElseThrow(UserIsNotStaffException::new);</span>
 
-<span class="pc bpc" id="L61" title="1 of 2 branches missed.">    if (bio != null) staff.setBio(bio);</span>
+<span class="pc bpc" id="L66" title="1 of 2 branches missed.">    if (bio != null) staff.setBio(bio);</span>
 
-<span class="fc" id="L63">    staffRepository.save(staff);</span>
-<span class="fc" id="L64">  }</span>
+<span class="fc" id="L68">    staffRepository.save(staff);</span>
+<span class="fc" id="L69">  }</span>
 
   @Override
   public Staff createStaff(
       UUID userId, String institutionEmail, UUID institutionId, UUID groupId, String bio) {
-<span class="fc" id="L69">    var user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);</span>
-<span class="fc" id="L70">    var staff = Staff.create(user, institutionEmail, institutionId, groupId, bio);</span>
-<span class="fc" id="L71">    staffRepository.save(staff);</span>
-<span class="pc bpc" id="L72" title="1 of 2 branches missed.">    if (user.getEmail() == null) {</span>
-<span class="fc" id="L73">      user.setEmail(institutionEmail);</span>
-<span class="fc" id="L74">      userRepository.save(user);</span>
+<span class="fc" id="L74">    var user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);</span>
+<span class="fc" id="L75">    var staff = Staff.create(user, institutionEmail, institutionId, groupId, bio);</span>
+<span class="fc" id="L76">    staffRepository.save(staff);</span>
+<span class="pc bpc" id="L77" title="1 of 2 branches missed.">    if (user.getEmail() == null) {</span>
+<span class="fc" id="L78">      user.setEmail(institutionEmail);</span>
+<span class="fc" id="L79">      userRepository.save(user);</span>
     }
-<span class="fc" id="L76">    return staff;</span>
+<span class="fc" id="L81">    return staff;</span>
   }
 
   @Override
   public File uploadProfilePicture(String fileName, String mimeType, long size, byte[] content) {
-<span class="nc" id="L81">    var staff = loggedInUserService.getLoggedInStaff();</span>
-<span class="nc" id="L82">    requireImage(mimeType);</span>
-<span class="nc" id="L83">    var file = fileResourceService.upload(fileName, mimeType, size, content, false);</span>
-<span class="nc" id="L84">    staff.setProfilePicture(file);</span>
-<span class="nc" id="L85">    staffRepository.save(staff);</span>
-<span class="nc" id="L86">    return file;</span>
+<span class="nc" id="L86">    var staff = loggedInUserService.getLoggedInStaff();</span>
+<span class="nc" id="L87">    requireImage(mimeType);</span>
+<span class="nc" id="L88">    var file = fileResourceService.upload(fileName, mimeType, size, content, false);</span>
+<span class="nc" id="L89">    staff.setProfilePicture(file);</span>
+<span class="nc" id="L90">    staffRepository.save(staff);</span>
+<span class="nc" id="L91">    return file;</span>
   }
 
   @Override
   public void deleteProfilePicture() {
-<span class="nc" id="L91">    var staff = loggedInUserService.getLoggedInStaff();</span>
-<span class="nc" id="L92">    staff.getProfilePicture().ifPresent(picture -&gt; fileResourceService.delete(picture.getId()));</span>
-<span class="nc" id="L93">    staff.setProfilePicture(null);</span>
-<span class="nc" id="L94">    staffRepository.save(staff);</span>
-<span class="nc" id="L95">  }</span>
+<span class="nc" id="L96">    var staff = loggedInUserService.getLoggedInStaff();</span>
+<span class="nc" id="L97">    staff.getProfilePicture().ifPresent(picture -&gt; fileResourceService.delete(picture.getId()));</span>
+<span class="nc" id="L98">    staff.setProfilePicture(null);</span>
+<span class="nc" id="L99">    staffRepository.save(staff);</span>
+<span class="nc" id="L100">  }</span>
 
   @Override
   public File uploadCoverPicture(String fileName, String mimeType, long size, byte[] content) {
-<span class="nc" id="L99">    var staff = loggedInUserService.getLoggedInStaff();</span>
-<span class="nc" id="L100">    requireImage(mimeType);</span>
-<span class="nc" id="L101">    var file = fileResourceService.upload(fileName, mimeType, size, content, false);</span>
-<span class="nc" id="L102">    staff.setCoverPicture(file);</span>
-<span class="nc" id="L103">    staffRepository.save(staff);</span>
-<span class="nc" id="L104">    return file;</span>
+<span class="nc" id="L104">    var staff = loggedInUserService.getLoggedInStaff();</span>
+<span class="nc" id="L105">    requireImage(mimeType);</span>
+<span class="nc" id="L106">    var file = fileResourceService.upload(fileName, mimeType, size, content, false);</span>
+<span class="nc" id="L107">    staff.setCoverPicture(file);</span>
+<span class="nc" id="L108">    staffRepository.save(staff);</span>
+<span class="nc" id="L109">    return file;</span>
   }
 
   @Override
   public void deleteCoverPicture() {
-<span class="nc" id="L109">    var staff = loggedInUserService.getLoggedInStaff();</span>
-<span class="nc" id="L110">    staff.getCoverPicture().ifPresent(picture -&gt; fileResourceService.delete(picture.getId()));</span>
-<span class="nc" id="L111">    staff.setCoverPicture(null);</span>
-<span class="nc" id="L112">    staffRepository.save(staff);</span>
-<span class="nc" id="L113">  }</span>
+<span class="nc" id="L114">    var staff = loggedInUserService.getLoggedInStaff();</span>
+<span class="nc" id="L115">    staff.getCoverPicture().ifPresent(picture -&gt; fileResourceService.delete(picture.getId()));</span>
+<span class="nc" id="L116">    staff.setCoverPicture(null);</span>
+<span class="nc" id="L117">    staffRepository.save(staff);</span>
+<span class="nc" id="L118">  }</span>
 
   private void requireImage(String mimeType) {
-<span class="nc bnc" id="L116" title="All 2 branches missed.">    if (!EFileType.fromMimeType(mimeType).isImage()) {</span>
-<span class="nc" id="L117">      throw new FileTypeNotSupportedException();</span>
+<span class="nc bnc" id="L121" title="All 2 branches missed.">    if (!EFileType.fromMimeType(mimeType).isImage()) {</span>
+<span class="nc" id="L122">      throw new FileTypeNotSupportedException();</span>
     }
-<span class="nc" id="L119">  }</span>
+<span class="nc" id="L124">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
