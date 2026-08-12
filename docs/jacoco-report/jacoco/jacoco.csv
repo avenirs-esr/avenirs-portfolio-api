@@ -83,7 +83,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.infrastructure.context,Cust
 avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.infrastructure.context,PrometheusLogFilter,5,11,3,3,1,3,2,3,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.selfknowledge.domain.data,SelfKnowledgeElementDetails,0,6,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.notification.infrastructure.adapter.repository,NotificationDatabaseRepository,0,45,0,0,0,13,0,3,0,3
-avenirs-portfolio-api,fr.avenirsesr.portfolio.user.application.adapter.controller,UserController,76,105,0,2,22,28,4,8,4,7
+avenirs-portfolio-api,fr.avenirsesr.portfolio.user.application.adapter.controller,UserController,76,101,0,2,22,26,4,7,4,6
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.skill.application.adapter.controller,DeclaredSkillProgressController,101,206,0,0,23,54,5,8,5,8
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.association.domain.data,AssociationData,0,12,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.association.domain.data,AssociationSearchResultData,0,15,0,0,0,1,0,1,0,1
