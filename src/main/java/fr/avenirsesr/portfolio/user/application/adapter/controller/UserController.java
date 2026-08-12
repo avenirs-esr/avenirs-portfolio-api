@@ -59,9 +59,7 @@ public class UserController {
   public ResponseEntity<LoggedInUserDTO> getMe(HmacAuthenticationToken authentication) {
     var me = userService.getMe();
     Set<ERole> roles =
-        authentication.getRoles().stream()
-            .map(role -> ERole.valueOf("ROLE_" + role))
-            .collect(Collectors.toSet());
+        authentication.getRoles().stream().map(ERole::valueOf).collect(Collectors.toSet());
     return ResponseEntity.ok(new LoggedInUserDTO(me.firstname(), me.lastname(), roles));
   }
 
