@@ -204,22 +204,27 @@ public class UserServiceImpl implements UserService {
   }
 
   private void provisionCategoryRecord(UUID userId, ExternalUserDTO externalUser) {
-<span class="pc bpc" id="L207" title="1 of 3 branches missed.">    switch (externalUser.category()) {</span>
-      case STUDENT -&gt;
-<span class="fc" id="L209">          studentService.createStudent(</span>
-              userId,
-<span class="fc" id="L211">              externalUser.email(),</span>
-<span class="fc" id="L212">              externalUser.institutionId(),</span>
-<span class="fc" id="L213">              externalUser.groupId(),</span>
-              null);
-      case STAFF -&gt;
-<span class="fc" id="L216">          staffService.createStaff(</span>
-              userId,
-<span class="fc" id="L218">              externalUser.email(),</span>
-<span class="fc" id="L219">              externalUser.institutionId(),</span>
-<span class="fc" id="L220">              externalUser.groupId(),</span>
-              null);
-    }
-<span class="fc" id="L223">  }</span>
+<span class="fc" id="L207">    externalUser</span>
+<span class="fc" id="L208">        .categories()</span>
+<span class="fc" id="L209">        .forEach(</span>
+            category -&gt; {
+<span class="pc bpc" id="L211" title="1 of 3 branches missed.">              switch (category) {</span>
+                case STUDENT -&gt;
+<span class="fc" id="L213">                    studentService.createStudent(</span>
+                        userId,
+<span class="fc" id="L215">                        externalUser.email(),</span>
+<span class="fc" id="L216">                        externalUser.institutionId(),</span>
+<span class="fc" id="L217">                        externalUser.groupId(),</span>
+                        null);
+                case STAFF -&gt;
+<span class="fc" id="L220">                    staffService.createStaff(</span>
+                        userId,
+<span class="fc" id="L222">                        externalUser.email(),</span>
+<span class="fc" id="L223">                        externalUser.institutionId(),</span>
+<span class="fc" id="L224">                        externalUser.groupId(),</span>
+                        null);
+              }
+<span class="fc" id="L227">            });</span>
+<span class="fc" id="L228">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
