@@ -204,21 +204,26 @@ public class UserServiceImpl implements UserService {
   }
 
   private void provisionCategoryRecord(UUID userId, ExternalUserDTO externalUser) {
-    switch (externalUser.category()) {
-      case STUDENT ->
-          studentService.createStudent(
-              userId,
-              externalUser.email(),
-              externalUser.institutionId(),
-              externalUser.groupId(),
-              null);
-      case STAFF ->
-          staffService.createStaff(
-              userId,
-              externalUser.email(),
-              externalUser.institutionId(),
-              externalUser.groupId(),
-              null);
-    }
+    externalUser
+        .categories()
+        .forEach(
+            category -> {
+              switch (category) {
+                case STUDENT ->
+                    studentService.createStudent(
+                        userId,
+                        externalUser.email(),
+                        externalUser.institutionId(),
+                        externalUser.groupId(),
+                        null);
+                case STAFF ->
+                    staffService.createStaff(
+                        userId,
+                        externalUser.email(),
+                        externalUser.institutionId(),
+                        externalUser.groupId(),
+                        null);
+              }
+            });
   }
 }
