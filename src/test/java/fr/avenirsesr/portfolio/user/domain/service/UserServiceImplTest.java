@@ -25,6 +25,7 @@ import fr.avenirsesr.portfolio.user.infrastructure.fixture.StaffFixture;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -544,7 +545,7 @@ class UserServiceImplTest {
         "Lucas",
         "Tessier",
         eppn,
-        category,
+        Set.of(category),
         eppn,
         "PEGASE",
         UUID.randomUUID(),
