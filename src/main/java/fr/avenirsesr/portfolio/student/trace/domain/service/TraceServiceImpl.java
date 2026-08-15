@@ -26,6 +26,7 @@ import fr.avenirsesr.portfolio.student.association.domain.data.AssociationData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.exception.AssociationDoesNotExistException;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
+import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.association.domain.service.AssociationSearchHelper;
@@ -579,6 +580,45 @@ public class TraceServiceImpl implements TraceService {
   }
 
   @Override
+  public PagedResult<AssociationSearchResultData> searchTracesForAssociation(
+      UUID excludeAssociatedWithElementId,
+      EAssociationContextType contextType,
+      String keyword,
+      PageCriteria pageCriteria) {
+    EAssociationType associationType = null;
+    if (contextType != null) {
+      associationType = getAssociationTypeForTraceCandidate(contextType);
+    }
+
+    var traces =
+        getTracesView(keyword, new TraceFilter(null, null, null, null), null, pageCriteria);
+
+    if (contextType == null) {
+      return associationSearchHelper.searchForAssociation(
+          null,
+          null,
+          null,
+          null,
+          traces,
+          TraceViewData::id,
+          TraceViewData::title,
+          null,
+          trace -> false);
+    }
+
+    return associationSearchHelper.searchForAssociation(
+        excludeAssociatedWithElementId,
+        contextType.toClass(),
+        associationType,
+        associationType.idExtractorFor(Trace.class),
+        traces,
+        TraceViewData::id,
+        TraceViewData::title,
+        null,
+        trace -> false);
+  }
+
+  @Override
   public PagedResult<AssociationSearchResultData> searchDeclaredActivityForAssociation(
       UUID traceId, String keyword, PageCriteria pageCriteria) {
     checkTraceOwnership(traceId);
@@ -627,6 +667,15 @@ public class TraceServiceImpl implements TraceService {
         DeclaredExperience::getTitle,
         de -> de.getExperienceType() != null ? de.getExperienceType().name() : null,
         de -> false);
+  }
+
+  private EAssociationType getAssociationTypeForTraceCandidate(
+      EAssociationContextType contextType) {
+    return switch (contextType) {
+      case DECLARED_ACTIVITY -> EAssociationType.DECLARED_ACTIVITY_TRACE;
+      case DECLARED_EXPERIENCE -> EAssociationType.TRACE_DECLARED_EXPERIENCE;
+      case TRACE, DECLARED_SKILL -> throw new UnsupportedOperationException();
+    };
   }
 
   @Override

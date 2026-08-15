@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.file.domain.model.FileDownload;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
+import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.trace.domain.data.*;
 import fr.avenirsesr.portfolio.student.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
@@ -77,6 +78,12 @@ public interface TraceService {
   TraceAssociationsData getTraceAssociations(UUID traceId, boolean onlyNotCompleted);
 
   void unassociate(UUID traceId, List<UUID> associationIds);
+
+  PagedResult<AssociationSearchResultData> searchTracesForAssociation(
+      UUID excludeAssociatedWithElementId,
+      EAssociationContextType contextType,
+      String keyword,
+      PageCriteria pageCriteria);
 
   PagedResult<AssociationSearchResultData> searchDeclaredActivityForAssociation(
       UUID traceId, String keyword, PageCriteria pageCriteria);

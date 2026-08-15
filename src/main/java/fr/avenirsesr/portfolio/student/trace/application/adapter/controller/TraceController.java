@@ -13,8 +13,10 @@ import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsCreati
 import fr.avenirsesr.portfolio.student.association.application.adapter.dto.AssociationSearchResultDeclaredActivityDTO;
 import fr.avenirsesr.portfolio.student.association.application.adapter.dto.AssociationSearchResultDeclaredExperienceDTO;
 import fr.avenirsesr.portfolio.student.association.application.adapter.dto.AssociationSearchResultDeclaredSkillIDTO;
+import fr.avenirsesr.portfolio.student.association.application.adapter.dto.AssociationSearchResultTraceDTO;
 import fr.avenirsesr.portfolio.student.association.application.adapter.mapper.AssociationSearchResultDTOMapper;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
+import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.trace.application.adapter.dto.*;
 import fr.avenirsesr.portfolio.student.trace.application.adapter.mapper.*;
 import fr.avenirsesr.portfolio.student.trace.application.adapter.response.TracesCreationResponse;
@@ -24,6 +26,8 @@ import fr.avenirsesr.portfolio.student.trace.domain.data.TracesSummaryData;
 import fr.avenirsesr.portfolio.student.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import java.security.Principal;
 import java.time.LocalDate;
@@ -124,6 +128,41 @@ public class TraceController {
     TraceDetailData traceDetail = traceService.getTraceDetail(traceId);
 
     return ResponseEntity.ok(traceDetailMapper.toDTO(traceDetail));
+  }
+
+  @PreAuthorize("hasAuthority('trace:association:manage:own')")
+  @GetMapping("/search-for-association")
+  public ResponseEntity<PagedResponse<AssociationSearchResultTraceDTO>> searchTracesForAssociation(
+      Principal principal,
+      @RequestParam(required = false) UUID excludeAssociatedWithElementId,
+      @Parameter(schema = @Schema(ref = "#/components/schemas/EAssociationContextType"))
+          @RequestParam(required = false)
+          EAssociationContextType contextType,
+      @RequestParam(required = false) String keyword,
+      @RequestParam(required = false) Integer page,
+      @RequestParam(required = false) Integer pageSize) {
+    var pageCriteria = new PageCriteria(page, pageSize);
+    log.debug(
+        "Received request to search traces for association (contextType={},"
+            + " excludeAssociatedWithElementId={}) by student [{}] (keyword={}, page={},"
+            + " pageSize={})",
+        contextType,
+        excludeAssociatedWithElementId,
+        principal.getName(),
+        keyword,
+        pageCriteria.page(),
+        pageCriteria.pageSize());
+
+    PagedResult<AssociationSearchResultData> pagedResult =
+        traceService.searchTracesForAssociation(
+            excludeAssociatedWithElementId, contextType, keyword, pageCriteria);
+
+    return ResponseEntity.ok(
+        new PagedResponse<>(
+            pagedResult.content().stream()
+                .map(associationSearchResultDTOMapper::toTraceDTO)
+                .toList(),
+            PageInfoDTO.fromDomain(pagedResult.pageInfo())));
   }
 
   @PreAuthorize("hasAuthority('trace:association:manage:own')")
