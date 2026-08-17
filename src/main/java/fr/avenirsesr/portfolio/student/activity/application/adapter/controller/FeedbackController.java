@@ -1,9 +1,13 @@
 package fr.avenirsesr.portfolio.student.activity.application.adapter.controller;
 
+import static fr.avenirsesr.portfolio.shared.application.adapter.Utils.readBytes;
+
 import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
+import fr.avenirsesr.portfolio.file.application.adapter.dto.FileDTO;
+import fr.avenirsesr.portfolio.file.application.adapter.mapper.FileDtoMapper;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.FeedbackDashboardDTO;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.FeedbackDetailsDTO;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.FeedbackOverviewDTO;
@@ -24,9 +28,12 @@ import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,6 +42,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @Slf4j
@@ -46,6 +54,7 @@ public class FeedbackController {
   private final FeedbackStaffListItemDTOMapper feedbackStaffListItemDTOMapper;
   private final StudentFeedbackItemListDTOMapper studentFeedbackItemListDTOMapper;
   private final FeedbackOverviewDTOMapper feedbackOverviewDTOMapper;
+  private final FileDtoMapper fileDtoMapper;
 
   @PreAuthorize("hasAuthority('feedback:request:read:assigned')")
   @GetMapping
@@ -166,5 +175,62 @@ public class FeedbackController {
         "Received request to submit feedback [{}] by user [{}]", feedbackId, principal.getName());
     feedbackService.submitFeedback(feedbackId);
     return ResponseEntity.noContent().build();
+  }
+
+  @PreAuthorize("hasAuthority('feedback:request:respond:assigned')")
+  @PostMapping(value = "/{feedbackId}/attachments", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<FileDTO> uploadAttachment(
+      Principal principal,
+      @Valid @PathVariable UUID feedbackId,
+      @RequestParam("file") MultipartFile file) {
+    log.debug(
+        "Received request to upload an attachment on feedback [{}] by user [{}]",
+        feedbackId,
+        principal.getName());
+    var uploaded =
+        feedbackService.uploadAttachment(
+            feedbackId,
+            file.getOriginalFilename(),
+            file.getContentType(),
+            file.getSize(),
+            readBytes(file));
+    return ResponseEntity.status(HttpStatus.CREATED).body(fileDtoMapper.fromDomain(uploaded));
+  }
+
+  @PreAuthorize("hasAuthority('feedback:request:respond:assigned')")
+  @DeleteMapping("/{feedbackId}/attachments/{attachmentId}")
+  public ResponseEntity<Void> deleteAttachment(
+      Principal principal,
+      @Valid @PathVariable UUID feedbackId,
+      @Valid @PathVariable UUID attachmentId) {
+    log.debug(
+        "Received request to delete attachment [{}] of feedback [{}] by user [{}]",
+        attachmentId,
+        feedbackId,
+        principal.getName());
+    feedbackService.deleteAttachment(feedbackId, attachmentId);
+    return ResponseEntity.noContent().build();
+  }
+
+  @PreAuthorize("hasAnyAuthority('feedback:received:read:own','feedback:request:read:assigned')")
+  @GetMapping(
+      value = "/{feedbackId}/attachments/{attachmentId}/download",
+      produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  public ResponseEntity<byte[]> downloadAttachment(
+      Principal principal,
+      @Valid @PathVariable UUID feedbackId,
+      @Valid @PathVariable UUID attachmentId) {
+    log.debug(
+        "Received request to download attachment [{}] of feedback [{}] by user [{}]",
+        attachmentId,
+        feedbackId,
+        principal.getName());
+    var downloadedFile = feedbackService.downloadAttachment(feedbackId, attachmentId);
+    return ResponseEntity.ok()
+        .contentType(MediaType.APPLICATION_OCTET_STREAM)
+        .header(
+            HttpHeaders.CONTENT_DISPOSITION,
+            "attachment; filename=\"" + downloadedFile.fileName() + "\"")
+        .body(downloadedFile.content());
   }
 }

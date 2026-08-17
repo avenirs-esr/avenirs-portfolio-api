@@ -3,9 +3,12 @@ package fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.model;
 import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.RICH_TEXT_LENGTH;
 
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
+import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -47,4 +50,12 @@ public class FeedbackEntity extends AvenirsBaseEntity {
   @JdbcTypeCode(SqlTypes.JSON)
   @Column(nullable = false)
   private AssociationsJson associations;
+
+  @ManyToMany
+  @JoinTable(
+      name = "feedback_attachments",
+      joinColumns = @JoinColumn(name = "feedback_id"),
+      inverseJoinColumns = @JoinColumn(name = "file_id"))
+  @OrderBy("createdAt")
+  private List<FileEntity> attachments = new ArrayList<>();
 }

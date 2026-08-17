@@ -10,6 +10,10 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
+import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
+import fr.avenirsesr.portfolio.file.domain.model.File;
+import fr.avenirsesr.portfolio.file.domain.model.FileDownload;
+import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.notification.domain.model.notification.AskForFeedbackNotification;
 import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
@@ -51,6 +55,7 @@ public class FeedbackServiceImpl implements FeedbackService {
   private final LoggedInUserService loggedInUserService;
   private final NotificationService notificationService;
   private final ActivityService activityService;
+  private final FileResourceService fileResourceService;
 
   @Override
   public Feedback createFeedback(UUID declaredActivityId) {
@@ -149,7 +154,8 @@ public class FeedbackServiceImpl implements FeedbackService {
         feedback.getStatus(),
         feedback.getIteration(),
         feedback.getAssociatedTraces(),
-        feedback.getAssociatedDeclaredSkills());
+        feedback.getAssociatedDeclaredSkills(),
+        feedback.getAttachments());
   }
 
   @Override
@@ -158,10 +164,9 @@ public class FeedbackServiceImpl implements FeedbackService {
       throw new UserNotAuthorizedException();
     }
 
-    String feedbackText =
-        feedback.getStatus() == EFeedbackStatus.SUBMITTED
-            ? feedback.getFeedback().orElse(null)
-            : null;
+    boolean isSubmitted = feedback.getStatus() == EFeedbackStatus.SUBMITTED;
+    String feedbackText = isSubmitted ? feedback.getFeedback().orElse(null) : null;
+    List<File> attachments = isSubmitted ? feedback.getAttachments() : List.of();
     return new FeedbackData(
         feedback.getId(),
         feedback.getCreatedAt(),
@@ -172,7 +177,8 @@ public class FeedbackServiceImpl implements FeedbackService {
         feedback.getStatus(),
         feedback.getIteration(),
         feedback.getAssociatedTraces(),
-        feedback.getAssociatedDeclaredSkills());
+        feedback.getAssociatedDeclaredSkills(),
+        attachments);
   }
 
   @Override
@@ -225,6 +231,58 @@ public class FeedbackServiceImpl implements FeedbackService {
 
   @Override
   public void submitFeedback(UUID feedbackId) {
+    Feedback feedback = fetchFeedbackAndCheckLoggedInStaffIsAuthor(feedbackId);
+
+    requireNotNull("feedback", feedback.getFeedback().orElse(null));
+
+    feedback.setStatus(EFeedbackStatus.SUBMITTED);
+    feedbackRepository.save(feedback);
+  }
+
+  @Override
+  public File uploadAttachment(
+      UUID feedbackId, String fileName, String mimeType, long size, byte[] content) {
+    Feedback feedback = fetchFeedbackAndCheckLoggedInStaffIsAuthor(feedbackId);
+
+    File file = fileResourceService.upload(fileName, mimeType, size, content, true);
+    feedback.addAttachment(file);
+    feedbackRepository.save(feedback);
+
+    return file;
+  }
+
+  @Override
+  public void deleteAttachment(UUID feedbackId, UUID attachmentId) {
+    Feedback feedback = fetchFeedbackAndCheckLoggedInStaffIsAuthor(feedbackId);
+    feedback.findAttachment(attachmentId).orElseThrow(FileNotFoundException::new);
+
+    feedback.removeAttachment(attachmentId);
+    feedbackRepository.save(feedback);
+    fileResourceService.delete(attachmentId);
+  }
+
+  @Override
+  public FileDownload downloadAttachment(UUID feedbackId, UUID attachmentId) {
+    Feedback feedback =
+        feedbackRepository.findById(feedbackId).orElseThrow(FeedbackNotFoundException::new);
+    User loggedInUser = loggedInUserService.getLoggedInUser();
+
+    boolean isAuthor =
+        loggedInUser.equals(feedback.getDeclaredActivity().getActivity().getAuthor().getUser());
+    boolean isOwningStudent =
+        loggedInUser.equals(feedback.getDeclaredActivity().getStudent().getUser())
+            && feedback.getStatus() == EFeedbackStatus.SUBMITTED;
+
+    if (!isAuthor && !isOwningStudent) {
+      throw new UserNotAuthorizedException();
+    }
+
+    feedback.findAttachment(attachmentId).orElseThrow(FileNotFoundException::new);
+
+    return fileResourceService.download(attachmentId);
+  }
+
+  private Feedback fetchFeedbackAndCheckLoggedInStaffIsAuthor(UUID feedbackId) {
     Feedback feedback =
         feedbackRepository.findById(feedbackId).orElseThrow(FeedbackNotFoundException::new);
 
@@ -235,10 +293,7 @@ public class FeedbackServiceImpl implements FeedbackService {
       throw new UserNotAuthorizedException();
     }
 
-    requireNotNull("feedback", feedback.getFeedback().orElse(null));
-
-    feedback.setStatus(EFeedbackStatus.SUBMITTED);
-    feedbackRepository.save(feedback);
+    return feedback;
   }
 
   @Override

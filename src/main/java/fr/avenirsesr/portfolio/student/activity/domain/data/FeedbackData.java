@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.student.activity.domain.data;
 
+import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
@@ -9,9 +10,10 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Represents the details of a feedback. The {@code feedback} field may be {@code null} when the
- * feedback has not yet been submitted (status other than {@link EFeedbackStatus#SUBMITTED}), in
- * order to hide the staff comment from the student until the review is finalised.
+ * Represents the details of a feedback. The {@code feedback} and {@code attachments} fields may be
+ * respectively {@code null} and empty when the feedback has not yet been submitted (status other
+ * than {@link EFeedbackStatus#SUBMITTED}), in order to hide the staff answer from the student until
+ * the review is finalised.
  */
 public record FeedbackData(
     UUID id,
@@ -23,4 +25,5 @@ public record FeedbackData(
     EFeedbackStatus status,
     int iteration,
     List<Trace> associatedTraces,
-    List<DeclaredSkillProgress> associatedDeclaredSkills) {}
+    List<DeclaredSkillProgress> associatedDeclaredSkills,
+    List<File> attachments) {}

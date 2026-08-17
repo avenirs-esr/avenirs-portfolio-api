@@ -12,6 +12,11 @@ import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
+import fr.avenirsesr.portfolio.file.domain.model.File;
+import fr.avenirsesr.portfolio.file.domain.model.FileDownload;
+import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
+import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
@@ -41,6 +46,7 @@ import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StaffFixture;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -53,6 +59,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -69,10 +76,15 @@ class FeedbackServiceImplTest {
   @Mock private DeclaredSkillProgressService declaredSkillProgressService;
   @Mock private LoggedInUserService loggedInUserService;
   @Mock private NotificationService notificationService;
+  @Mock private FileResourceService fileResourceService;
 
   @InjectMocks private FeedbackServiceImpl service;
 
   @Captor private ArgumentCaptor<Feedback> feedbackCaptor;
+
+  private static final String FILE_NAME = "retour.pdf";
+  private static final String MIME_TYPE = "application/pdf";
+  private static final byte[] CONTENT = "content".getBytes(StandardCharsets.UTF_8);
 
   private Student student;
 
@@ -253,6 +265,7 @@ class FeedbackServiceImplTest {
               EFeedbackStatus.IN_PROCESS,
               1,
               List.of(),
+              List.of(),
               List.of());
 
       when(declaredActivityService.fetchActivityAndCheckLoggedInStudentAuthorization(
@@ -292,6 +305,7 @@ class FeedbackServiceImplTest {
               EFeedbackStatus.SUBMITTED,
               1,
               List.of(),
+              List.of(),
               List.of());
 
       Feedback inProcessFeedback =
@@ -304,6 +318,7 @@ class FeedbackServiceImplTest {
               null,
               EFeedbackStatus.IN_PROCESS,
               2,
+              List.of(),
               List.of(),
               List.of());
 
@@ -348,6 +363,7 @@ class FeedbackServiceImplTest {
               null,
               EFeedbackStatus.NEW,
               1,
+              List.of(),
               List.of(),
               List.of());
 
@@ -412,6 +428,7 @@ class FeedbackServiceImplTest {
               EFeedbackStatus.SUBMITTED,
               1,
               List.of(),
+              List.of(),
               List.of());
 
       when(declaredActivityService.fetchActivityAndCheckLoggedInStudentAuthorization(
@@ -459,6 +476,7 @@ class FeedbackServiceImplTest {
               EFeedbackStatus.SUBMITTED,
               1,
               List.of(),
+              List.of(),
               List.of());
       Feedback feedback2 =
           Feedback.toDomain(
@@ -470,6 +488,7 @@ class FeedbackServiceImplTest {
               "Retour 2",
               EFeedbackStatus.SUBMITTED,
               1,
+              List.of(),
               List.of(),
               List.of());
 
@@ -510,6 +529,7 @@ class FeedbackServiceImplTest {
               EFeedbackStatus.SUBMITTED,
               1,
               List.of(),
+              List.of(),
               List.of());
 
       when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
@@ -541,6 +561,7 @@ class FeedbackServiceImplTest {
               EFeedbackStatus.NEW,
               1,
               List.of(),
+              List.of(),
               List.of());
 
       when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
@@ -552,6 +573,63 @@ class FeedbackServiceImplTest {
       BddLogger.then("FeedbackData is returned with feedback set to null (not yet submitted)");
       assertThat(result.feedback()).isNull();
       assertThat(result.status()).isEqualTo(EFeedbackStatus.NEW);
+    }
+
+    @Test
+    void should_hide_the_attachments_from_the_student_when_feedback_is_not_SUBMITTED() {
+      BddLogger.given("A student requesting their own IN_PROCESS feedback holding an attachment");
+      UUID feedbackId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().toModel();
+      Feedback feedback =
+          feedbackOf(feedbackId, activity, EFeedbackStatus.IN_PROCESS, List.of(attachment()));
+
+      when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
+      when(loggedInUserService.getLoggedInUser()).thenReturn(student.getUser());
+
+      BddLogger.when("getFeedbackDetails is called with STUDENT category");
+      FeedbackData result = service.getFeedbackDetails(feedbackId, EUserCategory.STUDENT);
+
+      BddLogger.then("FeedbackData is returned without any attachment");
+      assertThat(result.attachments()).isEmpty();
+    }
+
+    @Test
+    void should_expose_the_attachments_to_the_student_when_feedback_is_SUBMITTED() {
+      BddLogger.given("A student requesting their own SUBMITTED feedback holding an attachment");
+      UUID feedbackId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().toModel();
+      File existingAttachment = attachment();
+      Feedback feedback =
+          feedbackOf(feedbackId, activity, EFeedbackStatus.SUBMITTED, List.of(existingAttachment));
+
+      when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
+      when(loggedInUserService.getLoggedInUser()).thenReturn(student.getUser());
+
+      BddLogger.when("getFeedbackDetails is called with STUDENT category");
+      FeedbackData result = service.getFeedbackDetails(feedbackId, EUserCategory.STUDENT);
+
+      BddLogger.then("FeedbackData is returned with the attachment");
+      assertThat(result.attachments()).containsExactly(existingAttachment);
+    }
+
+    @Test
+    void should_expose_the_attachments_to_the_staff_author_whatever_the_status() {
+      BddLogger.given("A staff author requesting an IN_PROCESS feedback holding an attachment");
+      UUID feedbackId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().toModel();
+      File existingAttachment = attachment();
+      Feedback feedback =
+          feedbackOf(feedbackId, activity, EFeedbackStatus.IN_PROCESS, List.of(existingAttachment));
+      User authorUser = UserFixture.create().withId(activity.getAuthor().getId()).toModel();
+
+      when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
+      when(loggedInUserService.getLoggedInUser()).thenReturn(authorUser);
+
+      BddLogger.when("getFeedbackDetails is called with STAFF category");
+      FeedbackData result = service.getFeedbackDetails(feedbackId, EUserCategory.STAFF);
+
+      BddLogger.then("FeedbackData is returned with the attachment");
+      assertThat(result.attachments()).containsExactly(existingAttachment);
     }
 
     @Test
@@ -571,6 +649,7 @@ class FeedbackServiceImplTest {
               null,
               EFeedbackStatus.NEW,
               1,
+              List.of(),
               List.of(),
               List.of());
 
@@ -602,6 +681,7 @@ class FeedbackServiceImplTest {
               feedbackText,
               EFeedbackStatus.IN_PROCESS,
               1,
+              List.of(),
               List.of(),
               List.of());
 
@@ -635,6 +715,7 @@ class FeedbackServiceImplTest {
               EFeedbackStatus.NEW,
               1,
               List.of(),
+              List.of(),
               List.of());
 
       when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
@@ -666,6 +747,7 @@ class FeedbackServiceImplTest {
               EFeedbackStatus.IN_PROCESS,
               1,
               List.of(),
+              List.of(),
               List.of());
 
       when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
@@ -695,6 +777,7 @@ class FeedbackServiceImplTest {
               null,
               EFeedbackStatus.IN_PROCESS,
               1,
+              List.of(),
               List.of(),
               List.of());
 
@@ -743,6 +826,7 @@ class FeedbackServiceImplTest {
               EFeedbackStatus.IN_PROCESS,
               1,
               List.of(),
+              List.of(),
               List.of());
 
       BddLogger.when("getStudentFeedbackDetails is called with the student's own user");
@@ -771,6 +855,7 @@ class FeedbackServiceImplTest {
               EFeedbackStatus.SUBMITTED,
               1,
               List.of(),
+              List.of(),
               List.of());
 
       BddLogger.when("getStudentFeedbackDetails is called with the student's own user");
@@ -796,6 +881,7 @@ class FeedbackServiceImplTest {
               null,
               EFeedbackStatus.NEW,
               1,
+              List.of(),
               List.of(),
               List.of());
       User differentUser = UserFixture.create().toModel();
@@ -829,6 +915,7 @@ class FeedbackServiceImplTest {
               null,
               EFeedbackStatus.IN_PROCESS,
               1,
+              List.of(),
               List.of(),
               List.of());
       String feedbackText = "Excellent travail, bravo !";
@@ -882,6 +969,7 @@ class FeedbackServiceImplTest {
               EFeedbackStatus.IN_PROCESS,
               1,
               List.of(),
+              List.of(),
               List.of());
       User differentUser = UserFixture.create().toModel();
 
@@ -915,6 +1003,7 @@ class FeedbackServiceImplTest {
               null,
               EFeedbackStatus.IN_PROCESS,
               1,
+              List.of(),
               List.of(),
               List.of());
       String tooLongFeedback = "a".repeat(RICH_DESCRIPTION_LENGTH + 1);
@@ -956,6 +1045,7 @@ class FeedbackServiceImplTest {
               "Bon travail !",
               EFeedbackStatus.IN_PROCESS,
               1,
+              List.of(),
               List.of(),
               List.of());
 
@@ -1008,6 +1098,7 @@ class FeedbackServiceImplTest {
               EFeedbackStatus.IN_PROCESS,
               1,
               List.of(),
+              List.of(),
               List.of());
 
       when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
@@ -1042,6 +1133,7 @@ class FeedbackServiceImplTest {
               EFeedbackStatus.IN_PROCESS,
               1,
               List.of(),
+              List.of(),
               List.of());
 
       when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
@@ -1075,6 +1167,7 @@ class FeedbackServiceImplTest {
               null,
               EFeedbackStatus.NEW,
               1,
+              List.of(),
               List.of(),
               List.of());
 
@@ -1308,6 +1401,7 @@ class FeedbackServiceImplTest {
               EFeedbackStatus.SUBMITTED,
               1,
               List.of(),
+              List.of(),
               List.of());
 
       when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
@@ -1498,5 +1592,377 @@ class FeedbackServiceImplTest {
       verify(feedbackRepository)
           .findAttachmentIdsUsedByTraceSnapshots(declaredActivityIds, traceIds);
     }
+  }
+
+  @Nested
+  class UploadAttachment {
+
+    @Test
+    void should_upload_the_file_and_attach_it_to_the_feedback_when_staff_is_the_author() {
+      BddLogger.given("A logged-in staff who is the author of the activity and a valid feedback");
+      UUID feedbackId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().toModel();
+      Staff author = StaffFixture.create().withId(activity.getAuthor().getId()).toModel();
+      Feedback feedback = feedbackOf(feedbackId, activity, EFeedbackStatus.IN_PROCESS, List.of());
+      File uploaded = attachment();
+
+      when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(author);
+      when(fileResourceService.upload(FILE_NAME, MIME_TYPE, CONTENT.length, CONTENT, true))
+          .thenReturn(uploaded);
+      when(feedbackRepository.save(any(Feedback.class))).thenAnswer(i -> i.getArguments()[0]);
+
+      BddLogger.when("uploadAttachment is called");
+      File result =
+          service.uploadAttachment(feedbackId, FILE_NAME, MIME_TYPE, CONTENT.length, CONTENT);
+
+      BddLogger.then("The file is uploaded as restricted and saved as an attachment");
+      assertThat(result).isEqualTo(uploaded);
+      verify(fileResourceService).upload(FILE_NAME, MIME_TYPE, CONTENT.length, CONTENT, true);
+      verify(feedbackRepository).save(feedbackCaptor.capture());
+      assertThat(feedbackCaptor.getValue().getAttachments()).containsExactly(uploaded);
+    }
+
+    @Test
+    void should_keep_the_previously_uploaded_attachments() {
+      BddLogger.given("A feedback that already has an attachment");
+      UUID feedbackId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().toModel();
+      Staff author = StaffFixture.create().withId(activity.getAuthor().getId()).toModel();
+      File existingAttachment = attachment();
+      Feedback feedback =
+          feedbackOf(feedbackId, activity, EFeedbackStatus.IN_PROCESS, List.of(existingAttachment));
+      File uploaded = attachment();
+
+      when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(author);
+      when(fileResourceService.upload(FILE_NAME, MIME_TYPE, CONTENT.length, CONTENT, true))
+          .thenReturn(uploaded);
+      when(feedbackRepository.save(any(Feedback.class))).thenAnswer(i -> i.getArguments()[0]);
+
+      BddLogger.when("uploadAttachment is called");
+      service.uploadAttachment(feedbackId, FILE_NAME, MIME_TYPE, CONTENT.length, CONTENT);
+
+      BddLogger.then("The feedback holds both the existing and the new attachment");
+      verify(feedbackRepository).save(feedbackCaptor.capture());
+      assertThat(feedbackCaptor.getValue().getAttachments())
+          .containsExactly(existingAttachment, uploaded);
+    }
+
+    @Test
+    void should_throw_FeedbackNotFoundException_when_feedback_does_not_exist() {
+      BddLogger.given("A non-existent feedback ID");
+      UUID feedbackId = UUID.randomUUID();
+
+      when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.empty());
+
+      BddLogger.when("uploadAttachment is called");
+
+      BddLogger.then("A FeedbackNotFoundException is thrown and nothing is uploaded");
+      assertThatThrownBy(
+              () ->
+                  service.uploadAttachment(
+                      feedbackId, FILE_NAME, MIME_TYPE, CONTENT.length, CONTENT))
+          .isInstanceOf(FeedbackNotFoundException.class);
+
+      verifyNoInteractions(fileResourceService);
+      verify(feedbackRepository, never()).save(any());
+    }
+
+    @Test
+    void should_throw_UserNotAuthorizedException_when_staff_is_not_the_author() {
+      BddLogger.given("A logged-in staff who is NOT the author of the activity");
+      UUID feedbackId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().toModel();
+      Staff otherStaff = StaffFixture.create().toModel();
+      Feedback feedback = feedbackOf(feedbackId, activity, EFeedbackStatus.IN_PROCESS, List.of());
+
+      when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(otherStaff);
+
+      BddLogger.when("uploadAttachment is called");
+
+      BddLogger.then("A UserNotAuthorizedException is thrown and nothing is uploaded");
+      assertThatThrownBy(
+              () ->
+                  service.uploadAttachment(
+                      feedbackId, FILE_NAME, MIME_TYPE, CONTENT.length, CONTENT))
+          .isInstanceOf(UserNotAuthorizedException.class);
+
+      verifyNoInteractions(fileResourceService);
+      verify(feedbackRepository, never()).save(any());
+    }
+
+    @Test
+    void should_throw_UserIsNotStaffException_when_logged_in_user_is_not_staff() {
+      BddLogger.given("A logged-in user who is not registered as staff");
+      UUID feedbackId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().toModel();
+      Feedback feedback = feedbackOf(feedbackId, activity, EFeedbackStatus.IN_PROCESS, List.of());
+
+      when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
+      when(loggedInUserService.getLoggedInStaff()).thenThrow(new UserIsNotStaffException());
+
+      BddLogger.when("uploadAttachment is called");
+
+      BddLogger.then("A UserIsNotStaffException is thrown and nothing is uploaded");
+      assertThatThrownBy(
+              () ->
+                  service.uploadAttachment(
+                      feedbackId, FILE_NAME, MIME_TYPE, CONTENT.length, CONTENT))
+          .isInstanceOf(UserIsNotStaffException.class);
+
+      verifyNoInteractions(fileResourceService);
+      verify(feedbackRepository, never()).save(any());
+    }
+  }
+
+  @Nested
+  class DeleteAttachment {
+
+    @Test
+    void should_unlink_the_attachment_before_deleting_the_file_when_staff_is_the_author() {
+      BddLogger.given("A logged-in staff author and a feedback holding two attachments");
+      UUID feedbackId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().toModel();
+      Staff author = StaffFixture.create().withId(activity.getAuthor().getId()).toModel();
+      File attachmentToDelete = attachment();
+      File otherAttachment = attachment();
+      Feedback feedback =
+          feedbackOf(
+              feedbackId,
+              activity,
+              EFeedbackStatus.IN_PROCESS,
+              List.of(attachmentToDelete, otherAttachment));
+
+      when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(author);
+      when(feedbackRepository.save(any(Feedback.class))).thenAnswer(i -> i.getArguments()[0]);
+
+      BddLogger.when("deleteAttachment is called");
+      service.deleteAttachment(feedbackId, attachmentToDelete.getId());
+
+      BddLogger.then("The feedback is saved without the attachment, then the file is deleted");
+      InOrder inOrder = inOrder(feedbackRepository, fileResourceService);
+      inOrder.verify(feedbackRepository).save(feedbackCaptor.capture());
+      inOrder.verify(fileResourceService).delete(attachmentToDelete.getId());
+      assertThat(feedbackCaptor.getValue().getAttachments()).containsExactly(otherAttachment);
+    }
+
+    @Test
+    void should_throw_FileNotFoundException_when_the_attachment_is_not_linked_to_the_feedback() {
+      BddLogger.given("A logged-in staff author and a file that is not an attachment");
+      UUID feedbackId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().toModel();
+      Staff author = StaffFixture.create().withId(activity.getAuthor().getId()).toModel();
+      Feedback feedback =
+          feedbackOf(feedbackId, activity, EFeedbackStatus.IN_PROCESS, List.of(attachment()));
+
+      when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(author);
+
+      BddLogger.when("deleteAttachment is called with an unknown attachment ID");
+
+      BddLogger.then("A FileNotFoundException is thrown and nothing is deleted");
+      assertThatThrownBy(() -> service.deleteAttachment(feedbackId, UUID.randomUUID()))
+          .isInstanceOf(FileNotFoundException.class);
+
+      verifyNoInteractions(fileResourceService);
+      verify(feedbackRepository, never()).save(any());
+    }
+
+    @Test
+    void should_throw_UserNotAuthorizedException_when_staff_is_not_the_author() {
+      BddLogger.given("A logged-in staff who is NOT the author of the activity");
+      UUID feedbackId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().toModel();
+      Staff otherStaff = StaffFixture.create().toModel();
+      File existingAttachment = attachment();
+      Feedback feedback =
+          feedbackOf(feedbackId, activity, EFeedbackStatus.IN_PROCESS, List.of(existingAttachment));
+
+      when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(otherStaff);
+
+      BddLogger.when("deleteAttachment is called");
+
+      BddLogger.then("A UserNotAuthorizedException is thrown and nothing is deleted");
+      assertThatThrownBy(() -> service.deleteAttachment(feedbackId, existingAttachment.getId()))
+          .isInstanceOf(UserNotAuthorizedException.class);
+
+      verifyNoInteractions(fileResourceService);
+      verify(feedbackRepository, never()).save(any());
+    }
+
+    @Test
+    void should_throw_FeedbackNotFoundException_when_feedback_does_not_exist() {
+      BddLogger.given("A non-existent feedback ID");
+      UUID feedbackId = UUID.randomUUID();
+
+      when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.empty());
+
+      BddLogger.when("deleteAttachment is called");
+
+      BddLogger.then("A FeedbackNotFoundException is thrown and nothing is deleted");
+      assertThatThrownBy(() -> service.deleteAttachment(feedbackId, UUID.randomUUID()))
+          .isInstanceOf(FeedbackNotFoundException.class);
+
+      verifyNoInteractions(fileResourceService);
+      verify(feedbackRepository, never()).save(any());
+    }
+  }
+
+  @Nested
+  class DownloadAttachment {
+
+    @Test
+    void should_return_the_file_download_when_the_user_is_the_staff_author() {
+      BddLogger.given("A logged-in staff author and a feedback holding an attachment");
+      UUID feedbackId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().toModel();
+      User authorUser = UserFixture.create().withId(activity.getAuthor().getId()).toModel();
+      File existingAttachment = attachment();
+      Feedback feedback =
+          feedbackOf(feedbackId, activity, EFeedbackStatus.IN_PROCESS, List.of(existingAttachment));
+      FileDownload expected = new FileDownload(FILE_NAME, CONTENT);
+
+      when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
+      when(loggedInUserService.getLoggedInUser()).thenReturn(authorUser);
+      when(fileResourceService.download(existingAttachment.getId())).thenReturn(expected);
+
+      BddLogger.when("downloadAttachment is called");
+      FileDownload result = service.downloadAttachment(feedbackId, existingAttachment.getId());
+
+      BddLogger.then("The file download is returned even though the feedback is not submitted");
+      assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    void should_return_the_file_download_when_the_owning_student_and_feedback_is_SUBMITTED() {
+      BddLogger.given("A logged-in student owning a SUBMITTED feedback holding an attachment");
+      UUID feedbackId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().toModel();
+      File existingAttachment = attachment();
+      Feedback feedback =
+          feedbackOf(feedbackId, activity, EFeedbackStatus.SUBMITTED, List.of(existingAttachment));
+      FileDownload expected = new FileDownload(FILE_NAME, CONTENT);
+
+      when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
+      when(loggedInUserService.getLoggedInUser()).thenReturn(student.getUser());
+      when(fileResourceService.download(existingAttachment.getId())).thenReturn(expected);
+
+      BddLogger.when("downloadAttachment is called");
+      FileDownload result = service.downloadAttachment(feedbackId, existingAttachment.getId());
+
+      BddLogger.then("The file download is returned");
+      assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    void
+        should_throw_UserNotAuthorizedException_when_the_owning_student_and_feedback_is_not_SUBMITTED() {
+      BddLogger.given("A logged-in student owning a feedback that is not submitted yet");
+      UUID feedbackId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().toModel();
+      File existingAttachment = attachment();
+      Feedback feedback =
+          feedbackOf(feedbackId, activity, EFeedbackStatus.IN_PROCESS, List.of(existingAttachment));
+
+      when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
+      when(loggedInUserService.getLoggedInUser()).thenReturn(student.getUser());
+
+      BddLogger.when("downloadAttachment is called");
+
+      BddLogger.then("A UserNotAuthorizedException is thrown and nothing is downloaded");
+      assertThatThrownBy(() -> service.downloadAttachment(feedbackId, existingAttachment.getId()))
+          .isInstanceOf(UserNotAuthorizedException.class);
+
+      verifyNoInteractions(fileResourceService);
+    }
+
+    @Test
+    void should_throw_UserNotAuthorizedException_when_user_is_neither_author_nor_owning_student() {
+      BddLogger.given("A logged-in user unrelated to the feedback");
+      UUID feedbackId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().toModel();
+      File existingAttachment = attachment();
+      Feedback feedback =
+          feedbackOf(feedbackId, activity, EFeedbackStatus.SUBMITTED, List.of(existingAttachment));
+
+      when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
+      when(loggedInUserService.getLoggedInUser()).thenReturn(UserFixture.create().toModel());
+
+      BddLogger.when("downloadAttachment is called");
+
+      BddLogger.then("A UserNotAuthorizedException is thrown and nothing is downloaded");
+      assertThatThrownBy(() -> service.downloadAttachment(feedbackId, existingAttachment.getId()))
+          .isInstanceOf(UserNotAuthorizedException.class);
+
+      verifyNoInteractions(fileResourceService);
+    }
+
+    @Test
+    void should_throw_FileNotFoundException_when_the_attachment_is_not_linked_to_the_feedback() {
+      BddLogger.given("A logged-in staff author and a file that is not an attachment");
+      UUID feedbackId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().toModel();
+      User authorUser = UserFixture.create().withId(activity.getAuthor().getId()).toModel();
+      Feedback feedback =
+          feedbackOf(feedbackId, activity, EFeedbackStatus.IN_PROCESS, List.of(attachment()));
+
+      when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
+      when(loggedInUserService.getLoggedInUser()).thenReturn(authorUser);
+
+      BddLogger.when("downloadAttachment is called with an unknown attachment ID");
+
+      BddLogger.then("A FileNotFoundException is thrown and nothing is downloaded");
+      assertThatThrownBy(() -> service.downloadAttachment(feedbackId, UUID.randomUUID()))
+          .isInstanceOf(FileNotFoundException.class);
+
+      verifyNoInteractions(fileResourceService);
+    }
+
+    @Test
+    void should_throw_FeedbackNotFoundException_when_feedback_does_not_exist() {
+      BddLogger.given("A non-existent feedback ID");
+      UUID feedbackId = UUID.randomUUID();
+
+      when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.empty());
+
+      BddLogger.when("downloadAttachment is called");
+
+      BddLogger.then("A FeedbackNotFoundException is thrown and nothing is downloaded");
+      assertThatThrownBy(() -> service.downloadAttachment(feedbackId, UUID.randomUUID()))
+          .isInstanceOf(FeedbackNotFoundException.class);
+
+      verifyNoInteractions(fileResourceService);
+    }
+  }
+
+  private Feedback feedbackOf(
+      UUID feedbackId, Activity activity, EFeedbackStatus status, List<File> attachments) {
+    return Feedback.toDomain(
+        feedbackId,
+        Instant.now(),
+        Instant.now(),
+        DeclaredActivity.create(UUID.randomUUID(), student, activity, null, null, null, null, null),
+        "Ma réflexion",
+        "Mon retour",
+        status,
+        1,
+        List.of(),
+        List.of(),
+        attachments);
+  }
+
+  private File attachment() {
+    return File.create(
+        UUID.randomUUID(),
+        EFileType.PDF,
+        FILE_NAME,
+        CONTENT.length,
+        "uri/" + FILE_NAME,
+        UserFixture.create().toModel(),
+        true);
   }
 }

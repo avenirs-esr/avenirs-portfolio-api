@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.student.activity.application.adapter.mapper;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
+import fr.avenirsesr.portfolio.file.application.adapter.mapper.FileDtoMapper;
 import fr.avenirsesr.portfolio.shared.application.adapter.mapper.OptionalMapper;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityContentDtoMapper;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.FeedbackDetailsDTO;
@@ -18,7 +19,8 @@ import org.mapstruct.Mapping;
       OptionalMapper.class,
       TraceDetailMapper.class,
       DeclaredSkillProgressMapper.class,
-      ActivityContentDtoMapper.class
+      ActivityContentDtoMapper.class,
+      FileDtoMapper.class
     })
 public interface FeedbackDetailsDTOMapper {
 

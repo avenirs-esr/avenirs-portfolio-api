@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.service;
 
+import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
@@ -28,6 +29,7 @@ public class FeedbackServiceConfig {
   private final LoggedInUserService loggedInUserService;
   private final NotificationService notificationService;
   private final ActivityService activityService;
+  private final FileResourceService fileResourceService;
 
   @Bean
   public FeedbackService feedbackService(
@@ -41,6 +43,7 @@ public class FeedbackServiceConfig {
         declaredSkillProgressService,
         loggedInUserService,
         notificationService,
-        activityService);
+        activityService,
+        fileResourceService);
   }
 }

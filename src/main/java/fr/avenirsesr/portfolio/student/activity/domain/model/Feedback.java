@@ -1,10 +1,12 @@
 package fr.avenirsesr.portfolio.student.activity.domain.model;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
+import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -27,6 +29,7 @@ public class Feedback extends AvenirsBaseModel {
   private int iteration;
   private List<Trace> associatedTraces;
   private List<DeclaredSkillProgress> associatedDeclaredSkills;
+  private List<File> attachments;
 
   private Feedback(
       UUID id,
@@ -38,7 +41,8 @@ public class Feedback extends AvenirsBaseModel {
       EFeedbackStatus status,
       int iteration,
       List<Trace> associatedTraces,
-      List<DeclaredSkillProgress> associatedDeclaredSkills) {
+      List<DeclaredSkillProgress> associatedDeclaredSkills,
+      List<File> attachments) {
     super(id, createdAt, updatedAt);
     this.reflexion = reflexion;
     this.feedback = feedback;
@@ -46,6 +50,7 @@ public class Feedback extends AvenirsBaseModel {
     this.iteration = iteration;
     this.associatedTraces = associatedTraces;
     this.associatedDeclaredSkills = associatedDeclaredSkills;
+    this.attachments = new ArrayList<>(attachments == null ? List.of() : attachments);
     this.declaredActivity = declaredActivity;
   }
 
@@ -65,7 +70,8 @@ public class Feedback extends AvenirsBaseModel {
         EFeedbackStatus.NEW,
         iteration,
         associatedTraces,
-        associatedDeclaredSkills);
+        associatedDeclaredSkills,
+        List.of());
   }
 
   public static Feedback toDomain(
@@ -78,7 +84,8 @@ public class Feedback extends AvenirsBaseModel {
       EFeedbackStatus status,
       int iteration,
       List<Trace> associatedTraces,
-      List<DeclaredSkillProgress> associatedDeclaredSkills) {
+      List<DeclaredSkillProgress> associatedDeclaredSkills,
+      List<File> attachments) {
     return new Feedback(
         id,
         createdAt,
@@ -89,7 +96,22 @@ public class Feedback extends AvenirsBaseModel {
         status,
         iteration,
         associatedTraces,
-        associatedDeclaredSkills);
+        associatedDeclaredSkills,
+        attachments);
+  }
+
+  public void addAttachment(File attachment) {
+    this.attachments.add(attachment);
+  }
+
+  public void removeAttachment(UUID attachmentId) {
+    this.attachments.removeIf(attachment -> attachment.getId().equals(attachmentId));
+  }
+
+  public Optional<File> findAttachment(UUID attachmentId) {
+    return this.attachments.stream()
+        .filter(attachment -> attachment.getId().equals(attachmentId))
+        .findFirst();
   }
 
   public Optional<String> getReflexion() {

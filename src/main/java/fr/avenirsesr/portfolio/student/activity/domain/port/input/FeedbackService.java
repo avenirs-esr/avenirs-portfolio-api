@@ -4,6 +4,8 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
+import fr.avenirsesr.portfolio.file.domain.model.File;
+import fr.avenirsesr.portfolio.file.domain.model.FileDownload;
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackDashboardData;
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackData;
 import fr.avenirsesr.portfolio.student.activity.domain.model.Feedback;
@@ -29,6 +31,13 @@ public interface FeedbackService {
   List<Feedback> getFeedbackHistory(UUID declaredActivityId);
 
   void submitFeedback(UUID feedbackId);
+
+  File uploadAttachment(
+      UUID feedbackId, String fileName, String mimeType, long size, byte[] content);
+
+  void deleteAttachment(UUID feedbackId, UUID attachmentId);
+
+  FileDownload downloadAttachment(UUID feedbackId, UUID attachmentId);
 
   Set<UUID> findAttachmentIdsUsedByTraceSnapshots(
       List<UUID> declaredActivityIds, List<UUID> traceIds);
