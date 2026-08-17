@@ -277,36 +277,37 @@ public class DeclaredActivityController {
 
   @PreAuthorize(&quot;hasAuthority('trace:association:manage:own')&quot;)
   @GetMapping(&quot;/{declaredActivityId}/search-for-association/traces&quot;)
-  public ResponseEntity&lt;PagedResponse&lt;AssociationSearchResultTraceDTO&gt;&gt; searchTracesForAssociation(
-      Principal principal,
-      @Valid @PathVariable UUID declaredActivityId,
-      @RequestParam(required = false) Boolean isAssociated,
-      @RequestParam(required = false) String keyword,
-      @RequestParam(required = false) Integer page,
-      @RequestParam(required = false) Integer pageSize) {
-<span class="fc" id="L287">    var pageCriteria = new PageCriteria(page, pageSize);</span>
-<span class="fc" id="L288">    log.debug(</span>
+  public ResponseEntity&lt;PagedResponse&lt;AssociationSearchResultTraceDTO&gt;&gt;
+      searchTracesForAssociationWithDeclaredActivity(
+          Principal principal,
+          @Valid @PathVariable UUID declaredActivityId,
+          @RequestParam(required = false) Boolean isAssociated,
+          @RequestParam(required = false) String keyword,
+          @RequestParam(required = false) Integer page,
+          @RequestParam(required = false) Integer pageSize) {
+<span class="fc" id="L288">    var pageCriteria = new PageCriteria(page, pageSize);</span>
+<span class="fc" id="L289">    log.debug(</span>
         &quot;Received request to search traces for association with declared activity [{}] by student&quot;
             + &quot; [{}] (isAssociated={}, keyword={}, page={}, pageSize={})&quot;,
         declaredActivityId,
-<span class="fc" id="L292">        principal.getName(),</span>
+<span class="fc" id="L293">        principal.getName(),</span>
         isAssociated,
         keyword,
-<span class="fc" id="L295">        pageCriteria.page(),</span>
-<span class="fc" id="L296">        pageCriteria.pageSize());</span>
+<span class="fc" id="L296">        pageCriteria.page(),</span>
+<span class="fc" id="L297">        pageCriteria.pageSize());</span>
 
-<span class="fc" id="L298">    PagedResult&lt;AssociationSearchResultData&gt; pagedResult =</span>
-<span class="nc" id="L299">        declaredActivityService.searchTracesForAssociation(</span>
+<span class="fc" id="L299">    PagedResult&lt;AssociationSearchResultData&gt; pagedResult =</span>
+<span class="nc" id="L300">        declaredActivityService.searchTracesForAssociation(</span>
             declaredActivityId, keyword, pageCriteria, isAssociated);
 
-<span class="nc" id="L302">    var response =</span>
+<span class="nc" id="L303">    var response =</span>
         new PagedResponse&lt;&gt;(
-<span class="nc" id="L304">            pagedResult.content().stream()</span>
-<span class="nc" id="L305">                .map(associationSearchResultDTOMapper::toTraceDTO)</span>
-<span class="nc" id="L306">                .toList(),</span>
-<span class="nc" id="L307">            PageInfoDTO.fromDomain(pagedResult.pageInfo()));</span>
+<span class="nc" id="L305">            pagedResult.content().stream()</span>
+<span class="nc" id="L306">                .map(associationSearchResultDTOMapper::toTraceDTO)</span>
+<span class="nc" id="L307">                .toList(),</span>
+<span class="nc" id="L308">            PageInfoDTO.fromDomain(pagedResult.pageInfo()));</span>
 
-<span class="nc" id="L309">    return ResponseEntity.ok(response);</span>
+<span class="nc" id="L310">    return ResponseEntity.ok(response);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -45,13 +45,13 @@ public class AssociationSearchHelper {
       Predicate&lt;T&gt; additionalDisabledCondition) {
 
     Set&lt;UUID&gt; alreadyAssociatedIds =
-<span class="pc bpc" id="L48" title="1 of 2 branches missed.">        sourceEntityId != null</span>
+<span class="fc bfc" id="L48" title="All 2 branches covered.">        sourceEntityId != null</span>
             ? associationService
 <span class="fc" id="L50">                .getAllOf(sourceEntityId, sourceEntityClass, List.of(associationType))</span>
 <span class="fc" id="L51">                .stream()</span>
 <span class="fc" id="L52">                .map(associationIdExtractor)</span>
 <span class="fc" id="L53">                .collect(Collectors.toSet())</span>
-<span class="pc" id="L54">            : Set.of();</span>
+<span class="fc" id="L54">            : Set.of();</span>
 
 <span class="fc" id="L56">    var mappedContent =</span>
 <span class="fc" id="L57">        searchResults.content().stream()</span>
