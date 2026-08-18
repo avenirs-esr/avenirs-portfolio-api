@@ -20,8 +20,10 @@ import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.FeedbackService;
+import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.exception.AssociationDoesNotExistException;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
+import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.association.domain.service.AssociationSearchHelper;
@@ -208,6 +210,170 @@ class TraceServiceImplTest {
         var returnedTrace = result.content().getFirst();
 
         assertTrue(returnedTrace.isAssociated());
+      }
+    }
+
+    @Nested
+    class WhenSearchingTracesForAssociation {
+
+      @Test
+      void thenItShouldSearchTracesWithoutDisabledAssociationsWhenContextIsNull() {
+        BddLogger.when("searching traces for association without context");
+
+        Trace trace = TraceFixture.create().withStudent(student).toModel();
+        var pageCriteria = new PageCriteria(0, 8);
+        PagedResult<AssociationSearchResultData> expected =
+            new PagedResult<>(
+                List.of(
+                    new AssociationSearchResultData(trace.getId(), trace.getTitle(), null, false)),
+                new PageInfo(0, 8, 1));
+
+        when(traceRepository.findAll(
+                eq(student), anyString(), any(TraceFilter.class), isNull(), eq(pageCriteria)))
+            .thenReturn(new PagedResult<>(List.of(trace), new PageInfo(0, 8, 1)));
+        when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
+        when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
+        when(associationSearchHelper.searchForAssociation(
+                isNull(), isNull(), isNull(), isNull(), any(), any(), any(), isNull(), any()))
+            .thenReturn(expected);
+
+        PagedResult<AssociationSearchResultData> result =
+            traceService.searchTracesForAssociation(null, null, "kw", pageCriteria);
+
+        BddLogger.then("it should return the helper results");
+        assertSame(expected, result);
+        verify(traceRepository)
+            .findAll(
+                eq(student),
+                eq("kw"),
+                eq(new TraceFilter(null, null, null, null)),
+                isNull(),
+                eq(pageCriteria));
+        verify(associationSearchHelper)
+            .searchForAssociation(
+                isNull(), isNull(), isNull(), isNull(), any(), any(), any(), isNull(), any());
+      }
+
+      @Test
+      void thenItShouldUseDeclaredActivityAssociationTypeWhenContextIsDeclaredActivity() {
+        BddLogger.when("searching traces for association with declared activity context");
+
+        UUID contextId = UUID.randomUUID();
+        Trace trace = TraceFixture.create().withStudent(student).toModel();
+        var pageCriteria = new PageCriteria(0, 8);
+        PagedResult<AssociationSearchResultData> expected =
+            new PagedResult<>(
+                List.of(
+                    new AssociationSearchResultData(trace.getId(), trace.getTitle(), null, false)),
+                new PageInfo(0, 8, 1));
+
+        when(traceRepository.findAll(
+                eq(student), anyString(), any(TraceFilter.class), isNull(), eq(pageCriteria)))
+            .thenReturn(new PagedResult<>(List.of(trace), new PageInfo(0, 8, 1)));
+        when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
+        when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
+        when(associationSearchHelper.searchForAssociation(
+                eq(contextId),
+                eq(DeclaredActivity.class),
+                eq(EAssociationType.DECLARED_ACTIVITY_TRACE),
+                any(),
+                any(),
+                any(),
+                any(),
+                isNull(),
+                any()))
+            .thenReturn(expected);
+
+        PagedResult<AssociationSearchResultData> result =
+            traceService.searchTracesForAssociation(
+                contextId, EAssociationContextType.DECLARED_ACTIVITY, "kw", pageCriteria);
+
+        BddLogger.then("it should use the declared activity trace association type");
+        assertSame(expected, result);
+        verify(associationSearchHelper)
+            .searchForAssociation(
+                eq(contextId),
+                eq(DeclaredActivity.class),
+                eq(EAssociationType.DECLARED_ACTIVITY_TRACE),
+                any(),
+                any(),
+                any(),
+                any(),
+                isNull(),
+                any());
+      }
+
+      @Test
+      void thenItShouldUseTraceDeclaredExperienceAssociationTypeWhenContextIsDeclaredExperience() {
+        BddLogger.when("searching traces for association with declared experience context");
+
+        UUID contextId = UUID.randomUUID();
+        Trace trace = TraceFixture.create().withStudent(student).toModel();
+        var pageCriteria = new PageCriteria(0, 8);
+        PagedResult<AssociationSearchResultData> expected =
+            new PagedResult<>(
+                List.of(
+                    new AssociationSearchResultData(trace.getId(), trace.getTitle(), null, false)),
+                new PageInfo(0, 8, 1));
+
+        when(traceRepository.findAll(
+                eq(student), anyString(), any(TraceFilter.class), isNull(), eq(pageCriteria)))
+            .thenReturn(new PagedResult<>(List.of(trace), new PageInfo(0, 8, 1)));
+        when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
+        when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
+        when(associationSearchHelper.searchForAssociation(
+                eq(contextId),
+                eq(DeclaredExperience.class),
+                eq(EAssociationType.TRACE_DECLARED_EXPERIENCE),
+                any(),
+                any(),
+                any(),
+                any(),
+                isNull(),
+                any()))
+            .thenReturn(expected);
+
+        PagedResult<AssociationSearchResultData> result =
+            traceService.searchTracesForAssociation(
+                contextId, EAssociationContextType.DECLARED_EXPERIENCE, "kw", pageCriteria);
+
+        BddLogger.then("it should use the trace declared experience association type");
+        assertSame(expected, result);
+        verify(associationSearchHelper)
+            .searchForAssociation(
+                eq(contextId),
+                eq(DeclaredExperience.class),
+                eq(EAssociationType.TRACE_DECLARED_EXPERIENCE),
+                any(),
+                any(),
+                any(),
+                any(),
+                isNull(),
+                any());
+      }
+
+      @Test
+      void thenItShouldThrowUnsupportedOperationExceptionWhenContextIsTrace() {
+        assertThrows(
+            UnsupportedOperationException.class,
+            () ->
+                traceService.searchTracesForAssociation(
+                    UUID.randomUUID(),
+                    EAssociationContextType.TRACE,
+                    "kw",
+                    new PageCriteria(0, 8)));
+      }
+
+      @Test
+      void thenItShouldThrowUnsupportedOperationExceptionWhenContextIsDeclaredSkill() {
+        assertThrows(
+            UnsupportedOperationException.class,
+            () ->
+                traceService.searchTracesForAssociation(
+                    UUID.randomUUID(),
+                    EAssociationContextType.DECLARED_SKILL,
+                    "kw",
+                    new PageCriteria(0, 8)));
       }
     }
 

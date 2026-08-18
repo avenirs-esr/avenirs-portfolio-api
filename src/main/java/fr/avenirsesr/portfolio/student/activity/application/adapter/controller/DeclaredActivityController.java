@@ -277,13 +277,14 @@ public class DeclaredActivityController {
 
   @PreAuthorize("hasAuthority('trace:association:manage:own')")
   @GetMapping("/{declaredActivityId}/search-for-association/traces")
-  public ResponseEntity<PagedResponse<AssociationSearchResultTraceDTO>> searchTracesForAssociation(
-      Principal principal,
-      @Valid @PathVariable UUID declaredActivityId,
-      @RequestParam(required = false) Boolean isAssociated,
-      @RequestParam(required = false) String keyword,
-      @RequestParam(required = false) Integer page,
-      @RequestParam(required = false) Integer pageSize) {
+  public ResponseEntity<PagedResponse<AssociationSearchResultTraceDTO>>
+      searchTracesForAssociationWithDeclaredActivity(
+          Principal principal,
+          @Valid @PathVariable UUID declaredActivityId,
+          @RequestParam(required = false) Boolean isAssociated,
+          @RequestParam(required = false) String keyword,
+          @RequestParam(required = false) Integer page,
+          @RequestParam(required = false) Integer pageSize) {
     var pageCriteria = new PageCriteria(page, pageSize);
     log.debug(
         "Received request to search traces for association with declared activity [{}] by student"
