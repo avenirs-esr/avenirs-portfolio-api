@@ -617,7 +617,8 @@ class FeedbackControllerTest {
       when(fileDtoMapper.fromDomain(uploaded)).thenReturn(expectedDto);
 
       BddLogger.when("uploadAttachment is called");
-      ResponseEntity<FileDTO> response = controller.uploadAttachment(principal, feedbackId, file);
+      ResponseEntity<FileDTO> response =
+          controller.uploadFeedbackAttachment(principal, feedbackId, file);
 
       BddLogger.then("201 CREATED is returned with the mapped FileDTO");
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
@@ -634,7 +635,7 @@ class FeedbackControllerTest {
       MockMultipartFile file = multipartFile();
 
       BddLogger.when("uploadAttachment is called");
-      controller.uploadAttachment(principal, feedbackId, file);
+      controller.uploadFeedbackAttachment(principal, feedbackId, file);
 
       BddLogger.then("The service is called once with the file name, mime type, size and content");
       verify(feedbackService, times(1))
