@@ -662,7 +662,7 @@ class FeedbackControllerTest {
 
       BddLogger.when("deleteAttachment is called");
       ResponseEntity<Void> response =
-          controller.deleteAttachment(principal, feedbackId, attachmentId);
+          controller.deleteFeedbackAttachment(principal, feedbackId, attachmentId);
 
       BddLogger.then("204 No Content is returned with no body");
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
@@ -679,7 +679,7 @@ class FeedbackControllerTest {
       UUID attachmentId = UUID.randomUUID();
 
       BddLogger.when("deleteAttachment is called");
-      controller.deleteAttachment(principal, feedbackId, attachmentId);
+      controller.deleteFeedbackAttachment(principal, feedbackId, attachmentId);
 
       BddLogger.then("The service is called exactly once with both IDs");
       verify(feedbackService, times(1)).deleteAttachment(feedbackId, attachmentId);
