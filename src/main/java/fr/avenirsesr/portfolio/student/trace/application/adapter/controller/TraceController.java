@@ -138,6 +138,7 @@ public class TraceController {
       @Parameter(schema = @Schema(ref = "#/components/schemas/EAssociationContextType"))
           @RequestParam(required = false)
           EAssociationContextType contextType,
+      @RequestParam(required = false) Boolean isAssociated,
       @RequestParam(required = false) String keyword,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize) {
@@ -155,7 +156,7 @@ public class TraceController {
 
     PagedResult<AssociationSearchResultData> pagedResult =
         traceService.searchTracesForAssociation(
-            excludeAssociatedWithElementId, contextType, keyword, pageCriteria);
+            excludeAssociatedWithElementId, contextType, isAssociated, keyword, pageCriteria);
 
     return ResponseEntity.ok(
         new PagedResponse<>(

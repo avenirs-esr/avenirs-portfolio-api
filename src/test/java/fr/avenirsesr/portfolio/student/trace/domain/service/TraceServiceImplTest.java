@@ -1,11 +1,27 @@
 package fr.avenirsesr.portfolio.student.trace.domain.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import fr.avenirsesr.portfolio.common.configuration.domain.model.TraceConfiguration;
-import fr.avenirsesr.portfolio.common.data.domain.model.*;
+import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
@@ -33,7 +49,11 @@ import fr.avenirsesr.portfolio.student.experience.domain.port.input.DeclaredExpe
 import fr.avenirsesr.portfolio.student.skill.domain.exception.DeclaredSkillProgressNotFoundException;
 import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
-import fr.avenirsesr.portfolio.student.trace.domain.data.*;
+import fr.avenirsesr.portfolio.student.trace.domain.data.TraceAssociationsData;
+import fr.avenirsesr.portfolio.student.trace.domain.data.TraceDetailData;
+import fr.avenirsesr.portfolio.student.trace.domain.data.TraceLockedDeclaredActivitiesData;
+import fr.avenirsesr.portfolio.student.trace.domain.data.TraceViewData;
+import fr.avenirsesr.portfolio.student.trace.domain.data.TracesSummaryData;
 import fr.avenirsesr.portfolio.student.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.student.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
@@ -49,7 +69,11 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -238,7 +262,7 @@ class TraceServiceImplTest {
             .thenReturn(expected);
 
         PagedResult<AssociationSearchResultData> result =
-            traceService.searchTracesForAssociation(null, null, "kw", pageCriteria);
+            traceService.searchTracesForAssociation(null, null, null, "kw", pageCriteria);
 
         BddLogger.then("it should return the helper results");
         assertSame(expected, result);
@@ -286,7 +310,7 @@ class TraceServiceImplTest {
 
         PagedResult<AssociationSearchResultData> result =
             traceService.searchTracesForAssociation(
-                contextId, EAssociationContextType.DECLARED_ACTIVITY, "kw", pageCriteria);
+                contextId, EAssociationContextType.DECLARED_ACTIVITY, null, "kw", pageCriteria);
 
         BddLogger.then("it should use the declared activity trace association type");
         assertSame(expected, result);
@@ -335,7 +359,7 @@ class TraceServiceImplTest {
 
         PagedResult<AssociationSearchResultData> result =
             traceService.searchTracesForAssociation(
-                contextId, EAssociationContextType.DECLARED_EXPERIENCE, "kw", pageCriteria);
+                contextId, EAssociationContextType.DECLARED_EXPERIENCE, null, "kw", pageCriteria);
 
         BddLogger.then("it should use the trace declared experience association type");
         assertSame(expected, result);
@@ -360,6 +384,7 @@ class TraceServiceImplTest {
                 traceService.searchTracesForAssociation(
                     UUID.randomUUID(),
                     EAssociationContextType.TRACE,
+                    null,
                     "kw",
                     new PageCriteria(0, 8)));
       }
@@ -372,8 +397,81 @@ class TraceServiceImplTest {
                 traceService.searchTracesForAssociation(
                     UUID.randomUUID(),
                     EAssociationContextType.DECLARED_SKILL,
+                    null,
                     "kw",
                     new PageCriteria(0, 8)));
+      }
+
+      @Test
+      void thenItShouldSearchOnlyAssociatedTracesWhenIsAssociatedIsTrue() {
+        BddLogger.when("searching only associated traces");
+
+        Trace trace = TraceFixture.create().withStudent(student).toModel();
+        var pageCriteria = new PageCriteria(0, 8);
+        PagedResult<AssociationSearchResultData> expected =
+            new PagedResult<>(
+                List.of(
+                    new AssociationSearchResultData(trace.getId(), trace.getTitle(), null, false)),
+                new PageInfo(0, 8, 1));
+
+        when(traceRepository.findAll(
+                eq(student), anyString(), any(TraceFilter.class), isNull(), eq(pageCriteria)))
+            .thenReturn(new PagedResult<>(List.of(trace), new PageInfo(0, 8, 1)));
+        when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
+        when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, true));
+        when(associationSearchHelper.searchForAssociation(
+                isNull(), isNull(), isNull(), isNull(), any(), any(), any(), isNull(), any()))
+            .thenReturn(expected);
+
+        PagedResult<AssociationSearchResultData> result =
+            traceService.searchTracesForAssociation(null, null, true, "kw", pageCriteria);
+
+        BddLogger.then("it should return only associated traces");
+
+        assertSame(expected, result);
+        verify(traceRepository)
+            .findAll(
+                eq(student),
+                eq("kw"),
+                eq(new TraceFilter(true, null, null, null)),
+                isNull(),
+                eq(pageCriteria));
+      }
+
+      @Test
+      void thenItShouldSearchOnlyUnassociatedTracesWhenIsAssociatedIsFalse() {
+        BddLogger.when("searching only unassociated traces");
+
+        Trace trace = TraceFixture.create().withStudent(student).toModel();
+        var pageCriteria = new PageCriteria(0, 8);
+        PagedResult<AssociationSearchResultData> expected =
+            new PagedResult<>(
+                List.of(
+                    new AssociationSearchResultData(trace.getId(), trace.getTitle(), null, false)),
+                new PageInfo(0, 8, 1));
+
+        when(traceRepository.findAll(
+                eq(student), anyString(), any(TraceFilter.class), isNull(), eq(pageCriteria)))
+            .thenReturn(new PagedResult<>(List.of(trace), new PageInfo(0, 8, 1)));
+        when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
+        when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
+        when(associationSearchHelper.searchForAssociation(
+                isNull(), isNull(), isNull(), isNull(), any(), any(), any(), isNull(), any()))
+            .thenReturn(expected);
+
+        PagedResult<AssociationSearchResultData> result =
+            traceService.searchTracesForAssociation(null, null, false, "kw", pageCriteria);
+
+        BddLogger.then("it should return only unassociated traces");
+
+        assertSame(expected, result);
+        verify(traceRepository)
+            .findAll(
+                eq(student),
+                eq("kw"),
+                eq(new TraceFilter(false, null, null, null)),
+                isNull(),
+                eq(pageCriteria));
       }
     }
 

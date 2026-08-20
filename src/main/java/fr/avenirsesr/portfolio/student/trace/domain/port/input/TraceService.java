@@ -82,6 +82,7 @@ public interface TraceService {
   PagedResult<AssociationSearchResultData> searchTracesForAssociation(
       UUID excludeAssociatedWithElementId,
       EAssociationContextType contextType,
+      Boolean isAssociated,
       String keyword,
       PageCriteria pageCriteria);
 

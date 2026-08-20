@@ -583,6 +583,7 @@ public class TraceServiceImpl implements TraceService {
   public PagedResult<AssociationSearchResultData> searchTracesForAssociation(
       UUID excludeAssociatedWithElementId,
       EAssociationContextType contextType,
+      Boolean isAssociated,
       String keyword,
       PageCriteria pageCriteria) {
     EAssociationType associationType = null;
@@ -591,7 +592,7 @@ public class TraceServiceImpl implements TraceService {
     }
 
     var traces =
-        getTracesView(keyword, new TraceFilter(null, null, null, null), null, pageCriteria);
+        getTracesView(keyword, new TraceFilter(isAssociated, null, null, null), null, pageCriteria);
 
     if (contextType == null) {
       return associationSearchHelper.searchForAssociation(
