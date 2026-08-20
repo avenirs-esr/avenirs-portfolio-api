@@ -15,6 +15,7 @@ import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.exception.AssociationAlreadyExistException;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
+import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.association.domain.service.AssociationSearchHelper;
@@ -1945,6 +1946,168 @@ class DeclaredExperienceServiceImplTest {
           () -> service.deleteAssociations(experienceId, List.of(UUID.randomUUID())));
 
       verify(associationService, never()).deleteAllByIds(anyList());
+    }
+  }
+
+  @Nested
+  class WhenSearchingDeclaredExperiencesForAssociation {
+
+    @Test
+    void shouldSearchWithoutAssociationTypeWhenContextTypeIsNull() {
+      BddLogger.given("a logged-in student and no contextType provided");
+
+      var pageCriteria = new PageCriteria(0, 10);
+      var pageInfo = new PageInfo(0, 10, 0);
+
+      when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+      when(experienceRepository.findAllByStudent(student, pageCriteria, "java"))
+          .thenReturn(new PagedResult<>(List.of(), pageInfo));
+
+      when(associationSearchHelper.searchForAssociation(
+              isNull(), isNull(), isNull(), isNull(), any(), any(), any(), any(), any()))
+          .thenReturn(new PagedResult<>(List.of(), pageInfo));
+
+      BddLogger.when("searchDeclaredExperiencesForAssociation is called with contextType=null");
+      var result =
+          service.searchDeclaredExperiencesForAssociation(null, null, "java", pageCriteria);
+
+      BddLogger.then("it should search without an association type constraint");
+      assertThat(result.content()).isEmpty();
+      verify(associationSearchHelper)
+          .searchForAssociation(
+              isNull(), isNull(), isNull(), isNull(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void shouldSearchWithTraceAssociationTypeWhenContextTypeIsTrace() {
+      BddLogger.given("a logged-in student and contextType=TRACE");
+
+      var pageCriteria = new PageCriteria(0, 10);
+      var pageInfo = new PageInfo(0, 10, 0);
+      UUID excludeId = UUID.randomUUID();
+
+      when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+      when(experienceRepository.findAllByStudent(student, pageCriteria, "java"))
+          .thenReturn(new PagedResult<>(List.of(), pageInfo));
+
+      when(associationSearchHelper.searchForAssociation(
+              eq(excludeId),
+              eq(Trace.class),
+              eq(EAssociationType.TRACE_DECLARED_EXPERIENCE),
+              any(),
+              any(),
+              any(),
+              any(),
+              any(),
+              any()))
+          .thenReturn(new PagedResult<>(List.of(), pageInfo));
+
+      BddLogger.when("searchDeclaredExperiencesForAssociation is called with contextType=TRACE");
+      var result =
+          service.searchDeclaredExperiencesForAssociation(
+              excludeId, EAssociationContextType.TRACE, "java", pageCriteria);
+
+      BddLogger.then("it should search using the TRACE_DECLARED_EXPERIENCE association type");
+      assertThat(result.content()).isEmpty();
+      verify(associationSearchHelper)
+          .searchForAssociation(
+              eq(excludeId),
+              eq(Trace.class),
+              eq(EAssociationType.TRACE_DECLARED_EXPERIENCE),
+              any(),
+              any(),
+              any(),
+              any(),
+              any(),
+              any());
+    }
+
+    @Test
+    void shouldSearchWithDeclaredSkillAssociationTypeWhenContextTypeIsDeclaredSkill() {
+      BddLogger.given("a logged-in student and contextType=DECLARED_SKILL");
+
+      var pageCriteria = new PageCriteria(0, 10);
+      var pageInfo = new PageInfo(0, 10, 0);
+      UUID excludeId = UUID.randomUUID();
+
+      when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+      when(experienceRepository.findAllByStudent(student, pageCriteria, "java"))
+          .thenReturn(new PagedResult<>(List.of(), pageInfo));
+
+      when(associationSearchHelper.searchForAssociation(
+              eq(excludeId),
+              eq(DeclaredSkillProgress.class),
+              eq(EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL),
+              any(),
+              any(),
+              any(),
+              any(),
+              any(),
+              any()))
+          .thenReturn(new PagedResult<>(List.of(), pageInfo));
+
+      BddLogger.when(
+          "searchDeclaredExperiencesForAssociation is called with contextType=DECLARED_SKILL");
+      var result =
+          service.searchDeclaredExperiencesForAssociation(
+              excludeId, EAssociationContextType.DECLARED_SKILL, "java", pageCriteria);
+
+      BddLogger.then(
+          "it should search using the DECLARED_EXPERIENCE_DECLARED_SKILL association type"
+              + " instead of throwing UnsupportedOperationException");
+      assertThat(result.content()).isEmpty();
+      verify(associationSearchHelper)
+          .searchForAssociation(
+              eq(excludeId),
+              eq(DeclaredSkillProgress.class),
+              eq(EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL),
+              any(),
+              any(),
+              any(),
+              any(),
+              any(),
+              any());
+    }
+
+    @Test
+    void shouldThrowUnsupportedOperationExceptionWhenContextTypeIsDeclaredActivity() {
+      BddLogger.given("a logged-in student and contextType=DECLARED_ACTIVITY");
+
+      var pageCriteria = new PageCriteria(0, 10);
+      when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+      when(experienceRepository.findAllByStudent(student, pageCriteria, "java"))
+          .thenReturn(new PagedResult<>(List.of(), new PageInfo(0, 10, 0)));
+
+      BddLogger.when(
+          "searchDeclaredExperiencesForAssociation is called with contextType=DECLARED_ACTIVITY");
+
+      BddLogger.then("it should throw UnsupportedOperationException (not yet implemented)");
+      assertThrows(
+          UnsupportedOperationException.class,
+          () ->
+              service.searchDeclaredExperiencesForAssociation(
+                  null, EAssociationContextType.DECLARED_ACTIVITY, "java", pageCriteria));
+    }
+
+    @Test
+    void shouldThrowUnsupportedOperationExceptionWhenContextTypeIsDeclaredExperience() {
+      BddLogger.given("a logged-in student and contextType=DECLARED_EXPERIENCE");
+
+      var pageCriteria = new PageCriteria(0, 10);
+      when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+      when(experienceRepository.findAllByStudent(student, pageCriteria, "java"))
+          .thenReturn(new PagedResult<>(List.of(), new PageInfo(0, 10, 0)));
+
+      BddLogger.when(
+          "searchDeclaredExperiencesForAssociation is called with"
+              + " contextType=DECLARED_EXPERIENCE");
+
+      BddLogger.then("it should throw UnsupportedOperationException (not yet implemented)");
+      assertThrows(
+          UnsupportedOperationException.class,
+          () ->
+              service.searchDeclaredExperiencesForAssociation(
+                  null, EAssociationContextType.DECLARED_EXPERIENCE, "java", pageCriteria));
     }
   }
 }
