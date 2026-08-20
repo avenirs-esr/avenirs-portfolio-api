@@ -389,10 +389,10 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
       EAssociationContextType contextType,
       String keyword,
       PageCriteria pageCriteria) {
-<span class="fc" id="L392">    var experiences = search(keyword, pageCriteria);</span>
+<span class="nc" id="L392">    var experiences = search(keyword, pageCriteria);</span>
 
-<span class="fc bfc" id="L394" title="All 2 branches covered.">    if (contextType == null) {</span>
-<span class="fc" id="L395">      return associationSearchHelper.searchForAssociation(</span>
+<span class="nc bnc" id="L394" title="All 2 branches missed.">    if (contextType == null) {</span>
+<span class="nc" id="L395">      return associationSearchHelper.searchForAssociation(</span>
           null,
           null,
           null,
@@ -404,13 +404,13 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
 <span class="nc" id="L404">          de -&gt; false);</span>
     }
 
-<span class="fc" id="L407">    EAssociationType associationType = getAssociationType(contextType);</span>
+<span class="nc" id="L407">    EAssociationType associationType = getAssociationType(contextType);</span>
 
-<span class="fc" id="L409">    return associationSearchHelper.searchForAssociation(</span>
+<span class="nc" id="L409">    return associationSearchHelper.searchForAssociation(</span>
         excludeAssociatedWithElementId,
-<span class="fc" id="L411">        contextType.toClass(),</span>
+<span class="nc" id="L411">        contextType.toClass(),</span>
         associationType,
-<span class="fc" id="L413">        associationType.idExtractorFor(DeclaredExperience.class),</span>
+<span class="nc" id="L413">        associationType.idExtractorFor(DeclaredExperience.class),</span>
         experiences,
         AvenirsBaseModel::getId,
         DeclaredExperience::getTitle,
@@ -579,10 +579,10 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
   }
 
   private EAssociationType getAssociationType(EAssociationContextType contextType) {
-<span class="fc bfc" id="L582" title="All 3 branches covered.">    return switch (contextType) {</span>
-<span class="fc" id="L583">      case TRACE -&gt; EAssociationType.TRACE_DECLARED_EXPERIENCE;</span>
-<span class="fc" id="L584">      case DECLARED_SKILL -&gt; EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL;</span>
-<span class="fc" id="L585">      case DECLARED_ACTIVITY, DECLARED_EXPERIENCE -&gt; throw new UnsupportedOperationException();</span>
+<span class="nc bnc" id="L582" title="All 2 branches missed.">    return switch (contextType) {</span>
+<span class="nc" id="L583">      case TRACE -&gt; EAssociationType.TRACE_DECLARED_EXPERIENCE;</span>
+      case DECLARED_ACTIVITY, DECLARED_SKILL, DECLARED_EXPERIENCE -&gt;
+<span class="nc" id="L585">          throw new UnsupportedOperationException();</span>
     };
   }
 }
