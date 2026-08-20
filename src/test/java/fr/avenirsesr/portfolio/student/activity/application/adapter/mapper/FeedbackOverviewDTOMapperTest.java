@@ -4,6 +4,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import fr.avenirsesr.portfolio.activity.infrastructure.fixture.ActivityFixture;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.file.application.adapter.mapper.FileDtoMapper;
+import fr.avenirsesr.portfolio.file.domain.model.File;
+import fr.avenirsesr.portfolio.file.infrastructure.fixture.FileFixture;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.FeedbackOverviewDTO;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.Feedback;
@@ -15,11 +18,15 @@ import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class FeedbackOverviewDTOMapperTest {
+
+  @Spy private FileDtoMapper fileDtoMapper = Mappers.getMapper(FileDtoMapper.class);
 
   @InjectMocks private FeedbackOverviewDTOMapperImpl mapper;
 
@@ -134,5 +141,46 @@ class FeedbackOverviewDTOMapperTest {
     assertNull(dto.feedback());
     assertEquals(EFeedbackStatus.NEW, dto.status());
     assertEquals(feedback.getId(), dto.id());
+  }
+
+  @Test
+  void shouldMapFeedbackAttachmentsToOverviewDTO_whenAttachmentsPresent() {
+    BddLogger.given("A submitted feedback with one attachment");
+    Student student = StudentFixture.create().toModel();
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(
+            UUID.randomUUID(),
+            student,
+            ActivityFixture.create().toModel(),
+            null,
+            null,
+            null,
+            null,
+            null);
+    File attachment = FileFixture.create().toModel();
+    Feedback feedback =
+        Feedback.toDomain(
+            UUID.randomUUID(),
+            Instant.now(),
+            Instant.now(),
+            declaredActivity,
+            null,
+            "Voici mon retour détaillé",
+            EFeedbackStatus.SUBMITTED,
+            1,
+            List.of(),
+            List.of(),
+            List.of(attachment));
+
+    BddLogger.when("mapping to FeedbackOverviewDTO");
+    FeedbackOverviewDTO dto = mapper.toDTO(feedback);
+
+    BddLogger.then("the attachment is mapped to a FileDTO with matching id, name and url");
+    assertNotNull(dto.attachments());
+    assertEquals(1, dto.attachments().size());
+    var attachmentDTO = dto.attachments().get(0);
+    assertEquals(attachment.getId(), attachmentDTO.id());
+    assertEquals(attachment.getFileName(), attachmentDTO.fileName());
+    assertEquals(attachment.getUri(), attachmentDTO.url());
   }
 }
