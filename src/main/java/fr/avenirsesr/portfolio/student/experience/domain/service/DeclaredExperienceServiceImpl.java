@@ -581,8 +581,8 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
   private EAssociationType getAssociationType(EAssociationContextType contextType) {
     return switch (contextType) {
       case TRACE -> EAssociationType.TRACE_DECLARED_EXPERIENCE;
-      case DECLARED_ACTIVITY, DECLARED_SKILL, DECLARED_EXPERIENCE ->
-          throw new UnsupportedOperationException();
+      case DECLARED_SKILL -> EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL;
+      case DECLARED_ACTIVITY, DECLARED_EXPERIENCE -> throw new UnsupportedOperationException();
     };
   }
 }
