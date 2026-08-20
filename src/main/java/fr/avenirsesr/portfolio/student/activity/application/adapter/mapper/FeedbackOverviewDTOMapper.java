@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.student.activity.application.adapter.mapper;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
+import fr.avenirsesr.portfolio.file.application.adapter.mapper.FileDtoMapper;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.FeedbackOverviewDTO;
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackData;
 import fr.avenirsesr.portfolio.student.activity.domain.model.Feedback;
@@ -9,7 +10,9 @@ import java.util.Optional;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring")
+@Mapper(
+    componentModel = "spring",
+    uses = {FileDtoMapper.class})
 public interface FeedbackOverviewDTOMapper {
 
   @Mapping(source = "declaredActivity.student.user", target = "student")
