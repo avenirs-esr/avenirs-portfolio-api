@@ -533,38 +533,66 @@ public class ActivityServiceImpl implements ActivityService {
   @Override
   public ActivityDraft duplicateActivity(UUID activityId) {
     var staff = loggedInUserService.getLoggedInStaff();
-    var activity =
-        activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);
-
     var now = Instant.now();
+
+    var publishedSource = activityRepository.findById(activityId);
+    if (publishedSource.isPresent()) {
+      return saveDuplicateFrom(publishedSource.get(), staff, now);
+    }
+
+    var draftSource =
+        activityDraftRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);
+    return saveDuplicateFrom(draftSource, staff, now);
+  }
+
+  private ActivityDraft saveDuplicateFrom(Activity source, Staff staff, Instant now) {
     var duplicate =
         ActivityDraft.toDomain(
             UUID.randomUUID(),
             now,
             now,
-            activity.getTitle(),
+            source.getTitle(),
             staff,
-            activity.getThematic(),
-            activity.getSummary(),
-            activity.getDescription(),
-            activity.getRecommendedCompletionContexts().orElse(null),
-            activity.getStartDate().orElse(null),
-            activity.getEndDate().orElse(null),
-            activity.getTraceAllowedAssociations(),
-            activity.getFeedbackAllowedIterations(),
-            activity.isEnableReflection(),
-            activity
-                .getBanner()
-                .map(banner -> fileResourceService.copy(banner.getId()))
-                .orElse(null),
-            activity.getLinks(),
-            activity.getFiles().stream()
+            source.getThematic(),
+            source.getSummary(),
+            source.getDescription(),
+            source.getRecommendedCompletionContexts().orElse(null),
+            source.getStartDate().orElse(null),
+            source.getEndDate().orElse(null),
+            source.getTraceAllowedAssociations(),
+            source.getFeedbackAllowedIterations(),
+            source.isEnableReflection(),
+            source.getBanner().map(banner -> fileResourceService.copy(banner.getId())).orElse(null),
+            source.getLinks(),
+            source.getFiles().stream()
                 .map(file -> fileResourceService.copy(file.getId()))
                 .toList());
+    return activityDraftRepository.save(duplicate);
+  }
 
-    var savedDuplicate = activityDraftRepository.save(duplicate);
-    log.info("Duplicated activity {} into draft {}", activityId, savedDuplicate.getId());
-    return savedDuplicate;
+  private ActivityDraft saveDuplicateFrom(ActivityDraft source, Staff staff, Instant now) {
+    var duplicate =
+        ActivityDraft.toDomain(
+            UUID.randomUUID(),
+            now,
+            now,
+            source.getTitle(),
+            staff,
+            source.getThematic(),
+            source.getSummary().orElse(null),
+            source.getDescription().orElse(null),
+            source.getRecommendedCompletionContexts().orElse(null),
+            source.getStartDate().orElse(null),
+            source.getEndDate().orElse(null),
+            source.getTraceAllowedAssociations(),
+            source.getFeedbackAllowedIterations(),
+            source.isEnableReflection(),
+            source.getBanner().map(banner -> fileResourceService.copy(banner.getId())).orElse(null),
+            source.getLinks(),
+            source.getFiles().stream()
+                .map(file -> fileResourceService.copy(file.getId()))
+                .toList());
+    return activityDraftRepository.save(duplicate);
   }
 
   private boolean hasEnrolledStudents(Activity activity) {

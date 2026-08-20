@@ -1816,6 +1816,138 @@ class ActivityServiceImplTest {
         }
       }
 
+      @Nested
+      class AndTheSourceIsAnUnpublishedDraft {
+
+        ActivityDraft sourceDraft;
+
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("the source is an unpublished draft, not a published activity");
+          when(activityRepository.findById(activityId)).thenReturn(Optional.empty());
+          sourceDraft = aDraft(null, List.of());
+          when(activityDraftRepository.findById(activityId)).thenReturn(Optional.of(sourceDraft));
+          when(activityDraftRepository.save(any()))
+              .thenAnswer(invocation -> invocation.getArgument(0));
+        }
+
+        @Test
+        void thenItShouldSaveANewDraftWithANewIdAndTheLoggedInStaffAsAuthor() {
+          BddLogger.then("a brand new draft owned by the logged-in staff should be saved");
+
+          ActivityDraft result = activityService.duplicateActivity(activityId);
+
+          assertNotEquals(activityId, result.getId());
+          assertEquals(loggedInStaff, result.getAuthor());
+          verify(activityDraftRepository).save(result);
+        }
+
+        @Test
+        void thenItShouldCopyEveryDraftField() {
+          BddLogger.then("the new draft should hold the same content as the source draft");
+
+          ActivityDraft result = activityService.duplicateActivity(activityId);
+
+          assertEquals("Brouillon à dupliquer", result.getTitle());
+          assertEquals(EActivityThematic.EXPERIENCES, result.getThematic());
+          assertEquals("Un résumé", result.getSummary().orElseThrow());
+          assertEquals("<p>Une description</p>", result.getDescription().orElseThrow());
+          assertEquals("2026", result.getRecommendedCompletionContexts().orElseThrow());
+          assertEquals(LocalDate.parse("2026-06-01"), result.getStartDate().orElseThrow());
+          assertEquals(LocalDate.parse("2026-06-30"), result.getEndDate().orElseThrow());
+          assertEquals(3, result.getTraceAllowedAssociations());
+          assertEquals(2, result.getFeedbackAllowedIterations());
+          assertTrue(result.isEnableReflection());
+          assertEquals(List.of("https://example.com"), result.getLinks());
+        }
+
+        @Test
+        void thenItShouldResetCreationAndUpdateDates() {
+          BddLogger.then("the draft dates should be refreshed instead of copied");
+
+          Instant beforeDuplication = Instant.now();
+          ActivityDraft result = activityService.duplicateActivity(activityId);
+
+          assertFalse(result.getCreatedAt().isBefore(beforeDuplication));
+          assertFalse(result.getUpdatedAt().isBefore(beforeDuplication));
+        }
+
+        @Test
+        void thenItShouldLeaveTheSourceDraftUntouched() {
+          BddLogger.then("the source draft should never be modified or saved again");
+
+          activityService.duplicateActivity(activityId);
+
+          verify(activityDraftRepository, never()).save(sourceDraft);
+          verify(activityDraftRepository, never()).removeFromDatabase(any());
+        }
+
+        @Test
+        void thenItShouldNotRequireTheLoggedInStaffToBeTheAuthor() {
+          BddLogger.then("any staff should be allowed to duplicate the draft");
+
+          assertDoesNotThrow(() -> activityService.duplicateActivity(activityId));
+        }
+
+        @Nested
+        class AndTheDraftHasABannerAndFiles {
+
+          File banner;
+          File attachment;
+          File copiedBanner;
+          File copiedAttachment;
+
+          @BeforeEach
+          void setupAnd() {
+            BddLogger.and("the draft has a banner and an attached file");
+            banner = aFile();
+            attachment = aFile();
+            copiedBanner = mock(File.class);
+            copiedAttachment = mock(File.class);
+
+            when(activityDraftRepository.findById(activityId))
+                .thenReturn(Optional.of(aDraft(banner, List.of(attachment))));
+            when(fileResourceService.copy(banner.getId())).thenReturn(copiedBanner);
+            when(fileResourceService.copy(attachment.getId())).thenReturn(copiedAttachment);
+          }
+
+          @Test
+          void thenItShouldCopyThemInsteadOfSharingTheSourceOnes() {
+            BddLogger.then("the new draft should reference copies instead of the source files");
+
+            ActivityDraft result = activityService.duplicateActivity(activityId);
+
+            assertEquals(copiedBanner, result.getBanner().orElseThrow());
+            assertEquals(List.of(copiedAttachment), result.getFiles());
+            verify(fileResourceService).copy(banner.getId());
+            verify(fileResourceService).copy(attachment.getId());
+          }
+        }
+
+        private ActivityDraft aDraft(File banner, List<File> files) {
+          ActivityDraft d =
+              ActivityDraft.toDomain(
+                  activityId,
+                  Instant.parse("2020-01-01T00:00:00Z"),
+                  Instant.parse("2021-01-01T00:00:00Z"),
+                  "Brouillon à dupliquer",
+                  originalAuthor,
+                  EActivityThematic.EXPERIENCES,
+                  "Un résumé",
+                  "<p>Une description</p>",
+                  "2026",
+                  LocalDate.parse("2026-06-01"),
+                  LocalDate.parse("2026-06-30"),
+                  3,
+                  2,
+                  true,
+                  banner,
+                  List.of("https://example.com"),
+                  files);
+          return d;
+        }
+      }
+
       private Activity anActivity(File banner, List<File> files) {
         return Activity.toDomain(
             activityId,
