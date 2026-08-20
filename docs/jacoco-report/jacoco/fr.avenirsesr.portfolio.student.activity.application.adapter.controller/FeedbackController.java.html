@@ -179,7 +179,7 @@ public class FeedbackController {
 
   @PreAuthorize(&quot;hasAuthority('feedback:request:respond:assigned')&quot;)
   @PostMapping(value = &quot;/{feedbackId}/attachments&quot;, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ResponseEntity&lt;FileDTO&gt; uploadFeedbackAttachment(
+  public ResponseEntity&lt;FileDTO&gt; uploadAttachment(
       Principal principal,
       @Valid @PathVariable UUID feedbackId,
       @RequestParam(&quot;file&quot;) MultipartFile file) {
