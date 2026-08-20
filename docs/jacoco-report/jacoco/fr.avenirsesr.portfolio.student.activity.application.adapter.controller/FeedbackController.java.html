@@ -199,7 +199,7 @@ public class FeedbackController {
 
   @PreAuthorize(&quot;hasAuthority('feedback:request:respond:assigned')&quot;)
   @DeleteMapping(&quot;/{feedbackId}/attachments/{attachmentId}&quot;)
-  public ResponseEntity&lt;Void&gt; deleteFeedbackAttachment(
+  public ResponseEntity&lt;Void&gt; deleteAttachment(
       Principal principal,
       @Valid @PathVariable UUID feedbackId,
       @Valid @PathVariable UUID attachmentId) {
