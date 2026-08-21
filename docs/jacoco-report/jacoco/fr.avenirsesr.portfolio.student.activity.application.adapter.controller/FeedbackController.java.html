@@ -199,7 +199,7 @@ public class FeedbackController {
 
   @PreAuthorize(&quot;hasAuthority('feedback:request:respond:assigned')&quot;)
   @DeleteMapping(&quot;/{feedbackId}/attachments/{attachmentId}&quot;)
-  public ResponseEntity&lt;Void&gt; deleteAttachment(
+  public ResponseEntity&lt;Void&gt; deleteFeedbackAttachment(
       Principal principal,
       @Valid @PathVariable UUID feedbackId,
       @Valid @PathVariable UUID attachmentId) {
@@ -216,7 +216,7 @@ public class FeedbackController {
   @GetMapping(
       value = &quot;/{feedbackId}/attachments/{attachmentId}/download&quot;,
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  public ResponseEntity&lt;byte[]&gt; downloadAttachment(
+  public ResponseEntity&lt;byte[]&gt; downloadFeedbackAttachment(
       Principal principal,
       @Valid @PathVariable UUID feedbackId,
       @Valid @PathVariable UUID attachmentId) {
