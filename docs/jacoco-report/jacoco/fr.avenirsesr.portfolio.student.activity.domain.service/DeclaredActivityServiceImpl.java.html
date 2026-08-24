@@ -338,7 +338,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
         associationType,
 <span class="fc" id="L339">        associationType.idExtractorFor(Trace.class),</span>
 <span class="fc" id="L340">        traceService.getTracesView(</span>
-            keyword, new TraceFilter(isAssociated, null, null, null), null, pageCriteria, null),
+            keyword, new TraceFilter(isAssociated, null, null, null), null, pageCriteria),
         TraceViewData::id,
         TraceViewData::title,
         null,

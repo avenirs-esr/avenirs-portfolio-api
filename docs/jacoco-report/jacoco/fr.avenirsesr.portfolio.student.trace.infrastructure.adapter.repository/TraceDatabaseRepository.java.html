@@ -3,7 +3,6 @@
 import fr.avenirsesr.portfolio.common.data.domain.model.DateFilter;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.specification.DateFilterSpecificationBuilder;
 import fr.avenirsesr.portfolio.common.language.infrastructure.adapter.utils.TranslationUtil;
 import fr.avenirsesr.portfolio.student.trace.domain.filter.TraceFilter;
@@ -26,7 +25,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 
-<span class="fc" id="L29">@Slf4j</span>
+<span class="fc" id="L28">@Slf4j</span>
 @Repository
 @SQLRestriction(&quot;deleted_at IS NULL&quot;)
 public class TraceDatabaseRepository extends GenericUserJpaRepositoryAdapter&lt;Trace, TraceEntity&gt;
@@ -34,38 +33,38 @@ public class TraceDatabaseRepository extends GenericUserJpaRepositoryAdapter&lt;
   private final TraceJpaRepository jpaRepository;
 
   public TraceDatabaseRepository(TraceJpaRepository jpaRepository) {
-<span class="fc" id="L37">    super(jpaRepository, jpaRepository, TraceEntity.class, TraceMapper.INSTANCE);</span>
-<span class="fc" id="L38">    this.jpaRepository = jpaRepository;</span>
-<span class="fc" id="L39">  }</span>
+<span class="fc" id="L36">    super(jpaRepository, jpaRepository, TraceEntity.class, TraceMapper.INSTANCE);</span>
+<span class="fc" id="L37">    this.jpaRepository = jpaRepository;</span>
+<span class="fc" id="L38">  }</span>
 
   @Override
   public List&lt;Trace&gt; findLastsOf(Student student, int limit) {
-<span class="fc" id="L43">    return findAll(</span>
-<span class="fc" id="L44">            hasStudent(student),</span>
-<span class="fc" id="L45">            PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;)))</span>
-<span class="fc" id="L46">        .content();</span>
+<span class="fc" id="L42">    return findAll(</span>
+<span class="fc" id="L43">            hasStudent(student),</span>
+<span class="fc" id="L44">            PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;)))</span>
+<span class="fc" id="L45">        .content();</span>
   }
 
   @Override
   public Map&lt;Trace, Boolean&gt; isAssociated(List&lt;Trace&gt; traces) {
-<span class="pc bpc" id="L51" title="1 of 4 branches missed.">    if (traces == null || traces.isEmpty()) {</span>
-<span class="fc" id="L52">      return Map.of();</span>
+<span class="pc bpc" id="L50" title="1 of 4 branches missed.">    if (traces == null || traces.isEmpty()) {</span>
+<span class="fc" id="L51">      return Map.of();</span>
     }
 
-<span class="fc" id="L55">    var associatedIds =</span>
+<span class="fc" id="L54">    var associatedIds =</span>
         jpaRepository
-<span class="fc" id="L57">            .findAll(</span>
-<span class="fc" id="L58">                Specification.where(TraceSpecification.associated())</span>
-<span class="fc" id="L59">                    .and(</span>
+<span class="fc" id="L56">            .findAll(</span>
+<span class="fc" id="L57">                Specification.where(TraceSpecification.associated())</span>
+<span class="fc" id="L58">                    .and(</span>
                         (root, query, cb) -&gt;
-<span class="fc" id="L61">                            root.get(&quot;id&quot;).in(traces.stream().map(Trace::getId).toList())))</span>
-<span class="fc" id="L62">            .stream()</span>
-<span class="fc" id="L63">            .map(TraceEntity::getId)</span>
-<span class="fc" id="L64">            .collect(Collectors.toSet());</span>
+<span class="fc" id="L60">                            root.get(&quot;id&quot;).in(traces.stream().map(Trace::getId).toList())))</span>
+<span class="fc" id="L61">            .stream()</span>
+<span class="fc" id="L62">            .map(TraceEntity::getId)</span>
+<span class="fc" id="L63">            .collect(Collectors.toSet());</span>
 
-<span class="fc" id="L66">    return traces.stream()</span>
-<span class="fc" id="L67">        .collect(</span>
-<span class="fc" id="L68">            Collectors.toMap(Function.identity(), trace -&gt; associatedIds.contains(trace.getId())));</span>
+<span class="fc" id="L65">    return traces.stream()</span>
+<span class="fc" id="L66">        .collect(</span>
+<span class="fc" id="L67">            Collectors.toMap(Function.identity(), trace -&gt; associatedIds.contains(trace.getId())));</span>
   }
 
   @Override
@@ -74,35 +73,36 @@ public class TraceDatabaseRepository extends GenericUserJpaRepositoryAdapter&lt;
       String keyword,
       TraceFilter filter,
       DateFilter dateFilter,
-      PageCriteria pageCriteria,
-      SortCriteria sortCriteria) {
+      PageCriteria pageCriteria) {
 
-<span class="fc" id="L80">    Specification&lt;TraceEntity&gt; specification = hasStudent(student);</span>
+<span class="fc" id="L78">    Specification&lt;TraceEntity&gt; specification = hasStudent(student);</span>
 
-<span class="fc" id="L82">    var filterSpecification = new TraceFilterSpecificationBuilder().build(filter.toMap());</span>
-<span class="fc bfc" id="L83" title="All 2 branches covered.">    if (filterSpecification.isPresent()) {</span>
-<span class="fc" id="L84">      specification = specification.and(filterSpecification.get());</span>
+<span class="fc" id="L80">    var filterSpecification = new TraceFilterSpecificationBuilder().build(filter.toMap());</span>
+<span class="fc bfc" id="L81" title="All 2 branches covered.">    if (filterSpecification.isPresent()) {</span>
+<span class="fc" id="L82">      specification = specification.and(filterSpecification.get());</span>
     }
 
-<span class="fc bfc" id="L87" title="All 2 branches covered.">    if (dateFilter != null) {</span>
-<span class="fc" id="L88">      var dateFilterSpecification =</span>
-<span class="fc" id="L89">          new DateFilterSpecificationBuilder&lt;TraceEntity&gt;().build(dateFilter.toMap());</span>
-<span class="pc bpc" id="L90" title="1 of 2 branches missed.">      if (dateFilterSpecification.isPresent())</span>
-<span class="nc" id="L91">        specification = specification.and(dateFilterSpecification.get());</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">    if (dateFilter != null) {</span>
+<span class="fc" id="L86">      var dateFilterSpecification =</span>
+<span class="fc" id="L87">          new DateFilterSpecificationBuilder&lt;TraceEntity&gt;().build(dateFilter.toMap());</span>
+<span class="pc bpc" id="L88" title="1 of 2 branches missed.">      if (dateFilterSpecification.isPresent())</span>
+<span class="nc" id="L89">        specification = specification.and(dateFilterSpecification.get());</span>
     }
 
-<span class="fc bfc" id="L94" title="All 2 branches covered.">    if (keyword != null) {</span>
-<span class="fc" id="L95">      specification =</span>
-<span class="fc" id="L96">          specification.and(</span>
-<span class="fc" id="L97">              TraceSpecification.search(keyword, TranslationUtil.getRequestLanguage()));</span>
+<span class="fc bfc" id="L92" title="All 2 branches covered.">    if (keyword != null) {</span>
+<span class="fc" id="L93">      specification =</span>
+<span class="fc" id="L94">          specification.and(</span>
+<span class="fc" id="L95">              TraceSpecification.search(keyword, TranslationUtil.getRequestLanguage()));</span>
     }
 
-<span class="fc" id="L100">    return findAll(</span>
-        specification,
-<span class="fc" id="L102">        PageRequest.of(</span>
-<span class="fc" id="L103">            pageCriteria.page(),</span>
-<span class="fc" id="L104">            pageCriteria.pageSize(),</span>
-<span class="fc" id="L105">            TraceSpecification.toSort(sortCriteria, filter)));</span>
+    Sort sort =
+<span class="pc bpc" id="L99" title="3 of 4 branches missed.">        filter.isAssociated() != null &amp;&amp; !filter.isAssociated()</span>
+<span class="nc" id="L100">            ? Sort.by(Sort.Direction.ASC, &quot;createdAt&quot;)</span>
+<span class="fc" id="L101">            : Sort.by(Sort.Direction.DESC, &quot;updatedAt&quot;)</span>
+<span class="fc" id="L102">                .and(Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;));</span>
+
+<span class="fc" id="L104">    return findAll(</span>
+<span class="fc" id="L105">        specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort));</span>
   }
 
   @Override

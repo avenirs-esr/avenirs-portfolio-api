@@ -87,7 +87,7 @@ public class TraceController {
 <span class="fc" id="L87">        pageCriteria.page(),</span>
 <span class="fc" id="L88">        pageCriteria.pageSize());</span>
 <span class="fc" id="L89">    PagedResult&lt;TraceViewData&gt; tracesResult =</span>
-<span class="fc" id="L90">        traceService.getTracesView(keyword, traceFilter, dateFilter, pageCriteria, null);</span>
+<span class="fc" id="L90">        traceService.getTracesView(keyword, traceFilter, dateFilter, pageCriteria);</span>
 
 <span class="fc" id="L92">    var tracesViewResponse =</span>
         new PagedResponse&lt;&gt;(
