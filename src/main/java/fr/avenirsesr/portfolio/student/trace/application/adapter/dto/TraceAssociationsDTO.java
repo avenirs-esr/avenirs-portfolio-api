@@ -6,7 +6,12 @@ import fr.avenirsesr.portfolio.student.skill.application.adapter.dto.DeclaredSki
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 
-@Schema(requiredProperties = {"declaredActivityAssociations", "declaredSkillAssociations"})
+@Schema(
+    requiredProperties = {
+      "declaredActivityAssociations",
+      "declaredSkillAssociations",
+      "declaredExperienceAssociations"
+    })
 public record TraceAssociationsDTO(
     List<DeclaredActivityAssociationDTO> declaredActivityAssociations,
     List<DeclaredSkillAssociationDTO> declaredSkillAssociations,
