@@ -6,6 +6,9 @@ import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValida
 import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortField;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationData;
@@ -46,7 +49,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-<span class="fc" id="L49">@Slf4j</span>
+<span class="fc" id="L52">@Slf4j</span>
 @RequiredArgsConstructor
 public class DeclaredExperienceServiceImpl implements DeclaredExperienceService {
 
@@ -73,8 +76,8 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
       String externalLink,
       LocalDate startDate,
       LocalDate endDate) {
-<span class="fc" id="L76">    Student student = studentService.getStudentById(studentId);</span>
-<span class="fc" id="L77">    return create(</span>
+<span class="fc" id="L79">    Student student = studentService.getStudentById(studentId);</span>
+<span class="fc" id="L80">    return create(</span>
         experienceId,
         student,
         title,
@@ -104,9 +107,9 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
       String externalLink,
       LocalDate startDate,
       LocalDate endDate) {
-<span class="fc" id="L107">    Student student = studentService.getStudentById(studentId);</span>
-<span class="fc" id="L108">    return create(</span>
-<span class="fc" id="L109">        UUID.randomUUID(),</span>
+<span class="fc" id="L110">    Student student = studentService.getStudentById(studentId);</span>
+<span class="fc" id="L111">    return create(</span>
+<span class="fc" id="L112">        UUID.randomUUID(),</span>
         student,
         title,
         experienceType,
@@ -134,9 +137,9 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
       String externalLink,
       LocalDate startDate,
       LocalDate endDate) {
-<span class="fc" id="L137">    return create(</span>
-<span class="fc" id="L138">        UUID.randomUUID(),</span>
-<span class="fc" id="L139">        loggedInUserService.getLoggedInStudent(),</span>
+<span class="fc" id="L140">    return create(</span>
+<span class="fc" id="L141">        UUID.randomUUID(),</span>
+<span class="fc" id="L142">        loggedInUserService.getLoggedInStudent(),</span>
         title,
         experienceType,
         organization,
@@ -164,9 +167,9 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
       String externalLink,
       LocalDate startDate,
       LocalDate endDate) {
-<span class="fc" id="L167">    log.info(&quot;DeclaredExperience creation for {}&quot;, student);</span>
+<span class="fc" id="L170">    log.info(&quot;DeclaredExperience creation for {}&quot;, student);</span>
 
-<span class="fc" id="L169">    checkDeclaredExperienceDataValidity(</span>
+<span class="fc" id="L172">    checkDeclaredExperienceDataValidity(</span>
         title,
         organization,
         activitySector,
@@ -178,11 +181,11 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
         startDate,
         endDate);
 
-<span class="fc" id="L181">    var experience =</span>
-<span class="fc" id="L182">        DeclaredExperience.toDomain(</span>
+<span class="fc" id="L184">    var experience =</span>
+<span class="fc" id="L185">        DeclaredExperience.toDomain(</span>
             experienceId,
-<span class="fc" id="L184">            Instant.now(),</span>
-<span class="fc" id="L185">            Instant.now(),</span>
+<span class="fc" id="L187">            Instant.now(),</span>
+<span class="fc" id="L188">            Instant.now(),</span>
             student,
             title,
             experienceType,
@@ -197,9 +200,9 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
             endDate,
             false);
 
-<span class="fc" id="L200">    experience = experienceRepository.save(experience);</span>
-<span class="fc" id="L201">    log.info(&quot;{} has been created&quot;, experience);</span>
-<span class="fc" id="L202">    return experience;</span>
+<span class="fc" id="L203">    experience = experienceRepository.save(experience);</span>
+<span class="fc" id="L204">    log.info(&quot;{} has been created&quot;, experience);</span>
+<span class="fc" id="L205">    return experience;</span>
   }
 
   @Override
@@ -217,17 +220,17 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
       LocalDate startDate,
       LocalDate endDate,
       boolean valorized) {
-<span class="fc" id="L220">    Student student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L221">    log.info(&quot;Update experienceId {} by {}&quot;, experienceId, student);</span>
+<span class="fc" id="L223">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L224">    log.info(&quot;Update experienceId {} by {}&quot;, experienceId, student);</span>
 
-<span class="fc" id="L223">    var experience =</span>
+<span class="fc" id="L226">    var experience =</span>
         experienceRepository
-<span class="fc" id="L225">            .findById(experienceId)</span>
-<span class="fc" id="L226">            .orElseThrow(DeclaredExperienceNotFoundException::new);</span>
-<span class="fc bfc" id="L227" title="All 2 branches covered.">    if (!experience.getStudent().equals(student)) {</span>
-<span class="fc" id="L228">      throw new UserNotAuthorizedException();</span>
+<span class="fc" id="L228">            .findById(experienceId)</span>
+<span class="fc" id="L229">            .orElseThrow(DeclaredExperienceNotFoundException::new);</span>
+<span class="fc bfc" id="L230" title="All 2 branches covered.">    if (!experience.getStudent().equals(student)) {</span>
+<span class="fc" id="L231">      throw new UserNotAuthorizedException();</span>
     }
-<span class="fc" id="L230">    checkDeclaredExperienceDataValidity(</span>
+<span class="fc" id="L233">    checkDeclaredExperienceDataValidity(</span>
         title,
         organization,
         activitySector,
@@ -239,22 +242,22 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
         startDate,
         endDate);
 
-<span class="fc" id="L242">    experience.setTitle(title);</span>
-<span class="fc" id="L243">    experience.setExperienceType(experienceType);</span>
-<span class="fc" id="L244">    experience.setOrganization(organization);</span>
-<span class="fc" id="L245">    experience.setActivitySector(activitySector);</span>
-<span class="fc" id="L246">    experience.setLocation(location);</span>
-<span class="fc" id="L247">    experience.setDescription(description);</span>
-<span class="fc" id="L248">    experience.setSourceOfInformation(sourceOfInformation);</span>
-<span class="fc" id="L249">    experience.setSummary(summary);</span>
-<span class="fc" id="L250">    experience.setExternalLink(externalLink);</span>
-<span class="fc" id="L251">    experience.setStartDate(startDate);</span>
-<span class="fc" id="L252">    experience.setEndDate(endDate);</span>
-<span class="fc" id="L253">    experience.setValorized(valorized);</span>
-<span class="fc" id="L254">    experience = experienceRepository.save(experience);</span>
+<span class="fc" id="L245">    experience.setTitle(title);</span>
+<span class="fc" id="L246">    experience.setExperienceType(experienceType);</span>
+<span class="fc" id="L247">    experience.setOrganization(organization);</span>
+<span class="fc" id="L248">    experience.setActivitySector(activitySector);</span>
+<span class="fc" id="L249">    experience.setLocation(location);</span>
+<span class="fc" id="L250">    experience.setDescription(description);</span>
+<span class="fc" id="L251">    experience.setSourceOfInformation(sourceOfInformation);</span>
+<span class="fc" id="L252">    experience.setSummary(summary);</span>
+<span class="fc" id="L253">    experience.setExternalLink(externalLink);</span>
+<span class="fc" id="L254">    experience.setStartDate(startDate);</span>
+<span class="fc" id="L255">    experience.setEndDate(endDate);</span>
+<span class="fc" id="L256">    experience.setValorized(valorized);</span>
+<span class="fc" id="L257">    experience = experienceRepository.save(experience);</span>
 
-<span class="fc" id="L256">    log.info(&quot;{} updated successfully&quot;, experience);</span>
-<span class="fc" id="L257">    return experience;</span>
+<span class="fc" id="L259">    log.info(&quot;{} updated successfully&quot;, experience);</span>
+<span class="fc" id="L260">    return experience;</span>
   }
 
   private void checkDeclaredExperienceDataValidity(
@@ -268,119 +271,119 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
       String externalLink,
       LocalDate startDate,
       LocalDate endDate) {
-<span class="fc" id="L271">    requireNotBlankAndMaxLength(&quot;title&quot;, title, TITLE_LENGTH);</span>
-<span class="fc" id="L272">    requireNotBlankAndMaxLength(&quot;organization&quot;, organization, ORGANIZATION_LENGTH);</span>
-<span class="fc" id="L273">    validateOptionalTextMaxLength(&quot;activitySector&quot;, activitySector, ACTIVITY_SECTOR_LENGTH);</span>
-<span class="fc" id="L274">    validateOptionalTextMaxLength(&quot;location&quot;, location, LOCATION_LENGTH);</span>
-<span class="fc" id="L275">    validateOptionalTextMaxLength(</span>
+<span class="fc" id="L274">    requireNotBlankAndMaxLength(&quot;title&quot;, title, TITLE_LENGTH);</span>
+<span class="fc" id="L275">    requireNotBlankAndMaxLength(&quot;organization&quot;, organization, ORGANIZATION_LENGTH);</span>
+<span class="fc" id="L276">    validateOptionalTextMaxLength(&quot;activitySector&quot;, activitySector, ACTIVITY_SECTOR_LENGTH);</span>
+<span class="fc" id="L277">    validateOptionalTextMaxLength(&quot;location&quot;, location, LOCATION_LENGTH);</span>
+<span class="fc" id="L278">    validateOptionalTextMaxLength(</span>
         &quot;sourceOfInformation&quot;, sourceOfInformation, SOURCE_OF_INFORMATION_LENGTH);
-<span class="fc" id="L277">    validateOptionalTextMaxLength(&quot;description&quot;, description, DESCRIPTION_LENGTH);</span>
-<span class="fc" id="L278">    validateOptionalTextMaxLength(&quot;summary&quot;, summary, SUMMARY_LENGTH);</span>
-<span class="fc" id="L279">    requireNotNull(&quot;startDate&quot;, startDate);</span>
-<span class="fc" id="L280">    validateDateOrder(startDate, endDate);</span>
-<span class="fc" id="L281">    validateUrl(externalLink);</span>
-<span class="fc" id="L282">  }</span>
+<span class="fc" id="L280">    validateOptionalTextMaxLength(&quot;description&quot;, description, DESCRIPTION_LENGTH);</span>
+<span class="fc" id="L281">    validateOptionalTextMaxLength(&quot;summary&quot;, summary, SUMMARY_LENGTH);</span>
+<span class="fc" id="L282">    requireNotNull(&quot;startDate&quot;, startDate);</span>
+<span class="fc" id="L283">    validateDateOrder(startDate, endDate);</span>
+<span class="fc" id="L284">    validateUrl(externalLink);</span>
+<span class="fc" id="L285">  }</span>
 
   @Override
   public void delete(List&lt;UUID&gt; experienceIds) {
-<span class="fc" id="L286">    Student student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L287">    log.info(&quot;Deleting experienceIds {} by {}&quot;, experienceIds, student);</span>
+<span class="fc" id="L289">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L290">    log.info(&quot;Deleting experienceIds {} by {}&quot;, experienceIds, student);</span>
 
-<span class="fc" id="L289">    var experiences = experienceRepository.findAllById(experienceIds);</span>
+<span class="fc" id="L292">    var experiences = experienceRepository.findAllById(experienceIds);</span>
 
-<span class="fc bfc" id="L291" title="All 4 branches covered.">    if (experiences.stream().anyMatch(experience -&gt; !experience.getStudent().equals(student))) {</span>
-<span class="fc" id="L292">      throw new UserNotAuthorizedException();</span>
+<span class="fc bfc" id="L294" title="All 4 branches covered.">    if (experiences.stream().anyMatch(experience -&gt; !experience.getStudent().equals(student))) {</span>
+<span class="fc" id="L295">      throw new UserNotAuthorizedException();</span>
     }
 
-<span class="fc" id="L295">    if (!new HashSet&lt;&gt;(experiences.stream().map(AvenirsBaseModel::getId).toList())</span>
-<span class="fc bfc" id="L296" title="All 2 branches covered.">        .containsAll(experienceIds)) {</span>
-<span class="fc" id="L297">      throw new DeclaredExperienceNotFoundException();</span>
+<span class="fc" id="L298">    if (!new HashSet&lt;&gt;(experiences.stream().map(AvenirsBaseModel::getId).toList())</span>
+<span class="fc bfc" id="L299" title="All 2 branches covered.">        .containsAll(experienceIds)) {</span>
+<span class="fc" id="L300">      throw new DeclaredExperienceNotFoundException();</span>
     }
 
-<span class="fc" id="L300">    associationService.deleteAllOf(experienceIds, DeclaredExperience.class);</span>
+<span class="fc" id="L303">    associationService.deleteAllOf(experienceIds, DeclaredExperience.class);</span>
 
-<span class="fc" id="L302">    experienceRepository.removeAllFromDatabase(experiences);</span>
-<span class="fc" id="L303">    log.info(&quot;ExperienceIds {} successfully deleted&quot;, experienceIds);</span>
-<span class="fc" id="L304">  }</span>
+<span class="fc" id="L305">    experienceRepository.removeAllFromDatabase(experiences);</span>
+<span class="fc" id="L306">    log.info(&quot;ExperienceIds {} successfully deleted&quot;, experienceIds);</span>
+<span class="fc" id="L307">  }</span>
 
   @Override
   public DeclaredExperience get(UUID experienceId) {
-<span class="fc" id="L308">    Student student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L309">    log.info(&quot;Get experienceId {} by {}&quot;, experienceId, student);</span>
+<span class="fc" id="L311">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L312">    log.info(&quot;Get experienceId {} by {}&quot;, experienceId, student);</span>
 
-<span class="fc" id="L311">    var experience =</span>
+<span class="fc" id="L314">    var experience =</span>
         experienceRepository
-<span class="fc" id="L313">            .findById(experienceId)</span>
-<span class="fc" id="L314">            .orElseThrow(DeclaredExperienceNotFoundException::new);</span>
+<span class="fc" id="L316">            .findById(experienceId)</span>
+<span class="fc" id="L317">            .orElseThrow(DeclaredExperienceNotFoundException::new);</span>
 
-<span class="fc bfc" id="L316" title="All 2 branches covered.">    if (!experience.getStudent().equals(student)) {</span>
-<span class="fc" id="L317">      throw new UserNotAuthorizedException();</span>
+<span class="fc bfc" id="L319" title="All 2 branches covered.">    if (!experience.getStudent().equals(student)) {</span>
+<span class="fc" id="L320">      throw new UserNotAuthorizedException();</span>
     }
-<span class="fc" id="L319">    return experience;</span>
+<span class="fc" id="L322">    return experience;</span>
   }
 
   @Override
   public PagedResult&lt;DeclaredExperienceData&gt; getView(
       PageCriteria pageCriteria, Boolean isValorized, EExperienceType experienceType) {
-<span class="fc" id="L325">    Student student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L326">    log.info(&quot;Get experience view by {}&quot;, student);</span>
+<span class="fc" id="L328">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L329">    log.info(&quot;Get experience view by {}&quot;, student);</span>
 
-<span class="fc" id="L328">    var pagedExperiences =</span>
-<span class="fc" id="L329">        experienceRepository.findAllByStudent(student, pageCriteria, isValorized, experienceType);</span>
+<span class="fc" id="L331">    var pagedExperiences =</span>
+<span class="fc" id="L332">        experienceRepository.findAllByStudent(student, pageCriteria, isValorized, experienceType);</span>
 
-<span class="fc" id="L331">    var associationsCountByExperience = getAssociationCounts(pagedExperiences.content());</span>
+<span class="fc" id="L334">    var associationsCountByExperience = getAssociationCounts(pagedExperiences.content());</span>
 
-<span class="fc" id="L333">    return new PagedResult&lt;&gt;(</span>
-<span class="fc" id="L334">        pagedExperiences.content().stream()</span>
-<span class="fc" id="L335">            .map(</span>
+<span class="fc" id="L336">    return new PagedResult&lt;&gt;(</span>
+<span class="fc" id="L337">        pagedExperiences.content().stream()</span>
+<span class="fc" id="L338">            .map(</span>
                 experience -&gt;
-<span class="fc" id="L337">                    new DeclaredExperienceData(</span>
-<span class="fc" id="L338">                        experience, associationsCountByExperience.get(experience)))</span>
-<span class="fc" id="L339">            .toList(),</span>
-<span class="fc" id="L340">        pagedExperiences.pageInfo());</span>
+<span class="fc" id="L340">                    new DeclaredExperienceData(</span>
+<span class="fc" id="L341">                        experience, associationsCountByExperience.get(experience)))</span>
+<span class="fc" id="L342">            .toList(),</span>
+<span class="fc" id="L343">        pagedExperiences.pageInfo());</span>
   }
 
   private Map&lt;DeclaredExperience, DeclaredExperienceAssociationCount&gt; getAssociationCounts(
       List&lt;DeclaredExperience&gt; experiences) {
-<span class="fc" id="L345">    var ids = experiences.stream().map(AvenirsBaseModel::getId).toList();</span>
+<span class="fc" id="L348">    var ids = experiences.stream().map(AvenirsBaseModel::getId).toList();</span>
 
-<span class="fc" id="L347">    var traceAssociationsCountById =</span>
-<span class="fc" id="L348">        associationService.countAllOf(</span>
-            ids, DeclaredExperience.class, EAssociationType.TRACE_DECLARED_EXPERIENCE);
-<span class="fc" id="L350">    var declaredSkillAssociationsCountById =</span>
+<span class="fc" id="L350">    var traceAssociationsCountById =</span>
 <span class="fc" id="L351">        associationService.countAllOf(</span>
+            ids, DeclaredExperience.class, EAssociationType.TRACE_DECLARED_EXPERIENCE);
+<span class="fc" id="L353">    var declaredSkillAssociationsCountById =</span>
+<span class="fc" id="L354">        associationService.countAllOf(</span>
             ids, DeclaredExperience.class, EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL);
 
-<span class="fc" id="L354">    return experiences.stream()</span>
-<span class="fc" id="L355">        .collect(</span>
-<span class="fc" id="L356">            Collectors.toMap(</span>
-<span class="fc" id="L357">                Function.identity(),</span>
+<span class="fc" id="L357">    return experiences.stream()</span>
+<span class="fc" id="L358">        .collect(</span>
+<span class="fc" id="L359">            Collectors.toMap(</span>
+<span class="fc" id="L360">                Function.identity(),</span>
                 experience -&gt;
-<span class="fc" id="L359">                    new DeclaredExperienceAssociationCount(</span>
-<span class="fc" id="L360">                        traceAssociationsCountById.getOrDefault(experience.getId(), 0L).intValue(),</span>
+<span class="fc" id="L362">                    new DeclaredExperienceAssociationCount(</span>
+<span class="fc" id="L363">                        traceAssociationsCountById.getOrDefault(experience.getId(), 0L).intValue(),</span>
                         declaredSkillAssociationsCountById
-<span class="fc" id="L362">                            .getOrDefault(experience.getId(), 0L)</span>
-<span class="fc" id="L363">                            .intValue())));</span>
+<span class="fc" id="L365">                            .getOrDefault(experience.getId(), 0L)</span>
+<span class="fc" id="L366">                            .intValue())));</span>
   }
 
   @Override
   public List&lt;DeclaredExperience&gt; findAllByIds(List&lt;UUID&gt; experienceIds) {
-<span class="fc" id="L368">    return experienceRepository.findAllById(experienceIds);</span>
+<span class="fc" id="L371">    return experienceRepository.findAllById(experienceIds);</span>
   }
 
   @Override
   public PagedResult&lt;DeclaredExperience&gt; search(String keyword, PageCriteria pageCriteria) {
-<span class="fc" id="L373">    Student student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L374">    return experienceRepository.findAllByStudent(student, pageCriteria, keyword);</span>
+<span class="fc" id="L376">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L377">    return experienceRepository.findAllByStudent(student, pageCriteria, keyword);</span>
   }
 
   private TraceAssociationData traceAssociationMapper(Association association, List&lt;Trace&gt; traces) {
-<span class="fc" id="L378">    return new TraceAssociationData(</span>
-<span class="fc" id="L379">        association.getId(),</span>
-<span class="fc" id="L380">        traces.stream()</span>
-<span class="fc" id="L381">            .filter(t -&gt; t.getId().equals(association.getId1()))</span>
-<span class="fc" id="L382">            .findAny()</span>
-<span class="fc" id="L383">            .orElseThrow(TraceNotFoundException::new));</span>
+<span class="fc" id="L381">    return new TraceAssociationData(</span>
+<span class="fc" id="L382">        association.getId(),</span>
+<span class="fc" id="L383">        traces.stream()</span>
+<span class="fc" id="L384">            .filter(t -&gt; t.getId().equals(association.getId1()))</span>
+<span class="fc" id="L385">            .findAny()</span>
+<span class="fc" id="L386">            .orElseThrow(TraceNotFoundException::new));</span>
   }
 
   @Override
@@ -389,10 +392,10 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
       EAssociationContextType contextType,
       String keyword,
       PageCriteria pageCriteria) {
-<span class="fc" id="L392">    var experiences = search(keyword, pageCriteria);</span>
+<span class="fc" id="L395">    var experiences = search(keyword, pageCriteria);</span>
 
-<span class="fc bfc" id="L394" title="All 2 branches covered.">    if (contextType == null) {</span>
-<span class="fc" id="L395">      return associationSearchHelper.searchForAssociation(</span>
+<span class="fc bfc" id="L397" title="All 2 branches covered.">    if (contextType == null) {</span>
+<span class="fc" id="L398">      return associationSearchHelper.searchForAssociation(</span>
           null,
           null,
           null,
@@ -400,189 +403,193 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
           experiences,
           AvenirsBaseModel::getId,
           DeclaredExperience::getTitle,
-<span class="nc bnc" id="L403" title="All 2 branches missed.">          de -&gt; de.getExperienceType() != null ? de.getExperienceType().name() : null,</span>
-<span class="nc" id="L404">          de -&gt; false);</span>
+<span class="nc bnc" id="L406" title="All 2 branches missed.">          de -&gt; de.getExperienceType() != null ? de.getExperienceType().name() : null,</span>
+<span class="nc" id="L407">          de -&gt; false);</span>
     }
 
-<span class="fc" id="L407">    EAssociationType associationType = getAssociationType(contextType);</span>
+<span class="fc" id="L410">    EAssociationType associationType = getAssociationType(contextType);</span>
 
-<span class="fc" id="L409">    return associationSearchHelper.searchForAssociation(</span>
+<span class="fc" id="L412">    return associationSearchHelper.searchForAssociation(</span>
         excludeAssociatedWithElementId,
-<span class="fc" id="L411">        contextType.toClass(),</span>
+<span class="fc" id="L414">        contextType.toClass(),</span>
         associationType,
-<span class="fc" id="L413">        associationType.idExtractorFor(DeclaredExperience.class),</span>
+<span class="fc" id="L416">        associationType.idExtractorFor(DeclaredExperience.class),</span>
         experiences,
         AvenirsBaseModel::getId,
         DeclaredExperience::getTitle,
-<span class="nc bnc" id="L417" title="All 2 branches missed.">        de -&gt; de.getExperienceType() != null ? de.getExperienceType().name() : null,</span>
-<span class="nc" id="L418">        de -&gt; false);</span>
+<span class="nc bnc" id="L420" title="All 2 branches missed.">        de -&gt; de.getExperienceType() != null ? de.getExperienceType().name() : null,</span>
+<span class="nc" id="L421">        de -&gt; false);</span>
   }
 
   @Override
   public DeclaredExperienceAssociationsData getAssociations(UUID experienceId) {
-<span class="fc" id="L423">    var experience = fetchAndCheckLoggedInStudentAuthorization(experienceId);</span>
+<span class="fc" id="L426">    var experience = fetchAndCheckLoggedInStudentAuthorization(experienceId);</span>
 
-<span class="fc" id="L425">    var associations =</span>
-<span class="fc" id="L426">        associationService.getAllOf(</span>
-<span class="fc" id="L427">            experience.getId(),</span>
+<span class="fc" id="L428">    var associations =</span>
+<span class="fc" id="L429">        associationService.getAllOf(</span>
+<span class="fc" id="L430">            experience.getId(),</span>
             DeclaredExperience.class,
-<span class="fc" id="L429">            EAssociationType.getAllBy(DeclaredExperience.class));</span>
+<span class="fc" id="L432">            EAssociationType.getAllBy(DeclaredExperience.class));</span>
 
-<span class="fc" id="L431">    var traceAssociations =</span>
-<span class="fc" id="L432">        associations.stream()</span>
-<span class="fc bfc" id="L433" title="All 2 branches covered.">            .filter(a -&gt; a.getAssociationType() == EAssociationType.TRACE_DECLARED_EXPERIENCE)</span>
-<span class="fc" id="L434">            .toList();</span>
-<span class="fc" id="L435">    var traces =</span>
-<span class="fc" id="L436">        traceService.findAllTracesById(</span>
-<span class="fc" id="L437">            traceAssociations.stream().map(Association::getId1).toList());</span>
+<span class="fc" id="L434">    var traceAssociations =</span>
+<span class="fc" id="L435">        associations.stream()</span>
+<span class="fc bfc" id="L436" title="All 2 branches covered.">            .filter(a -&gt; a.getAssociationType() == EAssociationType.TRACE_DECLARED_EXPERIENCE)</span>
+<span class="fc" id="L437">            .toList();</span>
+<span class="fc" id="L438">    var traces =</span>
+<span class="fc" id="L439">        traceService.findAllTracesById(</span>
+<span class="fc" id="L440">            traceAssociations.stream().map(Association::getId1).toList());</span>
 
-<span class="fc" id="L439">    var declaredSkillAssociations =</span>
-<span class="fc" id="L440">        associations.stream()</span>
-<span class="fc" id="L441">            .filter(</span>
-<span class="fc bfc" id="L442" title="All 2 branches covered.">                a -&gt; a.getAssociationType() == EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL)</span>
-<span class="fc" id="L443">            .toList();</span>
-<span class="fc" id="L444">    var declaredSkillProgresses =</span>
-<span class="fc" id="L445">        declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(</span>
-<span class="fc" id="L446">            declaredSkillAssociations.stream().map(Association::getId2).toList());</span>
+<span class="fc" id="L442">    var declaredSkillAssociations =</span>
+<span class="fc" id="L443">        associations.stream()</span>
+<span class="fc" id="L444">            .filter(</span>
+<span class="fc bfc" id="L445" title="All 2 branches covered.">                a -&gt; a.getAssociationType() == EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL)</span>
+<span class="fc" id="L446">            .toList();</span>
+<span class="fc" id="L447">    var declaredSkillProgresses =</span>
+<span class="fc" id="L448">        declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(</span>
+<span class="fc" id="L449">            declaredSkillAssociations.stream().map(Association::getId2).toList());</span>
 
-<span class="fc" id="L448">    return new DeclaredExperienceAssociationsData(</span>
-<span class="fc" id="L449">        traceAssociations.stream().map(a -&gt; traceAssociationMapper(a, traces)).toList(),</span>
-<span class="fc" id="L450">        declaredSkillAssociations.stream()</span>
-<span class="fc" id="L451">            .map(a -&gt; declaredSkillAssociationMapper(a, declaredSkillProgresses))</span>
-<span class="fc" id="L452">            .toList());</span>
+<span class="fc" id="L451">    return new DeclaredExperienceAssociationsData(</span>
+<span class="fc" id="L452">        traceAssociations.stream().map(a -&gt; traceAssociationMapper(a, traces)).toList(),</span>
+<span class="fc" id="L453">        declaredSkillAssociations.stream()</span>
+<span class="fc" id="L454">            .map(a -&gt; declaredSkillAssociationMapper(a, declaredSkillProgresses))</span>
+<span class="fc" id="L455">            .toList());</span>
   }
 
   private DeclaredSkillAssociationData declaredSkillAssociationMapper(
       Association association, List&lt;DeclaredSkillProgress&gt; declaredSkillProgresses) {
-<span class="fc" id="L457">    return new DeclaredSkillAssociationData(</span>
-<span class="fc" id="L458">        association.getId(),</span>
-<span class="fc" id="L459">        declaredSkillProgresses.stream()</span>
-<span class="fc" id="L460">            .filter(</span>
-<span class="fc" id="L461">                declaredSkillProgress -&gt; declaredSkillProgress.getId().equals(association.getId2()))</span>
-<span class="fc" id="L462">            .findAny()</span>
-<span class="fc" id="L463">            .orElseThrow(DeclaredSkillProgressNotFoundException::new));</span>
+<span class="fc" id="L460">    return new DeclaredSkillAssociationData(</span>
+<span class="fc" id="L461">        association.getId(),</span>
+<span class="fc" id="L462">        declaredSkillProgresses.stream()</span>
+<span class="fc" id="L463">            .filter(</span>
+<span class="fc" id="L464">                declaredSkillProgress -&gt; declaredSkillProgress.getId().equals(association.getId2()))</span>
+<span class="fc" id="L465">            .findAny()</span>
+<span class="fc" id="L466">            .orElseThrow(DeclaredSkillProgressNotFoundException::new));</span>
   }
 
   @Override
   public DeclaredExperienceAssociationsData associateDeclaredExperienceWithDeclaredSkills(
       UUID declaredExperienceId, List&lt;UUID&gt; declaredSkillProgressIds) {
-<span class="fc" id="L469">    var experience = fetchAndCheckLoggedInStudentAuthorization(declaredExperienceId);</span>
-<span class="fc" id="L470">    Student student = experience.getStudent();</span>
+<span class="fc" id="L472">    var experience = fetchAndCheckLoggedInStudentAuthorization(declaredExperienceId);</span>
+<span class="fc" id="L473">    Student student = experience.getStudent();</span>
 
-<span class="fc" id="L472">    var uniqueDeclaredSkillProgressIds = declaredSkillProgressIds.stream().distinct().toList();</span>
-<span class="fc" id="L473">    var declaredSkillProgresses =</span>
-<span class="fc" id="L474">        declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(</span>
+<span class="fc" id="L475">    var uniqueDeclaredSkillProgressIds = declaredSkillProgressIds.stream().distinct().toList();</span>
+<span class="fc" id="L476">    var declaredSkillProgresses =</span>
+<span class="fc" id="L477">        declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(</span>
             uniqueDeclaredSkillProgressIds);
 
-<span class="fc" id="L477">    if (!new HashSet&lt;&gt;(declaredSkillProgresses.stream().map(DeclaredSkillProgress::getId).toList())</span>
-<span class="fc bfc" id="L478" title="All 2 branches covered.">        .containsAll(uniqueDeclaredSkillProgressIds)) {</span>
-<span class="fc" id="L479">      throw new DeclaredSkillProgressNotFoundException();</span>
+<span class="fc" id="L480">    if (!new HashSet&lt;&gt;(declaredSkillProgresses.stream().map(DeclaredSkillProgress::getId).toList())</span>
+<span class="fc bfc" id="L481" title="All 2 branches covered.">        .containsAll(uniqueDeclaredSkillProgressIds)) {</span>
+<span class="fc" id="L482">      throw new DeclaredSkillProgressNotFoundException();</span>
     }
 
-<span class="fc" id="L482">    if (!declaredSkillProgresses.stream()</span>
-<span class="fc bfc" id="L483" title="All 2 branches covered.">        .allMatch(declaredSkillProgress -&gt; declaredSkillProgress.getStudent().equals(student))) {</span>
-<span class="fc" id="L484">      throw new UserNotAuthorizedException();</span>
+<span class="fc" id="L485">    if (!declaredSkillProgresses.stream()</span>
+<span class="fc bfc" id="L486" title="All 2 branches covered.">        .allMatch(declaredSkillProgress -&gt; declaredSkillProgress.getStudent().equals(student))) {</span>
+<span class="fc" id="L487">      throw new UserNotAuthorizedException();</span>
     }
 
-<span class="fc" id="L487">    associationService.createAll(</span>
-<span class="fc" id="L488">        uniqueDeclaredSkillProgressIds.stream()</span>
-<span class="fc" id="L489">            .map(</span>
+<span class="fc" id="L490">    associationService.createAll(</span>
+<span class="fc" id="L491">        uniqueDeclaredSkillProgressIds.stream()</span>
+<span class="fc" id="L492">            .map(</span>
                 declaredSkillProgressId -&gt;
-<span class="fc" id="L491">                    new AssociationData(</span>
-<span class="fc" id="L492">                        experience.getId(),</span>
+<span class="fc" id="L494">                    new AssociationData(</span>
+<span class="fc" id="L495">                        experience.getId(),</span>
                         declaredSkillProgressId,
                         EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL))
-<span class="fc" id="L495">            .toList());</span>
+<span class="fc" id="L498">            .toList());</span>
 
-<span class="fc" id="L497">    return getAssociations(experience.getId());</span>
+<span class="fc" id="L500">    return getAssociations(experience.getId());</span>
   }
 
   @Override
   public DeclaredExperienceAssociationsData associateDeclaredExperienceWithTraces(
       UUID declaredExperienceId, List&lt;UUID&gt; traceIds) {
-<span class="fc" id="L503">    var experience = fetchAndCheckLoggedInStudentAuthorization(declaredExperienceId);</span>
-<span class="fc" id="L504">    Student student = experience.getStudent();</span>
+<span class="fc" id="L506">    var experience = fetchAndCheckLoggedInStudentAuthorization(declaredExperienceId);</span>
+<span class="fc" id="L507">    Student student = experience.getStudent();</span>
 
-<span class="fc" id="L506">    var uniqueTraceIds = traceIds.stream().distinct().toList();</span>
-<span class="fc" id="L507">    var traces = traceService.findAllTracesById(uniqueTraceIds);</span>
+<span class="fc" id="L509">    var uniqueTraceIds = traceIds.stream().distinct().toList();</span>
+<span class="fc" id="L510">    var traces = traceService.findAllTracesById(uniqueTraceIds);</span>
 
-<span class="fc bfc" id="L509" title="All 2 branches covered.">    if (!new HashSet&lt;&gt;(traces.stream().map(Trace::getId).toList()).containsAll(uniqueTraceIds)) {</span>
-<span class="fc" id="L510">      throw new TraceNotFoundException();</span>
+<span class="fc bfc" id="L512" title="All 2 branches covered.">    if (!new HashSet&lt;&gt;(traces.stream().map(Trace::getId).toList()).containsAll(uniqueTraceIds)) {</span>
+<span class="fc" id="L513">      throw new TraceNotFoundException();</span>
     }
 
-<span class="fc bfc" id="L513" title="All 2 branches covered.">    if (!traces.stream().allMatch(trace -&gt; trace.getStudent().equals(student))) {</span>
-<span class="fc" id="L514">      throw new UserNotAuthorizedException();</span>
+<span class="fc bfc" id="L516" title="All 2 branches covered.">    if (!traces.stream().allMatch(trace -&gt; trace.getStudent().equals(student))) {</span>
+<span class="fc" id="L517">      throw new UserNotAuthorizedException();</span>
     }
 
-<span class="fc" id="L517">    associationService.createAll(</span>
-<span class="fc" id="L518">        uniqueTraceIds.stream()</span>
-<span class="fc" id="L519">            .map(</span>
+<span class="fc" id="L520">    associationService.createAll(</span>
+<span class="fc" id="L521">        uniqueTraceIds.stream()</span>
+<span class="fc" id="L522">            .map(</span>
                 traceId -&gt;
-<span class="fc" id="L521">                    new AssociationData(</span>
-<span class="fc" id="L522">                        traceId, experience.getId(), EAssociationType.TRACE_DECLARED_EXPERIENCE))</span>
-<span class="fc" id="L523">            .toList());</span>
+<span class="fc" id="L524">                    new AssociationData(</span>
+<span class="fc" id="L525">                        traceId, experience.getId(), EAssociationType.TRACE_DECLARED_EXPERIENCE))</span>
+<span class="fc" id="L526">            .toList());</span>
 
-<span class="fc" id="L525">    return getAssociations(experience.getId());</span>
+<span class="fc" id="L528">    return getAssociations(experience.getId());</span>
   }
 
   @Override
   public PagedResult&lt;AssociationSearchResultData&gt; searchTracesForAssociation(
       UUID declaredExperienceId, String keyword, PageCriteria pageCriteria, Boolean isAssociated) {
-<span class="fc" id="L531">    fetchAndCheckLoggedInStudentAuthorization(declaredExperienceId);</span>
-<span class="fc" id="L532">    var associationType = EAssociationType.TRACE_DECLARED_EXPERIENCE;</span>
-<span class="fc" id="L533">    return associationSearchHelper.searchForAssociation(</span>
+<span class="fc" id="L534">    fetchAndCheckLoggedInStudentAuthorization(declaredExperienceId);</span>
+<span class="fc" id="L535">    var associationType = EAssociationType.TRACE_DECLARED_EXPERIENCE;</span>
+<span class="fc" id="L536">    return associationSearchHelper.searchForAssociation(</span>
         declaredExperienceId,
         DeclaredExperience.class,
         associationType,
-<span class="fc" id="L537">        associationType.idExtractorFor(Trace.class),</span>
-<span class="fc" id="L538">        traceService.getTracesView(</span>
-            keyword, new TraceFilter(isAssociated, null, null, null), null, pageCriteria),
+<span class="fc" id="L540">        associationType.idExtractorFor(Trace.class),</span>
+<span class="fc" id="L541">        traceService.getTracesView(</span>
+            keyword,
+            new TraceFilter(isAssociated, null, null, null),
+            null,
+            pageCriteria,
+            new SortCriteria(ESortField.DATE, ESortOrder.DESC)),
         TraceViewData::id,
         TraceViewData::title,
         null,
-<span class="fc" id="L543">        trace -&gt; false);</span>
+<span class="fc" id="L550">        trace -&gt; false);</span>
   }
 
   @Override
   public void deleteAssociations(UUID declaredExperienceId, List&lt;UUID&gt; idsToDelete) {
-<span class="fc" id="L548">    var experience = fetchAndCheckLoggedInStudentAuthorization(declaredExperienceId);</span>
+<span class="fc" id="L555">    var experience = fetchAndCheckLoggedInStudentAuthorization(declaredExperienceId);</span>
 
-<span class="fc" id="L550">    var associationIds =</span>
+<span class="fc" id="L557">    var associationIds =</span>
         associationService
-<span class="fc" id="L552">            .getAllOf(</span>
-<span class="fc" id="L553">                experience.getId(),</span>
+<span class="fc" id="L559">            .getAllOf(</span>
+<span class="fc" id="L560">                experience.getId(),</span>
                 DeclaredExperience.class,
-<span class="fc" id="L555">                List.of(</span>
+<span class="fc" id="L562">                List.of(</span>
                     EAssociationType.TRACE_DECLARED_EXPERIENCE,
                     EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL))
-<span class="fc" id="L558">            .stream()</span>
-<span class="fc" id="L559">            .map(Association::getId)</span>
-<span class="fc" id="L560">            .toList();</span>
+<span class="fc" id="L565">            .stream()</span>
+<span class="fc" id="L566">            .map(Association::getId)</span>
+<span class="fc" id="L567">            .toList();</span>
 
-<span class="fc bfc" id="L562" title="All 2 branches covered.">    if (!new HashSet&lt;&gt;(associationIds).containsAll(idsToDelete)) {</span>
-<span class="fc" id="L563">      throw new UserNotAuthorizedException();</span>
+<span class="fc bfc" id="L569" title="All 2 branches covered.">    if (!new HashSet&lt;&gt;(associationIds).containsAll(idsToDelete)) {</span>
+<span class="fc" id="L570">      throw new UserNotAuthorizedException();</span>
     }
 
-<span class="fc" id="L566">    associationService.deleteAllByIds(idsToDelete);</span>
-<span class="fc" id="L567">  }</span>
+<span class="fc" id="L573">    associationService.deleteAllByIds(idsToDelete);</span>
+<span class="fc" id="L574">  }</span>
 
   private DeclaredExperience fetchAndCheckLoggedInStudentAuthorization(UUID experienceId) {
-<span class="fc" id="L570">    Student student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L571">    var experience =</span>
+<span class="fc" id="L577">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L578">    var experience =</span>
         experienceRepository
-<span class="fc" id="L573">            .findById(experienceId)</span>
-<span class="fc" id="L574">            .orElseThrow(DeclaredExperienceNotFoundException::new);</span>
-<span class="fc bfc" id="L575" title="All 2 branches covered.">    if (!experience.getStudent().equals(student)) {</span>
-<span class="fc" id="L576">      throw new UserNotAuthorizedException();</span>
+<span class="fc" id="L580">            .findById(experienceId)</span>
+<span class="fc" id="L581">            .orElseThrow(DeclaredExperienceNotFoundException::new);</span>
+<span class="fc bfc" id="L582" title="All 2 branches covered.">    if (!experience.getStudent().equals(student)) {</span>
+<span class="fc" id="L583">      throw new UserNotAuthorizedException();</span>
     }
-<span class="fc" id="L578">    return experience;</span>
+<span class="fc" id="L585">    return experience;</span>
   }
 
   private EAssociationType getAssociationType(EAssociationContextType contextType) {
-<span class="fc bfc" id="L582" title="All 3 branches covered.">    return switch (contextType) {</span>
-<span class="fc" id="L583">      case TRACE -&gt; EAssociationType.TRACE_DECLARED_EXPERIENCE;</span>
-<span class="fc" id="L584">      case DECLARED_SKILL -&gt; EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL;</span>
-<span class="fc" id="L585">      case DECLARED_ACTIVITY, DECLARED_EXPERIENCE -&gt; throw new UnsupportedOperationException();</span>
+<span class="fc bfc" id="L589" title="All 3 branches covered.">    return switch (contextType) {</span>
+<span class="fc" id="L590">      case TRACE -&gt; EAssociationType.TRACE_DECLARED_EXPERIENCE;</span>
+<span class="fc" id="L591">      case DECLARED_SKILL -&gt; EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL;</span>
+<span class="fc" id="L592">      case DECLARED_ACTIVITY, DECLARED_EXPERIENCE -&gt; throw new UnsupportedOperationException();</span>
     };
   }
 }
