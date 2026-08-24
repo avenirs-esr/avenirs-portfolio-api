@@ -937,7 +937,7 @@ class DeclaredActivityServiceImplTest {
                     declaredActivityId, null, new PageCriteria(0, 10), null))
         .isInstanceOf(DeclaredActivityNotFoundException.class);
 
-    verify(traceService, never()).getTracesView(any(), any(), any(), any());
+    verify(traceService, never()).getTracesView(any(), any(), any(), any(), any());
   }
 
   @Test
@@ -964,7 +964,7 @@ class DeclaredActivityServiceImplTest {
                     declaredActivityId, null, new PageCriteria(0, 10), null))
         .isInstanceOf(UserNotAuthorizedException.class);
 
-    verify(traceService, never()).getTracesView(any(), any(), any(), any());
+    verify(traceService, never()).getTracesView(any(), any(), any(), any(), any());
   }
 
   @Test
@@ -1003,7 +1003,8 @@ class DeclaredActivityServiceImplTest {
             + " null dateFilter and correct pageCriteria");
     var traceFilterCaptor = ArgumentCaptor.forClass(TraceFilter.class);
     verify(traceService)
-        .getTracesView(eq("java"), traceFilterCaptor.capture(), eq(null), eq(pageCriteria));
+        .getTracesView(
+            eq("java"), traceFilterCaptor.capture(), eq(null), eq(pageCriteria), eq(null));
 
     assertThat(traceFilterCaptor.getValue().isAssociated()).isTrue();
     assertThat(traceFilterCaptor.getValue().fileTypes()).isNull();

@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.repository;
 import fr.avenirsesr.portfolio.common.data.domain.model.DateFilter;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.specification.DateFilterSpecificationBuilder;
 import fr.avenirsesr.portfolio.common.language.infrastructure.adapter.utils.TranslationUtil;
 import fr.avenirsesr.portfolio.student.trace.domain.filter.TraceFilter;
@@ -73,7 +74,8 @@ public class TraceDatabaseRepository extends GenericUserJpaRepositoryAdapter<Tra
       String keyword,
       TraceFilter filter,
       DateFilter dateFilter,
-      PageCriteria pageCriteria) {
+      PageCriteria pageCriteria,
+      SortCriteria sortCriteria) {
 
     Specification<TraceEntity> specification = hasStudent(student);
 
@@ -95,14 +97,12 @@ public class TraceDatabaseRepository extends GenericUserJpaRepositoryAdapter<Tra
               TraceSpecification.search(keyword, TranslationUtil.getRequestLanguage()));
     }
 
-    Sort sort =
-        filter.isAssociated() != null && !filter.isAssociated()
-            ? Sort.by(Sort.Direction.ASC, "createdAt")
-            : Sort.by(Sort.Direction.DESC, "updatedAt")
-                .and(Sort.by(Sort.Direction.DESC, "createdAt"));
-
     return findAll(
-        specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort));
+        specification,
+        PageRequest.of(
+            pageCriteria.page(),
+            pageCriteria.pageSize(),
+            TraceSpecification.toSort(sortCriteria, filter)));
   }
 
   @Override

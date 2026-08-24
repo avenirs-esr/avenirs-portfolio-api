@@ -4,11 +4,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortField;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.student.trace.domain.filter.ETraceFilterKey;
+import fr.avenirsesr.portfolio.student.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.student.trace.domain.model.enums.ETraceAuthorType;
 import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.repository.TraceJpaRepository;
@@ -24,6 +28,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.context.TestPropertySource;
 
@@ -182,6 +187,75 @@ class TraceSpecificationIT extends ContainerConfigurationTest {
     Specification<TraceEntity> spec = builder.getSpecification(ETraceFilterKey.IS_VALORIZED, null);
 
     assertThat(spec).isNull();
+  }
+
+  @Test
+  void shouldReturnDefaultSortForUnassociatedFilterWhenSortCriteriaIsNull() {
+    TraceFilter filter = new TraceFilter(false, null, null, null);
+
+    Sort result = TraceSpecification.toSort(null, filter);
+
+    assertThat(result).isEqualTo(Sort.by(Sort.Direction.ASC, "createdAt"));
+  }
+
+  @Test
+  void shouldReturnDefaultSortForAssociatedFilterWhenSortCriteriaIsNull() {
+    TraceFilter filter = new TraceFilter(true, null, null, null);
+
+    Sort result = TraceSpecification.toSort(null, filter);
+
+    assertThat(result)
+        .isEqualTo(
+            Sort.by(Sort.Direction.DESC, "updatedAt")
+                .and(Sort.by(Sort.Direction.DESC, "createdAt")));
+  }
+
+  @Test
+  void shouldReturnUnsortedWhenSortCriteriaAndFilterAreNull() {
+    Sort result = TraceSpecification.toSort(null, null);
+
+    assertThat(result).isEqualTo(Sort.unsorted());
+  }
+
+  @Test
+  void shouldSortByNameAscending() {
+    SortCriteria sortCriteria = new SortCriteria(ESortField.NAME, ESortOrder.ASC);
+
+    Sort result = TraceSpecification.toSort(sortCriteria, null);
+
+    assertThat(result).isEqualTo(Sort.by(Sort.Direction.ASC, "title"));
+  }
+
+  @Test
+  void shouldSortByNameDescending() {
+    SortCriteria sortCriteria = new SortCriteria(ESortField.NAME, ESortOrder.DESC);
+
+    Sort result = TraceSpecification.toSort(sortCriteria, null);
+
+    assertThat(result).isEqualTo(Sort.by(Sort.Direction.DESC, "title"));
+  }
+
+  @Test
+  void shouldSortByDateAscending() {
+    SortCriteria sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.ASC);
+
+    Sort result = TraceSpecification.toSort(sortCriteria, null);
+
+    assertThat(result)
+        .isEqualTo(
+            Sort.by(Sort.Direction.ASC, "updatedAt").and(Sort.by(Sort.Direction.ASC, "createdAt")));
+  }
+
+  @Test
+  void shouldSortByDateDescending() {
+    SortCriteria sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.DESC);
+
+    Sort result = TraceSpecification.toSort(sortCriteria, null);
+
+    assertThat(result)
+        .isEqualTo(
+            Sort.by(Sort.Direction.DESC, "updatedAt")
+                .and(Sort.by(Sort.Direction.DESC, "createdAt")));
   }
 
   private Specification<TraceEntity> ofTestStudent(UUID studentId) {

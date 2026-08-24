@@ -91,12 +91,17 @@ public class TraceServiceImpl implements TraceService {
 
   @Override
   public PagedResult<TraceViewData> getTracesView(
-      String keyword, TraceFilter filter, DateFilter dateFilter, PageCriteria pageCriteria) {
+      String keyword,
+      TraceFilter filter,
+      DateFilter dateFilter,
+      PageCriteria pageCriteria,
+      SortCriteria sortCriteria) {
     Student loggedInStudent = loggedInUserService.getLoggedInStudent();
     var config = traceConfigurationClient.getTraceConfiguration();
 
     PagedResult<Trace> pagedResult =
-        traceRepository.findAll(loggedInStudent, keyword, filter, dateFilter, pageCriteria);
+        traceRepository.findAll(
+            loggedInStudent, keyword, filter, dateFilter, pageCriteria, sortCriteria);
 
     List<Trace> traces = pagedResult.content();
 
@@ -592,7 +597,8 @@ public class TraceServiceImpl implements TraceService {
     }
 
     var traces =
-        getTracesView(keyword, new TraceFilter(isAssociated, null, null, null), null, pageCriteria);
+        getTracesView(
+            keyword, new TraceFilter(isAssociated, null, null, null), null, pageCriteria, null);
 
     if (contextType == null) {
       return associationSearchHelper.searchForAssociation(
@@ -766,14 +772,6 @@ public class TraceServiceImpl implements TraceService {
         .collect(
             Collectors.groupingBy(
                 Association::getId2, Collectors.mapping(Association::getId1, Collectors.toList())));
-  }
-
-  private List<UUID> getAssociatedDeclaredActivityIds(UUID traceId) {
-    return getAssociatedDeclaredActivityIdsByTraceId(List.of(traceId))
-        .getOrDefault(traceId, List.of())
-        .stream()
-        .distinct()
-        .toList();
   }
 
   private void deleteAllFilesByIds(List<UUID> fileIds) {

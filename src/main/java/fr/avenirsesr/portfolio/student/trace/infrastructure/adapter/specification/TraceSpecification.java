@@ -1,12 +1,16 @@
 package fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.specification;
 
+import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.association.infrastructure.adapter.model.AssociationEntity;
+import fr.avenirsesr.portfolio.student.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.model.TraceEntity;
 import jakarta.persistence.criteria.*;
 import java.util.UUID;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
 public class TraceSpecification {
@@ -66,6 +70,26 @@ public class TraceSpecification {
 
       return criteriaBuilder.or(
           titlePredicate, aiUsePredicate, personalNotePredicate, attachmentPredicate);
+    };
+  }
+
+  public static Sort toSort(SortCriteria sortCriteria, TraceFilter filter) {
+    if (sortCriteria == null) {
+      if (filter != null) {
+        return filter.isAssociated() != null && !filter.isAssociated()
+            ? Sort.by(Sort.Direction.ASC, "createdAt")
+            : Sort.by(Sort.Direction.DESC, "updatedAt")
+                .and(Sort.by(Sort.Direction.DESC, "createdAt"));
+      }
+      return Sort.unsorted();
+    }
+
+    Sort.Direction direction =
+        sortCriteria.order() == ESortOrder.ASC ? Sort.Direction.ASC : Sort.Direction.DESC;
+
+    return switch (sortCriteria.field()) {
+      case NAME -> Sort.by(direction, "title");
+      case DATE -> Sort.by(direction, "updatedAt").and(Sort.by(direction, "createdAt"));
     };
   }
 }

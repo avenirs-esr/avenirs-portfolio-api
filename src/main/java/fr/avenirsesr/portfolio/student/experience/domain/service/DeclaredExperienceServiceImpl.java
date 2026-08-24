@@ -6,6 +6,9 @@ import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValida
 import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortField;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationData;
@@ -536,7 +539,11 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
         associationType,
         associationType.idExtractorFor(Trace.class),
         traceService.getTracesView(
-            keyword, new TraceFilter(isAssociated, null, null, null), null, pageCriteria),
+            keyword,
+            new TraceFilter(isAssociated, null, null, null),
+            null,
+            pageCriteria,
+            new SortCriteria(ESortField.DATE, ESortOrder.DESC)),
         TraceViewData::id,
         TraceViewData::title,
         null,

@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.student.trace.domain.port.input;
 import fr.avenirsesr.portfolio.common.data.domain.model.DateFilter;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.file.domain.model.FileDownload;
@@ -23,7 +24,11 @@ public interface TraceService {
   List<Trace> lastTracesOf();
 
   PagedResult<TraceViewData> getTracesView(
-      String keyword, TraceFilter filter, DateFilter dateFilter, PageCriteria pageCriteria);
+      String keyword,
+      TraceFilter filter,
+      DateFilter dateFilter,
+      PageCriteria pageCriteria,
+      SortCriteria sortCriteria);
 
   void deleteAllByIds(List<UUID> tracesIds);
 
