@@ -87,7 +87,7 @@ public class TraceController {
         pageCriteria.page(),
         pageCriteria.pageSize());
     PagedResult<TraceViewData> tracesResult =
-        traceService.getTracesView(keyword, traceFilter, dateFilter, pageCriteria);
+        traceService.getTracesView(keyword, traceFilter, dateFilter, pageCriteria, null);
 
     var tracesViewResponse =
         new PagedResponse<>(

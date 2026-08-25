@@ -22,6 +22,9 @@ import fr.avenirsesr.portfolio.common.configuration.domain.model.TraceConfigurat
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortField;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
@@ -162,7 +165,7 @@ class TraceServiceImplTest {
         var filter = new TraceFilter(false, null, null, null);
         var pageCriteria = new PageCriteria(pageNumber, pageSize);
 
-        when(traceRepository.findAll(student, null, filter, null, pageCriteria))
+        when(traceRepository.findAll(student, null, filter, null, pageCriteria, null))
             .thenReturn(
                 new PagedResult<>(traces, new PageInfo(pageNumber, pageSize, totalElement)));
         when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
@@ -170,7 +173,7 @@ class TraceServiceImplTest {
             .thenReturn(traces.stream().collect(Collectors.toMap(t -> t, t -> false)));
 
         PagedResult<TraceViewData> result =
-            traceService.getTracesView(null, filter, null, pageCriteria);
+            traceService.getTracesView(null, filter, null, pageCriteria, null);
 
         BddLogger.then("it should return the traces view");
 
@@ -191,12 +194,12 @@ class TraceServiceImplTest {
         var pageCriteria = new PageCriteria(0, 8);
 
         when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
-        when(traceRepository.findAll(student, null, filter, null, pageCriteria))
+        when(traceRepository.findAll(student, null, filter, null, pageCriteria, null))
             .thenReturn(new PagedResult<>(List.of(trace), new PageInfo(0, 8, 1)));
         when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
 
         PagedResult<TraceViewData> result =
-            traceService.getTracesView(null, filter, null, pageCriteria);
+            traceService.getTracesView(null, filter, null, pageCriteria, null);
 
         BddLogger.then("it should return willBeDeletedAt");
 
@@ -222,18 +225,42 @@ class TraceServiceImplTest {
         var pageCriteria = new PageCriteria(0, 8);
 
         when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
-        when(traceRepository.findAll(student, null, filter, null, pageCriteria))
+        when(traceRepository.findAll(student, null, filter, null, pageCriteria, null))
             .thenReturn(new PagedResult<>(List.of(trace), new PageInfo(0, 8, 1)));
         when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, true));
 
         PagedResult<TraceViewData> result =
-            traceService.getTracesView(null, filter, null, pageCriteria);
+            traceService.getTracesView(null, filter, null, pageCriteria, null);
 
         BddLogger.then("it should return empty willBeDeletedAt");
 
         var returnedTrace = result.content().getFirst();
 
         assertTrue(returnedTrace.isAssociated());
+      }
+
+      @Test
+      void thenItShouldForwardSortCriteriaToRepository() {
+        BddLogger.when("getting traces view with a sort criteria");
+
+        var filter = new TraceFilter(false, null, null, null);
+        var pageCriteria = new PageCriteria(0, 8);
+        var sortCriteria = new SortCriteria(ESortField.NAME, ESortOrder.ASC);
+
+        Trace trace = TraceFixture.create().withStudent(student).toModel();
+
+        when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
+        when(traceRepository.findAll(student, null, filter, null, pageCriteria, sortCriteria))
+            .thenReturn(new PagedResult<>(List.of(trace), new PageInfo(0, 8, 1)));
+        when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
+
+        traceService.getTracesView(null, filter, null, pageCriteria, sortCriteria);
+
+        BddLogger.then("it should forward the sort criteria to the repository");
+
+        verify(traceRepository)
+            .findAll(
+                eq(student), isNull(), eq(filter), isNull(), eq(pageCriteria), eq(sortCriteria));
       }
     }
 
@@ -253,7 +280,12 @@ class TraceServiceImplTest {
                 new PageInfo(0, 8, 1));
 
         when(traceRepository.findAll(
-                eq(student), anyString(), any(TraceFilter.class), isNull(), eq(pageCriteria)))
+                eq(student),
+                anyString(),
+                any(TraceFilter.class),
+                isNull(),
+                eq(pageCriteria),
+                eq(null)))
             .thenReturn(new PagedResult<>(List.of(trace), new PageInfo(0, 8, 1)));
         when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
         when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
@@ -272,7 +304,8 @@ class TraceServiceImplTest {
                 eq("kw"),
                 eq(new TraceFilter(null, null, null, null)),
                 isNull(),
-                eq(pageCriteria));
+                eq(pageCriteria),
+                isNull());
         verify(associationSearchHelper)
             .searchForAssociation(
                 isNull(), isNull(), isNull(), isNull(), any(), any(), any(), isNull(), any());
@@ -292,7 +325,12 @@ class TraceServiceImplTest {
                 new PageInfo(0, 8, 1));
 
         when(traceRepository.findAll(
-                eq(student), anyString(), any(TraceFilter.class), isNull(), eq(pageCriteria)))
+                eq(student),
+                anyString(),
+                any(TraceFilter.class),
+                isNull(),
+                eq(pageCriteria),
+                eq(null)))
             .thenReturn(new PagedResult<>(List.of(trace), new PageInfo(0, 8, 1)));
         when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
         when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
@@ -341,7 +379,12 @@ class TraceServiceImplTest {
                 new PageInfo(0, 8, 1));
 
         when(traceRepository.findAll(
-                eq(student), anyString(), any(TraceFilter.class), isNull(), eq(pageCriteria)))
+                eq(student),
+                anyString(),
+                any(TraceFilter.class),
+                isNull(),
+                eq(pageCriteria),
+                eq(null)))
             .thenReturn(new PagedResult<>(List.of(trace), new PageInfo(0, 8, 1)));
         when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
         when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
@@ -415,7 +458,12 @@ class TraceServiceImplTest {
                 new PageInfo(0, 8, 1));
 
         when(traceRepository.findAll(
-                eq(student), anyString(), any(TraceFilter.class), isNull(), eq(pageCriteria)))
+                eq(student),
+                anyString(),
+                any(TraceFilter.class),
+                isNull(),
+                eq(pageCriteria),
+                eq(null)))
             .thenReturn(new PagedResult<>(List.of(trace), new PageInfo(0, 8, 1)));
         when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
         when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, true));
@@ -435,7 +483,8 @@ class TraceServiceImplTest {
                 eq("kw"),
                 eq(new TraceFilter(true, null, null, null)),
                 isNull(),
-                eq(pageCriteria));
+                eq(pageCriteria),
+                eq(null));
       }
 
       @Test
@@ -451,7 +500,12 @@ class TraceServiceImplTest {
                 new PageInfo(0, 8, 1));
 
         when(traceRepository.findAll(
-                eq(student), anyString(), any(TraceFilter.class), isNull(), eq(pageCriteria)))
+                eq(student),
+                anyString(),
+                any(TraceFilter.class),
+                isNull(),
+                eq(pageCriteria),
+                eq(null)))
             .thenReturn(new PagedResult<>(List.of(trace), new PageInfo(0, 8, 1)));
         when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
         when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
@@ -471,7 +525,8 @@ class TraceServiceImplTest {
                 eq("kw"),
                 eq(new TraceFilter(false, null, null, null)),
                 isNull(),
-                eq(pageCriteria));
+                eq(pageCriteria),
+                eq(null));
       }
     }
 

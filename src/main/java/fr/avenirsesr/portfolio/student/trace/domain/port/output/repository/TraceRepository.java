@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.student.trace.domain.port.output.repository;
 import fr.avenirsesr.portfolio.common.data.domain.model.DateFilter;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.port.output.repository.GenericRepositoryPort;
 import fr.avenirsesr.portfolio.student.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
@@ -18,7 +19,8 @@ public interface TraceRepository extends GenericRepositoryPort<Trace> {
       String keyword,
       TraceFilter filter,
       DateFilter dateFilter,
-      PageCriteria pageCriteria);
+      PageCriteria pageCriteria,
+      SortCriteria sortCriteria);
 
   List<Trace> findAll(Student student, boolean isAssociated);
 

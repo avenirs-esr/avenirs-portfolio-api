@@ -8,6 +8,9 @@ import static org.mockito.Mockito.*;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortField;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
@@ -1759,7 +1762,7 @@ class DeclaredExperienceServiceImplTest {
               service.searchTracesForAssociation(
                   experienceId, null, new PageCriteria(0, 10), null));
 
-      verify(traceService, never()).getTracesView(any(), any(), any(), any());
+      verify(traceService, never()).getTracesView(any(), any(), any(), any(), any());
     }
 
     @Test
@@ -1784,7 +1787,7 @@ class DeclaredExperienceServiceImplTest {
               service.searchTracesForAssociation(
                   experienceId, null, new PageCriteria(0, 10), null));
 
-      verify(traceService, never()).getTracesView(any(), any(), any(), any());
+      verify(traceService, never()).getTracesView(any(), any(), any(), any(), any());
     }
 
     @Test
@@ -1821,7 +1824,12 @@ class DeclaredExperienceServiceImplTest {
               + " filter, null dateFilter and correct pageCriteria");
       var traceFilterCaptor = ArgumentCaptor.forClass(TraceFilter.class);
       verify(traceService)
-          .getTracesView(eq("java"), traceFilterCaptor.capture(), eq(null), eq(pageCriteria));
+          .getTracesView(
+              eq("java"),
+              traceFilterCaptor.capture(),
+              eq(null),
+              eq(pageCriteria),
+              eq(new SortCriteria(ESortField.DATE, ESortOrder.DESC)));
 
       assertThat(traceFilterCaptor.getValue().isAssociated()).isTrue();
       assertThat(traceFilterCaptor.getValue().fileTypes()).isNull();
