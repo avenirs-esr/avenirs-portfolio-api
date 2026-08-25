@@ -179,7 +179,7 @@ public class DeclaredSkillProgressController {
 
   @PreAuthorize("hasAuthority('declared-skill:list:own')")
   @GetMapping("/{declaredSkillProgressId}/associations")
-  public ResponseEntity<DeclaredSkillAssociationsDTO> getDeclaredSkillWithDeclaredActivities(
+  public ResponseEntity<DeclaredSkillAssociationsDTO> getDeclaredSkillAssociations(
       Principal principal, @Valid @PathVariable UUID declaredSkillProgressId) {
     log.debug(
         "Received request to get declared skill [{}] associations for student [{}]",
