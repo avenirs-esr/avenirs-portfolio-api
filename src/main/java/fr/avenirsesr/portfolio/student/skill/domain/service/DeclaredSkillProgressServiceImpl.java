@@ -46,6 +46,7 @@ import fr.avenirsesr.portfolio.student.skill.domain.port.output.repository.Decla
 import fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.client.ExternalSkillClient;
 import fr.avenirsesr.portfolio.student.trace.domain.data.TraceAssociationData;
 import fr.avenirsesr.portfolio.student.trace.domain.exception.TraceNotFoundException;
+import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.*;
@@ -274,6 +275,32 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
                         EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL))
             .toList());
 
+    return getAssociationsOf(declaredSkillId);
+  }
+
+  @Override
+  public DeclaredSkillAssociationsData associateDeclaredSkillWithTraces(
+      UUID declaredSkillId, List<UUID> traceIds) {
+    fetchAndCheckLoggedInStudentAuthorization(declaredSkillId);
+    Student student = loggedInUserService.getLoggedInStudent();
+    var uniqueTraceIds = traceIds.stream().distinct().toList();
+    var traces = traceService.findAllTracesById(uniqueTraceIds);
+
+    if (!new HashSet<>(traces.stream().map(Trace::getId).toList()).containsAll(uniqueTraceIds)) {
+      throw new TraceNotFoundException();
+    }
+
+    if (!traces.stream().allMatch(trace -> trace.getStudent().equals(student))) {
+      throw new UserNotAuthorizedException();
+    }
+
+    associationService.createAll(
+        uniqueTraceIds.stream()
+            .map(
+                traceId ->
+                    new AssociationData(
+                        traceId, declaredSkillId, EAssociationType.TRACE_DECLARED_SKILL))
+            .toList());
     return getAssociationsOf(declaredSkillId);
   }
 

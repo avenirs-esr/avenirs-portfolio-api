@@ -238,4 +238,21 @@ public class DeclaredSkillProgressController {
             declaredSkillProgressId, body.idsToAssociate());
     return ResponseEntity.ok(declaredSkillAssociationsDTOMapper.toDTO(newAssociations));
   }
+
+  @PreAuthorize("hasAuthority('declared-skill:association:manage:own')")
+  @PostMapping("/{declaredSkillProgressId}/associate/traces")
+  public ResponseEntity<DeclaredSkillAssociationsDTO> associateDeclaredSkillWithTraces(
+      Principal principal,
+      @Valid @PathVariable UUID declaredSkillProgressId,
+      @Valid @RequestBody AssociationsCreationRequest body) {
+    log.debug(
+        "Received request to associate declared skill [{}] with traces [{}] by" + " student [{}]",
+        declaredSkillProgressId,
+        body.idsToAssociate(),
+        principal.getName());
+    var newAssociations =
+        declaredSkillProgressService.associateDeclaredSkillWithTraces(
+            declaredSkillProgressId, body.idsToAssociate());
+    return ResponseEntity.ok(declaredSkillAssociationsDTOMapper.toDTO(newAssociations));
+  }
 }
