@@ -84,7 +84,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.infrastructure.context,Prom
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.selfknowledge.domain.data,SelfKnowledgeElementDetails,0,6,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.notification.infrastructure.adapter.repository,NotificationDatabaseRepository,0,45,0,0,0,13,0,3,0,3
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.application.adapter.controller,UserController,76,101,0,2,22,26,4,7,4,6
-avenirs-portfolio-api,fr.avenirsesr.portfolio.student.skill.application.adapter.controller,DeclaredSkillProgressController,101,206,0,0,23,54,5,8,5,8
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.skill.application.adapter.controller,DeclaredSkillProgressController,101,238,0,0,23,61,5,9,5,9
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.association.domain.data,AssociationData,0,12,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.association.domain.data,AssociationSearchResultData,0,15,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.repository,ActivityDatabaseRepository,37,93,0,4,8,24,1,6,1,4
@@ -101,7 +101,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.student.skill.domain.data,Declared
 avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.domain.data,ActivityPresentationData,0,33,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.domain.data,ActivityStaffOverviewData,0,21,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.domain.data,ActivityWithStudentStatusData,0,12,0,0,0,1,0,1,0,1
-avenirs-portfolio-api,fr.avenirsesr.portfolio.student.skill.domain.service,DeclaredSkillProgressServiceImpl,28,775,2,40,8,204,8,55,6,35
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.skill.domain.service,DeclaredSkillProgressServiceImpl,28,844,2,44,8,218,8,60,6,38
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.skill.domain.service,DeclaredSkillSyncServiceImpl,0,64,0,4,0,20,0,4,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.selfknowledge.application.adapter.controller,SelfKnowledgeController,7,164,0,0,2,42,1,9,1,9
 avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.domain.service,ActivityServiceImpl,142,1282,12,82,29,315,15,78,7,39
