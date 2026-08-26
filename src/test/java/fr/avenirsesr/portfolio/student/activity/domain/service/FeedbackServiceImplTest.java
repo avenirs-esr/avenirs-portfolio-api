@@ -27,6 +27,8 @@ import fr.avenirsesr.portfolio.student.activity.domain.exception.DeclaredActivit
 import fr.avenirsesr.portfolio.student.activity.domain.exception.FeedbackInProcessException;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.FeedbackMaximumIterationReachedException;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.FeedbackNotFoundException;
+import fr.avenirsesr.portfolio.student.activity.domain.exception.FeedbackSeenException;
+import fr.avenirsesr.portfolio.student.activity.domain.exception.FeedbackSubmittedException;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
@@ -456,6 +458,53 @@ class FeedbackServiceImplTest {
     }
 
     @Test
+    void should_create_new_feedback_when_last_feedback_is_SEEN_and_limit_not_reached() {
+      BddLogger.given("A logged-in student with 1 SEEN feedback and feedbackAllowedIterations=2");
+      UUID declaredActivityId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().withFeedbackAllowedIterations(2).toModel();
+      DeclaredActivity declaredActivity =
+          DeclaredActivity.create(
+              UUID.randomUUID(), student, activity, null, null, null, null, null);
+
+      Feedback seenFeedback =
+          Feedback.toDomain(
+              UUID.randomUUID(),
+              Instant.now(),
+              Instant.now(),
+              declaredActivity,
+              null,
+              "Retour du formateur",
+              EFeedbackStatus.SEEN,
+              1,
+              List.of(),
+              List.of(),
+              List.of());
+
+      when(declaredActivityService.fetchActivityAndCheckLoggedInStudentAuthorization(
+              declaredActivityId))
+          .thenReturn(declaredActivity);
+      when(feedbackRepository.findAllByDeclaredActivityId(declaredActivityId))
+          .thenReturn(List.of(seenFeedback));
+      when(associationService.getAllOf(
+              any(UUID.class), any(Class.class), ArgumentMatchers.<List<EAssociationType>>any()))
+          .thenReturn(List.of());
+      when(traceService.findAllTracesById(List.of())).thenReturn(List.of());
+      when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of()))
+          .thenReturn(List.of());
+      when(feedbackRepository.save(any(Feedback.class))).thenAnswer(i -> i.getArguments()[0]);
+
+      BddLogger.when("createFeedback is called");
+      service.createFeedback(declaredActivityId);
+
+      BddLogger.then(
+          "A new feedback is created with a different ID from the SEEN one and status NEW");
+      verify(feedbackRepository).save(feedbackCaptor.capture());
+      Feedback saved = feedbackCaptor.getValue();
+      assertThat(saved.getId()).isNotEqualTo(seenFeedback.getId());
+      assertThat(saved.getStatus()).isEqualTo(EFeedbackStatus.NEW);
+    }
+
+    @Test
     void should_throw_FeedbackMaximumIterationReachedException_when_limit_is_reached() {
       BddLogger.given(
           "A logged-in student with 2 SUBMITTED feedbacks and feedbackAllowedIterations=2");
@@ -506,13 +555,68 @@ class FeedbackServiceImplTest {
 
       verify(feedbackRepository, never()).save(any());
     }
+
+    @Test
+    void
+        should_throw_FeedbackMaximumIterationReachedException_when_last_feedback_is_SEEN_and_limit_is_reached() {
+      BddLogger.given(
+          "A logged-in student with 2 feedbacks (SUBMITTED then SEEN) and"
+              + " feedbackAllowedIterations=2");
+      UUID declaredActivityId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().withFeedbackAllowedIterations(2).toModel();
+      DeclaredActivity declaredActivity =
+          DeclaredActivity.create(
+              UUID.randomUUID(), student, activity, null, null, null, null, null);
+
+      Feedback submittedFeedback =
+          Feedback.toDomain(
+              UUID.randomUUID(),
+              Instant.now().minusSeconds(120),
+              Instant.now().minusSeconds(120),
+              declaredActivity,
+              null,
+              "Retour 1",
+              EFeedbackStatus.SUBMITTED,
+              1,
+              List.of(),
+              List.of(),
+              List.of());
+      Feedback seenFeedback =
+          Feedback.toDomain(
+              UUID.randomUUID(),
+              Instant.now(),
+              Instant.now(),
+              declaredActivity,
+              null,
+              "Retour 2",
+              EFeedbackStatus.SEEN,
+              1,
+              List.of(),
+              List.of(),
+              List.of());
+
+      when(declaredActivityService.fetchActivityAndCheckLoggedInStudentAuthorization(
+              declaredActivityId))
+          .thenReturn(declaredActivity);
+      when(feedbackRepository.findAllByDeclaredActivityId(declaredActivityId))
+          .thenReturn(List.of(seenFeedback, submittedFeedback));
+
+      BddLogger.when("createFeedback is called");
+
+      BddLogger.then("A FeedbackMaximumIterationReachedException is thrown and nothing is saved");
+      assertThatThrownBy(() -> service.createFeedback(declaredActivityId))
+          .isInstanceOf(FeedbackMaximumIterationReachedException.class);
+
+      verify(feedbackRepository, never()).save(any());
+    }
   }
 
   @Nested
   class GetFeedbackDetails {
 
     @Test
-    void should_return_FeedbackData_with_feedback_visible_when_student_and_SUBMITTED() {
+    void
+        should_return_FeedbackData_with_feedback_visible_and_status_SEEN_when_student_and_SUBMITTED() {
       BddLogger.given("A logged-in student requesting details of their own SUBMITTED feedback");
       UUID feedbackId = UUID.randomUUID();
       Activity activity = ActivityFixture.create().toModel();
@@ -538,10 +642,13 @@ class FeedbackServiceImplTest {
       BddLogger.when("getFeedbackDetails is called with STUDENT category");
       FeedbackData result = service.getFeedbackDetails(feedbackId, EUserCategory.STUDENT);
 
-      BddLogger.then("FeedbackData is returned with the feedback text visible");
+      BddLogger.then(
+          "FeedbackData is returned with the feedback text visible and the status now SEEN");
       assertThat(result.feedback()).isEqualTo(feedbackText);
-      assertThat(result.status()).isEqualTo(EFeedbackStatus.SUBMITTED);
+      assertThat(result.status()).isEqualTo(EFeedbackStatus.SEEN);
       assertThat(result.id()).isEqualTo(feedbackId);
+      verify(feedbackRepository).save(feedbackCaptor.capture());
+      assertThat(feedbackCaptor.getValue().getStatus()).isEqualTo(EFeedbackStatus.SEEN);
     }
 
     @Test
@@ -839,7 +946,7 @@ class FeedbackServiceImplTest {
     }
 
     @Test
-    void should_return_feedback_text_when_status_is_SUBMITTED() {
+    void should_transition_status_to_SEEN_and_persist_it_when_status_is_SUBMITTED() {
       BddLogger.given("A SUBMITTED feedback with a feedback text");
       Activity activity = ActivityFixture.create().toModel();
       String feedbackText = "Excellent travail, continuez ainsi !";
@@ -861,9 +968,42 @@ class FeedbackServiceImplTest {
       BddLogger.when("getStudentFeedbackDetails is called with the student's own user");
       FeedbackData result = service.getStudentFeedbackDetails(student.getUser(), feedback);
 
-      BddLogger.then("FeedbackData is returned with the feedback text visible");
+      BddLogger.then(
+          "FeedbackData is returned with the feedback text visible, status SEEN, and the feedback"
+              + " is persisted with the new status");
       assertThat(result.feedback()).isEqualTo(feedbackText);
-      assertThat(result.status()).isEqualTo(EFeedbackStatus.SUBMITTED);
+      assertThat(result.status()).isEqualTo(EFeedbackStatus.SEEN);
+      verify(feedbackRepository).save(feedbackCaptor.capture());
+      assertThat(feedbackCaptor.getValue().getStatus()).isEqualTo(EFeedbackStatus.SEEN);
+    }
+
+    @Test
+    void should_keep_feedback_visible_without_saving_again_when_status_is_already_SEEN() {
+      BddLogger.given("A feedback already SEEN by the student");
+      Activity activity = ActivityFixture.create().toModel();
+      String feedbackText = "Excellent travail, continuez ainsi !";
+      Feedback feedback =
+          Feedback.toDomain(
+              UUID.randomUUID(),
+              Instant.now(),
+              Instant.now(),
+              DeclaredActivity.create(
+                  UUID.randomUUID(), student, activity, null, null, null, null, null),
+              "Ma réflexion",
+              feedbackText,
+              EFeedbackStatus.SEEN,
+              1,
+              List.of(),
+              List.of(),
+              List.of());
+
+      BddLogger.when("getStudentFeedbackDetails is called again with the student's own user");
+      FeedbackData result = service.getStudentFeedbackDetails(student.getUser(), feedback);
+
+      BddLogger.then("The feedback text stays visible and no extra save is triggered");
+      assertThat(result.feedback()).isEqualTo(feedbackText);
+      assertThat(result.status()).isEqualTo(EFeedbackStatus.SEEN);
+      verify(feedbackRepository, never()).save(any());
     }
 
     @Test
@@ -1017,6 +1157,41 @@ class FeedbackServiceImplTest {
       BddLogger.then("A FieldValidationException is thrown and nothing is saved");
       assertThatThrownBy(() -> service.updateFeedback(feedbackId, tooLongFeedback))
           .isInstanceOf(FieldValidationException.class);
+
+      verify(feedbackRepository, never()).save(any());
+    }
+
+    @Test
+    void should_throw_FeedbackSeenException_when_feedback_status_is_SEEN() {
+      BddLogger.given("A logged-in staff who is the author of the activity and a SEEN feedback");
+      UUID feedbackId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().toModel();
+      DeclaredActivity declaredActivity =
+          DeclaredActivity.create(
+              UUID.randomUUID(), student, activity, null, null, null, null, null);
+      Feedback feedback =
+          Feedback.toDomain(
+              feedbackId,
+              Instant.now(),
+              Instant.now(),
+              declaredActivity,
+              null,
+              "Bon travail !",
+              EFeedbackStatus.SEEN,
+              1,
+              List.of(),
+              List.of(),
+              List.of());
+      User authorUser = UserFixture.create().withId(activity.getAuthor().getId()).toModel();
+
+      when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
+      when(loggedInUserService.getLoggedInUser()).thenReturn(authorUser);
+
+      BddLogger.when("updateFeedback is called on a SEEN feedback");
+
+      BddLogger.then("A FeedbackSeenException is thrown and nothing is saved");
+      assertThatThrownBy(() -> service.updateFeedback(feedbackId, "Nouveau texte"))
+          .isInstanceOf(FeedbackSeenException.class);
 
       verify(feedbackRepository, never()).save(any());
     }
@@ -1182,6 +1357,78 @@ class FeedbackServiceImplTest {
 
       verify(feedbackRepository, never()).save(any());
     }
+
+    @Test
+    void should_throw_FeedbackSubmittedException_when_feedback_status_is_already_SUBMITTED() {
+      BddLogger.given(
+          "A logged-in staff who is the author of the activity and a feedback already SUBMITTED");
+      UUID feedbackId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().toModel();
+      Staff staff = StaffFixture.create().withId(activity.getAuthor().getId()).toModel();
+      DeclaredActivity declaredActivity =
+          DeclaredActivity.create(
+              UUID.randomUUID(), student, activity, null, null, null, null, null);
+      Feedback feedback =
+          Feedback.toDomain(
+              feedbackId,
+              Instant.now(),
+              Instant.now(),
+              declaredActivity,
+              null,
+              "Bon travail !",
+              EFeedbackStatus.SUBMITTED,
+              1,
+              List.of(),
+              List.of(),
+              List.of());
+
+      when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+
+      BddLogger.when("submitFeedback is called again on the same feedback");
+
+      BddLogger.then("A FeedbackSubmittedException is thrown and nothing is saved");
+      assertThatThrownBy(() -> service.submitFeedback(feedbackId))
+          .isInstanceOf(FeedbackSubmittedException.class);
+
+      verify(feedbackRepository, never()).save(any());
+    }
+
+    @Test
+    void should_throw_FeedbackSubmittedException_when_feedback_status_is_already_SEEN() {
+      BddLogger.given(
+          "A logged-in staff who is the author of the activity and a feedback already SEEN");
+      UUID feedbackId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().toModel();
+      Staff staff = StaffFixture.create().withId(activity.getAuthor().getId()).toModel();
+      DeclaredActivity declaredActivity =
+          DeclaredActivity.create(
+              UUID.randomUUID(), student, activity, null, null, null, null, null);
+      Feedback feedback =
+          Feedback.toDomain(
+              feedbackId,
+              Instant.now(),
+              Instant.now(),
+              declaredActivity,
+              null,
+              "Bon travail !",
+              EFeedbackStatus.SEEN,
+              1,
+              List.of(),
+              List.of(),
+              List.of());
+
+      when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+
+      BddLogger.when("submitFeedback is called on a SEEN feedback");
+
+      BddLogger.then("A FeedbackSubmittedException is thrown and nothing is saved");
+      assertThatThrownBy(() -> service.submitFeedback(feedbackId))
+          .isInstanceOf(FeedbackSubmittedException.class);
+
+      verify(feedbackRepository, never()).save(any());
+    }
   }
 
   @Nested
@@ -1277,13 +1524,15 @@ class FeedbackServiceImplTest {
       when(feedbackRepository.countByStatus(staff, null, EFeedbackStatus.NEW)).thenReturn(2);
       when(feedbackRepository.countByStatus(staff, null, EFeedbackStatus.IN_PROCESS)).thenReturn(3);
       when(feedbackRepository.countByStatus(staff, null, EFeedbackStatus.SUBMITTED)).thenReturn(3);
+      when(feedbackRepository.countByStatus(staff, null, EFeedbackStatus.SEEN)).thenReturn(2);
 
       BddLogger.when("getFeedbackDashboard is called without activityId");
       FeedbackDashboardData result = service.getFeedbackDashboard(null);
 
       BddLogger.then(
-          "FeedbackDashboardData is assembled: new=2, pending=5(2+3), processed=3, total=8");
-      assertThat(result).isEqualTo(new FeedbackDashboardData(2, 5, 3, 8));
+          "FeedbackDashboardData is assembled: new=2, pending=5(2+3),"
+              + " processed=5(3 SUBMITTED+2 SEEN), total=10");
+      assertThat(result).isEqualTo(new FeedbackDashboardData(2, 5, 5, 10));
     }
 
     @Test
@@ -1301,15 +1550,19 @@ class FeedbackServiceImplTest {
           .thenReturn(0);
       when(feedbackRepository.countByStatus(staff, activity, EFeedbackStatus.SUBMITTED))
           .thenReturn(0);
+      when(feedbackRepository.countByStatus(staff, activity, EFeedbackStatus.SEEN)).thenReturn(1);
 
       BddLogger.when("getFeedbackDashboard is called with activityId");
       FeedbackDashboardData result = service.getFeedbackDashboard(activityId);
 
-      BddLogger.then("countByStatus is called with the resolved activity and the result assembled");
-      assertThat(result).isEqualTo(new FeedbackDashboardData(1, 1, 0, 1));
+      BddLogger.then(
+          "countByStatus is called with the resolved activity for all 4 statuses: new=1,"
+              + " pending=1, processed=1(SEEN), total=2");
+      assertThat(result).isEqualTo(new FeedbackDashboardData(1, 1, 1, 2));
       verify(feedbackRepository).countByStatus(staff, activity, EFeedbackStatus.NEW);
       verify(feedbackRepository).countByStatus(staff, activity, EFeedbackStatus.IN_PROCESS);
       verify(feedbackRepository).countByStatus(staff, activity, EFeedbackStatus.SUBMITTED);
+      verify(feedbackRepository).countByStatus(staff, activity, EFeedbackStatus.SEEN);
     }
 
     @Test
@@ -1366,7 +1619,7 @@ class FeedbackServiceImplTest {
       when(declaredActivityRepository.findById(declaredActivityId))
           .thenReturn(Optional.of(declaredActivity));
       when(feedbackRepository.findAllByDeclaredActivityId(
-              declaredActivityId, EFeedbackStatus.SUBMITTED))
+              declaredActivityId, EFeedbackStatus.SUBMITTED, EFeedbackStatus.SEEN))
           .thenReturn(List.of(feedback1, feedback2));
 
       BddLogger.when("getFeedbackHistory is called");
@@ -1375,14 +1628,15 @@ class FeedbackServiceImplTest {
       BddLogger.then("The repository result is returned");
       assertThat(result).containsExactly(feedback1, feedback2);
       verify(feedbackRepository)
-          .findAllByDeclaredActivityId(declaredActivityId, EFeedbackStatus.SUBMITTED);
+          .findAllByDeclaredActivityId(
+              declaredActivityId, EFeedbackStatus.SUBMITTED, EFeedbackStatus.SEEN);
     }
 
     @Test
-    void should_return_only_SUBMITTED_feedbacks_when_repository_is_called_with_SUBMITTED_status() {
+    void should_return_SUBMITTED_and_SEEN_feedbacks_when_repository_is_called_with_both_statuses() {
       BddLogger.given(
-          "A logged-in staff who is the author and the repository is queried with SUBMITTED"
-              + " status");
+          "A logged-in staff who is the author and the repository is queried with SUBMITTED and"
+              + " SEEN status");
       UUID declaredActivityId = UUID.randomUUID();
       Activity activity = ActivityFixture.create().toModel();
       Staff staff = StaffFixture.create().withId(activity.getAuthor().getId()).toModel();
@@ -1403,21 +1657,36 @@ class FeedbackServiceImplTest {
               List.of(),
               List.of(),
               List.of());
+      Feedback seenFeedback =
+          Feedback.toDomain(
+              UUID.randomUUID(),
+              Instant.now(),
+              Instant.now(),
+              declaredActivity,
+              null,
+              "Retour déjà vu",
+              EFeedbackStatus.SEEN,
+              2,
+              List.of(),
+              List.of(),
+              List.of());
 
       when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
       when(declaredActivityRepository.findById(declaredActivityId))
           .thenReturn(Optional.of(declaredActivity));
       when(feedbackRepository.findAllByDeclaredActivityId(
-              declaredActivityId, EFeedbackStatus.SUBMITTED))
-          .thenReturn(List.of(submittedFeedback));
+              declaredActivityId, EFeedbackStatus.SUBMITTED, EFeedbackStatus.SEEN))
+          .thenReturn(List.of(seenFeedback, submittedFeedback));
 
       BddLogger.when("getFeedbackHistory is called");
       List<Feedback> result = service.getFeedbackHistory(declaredActivityId);
 
-      BddLogger.then("The repository is called with SUBMITTED status and its result is returned");
-      assertThat(result).containsExactly(submittedFeedback);
+      BddLogger.then(
+          "The repository is called with SUBMITTED and SEEN status and both feedbacks come back");
+      assertThat(result).containsExactly(seenFeedback, submittedFeedback);
       verify(feedbackRepository)
-          .findAllByDeclaredActivityId(declaredActivityId, EFeedbackStatus.SUBMITTED);
+          .findAllByDeclaredActivityId(
+              declaredActivityId, EFeedbackStatus.SUBMITTED, EFeedbackStatus.SEEN);
     }
 
     @Test
@@ -1435,7 +1704,7 @@ class FeedbackServiceImplTest {
       when(declaredActivityRepository.findById(declaredActivityId))
           .thenReturn(Optional.of(declaredActivity));
       when(feedbackRepository.findAllByDeclaredActivityId(
-              declaredActivityId, EFeedbackStatus.SUBMITTED))
+              declaredActivityId, EFeedbackStatus.SUBMITTED, EFeedbackStatus.SEEN))
           .thenReturn(List.of());
 
       BddLogger.when("getFeedbackHistory is called");
@@ -1460,7 +1729,7 @@ class FeedbackServiceImplTest {
       when(declaredActivityRepository.findById(declaredActivityId))
           .thenReturn(Optional.of(declaredActivity));
       when(feedbackRepository.findAllByDeclaredActivityId(
-              declaredActivityId, EFeedbackStatus.SUBMITTED))
+              declaredActivityId, EFeedbackStatus.SUBMITTED, EFeedbackStatus.SEEN))
           .thenReturn(List.of());
 
       BddLogger.when("getFeedbackHistory is called");
@@ -1485,7 +1754,7 @@ class FeedbackServiceImplTest {
       assertThatThrownBy(() -> service.getFeedbackHistory(declaredActivityId))
           .isInstanceOf(DeclaredActivityNotFoundException.class);
 
-      verify(feedbackRepository, never()).findAllByDeclaredActivityId(any(), any());
+      verify(feedbackRepository, never()).findAllByDeclaredActivityId(any(), any(), any());
     }
 
     @Test
@@ -1508,7 +1777,7 @@ class FeedbackServiceImplTest {
       assertThatThrownBy(() -> service.getFeedbackHistory(declaredActivityId))
           .isInstanceOf(UserNotAuthorizedException.class);
 
-      verify(feedbackRepository, never()).findAllByDeclaredActivityId(any(), any());
+      verify(feedbackRepository, never()).findAllByDeclaredActivityId(any(), any(), any());
     }
 
     @Test
@@ -1525,7 +1794,7 @@ class FeedbackServiceImplTest {
           .isInstanceOf(UserIsNotStaffException.class);
 
       verify(declaredActivityRepository, never()).findById(any());
-      verify(feedbackRepository, never()).findAllByDeclaredActivityId(any(), any());
+      verify(feedbackRepository, never()).findAllByDeclaredActivityId(any(), any(), any());
     }
   }
 
@@ -1715,6 +1984,30 @@ class FeedbackServiceImplTest {
       verifyNoInteractions(fileResourceService);
       verify(feedbackRepository, never()).save(any());
     }
+
+    @Test
+    void should_throw_FeedbackSeenException_when_feedback_status_is_SEEN() {
+      BddLogger.given("A logged-in staff who is the author of a SEEN feedback");
+      UUID feedbackId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().toModel();
+      Staff author = StaffFixture.create().withId(activity.getAuthor().getId()).toModel();
+      Feedback feedback = feedbackOf(feedbackId, activity, EFeedbackStatus.SEEN, List.of());
+
+      when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(author);
+
+      BddLogger.when("uploadAttachment is called on a SEEN feedback");
+
+      BddLogger.then("A FeedbackSeenException is thrown and nothing is uploaded");
+      assertThatThrownBy(
+              () ->
+                  service.uploadAttachment(
+                      feedbackId, FILE_NAME, MIME_TYPE, CONTENT.length, CONTENT))
+          .isInstanceOf(FeedbackSeenException.class);
+
+      verifyNoInteractions(fileResourceService);
+      verify(feedbackRepository, never()).save(any());
+    }
   }
 
   @Nested
@@ -1810,6 +2103,29 @@ class FeedbackServiceImplTest {
       verifyNoInteractions(fileResourceService);
       verify(feedbackRepository, never()).save(any());
     }
+
+    @Test
+    void should_throw_FeedbackSeenException_when_feedback_status_is_SEEN() {
+      BddLogger.given("A logged-in staff author and a SEEN feedback holding an attachment");
+      UUID feedbackId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().toModel();
+      Staff author = StaffFixture.create().withId(activity.getAuthor().getId()).toModel();
+      File existingAttachment = attachment();
+      Feedback feedback =
+          feedbackOf(feedbackId, activity, EFeedbackStatus.SEEN, List.of(existingAttachment));
+
+      when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(author);
+
+      BddLogger.when("deleteAttachment is called on a SEEN feedback");
+
+      BddLogger.then("A FeedbackSeenException is thrown and nothing is deleted");
+      assertThatThrownBy(() -> service.deleteAttachment(feedbackId, existingAttachment.getId()))
+          .isInstanceOf(FeedbackSeenException.class);
+
+      verifyNoInteractions(fileResourceService);
+      verify(feedbackRepository, never()).save(any());
+    }
   }
 
   @Nested
@@ -1855,6 +2171,49 @@ class FeedbackServiceImplTest {
       FileDownload result = service.downloadAttachment(feedbackId, existingAttachment.getId());
 
       BddLogger.then("The file download is returned");
+      assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    void should_return_the_file_download_when_the_owning_student_and_feedback_is_SEEN() {
+      BddLogger.given("A logged-in student owning a SEEN feedback holding an attachment");
+      UUID feedbackId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().toModel();
+      File existingAttachment = attachment();
+      Feedback feedback =
+          feedbackOf(feedbackId, activity, EFeedbackStatus.SEEN, List.of(existingAttachment));
+      FileDownload expected = new FileDownload(FILE_NAME, CONTENT);
+
+      when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
+      when(loggedInUserService.getLoggedInUser()).thenReturn(student.getUser());
+      when(fileResourceService.download(existingAttachment.getId())).thenReturn(expected);
+
+      BddLogger.when("downloadAttachment is called");
+      FileDownload result = service.downloadAttachment(feedbackId, existingAttachment.getId());
+
+      BddLogger.then("The file download is returned since SEEN still grants access to the owner");
+      assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    void should_return_the_file_download_when_the_user_is_the_staff_author_and_feedback_is_SEEN() {
+      BddLogger.given("A logged-in staff author and a SEEN feedback holding an attachment");
+      UUID feedbackId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().toModel();
+      User authorUser = UserFixture.create().withId(activity.getAuthor().getId()).toModel();
+      File existingAttachment = attachment();
+      Feedback feedback =
+          feedbackOf(feedbackId, activity, EFeedbackStatus.SEEN, List.of(existingAttachment));
+      FileDownload expected = new FileDownload(FILE_NAME, CONTENT);
+
+      when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
+      when(loggedInUserService.getLoggedInUser()).thenReturn(authorUser);
+      when(fileResourceService.download(existingAttachment.getId())).thenReturn(expected);
+
+      BddLogger.when("downloadAttachment is called");
+      FileDownload result = service.downloadAttachment(feedbackId, existingAttachment.getId());
+
+      BddLogger.then("The file download is returned since staff access does not depend on status");
       assertThat(result).isEqualTo(expected);
     }
 
