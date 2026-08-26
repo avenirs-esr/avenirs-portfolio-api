@@ -2,6 +2,9 @@
 
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.model.FeedbackEntity;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -10,27 +13,29 @@ public final class FeedbackSpecification {
   private FeedbackSpecification() {}
 
   public static Specification&lt;FeedbackEntity&gt; hasStaffAuthor(UUID staffId) {
-<span class="fc" id="L13">    return (root, query, cb) -&gt;</span>
-<span class="fc" id="L14">        cb.equal(root.join(&quot;declaredActivity&quot;).join(&quot;activity&quot;).get(&quot;author&quot;).get(&quot;id&quot;), staffId);</span>
+<span class="fc" id="L16">    return (root, query, cb) -&gt;</span>
+<span class="fc" id="L17">        cb.equal(root.join(&quot;declaredActivity&quot;).join(&quot;activity&quot;).get(&quot;author&quot;).get(&quot;id&quot;), staffId);</span>
   }
 
-  public static Specification&lt;FeedbackEntity&gt; hasStatus(EFeedbackStatus status) {
-<span class="fc" id="L18">    return (root, query, cb) -&gt; {</span>
-<span class="fc bfc" id="L19" title="All 2 branches covered.">      if (status == null) return cb.conjunction();</span>
-<span class="fc" id="L20">      return cb.equal(root.get(&quot;status&quot;), status);</span>
+  public static Specification&lt;FeedbackEntity&gt; hasStatus(EFeedbackStatus... status) {
+    List&lt;EFeedbackStatus&gt; statuses =
+<span class="pc bpc" id="L22" title="1 of 2 branches missed.">        status == null ? List.of() : Arrays.stream(status).filter(Objects::nonNull).toList();</span>
+<span class="fc" id="L23">    return (root, query, cb) -&gt; {</span>
+<span class="fc bfc" id="L24" title="All 2 branches covered.">      if (statuses.isEmpty()) return cb.conjunction();</span>
+<span class="fc" id="L25">      return root.get(&quot;status&quot;).in(statuses);</span>
     };
   }
 
   public static Specification&lt;FeedbackEntity&gt; hasActivityId(UUID activityId) {
-<span class="fc" id="L25">    return (root, query, cb) -&gt; {</span>
-<span class="fc bfc" id="L26" title="All 2 branches covered.">      if (activityId == null) return cb.conjunction();</span>
-<span class="fc" id="L27">      return cb.equal(root.get(&quot;declaredActivity&quot;).get(&quot;activity&quot;).get(&quot;id&quot;), activityId);</span>
+<span class="fc" id="L30">    return (root, query, cb) -&gt; {</span>
+<span class="fc bfc" id="L31" title="All 2 branches covered.">      if (activityId == null) return cb.conjunction();</span>
+<span class="fc" id="L32">      return cb.equal(root.get(&quot;declaredActivity&quot;).get(&quot;activity&quot;).get(&quot;id&quot;), activityId);</span>
     };
   }
 
   public static Specification&lt;FeedbackEntity&gt; hasDeclaredActivityId(UUID declaredActivityId) {
-<span class="fc" id="L32">    return (root, query, cb) -&gt;</span>
-<span class="fc" id="L33">        cb.equal(root.get(&quot;declaredActivity&quot;).get(&quot;id&quot;), declaredActivityId);</span>
+<span class="fc" id="L37">    return (root, query, cb) -&gt;</span>
+<span class="fc" id="L38">        cb.equal(root.get(&quot;declaredActivity&quot;).get(&quot;id&quot;), declaredActivityId);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
