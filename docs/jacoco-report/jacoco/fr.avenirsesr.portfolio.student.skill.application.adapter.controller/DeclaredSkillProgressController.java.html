@@ -238,5 +238,22 @@ public class DeclaredSkillProgressController {
 <span class="fc" id="L238">            declaredSkillProgressId, body.idsToAssociate());</span>
 <span class="fc" id="L239">    return ResponseEntity.ok(declaredSkillAssociationsDTOMapper.toDTO(newAssociations));</span>
   }
+
+  @PreAuthorize(&quot;hasAuthority('declared-skill:association:manage:own')&quot;)
+  @PostMapping(&quot;/{declaredSkillProgressId}/associate/traces&quot;)
+  public ResponseEntity&lt;DeclaredSkillAssociationsDTO&gt; associateDeclaredSkillWithTraces(
+      Principal principal,
+      @Valid @PathVariable UUID declaredSkillProgressId,
+      @Valid @RequestBody AssociationsCreationRequest body) {
+<span class="fc" id="L248">    log.debug(</span>
+        &quot;Received request to associate declared skill [{}] with traces [{}] by&quot; + &quot; student [{}]&quot;,
+        declaredSkillProgressId,
+<span class="fc" id="L251">        body.idsToAssociate(),</span>
+<span class="fc" id="L252">        principal.getName());</span>
+<span class="fc" id="L253">    var newAssociations =</span>
+<span class="fc" id="L254">        declaredSkillProgressService.associateDeclaredSkillWithTraces(</span>
+<span class="fc" id="L255">            declaredSkillProgressId, body.idsToAssociate());</span>
+<span class="fc" id="L256">    return ResponseEntity.ok(declaredSkillAssociationsDTOMapper.toDTO(newAssociations));</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
