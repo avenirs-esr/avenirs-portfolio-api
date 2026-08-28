@@ -24,6 +24,8 @@ import fr.avenirsesr.portfolio.student.activity.domain.exception.DeclaredActivit
 import fr.avenirsesr.portfolio.student.activity.domain.exception.FeedbackInProcessException;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.FeedbackMaximumIterationReachedException;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.FeedbackNotFoundException;
+import fr.avenirsesr.portfolio.student.activity.domain.exception.FeedbackSeenException;
+import fr.avenirsesr.portfolio.student.activity.domain.exception.FeedbackSubmittedException;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
@@ -101,7 +103,7 @@ public class FeedbackServiceImpl implements FeedbackService {
           lastFeedback.setAssociatedDeclaredSkills(declaredSkills);
           return feedbackRepository.save(lastFeedback);
         }
-        case SUBMITTED -> {
+        case SUBMITTED, SEEN -> {
           int maxIterations = declaredActivity.getActivity().getFeedbackAllowedIterations();
           if (maxIterations != -1 && existingFeedbacks.size() >= maxIterations) {
             throw new FeedbackMaximumIterationReachedException();
@@ -164,9 +166,14 @@ public class FeedbackServiceImpl implements FeedbackService {
       throw new UserNotAuthorizedException();
     }
 
-    boolean isSubmitted = feedback.getStatus() == EFeedbackStatus.SUBMITTED;
-    String feedbackText = isSubmitted ? feedback.getFeedback().orElse(null) : null;
-    List<File> attachments = isSubmitted ? feedback.getAttachments() : List.of();
+    if (feedback.getStatus() == EFeedbackStatus.SUBMITTED) {
+      feedback.setStatus(EFeedbackStatus.SEEN);
+      feedbackRepository.save(feedback);
+    }
+
+    boolean canBeViewed = feedback.getStatus() == EFeedbackStatus.SEEN;
+    String feedbackText = canBeViewed ? feedback.getFeedback().orElse(null) : null;
+    List<File> attachments = canBeViewed ? feedback.getAttachments() : List.of();
     return new FeedbackData(
         feedback.getId(),
         feedback.getCreatedAt(),
@@ -191,6 +198,10 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     if (!loggedInUser.equals(author.getUser())) {
       throw new UserNotAuthorizedException();
+    }
+
+    if (feedbackToUpdate.getStatus() == EFeedbackStatus.SEEN) {
+      throw new FeedbackSeenException();
     }
 
     validateOptionalTextMaxLength("feedback", feedback, RICH_DESCRIPTION_LENGTH);
@@ -226,12 +237,17 @@ public class FeedbackServiceImpl implements FeedbackService {
       throw new UserNotAuthorizedException();
     }
     return feedbackRepository.findAllByDeclaredActivityId(
-        declaredActivityId, EFeedbackStatus.SUBMITTED);
+        declaredActivityId, EFeedbackStatus.SUBMITTED, EFeedbackStatus.SEEN);
   }
 
   @Override
   public void submitFeedback(UUID feedbackId) {
     Feedback feedback = fetchFeedbackAndCheckLoggedInStaffIsAuthor(feedbackId);
+
+    if (feedback.getStatus() == EFeedbackStatus.SUBMITTED
+        || feedback.getStatus() == EFeedbackStatus.SEEN) {
+      throw new FeedbackSubmittedException();
+    }
 
     requireNotNull("feedback", feedback.getFeedback().orElse(null));
 
@@ -244,6 +260,10 @@ public class FeedbackServiceImpl implements FeedbackService {
       UUID feedbackId, String fileName, String mimeType, long size, byte[] content) {
     Feedback feedback = fetchFeedbackAndCheckLoggedInStaffIsAuthor(feedbackId);
 
+    if (feedback.getStatus() == EFeedbackStatus.SEEN) {
+      throw new FeedbackSeenException();
+    }
+
     File file = fileResourceService.upload(fileName, mimeType, size, content, true);
     feedback.addAttachment(file);
     feedbackRepository.save(feedback);
@@ -254,8 +274,12 @@ public class FeedbackServiceImpl implements FeedbackService {
   @Override
   public void deleteAttachment(UUID feedbackId, UUID attachmentId) {
     Feedback feedback = fetchFeedbackAndCheckLoggedInStaffIsAuthor(feedbackId);
-    feedback.findAttachment(attachmentId).orElseThrow(FileNotFoundException::new);
 
+    if (feedback.getStatus() == EFeedbackStatus.SEEN) {
+      throw new FeedbackSeenException();
+    }
+
+    feedback.findAttachment(attachmentId).orElseThrow(FileNotFoundException::new);
     feedback.removeAttachment(attachmentId);
     feedbackRepository.save(feedback);
     fileResourceService.delete(attachmentId);
@@ -271,7 +295,8 @@ public class FeedbackServiceImpl implements FeedbackService {
         loggedInUser.equals(feedback.getDeclaredActivity().getActivity().getAuthor().getUser());
     boolean isOwningStudent =
         loggedInUser.equals(feedback.getDeclaredActivity().getStudent().getUser())
-            && feedback.getStatus() == EFeedbackStatus.SUBMITTED;
+            && (feedback.getStatus() == EFeedbackStatus.SUBMITTED
+                || feedback.getStatus() == EFeedbackStatus.SEEN);
 
     if (!isAuthor && !isOwningStudent) {
       throw new UserNotAuthorizedException();
@@ -322,9 +347,13 @@ public class FeedbackServiceImpl implements FeedbackService {
         feedbackRepository.countByStatus(staff, activity, EFeedbackStatus.IN_PROCESS);
     int submittedCount =
         feedbackRepository.countByStatus(staff, activity, EFeedbackStatus.SUBMITTED);
+    int seenCount = feedbackRepository.countByStatus(staff, activity, EFeedbackStatus.SEEN);
 
-    int pendingCount = newCount + inProcessCount;
+    int pendingFeedbacks = newCount + inProcessCount;
+    int processedFeedbacks = submittedCount + seenCount;
+    int totalFeedbacks = processedFeedbacks + pendingFeedbacks;
+
     return new FeedbackDashboardData(
-        newCount, pendingCount, submittedCount, pendingCount + submittedCount);
+        newCount, pendingFeedbacks, processedFeedbacks, totalFeedbacks);
   }
 }
