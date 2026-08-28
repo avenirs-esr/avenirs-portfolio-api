@@ -420,6 +420,60 @@ class TraceServiceImplTest {
       }
 
       @Test
+      void thenItShouldUseTraceDeclaredSkillAssociationTypeWhenContextIsDeclaredSkill() {
+        BddLogger.when("searching traces for association with declared skill context");
+
+        UUID contextId = UUID.randomUUID();
+        Trace trace = TraceFixture.create().withStudent(student).toModel();
+        var pageCriteria = new PageCriteria(0, 8);
+        PagedResult<AssociationSearchResultData> expected =
+            new PagedResult<>(
+                List.of(
+                    new AssociationSearchResultData(trace.getId(), trace.getTitle(), null, false)),
+                new PageInfo(0, 8, 1));
+
+        when(traceRepository.findAll(
+                eq(student),
+                anyString(),
+                any(TraceFilter.class),
+                isNull(),
+                eq(pageCriteria),
+                eq(null)))
+            .thenReturn(new PagedResult<>(List.of(trace), new PageInfo(0, 8, 1)));
+        when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
+        when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
+        when(associationSearchHelper.searchForAssociation(
+                eq(contextId),
+                eq(DeclaredSkillProgress.class),
+                eq(EAssociationType.TRACE_DECLARED_SKILL),
+                any(),
+                any(),
+                any(),
+                any(),
+                isNull(),
+                any()))
+            .thenReturn(expected);
+
+        PagedResult<AssociationSearchResultData> result =
+            traceService.searchTracesForAssociation(
+                contextId, EAssociationContextType.DECLARED_SKILL, null, "kw", pageCriteria);
+
+        BddLogger.then("it should use the trace declared skill association type");
+        assertSame(expected, result);
+        verify(associationSearchHelper)
+            .searchForAssociation(
+                eq(contextId),
+                eq(DeclaredSkillProgress.class),
+                eq(EAssociationType.TRACE_DECLARED_SKILL),
+                any(),
+                any(),
+                any(),
+                any(),
+                isNull(),
+                any());
+      }
+
+      @Test
       void thenItShouldThrowUnsupportedOperationExceptionWhenContextIsTrace() {
         assertThrows(
             UnsupportedOperationException.class,
@@ -427,19 +481,6 @@ class TraceServiceImplTest {
                 traceService.searchTracesForAssociation(
                     UUID.randomUUID(),
                     EAssociationContextType.TRACE,
-                    null,
-                    "kw",
-                    new PageCriteria(0, 8)));
-      }
-
-      @Test
-      void thenItShouldThrowUnsupportedOperationExceptionWhenContextIsDeclaredSkill() {
-        assertThrows(
-            UnsupportedOperationException.class,
-            () ->
-                traceService.searchTracesForAssociation(
-                    UUID.randomUUID(),
-                    EAssociationContextType.DECLARED_SKILL,
                     null,
                     "kw",
                     new PageCriteria(0, 8)));

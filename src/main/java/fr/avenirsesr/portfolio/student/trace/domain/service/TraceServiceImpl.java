@@ -681,7 +681,8 @@ public class TraceServiceImpl implements TraceService {
     return switch (contextType) {
       case DECLARED_ACTIVITY -> EAssociationType.DECLARED_ACTIVITY_TRACE;
       case DECLARED_EXPERIENCE -> EAssociationType.TRACE_DECLARED_EXPERIENCE;
-      case TRACE, DECLARED_SKILL -> throw new UnsupportedOperationException();
+      case DECLARED_SKILL -> EAssociationType.TRACE_DECLARED_SKILL;
+      case TRACE -> throw new UnsupportedOperationException();
     };
   }
 
