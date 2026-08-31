@@ -74,9 +74,9 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
       String sourceOfInformation,
       String summary,
       String externalLink,
+      String result,
       LocalDate startDate,
-      LocalDate endDate,
-      String result) {
+      LocalDate endDate) {
 <span class="fc" id="L80">    Student student = studentService.getStudentById(studentId);</span>
 <span class="fc" id="L81">    return create(</span>
         experienceId,
@@ -90,9 +90,9 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
         sourceOfInformation,
         summary,
         externalLink,
+        result,
         startDate,
-        endDate,
-        result);
+        endDate);
   }
 
   @Override
@@ -107,9 +107,9 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
       String sourceOfInformation,
       String summary,
       String externalLink,
+      String result,
       LocalDate startDate,
-      LocalDate endDate,
-      String result) {
+      LocalDate endDate) {
 <span class="fc" id="L113">    Student student = studentService.getStudentById(studentId);</span>
 <span class="fc" id="L114">    return create(</span>
 <span class="fc" id="L115">        UUID.randomUUID(),</span>
@@ -123,9 +123,9 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
         sourceOfInformation,
         summary,
         externalLink,
+        result,
         startDate,
-        endDate,
-        result);
+        endDate);
   }
 
   @Override
@@ -139,9 +139,9 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
       String sourceOfInformation,
       String summary,
       String externalLink,
+      String result,
       LocalDate startDate,
-      LocalDate endDate,
-      String result) {
+      LocalDate endDate) {
 <span class="fc" id="L145">    return create(</span>
 <span class="fc" id="L146">        UUID.randomUUID(),</span>
 <span class="fc" id="L147">        loggedInUserService.getLoggedInStudent(),</span>
@@ -154,9 +154,9 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
         sourceOfInformation,
         summary,
         externalLink,
+        result,
         startDate,
-        endDate,
-        result);
+        endDate);
   }
 
   private DeclaredExperience create(
@@ -171,9 +171,9 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
       String sourceOfInformation,
       String summary,
       String externalLink,
+      String result,
       LocalDate startDate,
-      LocalDate endDate,
-      String result) {
+      LocalDate endDate) {
 <span class="fc" id="L177">    log.info(&quot;DeclaredExperience creation for {}&quot;, student);</span>
 
 <span class="fc" id="L179">    checkDeclaredExperienceDataValidity(</span>
@@ -185,9 +185,9 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
         sourceOfInformation,
         summary,
         externalLink,
+        result,
         startDate,
-        endDate,
-        result);
+        endDate);
 
 <span class="fc" id="L192">    var experience =</span>
 <span class="fc" id="L193">        DeclaredExperience.toDomain(</span>
@@ -204,10 +204,10 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
             sourceOfInformation,
             summary,
             externalLink,
+            result,
             startDate,
             endDate,
-            false,
-            result);
+            false);
 
 <span class="fc" id="L212">    experience = experienceRepository.save(experience);</span>
 <span class="fc" id="L213">    log.info(&quot;{} has been created&quot;, experience);</span>
@@ -226,10 +226,10 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
       String sourceOfInformation,
       String summary,
       String externalLink,
+      String result,
       LocalDate startDate,
       LocalDate endDate,
-      boolean valorized,
-      String result) {
+      boolean valorized) {
 <span class="fc" id="L233">    Student student = loggedInUserService.getLoggedInStudent();</span>
 <span class="fc" id="L234">    log.info(&quot;Update experienceId {} by {}&quot;, experienceId, student);</span>
 
@@ -249,9 +249,9 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
         sourceOfInformation,
         summary,
         externalLink,
+        result,
         startDate,
-        endDate,
-        result);
+        endDate);
 
 <span class="fc" id="L256">    experience.setTitle(title);</span>
 <span class="fc" id="L257">    experience.setExperienceType(experienceType);</span>
@@ -262,10 +262,10 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
 <span class="fc" id="L262">    experience.setSourceOfInformation(sourceOfInformation);</span>
 <span class="fc" id="L263">    experience.setSummary(summary);</span>
 <span class="fc" id="L264">    experience.setExternalLink(externalLink);</span>
-<span class="fc" id="L265">    experience.setStartDate(startDate);</span>
-<span class="fc" id="L266">    experience.setEndDate(endDate);</span>
-<span class="fc" id="L267">    experience.setValorized(valorized);</span>
-<span class="fc" id="L268">    experience.setResult(result);</span>
+<span class="fc" id="L265">    experience.setResult(result);</span>
+<span class="fc" id="L266">    experience.setStartDate(startDate);</span>
+<span class="fc" id="L267">    experience.setEndDate(endDate);</span>
+<span class="fc" id="L268">    experience.setValorized(valorized);</span>
 <span class="fc" id="L269">    experience = experienceRepository.save(experience);</span>
 
 <span class="fc" id="L271">    log.info(&quot;{} updated successfully&quot;, experience);</span>
@@ -281,9 +281,9 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
       String sourceOfInformation,
       String summary,
       String externalLink,
+      String result,
       LocalDate startDate,
-      LocalDate endDate,
-      String result) {
+      LocalDate endDate) {
 <span class="fc" id="L287">    requireNotBlankAndMaxLength(&quot;title&quot;, title, TITLE_LENGTH);</span>
 <span class="fc" id="L288">    requireNotBlankAndMaxLength(&quot;organization&quot;, organization, ORGANIZATION_LENGTH);</span>
 <span class="fc" id="L289">    validateOptionalTextMaxLength(&quot;activitySector&quot;, activitySector, ACTIVITY_SECTOR_LENGTH);</span>

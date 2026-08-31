@@ -56,9 +56,9 @@ public class DeclaredExperienceController {
 <span class="fc" id="L56">            request.sourceOfInformation(),</span>
 <span class="fc" id="L57">            request.summary(),</span>
 <span class="fc" id="L58">            request.externalLink(),</span>
-<span class="fc" id="L59">            request.startDate(),</span>
-<span class="fc" id="L60">            request.endDate(),</span>
-<span class="fc" id="L61">            request.result());</span>
+<span class="fc" id="L59">            request.result(),</span>
+<span class="fc" id="L60">            request.startDate(),</span>
+<span class="fc" id="L61">            request.endDate());</span>
 
 <span class="fc" id="L63">    return ResponseEntity.created(URI.create(&quot;/me/declared/experiences/&quot; + experience.getId()))</span>
 <span class="fc" id="L64">        .body(declaredExperienceMapper.toDTO(experience));</span>
@@ -109,10 +109,10 @@ public class DeclaredExperienceController {
 <span class="fc" id="L109">            request.sourceOfInformation(),</span>
 <span class="fc" id="L110">            request.summary(),</span>
 <span class="fc" id="L111">            request.externalLink(),</span>
-<span class="fc" id="L112">            request.startDate(),</span>
-<span class="fc" id="L113">            request.endDate(),</span>
-<span class="fc" id="L114">            Boolean.TRUE.equals(request.valorized()),</span>
-<span class="fc" id="L115">            request.result());</span>
+<span class="fc" id="L112">            request.result(),</span>
+<span class="fc" id="L113">            request.startDate(),</span>
+<span class="fc" id="L114">            request.endDate(),</span>
+<span class="fc" id="L115">            Boolean.TRUE.equals(request.valorized()));</span>
 
 <span class="fc" id="L117">    return ResponseEntity.ok(declaredExperienceMapper.toDTO(experience));</span>
   }
