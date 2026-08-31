@@ -27,6 +27,7 @@ public record DeclaredExperienceViewDTO(
     String sourceOfInformation,
     String summary,
     String externalLink,
+    String result,
     LocalDate startDate,
     LocalDate endDate,
     boolean valorized,

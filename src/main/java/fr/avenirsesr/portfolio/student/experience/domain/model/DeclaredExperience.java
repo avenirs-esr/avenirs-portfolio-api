@@ -22,6 +22,7 @@ public class DeclaredExperience extends AvenirsBaseModel {
   private String sourceOfInformation;
   private String summary;
   private String externalLink;
+  private String result;
   private LocalDate startDate;
   private LocalDate endDate;
   private boolean valorized;
@@ -40,6 +41,7 @@ public class DeclaredExperience extends AvenirsBaseModel {
       String sourceOfInformation,
       String summary,
       String externalLink,
+      String result,
       LocalDate startDate,
       LocalDate endDate,
       boolean valorized) {
@@ -54,6 +56,7 @@ public class DeclaredExperience extends AvenirsBaseModel {
     this.sourceOfInformation = sourceOfInformation;
     this.summary = summary;
     this.externalLink = externalLink;
+    this.result = result;
     this.startDate = startDate;
     this.endDate = endDate;
     this.valorized = valorized;
@@ -70,6 +73,7 @@ public class DeclaredExperience extends AvenirsBaseModel {
       String sourceOfInformation,
       String summary,
       String externalLink,
+      String result,
       LocalDate startDate,
       LocalDate endDate) {
     return new DeclaredExperience(
@@ -86,6 +90,7 @@ public class DeclaredExperience extends AvenirsBaseModel {
         sourceOfInformation,
         summary,
         externalLink,
+        result,
         startDate,
         endDate,
         false);
@@ -105,6 +110,7 @@ public class DeclaredExperience extends AvenirsBaseModel {
       String sourceOfInformation,
       String summary,
       String externalLink,
+      String result,
       LocalDate startDate,
       LocalDate endDate,
       boolean valorized) {
@@ -122,6 +128,7 @@ public class DeclaredExperience extends AvenirsBaseModel {
         sourceOfInformation,
         summary,
         externalLink,
+        result,
         startDate,
         endDate,
         valorized);

@@ -74,6 +74,7 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
       String sourceOfInformation,
       String summary,
       String externalLink,
+      String result,
       LocalDate startDate,
       LocalDate endDate) {
     Student student = studentService.getStudentById(studentId);
@@ -89,6 +90,7 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
         sourceOfInformation,
         summary,
         externalLink,
+        result,
         startDate,
         endDate);
   }
@@ -105,6 +107,7 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
       String sourceOfInformation,
       String summary,
       String externalLink,
+      String result,
       LocalDate startDate,
       LocalDate endDate) {
     Student student = studentService.getStudentById(studentId);
@@ -120,6 +123,7 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
         sourceOfInformation,
         summary,
         externalLink,
+        result,
         startDate,
         endDate);
   }
@@ -135,6 +139,7 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
       String sourceOfInformation,
       String summary,
       String externalLink,
+      String result,
       LocalDate startDate,
       LocalDate endDate) {
     return create(
@@ -149,6 +154,7 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
         sourceOfInformation,
         summary,
         externalLink,
+        result,
         startDate,
         endDate);
   }
@@ -165,6 +171,7 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
       String sourceOfInformation,
       String summary,
       String externalLink,
+      String result,
       LocalDate startDate,
       LocalDate endDate) {
     log.info("DeclaredExperience creation for {}", student);
@@ -178,6 +185,7 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
         sourceOfInformation,
         summary,
         externalLink,
+        result,
         startDate,
         endDate);
 
@@ -196,6 +204,7 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
             sourceOfInformation,
             summary,
             externalLink,
+            result,
             startDate,
             endDate,
             false);
@@ -217,6 +226,7 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
       String sourceOfInformation,
       String summary,
       String externalLink,
+      String result,
       LocalDate startDate,
       LocalDate endDate,
       boolean valorized) {
@@ -239,6 +249,7 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
         sourceOfInformation,
         summary,
         externalLink,
+        result,
         startDate,
         endDate);
 
@@ -251,6 +262,7 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
     experience.setSourceOfInformation(sourceOfInformation);
     experience.setSummary(summary);
     experience.setExternalLink(externalLink);
+    experience.setResult(result);
     experience.setStartDate(startDate);
     experience.setEndDate(endDate);
     experience.setValorized(valorized);
@@ -269,6 +281,7 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
       String sourceOfInformation,
       String summary,
       String externalLink,
+      String result,
       LocalDate startDate,
       LocalDate endDate) {
     requireNotBlankAndMaxLength("title", title, TITLE_LENGTH);
@@ -279,6 +292,7 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
         "sourceOfInformation", sourceOfInformation, SOURCE_OF_INFORMATION_LENGTH);
     validateOptionalTextMaxLength("description", description, DESCRIPTION_LENGTH);
     validateOptionalTextMaxLength("summary", summary, SUMMARY_LENGTH);
+    validateOptionalTextMaxLength("result", result, RESULT_LENGTH);
     requireNotNull("startDate", startDate);
     validateDateOrder(startDate, endDate);
     validateUrl(externalLink);

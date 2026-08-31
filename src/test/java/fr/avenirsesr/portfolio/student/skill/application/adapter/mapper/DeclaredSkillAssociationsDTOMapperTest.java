@@ -75,6 +75,7 @@ class DeclaredSkillAssociationsDTOMapperTest {
             null,
             null,
             null,
+            null,
             LocalDate.of(2022, 1, 10),
             null);
     UUID associationId = UUID.randomUUID();

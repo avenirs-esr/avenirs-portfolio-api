@@ -24,6 +24,7 @@ public record DeclaredExperienceRequest(
     @Size(max = SOURCE_OF_INFORMATION_LENGTH) String sourceOfInformation,
     @Size(max = SUMMARY_LENGTH) String summary,
     String externalLink,
+    @Size(max = RESULT_LENGTH) String result,
     LocalDate startDate,
     LocalDate endDate,
     Boolean valorized) {}

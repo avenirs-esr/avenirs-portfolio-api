@@ -68,6 +68,10 @@ public class DeclaredExperienceEntity extends PeriodEntity<LocalDate> {
   @Column(name = "external_link")
   private String externalLink;
 
+  @Size(max = RESULT_LENGTH, message = "result can not exceed {max} characters")
+  @Column(length = RESULT_LENGTH)
+  private String result;
+
   @Column(nullable = false)
   private boolean valorized;
 
@@ -85,6 +89,7 @@ public class DeclaredExperienceEntity extends PeriodEntity<LocalDate> {
       String sourceOfInformation,
       String summary,
       String externalLink,
+      String result,
       LocalDate startDate,
       LocalDate endDate,
       boolean valorized) {
@@ -101,6 +106,7 @@ public class DeclaredExperienceEntity extends PeriodEntity<LocalDate> {
     this.sourceOfInformation = sourceOfInformation;
     this.summary = summary;
     this.externalLink = externalLink;
+    this.result = result;
     this.startDate = startDate;
     this.endDate = endDate;
     this.valorized = valorized;
@@ -120,6 +126,7 @@ public class DeclaredExperienceEntity extends PeriodEntity<LocalDate> {
       String sourceOfInformation,
       String summary,
       String externalLink,
+      String result,
       LocalDate startDate,
       LocalDate endDate,
       boolean valorized) {
@@ -137,6 +144,7 @@ public class DeclaredExperienceEntity extends PeriodEntity<LocalDate> {
         sourceOfInformation,
         summary,
         externalLink,
+        result,
         startDate,
         endDate,
         valorized);

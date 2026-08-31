@@ -26,6 +26,7 @@ public class DeclaredExperienceMapper
         declaredExperience.getSourceOfInformation(),
         declaredExperience.getSummary(),
         declaredExperience.getExternalLink(),
+        declaredExperience.getResult(),
         declaredExperience.getStartDate(),
         declaredExperience.getEndDate(),
         declaredExperience.isValorized());
@@ -47,6 +48,7 @@ public class DeclaredExperienceMapper
         entity.getSourceOfInformation(),
         entity.getSummary(),
         entity.getExternalLink(),
+        entity.getResult(),
         entity.getStartDate(),
         entity.getEndDate(),
         entity.isValorized());
@@ -72,6 +74,7 @@ public class DeclaredExperienceMapper
         entity.getSourceOfInformation(),
         entity.getSummary(),
         entity.getExternalLink(),
+        entity.getResult(),
         entity.getStartDate(),
         entity.getEndDate(),
         entity.isValorized());

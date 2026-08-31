@@ -16,5 +16,6 @@ public record DeclaredExperienceCreationData(
     String sourceOfInformation,
     String summary,
     String externalLink,
+    String result,
     LocalDate startDate,
     LocalDate endDate) {}

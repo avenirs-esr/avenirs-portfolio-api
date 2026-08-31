@@ -61,6 +61,7 @@ public class DeclaredExperienceSeeder {
                               entity.getSourceOfInformation(),
                               entity.getSummary(),
                               entity.getExternalLink(),
+                              entity.getResult(),
                               entity.getStartDate(),
                               entity.getEndDate()))
                   .toList();
@@ -83,6 +84,7 @@ public class DeclaredExperienceSeeder {
                   data.sourceOfInformation(),
                   data.summary(),
                   data.externalLink(),
+                  data.result(),
                   data.startDate(),
                   data.endDate());
           declaredExperiences.add(experience);

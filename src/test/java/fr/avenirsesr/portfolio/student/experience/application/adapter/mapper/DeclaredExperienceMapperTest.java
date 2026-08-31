@@ -45,6 +45,7 @@ class DeclaredExperienceMapperTest {
             "LinkedIn",
             "Built REST APIs",
             "https://techcorp.com",
+            "Graduated with honors",
             LocalDate.now().minusMonths(6),
             LocalDate.now());
 
@@ -57,6 +58,7 @@ class DeclaredExperienceMapperTest {
     assertEquals(experience.getTitle(), dto.title());
     assertEquals(EExperienceType.PROFESSIONAL, dto.experienceType());
     assertEquals("Tech Corp", dto.organization());
+    assertEquals("Graduated with honors", dto.result());
     assertFalse(dto.valorized());
   }
 
@@ -79,6 +81,7 @@ class DeclaredExperienceMapperTest {
             "LinkedIn",
             "Built REST APIs",
             "https://techcorp.com",
+            "Graduated with honors",
             LocalDate.now().minusMonths(6),
             LocalDate.now(),
             true);
@@ -106,6 +109,7 @@ class DeclaredExperienceMapperTest {
             "LinkedIn",
             "Built REST APIs",
             "https://techcorp.com",
+            "Graduated with honors",
             LocalDate.now().minusMonths(6),
             LocalDate.now());
     DeclaredExperienceData experienceData =
@@ -118,6 +122,7 @@ class DeclaredExperienceMapperTest {
     assertNotNull(dto);
     assertEquals(experience.getId(), dto.id());
     assertEquals(experience.getTitle(), dto.title());
+    assertEquals("Graduated with honors", dto.result());
     assertNotNull(dto.declaredExperienceAssociationCountDTO());
     assertEquals(2, dto.declaredExperienceAssociationCountDTO().traceAssociationsCount());
     assertEquals(3, dto.declaredExperienceAssociationCountDTO().declaredSkillAssociationsCount());

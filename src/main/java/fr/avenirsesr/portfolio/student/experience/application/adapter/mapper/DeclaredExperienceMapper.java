@@ -29,6 +29,7 @@ public interface DeclaredExperienceMapper {
   @Mapping(source = "declaredExperience.sourceOfInformation", target = "sourceOfInformation")
   @Mapping(source = "declaredExperience.summary", target = "summary")
   @Mapping(source = "declaredExperience.externalLink", target = "externalLink")
+  @Mapping(source = "declaredExperience.result", target = "result")
   @Mapping(source = "declaredExperience.startDate", target = "startDate")
   @Mapping(source = "declaredExperience.endDate", target = "endDate")
   @Mapping(source = "declaredExperience.valorized", target = "valorized")

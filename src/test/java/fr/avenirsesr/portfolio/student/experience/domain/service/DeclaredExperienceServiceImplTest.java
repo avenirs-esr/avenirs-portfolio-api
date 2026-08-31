@@ -105,6 +105,7 @@ class DeclaredExperienceServiceImplTest {
             "Source",
             "Summary",
             "https://test.fr",
+            null,
             start,
             end);
 
@@ -130,6 +131,7 @@ class DeclaredExperienceServiceImplTest {
             "Source",
             "Summary",
             "https://test.fr",
+            null,
             start,
             end);
 
@@ -156,6 +158,7 @@ class DeclaredExperienceServiceImplTest {
                 "Source",
                 "Summary",
                 "https://test.fr",
+                null,
                 start,
                 end));
   }
@@ -177,6 +180,7 @@ class DeclaredExperienceServiceImplTest {
             "Source",
             "Summary",
             "https://test.fr",
+            null,
             start,
             end);
 
@@ -201,6 +205,7 @@ class DeclaredExperienceServiceImplTest {
                 "Source",
                 "Summary",
                 "https://test.fr",
+                null,
                 start,
                 end));
   }
@@ -223,6 +228,7 @@ class DeclaredExperienceServiceImplTest {
                 "Source",
                 "Summary",
                 "https://test.fr",
+                null,
                 start,
                 end));
   }
@@ -243,6 +249,7 @@ class DeclaredExperienceServiceImplTest {
                 "Source",
                 "Summary",
                 "https://test.fr",
+                null,
                 start,
                 end));
   }
@@ -265,6 +272,7 @@ class DeclaredExperienceServiceImplTest {
                 "Source",
                 "Summary",
                 "https://test.fr",
+                null,
                 start,
                 end));
   }
@@ -287,6 +295,7 @@ class DeclaredExperienceServiceImplTest {
                 "Source",
                 "Summary",
                 "https://test.fr",
+                null,
                 start,
                 end));
   }
@@ -309,6 +318,7 @@ class DeclaredExperienceServiceImplTest {
                 "Source",
                 "Summary",
                 "https://test.fr",
+                null,
                 start,
                 end));
   }
@@ -331,6 +341,7 @@ class DeclaredExperienceServiceImplTest {
                 tooLong,
                 "Summary",
                 "https://test.fr",
+                null,
                 start,
                 end));
   }
@@ -353,6 +364,7 @@ class DeclaredExperienceServiceImplTest {
                 "Source",
                 "Summary",
                 "https://test.fr",
+                null,
                 start,
                 end));
   }
@@ -375,6 +387,7 @@ class DeclaredExperienceServiceImplTest {
                 "Source",
                 tooLong,
                 "https://test.fr",
+                null,
                 start,
                 end));
   }
@@ -395,6 +408,7 @@ class DeclaredExperienceServiceImplTest {
                 "Source",
                 "Summary",
                 "https://test.fr",
+                null,
                 null,
                 end));
   }
@@ -417,6 +431,7 @@ class DeclaredExperienceServiceImplTest {
                 "Source",
                 "Summary",
                 "https://test.fr",
+                null,
                 start,
                 wrongEnd));
   }
@@ -482,6 +497,7 @@ class DeclaredExperienceServiceImplTest {
             "Source",
             "Summary",
             "https://test.fr",
+            null,
             start,
             end,
             false);
@@ -511,6 +527,7 @@ class DeclaredExperienceServiceImplTest {
                 "Source",
                 "Summary",
                 "https://test.fr",
+                null,
                 start,
                 end,
                 false));
@@ -540,6 +557,7 @@ class DeclaredExperienceServiceImplTest {
                 "Source",
                 "Summary",
                 "https://test.fr",
+                null,
                 start,
                 end,
                 false));
@@ -568,6 +586,7 @@ class DeclaredExperienceServiceImplTest {
                 "Source",
                 "Summary",
                 "https://test.fr",
+                null,
                 start,
                 end,
                 false));
@@ -597,6 +616,7 @@ class DeclaredExperienceServiceImplTest {
                 "Source",
                 "Summary",
                 "https://test.fr",
+                null,
                 start,
                 wrongEnd,
                 false));
@@ -625,6 +645,7 @@ class DeclaredExperienceServiceImplTest {
                 "Source",
                 "Summary",
                 "https://test.fr",
+                null,
                 start,
                 end,
                 false));
@@ -654,6 +675,7 @@ class DeclaredExperienceServiceImplTest {
                 "Source",
                 "Summary",
                 "https://test.fr",
+                null,
                 start,
                 end,
                 false));
@@ -683,6 +705,7 @@ class DeclaredExperienceServiceImplTest {
                 "Source",
                 "Summary",
                 "https://test.fr",
+                null,
                 start,
                 end,
                 false));
@@ -712,6 +735,7 @@ class DeclaredExperienceServiceImplTest {
                 "Source",
                 "Summary",
                 "https://test.fr",
+                null,
                 start,
                 end,
                 false));
@@ -741,6 +765,7 @@ class DeclaredExperienceServiceImplTest {
                 tooLong,
                 "Summary",
                 "https://test.fr",
+                null,
                 start,
                 end,
                 false));
@@ -770,6 +795,7 @@ class DeclaredExperienceServiceImplTest {
                 "Source",
                 "Summary",
                 "https://test.fr",
+                null,
                 start,
                 end,
                 false));
@@ -799,6 +825,7 @@ class DeclaredExperienceServiceImplTest {
                 "Source",
                 tooLong,
                 "https://test.fr",
+                null,
                 start,
                 end,
                 false));
@@ -827,6 +854,7 @@ class DeclaredExperienceServiceImplTest {
                 "Source",
                 "Summary",
                 "not-an-url",
+                null,
                 start,
                 end,
                 false));
@@ -858,6 +886,7 @@ class DeclaredExperienceServiceImplTest {
             "New Source",
             "New Summary",
             "https://new.link",
+            "New Result",
             start,
             end,
             true);
@@ -875,6 +904,7 @@ class DeclaredExperienceServiceImplTest {
     verify(experience).setSourceOfInformation("New Source");
     verify(experience).setSummary("New Summary");
     verify(experience).setExternalLink("https://new.link");
+    verify(experience).setResult("New Result");
     verify(experience).setStartDate(start);
     verify(experience).setEndDate(end);
     verify(experience).setValorized(true);
@@ -905,6 +935,7 @@ class DeclaredExperienceServiceImplTest {
         "Source",
         "Summary",
         "https://test.fr",
+        null,
         start,
         end,
         true);
@@ -935,6 +966,7 @@ class DeclaredExperienceServiceImplTest {
         "Source",
         "Summary",
         "https://test.fr",
+        null,
         start,
         end,
         false);

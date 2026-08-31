@@ -56,6 +56,7 @@ public class DeclaredExperienceController {
             request.sourceOfInformation(),
             request.summary(),
             request.externalLink(),
+            request.result(),
             request.startDate(),
             request.endDate());
 
@@ -108,6 +109,7 @@ public class DeclaredExperienceController {
             request.sourceOfInformation(),
             request.summary(),
             request.externalLink(),
+            request.result(),
             request.startDate(),
             request.endDate(),
             Boolean.TRUE.equals(request.valorized()));

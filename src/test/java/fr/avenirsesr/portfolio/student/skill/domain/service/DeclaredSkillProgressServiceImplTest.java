@@ -1395,6 +1395,7 @@ public class DeclaredSkillProgressServiceImplTest {
             null,
             null,
             null,
+            null,
             startDate,
             endDate);
       }

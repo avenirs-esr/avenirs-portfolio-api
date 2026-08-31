@@ -84,7 +84,8 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         + "  \"summary\": \"Summary text\",\n"
         + "  \"externalLink\": \"https://example.com\",\n"
         + "  \"startDate\": \"2024-01-01\",\n"
-        + "  \"endDate\": \"2024-03-01\"\n"
+        + "  \"endDate\": \"2024-03-01\",\n"
+        + "  \"result\": \"Certified\"\n"
         + "}\n";
   }
 
@@ -134,7 +135,9 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .jsonPath("$.title")
         .isEqualTo("My Experience")
         .jsonPath("$.valorized")
-        .isEqualTo(false);
+        .isEqualTo(false)
+        .jsonPath("$.result")
+        .isEqualTo("Certified");
   }
 
   @Transactional
@@ -286,7 +289,8 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
             + "  \"summary\": \"Updated summary\",\n"
             + "  \"externalLink\": \"https://updated.com\",\n"
             + "  \"startDate\": \"2024-02-01\",\n"
-            + "  \"endDate\": \"2024-04-01\"\n"
+            + "  \"endDate\": \"2024-04-01\",\n"
+            + "  \"result\": \"Updated Result\"\n"
             + "}";
 
     BddLogger.when("performing PUT on that declared experience");
@@ -312,7 +316,9 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .jsonPath("$.location")
         .isEqualTo("Lyon")
         .jsonPath("$.externalLink")
-        .isEqualTo("https://updated.com");
+        .isEqualTo("https://updated.com")
+        .jsonPath("$.result")
+        .isEqualTo("Updated Result");
   }
 
   @Transactional

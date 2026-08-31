@@ -38,6 +38,7 @@ public class FakeDeclaredExperience {
             "fake sourceOfInformation",
             "fake summary",
             faker.internet().url(),
+            "fake result",
             LocalDate.now().minusWeeks(5),
             null,
             false));
