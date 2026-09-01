@@ -62,20 +62,20 @@ public class FeedbackController {
       Principal principal,
       @Parameter(schema = @Schema(ref = "#/components/schemas/EFeedbackStatus"))
           @RequestParam(required = false)
-          EFeedbackStatus status,
+          List<EFeedbackStatus> statuses,
       @RequestParam(required = false) UUID activityId,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize) {
     var pageCriteria = new PageCriteria(page, pageSize);
     log.debug(
-        "Received request to get staff feedbacks for user [{}] (status={}, activityId={}, page={},"
-            + " pageSize={})",
+        "Received request to get staff feedbacks for user [{}] (statuses={}, activityId={},"
+            + " page={}, pageSize={})",
         principal.getName(),
-        status,
+        statuses,
         activityId,
         pageCriteria.page(),
         pageCriteria.pageSize());
-    var result = feedbackService.getStaffFeedbacks(status, activityId, pageCriteria);
+    var result = feedbackService.getStaffFeedbacks(statuses, activityId, pageCriteria);
     return ResponseEntity.ok(
         new PagedResponse<>(
             result.content().stream().map(feedbackStaffListItemDTOMapper::toDTO).toList(),

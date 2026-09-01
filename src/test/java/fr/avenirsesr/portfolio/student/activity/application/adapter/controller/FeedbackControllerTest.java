@@ -226,7 +226,7 @@ class FeedbackControllerTest {
     }
 
     @Test
-    void should_forward_status_filter_to_service() {
+    void should_forward_statuses_filter_to_service() {
       BddLogger.given("A logged-in staff requesting only IN_PROCESS feedbacks");
 
       Feedback feedback = mock(Feedback.class);
@@ -235,19 +235,53 @@ class FeedbackControllerTest {
       PagedResult<Feedback> pagedResult =
           new PagedResult<>(List.of(feedback), new PageInfo(0, 8, 1));
 
-      when(feedbackService.getStaffFeedbacks(eq(EFeedbackStatus.IN_PROCESS), isNull(), any()))
+      List<EFeedbackStatus> statuses = List.of(EFeedbackStatus.IN_PROCESS);
+
+      when(feedbackService.getStaffFeedbacks(eq(statuses), isNull(), any()))
           .thenReturn(pagedResult);
       when(feedbackStaffListItemDTOMapper.toDTO(feedback)).thenReturn(dto);
 
       BddLogger.when("getStaffFeedbacks is called with status=IN_PROCESS");
       ResponseEntity<PagedResponse<FeedbackStaffListItemDTO>> response =
-          controller.getStaffFeedbacks(principal, EFeedbackStatus.IN_PROCESS, null, 0, 8);
+          controller.getStaffFeedbacks(principal, statuses, null, 0, 8);
 
       BddLogger.then("service is called with IN_PROCESS and result has 1 item");
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
       assertThat(response.getBody().data()).hasSize(1);
 
-      verify(feedbackService).getStaffFeedbacks(eq(EFeedbackStatus.IN_PROCESS), isNull(), any());
+      verify(feedbackService).getStaffFeedbacks(eq(statuses), isNull(), any());
+    }
+
+    @Test
+    void should_forward_multiple_statuses_filter_to_service() {
+      BddLogger.given("A logged-in staff requesting feedbacks with multiple statuses");
+
+      Feedback feedback1 = mock(Feedback.class);
+      Feedback feedback2 = mock(Feedback.class);
+      FeedbackStaffListItemDTO dto1 = mock(FeedbackStaffListItemDTO.class);
+      FeedbackStaffListItemDTO dto2 = mock(FeedbackStaffListItemDTO.class);
+
+      PagedResult<Feedback> pagedResult =
+          new PagedResult<>(List.of(feedback1, feedback2), new PageInfo(0, 8, 2));
+
+      List<EFeedbackStatus> statuses = List.of(EFeedbackStatus.SUBMITTED, EFeedbackStatus.SEEN);
+
+      when(feedbackService.getStaffFeedbacks(eq(statuses), isNull(), any()))
+          .thenReturn(pagedResult);
+      when(feedbackStaffListItemDTOMapper.toDTO(feedback1)).thenReturn(dto1);
+      when(feedbackStaffListItemDTOMapper.toDTO(feedback2)).thenReturn(dto2);
+
+      BddLogger.when("getStaffFeedbacks is called with multiple statuses");
+      ResponseEntity<PagedResponse<FeedbackStaffListItemDTO>> response =
+          controller.getStaffFeedbacks(principal, statuses, null, 0, 8);
+
+      BddLogger.then("service is called with both statuses and result contains 2 items");
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().data()).containsExactly(dto1, dto2);
+      assertThat(response.getBody().page().totalElements()).isEqualTo(2);
+
+      verify(feedbackService).getStaffFeedbacks(eq(statuses), isNull(), any());
     }
 
     @Test

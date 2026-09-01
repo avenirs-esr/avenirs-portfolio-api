@@ -104,10 +104,10 @@ public class FeedbackDatabaseRepository
 
   @Override
   public PagedResult<Feedback> findByStaff(
-      UUID staffId, EFeedbackStatus statusFilter, UUID activityId, PageCriteria pageCriteria) {
+      UUID staffId, UUID activityId, PageCriteria pageCriteria, EFeedbackStatus... status) {
     var specification =
         FeedbackSpecification.hasStaffAuthor(staffId)
-            .and(FeedbackSpecification.hasStatus(statusFilter))
+            .and(FeedbackSpecification.hasStatus(status))
             .and(FeedbackSpecification.hasActivityId(activityId));
     // Status strings sort alphabetically in the required priority order:
     // "IN_PROCESS" < "NEW" < "SUBMITTED"

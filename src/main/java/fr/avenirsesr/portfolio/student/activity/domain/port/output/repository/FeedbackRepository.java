@@ -15,7 +15,7 @@ public interface FeedbackRepository extends GenericRepositoryPort<Feedback> {
   List<Feedback> findAllByDeclaredActivityId(UUID declaredActivityId, EFeedbackStatus... status);
 
   PagedResult<Feedback> findByStaff(
-      UUID staffId, EFeedbackStatus statusFilter, UUID activityId, PageCriteria pageCriteria);
+      UUID staffId, UUID activityId, PageCriteria pageCriteria, EFeedbackStatus... status);
 
   List<Feedback> findLatestFeedbacksByStaffAndActivityForEachStudent(UUID staffId, UUID activityId);
 
