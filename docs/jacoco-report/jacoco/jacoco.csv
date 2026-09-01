@@ -10,7 +10,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.student.experience.domain.service,
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.selfknowledge.infrastructure.adapter.repository,SelfKnowledgeElementDatabaseRepository,8,30,0,0,3,9,1,2,1,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.program.application.adapter.controller,DeclaredProgramController,0,131,0,0,0,38,0,6,0,6
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.repository,DeclaredActivityDatabaseRepository,22,96,4,0,5,18,4,7,2,7
-avenirs-portfolio-api,fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.repository,FeedbackDatabaseRepository,51,316,1,5,8,75,6,17,5,15
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.repository,FeedbackDatabaseRepository,51,311,1,5,8,75,6,17,5,15
 avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.application.adapter,Utils,7,45,0,6,2,11,0,5,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.domain.data,TraceAssociationData,0,9,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.domain.data,TraceViewData,0,33,0,0,0,1,0,1,0,1
@@ -106,5 +106,5 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.student.selfknowledge.application.
 avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.domain.service,ActivityServiceImpl,142,1282,12,82,29,315,15,78,7,39
 avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.domain.service,ActivityServiceImpl.FieldSync,0,30,0,2,0,5,0,3,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.notification.infrastructure.adapter.specification,NotificationSpecification,0,36,0,0,0,4,0,6,0,6
-avenirs-portfolio-api,fr.avenirsesr.portfolio.student.activity.domain.service,FeedbackServiceImpl,0,664,2,60,0,162,2,46,0,16
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.activity.domain.service,FeedbackServiceImpl,0,675,2,62,0,163,2,47,0,16
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.activity.domain.service,DeclaredActivityServiceImpl,97,927,11,70,23,239,22,74,11,44
