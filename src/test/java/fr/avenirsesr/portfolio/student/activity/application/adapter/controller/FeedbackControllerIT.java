@@ -441,7 +441,7 @@ public class FeedbackControllerIT extends ContainerConfigurationTest {
     String body =
         webTestClient
             .get()
-            .uri(uriBuilder -> uriBuilder.path(BASE_PATH).queryParam("status", "NEW").build())
+            .uri(uriBuilder -> uriBuilder.path(BASE_PATH).queryParam("statuses", "NEW").build())
             .header("X-Signed-Context", studentPayload)
             .header("X-Context-Signature", studentSignature)
             .exchange()

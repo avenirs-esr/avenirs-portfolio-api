@@ -24,7 +24,7 @@ public interface FeedbackService {
   void updateFeedback(UUID feedbackId, String feedback);
 
   PagedResult<Feedback> getStaffFeedbacks(
-      EFeedbackStatus statusFilter, UUID activityId, PageCriteria pageCriteria);
+      List<EFeedbackStatus> statuses, UUID activityId, PageCriteria pageCriteria);
 
   List<Feedback> getFeedbacksByActivity(UUID activityId);
 

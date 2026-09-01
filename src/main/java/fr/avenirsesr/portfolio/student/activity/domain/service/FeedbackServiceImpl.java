@@ -212,9 +212,11 @@ public class FeedbackServiceImpl implements FeedbackService {
 
   @Override
   public PagedResult<Feedback> getStaffFeedbacks(
-      EFeedbackStatus statusFilter, UUID activityId, PageCriteria pageCriteria) {
+      List<EFeedbackStatus> statuses, UUID activityId, PageCriteria pageCriteria) {
     var staff = loggedInUserService.getLoggedInStaff();
-    return feedbackRepository.findByStaff(staff.getId(), statusFilter, activityId, pageCriteria);
+    var statusArray =
+        statuses == null ? new EFeedbackStatus[0] : statuses.toArray(new EFeedbackStatus[0]);
+    return feedbackRepository.findByStaff(staff.getId(), activityId, pageCriteria, statusArray);
   }
 
   @Override
