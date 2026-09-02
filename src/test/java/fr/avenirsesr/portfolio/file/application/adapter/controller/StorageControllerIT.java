@@ -1,8 +1,5 @@
 package fr.avenirsesr.portfolio.file.application.adapter.controller;
 
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
-
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.FileRepository;
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
@@ -11,7 +8,6 @@ import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
@@ -53,7 +50,7 @@ class StorageControllerIT extends ContainerConfigurationTest {
     StorageController storageController =
         new StorageController(
             new FileResourceServiceImpl(fileStorageService, fileRepository, loggedInUserService),
-            fileStorageService);
+            new DefaultResourceLoader());
 
     webTestClient =
         WebTestClient.bindToController(storageController).configureClient().baseUrl("").build();
@@ -62,9 +59,6 @@ class StorageControllerIT extends ContainerConfigurationTest {
   @Test
   void shouldGetDefaultUserProfilePhoto() {
     BddLogger.given("the " + DEFAULT_PROFILE + " endpoint");
-
-    when(fileStorageService.get(anyString()))
-        .thenReturn("Contenu du fichier de test".getBytes(StandardCharsets.UTF_8));
 
     BddLogger.when("performing a GET with a PROFILE photo type");
     BddLogger.then("it should return the default user profile photo");
@@ -84,9 +78,6 @@ class StorageControllerIT extends ContainerConfigurationTest {
   @Test
   void shouldGetDefaultUserCoverPhoto() throws IOException {
     BddLogger.given("the " + DEFAULT_COVER + " endpoint");
-
-    when(fileStorageService.get(anyString()))
-        .thenReturn("Contenu du fichier de test".getBytes(StandardCharsets.UTF_8));
 
     BddLogger.when("performing a GET with a COVER photo type");
     BddLogger.then("it should return the default user cover photo");

@@ -9,16 +9,21 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 /**
  * Stores files on the local filesystem. The locator handed back to the domain is the absolute path
  * of the written file.
+ *
+ * <p>Default backend: it stays active as long as {@code file.storage.type} is not set to {@code
+ * s3}.
  */
 @Slf4j
 @Component
 @Primary
+@ConditionalOnProperty(name = "file.storage.type", havingValue = "local", matchIfMissing = true)
 public class FileStorageServiceImpl implements FileStorageService {
 
   @Override
