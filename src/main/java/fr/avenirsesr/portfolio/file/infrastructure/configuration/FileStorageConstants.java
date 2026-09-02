@@ -45,6 +45,16 @@ public class FileStorageConstants {
   public static String DEFAULT_PROFILE_FILE_URL;
   public static String DEFAULT_COVER_FILE_URL;
 
+  /**
+   * Builds the URL serving the content of the given file, handled by {@code StorageController}.
+   *
+   * <p>This is the only supported way to expose a file: {@code File.uri} holds a storage locator
+   * that is meaningful to the storage adapter alone, never to a client.
+   */
+  public static String publicUrlOf(UUID fileId) {
+    return PHOTO_ENDPOINT_PREFIX + "/" + fileId;
+  }
+
   @PostConstruct
   private void init() {
     STORAGE_PATH = storagePath;

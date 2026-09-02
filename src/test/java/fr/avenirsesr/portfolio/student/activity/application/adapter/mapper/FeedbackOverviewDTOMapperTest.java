@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.activity.infrastructure.fixture.ActivityFixture;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.file.application.adapter.mapper.FileDtoMapper;
 import fr.avenirsesr.portfolio.file.domain.model.File;
+import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
 import fr.avenirsesr.portfolio.file.infrastructure.fixture.FileFixture;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.FeedbackOverviewDTO;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
@@ -16,6 +17,7 @@ import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
@@ -29,6 +31,12 @@ class FeedbackOverviewDTOMapperTest {
   @Spy private FileDtoMapper fileDtoMapper = Mappers.getMapper(FileDtoMapper.class);
 
   @InjectMocks private FeedbackOverviewDTOMapperImpl mapper;
+
+  @BeforeEach
+  void setUpStorageEndpoint() {
+    // Normally injected by Spring from file.storage.endpoint-prefix; there is no context here.
+    FileStorageConstants.PHOTO_ENDPOINT_PREFIX = "/storage";
+  }
 
   @Test
   void shouldMapFeedbackToOverviewDTO_withStudentAndStaffFromActivity() {
@@ -181,6 +189,6 @@ class FeedbackOverviewDTOMapperTest {
     var attachmentDTO = dto.attachments().get(0);
     assertEquals(attachment.getId(), attachmentDTO.id());
     assertEquals(attachment.getFileName(), attachmentDTO.fileName());
-    assertEquals(attachment.getUri(), attachmentDTO.url());
+    assertEquals("/storage/" + attachment.getId(), attachmentDTO.url());
   }
 }

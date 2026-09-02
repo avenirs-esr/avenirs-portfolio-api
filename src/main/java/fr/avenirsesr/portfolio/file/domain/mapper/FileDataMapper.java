@@ -18,6 +18,6 @@ public interface FileDataMapper {
     return new FileData(
         Optional.ofNullable(file.getId()),
         Optional.ofNullable(file.getFileName()),
-        FileStorageConstants.PHOTO_ENDPOINT_PREFIX + "/" + file.getId());
+        FileStorageConstants.publicUrlOf(file.getId()));
   }
 }
