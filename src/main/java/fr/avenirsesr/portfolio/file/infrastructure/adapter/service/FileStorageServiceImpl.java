@@ -8,11 +8,14 @@ import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageCons
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
+/**
+ * Stores files on the local filesystem. The locator handed back to the domain is the absolute path
+ * of the written file.
+ */
 @Slf4j
 @Component
 @Primary
@@ -39,8 +42,8 @@ public class FileStorageServiceImpl implements FileStorageService {
   }
 
   @Override
-  public byte[] get(String path) {
-    File file = new File(path);
+  public byte[] get(String locator) {
+    File file = new File(locator);
 
     if (!file.exists()) {
       throw new FileNotFoundException();
@@ -49,45 +52,23 @@ public class FileStorageServiceImpl implements FileStorageService {
     try {
       return java.nio.file.Files.readAllBytes(file.toPath());
     } catch (IOException e) {
-      throw new FileStorageException("Failed to read file at path " + path, e);
+      throw new FileStorageException("Failed to read file at path " + locator, e);
     }
   }
 
   @Override
-  public void delete(UUID id) {
-    String uploadDir = System.getProperty("user.dir") + FileStorageConstants.STORAGE_PATH;
-
-    File dir = new File(uploadDir);
-    if (!dir.exists()) {
-      throw new IllegalStateException("File storage directory does not exist");
-    }
-
-    File[] matchingFiles = dir.listFiles((d, name) -> name.startsWith(id.toString() + "."));
-    if (matchingFiles == null || matchingFiles.length == 0) {
-      log.error("No file with id {} found", id);
-      throw new FileNotFoundException();
-    }
-
-    File fileToDelete = matchingFiles[0];
-    if (!fileToDelete.delete()) {
-      throw new FileStorageException("Failed to delete file with id " + id, null);
-    }
-    log.info("File with id {} has been deleted", id);
-  }
-
-  @Override
-  public void deleteByPath(String path) {
-    File file = new File(path);
+  public void delete(String locator) {
+    File file = new File(locator);
 
     if (!file.exists()) {
-      log.error("No file found at path {}", path);
+      log.error("No file found at path {}", locator);
       throw new FileNotFoundException();
     }
 
     if (!file.delete()) {
-      throw new FileStorageException("Failed to delete file at path " + path, null);
+      throw new FileStorageException("Failed to delete file at path " + locator, null);
     }
 
-    log.info("File at path {} has been deleted", path);
+    log.info("File at path {} has been deleted", locator);
   }
 }

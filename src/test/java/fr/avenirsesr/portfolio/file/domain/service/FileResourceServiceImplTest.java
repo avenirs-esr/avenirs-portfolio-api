@@ -123,7 +123,6 @@ class FileResourceServiceImplTest {
 
           fileResourceService.copy(sourceId);
 
-          verify(fileStorageService, never()).deleteByPath(any());
           verify(fileStorageService, never()).delete(any());
           verify(fileRepository, never()).removeFromDatabase(any());
         }

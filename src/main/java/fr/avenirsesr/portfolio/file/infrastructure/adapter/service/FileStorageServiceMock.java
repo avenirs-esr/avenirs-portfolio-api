@@ -9,7 +9,6 @@ import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageCons
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -65,9 +64,9 @@ public class FileStorageServiceMock implements FileStorageService {
   }
 
   @Override
-  public byte[] get(String path) {
-    log.debug("Mocking get file resource {} return placeholder file", path);
-    File file = new File(path);
+  public byte[] get(String locator) {
+    log.debug("Mocking get file resource {} return placeholder file", locator);
+    File file = new File(locator);
 
     if (!file.exists()) {
       throw new FileNotFoundException();
@@ -81,12 +80,7 @@ public class FileStorageServiceMock implements FileStorageService {
   }
 
   @Override
-  public void delete(UUID id) {
-    log.debug("Mocking delete file resource {}", id);
-  }
-
-  @Override
-  public void deleteByPath(String path) throws FileStorageException {
-    log.debug("Mocking delete file resource by path {}", path);
+  public void delete(String locator) {
+    log.debug("Mocking delete file resource {}", locator);
   }
 }
