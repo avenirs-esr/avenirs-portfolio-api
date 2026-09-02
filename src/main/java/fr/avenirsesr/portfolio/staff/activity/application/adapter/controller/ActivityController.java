@@ -19,9 +19,11 @@ import fr.avenirsesr.portfolio.staff.activity.application.adapter.response.Activ
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityPresentationData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityStaffOverviewData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityWithStudentStatusData;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
+import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -50,6 +52,7 @@ public class ActivityController {
   private final ActivityNavigationMapper activityNavigationMapper;
   private final ActivityOverviewDtoMapper activityOverviewDtoMapper;
   private final ActivityStaffOverviewDtoMapper activityStaffOverviewDtoMapper;
+  private final ActivityItemNavigationMapper activityItemNavigationMapper;
   private final FileDTOMapper fileDTOMapper;
 
   @PreAuthorize("hasAuthority('activity:read:contextual')")
@@ -415,5 +418,34 @@ public class ActivityController {
             HttpHeaders.CONTENT_DISPOSITION,
             "attachment; filename=\"" + downloadedFile.fileName() + "\"")
         .body(downloadedFile.content());
+  }
+
+  @PreAuthorize("hasAuthority('feedback:request:read:assigned')")
+  @GetMapping("/with-feedbacks")
+  public ResponseEntity<PagedResponse<ActivityItemNavigationDTO>> getActivitiesWithFeedbacks(
+      Principal principal,
+      @Parameter(schema = @Schema(ref = "#/components/schemas/EFeedbackStatus"))
+          @RequestParam(required = false)
+          List<EFeedbackStatus> statuses,
+      @RequestParam(required = false) Integer page,
+      @RequestParam(required = false) Integer pageSize) {
+    var pageCriteria = new PageCriteria(page, pageSize);
+    log.debug(
+        "Received request to get activities with feedbacks for user [{}] (statuses={}, page={},"
+            + " pageSize={})",
+        principal.getName(),
+        statuses,
+        pageCriteria.page(),
+        pageCriteria.pageSize());
+
+    PagedResult<Activity> pagedResult =
+        activityService.getActivitiesWithFeedbacks(statuses, pageCriteria);
+
+    var response =
+        new PagedResponse<>(
+            pagedResult.content().stream().map(activityItemNavigationMapper::toDTO).toList(),
+            PageInfoDTO.fromDomain(pagedResult.pageInfo()));
+
+    return ResponseEntity.ok(response);
   }
 }

@@ -14,6 +14,7 @@ import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDraftCreationRequest;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDraftUpdateRequest;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
+import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -34,6 +35,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
 
   private static final String BASE_PATH = "/me/activities";
   private static final String NAVIGATION_PATH = BASE_PATH + "/navigation";
+  private static final String WITH_FEEDBACKS_PATH = BASE_PATH + "/with-feedbacks";
   private static final String PRESENTATION_PATH =
       BASE_PATH + "/PUBLISHED/{activityId}/presentation";
   private static final String DRAFT_PATH = BASE_PATH + "/draft";
@@ -152,6 +154,120 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             || !firstItem.get("title").isTextual()) {
           throw new AssertionError("invalid item shape");
         }
+      }
+    }
+
+    @Nested
+    class WhenGettingActivitiesWithFeedbacks {
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("performing a GET on " + WITH_FEEDBACKS_PATH);
+      }
+
+      @Test
+      void thenItShouldReturnPagedActivitiesWithFeedbacks() {
+        BddLogger.then("it should return paged activities with data and page info");
+
+        webTestClient
+            .get()
+            .uri(
+                uriBuilder ->
+                    uriBuilder
+                        .path(WITH_FEEDBACKS_PATH)
+                        .queryParam("page", "0")
+                        .queryParam("pageSize", "10")
+                        .build())
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.data")
+            .isArray()
+            .jsonPath("$.page.page")
+            .isEqualTo(0)
+            .jsonPath("$.page.pageSize")
+            .isEqualTo(10)
+            .jsonPath("$.page.totalElements")
+            .exists();
+      }
+
+      @Test
+      void thenItShouldReturnDefaultPaginationWhenNoParamsProvided() {
+        BddLogger.then("it should return 200 with default pagination");
+
+        webTestClient
+            .get()
+            .uri(WITH_FEEDBACKS_PATH)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.data")
+            .isArray()
+            .jsonPath("$.page.page")
+            .exists()
+            .jsonPath("$.page.pageSize")
+            .exists()
+            .jsonPath("$.page.totalElements")
+            .exists();
+      }
+
+      @Test
+      void thenItShouldFilterByFeedbackStatus() {
+        BddLogger.given("a feedback status filter");
+
+        webTestClient
+            .get()
+            .uri(
+                uriBuilder ->
+                    uriBuilder
+                        .path(WITH_FEEDBACKS_PATH)
+                        .queryParam("statuses", EFeedbackStatus.values()[0].name())
+                        .queryParam("page", "0")
+                        .queryParam("pageSize", "10")
+                        .build())
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.data")
+            .isArray()
+            .jsonPath("$.page.totalElements")
+            .exists();
+      }
+
+      @Test
+      void thenItShouldReturn401WhenNotAuthenticated() {
+        BddLogger.then("it should return 401");
+
+        webTestClient
+            .get()
+            .uri(WITH_FEEDBACKS_PATH)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isUnauthorized();
+      }
+
+      @Test
+      void thenItShouldReturn403WhenUserHasNoAssignedFeedbackPermission() {
+        BddLogger.then("it should return 403");
+
+        webTestClient
+            .get()
+            .uri(WITH_FEEDBACKS_PATH)
+            .headers(ActivityControllerIT.this::addNoPermissionHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isForbidden();
       }
     }
 
