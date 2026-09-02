@@ -11,6 +11,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityDraft;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
+import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import java.time.LocalDate;
 import java.util.List;
@@ -91,4 +92,7 @@ public interface ActivityService {
   void deleteDraftFile(UUID activityDraftId, UUID fileId);
 
   FileDownload downloadActivityFile(UUID activityId, UUID fileId);
+
+  PagedResult<Activity> getActivitiesWithFeedbacks(
+      List<EFeedbackStatus> statuses, PageCriteria pageCriteria);
 }

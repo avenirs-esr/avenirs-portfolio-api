@@ -38,6 +38,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.Acti
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityRepository;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.StaffActivityOverviewRepository;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
+import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
@@ -681,5 +682,14 @@ public class ActivityServiceImpl implements ActivityService {
       throw new ActivityDraftNotFoundException();
     }
     return draft;
+  }
+
+  @Override
+  public PagedResult<Activity> getActivitiesWithFeedbacks(
+      List<EFeedbackStatus> statuses, PageCriteria pageCriteria) {
+    Staff staff = loggedInUserService.getLoggedInStaff();
+    var statusArray =
+        statuses == null ? new EFeedbackStatus[0] : statuses.toArray(EFeedbackStatus[]::new);
+    return activityRepository.findWithFeedbacks(staff.getId(), pageCriteria, statusArray);
   }
 }

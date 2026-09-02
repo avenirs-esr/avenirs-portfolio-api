@@ -10,8 +10,10 @@ import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.Acti
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.mapper.ActivityMapper;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityEntity;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.specification.ActivitySpecification;
+import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import java.time.Duration;
 import java.util.List;
+import java.util.UUID;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
@@ -67,6 +69,15 @@ public class ActivityDatabaseRepository
             .and(
                 ActivitySpecification.exclude(
                     activityToExclude.stream().map(ActivityMapper.INSTANCE::fromDomain).toList()));
+    return findAll(
+        specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort));
+  }
+
+  @Override
+  public PagedResult<Activity> findWithFeedbacks(
+      UUID authorId, PageCriteria pageCriteria, EFeedbackStatus... status) {
+    var specification = ActivitySpecification.hasFeedback(authorId, status);
+    var sort = Sort.by(Sort.Direction.DESC, "createdAt");
     return findAll(
         specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort));
   }

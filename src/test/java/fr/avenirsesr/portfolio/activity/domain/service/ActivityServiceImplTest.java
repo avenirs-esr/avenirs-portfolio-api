@@ -35,6 +35,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.Staf
 import fr.avenirsesr.portfolio.staff.activity.domain.service.ActivityServiceImpl;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
+import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
@@ -1206,6 +1207,81 @@ class ActivityServiceImplTest {
             null,
             List.of(),
             List.of());
+      }
+    }
+
+    @Nested
+    class WhenGettingActivitiesWithFeedbacks {
+
+      PageCriteria pageCriteria;
+      Staff staff;
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("getting activities with feedbacks");
+        pageCriteria = mock(PageCriteria.class);
+        staff = mock(Staff.class);
+
+        when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+        when(staff.getId()).thenReturn(UUID.randomUUID());
+      }
+
+      @Test
+      void thenItShouldReturnActivitiesWithFeedbacks() {
+        BddLogger.then("activities with feedbacks should be returned");
+
+        Activity activity = mock(Activity.class);
+        PageInfo pageInfo = new PageInfo(0, 10, 1);
+        PagedResult<Activity> expected = new PagedResult<>(List.of(activity), pageInfo);
+
+        when(activityRepository.findWithFeedbacks(
+                eq(staff.getId()), eq(pageCriteria), any(EFeedbackStatus[].class)))
+            .thenReturn(expected);
+
+        var result = activityService.getActivitiesWithFeedbacks(List.of(), pageCriteria);
+
+        assertEquals(expected, result);
+        assertEquals(1, result.content().size());
+        assertEquals(activity, result.content().getFirst());
+
+        verify(loggedInUserService).getLoggedInStaff();
+        verify(activityRepository)
+            .findWithFeedbacks(eq(staff.getId()), eq(pageCriteria), any(EFeedbackStatus[].class));
+      }
+
+      @Test
+      void thenItShouldForwardStatusesToRepository() {
+        BddLogger.then("feedback statuses should be forwarded to the repository");
+
+        EFeedbackStatus status = EFeedbackStatus.values()[0];
+        PageInfo pageInfo = new PageInfo(0, 10, 0);
+
+        when(activityRepository.findWithFeedbacks(
+                eq(staff.getId()), eq(pageCriteria), any(EFeedbackStatus[].class)))
+            .thenReturn(new PagedResult<>(List.of(), pageInfo));
+
+        activityService.getActivitiesWithFeedbacks(List.of(status), pageCriteria);
+
+        ArgumentCaptor<EFeedbackStatus[]> captor = ArgumentCaptor.forClass(EFeedbackStatus[].class);
+
+        verify(activityRepository)
+            .findWithFeedbacks(eq(staff.getId()), eq(pageCriteria), captor.capture());
+
+        assertArrayEquals(new EFeedbackStatus[] {status}, captor.getValue());
+      }
+
+      @Test
+      void thenItShouldUseEmptyStatusesWhenStatusesAreEmpty() {
+        BddLogger.then("no status filter should be forwarded when statuses are empty");
+
+        PageInfo pageInfo = new PageInfo(0, 10, 0);
+
+        when(activityRepository.findWithFeedbacks(staff.getId(), pageCriteria))
+            .thenReturn(new PagedResult<>(List.of(), pageInfo));
+
+        activityService.getActivitiesWithFeedbacks(null, pageCriteria);
+
+        verify(activityRepository).findWithFeedbacks(staff.getId(), pageCriteria);
       }
     }
 

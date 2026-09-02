@@ -1,10 +1,20 @@
 package fr.avenirsesr.portfolio.activity.application.adapter.controller;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 import fr.avenirsesr.portfolio.activity.infrastructure.fixture.ActivityFixture;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
@@ -16,10 +26,12 @@ import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.application.adapter.mapper.FileDTOMapper;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.controller.ActivityController;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityContentDTO;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityItemNavigationDTO;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityOverviewDTO;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityStaffOverviewDTO;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.AuthorDTO;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityContentDtoMapper;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityItemNavigationMapper;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityOverviewDtoMapper;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityStaffOverviewDtoMapper;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.response.ActivityDraftCreationResponse;
@@ -31,6 +43,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
+import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import jakarta.servlet.http.HttpServletRequest;
@@ -53,6 +66,7 @@ class ActivityControllerTest {
   @Mock private ActivityOverviewDtoMapper activityOverviewDtoMapper;
   @Mock private ActivityStaffOverviewDtoMapper activityStaffOverviewDtoMapper;
   @Mock private ActivityContentDtoMapper activityContentDtoMapper;
+  @Mock private ActivityItemNavigationMapper activityItemNavigationMapper;
   @Mock private FileDTOMapper fileDTOMapper;
 
   @InjectMocks private ActivityController controller;
@@ -299,6 +313,90 @@ class ActivityControllerTest {
     assertTrue(response.getBody().data().isEmpty());
 
     verify(activityService).latestActivitiesView(any(PageCriteria.class));
+  }
+
+  @Test
+  void shouldReturnActivitiesWithFeedbacks() {
+    BddLogger.given("an ActivityController with activities having feedbacks");
+
+    PageInfo pageInfo = new PageInfo(0, 10, 1);
+    ActivityItemNavigationDTO dto = mock(ActivityItemNavigationDTO.class);
+
+    PagedResult<Activity> pagedResult = new PagedResult<>(List.of(activity), pageInfo);
+
+    when(activityService.getActivitiesWithFeedbacks(anyList(), any(PageCriteria.class)))
+        .thenReturn(pagedResult);
+
+    when(activityItemNavigationMapper.toDTO(activity)).thenReturn(dto);
+
+    BddLogger.when("getting activities with feedbacks");
+
+    var response =
+        controller.getActivitiesWithFeedbacks(
+            principal, List.of(EFeedbackStatus.values()[0]), 0, 10);
+
+    BddLogger.then("it should return the activities with feedbacks");
+
+    assertEquals(200, response.getStatusCode().value());
+    assertNotNull(response.getBody());
+    assertEquals(1, response.getBody().data().size());
+    assertEquals(dto, response.getBody().data().getFirst());
+
+    verify(activityService)
+        .getActivitiesWithFeedbacks(
+            eq(List.of(EFeedbackStatus.values()[0])),
+            argThat(criteria -> criteria.page() == 0 && criteria.pageSize() == 10));
+
+    verify(activityItemNavigationMapper).toDTO(activity);
+  }
+
+  @Test
+  void shouldReturnEmptyActivitiesWithFeedbacks() {
+    BddLogger.given("an ActivityController with no activities having feedbacks");
+
+    PageInfo pageInfo = new PageInfo(0, 10, 0);
+
+    when(activityService.getActivitiesWithFeedbacks(anyList(), any(PageCriteria.class)))
+        .thenReturn(new PagedResult<>(List.of(), pageInfo));
+
+    BddLogger.when("getting activities with feedbacks with no results");
+
+    var response = controller.getActivitiesWithFeedbacks(principal, List.of(), 0, 10);
+
+    BddLogger.then("it should return an empty result");
+
+    assertEquals(200, response.getStatusCode().value());
+    assertNotNull(response.getBody());
+    assertTrue(response.getBody().data().isEmpty());
+
+    verify(activityService)
+        .getActivitiesWithFeedbacks(
+            eq(List.of()), argThat(criteria -> criteria.page() == 0 && criteria.pageSize() == 10));
+
+    verifyNoInteractions(activityItemNavigationMapper);
+  }
+
+  @Test
+  void shouldForwardFeedbackStatusesToService() {
+    BddLogger.given("an ActivityController with feedback status");
+
+    PageInfo pageInfo = new PageInfo(0, 10, 0);
+
+    EFeedbackStatus status = EFeedbackStatus.values()[0];
+
+    when(activityService.getActivitiesWithFeedbacks(eq(List.of(status)), any(PageCriteria.class)))
+        .thenReturn(new PagedResult<>(List.of(), pageInfo));
+
+    BddLogger.when("getting activities with a feedback status filter");
+
+    controller.getActivitiesWithFeedbacks(principal, List.of(status), 0, 10);
+
+    BddLogger.then("the statuses should be forwarded to the service");
+
+    verify(activityService)
+        .getActivitiesWithFeedbacks(
+            eq(List.of(status)),
+            argThat(criteria -> criteria.page() == 0 && criteria.pageSize() == 10));
   }
 
   @Test
