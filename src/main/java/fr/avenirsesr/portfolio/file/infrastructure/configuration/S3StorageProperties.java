@@ -15,9 +15,10 @@ public class S3StorageProperties {
 
   /**
    * Region sent along with the request signature. The AWS SDK refuses to build a client without one
-   * even when the backend ignores it, in which case any placeholder such as {@code us-east-1} does.
+   * even when the backend ignores it, so this defaults to the region the hosted bucket lives in. A
+   * backend that does validate it reports the value it expects in the error message.
    */
-  private String region = "us-east-1";
+  private String region = "eu-west-3";
 
   /** Bucket holding every file of this environment. */
   private String bucket;
