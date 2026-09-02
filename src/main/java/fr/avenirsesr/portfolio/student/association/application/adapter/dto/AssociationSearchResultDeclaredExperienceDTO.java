@@ -4,7 +4,7 @@ import fr.avenirsesr.portfolio.student.experience.domain.model.enums.EExperience
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.UUID;
 
-@Schema(requiredProperties = {"id", "title", "experienceType", "disabled"})
+@Schema(requiredProperties = {"id", "title", "disabled"})
 public record AssociationSearchResultDeclaredExperienceDTO(
     UUID id,
     String title,
