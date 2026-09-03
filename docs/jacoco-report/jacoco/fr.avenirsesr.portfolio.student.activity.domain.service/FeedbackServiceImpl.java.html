@@ -358,5 +358,10 @@ public class FeedbackServiceImpl implements FeedbackService {
 <span class="fc" id="L358">    return new FeedbackDashboardData(</span>
         newCount, pendingFeedbacks, processedFeedbacks, totalFeedbacks);
   }
+
+  @Override
+  public Feedback getLatestFeedback(UUID declaredActivityId) {
+<span class="fc" id="L364">    return feedbackRepository.findAllByDeclaredActivityId(declaredActivityId).getFirst();</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
