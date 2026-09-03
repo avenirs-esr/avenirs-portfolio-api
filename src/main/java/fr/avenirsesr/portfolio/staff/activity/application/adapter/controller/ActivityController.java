@@ -26,6 +26,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.servlet.http.HttpServletRequest;
 import java.security.Principal;
@@ -424,7 +425,8 @@ public class ActivityController {
   @GetMapping("/with-feedbacks")
   public ResponseEntity<PagedResponse<ActivityItemNavigationDTO>> getActivitiesWithFeedbacks(
       Principal principal,
-      @Parameter(schema = @Schema(ref = "#/components/schemas/EFeedbackStatus"))
+      @Parameter(
+              array = @ArraySchema(schema = @Schema(ref = "#/components/schemas/EFeedbackStatus")))
           @RequestParam(required = false)
           List<EFeedbackStatus> statuses,
       @RequestParam(required = false) Integer page,
