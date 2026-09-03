@@ -40,7 +40,6 @@ public class S3FileStorageService implements FileStorageService {
           PutObjectRequest.builder()
               .bucket(properties.getBucket())
               .key(key)
-              // Stored alongside the object so a client reading it back is told what it is.
               .contentType(fileResource.fileType().getMimeType())
               .build(),
           RequestBody.fromBytes(fileResource.content()));

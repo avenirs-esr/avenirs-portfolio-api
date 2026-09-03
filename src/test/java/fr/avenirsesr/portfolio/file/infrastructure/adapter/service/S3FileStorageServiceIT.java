@@ -35,6 +35,7 @@ import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 class S3FileStorageServiceIT {
 
   private static final String BUCKET = "avenirs-portfolio-it";
+  private static final String REGION = "eu-west-3";
   private static final String ACCESS_KEY = "avenirs-it-access-key";
   private static final String SECRET_KEY = "avenirs-it-secret-key";
   private static final int MINIO_PORT = 9000;
@@ -59,7 +60,7 @@ class S3FileStorageServiceIT {
 
     var properties = new S3StorageProperties();
     properties.setBucket(BUCKET);
-    properties.setRegion("us-east-1");
+    properties.setRegion(REGION);
     properties.setAccessKey(ACCESS_KEY);
     properties.setSecretKey(SECRET_KEY);
 
