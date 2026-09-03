@@ -21,11 +21,9 @@ import fr.avenirsesr.portfolio.student.activity.application.adapter.mapper.Stude
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.FeedbackService;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import java.security.Principal;
-import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -47,7 +45,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-<span class="fc" id="L50">@Slf4j</span>
+<span class="fc" id="L48">@Slf4j</span>
 @AllArgsConstructor
 @RequestMapping(&quot;/me/activity-progress/feedbacks&quot;)
 public class FeedbackController {
@@ -62,53 +60,40 @@ public class FeedbackController {
   @GetMapping
   public ResponseEntity&lt;PagedResponse&lt;FeedbackStaffListItemDTO&gt;&gt; getStaffFeedbacks(
       Principal principal,
-      @Parameter(
-              array = @ArraySchema(schema = @Schema(ref = &quot;#/components/schemas/EFeedbackStatus&quot;)))
+      @Parameter(schema = @Schema(ref = &quot;#/components/schemas/EFeedbackStatus&quot;))
           @RequestParam(required = false)
           List&lt;EFeedbackStatus&gt; statuses,
       @RequestParam(required = false) UUID activityId,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize) {
-<span class="fc" id="L72">    var pageCriteria = new PageCriteria(page, pageSize);</span>
-<span class="fc" id="L73">    log.debug(</span>
+<span class="fc" id="L69">    var pageCriteria = new PageCriteria(page, pageSize);</span>
+<span class="fc" id="L70">    log.debug(</span>
         &quot;Received request to get staff feedbacks for user [{}] (statuses={}, activityId={},&quot;
             + &quot; page={}, pageSize={})&quot;,
-<span class="fc" id="L76">        principal.getName(),</span>
+<span class="fc" id="L73">        principal.getName(),</span>
         statuses,
         activityId,
-<span class="fc" id="L79">        pageCriteria.page(),</span>
-<span class="fc" id="L80">        pageCriteria.pageSize());</span>
-<span class="fc" id="L81">    var result = feedbackService.getStaffFeedbacks(statuses, activityId, pageCriteria);</span>
-
-<span class="fc" id="L83">    var latestFeedbackIdsByDeclaredActivity = new HashMap&lt;UUID, UUID&gt;();</span>
-<span class="fc" id="L84">    var content =</span>
-<span class="fc" id="L85">        result.content().stream()</span>
-<span class="fc" id="L86">            .map(</span>
-                feedback -&gt; {
-<span class="fc" id="L88">                  var declaredActivityId = feedback.getDeclaredActivity().getId();</span>
-<span class="fc" id="L89">                  var latestFeedbackId =</span>
-<span class="fc" id="L90">                      latestFeedbackIdsByDeclaredActivity.computeIfAbsent(</span>
-<span class="fc" id="L91">                          declaredActivityId, id -&gt; feedbackService.getLatestFeedback(id).getId());</span>
-<span class="fc" id="L92">                  return feedbackStaffListItemDTOMapper.toDTO(feedback, latestFeedbackId);</span>
-                })
-<span class="fc" id="L94">            .toList();</span>
-
-<span class="fc" id="L96">    return ResponseEntity.ok(</span>
-<span class="fc" id="L97">        new PagedResponse&lt;&gt;(content, PageInfoDTO.fromDomain(result.pageInfo())));</span>
+<span class="fc" id="L76">        pageCriteria.page(),</span>
+<span class="fc" id="L77">        pageCriteria.pageSize());</span>
+<span class="fc" id="L78">    var result = feedbackService.getStaffFeedbacks(statuses, activityId, pageCriteria);</span>
+<span class="fc" id="L79">    return ResponseEntity.ok(</span>
+        new PagedResponse&lt;&gt;(
+<span class="fc" id="L81">            result.content().stream().map(feedbackStaffListItemDTOMapper::toDTO).toList(),</span>
+<span class="fc" id="L82">            PageInfoDTO.fromDomain(result.pageInfo())));</span>
   }
 
   @PreAuthorize(&quot;hasAuthority('feedback:history:read:contextual')&quot;)
   @GetMapping(&quot;/exhaustive-list/{activityId}&quot;)
   public ResponseEntity&lt;List&lt;StudentFeedbackItemListDTO&gt;&gt; getFeedbacksByActivity(
       Principal principal, @PathVariable UUID activityId) {
-<span class="fc" id="L104">    log.debug(</span>
+<span class="fc" id="L89">    log.debug(</span>
         &quot;Received request to get all feedbacks for activity [{}] by user [{}]&quot;,
         activityId,
-<span class="fc" id="L107">        principal.getName());</span>
-<span class="fc" id="L108">    return ResponseEntity.ok(</span>
-<span class="fc" id="L109">        feedbackService.getFeedbacksByActivity(activityId).stream()</span>
-<span class="fc" id="L110">            .map(studentFeedbackItemListDTOMapper::toDTO)</span>
-<span class="fc" id="L111">            .toList());</span>
+<span class="fc" id="L92">        principal.getName());</span>
+<span class="fc" id="L93">    return ResponseEntity.ok(</span>
+<span class="fc" id="L94">        feedbackService.getFeedbacksByActivity(activityId).stream()</span>
+<span class="fc" id="L95">            .map(studentFeedbackItemListDTOMapper::toDTO)</span>
+<span class="fc" id="L96">            .toList());</span>
   }
 
   @PreAuthorize(&quot;hasAnyAuthority('feedback:received:read:own','feedback:request:read:assigned')&quot;)
@@ -117,14 +102,14 @@ public class FeedbackController {
       Principal principal,
       @Valid @PathVariable UUID feedbackId,
       @PathVariable EUserCategory userCategory) {
-<span class="fc" id="L120">    log.debug(</span>
+<span class="fc" id="L105">    log.debug(</span>
         &quot;Received request to get feedback details [{}] by user [{}] (userCategory={})&quot;,
         feedbackId,
-<span class="fc" id="L123">        principal.getName(),</span>
+<span class="fc" id="L108">        principal.getName(),</span>
         userCategory);
-<span class="fc" id="L125">    return ResponseEntity.ok(</span>
-<span class="fc" id="L126">        feedbackDetailsDTOMapper.toDTO(</span>
-<span class="fc" id="L127">            feedbackService.getFeedbackDetails(feedbackId, userCategory)));</span>
+<span class="fc" id="L110">    return ResponseEntity.ok(</span>
+<span class="fc" id="L111">        feedbackDetailsDTOMapper.toDTO(</span>
+<span class="fc" id="L112">            feedbackService.getFeedbackDetails(feedbackId, userCategory)));</span>
   }
 
   @PreAuthorize(&quot;hasAuthority('feedback:request:respond:assigned')&quot;)
@@ -133,63 +118,63 @@ public class FeedbackController {
       Principal principal,
       @Valid @PathVariable UUID feedbackId,
       @Valid @RequestBody UpdateFeedbackRequest request) {
-<span class="fc" id="L136">    log.debug(</span>
-<span class="fc" id="L137">        &quot;Received request to update feedback [{}] by user [{}]&quot;, feedbackId, principal.getName());</span>
-<span class="fc" id="L138">    feedbackService.updateFeedback(feedbackId, request.feedback());</span>
-<span class="fc" id="L139">    return ResponseEntity.noContent().build();</span>
+<span class="fc" id="L121">    log.debug(</span>
+<span class="fc" id="L122">        &quot;Received request to update feedback [{}] by user [{}]&quot;, feedbackId, principal.getName());</span>
+<span class="fc" id="L123">    feedbackService.updateFeedback(feedbackId, request.feedback());</span>
+<span class="fc" id="L124">    return ResponseEntity.noContent().build();</span>
   }
 
   @PreAuthorize(&quot;hasAuthority('feedback:request:create:own')&quot;)
   @PostMapping(&quot;/{declaredActivityId}/ask-for-feedback&quot;)
   public ResponseEntity&lt;FeedbackDetailsDTO&gt; askForFeedback(
       Principal principal, @Valid @PathVariable UUID declaredActivityId) {
-<span class="fc" id="L146">    log.debug(</span>
+<span class="fc" id="L131">    log.debug(</span>
         &quot;Received request to ask for feedback on declared activity [{}] by student [{}]&quot;,
         declaredActivityId,
-<span class="fc" id="L149">        principal.getName());</span>
-<span class="fc" id="L150">    return ResponseEntity.status(HttpStatus.CREATED)</span>
-<span class="fc" id="L151">        .body(feedbackDetailsDTOMapper.toDTO(feedbackService.createFeedback(declaredActivityId)));</span>
+<span class="fc" id="L134">        principal.getName());</span>
+<span class="fc" id="L135">    return ResponseEntity.status(HttpStatus.CREATED)</span>
+<span class="fc" id="L136">        .body(feedbackDetailsDTOMapper.toDTO(feedbackService.createFeedback(declaredActivityId)));</span>
   }
 
   @PreAuthorize(&quot;hasAuthority('feedback:dashboard:read:contextual')&quot;)
   @GetMapping(&quot;/dashboard&quot;)
   public ResponseEntity&lt;FeedbackDashboardDTO&gt; getFeedbackDashboard(
       Principal principal, @RequestParam(required = false) UUID activityId) {
-<span class="fc" id="L158">    log.debug(</span>
+<span class="fc" id="L143">    log.debug(</span>
         &quot;Received request to get feedback dashboard for user [{}] (activityId={})&quot;,
-<span class="fc" id="L160">        principal.getName(),</span>
+<span class="fc" id="L145">        principal.getName(),</span>
         activityId);
-<span class="fc" id="L162">    var dashboard = feedbackService.getFeedbackDashboard(activityId);</span>
-<span class="fc" id="L163">    return ResponseEntity.ok(</span>
+<span class="fc" id="L147">    var dashboard = feedbackService.getFeedbackDashboard(activityId);</span>
+<span class="fc" id="L148">    return ResponseEntity.ok(</span>
         new FeedbackDashboardDTO(
-<span class="fc" id="L165">            dashboard.newFeedbacks(),</span>
-<span class="fc" id="L166">            dashboard.pendingFeedbacks(),</span>
-<span class="fc" id="L167">            dashboard.processedFeedbacks(),</span>
-<span class="fc" id="L168">            dashboard.totalFeedbacks()));</span>
+<span class="fc" id="L150">            dashboard.newFeedbacks(),</span>
+<span class="fc" id="L151">            dashboard.pendingFeedbacks(),</span>
+<span class="fc" id="L152">            dashboard.processedFeedbacks(),</span>
+<span class="fc" id="L153">            dashboard.totalFeedbacks()));</span>
   }
 
   @PreAuthorize(&quot;hasAuthority('feedback:history:read:contextual')&quot;)
   @GetMapping(&quot;/{declaredActivityId}/history&quot;)
   public ResponseEntity&lt;List&lt;FeedbackOverviewDTO&gt;&gt; getFeedbackHistory(
       Principal principal, @PathVariable UUID declaredActivityId) {
-<span class="fc" id="L175">    log.debug(</span>
+<span class="fc" id="L160">    log.debug(</span>
         &quot;Received request to get feedback history for declared activity [{}] by user [{}]&quot;,
         declaredActivityId,
-<span class="fc" id="L178">        principal.getName());</span>
-<span class="fc" id="L179">    return ResponseEntity.ok(</span>
-<span class="fc" id="L180">        feedbackService.getFeedbackHistory(declaredActivityId).stream()</span>
-<span class="fc" id="L181">            .map(feedbackOverviewDTOMapper::toDTO)</span>
-<span class="fc" id="L182">            .toList());</span>
+<span class="fc" id="L163">        principal.getName());</span>
+<span class="fc" id="L164">    return ResponseEntity.ok(</span>
+<span class="fc" id="L165">        feedbackService.getFeedbackHistory(declaredActivityId).stream()</span>
+<span class="fc" id="L166">            .map(feedbackOverviewDTOMapper::toDTO)</span>
+<span class="fc" id="L167">            .toList());</span>
   }
 
   @PreAuthorize(&quot;hasAuthority('feedback:request:respond:assigned')&quot;)
   @PostMapping(&quot;/{feedbackId}/submit&quot;)
   public ResponseEntity&lt;Void&gt; submitFeedback(
       Principal principal, @Valid @PathVariable UUID feedbackId) {
-<span class="fc" id="L189">    log.debug(</span>
-<span class="fc" id="L190">        &quot;Received request to submit feedback [{}] by user [{}]&quot;, feedbackId, principal.getName());</span>
-<span class="fc" id="L191">    feedbackService.submitFeedback(feedbackId);</span>
-<span class="fc" id="L192">    return ResponseEntity.noContent().build();</span>
+<span class="fc" id="L174">    log.debug(</span>
+<span class="fc" id="L175">        &quot;Received request to submit feedback [{}] by user [{}]&quot;, feedbackId, principal.getName());</span>
+<span class="fc" id="L176">    feedbackService.submitFeedback(feedbackId);</span>
+<span class="fc" id="L177">    return ResponseEntity.noContent().build();</span>
   }
 
   @PreAuthorize(&quot;hasAuthority('feedback:request:respond:assigned')&quot;)
@@ -198,18 +183,18 @@ public class FeedbackController {
       Principal principal,
       @Valid @PathVariable UUID feedbackId,
       @RequestParam(&quot;file&quot;) MultipartFile file) {
-<span class="fc" id="L201">    log.debug(</span>
+<span class="fc" id="L186">    log.debug(</span>
         &quot;Received request to upload an attachment on feedback [{}] by user [{}]&quot;,
         feedbackId,
-<span class="fc" id="L204">        principal.getName());</span>
-<span class="fc" id="L205">    var uploaded =</span>
-<span class="fc" id="L206">        feedbackService.uploadAttachment(</span>
+<span class="fc" id="L189">        principal.getName());</span>
+<span class="fc" id="L190">    var uploaded =</span>
+<span class="fc" id="L191">        feedbackService.uploadAttachment(</span>
             feedbackId,
-<span class="fc" id="L208">            file.getOriginalFilename(),</span>
-<span class="fc" id="L209">            file.getContentType(),</span>
-<span class="fc" id="L210">            file.getSize(),</span>
-<span class="fc" id="L211">            readBytes(file));</span>
-<span class="fc" id="L212">    return ResponseEntity.status(HttpStatus.CREATED).body(fileDtoMapper.fromDomain(uploaded));</span>
+<span class="fc" id="L193">            file.getOriginalFilename(),</span>
+<span class="fc" id="L194">            file.getContentType(),</span>
+<span class="fc" id="L195">            file.getSize(),</span>
+<span class="fc" id="L196">            readBytes(file));</span>
+<span class="fc" id="L197">    return ResponseEntity.status(HttpStatus.CREATED).body(fileDtoMapper.fromDomain(uploaded));</span>
   }
 
   @PreAuthorize(&quot;hasAuthority('feedback:request:respond:assigned')&quot;)
@@ -218,13 +203,13 @@ public class FeedbackController {
       Principal principal,
       @Valid @PathVariable UUID feedbackId,
       @Valid @PathVariable UUID attachmentId) {
-<span class="fc" id="L221">    log.debug(</span>
+<span class="fc" id="L206">    log.debug(</span>
         &quot;Received request to delete attachment [{}] of feedback [{}] by user [{}]&quot;,
         attachmentId,
         feedbackId,
-<span class="fc" id="L225">        principal.getName());</span>
-<span class="fc" id="L226">    feedbackService.deleteAttachment(feedbackId, attachmentId);</span>
-<span class="fc" id="L227">    return ResponseEntity.noContent().build();</span>
+<span class="fc" id="L210">        principal.getName());</span>
+<span class="fc" id="L211">    feedbackService.deleteAttachment(feedbackId, attachmentId);</span>
+<span class="fc" id="L212">    return ResponseEntity.noContent().build();</span>
   }
 
   @PreAuthorize(&quot;hasAnyAuthority('feedback:received:read:own','feedback:request:read:assigned')&quot;)
@@ -235,18 +220,18 @@ public class FeedbackController {
       Principal principal,
       @Valid @PathVariable UUID feedbackId,
       @Valid @PathVariable UUID attachmentId) {
-<span class="fc" id="L238">    log.debug(</span>
+<span class="fc" id="L223">    log.debug(</span>
         &quot;Received request to download attachment [{}] of feedback [{}] by user [{}]&quot;,
         attachmentId,
         feedbackId,
-<span class="fc" id="L242">        principal.getName());</span>
-<span class="fc" id="L243">    var downloadedFile = feedbackService.downloadAttachment(feedbackId, attachmentId);</span>
-<span class="fc" id="L244">    return ResponseEntity.ok()</span>
-<span class="fc" id="L245">        .contentType(MediaType.APPLICATION_OCTET_STREAM)</span>
-<span class="fc" id="L246">        .header(</span>
+<span class="fc" id="L227">        principal.getName());</span>
+<span class="fc" id="L228">    var downloadedFile = feedbackService.downloadAttachment(feedbackId, attachmentId);</span>
+<span class="fc" id="L229">    return ResponseEntity.ok()</span>
+<span class="fc" id="L230">        .contentType(MediaType.APPLICATION_OCTET_STREAM)</span>
+<span class="fc" id="L231">        .header(</span>
             HttpHeaders.CONTENT_DISPOSITION,
-<span class="fc" id="L248">            &quot;attachment; filename=\&quot;&quot; + downloadedFile.fileName() + &quot;\&quot;&quot;)</span>
-<span class="fc" id="L249">        .body(downloadedFile.content());</span>
+<span class="fc" id="L233">            &quot;attachment; filename=\&quot;&quot; + downloadedFile.fileName() + &quot;\&quot;&quot;)</span>
+<span class="fc" id="L234">        .body(downloadedFile.content());</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
