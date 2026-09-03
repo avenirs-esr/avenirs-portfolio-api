@@ -3,34 +3,65 @@
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityEntity;
+import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
+import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.model.DeclaredActivityEntity;
+import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.model.FeedbackEntity;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import org.springframework.data.jpa.domain.Specification;
 
-<span class="nc" id="L11">public class ActivitySpecification {</span>
+<span class="nc" id="L20">public class ActivitySpecification {</span>
   public static Specification&lt;ActivityEntity&gt; isPublished() {
-<span class="fc" id="L13">    return (root, query, criteriaBuilder) -&gt;</span>
-<span class="fc" id="L14">        criteriaBuilder.equal(root.get(&quot;status&quot;), EActivityStatus.PUBLISHED);</span>
+<span class="fc" id="L22">    return (root, query, criteriaBuilder) -&gt;</span>
+<span class="fc" id="L23">        criteriaBuilder.equal(root.get(&quot;status&quot;), EActivityStatus.PUBLISHED);</span>
   }
 
   public static Specification&lt;ActivityEntity&gt; withThematic(EActivityThematic thematic) {
-<span class="fc" id="L18">    return (root, query, criteriaBuilder) -&gt; criteriaBuilder.equal(root.get(&quot;thematic&quot;), thematic);</span>
+<span class="fc" id="L27">    return (root, query, criteriaBuilder) -&gt; criteriaBuilder.equal(root.get(&quot;thematic&quot;), thematic);</span>
   }
 
   public static Specification&lt;ActivityEntity&gt; latest(Duration duration) {
-<span class="nc" id="L22">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="nc" id="L23">      Instant threshold = Instant.now().minus(duration);</span>
-<span class="nc" id="L24">      return criteriaBuilder.greaterThan(root.get(&quot;createdAt&quot;), threshold);</span>
+<span class="nc" id="L31">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="nc" id="L32">      Instant threshold = Instant.now().minus(duration);</span>
+<span class="nc" id="L33">      return criteriaBuilder.greaterThan(root.get(&quot;createdAt&quot;), threshold);</span>
     };
   }
 
   public static Specification&lt;ActivityEntity&gt; exclude(List&lt;ActivityEntity&gt; activities) {
-<span class="nc" id="L29">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="nc bnc" id="L30" title="All 4 branches missed.">      if (activities == null || activities.isEmpty()) {</span>
-<span class="nc" id="L31">        return criteriaBuilder.conjunction();</span>
+<span class="nc" id="L38">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="nc bnc" id="L39" title="All 4 branches missed.">      if (activities == null || activities.isEmpty()) {</span>
+<span class="nc" id="L40">        return criteriaBuilder.conjunction();</span>
       }
-<span class="nc" id="L33">      return root.in(activities).not();</span>
+<span class="nc" id="L42">      return root.in(activities).not();</span>
+    };
+  }
+
+  public static Specification&lt;ActivityEntity&gt; hasFeedback(
+      UUID authorId, EFeedbackStatus... statuses) {
+<span class="fc" id="L48">    return (root, query, cb) -&gt; {</span>
+<span class="fc" id="L49">      Subquery&lt;Integer&gt; subquery = query.subquery(Integer.class);</span>
+<span class="fc" id="L50">      Root&lt;FeedbackEntity&gt; feedback = subquery.from(FeedbackEntity.class);</span>
+<span class="fc" id="L51">      Join&lt;FeedbackEntity, DeclaredActivityEntity&gt; declaredActivity =</span>
+<span class="fc" id="L52">          feedback.join(&quot;declaredActivity&quot;);</span>
+
+<span class="fc" id="L54">      List&lt;Predicate&gt; predicates = new ArrayList&lt;&gt;(2);</span>
+<span class="fc" id="L55">      predicates.add(cb.equal(declaredActivity.get(&quot;activity&quot;), root));</span>
+<span class="fc" id="L56">      predicates.add(cb.equal(root.get(&quot;author&quot;).get(&quot;id&quot;), authorId));</span>
+
+<span class="pc bpc" id="L58" title="1 of 4 branches missed.">      if (statuses != null &amp;&amp; statuses.length &gt; 0) {</span>
+<span class="fc" id="L59">        predicates.add(feedback.get(&quot;status&quot;).in((Object[]) statuses));</span>
+      }
+
+<span class="fc" id="L62">      subquery.select(cb.literal(1)).where(predicates.toArray(Predicate[]::new));</span>
+
+<span class="fc" id="L64">      return cb.exists(subquery);</span>
     };
   }
 }

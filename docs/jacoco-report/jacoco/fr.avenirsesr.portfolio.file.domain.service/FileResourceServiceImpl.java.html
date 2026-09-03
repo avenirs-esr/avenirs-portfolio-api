@@ -84,7 +84,7 @@ public class FileResourceServiceImpl implements FileResourceService {
   @Override
   public void delete(UUID fileId) {
 <span class="fc" id="L86">    var file = fileRepository.findById(fileId).orElseThrow(FileNotFoundException::new);</span>
-<span class="fc" id="L87">    fileStorageService.delete(file.getUri());</span>
+<span class="fc" id="L87">    fileStorageService.deleteByPath(file.getUri());</span>
 <span class="fc" id="L88">    fileRepository.removeFromDatabase(file);</span>
 <span class="fc" id="L89">    log.info(&quot;File deleted: {}&quot;, file);</span>
 <span class="fc" id="L90">  }</span>
