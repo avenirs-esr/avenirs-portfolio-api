@@ -21,6 +21,7 @@ import fr.avenirsesr.portfolio.student.activity.application.adapter.mapper.Stude
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.FeedbackService;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import java.security.Principal;
@@ -61,7 +62,8 @@ public class FeedbackController {
   @GetMapping
   public ResponseEntity<PagedResponse<FeedbackStaffListItemDTO>> getStaffFeedbacks(
       Principal principal,
-      @Parameter(schema = @Schema(ref = "#/components/schemas/EFeedbackStatus"))
+      @Parameter(
+              array = @ArraySchema(schema = @Schema(ref = "#/components/schemas/EFeedbackStatus")))
           @RequestParam(required = false)
           List<EFeedbackStatus> statuses,
       @RequestParam(required = false) UUID activityId,
