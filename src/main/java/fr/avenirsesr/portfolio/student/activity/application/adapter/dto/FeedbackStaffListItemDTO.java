@@ -9,6 +9,7 @@ import java.util.UUID;
 
 public record FeedbackStaffListItemDTO(
     UUID id,
+    UUID latestFeedbackId,
     UserInfoDTO student,
     ActivityContentDTO activity,
     @Schema(ref = "#/components/schemas/EFeedbackStatus") EFeedbackStatus status,
