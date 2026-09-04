@@ -51,11 +51,11 @@ public class DeclaredActivityDatabaseRepository
   @Override
   public List&lt;DeclaredActivity&gt; findAllByActivityIdAndStudent(
       List&lt;UUID&gt; activityIds, Student student, FetchGraph fetchGraph) {
-<span class="pc bpc" id="L54" title="2 of 4 branches missed.">    if (activityIds == null || activityIds.isEmpty()) {</span>
+<span class="nc bnc" id="L54" title="All 4 branches missed.">    if (activityIds == null || activityIds.isEmpty()) {</span>
 <span class="nc" id="L55">      return List.of();</span>
     }
 
-<span class="fc" id="L58">    return findAll(hasActivityIdInAndStudent(activityIds, student), fetchGraph);</span>
+<span class="nc" id="L58">    return findAll(hasActivityIdInAndStudent(activityIds, student), fetchGraph);</span>
   }
 
   @Override
@@ -85,17 +85,13 @@ public class DeclaredActivityDatabaseRepository
   }
 
   @Override
-  public int countEnrolledByActivity(Activity activity) {
-<span class="fc" id="L89">    return jpaRepository.countByActivityIdAndUnsubscribedAtIsNull(activity.getId());</span>
+  public int countByActivity(Activity activity) {
+<span class="fc" id="L89">    return jpaRepository.countByActivityId(activity.getId());</span>
   }
 
   @Override
-  public List&lt;DeclaredActivity&gt; findAllEnrolledByActivity(
-      Activity activity, FetchGraph fetchGraph) {
-<span class="fc" id="L95">    return findAll(</span>
-<span class="fc" id="L96">        DeclaredActivitySpecification.hasActivityId(activity.getId())</span>
-<span class="fc" id="L97">            .and(DeclaredActivitySpecification.isNotUnsubscribed()),</span>
-        fetchGraph);
+  public List&lt;DeclaredActivity&gt; findAllByActivity(Activity activity, FetchGraph fetchGraph) {
+<span class="fc" id="L94">    return findAll(DeclaredActivitySpecification.hasActivityId(activity.getId()), fetchGraph);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

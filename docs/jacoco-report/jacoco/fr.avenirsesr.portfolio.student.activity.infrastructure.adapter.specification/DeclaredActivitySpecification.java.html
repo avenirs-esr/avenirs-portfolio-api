@@ -12,13 +12,13 @@ import org.springframework.data.jpa.domain.Specification;
 public final class DeclaredActivitySpecification {
   public static Specification&lt;DeclaredActivityEntity&gt; hasActivityIdIn(
       Collection&lt;UUID&gt; activityIds) {
-<span class="fc" id="L15">    return (root, query, cb) -&gt; root.get(&quot;activity&quot;).get(&quot;id&quot;).in(activityIds);</span>
+<span class="nc" id="L15">    return (root, query, cb) -&gt; root.get(&quot;activity&quot;).get(&quot;id&quot;).in(activityIds);</span>
   }
 
   public static Specification&lt;DeclaredActivityEntity&gt; hasActivityIdInAndStudent(
       Collection&lt;UUID&gt; activityIds, Student student) {
-<span class="fc" id="L20">    return Specification.where(StudentSpecification.&lt;DeclaredActivityEntity&gt;hasStudent(student))</span>
-<span class="fc" id="L21">        .and(hasActivityIdIn(activityIds));</span>
+<span class="nc" id="L20">    return Specification.where(StudentSpecification.&lt;DeclaredActivityEntity&gt;hasStudent(student))</span>
+<span class="nc" id="L21">        .and(hasActivityIdIn(activityIds));</span>
   }
 
   public static Specification&lt;DeclaredActivityEntity&gt; hasActivityId(UUID activityId) {
@@ -42,10 +42,6 @@ public final class DeclaredActivitySpecification {
 
   public static Specification&lt;DeclaredActivityEntity&gt; isCompleted() {
 <span class="nc" id="L44">    return (root, query, cb) -&gt; cb.isNotNull(root.get(&quot;finishedAt&quot;));</span>
-  }
-
-  public static Specification&lt;DeclaredActivityEntity&gt; isNotUnsubscribed() {
-<span class="fc" id="L48">    return (root, query, cb) -&gt; cb.isNull(root.get(&quot;unsubscribedAt&quot;));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
