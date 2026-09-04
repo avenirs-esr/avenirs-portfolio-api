@@ -5,7 +5,6 @@ import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.Activit
 import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.FeedbackStaffListItemDTO;
 import fr.avenirsesr.portfolio.student.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.user.application.adapter.dto.UserInfoDTO;
-import java.util.UUID;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -14,10 +13,9 @@ import org.mapstruct.Mapping;
     uses = {ActivityContentDtoMapper.class})
 public interface FeedbackStaffListItemDTOMapper {
 
-  @Mapping(source = "feedback.declaredActivity.student.user", target = "student")
-  @Mapping(source = "feedback.declaredActivity.activity", target = "activity")
-  @Mapping(source = "latestFeedbackId", target = "latestFeedbackId")
-  FeedbackStaffListItemDTO toDTO(Feedback feedback, UUID latestFeedbackId);
+  @Mapping(source = "declaredActivity.student.user", target = "student")
+  @Mapping(source = "declaredActivity.activity", target = "activity")
+  FeedbackStaffListItemDTO toDTO(Feedback feedback);
 
   UserInfoDTO toUserInfoDTO(User user);
 }
