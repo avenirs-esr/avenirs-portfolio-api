@@ -109,8 +109,6 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
       throw new DeclaredActivityAlreadyExistException();
     }
 
-    // A student who unsubscribed keeps his former declared activity: only the unsubscription and
-    // the period are reset, so his reflection and associations survive the round trip.
     var declaredActivity =
         existingDeclaredActivity.orElse(
             DeclaredActivity.create(
