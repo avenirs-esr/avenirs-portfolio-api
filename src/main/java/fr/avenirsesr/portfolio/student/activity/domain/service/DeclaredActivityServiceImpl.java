@@ -102,15 +102,24 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
       throw new ActivityUnpublishedException();
     }
 
-    if (declaredActivityRepository.findByActivity(student, activity).isPresent()) {
+    validateActivityDates(startDate, endDate, Instant.now());
+
+    var existingDeclaredActivity = declaredActivityRepository.findByActivity(student, activity);
+    if (existingDeclaredActivity.filter(da -> !da.isUnsubscribed()).isPresent()) {
       throw new DeclaredActivityAlreadyExistException();
     }
 
-    validateActivityDates(startDate, endDate, Instant.now());
+    // A student who unsubscribed keeps his former declared activity: only the unsubscription and
+    // the period are reset, so his reflection and associations survive the round trip.
+    var declaredActivity =
+        existingDeclaredActivity.orElse(
+            DeclaredActivity.create(
+                declaredActivityId, student, activity, null, null, startDate, endDate, null));
 
-    DeclaredActivity declaredActivity =
-        DeclaredActivity.create(
-            declaredActivityId, student, activity, null, null, startDate, endDate, null);
+    declaredActivity.setUnsubscribedAt(null);
+    declaredActivity.setStartDate(startDate);
+    declaredActivity.setEndDate(endDate);
+
     return declaredActivityRepository.save(declaredActivity);
   }
 
@@ -131,9 +140,23 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
       throw new DeclaredActivityNotFoundException();
     }
 
-    associationService.deleteAllOf(activityIds, DeclaredActivity.class);
+    var activitiesToUnsubscribe =
+        declaredActivities.stream()
+            .filter(declaredActivity -> !declaredActivity.isUnsubscribed())
+            .toList();
 
-    declaredActivityRepository.removeAllFromDatabase(declaredActivities);
+    if (activitiesToUnsubscribe.isEmpty()) {
+      return;
+    }
+
+    feedbackService.deletePendingFeedbacks(
+        activitiesToUnsubscribe.stream().map(DeclaredActivity::getId).toList());
+
+    var unsubscribedAt = Instant.now();
+    activitiesToUnsubscribe.forEach(
+        declaredActivity -> declaredActivity.unsubscribe(unsubscribedAt));
+
+    declaredActivityRepository.saveAll(activitiesToUnsubscribe);
   }
 
   @Override
@@ -146,6 +169,10 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
 
     if (!declaredActivity.getStudent().equals(student)) {
       throw new UserNotAuthorizedException();
+    }
+
+    if (declaredActivity.isUnsubscribed()) {
+      throw new DeclaredActivityUnsubscribedException();
     }
 
     if (declaredActivity.getStartedAt().isEmpty()) {
@@ -170,6 +197,9 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
             .orElseThrow(DeclaredActivityNotFoundException::new);
     if (!declaredActivity.getStudent().equals(student)) {
       throw new UserNotAuthorizedException();
+    }
+    if (declaredActivity.isUnsubscribed()) {
+      throw new DeclaredActivityUnsubscribedException();
     }
     if (declaredActivity.getFinishedAt().isPresent()) {
       throw new DeclaredActivityAlreadyFinishedException();
@@ -238,6 +268,10 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
       throw new UserNotAuthorizedException();
     }
 
+    if (declaredActivity.isUnsubscribed()) {
+      throw new DeclaredActivityUnsubscribedException();
+    }
+
     if (startDate != null || endDate != null) {
       validateActivityDates(startDate, endDate, declaredActivity.getCreatedAt());
       declaredActivity.setStartDate(startDate);
@@ -265,6 +299,9 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     Student student = loggedInUserService.getLoggedInStudent();
     DeclaredActivity declaredActivity =
         fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
+    if (declaredActivity.isUnsubscribed()) {
+      throw new DeclaredActivityUnsubscribedException();
+    }
     var traces = traceService.findAllTracesById(traceIds);
 
     if (!new HashSet<>(traces.stream().map(Trace::getId).toList()).containsAll(traceIds)) {
@@ -301,7 +338,9 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   public DeclaredActivityAssociationsData associateActivityWithDeclaredSkills(
       UUID declaredActivityId, List<UUID> declaredSkillIds) {
     Student student = loggedInUserService.getLoggedInStudent();
-    fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
+    if (fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId).isUnsubscribed()) {
+      throw new DeclaredActivityUnsubscribedException();
+    }
     var declaredSkills =
         declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(declaredSkillIds);
 
@@ -446,6 +485,9 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   public void deleteAssociations(UUID declaredActivityId, List<UUID> idsToDelete) {
     DeclaredActivity declaredActivity =
         fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
+    if (declaredActivity.isUnsubscribed()) {
+      throw new DeclaredActivityUnsubscribedException();
+    }
 
     var associatedElementsIds =
         associationService
@@ -544,6 +586,10 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
 
   private EDeclaredActivityStatus getDeclaredActivityStatus(
       DeclaredActivity declaredActivity, boolean hasActiveFeedback) {
+    if (declaredActivity.isUnsubscribed()) {
+      return EDeclaredActivityStatus.UNSUBSCRIBED;
+    }
+
     if (declaredActivity.getFinishedAt().isPresent()) {
       return EDeclaredActivityStatus.COMPLETED;
     }
@@ -570,19 +616,22 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
 
   @Override
   public int countEnrolledStudents(Activity activity) {
-    return declaredActivityRepository.countByActivity(activity);
+    return declaredActivityRepository.countEnrolledByActivity(activity);
   }
 
   @Override
   public List<DeclaredActivity> getEnrolledStudents(Activity activity) {
     var graph =
         FetchGraph.init().add("student").fetch("user").root().add("activity").fetch("author");
-    return declaredActivityRepository.findAllByActivity(activity, graph);
+    return declaredActivityRepository.findAllEnrolledByActivity(activity, graph);
   }
 
   @Override
   public boolean isEnrolled(Activity activity, Student student) {
-    return declaredActivityRepository.findByActivity(student, activity).isPresent();
+    return declaredActivityRepository
+        .findByActivity(student, activity)
+        .filter(declaredActivity -> !declaredActivity.isUnsubscribed())
+        .isPresent();
   }
 
   private EAssociationType getAssociationType(EAssociationContextType contextType) {

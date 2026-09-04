@@ -43,4 +43,8 @@ public final class DeclaredActivitySpecification {
   public static Specification<DeclaredActivityEntity> isCompleted() {
     return (root, query, cb) -> cb.isNotNull(root.get("finishedAt"));
   }
+
+  public static Specification<DeclaredActivityEntity> isNotUnsubscribed() {
+    return (root, query, cb) -> cb.isNull(root.get("unsubscribedAt"));
+  }
 }

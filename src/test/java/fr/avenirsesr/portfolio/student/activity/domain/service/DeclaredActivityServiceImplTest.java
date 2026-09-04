@@ -29,6 +29,7 @@ import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackData;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.*;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.Feedback;
+import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.FeedbackService;
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.DeclaredActivityRepository;
@@ -181,6 +182,66 @@ class DeclaredActivityServiceImplTest {
   }
 
   @Test
+  void subscribe_should_reuse_the_existing_declared_activity_when_student_was_unsubscribed() {
+    BddLogger.given("A logged-in student who unsubscribed from an activity");
+    Activity activity = ActivityFixture.create().toModel();
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(
+            UUID.randomUUID(), student, activity, Instant.now(), "my reflection", null, null, null);
+    declaredActivity.unsubscribe(Instant.now());
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(activityService.getActivityById(activity.getId())).thenReturn(activity);
+    when(declaredActivityRepository.findByActivity(student, activity))
+        .thenReturn(Optional.of(declaredActivity));
+    when(declaredActivityRepository.save(any(DeclaredActivity.class)))
+        .thenAnswer(i -> i.getArguments()[0]);
+
+    BddLogger.when("He subscribes to this activity again");
+    DeclaredActivity result = service.subscribe(activity.getId(), null, null);
+
+    BddLogger.then("The former declared activity is reused and no longer unsubscribed");
+    assertThat(result).isSameAs(declaredActivity);
+    assertThat(result.isUnsubscribed()).isFalse();
+    assertThat(result.getReflection()).isEqualTo("my reflection");
+    verify(declaredActivityRepository).save(declaredActivity);
+  }
+
+  @Test
+  void subscribe_should_apply_the_new_period_when_resubscribing_with_dates() {
+    BddLogger.given("A logged-in student who unsubscribed from an activity");
+    Activity activity = ActivityFixture.create().toModel();
+    LocalDate startDate = LocalDate.now().plusDays(2);
+    LocalDate endDate = LocalDate.now().plusDays(5);
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(
+            UUID.randomUUID(),
+            student,
+            activity,
+            null,
+            null,
+            LocalDate.now().plusDays(20),
+            LocalDate.now().plusDays(30),
+            null);
+    declaredActivity.unsubscribe(Instant.now());
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(activityService.getActivityById(activity.getId())).thenReturn(activity);
+    when(declaredActivityRepository.findByActivity(student, activity))
+        .thenReturn(Optional.of(declaredActivity));
+    when(declaredActivityRepository.save(any(DeclaredActivity.class)))
+        .thenAnswer(i -> i.getArguments()[0]);
+
+    BddLogger.when("He subscribes again with a new period");
+    DeclaredActivity result = service.subscribe(activity.getId(), startDate, endDate);
+
+    BddLogger.then("The period is updated on the reused declared activity");
+    assertThat(result.getStartDate()).isEqualTo(startDate);
+    assertThat(result.getEndDate()).isEqualTo(endDate);
+    assertThat(result.isUnsubscribed()).isFalse();
+  }
+
+  @Test
   void subscribe_should_throw_DeclaredActivityDatesException_when_only_one_date_provided() {
     BddLogger.given("A logged-in student and a valid activity, but only startDate is provided");
     UUID activityId = UUID.randomUUID();
@@ -242,45 +303,65 @@ class DeclaredActivityServiceImplTest {
 
   @Test
   void
-      unsubscribeMultiple_shouldRemoveDeclaredActivities_whenOwnedByStudent_and_all_activityIds_found() {
+      unsubscribeMultiple_shouldMarkDeclaredActivitiesAsUnsubscribed_whenOwnedByStudent_and_all_activityIds_found() {
     BddLogger.given("Valid declared activities (found by activityIds) owned by the student");
 
-    var declaredActivity1 = mock(DeclaredActivity.class);
-    var declaredActivity2 = mock(DeclaredActivity.class);
+    var activity1 = ActivityFixture.create().toModel();
+    var activity2 = ActivityFixture.create().toModel();
+    var activityIds = List.of(activity1.getId(), activity2.getId());
 
-    var activity1 = mock(Activity.class);
-    var activity2 = mock(Activity.class);
-
-    var idActivity1 = UUID.randomUUID();
-    var idActivity2 = UUID.randomUUID();
-    var activityIds = List.of(idActivity1, idActivity2);
-
-    when(declaredActivity1.getId()).thenReturn(idActivity1);
-    when(declaredActivity2.getId()).thenReturn(idActivity2);
+    var declaredActivity1 =
+        DeclaredActivity.create(
+            UUID.randomUUID(), student, activity1, null, null, null, null, null);
+    var declaredActivity2 =
+        DeclaredActivity.create(
+            UUID.randomUUID(), student, activity2, null, null, null, null, null);
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-
-    // repository returns declared activities found by (activityIds + student + graph)
     when(declaredActivityRepository.findAllByActivityIdAndStudent(
             eq(activityIds), eq(student), any(FetchGraph.class)))
         .thenReturn(List.of(declaredActivity1, declaredActivity2));
 
-    // each declared activity has an activity with an id
-    when(declaredActivity1.getActivity()).thenReturn(activity1);
-    when(declaredActivity2.getActivity()).thenReturn(activity2);
-    when(activity1.getId()).thenReturn(idActivity1);
-    when(activity2.getId()).thenReturn(idActivity2);
-    doNothing().when(associationService).deleteAllOf(activityIds, DeclaredActivity.class);
-
     BddLogger.when("He requests to unsubscribe from these activities");
     declaredActivityService.unsubscribeMultiple(activityIds);
 
-    BddLogger.then("The student is removed from all activities.");
-    verify(declaredActivityRepository)
-        .removeAllFromDatabase(List.of(declaredActivity1, declaredActivity2));
-    verify(associationService)
-        .deleteAllOf(
-            List.of(declaredActivity1.getId(), declaredActivity2.getId()), DeclaredActivity.class);
+    BddLogger.then("The declared activities are kept but flagged as unsubscribed");
+    assertThat(declaredActivity1.isUnsubscribed()).isTrue();
+    assertThat(declaredActivity2.isUnsubscribed()).isTrue();
+    verify(declaredActivityRepository).saveAll(List.of(declaredActivity1, declaredActivity2));
+    verify(declaredActivityRepository, never()).removeAllFromDatabase(anyList());
+
+    BddLogger.and("Their pending feedbacks are deleted");
+    verify(feedbackService)
+        .deletePendingFeedbacks(List.of(declaredActivity1.getId(), declaredActivity2.getId()));
+
+    BddLogger.and("Their associations are kept for a future re-subscription");
+    verify(associationService, never()).deleteAllOf(anyList(), any());
+  }
+
+  @Test
+  void unsubscribeMultiple_should_ignore_already_unsubscribed_declared_activities() {
+    BddLogger.given("A declared activity the student already unsubscribed from");
+
+    var activity = ActivityFixture.create().toModel();
+    var activityIds = List.of(activity.getId());
+    var unsubscribedAt = Instant.now().minusSeconds(3600);
+    var declaredActivity =
+        DeclaredActivity.create(UUID.randomUUID(), student, activity, null, null, null, null, null);
+    declaredActivity.unsubscribe(unsubscribedAt);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findAllByActivityIdAndStudent(
+            eq(activityIds), eq(student), any(FetchGraph.class)))
+        .thenReturn(List.of(declaredActivity));
+
+    BddLogger.when("He requests to unsubscribe from it again");
+    declaredActivityService.unsubscribeMultiple(activityIds);
+
+    BddLogger.then("Nothing is changed and no feedback is deleted");
+    assertThat(declaredActivity.getUnsubscribedAt()).contains(unsubscribedAt);
+    verify(declaredActivityRepository, never()).saveAll(anyList());
+    verify(feedbackService, never()).deletePendingFeedbacks(anyList());
   }
 
   @Test
@@ -306,11 +387,11 @@ class DeclaredActivityServiceImplTest {
 
     BddLogger.when("He requests to unsubscribe from these activities");
 
-    BddLogger.then("A DeclaredActivityNotFoundException is thrown and nothing is removed");
+    BddLogger.then("A DeclaredActivityNotFoundException is thrown and nothing is unsubscribed");
     assertThatThrownBy(() -> declaredActivityService.unsubscribeMultiple(activityIds))
         .isInstanceOf(DeclaredActivityNotFoundException.class);
 
-    verify(declaredActivityRepository, never()).removeAllFromDatabase(anyList());
+    verify(declaredActivityRepository, never()).saveAll(anyList());
   }
 
   @Test
@@ -1766,7 +1847,7 @@ class DeclaredActivityServiceImplTest {
   void countEnrolledStudents_should_delegate_to_repository() {
     BddLogger.given("an activity with enrolled students");
     Activity activity = ActivityFixture.create().toModel();
-    when(declaredActivityRepository.countByActivity(activity)).thenReturn(3);
+    when(declaredActivityRepository.countEnrolledByActivity(activity)).thenReturn(3);
 
     BddLogger.when("counting enrolled students");
     int count = service.countEnrolledStudents(activity);
@@ -1779,7 +1860,7 @@ class DeclaredActivityServiceImplTest {
   void countEnrolledStudents_should_return_zero_when_no_students_enrolled() {
     BddLogger.given("an activity with no enrolled students");
     Activity activity = ActivityFixture.create().toModel();
-    when(declaredActivityRepository.countByActivity(activity)).thenReturn(0);
+    when(declaredActivityRepository.countEnrolledByActivity(activity)).thenReturn(0);
 
     BddLogger.when("counting enrolled students");
     int count = service.countEnrolledStudents(activity);
@@ -1800,7 +1881,7 @@ class DeclaredActivityServiceImplTest {
     DeclaredActivity declaredActivity2 =
         DeclaredActivity.create(
             UUID.randomUUID(), student2, activity, null, null, null, null, null);
-    when(declaredActivityRepository.findAllByActivity(eq(activity), any(FetchGraph.class)))
+    when(declaredActivityRepository.findAllEnrolledByActivity(eq(activity), any(FetchGraph.class)))
         .thenReturn(List.of(declaredActivity1, declaredActivity2));
 
     BddLogger.when("getting the enrolled students");
@@ -1811,10 +1892,140 @@ class DeclaredActivityServiceImplTest {
   }
 
   @Test
+  void finish_should_throw_DeclaredActivityUnsubscribedException_when_unsubscribed() {
+    BddLogger.given("A logged-in student and an activity he unsubscribed from");
+    UUID declaredActivityId = UUID.randomUUID();
+    DeclaredActivity declaredActivity = unsubscribedDeclaredActivity();
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(declaredActivityId))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("He tries to finish it");
+
+    BddLogger.then("A DeclaredActivityUnsubscribedException is thrown");
+    assertThatThrownBy(() -> service.finish(declaredActivityId))
+        .isInstanceOf(DeclaredActivityUnsubscribedException.class);
+    verify(declaredActivityRepository, never()).save(any());
+  }
+
+  @Test
+  void updateReflection_should_throw_DeclaredActivityUnsubscribedException_when_unsubscribed() {
+    BddLogger.given("A logged-in student and an activity he unsubscribed from");
+    UUID declaredActivityId = UUID.randomUUID();
+    DeclaredActivity declaredActivity = unsubscribedDeclaredActivity();
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(declaredActivityId))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("He tries to update its reflection");
+
+    BddLogger.then("A DeclaredActivityUnsubscribedException is thrown");
+    assertThatThrownBy(() -> service.updateReflection(declaredActivityId, "new reflection"))
+        .isInstanceOf(DeclaredActivityUnsubscribedException.class);
+    verify(declaredActivityRepository, never()).save(any());
+  }
+
+  @Test
+  void
+      updateDeclaredActivity_should_throw_DeclaredActivityUnsubscribedException_when_unsubscribed() {
+    BddLogger.given("A logged-in student and an activity he unsubscribed from");
+    UUID declaredActivityId = UUID.randomUUID();
+    DeclaredActivity declaredActivity = unsubscribedDeclaredActivity();
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(declaredActivityId))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("He tries to update it");
+
+    BddLogger.then("A DeclaredActivityUnsubscribedException is thrown");
+    assertThatThrownBy(
+            () -> service.updateDeclaredActivity(declaredActivityId, null, null, Boolean.TRUE))
+        .isInstanceOf(DeclaredActivityUnsubscribedException.class);
+    verify(declaredActivityRepository, never()).save(any());
+  }
+
+  @Test
+  void getDeclaredActivityStatus_should_return_UNSUBSCRIBED_when_declared_activity_unsubscribed() {
+    BddLogger.given("A finished declared activity the student then unsubscribed from");
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(
+            UUID.randomUUID(),
+            student,
+            ActivityFixture.create().toModel(),
+            Instant.now(),
+            null,
+            null,
+            null,
+            Instant.now());
+    declaredActivity.unsubscribe(Instant.now());
+
+    when(feedbackRepository.findDeclaredActivityIdsHavingActiveFeedbacks(
+            List.of(declaredActivity.getId())))
+        .thenReturn(List.of());
+
+    BddLogger.when("Its status is resolved");
+    var status = service.getDeclaredActivityStatus(declaredActivity);
+
+    BddLogger.then("UNSUBSCRIBED takes precedence over every other status");
+    assertThat(status).isEqualTo(EDeclaredActivityStatus.UNSUBSCRIBED);
+  }
+
+  @Test
+  void isEnrolled_should_return_false_when_the_student_unsubscribed() {
+    BddLogger.given("An activity the student unsubscribed from");
+    Activity activity = ActivityFixture.create().toModel();
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(UUID.randomUUID(), student, activity, null, null, null, null, null);
+    declaredActivity.unsubscribe(Instant.now());
+
+    when(declaredActivityRepository.findByActivity(student, activity))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("Checking whether he is enrolled");
+
+    BddLogger.then("He is not considered enrolled anymore");
+    assertThat(service.isEnrolled(activity, student)).isFalse();
+  }
+
+  @Test
+  void isEnrolled_should_return_true_when_the_student_is_still_subscribed() {
+    BddLogger.given("An activity the student is subscribed to");
+    Activity activity = ActivityFixture.create().toModel();
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(UUID.randomUUID(), student, activity, null, null, null, null, null);
+
+    when(declaredActivityRepository.findByActivity(student, activity))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("Checking whether he is enrolled");
+
+    BddLogger.then("He is considered enrolled");
+    assertThat(service.isEnrolled(activity, student)).isTrue();
+  }
+
+  private DeclaredActivity unsubscribedDeclaredActivity() {
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(
+            UUID.randomUUID(),
+            student,
+            ActivityFixture.create().toModel(),
+            Instant.now(),
+            null,
+            null,
+            null,
+            null);
+    declaredActivity.unsubscribe(Instant.now());
+    return declaredActivity;
+  }
+
+  @Test
   void getEnrolledStudents_should_return_empty_list_when_no_students_enrolled() {
     BddLogger.given("an activity with no enrolled students");
     Activity activity = ActivityFixture.create().toModel();
-    when(declaredActivityRepository.findAllByActivity(eq(activity), any(FetchGraph.class)))
+    when(declaredActivityRepository.findAllEnrolledByActivity(eq(activity), any(FetchGraph.class)))
         .thenReturn(List.of());
 
     BddLogger.when("getting the enrolled students");

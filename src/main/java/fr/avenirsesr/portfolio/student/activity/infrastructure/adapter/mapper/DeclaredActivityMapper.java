@@ -22,6 +22,7 @@ public class DeclaredActivityMapper implements Mapper<DeclaredActivityEntity, De
         declaredActivity.getEndDate(),
         declaredActivity.getFinishedAt().orElse(null),
         declaredActivity.isValorized(),
+        declaredActivity.getUnsubscribedAt().orElse(null),
         declaredActivity.getCreatedAt(),
         declaredActivity.getUpdatedAt());
   }
@@ -38,6 +39,7 @@ public class DeclaredActivityMapper implements Mapper<DeclaredActivityEntity, De
         entity.getEndDate(),
         entity.getFinishedAt(),
         entity.isValorized(),
+        entity.getUnsubscribedAt(),
         entity.getCreatedAt(),
         entity.getUpdatedAt());
   }
@@ -59,6 +61,7 @@ public class DeclaredActivityMapper implements Mapper<DeclaredActivityEntity, De
         entity.getEndDate(),
         entity.getFinishedAt(),
         entity.isValorized(),
+        entity.getUnsubscribedAt(),
         entity.getCreatedAt(),
         entity.getUpdatedAt());
   }
