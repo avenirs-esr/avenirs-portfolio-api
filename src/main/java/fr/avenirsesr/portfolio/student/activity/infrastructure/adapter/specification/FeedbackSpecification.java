@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.specific
 
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.model.FeedbackEntity;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -36,5 +37,17 @@ public final class FeedbackSpecification {
   public static Specification<FeedbackEntity> hasDeclaredActivityId(UUID declaredActivityId) {
     return (root, query, cb) ->
         cb.equal(root.get("declaredActivity").get("id"), declaredActivityId);
+  }
+
+  public static Specification<FeedbackEntity> isLatestOfItsDeclaredActivity() {
+    return (root, query, cb) -> {
+      var subquery = query.subquery(Instant.class);
+      var subRoot = subquery.from(FeedbackEntity.class);
+      subquery.select(cb.greatest(subRoot.<Instant>get("createdAt")));
+      subquery.where(
+          cb.equal(
+              subRoot.get("declaredActivity").get("id"), root.get("declaredActivity").get("id")));
+      return cb.equal(root.<Instant>get("createdAt"), subquery);
+    };
   }
 }

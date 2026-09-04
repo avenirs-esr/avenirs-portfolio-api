@@ -459,6 +459,50 @@ public class FeedbackControllerIT extends ContainerConfigurationTest {
     }
   }
 
+  @Test
+  @Transactional
+  void shouldReturnOnlyTheLatestFeedbackWhenADeclaredActivityHasMultipleIterations()
+      throws Exception {
+    BddLogger.given(
+        "a declared activity with two feedback iterations: one submitted, one still new");
+    String firstFeedbackId = askForFeedbackAndGetId(declaredActivityId);
+    updateFeedbackWithText(firstFeedbackId, "Premier retour de l'étudiant");
+    submitFeedback(firstFeedbackId);
+    String latestFeedbackId = askForFeedbackAndGetId(declaredActivityId);
+
+    BddLogger.when("performing a GET on the staff feedback endpoint filtered on this activity");
+    String body =
+        webTestClient
+            .get()
+            .uri(
+                uriBuilder ->
+                    uriBuilder.path(BASE_PATH).queryParam("activityId", ACTIVITY_ID).build())
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Signature", studentSignature)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    BddLogger.then(
+        "only the latest feedback of this declared activity is returned, the older one is not");
+    JsonNode data = objectMapper.readTree(body).get("data");
+    assertThat(data.isArray()).isTrue();
+    assertThat(data.size()).isEqualTo(1);
+
+    boolean containsLatest = false;
+    boolean containsFirst = false;
+    for (JsonNode item : data) {
+      String id = item.get("id").asText();
+      if (id.equals(latestFeedbackId)) containsLatest = true;
+      if (id.equals(firstFeedbackId)) containsFirst = true;
+    }
+    assertThat(containsLatest).isTrue();
+    assertThat(containsFirst).isFalse();
+  }
+
   // ── POST /{feedbackId}/submit ────────────────────────────────────────
 
   @Test

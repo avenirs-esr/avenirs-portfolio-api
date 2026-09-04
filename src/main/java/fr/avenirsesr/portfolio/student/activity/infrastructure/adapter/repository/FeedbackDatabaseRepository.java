@@ -108,7 +108,8 @@ public class FeedbackDatabaseRepository
     var specification =
         FeedbackSpecification.hasStaffAuthor(staffId)
             .and(FeedbackSpecification.hasStatus(status))
-            .and(FeedbackSpecification.hasActivityId(activityId));
+            .and(FeedbackSpecification.hasActivityId(activityId))
+            .and(FeedbackSpecification.isLatestOfItsDeclaredActivity());
     // Status strings sort alphabetically in the required priority order:
     // "IN_PROCESS" < "NEW" < "SUBMITTED"
     var sort = Sort.by("status").ascending().and(Sort.by("createdAt").ascending());
@@ -171,7 +172,8 @@ public class FeedbackDatabaseRepository
     var spec =
         FeedbackSpecification.hasStaffAuthor(staff.getId())
             .and(FeedbackSpecification.hasActivityId(activity != null ? activity.getId() : null))
-            .and(FeedbackSpecification.hasStatus(status));
+            .and(FeedbackSpecification.hasStatus(status))
+            .and(FeedbackSpecification.isLatestOfItsDeclaredActivity());
     return (int) jpaRepository.count(spec);
   }
 
