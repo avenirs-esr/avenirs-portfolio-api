@@ -358,9 +358,4 @@ public class FeedbackServiceImpl implements FeedbackService {
     return new FeedbackDashboardData(
         newCount, pendingFeedbacks, processedFeedbacks, totalFeedbacks);
   }
-
-  @Override
-  public Feedback getLatestFeedback(UUID declaredActivityId) {
-    return feedbackRepository.findAllByDeclaredActivityId(declaredActivityId).getFirst();
-  }
 }
