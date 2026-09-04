@@ -29,6 +29,9 @@ public class DeclaredActivity extends AvenirsBaseModel {
 
   private boolean valorized;
 
+  @Getter(AccessLevel.NONE)
+  private Instant unsubscribedAt;
+
   private DeclaredActivity(
       UUID id,
       Student student,
@@ -39,6 +42,7 @@ public class DeclaredActivity extends AvenirsBaseModel {
       LocalDate endDate,
       Instant finishedAt,
       boolean valorized,
+      Instant unsubscribedAt,
       Instant createdAt,
       Instant updatedAt) {
     super(id, createdAt, updatedAt);
@@ -50,6 +54,7 @@ public class DeclaredActivity extends AvenirsBaseModel {
     this.endDate = endDate;
     this.finishedAt = finishedAt;
     this.valorized = valorized;
+    this.unsubscribedAt = unsubscribedAt;
   }
 
   public static DeclaredActivity create(
@@ -71,6 +76,7 @@ public class DeclaredActivity extends AvenirsBaseModel {
         endDate,
         finishedAt,
         false,
+        null,
         Instant.now(),
         Instant.now());
   }
@@ -85,6 +91,7 @@ public class DeclaredActivity extends AvenirsBaseModel {
       LocalDate endDate,
       Instant finishedAt,
       boolean valorized,
+      Instant unsubscribedAt,
       Instant createdAt,
       Instant updatedAt) {
     return new DeclaredActivity(
@@ -97,6 +104,7 @@ public class DeclaredActivity extends AvenirsBaseModel {
         endDate,
         finishedAt,
         valorized,
+        unsubscribedAt,
         createdAt,
         updatedAt);
   }
@@ -107,5 +115,17 @@ public class DeclaredActivity extends AvenirsBaseModel {
 
   public Optional<Instant> getStartedAt() {
     return Optional.ofNullable(startedAt);
+  }
+
+  public Optional<Instant> getUnsubscribedAt() {
+    return Optional.ofNullable(unsubscribedAt);
+  }
+
+  public boolean isUnsubscribed() {
+    return unsubscribedAt != null;
+  }
+
+  public void unsubscribe(Instant unsubscribedAt) {
+    this.unsubscribedAt = unsubscribedAt;
   }
 }

@@ -24,6 +24,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackDashboardData;
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackData;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.DeclaredActivityNotFoundException;
+import fr.avenirsesr.portfolio.student.activity.domain.exception.DeclaredActivityUnsubscribedException;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.FeedbackInProcessException;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.FeedbackMaximumIterationReachedException;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.FeedbackNotFoundException;
@@ -130,6 +131,28 @@ class FeedbackServiceImplTest {
       assertThat(captured.getAssociatedTraces()).isEmpty();
       assertThat(captured.getAssociatedDeclaredSkills()).isEmpty();
       assertThat(captured.getReflexion()).isEmpty();
+    }
+
+    @Test
+    void should_throw_DeclaredActivityUnsubscribedException_when_declared_activity_unsubscribed() {
+      BddLogger.given("A logged-in student and an activity he unsubscribed from");
+      UUID declaredActivityId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().toModel();
+      DeclaredActivity declaredActivity =
+          DeclaredActivity.create(
+              UUID.randomUUID(), student, activity, null, null, null, null, null);
+      declaredActivity.unsubscribe(Instant.now());
+
+      when(declaredActivityService.fetchActivityAndCheckLoggedInStudentAuthorization(
+              declaredActivityId))
+          .thenReturn(declaredActivity);
+
+      BddLogger.when("createFeedback is called");
+
+      BddLogger.then("A DeclaredActivityUnsubscribedException is thrown and nothing is saved");
+      assertThatThrownBy(() -> service.createFeedback(declaredActivityId))
+          .isInstanceOf(DeclaredActivityUnsubscribedException.class);
+      verify(feedbackRepository, never()).save(any());
     }
 
     @Test
@@ -2333,6 +2356,61 @@ class FeedbackServiceImplTest {
           .isInstanceOf(FeedbackNotFoundException.class);
 
       verifyNoInteractions(fileResourceService);
+    }
+  }
+
+  @Nested
+  class DeletePendingFeedbacks {
+
+    @Test
+    void should_delete_new_and_in_process_feedbacks_along_with_their_attachments() {
+      BddLogger.given("A declared activity with a pending feedback holding an attachment");
+      UUID declaredActivityId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().toModel();
+      File existingAttachment = attachment();
+      Feedback pendingFeedback =
+          feedbackOf(
+              UUID.randomUUID(), activity, EFeedbackStatus.IN_PROCESS, List.of(existingAttachment));
+
+      when(feedbackRepository.findAllByDeclaredActivityId(
+              declaredActivityId, EFeedbackStatus.NEW, EFeedbackStatus.IN_PROCESS))
+          .thenReturn(List.of(pendingFeedback));
+
+      BddLogger.when("deletePendingFeedbacks is called");
+      service.deletePendingFeedbacks(List.of(declaredActivityId));
+
+      BddLogger.then("The feedback and its attachment are deleted");
+      verify(feedbackRepository).removeAllFromDatabase(List.of(pendingFeedback));
+      verify(fileResourceService).delete(existingAttachment.getId());
+    }
+
+    @Test
+    void should_do_nothing_when_no_pending_feedback_exists() {
+      BddLogger.given("A declared activity without any pending feedback");
+      UUID declaredActivityId = UUID.randomUUID();
+
+      when(feedbackRepository.findAllByDeclaredActivityId(
+              declaredActivityId, EFeedbackStatus.NEW, EFeedbackStatus.IN_PROCESS))
+          .thenReturn(List.of());
+
+      BddLogger.when("deletePendingFeedbacks is called");
+      service.deletePendingFeedbacks(List.of(declaredActivityId));
+
+      BddLogger.then("Nothing is deleted");
+      verify(feedbackRepository, never()).removeAllFromDatabase(anyList());
+      verifyNoInteractions(fileResourceService);
+    }
+
+    @Test
+    void should_do_nothing_when_no_declared_activity_is_given() {
+      BddLogger.given("An empty list of declared activities");
+
+      BddLogger.when("deletePendingFeedbacks is called");
+      service.deletePendingFeedbacks(List.of());
+
+      BddLogger.then("The repository is never queried");
+      verifyNoInteractions(fileResourceService);
+      verify(feedbackRepository, never()).removeAllFromDatabase(anyList());
     }
   }
 
