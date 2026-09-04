@@ -273,6 +273,7 @@ class TraceServiceImplTest {
 
         Trace trace = TraceFixture.create().withStudent(student).toModel();
         var pageCriteria = new PageCriteria(0, 8);
+        var sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.DESC);
         PagedResult<AssociationSearchResultData> expected =
             new PagedResult<>(
                 List.of(
@@ -285,7 +286,7 @@ class TraceServiceImplTest {
                 any(TraceFilter.class),
                 isNull(),
                 eq(pageCriteria),
-                eq(null)))
+                eq(sortCriteria)))
             .thenReturn(new PagedResult<>(List.of(trace), new PageInfo(0, 8, 1)));
         when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
         when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
@@ -305,7 +306,7 @@ class TraceServiceImplTest {
                 eq(new TraceFilter(null, null, null, null)),
                 isNull(),
                 eq(pageCriteria),
-                isNull());
+                eq(sortCriteria));
         verify(associationSearchHelper)
             .searchForAssociation(
                 isNull(), isNull(), isNull(), isNull(), any(), any(), any(), isNull(), any());
@@ -318,6 +319,7 @@ class TraceServiceImplTest {
         UUID contextId = UUID.randomUUID();
         Trace trace = TraceFixture.create().withStudent(student).toModel();
         var pageCriteria = new PageCriteria(0, 8);
+        var sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.DESC);
         PagedResult<AssociationSearchResultData> expected =
             new PagedResult<>(
                 List.of(
@@ -330,7 +332,7 @@ class TraceServiceImplTest {
                 any(TraceFilter.class),
                 isNull(),
                 eq(pageCriteria),
-                eq(null)))
+                eq(sortCriteria)))
             .thenReturn(new PagedResult<>(List.of(trace), new PageInfo(0, 8, 1)));
         when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
         when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
@@ -372,6 +374,7 @@ class TraceServiceImplTest {
         UUID contextId = UUID.randomUUID();
         Trace trace = TraceFixture.create().withStudent(student).toModel();
         var pageCriteria = new PageCriteria(0, 8);
+        var sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.DESC);
         PagedResult<AssociationSearchResultData> expected =
             new PagedResult<>(
                 List.of(
@@ -384,7 +387,7 @@ class TraceServiceImplTest {
                 any(TraceFilter.class),
                 isNull(),
                 eq(pageCriteria),
-                eq(null)))
+                eq(sortCriteria)))
             .thenReturn(new PagedResult<>(List.of(trace), new PageInfo(0, 8, 1)));
         when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
         when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
@@ -426,6 +429,7 @@ class TraceServiceImplTest {
         UUID contextId = UUID.randomUUID();
         Trace trace = TraceFixture.create().withStudent(student).toModel();
         var pageCriteria = new PageCriteria(0, 8);
+        var sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.DESC);
         PagedResult<AssociationSearchResultData> expected =
             new PagedResult<>(
                 List.of(
@@ -438,7 +442,7 @@ class TraceServiceImplTest {
                 any(TraceFilter.class),
                 isNull(),
                 eq(pageCriteria),
-                eq(null)))
+                eq(sortCriteria)))
             .thenReturn(new PagedResult<>(List.of(trace), new PageInfo(0, 8, 1)));
         when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
         when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
@@ -492,6 +496,7 @@ class TraceServiceImplTest {
 
         Trace trace = TraceFixture.create().withStudent(student).toModel();
         var pageCriteria = new PageCriteria(0, 8);
+        var sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.DESC);
         PagedResult<AssociationSearchResultData> expected =
             new PagedResult<>(
                 List.of(
@@ -504,7 +509,7 @@ class TraceServiceImplTest {
                 any(TraceFilter.class),
                 isNull(),
                 eq(pageCriteria),
-                eq(null)))
+                eq(sortCriteria)))
             .thenReturn(new PagedResult<>(List.of(trace), new PageInfo(0, 8, 1)));
         when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
         when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, true));
@@ -525,7 +530,7 @@ class TraceServiceImplTest {
                 eq(new TraceFilter(true, null, null, null)),
                 isNull(),
                 eq(pageCriteria),
-                eq(null));
+                eq(sortCriteria));
       }
 
       @Test
@@ -534,6 +539,7 @@ class TraceServiceImplTest {
 
         Trace trace = TraceFixture.create().withStudent(student).toModel();
         var pageCriteria = new PageCriteria(0, 8);
+        var sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.DESC);
         PagedResult<AssociationSearchResultData> expected =
             new PagedResult<>(
                 List.of(
@@ -546,7 +552,7 @@ class TraceServiceImplTest {
                 any(TraceFilter.class),
                 isNull(),
                 eq(pageCriteria),
-                eq(null)))
+                eq(sortCriteria)))
             .thenReturn(new PagedResult<>(List.of(trace), new PageInfo(0, 8, 1)));
         when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
         when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
@@ -567,7 +573,7 @@ class TraceServiceImplTest {
                 eq(new TraceFilter(false, null, null, null)),
                 isNull(),
                 eq(pageCriteria),
-                eq(null));
+                eq(sortCriteria));
       }
     }
 

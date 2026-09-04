@@ -9,6 +9,8 @@ import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValida
 
 import fr.avenirsesr.portfolio.common.configuration.domain.model.TraceConfiguration;
 import fr.avenirsesr.portfolio.common.data.domain.model.*;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortField;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.file.domain.model.File;
@@ -598,7 +600,11 @@ public class TraceServiceImpl implements TraceService {
 
     var traces =
         getTracesView(
-            keyword, new TraceFilter(isAssociated, null, null, null), null, pageCriteria, null);
+            keyword,
+            new TraceFilter(isAssociated, null, null, null),
+            null,
+            pageCriteria,
+            new SortCriteria(ESortField.DATE, ESortOrder.DESC));
 
     if (contextType == null) {
       return associationSearchHelper.searchForAssociation(
