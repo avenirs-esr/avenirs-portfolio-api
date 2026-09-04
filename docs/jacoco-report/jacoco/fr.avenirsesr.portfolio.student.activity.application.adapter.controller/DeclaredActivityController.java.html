@@ -115,9 +115,9 @@ public class DeclaredActivityController {
   public ResponseEntity&lt;String&gt; unsubscribeActivitiesProgresses(
       @RequestBody List&lt;UUID&gt; activityIds) {
 
-<span class="nc" id="L118">    declaredActivityService.unsubscribeMultiple(activityIds);</span>
+<span class="fc" id="L118">    declaredActivityService.unsubscribeMultiple(activityIds);</span>
 
-<span class="nc" id="L120">    return ResponseEntity.ok(&quot;Declared activities successfully unsubscribed&quot;);</span>
+<span class="fc" id="L120">    return ResponseEntity.ok(&quot;Declared activities successfully unsubscribed&quot;);</span>
   }
 
   @PreAuthorize(&quot;hasAuthority('declared-activity:update:own')&quot;)
@@ -196,11 +196,11 @@ public class DeclaredActivityController {
   public ResponseEntity&lt;String&gt; updateDeclaredActivity(
       @Valid @RequestBody DeclaredActivityUpdateRequest declaredActivityUpdateRequest,
       @PathVariable UUID declaredActivityId) {
-<span class="nc" id="L199">    var optionalPeriod = Optional.ofNullable(declaredActivityUpdateRequest.period());</span>
-<span class="nc" id="L200">    LocalDate startDate = optionalPeriod.map(DeclaredActivityPeriodDTO::startDate).orElse(null);</span>
-<span class="nc" id="L201">    LocalDate endDate = optionalPeriod.map(DeclaredActivityPeriodDTO::endDate).orElse(null);</span>
-<span class="nc" id="L202">    declaredActivityService.updateDeclaredActivity(</span>
-<span class="nc" id="L203">        declaredActivityId, startDate, endDate, declaredActivityUpdateRequest.valorized());</span>
+<span class="fc" id="L199">    var optionalPeriod = Optional.ofNullable(declaredActivityUpdateRequest.period());</span>
+<span class="fc" id="L200">    LocalDate startDate = optionalPeriod.map(DeclaredActivityPeriodDTO::startDate).orElse(null);</span>
+<span class="fc" id="L201">    LocalDate endDate = optionalPeriod.map(DeclaredActivityPeriodDTO::endDate).orElse(null);</span>
+<span class="pc" id="L202">    declaredActivityService.updateDeclaredActivity(</span>
+<span class="fc" id="L203">        declaredActivityId, startDate, endDate, declaredActivityUpdateRequest.valorized());</span>
 <span class="nc" id="L204">    return ResponseEntity.ok(&quot;Declared activity successfully updated&quot;);</span>
   }
 

@@ -21,6 +21,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackDashboardData;
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackData;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.DeclaredActivityNotFoundException;
+import fr.avenirsesr.portfolio.student.activity.domain.exception.DeclaredActivityUnsubscribedException;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.FeedbackInProcessException;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.FeedbackMaximumIterationReachedException;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.FeedbackNotFoundException;
@@ -45,7 +46,7 @@ import java.util.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-<span class="fc" id="L48">@Slf4j</span>
+<span class="fc" id="L49">@Slf4j</span>
 @AllArgsConstructor
 public class FeedbackServiceImpl implements FeedbackService {
   private final FeedbackRepository feedbackRepository;
@@ -61,302 +62,341 @@ public class FeedbackServiceImpl implements FeedbackService {
 
   @Override
   public Feedback createFeedback(UUID declaredActivityId) {
-<span class="fc" id="L64">    DeclaredActivity declaredActivity =</span>
-<span class="fc" id="L65">        declaredActivityService.fetchActivityAndCheckLoggedInStudentAuthorization(</span>
+<span class="fc" id="L65">    DeclaredActivity declaredActivity =</span>
+<span class="fc" id="L66">        declaredActivityService.fetchActivityAndCheckLoggedInStudentAuthorization(</span>
             declaredActivityId);
 
-<span class="fc" id="L68">    validateOptionalEnrichedTextMaxLength(</span>
-<span class="fc" id="L69">        &quot;reflexion&quot;, declaredActivity.getReflection(), RICH_DESCRIPTION_LENGTH);</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">    if (declaredActivity.isUnsubscribed()) {</span>
+<span class="fc" id="L70">      throw new DeclaredActivityUnsubscribedException();</span>
+    }
 
-<span class="fc" id="L71">    var allAssociations =</span>
-<span class="fc" id="L72">        associationService.getAllOf(</span>
+<span class="fc" id="L73">    validateOptionalEnrichedTextMaxLength(</span>
+<span class="fc" id="L74">        &quot;reflexion&quot;, declaredActivity.getReflection(), RICH_DESCRIPTION_LENGTH);</span>
+
+<span class="fc" id="L76">    var allAssociations =</span>
+<span class="fc" id="L77">        associationService.getAllOf(</span>
             declaredActivityId,
             DeclaredActivity.class,
-<span class="fc" id="L75">            List.of(</span>
+<span class="fc" id="L80">            List.of(</span>
                 EAssociationType.DECLARED_ACTIVITY_TRACE,
                 EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL));
 
-<span class="fc" id="L79">    var traceIds =</span>
-<span class="fc" id="L80">        AssociationUtils.getIdsOf(</span>
+<span class="fc" id="L84">    var traceIds =</span>
+<span class="fc" id="L85">        AssociationUtils.getIdsOf(</span>
             allAssociations, EAssociationType.DECLARED_ACTIVITY_TRACE, Trace.class);
 
-<span class="fc" id="L83">    var declaredSkillsIds =</span>
-<span class="fc" id="L84">        AssociationUtils.getIdsOf(</span>
+<span class="fc" id="L88">    var declaredSkillsIds =</span>
+<span class="fc" id="L89">        AssociationUtils.getIdsOf(</span>
             allAssociations,
             EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL,
             DeclaredSkillProgress.class);
 
-<span class="fc" id="L89">    List&lt;Trace&gt; traces = traceService.findAllTracesById(traceIds);</span>
-<span class="fc" id="L90">    List&lt;DeclaredSkillProgress&gt; declaredSkills =</span>
-<span class="fc" id="L91">        declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(declaredSkillsIds);</span>
+<span class="fc" id="L94">    List&lt;Trace&gt; traces = traceService.findAllTracesById(traceIds);</span>
+<span class="fc" id="L95">    List&lt;DeclaredSkillProgress&gt; declaredSkills =</span>
+<span class="fc" id="L96">        declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(declaredSkillsIds);</span>
 
-<span class="fc" id="L93">    List&lt;Feedback&gt; existingFeedbacks =</span>
-<span class="fc" id="L94">        feedbackRepository.findAllByDeclaredActivityId(declaredActivityId);</span>
+<span class="fc" id="L98">    List&lt;Feedback&gt; existingFeedbacks =</span>
+<span class="fc" id="L99">        feedbackRepository.findAllByDeclaredActivityId(declaredActivityId);</span>
 
-<span class="fc bfc" id="L96" title="All 2 branches covered.">    if (!existingFeedbacks.isEmpty()) {</span>
-<span class="fc" id="L97">      Feedback lastFeedback = existingFeedbacks.getFirst();</span>
-<span class="pc bpc" id="L98" title="1 of 4 branches missed.">      switch (lastFeedback.getStatus()) {</span>
-<span class="fc" id="L99">        case IN_PROCESS -&gt; throw new FeedbackInProcessException();</span>
+<span class="fc bfc" id="L101" title="All 2 branches covered.">    if (!existingFeedbacks.isEmpty()) {</span>
+<span class="fc" id="L102">      Feedback lastFeedback = existingFeedbacks.getFirst();</span>
+<span class="pc bpc" id="L103" title="1 of 4 branches missed.">      switch (lastFeedback.getStatus()) {</span>
+<span class="fc" id="L104">        case IN_PROCESS -&gt; throw new FeedbackInProcessException();</span>
         case NEW -&gt; {
-<span class="fc" id="L101">          lastFeedback.setReflexion(declaredActivity.getReflection());</span>
-<span class="fc" id="L102">          lastFeedback.setAssociatedTraces(traces);</span>
-<span class="fc" id="L103">          lastFeedback.setAssociatedDeclaredSkills(declaredSkills);</span>
-<span class="fc" id="L104">          return feedbackRepository.save(lastFeedback);</span>
+<span class="fc" id="L106">          lastFeedback.setReflexion(declaredActivity.getReflection());</span>
+<span class="fc" id="L107">          lastFeedback.setAssociatedTraces(traces);</span>
+<span class="fc" id="L108">          lastFeedback.setAssociatedDeclaredSkills(declaredSkills);</span>
+<span class="fc" id="L109">          return feedbackRepository.save(lastFeedback);</span>
         }
         case SUBMITTED, SEEN -&gt; {
-<span class="fc" id="L107">          int maxIterations = declaredActivity.getActivity().getFeedbackAllowedIterations();</span>
-<span class="pc bpc" id="L108" title="1 of 4 branches missed.">          if (maxIterations != -1 &amp;&amp; existingFeedbacks.size() &gt;= maxIterations) {</span>
-<span class="fc" id="L109">            throw new FeedbackMaximumIterationReachedException();</span>
+<span class="fc" id="L112">          int maxIterations = declaredActivity.getActivity().getFeedbackAllowedIterations();</span>
+<span class="pc bpc" id="L113" title="1 of 4 branches missed.">          if (maxIterations != -1 &amp;&amp; existingFeedbacks.size() &gt;= maxIterations) {</span>
+<span class="fc" id="L114">            throw new FeedbackMaximumIterationReachedException();</span>
           }
         }
       }
     }
 
-<span class="fc" id="L115">    int iteration = existingFeedbacks.size() + 1;</span>
-<span class="fc" id="L116">    Feedback feedback =</span>
-<span class="fc" id="L117">        Feedback.create(</span>
-<span class="fc" id="L118">            declaredActivity, declaredActivity.getReflection(), traces, declaredSkills, iteration);</span>
-<span class="fc" id="L119">    var savedFeedback = feedbackRepository.save(feedback);</span>
+<span class="fc" id="L120">    int iteration = existingFeedbacks.size() + 1;</span>
+<span class="fc" id="L121">    Feedback feedback =</span>
+<span class="fc" id="L122">        Feedback.create(</span>
+<span class="fc" id="L123">            declaredActivity, declaredActivity.getReflection(), traces, declaredSkills, iteration);</span>
+<span class="fc" id="L124">    var savedFeedback = feedbackRepository.save(feedback);</span>
 
-<span class="fc" id="L121">    var author = savedFeedback.getDeclaredActivity().getActivity().getAuthor().getUser();</span>
-<span class="fc" id="L122">    notificationService.notify(new AskForFeedbackNotification(author, savedFeedback));</span>
+<span class="fc" id="L126">    var author = savedFeedback.getDeclaredActivity().getActivity().getAuthor().getUser();</span>
+<span class="fc" id="L127">    notificationService.notify(new AskForFeedbackNotification(author, savedFeedback));</span>
 
-<span class="fc" id="L124">    return savedFeedback;</span>
+<span class="fc" id="L129">    return savedFeedback;</span>
   }
 
   @Override
   public FeedbackData getFeedbackDetails(UUID feedbackId, EUserCategory userCategory) {
-<span class="fc" id="L129">    var user = loggedInUserService.getLoggedInUser();</span>
-<span class="fc" id="L130">    Feedback feedback =</span>
-<span class="fc" id="L131">        feedbackRepository.findById(feedbackId).orElseThrow(FeedbackNotFoundException::new);</span>
+<span class="fc" id="L134">    var user = loggedInUserService.getLoggedInUser();</span>
+<span class="fc" id="L135">    Feedback feedback =</span>
+<span class="fc" id="L136">        feedbackRepository.findById(feedbackId).orElseThrow(FeedbackNotFoundException::new);</span>
 
-<span class="fc bfc" id="L133" title="All 2 branches covered.">    return switch (userCategory) {</span>
-<span class="fc" id="L134">      case STUDENT -&gt; getStudentFeedbackDetails(user, feedback);</span>
-<span class="fc" id="L135">      case STAFF -&gt; getStaffFeedbackDetails(user, feedback);</span>
+<span class="fc bfc" id="L138" title="All 2 branches covered.">    return switch (userCategory) {</span>
+<span class="fc" id="L139">      case STUDENT -&gt; getStudentFeedbackDetails(user, feedback);</span>
+<span class="fc" id="L140">      case STAFF -&gt; getStaffFeedbackDetails(user, feedback);</span>
     };
   }
 
   private FeedbackData getStaffFeedbackDetails(User loggedInUser, Feedback feedback) {
-<span class="fc bfc" id="L140" title="All 2 branches covered.">    if (!loggedInUser.equals(feedback.getDeclaredActivity().getActivity().getAuthor().getUser())) {</span>
-<span class="fc" id="L141">      throw new UserNotAuthorizedException();</span>
+<span class="fc bfc" id="L145" title="All 2 branches covered.">    if (!loggedInUser.equals(feedback.getDeclaredActivity().getActivity().getAuthor().getUser())) {</span>
+<span class="fc" id="L146">      throw new UserNotAuthorizedException();</span>
     }
 
-<span class="fc bfc" id="L144" title="All 2 branches covered.">    if (feedback.getStatus() == EFeedbackStatus.NEW) {</span>
-<span class="fc" id="L145">      feedback.setStatus(EFeedbackStatus.IN_PROCESS);</span>
-<span class="fc" id="L146">      feedbackRepository.save(feedback);</span>
+<span class="fc bfc" id="L149" title="All 2 branches covered.">    if (feedback.getStatus() == EFeedbackStatus.NEW) {</span>
+<span class="fc" id="L150">      feedback.setStatus(EFeedbackStatus.IN_PROCESS);</span>
+<span class="fc" id="L151">      feedbackRepository.save(feedback);</span>
     }
 
-<span class="fc" id="L149">    return new FeedbackData(</span>
-<span class="fc" id="L150">        feedback.getId(),</span>
-<span class="fc" id="L151">        feedback.getCreatedAt(),</span>
-<span class="fc" id="L152">        feedback.getUpdatedAt(),</span>
-<span class="fc" id="L153">        feedback.getDeclaredActivity(),</span>
-<span class="fc" id="L154">        feedback.getReflexion().orElse(null),</span>
-<span class="fc" id="L155">        feedback.getFeedback().orElse(null),</span>
-<span class="fc" id="L156">        feedback.getStatus(),</span>
-<span class="fc" id="L157">        feedback.getIteration(),</span>
-<span class="fc" id="L158">        feedback.getAssociatedTraces(),</span>
-<span class="fc" id="L159">        feedback.getAssociatedDeclaredSkills(),</span>
-<span class="fc" id="L160">        feedback.getAttachments());</span>
+<span class="fc" id="L154">    return new FeedbackData(</span>
+<span class="fc" id="L155">        feedback.getId(),</span>
+<span class="fc" id="L156">        feedback.getCreatedAt(),</span>
+<span class="fc" id="L157">        feedback.getUpdatedAt(),</span>
+<span class="fc" id="L158">        feedback.getDeclaredActivity(),</span>
+<span class="fc" id="L159">        feedback.getReflexion().orElse(null),</span>
+<span class="fc" id="L160">        feedback.getFeedback().orElse(null),</span>
+<span class="fc" id="L161">        feedback.getStatus(),</span>
+<span class="fc" id="L162">        feedback.getIteration(),</span>
+<span class="fc" id="L163">        feedback.getAssociatedTraces(),</span>
+<span class="fc" id="L164">        feedback.getAssociatedDeclaredSkills(),</span>
+<span class="fc" id="L165">        feedback.getAttachments());</span>
   }
 
   @Override
   public FeedbackData getStudentFeedbackDetails(User loggedInUser, Feedback feedback) {
-<span class="fc bfc" id="L165" title="All 2 branches covered.">    if (!loggedInUser.equals(feedback.getDeclaredActivity().getStudent().getUser())) {</span>
-<span class="fc" id="L166">      throw new UserNotAuthorizedException();</span>
+<span class="fc bfc" id="L170" title="All 2 branches covered.">    if (!loggedInUser.equals(feedback.getDeclaredActivity().getStudent().getUser())) {</span>
+<span class="fc" id="L171">      throw new UserNotAuthorizedException();</span>
     }
 
-<span class="fc bfc" id="L169" title="All 2 branches covered.">    if (feedback.getStatus() == EFeedbackStatus.SUBMITTED) {</span>
-<span class="fc" id="L170">      feedback.setStatus(EFeedbackStatus.SEEN);</span>
-<span class="fc" id="L171">      feedbackRepository.save(feedback);</span>
+<span class="fc bfc" id="L174" title="All 2 branches covered.">    if (feedback.getStatus() == EFeedbackStatus.SUBMITTED) {</span>
+<span class="fc" id="L175">      feedback.setStatus(EFeedbackStatus.SEEN);</span>
+<span class="fc" id="L176">      feedbackRepository.save(feedback);</span>
     }
 
-<span class="fc bfc" id="L174" title="All 2 branches covered.">    boolean canBeViewed = feedback.getStatus() == EFeedbackStatus.SEEN;</span>
-<span class="fc bfc" id="L175" title="All 2 branches covered.">    String feedbackText = canBeViewed ? feedback.getFeedback().orElse(null) : null;</span>
-<span class="fc bfc" id="L176" title="All 2 branches covered.">    List&lt;File&gt; attachments = canBeViewed ? feedback.getAttachments() : List.of();</span>
-<span class="fc" id="L177">    return new FeedbackData(</span>
-<span class="fc" id="L178">        feedback.getId(),</span>
-<span class="fc" id="L179">        feedback.getCreatedAt(),</span>
-<span class="fc" id="L180">        feedback.getUpdatedAt(),</span>
-<span class="fc" id="L181">        feedback.getDeclaredActivity(),</span>
-<span class="fc" id="L182">        feedback.getReflexion().orElse(null),</span>
+<span class="fc bfc" id="L179" title="All 2 branches covered.">    boolean canBeViewed = feedback.getStatus() == EFeedbackStatus.SEEN;</span>
+<span class="fc bfc" id="L180" title="All 2 branches covered.">    String feedbackText = canBeViewed ? feedback.getFeedback().orElse(null) : null;</span>
+<span class="fc bfc" id="L181" title="All 2 branches covered.">    List&lt;File&gt; attachments = canBeViewed ? feedback.getAttachments() : List.of();</span>
+<span class="fc" id="L182">    return new FeedbackData(</span>
+<span class="fc" id="L183">        feedback.getId(),</span>
+<span class="fc" id="L184">        feedback.getCreatedAt(),</span>
+<span class="fc" id="L185">        feedback.getUpdatedAt(),</span>
+<span class="fc" id="L186">        feedback.getDeclaredActivity(),</span>
+<span class="fc" id="L187">        feedback.getReflexion().orElse(null),</span>
         feedbackText,
-<span class="fc" id="L184">        feedback.getStatus(),</span>
-<span class="fc" id="L185">        feedback.getIteration(),</span>
-<span class="fc" id="L186">        feedback.getAssociatedTraces(),</span>
-<span class="fc" id="L187">        feedback.getAssociatedDeclaredSkills(),</span>
+<span class="fc" id="L189">        feedback.getStatus(),</span>
+<span class="fc" id="L190">        feedback.getIteration(),</span>
+<span class="fc" id="L191">        feedback.getAssociatedTraces(),</span>
+<span class="fc" id="L192">        feedback.getAssociatedDeclaredSkills(),</span>
         attachments);
   }
 
   @Override
   public void updateFeedback(UUID feedbackId, String feedback) {
-<span class="fc" id="L193">    Feedback feedbackToUpdate =</span>
-<span class="fc" id="L194">        feedbackRepository.findById(feedbackId).orElseThrow(FeedbackNotFoundException::new);</span>
+<span class="fc" id="L198">    Feedback feedbackToUpdate =</span>
+<span class="fc" id="L199">        feedbackRepository.findById(feedbackId).orElseThrow(FeedbackNotFoundException::new);</span>
 
-<span class="fc" id="L196">    User loggedInUser = loggedInUserService.getLoggedInUser();</span>
-<span class="fc" id="L197">    Staff author = feedbackToUpdate.getDeclaredActivity().getActivity().getAuthor();</span>
+<span class="fc" id="L201">    User loggedInUser = loggedInUserService.getLoggedInUser();</span>
+<span class="fc" id="L202">    Staff author = feedbackToUpdate.getDeclaredActivity().getActivity().getAuthor();</span>
 
-<span class="fc bfc" id="L199" title="All 2 branches covered.">    if (!loggedInUser.equals(author.getUser())) {</span>
-<span class="fc" id="L200">      throw new UserNotAuthorizedException();</span>
+<span class="fc bfc" id="L204" title="All 2 branches covered.">    if (!loggedInUser.equals(author.getUser())) {</span>
+<span class="fc" id="L205">      throw new UserNotAuthorizedException();</span>
     }
 
-<span class="fc bfc" id="L203" title="All 2 branches covered.">    if (feedbackToUpdate.getStatus() == EFeedbackStatus.SEEN) {</span>
-<span class="fc" id="L204">      throw new FeedbackSeenException();</span>
+<span class="fc bfc" id="L208" title="All 2 branches covered.">    if (feedbackToUpdate.getStatus() == EFeedbackStatus.SEEN) {</span>
+<span class="fc" id="L209">      throw new FeedbackSeenException();</span>
     }
 
-<span class="fc" id="L207">    validateOptionalTextMaxLength(&quot;feedback&quot;, feedback, RICH_DESCRIPTION_LENGTH);</span>
+<span class="fc" id="L212">    validateOptionalTextMaxLength(&quot;feedback&quot;, feedback, RICH_DESCRIPTION_LENGTH);</span>
 
-<span class="fc" id="L209">    feedbackToUpdate.setFeedback(feedback);</span>
-<span class="fc" id="L210">    feedbackRepository.save(feedbackToUpdate);</span>
-<span class="fc" id="L211">  }</span>
+<span class="fc" id="L214">    feedbackToUpdate.setFeedback(feedback);</span>
+<span class="fc" id="L215">    feedbackRepository.save(feedbackToUpdate);</span>
+<span class="fc" id="L216">  }</span>
 
   @Override
   public PagedResult&lt;Feedback&gt; getStaffFeedbacks(
       List&lt;EFeedbackStatus&gt; statuses, UUID activityId, PageCriteria pageCriteria) {
-<span class="fc" id="L216">    var staff = loggedInUserService.getLoggedInStaff();</span>
+<span class="fc" id="L221">    var staff = loggedInUserService.getLoggedInStaff();</span>
     var statusArray =
-<span class="fc bfc" id="L218" title="All 2 branches covered.">        statuses == null ? new EFeedbackStatus[0] : statuses.toArray(new EFeedbackStatus[0]);</span>
-<span class="fc" id="L219">    return feedbackRepository.findByStaff(staff.getId(), activityId, pageCriteria, statusArray);</span>
+<span class="fc bfc" id="L223" title="All 2 branches covered.">        statuses == null ? new EFeedbackStatus[0] : statuses.toArray(new EFeedbackStatus[0]);</span>
+<span class="fc" id="L224">    return feedbackRepository.findByStaff(staff.getId(), activityId, pageCriteria, statusArray);</span>
   }
 
   @Override
   public List&lt;Feedback&gt; getFeedbacksByActivity(UUID activityId) {
-<span class="fc" id="L224">    var staff = loggedInUserService.getLoggedInStaff();</span>
+<span class="fc" id="L229">    var staff = loggedInUserService.getLoggedInStaff();</span>
 
-<span class="fc" id="L226">    return feedbackRepository.findLatestFeedbacksByStaffAndActivityForEachStudent(</span>
-<span class="fc" id="L227">        staff.getId(), activityId);</span>
+<span class="fc" id="L231">    return feedbackRepository.findLatestFeedbacksByStaffAndActivityForEachStudent(</span>
+<span class="fc" id="L232">        staff.getId(), activityId);</span>
   }
 
   @Override
   public List&lt;Feedback&gt; getFeedbackHistory(UUID declaredActivityId) {
-<span class="fc" id="L232">    Staff loggedInStaff = loggedInUserService.getLoggedInStaff();</span>
-<span class="fc" id="L233">    DeclaredActivity declaredActivity =</span>
+<span class="fc" id="L237">    Staff loggedInStaff = loggedInUserService.getLoggedInStaff();</span>
+<span class="fc" id="L238">    DeclaredActivity declaredActivity =</span>
         declaredActivityRepository
-<span class="fc" id="L235">            .findById(declaredActivityId)</span>
-<span class="fc" id="L236">            .orElseThrow(DeclaredActivityNotFoundException::new);</span>
+<span class="fc" id="L240">            .findById(declaredActivityId)</span>
+<span class="fc" id="L241">            .orElseThrow(DeclaredActivityNotFoundException::new);</span>
 
-<span class="fc bfc" id="L238" title="All 2 branches covered.">    if (!loggedInStaff.equals(declaredActivity.getActivity().getAuthor())) {</span>
-<span class="fc" id="L239">      throw new UserNotAuthorizedException();</span>
+<span class="fc bfc" id="L243" title="All 2 branches covered.">    if (!loggedInStaff.equals(declaredActivity.getActivity().getAuthor())) {</span>
+<span class="fc" id="L244">      throw new UserNotAuthorizedException();</span>
     }
-<span class="fc" id="L241">    return feedbackRepository.findAllByDeclaredActivityId(</span>
+<span class="fc" id="L246">    return feedbackRepository.findAllByDeclaredActivityId(</span>
         declaredActivityId, EFeedbackStatus.SUBMITTED, EFeedbackStatus.SEEN);
   }
 
   @Override
   public void submitFeedback(UUID feedbackId) {
-<span class="fc" id="L247">    Feedback feedback = fetchFeedbackAndCheckLoggedInStaffIsAuthor(feedbackId);</span>
+<span class="fc" id="L252">    Feedback feedback = fetchFeedbackAndCheckLoggedInStaffIsAuthor(feedbackId);</span>
 
-<span class="fc bfc" id="L249" title="All 2 branches covered.">    if (feedback.getStatus() == EFeedbackStatus.SUBMITTED</span>
-<span class="fc bfc" id="L250" title="All 2 branches covered.">        || feedback.getStatus() == EFeedbackStatus.SEEN) {</span>
-<span class="fc" id="L251">      throw new FeedbackSubmittedException();</span>
+<span class="fc bfc" id="L254" title="All 2 branches covered.">    if (feedback.getStatus() == EFeedbackStatus.SUBMITTED</span>
+<span class="fc bfc" id="L255" title="All 2 branches covered.">        || feedback.getStatus() == EFeedbackStatus.SEEN) {</span>
+<span class="fc" id="L256">      throw new FeedbackSubmittedException();</span>
     }
 
-<span class="fc" id="L254">    requireNotNull(&quot;feedback&quot;, feedback.getFeedback().orElse(null));</span>
+<span class="fc" id="L259">    requireNotNull(&quot;feedback&quot;, feedback.getFeedback().orElse(null));</span>
 
-<span class="fc" id="L256">    feedback.setStatus(EFeedbackStatus.SUBMITTED);</span>
-<span class="fc" id="L257">    feedbackRepository.save(feedback);</span>
-<span class="fc" id="L258">  }</span>
+<span class="fc" id="L261">    feedback.setStatus(EFeedbackStatus.SUBMITTED);</span>
+<span class="fc" id="L262">    feedbackRepository.save(feedback);</span>
+<span class="fc" id="L263">  }</span>
 
   @Override
   public File uploadAttachment(
       UUID feedbackId, String fileName, String mimeType, long size, byte[] content) {
-<span class="fc" id="L263">    Feedback feedback = fetchFeedbackAndCheckLoggedInStaffIsAuthor(feedbackId);</span>
+<span class="fc" id="L268">    Feedback feedback = fetchFeedbackAndCheckLoggedInStaffIsAuthor(feedbackId);</span>
 
-<span class="fc bfc" id="L265" title="All 2 branches covered.">    if (feedback.getStatus() == EFeedbackStatus.SEEN) {</span>
-<span class="fc" id="L266">      throw new FeedbackSeenException();</span>
+<span class="fc bfc" id="L270" title="All 2 branches covered.">    if (feedback.getStatus() == EFeedbackStatus.SEEN) {</span>
+<span class="fc" id="L271">      throw new FeedbackSeenException();</span>
     }
 
-<span class="fc" id="L269">    File file = fileResourceService.upload(fileName, mimeType, size, content, true);</span>
-<span class="fc" id="L270">    feedback.addAttachment(file);</span>
-<span class="fc" id="L271">    feedbackRepository.save(feedback);</span>
+<span class="fc" id="L274">    File file = fileResourceService.upload(fileName, mimeType, size, content, true);</span>
+<span class="fc" id="L275">    feedback.addAttachment(file);</span>
+<span class="fc" id="L276">    feedbackRepository.save(feedback);</span>
 
-<span class="fc" id="L273">    return file;</span>
+<span class="fc" id="L278">    return file;</span>
   }
 
   @Override
   public void deleteAttachment(UUID feedbackId, UUID attachmentId) {
-<span class="fc" id="L278">    Feedback feedback = fetchFeedbackAndCheckLoggedInStaffIsAuthor(feedbackId);</span>
+<span class="fc" id="L283">    Feedback feedback = fetchFeedbackAndCheckLoggedInStaffIsAuthor(feedbackId);</span>
 
-<span class="fc bfc" id="L280" title="All 2 branches covered.">    if (feedback.getStatus() == EFeedbackStatus.SEEN) {</span>
-<span class="fc" id="L281">      throw new FeedbackSeenException();</span>
+<span class="fc bfc" id="L285" title="All 2 branches covered.">    if (feedback.getStatus() == EFeedbackStatus.SEEN) {</span>
+<span class="fc" id="L286">      throw new FeedbackSeenException();</span>
     }
 
-<span class="fc" id="L284">    feedback.findAttachment(attachmentId).orElseThrow(FileNotFoundException::new);</span>
-<span class="fc" id="L285">    feedback.removeAttachment(attachmentId);</span>
-<span class="fc" id="L286">    feedbackRepository.save(feedback);</span>
-<span class="fc" id="L287">    fileResourceService.delete(attachmentId);</span>
-<span class="fc" id="L288">  }</span>
+<span class="fc" id="L289">    feedback.findAttachment(attachmentId).orElseThrow(FileNotFoundException::new);</span>
+<span class="fc" id="L290">    feedback.removeAttachment(attachmentId);</span>
+<span class="fc" id="L291">    feedbackRepository.save(feedback);</span>
+<span class="fc" id="L292">    fileResourceService.delete(attachmentId);</span>
+<span class="fc" id="L293">  }</span>
 
   @Override
   public FileDownload downloadAttachment(UUID feedbackId, UUID attachmentId) {
-<span class="fc" id="L292">    Feedback feedback =</span>
-<span class="fc" id="L293">        feedbackRepository.findById(feedbackId).orElseThrow(FeedbackNotFoundException::new);</span>
-<span class="fc" id="L294">    User loggedInUser = loggedInUserService.getLoggedInUser();</span>
+<span class="fc" id="L297">    Feedback feedback =</span>
+<span class="fc" id="L298">        feedbackRepository.findById(feedbackId).orElseThrow(FeedbackNotFoundException::new);</span>
+<span class="fc" id="L299">    User loggedInUser = loggedInUserService.getLoggedInUser();</span>
 
-<span class="fc" id="L296">    boolean isAuthor =</span>
-<span class="fc" id="L297">        loggedInUser.equals(feedback.getDeclaredActivity().getActivity().getAuthor().getUser());</span>
-<span class="fc" id="L298">    boolean isOwningStudent =</span>
-<span class="fc bfc" id="L299" title="All 2 branches covered.">        loggedInUser.equals(feedback.getDeclaredActivity().getStudent().getUser())</span>
-<span class="fc bfc" id="L300" title="All 2 branches covered.">            &amp;&amp; (feedback.getStatus() == EFeedbackStatus.SUBMITTED</span>
-<span class="fc bfc" id="L301" title="All 2 branches covered.">                || feedback.getStatus() == EFeedbackStatus.SEEN);</span>
+<span class="fc" id="L301">    boolean isAuthor =</span>
+<span class="fc" id="L302">        loggedInUser.equals(feedback.getDeclaredActivity().getActivity().getAuthor().getUser());</span>
+<span class="fc" id="L303">    boolean isOwningStudent =</span>
+<span class="fc bfc" id="L304" title="All 2 branches covered.">        loggedInUser.equals(feedback.getDeclaredActivity().getStudent().getUser())</span>
+<span class="fc bfc" id="L305" title="All 2 branches covered.">            &amp;&amp; (feedback.getStatus() == EFeedbackStatus.SUBMITTED</span>
+<span class="fc bfc" id="L306" title="All 2 branches covered.">                || feedback.getStatus() == EFeedbackStatus.SEEN);</span>
 
-<span class="fc bfc" id="L303" title="All 4 branches covered.">    if (!isAuthor &amp;&amp; !isOwningStudent) {</span>
-<span class="fc" id="L304">      throw new UserNotAuthorizedException();</span>
+<span class="fc bfc" id="L308" title="All 4 branches covered.">    if (!isAuthor &amp;&amp; !isOwningStudent) {</span>
+<span class="fc" id="L309">      throw new UserNotAuthorizedException();</span>
     }
 
-<span class="fc" id="L307">    feedback.findAttachment(attachmentId).orElseThrow(FileNotFoundException::new);</span>
+<span class="fc" id="L312">    feedback.findAttachment(attachmentId).orElseThrow(FileNotFoundException::new);</span>
 
-<span class="fc" id="L309">    return fileResourceService.download(attachmentId);</span>
+<span class="fc" id="L314">    return fileResourceService.download(attachmentId);</span>
   }
 
   private Feedback fetchFeedbackAndCheckLoggedInStaffIsAuthor(UUID feedbackId) {
-<span class="fc" id="L313">    Feedback feedback =</span>
-<span class="fc" id="L314">        feedbackRepository.findById(feedbackId).orElseThrow(FeedbackNotFoundException::new);</span>
+<span class="fc" id="L318">    Feedback feedback =</span>
+<span class="fc" id="L319">        feedbackRepository.findById(feedbackId).orElseThrow(FeedbackNotFoundException::new);</span>
 
-<span class="fc" id="L316">    Staff loggedInStaff = loggedInUserService.getLoggedInStaff();</span>
-<span class="fc" id="L317">    Staff author = feedback.getDeclaredActivity().getActivity().getAuthor();</span>
+<span class="fc" id="L321">    Staff loggedInStaff = loggedInUserService.getLoggedInStaff();</span>
+<span class="fc" id="L322">    Staff author = feedback.getDeclaredActivity().getActivity().getAuthor();</span>
 
-<span class="fc bfc" id="L319" title="All 2 branches covered.">    if (!loggedInStaff.equals(author)) {</span>
-<span class="fc" id="L320">      throw new UserNotAuthorizedException();</span>
+<span class="fc bfc" id="L324" title="All 2 branches covered.">    if (!loggedInStaff.equals(author)) {</span>
+<span class="fc" id="L325">      throw new UserNotAuthorizedException();</span>
     }
 
-<span class="fc" id="L323">    return feedback;</span>
+<span class="fc" id="L328">    return feedback;</span>
   }
 
   @Override
   public Set&lt;UUID&gt; findAttachmentIdsUsedByTraceSnapshots(
       List&lt;UUID&gt; declaredActivityIds, List&lt;UUID&gt; traceIds) {
-<span class="fc bfc" id="L329" title="All 4 branches covered.">    if (declaredActivityIds.isEmpty() || traceIds.isEmpty()) {</span>
-<span class="fc" id="L330">      return Set.of();</span>
+<span class="fc bfc" id="L334" title="All 4 branches covered.">    if (declaredActivityIds.isEmpty() || traceIds.isEmpty()) {</span>
+<span class="fc" id="L335">      return Set.of();</span>
     }
 
-<span class="fc" id="L333">    return feedbackRepository.findAttachmentIdsUsedByTraceSnapshots(declaredActivityIds, traceIds);</span>
+<span class="fc" id="L338">    return feedbackRepository.findAttachmentIdsUsedByTraceSnapshots(declaredActivityIds, traceIds);</span>
   }
 
   @Override
   public FeedbackDashboardData getFeedbackDashboard(UUID activityId) {
-<span class="fc" id="L338">    Staff staff = loggedInUserService.getLoggedInStaff();</span>
+<span class="fc" id="L343">    Staff staff = loggedInUserService.getLoggedInStaff();</span>
 
-<span class="fc bfc" id="L340" title="All 2 branches covered.">    var activity = activityId != null ? activityService.getActivityById(activityId) : null;</span>
-<span class="fc bfc" id="L341" title="All 2 branches covered.">    if (activity != null) {</span>
-<span class="fc bfc" id="L342" title="All 2 branches covered.">      if (!staff.equals(activity.getAuthor())) {</span>
-<span class="fc" id="L343">        throw new UserNotAuthorizedException();</span>
+<span class="fc bfc" id="L345" title="All 2 branches covered.">    var activity = activityId != null ? activityService.getActivityById(activityId) : null;</span>
+<span class="fc bfc" id="L346" title="All 2 branches covered.">    if (activity != null) {</span>
+<span class="fc bfc" id="L347" title="All 2 branches covered.">      if (!staff.equals(activity.getAuthor())) {</span>
+<span class="fc" id="L348">        throw new UserNotAuthorizedException();</span>
       }
     }
 
-<span class="fc" id="L347">    int newCount = feedbackRepository.countByStatus(staff, activity, EFeedbackStatus.NEW);</span>
-<span class="fc" id="L348">    int inProcessCount =</span>
-<span class="fc" id="L349">        feedbackRepository.countByStatus(staff, activity, EFeedbackStatus.IN_PROCESS);</span>
-<span class="fc" id="L350">    int submittedCount =</span>
-<span class="fc" id="L351">        feedbackRepository.countByStatus(staff, activity, EFeedbackStatus.SUBMITTED);</span>
-<span class="fc" id="L352">    int seenCount = feedbackRepository.countByStatus(staff, activity, EFeedbackStatus.SEEN);</span>
+<span class="fc" id="L352">    int newCount = feedbackRepository.countByStatus(staff, activity, EFeedbackStatus.NEW);</span>
+<span class="fc" id="L353">    int inProcessCount =</span>
+<span class="fc" id="L354">        feedbackRepository.countByStatus(staff, activity, EFeedbackStatus.IN_PROCESS);</span>
+<span class="fc" id="L355">    int submittedCount =</span>
+<span class="fc" id="L356">        feedbackRepository.countByStatus(staff, activity, EFeedbackStatus.SUBMITTED);</span>
+<span class="fc" id="L357">    int seenCount = feedbackRepository.countByStatus(staff, activity, EFeedbackStatus.SEEN);</span>
 
-<span class="fc" id="L354">    int pendingFeedbacks = newCount + inProcessCount;</span>
-<span class="fc" id="L355">    int processedFeedbacks = submittedCount + seenCount;</span>
-<span class="fc" id="L356">    int totalFeedbacks = processedFeedbacks + pendingFeedbacks;</span>
+<span class="fc" id="L359">    int pendingFeedbacks = newCount + inProcessCount;</span>
+<span class="fc" id="L360">    int processedFeedbacks = submittedCount + seenCount;</span>
+<span class="fc" id="L361">    int totalFeedbacks = processedFeedbacks + pendingFeedbacks;</span>
 
-<span class="fc" id="L358">    return new FeedbackDashboardData(</span>
+<span class="fc" id="L363">    return new FeedbackDashboardData(</span>
         newCount, pendingFeedbacks, processedFeedbacks, totalFeedbacks);
   }
+
+  @Override
+  public Feedback getLatestFeedback(UUID declaredActivityId) {
+<span class="fc" id="L369">    return feedbackRepository.findAllByDeclaredActivityId(declaredActivityId).getFirst();</span>
+  }
+
+  @Override
+  public void deletePendingFeedbacks(List&lt;UUID&gt; declaredActivityIds) {
+<span class="fc bfc" id="L374" title="All 2 branches covered.">    if (declaredActivityIds.isEmpty()) {</span>
+<span class="fc" id="L375">      return;</span>
+    }
+
+<span class="fc" id="L378">    List&lt;Feedback&gt; pendingFeedbacks =</span>
+<span class="fc" id="L379">        declaredActivityIds.stream()</span>
+<span class="fc" id="L380">            .flatMap(</span>
+                declaredActivityId -&gt;
+<span class="fc" id="L382">                    feedbackRepository</span>
+<span class="fc" id="L383">                        .findAllByDeclaredActivityId(</span>
+                            declaredActivityId, EFeedbackStatus.NEW, EFeedbackStatus.IN_PROCESS)
+<span class="fc" id="L385">                        .stream())</span>
+<span class="fc" id="L386">            .toList();</span>
+
+<span class="fc bfc" id="L388" title="All 2 branches covered.">    if (pendingFeedbacks.isEmpty()) {</span>
+<span class="fc" id="L389">      return;</span>
+    }
+
+<span class="fc" id="L392">    List&lt;UUID&gt; attachmentIds =</span>
+<span class="fc" id="L393">        pendingFeedbacks.stream()</span>
+<span class="fc" id="L394">            .flatMap(feedback -&gt; feedback.getAttachments().stream())</span>
+<span class="fc" id="L395">            .map(File::getId)</span>
+<span class="fc" id="L396">            .toList();</span>
+
+<span class="fc" id="L398">    feedbackRepository.removeAllFromDatabase(pendingFeedbacks);</span>
+<span class="fc" id="L399">    attachmentIds.forEach(fileResourceService::delete);</span>
+<span class="fc" id="L400">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
