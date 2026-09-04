@@ -85,12 +85,16 @@ public class DeclaredActivityDatabaseRepository
   }
 
   @Override
-  public int countByActivity(Activity activity) {
-    return jpaRepository.countByActivityId(activity.getId());
+  public int countEnrolledByActivity(Activity activity) {
+    return jpaRepository.countByActivityIdAndUnsubscribedAtIsNull(activity.getId());
   }
 
   @Override
-  public List<DeclaredActivity> findAllByActivity(Activity activity, FetchGraph fetchGraph) {
-    return findAll(DeclaredActivitySpecification.hasActivityId(activity.getId()), fetchGraph);
+  public List<DeclaredActivity> findAllEnrolledByActivity(
+      Activity activity, FetchGraph fetchGraph) {
+    return findAll(
+        DeclaredActivitySpecification.hasActivityId(activity.getId())
+            .and(DeclaredActivitySpecification.isNotUnsubscribed()),
+        fetchGraph);
   }
 }

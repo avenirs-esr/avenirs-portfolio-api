@@ -21,6 +21,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackDashboardData;
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackData;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.DeclaredActivityNotFoundException;
+import fr.avenirsesr.portfolio.student.activity.domain.exception.DeclaredActivityUnsubscribedException;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.FeedbackInProcessException;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.FeedbackMaximumIterationReachedException;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.FeedbackNotFoundException;
@@ -64,6 +65,10 @@ public class FeedbackServiceImpl implements FeedbackService {
     DeclaredActivity declaredActivity =
         declaredActivityService.fetchActivityAndCheckLoggedInStudentAuthorization(
             declaredActivityId);
+
+    if (declaredActivity.isUnsubscribed()) {
+      throw new DeclaredActivityUnsubscribedException();
+    }
 
     validateOptionalEnrichedTextMaxLength(
         "reflexion", declaredActivity.getReflection(), RICH_DESCRIPTION_LENGTH);
@@ -362,5 +367,35 @@ public class FeedbackServiceImpl implements FeedbackService {
   @Override
   public Feedback getLatestFeedback(UUID declaredActivityId) {
     return feedbackRepository.findAllByDeclaredActivityId(declaredActivityId).getFirst();
+  }
+
+  @Override
+  public void deletePendingFeedbacks(List<UUID> declaredActivityIds) {
+    if (declaredActivityIds.isEmpty()) {
+      return;
+    }
+
+    List<Feedback> pendingFeedbacks =
+        declaredActivityIds.stream()
+            .flatMap(
+                declaredActivityId ->
+                    feedbackRepository
+                        .findAllByDeclaredActivityId(
+                            declaredActivityId, EFeedbackStatus.NEW, EFeedbackStatus.IN_PROCESS)
+                        .stream())
+            .toList();
+
+    if (pendingFeedbacks.isEmpty()) {
+      return;
+    }
+
+    List<UUID> attachmentIds =
+        pendingFeedbacks.stream()
+            .flatMap(feedback -> feedback.getAttachments().stream())
+            .map(File::getId)
+            .toList();
+
+    feedbackRepository.removeAllFromDatabase(pendingFeedbacks);
+    attachmentIds.forEach(fileResourceService::delete);
   }
 }

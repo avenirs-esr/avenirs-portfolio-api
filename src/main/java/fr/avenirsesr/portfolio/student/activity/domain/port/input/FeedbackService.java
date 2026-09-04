@@ -45,4 +45,6 @@ public interface FeedbackService {
   FeedbackDashboardData getFeedbackDashboard(UUID activityId);
 
   Feedback getLatestFeedback(UUID declaredActivityId);
+
+  void deletePendingFeedbacks(List<UUID> declaredActivityIds);
 }
