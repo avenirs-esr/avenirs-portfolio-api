@@ -25,7 +25,6 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import java.security.Principal;
-import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -79,22 +78,10 @@ public class FeedbackController {
         pageCriteria.page(),
         pageCriteria.pageSize());
     var result = feedbackService.getStaffFeedbacks(statuses, activityId, pageCriteria);
-
-    var latestFeedbackIdsByDeclaredActivity = new HashMap<UUID, UUID>();
-    var content =
-        result.content().stream()
-            .map(
-                feedback -> {
-                  var declaredActivityId = feedback.getDeclaredActivity().getId();
-                  var latestFeedbackId =
-                      latestFeedbackIdsByDeclaredActivity.computeIfAbsent(
-                          declaredActivityId, id -> feedbackService.getLatestFeedback(id).getId());
-                  return feedbackStaffListItemDTOMapper.toDTO(feedback, latestFeedbackId);
-                })
-            .toList();
-
     return ResponseEntity.ok(
-        new PagedResponse<>(content, PageInfoDTO.fromDomain(result.pageInfo())));
+        new PagedResponse<>(
+            result.content().stream().map(feedbackStaffListItemDTOMapper::toDTO).toList(),
+            PageInfoDTO.fromDomain(result.pageInfo())));
   }
 
   @PreAuthorize("hasAuthority('feedback:history:read:contextual')")

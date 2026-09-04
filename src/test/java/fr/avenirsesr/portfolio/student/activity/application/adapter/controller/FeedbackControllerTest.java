@@ -29,7 +29,6 @@ import fr.avenirsesr.portfolio.student.activity.application.adapter.mapper.Feedb
 import fr.avenirsesr.portfolio.student.activity.application.adapter.mapper.StudentFeedbackItemListDTOMapper;
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackDashboardData;
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackData;
-import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.FeedbackService;
@@ -195,27 +194,12 @@ class FeedbackControllerTest {
   @Nested
   class GetStaffFeedbacks {
 
-    private Feedback feedbackWithLatestId(UUID declaredActivityId, UUID latestFeedbackId) {
-      Feedback feedback = mock(Feedback.class);
-      DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
-      when(feedback.getDeclaredActivity()).thenReturn(declaredActivity);
-      when(declaredActivity.getId()).thenReturn(declaredActivityId);
-
-      Feedback latestFeedback = mock(Feedback.class);
-      when(latestFeedback.getId()).thenReturn(latestFeedbackId);
-      when(feedbackService.getLatestFeedback(declaredActivityId)).thenReturn(latestFeedback);
-
-      return feedback;
-    }
-
     @Test
     void should_return_200_with_paged_result_when_no_filters() {
       BddLogger.given("A logged-in staff with two feedbacks and no filter applied");
 
-      UUID latestFeedbackId1 = UUID.randomUUID();
-      UUID latestFeedbackId2 = UUID.randomUUID();
-      Feedback feedback1 = feedbackWithLatestId(UUID.randomUUID(), latestFeedbackId1);
-      Feedback feedback2 = feedbackWithLatestId(UUID.randomUUID(), latestFeedbackId2);
+      Feedback feedback1 = mock(Feedback.class);
+      Feedback feedback2 = mock(Feedback.class);
       FeedbackStaffListItemDTO dto1 = mock(FeedbackStaffListItemDTO.class);
       FeedbackStaffListItemDTO dto2 = mock(FeedbackStaffListItemDTO.class);
 
@@ -223,8 +207,8 @@ class FeedbackControllerTest {
           new PagedResult<>(List.of(feedback1, feedback2), new PageInfo(0, 8, 2));
 
       when(feedbackService.getStaffFeedbacks(isNull(), isNull(), any())).thenReturn(pagedResult);
-      when(feedbackStaffListItemDTOMapper.toDTO(feedback1, latestFeedbackId1)).thenReturn(dto1);
-      when(feedbackStaffListItemDTOMapper.toDTO(feedback2, latestFeedbackId2)).thenReturn(dto2);
+      when(feedbackStaffListItemDTOMapper.toDTO(feedback1)).thenReturn(dto1);
+      when(feedbackStaffListItemDTOMapper.toDTO(feedback2)).thenReturn(dto2);
 
       BddLogger.when("getStaffFeedbacks is called without any filter");
       ResponseEntity<PagedResponse<FeedbackStaffListItemDTO>> response =
@@ -237,16 +221,15 @@ class FeedbackControllerTest {
       assertThat(response.getBody().page().totalElements()).isEqualTo(2);
 
       verify(feedbackService).getStaffFeedbacks(isNull(), isNull(), any());
-      verify(feedbackStaffListItemDTOMapper).toDTO(feedback1, latestFeedbackId1);
-      verify(feedbackStaffListItemDTOMapper).toDTO(feedback2, latestFeedbackId2);
+      verify(feedbackStaffListItemDTOMapper).toDTO(feedback1);
+      verify(feedbackStaffListItemDTOMapper).toDTO(feedback2);
     }
 
     @Test
     void should_forward_statuses_filter_to_service() {
       BddLogger.given("A logged-in staff requesting only IN_PROCESS feedbacks");
 
-      UUID latestFeedbackId = UUID.randomUUID();
-      Feedback feedback = feedbackWithLatestId(UUID.randomUUID(), latestFeedbackId);
+      Feedback feedback = mock(Feedback.class);
       FeedbackStaffListItemDTO dto = mock(FeedbackStaffListItemDTO.class);
 
       PagedResult<Feedback> pagedResult =
@@ -256,7 +239,7 @@ class FeedbackControllerTest {
 
       when(feedbackService.getStaffFeedbacks(eq(statuses), isNull(), any()))
           .thenReturn(pagedResult);
-      when(feedbackStaffListItemDTOMapper.toDTO(feedback, latestFeedbackId)).thenReturn(dto);
+      when(feedbackStaffListItemDTOMapper.toDTO(feedback)).thenReturn(dto);
 
       BddLogger.when("getStaffFeedbacks is called with status=IN_PROCESS");
       ResponseEntity<PagedResponse<FeedbackStaffListItemDTO>> response =
@@ -273,10 +256,8 @@ class FeedbackControllerTest {
     void should_forward_multiple_statuses_filter_to_service() {
       BddLogger.given("A logged-in staff requesting feedbacks with multiple statuses");
 
-      UUID latestFeedbackId1 = UUID.randomUUID();
-      UUID latestFeedbackId2 = UUID.randomUUID();
-      Feedback feedback1 = feedbackWithLatestId(UUID.randomUUID(), latestFeedbackId1);
-      Feedback feedback2 = feedbackWithLatestId(UUID.randomUUID(), latestFeedbackId2);
+      Feedback feedback1 = mock(Feedback.class);
+      Feedback feedback2 = mock(Feedback.class);
       FeedbackStaffListItemDTO dto1 = mock(FeedbackStaffListItemDTO.class);
       FeedbackStaffListItemDTO dto2 = mock(FeedbackStaffListItemDTO.class);
 
@@ -287,8 +268,8 @@ class FeedbackControllerTest {
 
       when(feedbackService.getStaffFeedbacks(eq(statuses), isNull(), any()))
           .thenReturn(pagedResult);
-      when(feedbackStaffListItemDTOMapper.toDTO(feedback1, latestFeedbackId1)).thenReturn(dto1);
-      when(feedbackStaffListItemDTOMapper.toDTO(feedback2, latestFeedbackId2)).thenReturn(dto2);
+      when(feedbackStaffListItemDTOMapper.toDTO(feedback1)).thenReturn(dto1);
+      when(feedbackStaffListItemDTOMapper.toDTO(feedback2)).thenReturn(dto2);
 
       BddLogger.when("getStaffFeedbacks is called with multiple statuses");
       ResponseEntity<PagedResponse<FeedbackStaffListItemDTO>> response =
@@ -308,8 +289,7 @@ class FeedbackControllerTest {
       BddLogger.given("A logged-in staff requesting feedbacks for a specific activity");
 
       UUID activityId = UUID.randomUUID();
-      UUID latestFeedbackId = UUID.randomUUID();
-      Feedback feedback = feedbackWithLatestId(UUID.randomUUID(), latestFeedbackId);
+      Feedback feedback = mock(Feedback.class);
       FeedbackStaffListItemDTO dto = mock(FeedbackStaffListItemDTO.class);
 
       PagedResult<Feedback> pagedResult =
@@ -317,7 +297,7 @@ class FeedbackControllerTest {
 
       when(feedbackService.getStaffFeedbacks(isNull(), eq(activityId), any()))
           .thenReturn(pagedResult);
-      when(feedbackStaffListItemDTOMapper.toDTO(feedback, latestFeedbackId)).thenReturn(dto);
+      when(feedbackStaffListItemDTOMapper.toDTO(feedback)).thenReturn(dto);
 
       BddLogger.when("getStaffFeedbacks is called with activityId");
       ResponseEntity<PagedResponse<FeedbackStaffListItemDTO>> response =

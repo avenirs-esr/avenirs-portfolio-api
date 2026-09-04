@@ -1513,44 +1513,6 @@ class FeedbackServiceImplTest {
   }
 
   @Nested
-  class GetLatestFeedback {
-    @Test
-    void should_return_the_first_feedback_returned_by_the_repository() {
-      BddLogger.given(
-          "A declared activity with several feedbacks, the repository already sorting them by"
-              + " createdAt descending");
-      UUID declaredActivityId = UUID.randomUUID();
-      Feedback latestFeedback = mock(Feedback.class);
-      Feedback olderFeedback = mock(Feedback.class);
-
-      when(feedbackRepository.findAllByDeclaredActivityId(declaredActivityId))
-          .thenReturn(List.of(latestFeedback, olderFeedback));
-
-      BddLogger.when("getLatestFeedback is called");
-      Feedback result = service.getLatestFeedback(declaredActivityId);
-
-      BddLogger.then("The first feedback of the repository result (the most recent) is returned");
-      assertThat(result).isEqualTo(latestFeedback);
-    }
-
-    @Test
-    void should_pass_the_declared_activity_id_to_the_repository() {
-      BddLogger.given("A declared activity ID");
-      UUID declaredActivityId = UUID.randomUUID();
-      Feedback feedback = mock(Feedback.class);
-
-      when(feedbackRepository.findAllByDeclaredActivityId(declaredActivityId))
-          .thenReturn(List.of(feedback));
-
-      BddLogger.when("getLatestFeedback is called");
-      service.getLatestFeedback(declaredActivityId);
-
-      BddLogger.then("The repository is called with the correct declaredActivityId");
-      verify(feedbackRepository).findAllByDeclaredActivityId(declaredActivityId);
-    }
-  }
-
-  @Nested
   class GetFeedbackDashboardData {
 
     @Test
