@@ -618,33 +618,38 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   }
 
   @Override
+  public int countUnsubscriptionsSince(Activity activity, Instant since) {
+<span class="fc" id="L622">    return declaredActivityRepository.countUnsubscribedByActivitySince(activity, since);</span>
+  }
+
+  @Override
   public List&lt;DeclaredActivity&gt; getEnrolledStudents(Activity activity) {
     var graph =
-<span class="fc" id="L623">        FetchGraph.init().add(&quot;student&quot;).fetch(&quot;user&quot;).root().add(&quot;activity&quot;).fetch(&quot;author&quot;);</span>
-<span class="fc" id="L624">    return declaredActivityRepository.findAllEnrolledByActivity(activity, graph);</span>
+<span class="fc" id="L628">        FetchGraph.init().add(&quot;student&quot;).fetch(&quot;user&quot;).root().add(&quot;activity&quot;).fetch(&quot;author&quot;);</span>
+<span class="fc" id="L629">    return declaredActivityRepository.findAllEnrolledByActivity(activity, graph);</span>
   }
 
   @Override
   public boolean isEnrolled(Activity activity, Student student) {
-<span class="fc" id="L629">    return declaredActivityRepository</span>
-<span class="fc" id="L630">        .findByActivity(student, activity)</span>
-<span class="fc bfc" id="L631" title="All 2 branches covered.">        .filter(declaredActivity -&gt; !declaredActivity.isUnsubscribed())</span>
-<span class="fc" id="L632">        .isPresent();</span>
+<span class="fc" id="L634">    return declaredActivityRepository</span>
+<span class="fc" id="L635">        .findByActivity(student, activity)</span>
+<span class="fc bfc" id="L636" title="All 2 branches covered.">        .filter(declaredActivity -&gt; !declaredActivity.isUnsubscribed())</span>
+<span class="fc" id="L637">        .isPresent();</span>
   }
 
   private EAssociationType getAssociationType(EAssociationContextType contextType) {
-<span class="pc bpc" id="L636" title="1 of 3 branches missed.">    return switch (contextType) {</span>
-<span class="fc" id="L637">      case TRACE -&gt; EAssociationType.DECLARED_ACTIVITY_TRACE;</span>
-<span class="fc" id="L638">      case DECLARED_SKILL -&gt; EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL;</span>
-<span class="nc" id="L639">      case DECLARED_ACTIVITY, DECLARED_EXPERIENCE -&gt; throw new UnsupportedOperationException();</span>
+<span class="pc bpc" id="L641" title="1 of 3 branches missed.">    return switch (contextType) {</span>
+<span class="fc" id="L642">      case TRACE -&gt; EAssociationType.DECLARED_ACTIVITY_TRACE;</span>
+<span class="fc" id="L643">      case DECLARED_SKILL -&gt; EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL;</span>
+<span class="nc" id="L644">      case DECLARED_ACTIVITY, DECLARED_EXPERIENCE -&gt; throw new UnsupportedOperationException();</span>
     };
   }
 
   private boolean isSubmittedOrFinished(
       DeclaredActivity declaredActivity, boolean hasActiveFeedback) {
-<span class="fc" id="L645">    EDeclaredActivityStatus status = getDeclaredActivityStatus(declaredActivity, hasActiveFeedback);</span>
+<span class="fc" id="L650">    EDeclaredActivityStatus status = getDeclaredActivityStatus(declaredActivity, hasActiveFeedback);</span>
 
-<span class="fc bfc" id="L647" title="All 4 branches covered.">    return status == EDeclaredActivityStatus.SUBMITTED</span>
+<span class="fc bfc" id="L652" title="All 4 branches covered.">    return status == EDeclaredActivityStatus.SUBMITTED</span>
         || status == EDeclaredActivityStatus.COMPLETED;
   }
 }
