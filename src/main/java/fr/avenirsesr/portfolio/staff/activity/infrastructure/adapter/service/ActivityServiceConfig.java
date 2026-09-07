@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityDraftRepository;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityRepository;
+import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityViewRepository;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.StaffActivityOverviewRepository;
 import fr.avenirsesr.portfolio.staff.activity.domain.service.ActivityServiceImpl;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
@@ -25,6 +26,7 @@ public class ActivityServiceConfig {
   private final NotificationService notificationService;
   private final FileResourceService fileResourceService;
   private final StudentRepository studentRepository;
+  private final ActivityViewRepository activityViewRepository;
 
   @Bean
   public ActivityService activityService() {
@@ -36,6 +38,7 @@ public class ActivityServiceConfig {
         staffActivityOverviewRepository,
         notificationService,
         fileResourceService,
-        studentRepository);
+        studentRepository,
+        activityViewRepository);
   }
 }

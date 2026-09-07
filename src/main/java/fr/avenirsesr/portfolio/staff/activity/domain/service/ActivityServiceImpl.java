@@ -20,6 +20,7 @@ import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageCons
 import fr.avenirsesr.portfolio.notification.domain.model.notification.ActivityUpdatedNotification;
 import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityDashboardData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityPresentationData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityStaffOverviewData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityWithStudentStatusData;
@@ -36,6 +37,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityUpdata
 import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityDraftRepository;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityRepository;
+import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityViewRepository;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.StaffActivityOverviewRepository;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
@@ -56,6 +58,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ActivityServiceImpl implements ActivityService {
 
   private static final Duration DURATION_FOR_LATEST = Duration.ofDays(90);
+  private static final Duration DURATION_FOR_RECENT_UNSUBSCRIPTIONS = Duration.ofDays(30);
   private static final EnumSet<EFileType> ALLOWED_DRAFT_FILE_TYPES =
       EnumSet.of(
           EFileType.PDF,
@@ -72,6 +75,7 @@ public class ActivityServiceImpl implements ActivityService {
   private final NotificationService notificationService;
   private final FileResourceService fileResourceService;
   private final StudentRepository studentRepository;
+  private final ActivityViewRepository activityViewRepository;
 
   @Override
   public Activity create(
@@ -308,12 +312,13 @@ public class ActivityServiceImpl implements ActivityService {
       case PUBLISHED, UNPUBLISHED -> {
         Activity activity =
             activityRepository.findById(id).orElseThrow(ActivityNotFoundException::new);
+        var declaredActivityId =
+            declaredActivityService.getByActivity(activity).map(DeclaredActivity::getId);
+        activityViewRepository.recordView(
+            activity.getId(), loggedInUserService.getLoggedInStudent().getId());
         yield ActivityPresentationDataMapper.toData(
             activity,
-            declaredActivityService
-                .getByActivity(activity)
-                .map(DeclaredActivity::getId)
-                .orElse(null),
+            declaredActivityId.orElse(null),
             FileDataMapper.mapFileData(
                 activity.getBanner(), FileStorageConstants.DEFAULT_COVER_FILE_URL));
       }
@@ -326,6 +331,22 @@ public class ActivityServiceImpl implements ActivityService {
                 draft.getBanner(), FileStorageConstants.DEFAULT_COVER_FILE_URL));
       }
     };
+  }
+
+  @Override
+  public ActivityDashboardData getActivityDashboard(UUID activityId) {
+    var staff = loggedInUserService.getLoggedInStaff();
+    var activity =
+        activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);
+    if (!activity.getAuthor().equals(staff)) {
+      throw new UserNotAuthorizedException();
+    }
+
+    return new ActivityDashboardData(
+        activityViewRepository.countUniqueViews(activityId),
+        declaredActivityService.countEnrolledStudents(activity),
+        declaredActivityService.countUnsubscriptionsSince(
+            activity, Instant.now().minus(DURATION_FOR_RECENT_UNSUBSCRIPTIONS)));
   }
 
   @Override

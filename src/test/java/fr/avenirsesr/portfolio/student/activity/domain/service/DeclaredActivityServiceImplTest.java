@@ -50,6 +50,7 @@ import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
@@ -1867,6 +1868,21 @@ class DeclaredActivityServiceImplTest {
 
     BddLogger.then("it should return zero");
     assertThat(count).isZero();
+  }
+
+  @Test
+  void countUnsubscriptionsSince_should_delegate_to_repository() {
+    BddLogger.given("an activity left by students since a given date");
+    Activity activity = ActivityFixture.create().toModel();
+    Instant since = Instant.now().minus(Duration.ofDays(30));
+    when(declaredActivityRepository.countUnsubscribedByActivitySince(activity, since))
+        .thenReturn(5);
+
+    BddLogger.when("counting the unsubscriptions since this date");
+    int count = service.countUnsubscriptionsSince(activity, since);
+
+    BddLogger.then("it should return the repository count");
+    assertThat(count).isEqualTo(5);
   }
 
   @Test

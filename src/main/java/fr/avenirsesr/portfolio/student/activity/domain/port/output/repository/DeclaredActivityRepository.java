@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.common.data.domain.port.output.repository.Generic
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -29,6 +30,8 @@ public interface DeclaredActivityRepository extends GenericRepositoryPort<Declar
   Optional<DeclaredActivity> findByActivity(Student student, Activity activity);
 
   int countEnrolledByActivity(Activity activity);
+
+  int countUnsubscribedByActivitySince(Activity activity, Instant since);
 
   List<DeclaredActivity> findAllEnrolledByActivity(Activity activity, FetchGraph fetchGraph);
 }

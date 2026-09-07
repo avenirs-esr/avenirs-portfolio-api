@@ -10,6 +10,7 @@ import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActi
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -76,6 +77,8 @@ public interface DeclaredActivityService {
   DeclaredActivity fetchActivityAndCheckLoggedInStudentAuthorization(UUID declaredActivityId);
 
   int countEnrolledStudents(Activity activity);
+
+  int countUnsubscriptionsSince(Activity activity, Instant since);
 
   List<DeclaredActivity> getEnrolledStudents(Activity activity);
 

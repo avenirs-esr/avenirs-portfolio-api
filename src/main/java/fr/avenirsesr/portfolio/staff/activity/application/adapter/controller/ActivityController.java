@@ -77,6 +77,23 @@ public class ActivityController {
     return ResponseEntity.ok(dto);
   }
 
+  @PreAuthorize("hasAuthority('activity:read:contextual')")
+  @GetMapping("/{activityId}/dashboard")
+  public ResponseEntity<ActivityDashboardDTO> getActivityDashboard(
+      Principal principal, @PathVariable UUID activityId) {
+    log.debug(
+        "Received request to get activity [{}] dashboard by user [{}]",
+        activityId,
+        principal.getName());
+
+    var dashboard = activityService.getActivityDashboard(activityId);
+    return ResponseEntity.ok(
+        new ActivityDashboardDTO(
+            dashboard.uniqueStudentViews(),
+            dashboard.enrolledStudents(),
+            dashboard.unsubscriptionsLast30Days()));
+  }
+
   @PreAuthorize("hasAuthority('activity:document:read:contextual')")
   @GetMapping("/{activityStatus}/{activityId}/content")
   public ResponseEntity<ActivityContentDTO> getActivityContent(

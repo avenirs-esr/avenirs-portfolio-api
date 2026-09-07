@@ -13,6 +13,7 @@ import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.model.Dec
 import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.specification.DeclaredActivitySpecification;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.repository.GenericUserJpaRepositoryAdapter;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -87,6 +88,12 @@ public class DeclaredActivityDatabaseRepository
   @Override
   public int countEnrolledByActivity(Activity activity) {
     return jpaRepository.countByActivityIdAndUnsubscribedAtIsNull(activity.getId());
+  }
+
+  @Override
+  public int countUnsubscribedByActivitySince(Activity activity, Instant since) {
+    return jpaRepository.countByActivityIdAndUnsubscribedAtGreaterThanEqual(
+        activity.getId(), since);
   }
 
   @Override
