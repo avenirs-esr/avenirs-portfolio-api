@@ -618,6 +618,11 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   }
 
   @Override
+  public int countUnsubscriptionsSince(Activity activity, Instant since) {
+    return declaredActivityRepository.countUnsubscribedByActivitySince(activity, since);
+  }
+
+  @Override
   public List<DeclaredActivity> getEnrolledStudents(Activity activity) {
     var graph =
         FetchGraph.init().add("student").fetch("user").root().add("activity").fetch("author");

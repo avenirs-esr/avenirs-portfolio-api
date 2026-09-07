@@ -19,6 +19,7 @@ import fr.avenirsesr.portfolio.notification.domain.model.notification.ActivityUp
 import fr.avenirsesr.portfolio.notification.domain.model.notification.parameters.ActivityModifiedParameters;
 import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityDashboardData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityPresentationData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityStaffOverviewData;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityDraftNotFoundException;
@@ -31,6 +32,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThemat
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityUpdatableField;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityDraftRepository;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityRepository;
+import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityViewRepository;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.StaffActivityOverviewRepository;
 import fr.avenirsesr.portfolio.staff.activity.domain.service.ActivityServiceImpl;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
@@ -57,6 +59,7 @@ class ActivityServiceImplTest {
   @Mock private StaffActivityOverviewRepository staffActivityOverviewRepository;
   @Mock private NotificationService notificationService;
   @Mock private FileResourceService fileResourceService;
+  @Mock private ActivityViewRepository activityViewRepository;
 
   @InjectMocks private ActivityServiceImpl activityService;
 
@@ -1483,10 +1486,12 @@ class ActivityServiceImplTest {
           UUID bannerId = UUID.randomUUID();
           Activity activity = mock(Activity.class);
           File banner = mock(File.class);
+          Student student = mock(Student.class);
 
           when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
           when(activity.getBanner()).thenReturn(Optional.of(banner));
           when(declaredActivityService.getByActivity(activity)).thenReturn(Optional.empty());
+          when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
           when(activity.getId()).thenReturn(activityId);
           when(activity.getTitle()).thenReturn("Activity");
           when(activity.getThematic()).thenReturn(EActivityThematic.EXPERIENCES);
@@ -1515,6 +1520,27 @@ class ActivityServiceImplTest {
         }
 
         @Test
+        void thenItShouldRecordTheConsultationOfTheLoggedInStudent() {
+          BddLogger.then("the consultation should be recorded once for the logged-in student");
+
+          UUID studentId = UUID.randomUUID();
+          Activity activity = mock(Activity.class);
+          Student student = mock(Student.class);
+
+          when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
+          when(activity.getId()).thenReturn(activityId);
+          when(activity.getBanner()).thenReturn(Optional.empty());
+          when(activity.getRecommendedCompletionContexts()).thenReturn(Optional.empty());
+          when(declaredActivityService.getByActivity(activity)).thenReturn(Optional.empty());
+          when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+          when(student.getId()).thenReturn(studentId);
+
+          activityService.getActivityPresentation(EActivityStatus.PUBLISHED, activityId);
+
+          verify(activityViewRepository).recordView(activityId, studentId);
+        }
+
+        @Test
         void thenItShouldThrowActivityNotFoundExceptionWhenActivityDoesNotExist() {
           BddLogger.then("the service should throw ActivityNotFoundException");
 
@@ -1525,7 +1551,89 @@ class ActivityServiceImplTest {
               () -> activityService.getActivityPresentation(EActivityStatus.PUBLISHED, activityId));
 
           verify(activityRepository).findById(activityId);
+          verify(activityViewRepository, never()).recordView(any(), any());
         }
+      }
+    }
+
+    @Nested
+    class WhenGettingActivityDashboard {
+
+      UUID activityId;
+      Staff author;
+      Activity activity;
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("getting the activity dashboard");
+        activityId = UUID.randomUUID();
+        author = mock(Staff.class);
+        activity = mock(Activity.class);
+      }
+
+      @Test
+      void thenItShouldReturnTheThreeKeyFiguresWhenTheStaffIsTheAuthor() {
+        BddLogger.then("the key figures of the activity should be returned");
+
+        when(loggedInUserService.getLoggedInStaff()).thenReturn(author);
+        when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
+        when(activity.getAuthor()).thenReturn(author);
+        when(activityViewRepository.countUniqueViews(activityId)).thenReturn(128);
+        when(declaredActivityService.countEnrolledStudents(activity)).thenReturn(42);
+        when(declaredActivityService.countUnsubscriptionsSince(eq(activity), any())).thenReturn(3);
+
+        ActivityDashboardData result = activityService.getActivityDashboard(activityId);
+
+        assertEquals(128, result.uniqueStudentViews());
+        assertEquals(42, result.enrolledStudents());
+        assertEquals(3, result.unsubscriptionsLast30Days());
+      }
+
+      @Test
+      void thenItShouldCountUnsubscriptionsOverTheLastThirtyDays() {
+        BddLogger.then("only the unsubscriptions of the last 30 days should be counted");
+
+        when(loggedInUserService.getLoggedInStaff()).thenReturn(author);
+        when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
+        when(activity.getAuthor()).thenReturn(author);
+
+        Instant beforeCall = Instant.now();
+        activityService.getActivityDashboard(activityId);
+
+        ArgumentCaptor<Instant> sinceCaptor = ArgumentCaptor.forClass(Instant.class);
+        verify(declaredActivityService)
+            .countUnsubscriptionsSince(eq(activity), sinceCaptor.capture());
+
+        Instant expectedSince = beforeCall.minus(Duration.ofDays(30));
+        assertFalse(sinceCaptor.getValue().isBefore(expectedSince));
+        assertTrue(sinceCaptor.getValue().isBefore(expectedSince.plusSeconds(60)));
+      }
+
+      @Test
+      void thenItShouldThrowUserNotAuthorizedExceptionWhenTheStaffIsNotTheAuthor() {
+        BddLogger.then("the service should throw UserNotAuthorizedException");
+
+        when(loggedInUserService.getLoggedInStaff()).thenReturn(mock(Staff.class));
+        when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
+        when(activity.getAuthor()).thenReturn(author);
+
+        assertThrows(
+            UserNotAuthorizedException.class,
+            () -> activityService.getActivityDashboard(activityId));
+
+        verify(activityViewRepository, never()).countUniqueViews(any());
+      }
+
+      @Test
+      void thenItShouldThrowActivityNotFoundExceptionWhenTheActivityDoesNotExist() {
+        BddLogger.then("the service should throw ActivityNotFoundException");
+
+        when(loggedInUserService.getLoggedInStaff()).thenReturn(author);
+        when(activityRepository.findById(activityId)).thenReturn(Optional.empty());
+
+        assertThrows(
+            ActivityNotFoundException.class,
+            () -> activityService.getActivityDashboard(activityId));
       }
     }
 

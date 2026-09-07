@@ -16,7 +16,9 @@ import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.Activi
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,6 +53,8 @@ class ActivityControllerIT extends ContainerConfigurationTest {
   private static final String STATUS_PRESENTATION_PATH =
       BASE_PATH + "/{activityStatus}/{activityId}/presentation";
   private static final String SUBSCRIBE_PATH = "/me/activity-progress/subscribe/{activityId}";
+  private static final String UNSUBSCRIBE_PATH = "/me/activity-progress/unsubscribe";
+  private static final String DASHBOARD_PATH = BASE_PATH + "/{activityId}/dashboard";
 
   @Autowired private WebTestClient webTestClient;
   @Autowired private ObjectMapper objectMapper;
@@ -382,6 +386,124 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             .uri(PRESENTATION_PATH, unknownId)
             .header("Accept-Language", ELanguage.FRENCH.getCode())
             .headers(ActivityControllerIT.this::addStudentHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isNotFound()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("ACTIVITY_NOT_FOUND");
+      }
+    }
+
+    @Nested
+    class WhenGettingActivityDashboard {
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("performing a GET on " + DASHBOARD_PATH);
+      }
+
+      @Test
+      void thenItShouldCountEachStudentOnlyOnceWhateverTheNumberOfConsultations() throws Exception {
+        BddLogger.and("given an activity published by the staff and consulted by two students");
+        UUID activityId = publishNewActivityAsStaff("Activité consultée pour le tableau de bord");
+
+        getPresentationAsStudent(activityId);
+        getPresentationAsStudent(activityId);
+        getPresentationAsSecondStudent(activityId);
+
+        BddLogger.then("it should return 200 with two unique student views");
+
+        webTestClient
+            .get()
+            .uri(DASHBOARD_PATH, activityId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.uniqueStudentViews")
+            .isEqualTo(2)
+            .jsonPath("$.enrolledStudents")
+            .isEqualTo(0)
+            .jsonPath("$.unsubscriptionsLast30Days")
+            .isEqualTo(0);
+      }
+
+      @Test
+      void thenItShouldCountTheEnrolledStudentsAndTheRecentUnsubscriptions() throws Exception {
+        BddLogger.and("given an activity published by the staff and subscribed by a student");
+        UUID activityId = publishNewActivityAsStaff("Activité suivie pour le tableau de bord");
+        subscribeStudentToActivity(activityId);
+
+        BddLogger.then("it should count the student as enrolled");
+
+        webTestClient
+            .get()
+            .uri(DASHBOARD_PATH, activityId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.enrolledStudents")
+            .isEqualTo(1)
+            .jsonPath("$.unsubscriptionsLast30Days")
+            .isEqualTo(0);
+
+        BddLogger.and("once the student unsubscribes");
+        unsubscribeStudentFromActivity(activityId);
+
+        BddLogger.then("it should count the unsubscription and drop the enrolled student");
+
+        webTestClient
+            .get()
+            .uri(DASHBOARD_PATH, activityId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.enrolledStudents")
+            .isEqualTo(0)
+            .jsonPath("$.unsubscriptionsLast30Days")
+            .isEqualTo(1);
+      }
+
+      @Test
+      void thenItShouldReturn403WhenTheStaffIsNotTheAuthor() throws Exception {
+        BddLogger.and("given an activity of the library the staff did not author");
+        UUID activityId = findActivityNotAuthoredByStaff();
+
+        BddLogger.then("it should return 403");
+
+        webTestClient
+            .get()
+            .uri(DASHBOARD_PATH, activityId)
+            .header("Accept-Language", ELanguage.FRENCH.getCode())
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isForbidden();
+      }
+
+      @Test
+      void thenItShouldReturn404WhenActivityNotFound() {
+        BddLogger.and("given a non-existent activity id");
+        UUID unknownId = UUID.randomUUID();
+
+        BddLogger.then("it should return 404 with ACTIVITY_NOT_FOUND error code");
+
+        webTestClient
+            .get()
+            .uri(DASHBOARD_PATH, unknownId)
+            .header("Accept-Language", ELanguage.FRENCH.getCode())
+            .headers(ActivityControllerIT.this::addStaffHeaders)
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus()
@@ -2146,6 +2268,105 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         .exchange()
         .expectStatus()
         .isCreated();
+  }
+
+  private Set<UUID> staffAuthoredActivityIds() throws Exception {
+    String body =
+        webTestClient
+            .get()
+            .uri(
+                uriBuilder ->
+                    uriBuilder.path(WORKING_SPACE_PATH).queryParam("pageSize", 100).build())
+            .headers(this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    Set<UUID> ids = new HashSet<>();
+    objectMapper
+        .readTree(body)
+        .get("data")
+        .forEach(activity -> ids.add(UUID.fromString(activity.get("activityId").asText())));
+    return ids;
+  }
+
+  private UUID findActivityNotAuthoredByStaff() throws Exception {
+    Set<UUID> authoredActivityIds = staffAuthoredActivityIds();
+
+    String body =
+        webTestClient
+            .get()
+            .uri(uriBuilder -> uriBuilder.path(LIBRARY_PATH).queryParam("pageSize", 100).build())
+            .headers(this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    for (JsonNode activity : objectMapper.readTree(body).get("data")) {
+      UUID activityId = UUID.fromString(activity.get("activityId").asText());
+      if (!authoredActivityIds.contains(activityId)) {
+        return activityId;
+      }
+    }
+    throw new IllegalStateException("Seeder returned no activity authored by another staff");
+  }
+
+  private void unsubscribeStudentFromActivity(UUID activityId) {
+    webTestClient
+        .method(org.springframework.http.HttpMethod.DELETE)
+        .uri(UNSUBSCRIBE_PATH)
+        .headers(this::addStudentHeaders)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(List.of(activityId))
+        .exchange()
+        .expectStatus()
+        .isOk();
+  }
+
+  private void getPresentationAsStudent(UUID activityId) {
+    webTestClient
+        .get()
+        .uri(PRESENTATION_PATH, activityId)
+        .headers(this::addStudentHeaders)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isOk();
+  }
+
+  private void getPresentationAsSecondStudent(UUID activityId) {
+    webTestClient
+        .get()
+        .uri(PRESENTATION_PATH, activityId)
+        .headers(this::addSecondStudentHeaders)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isOk();
+  }
+
+  private UUID publishNewActivityAsStaff(String title) throws Exception {
+    UUID draftId = createDraftAndGetId(title);
+    fillDraftWithSummaryAndDescription(draftId);
+
+    webTestClient
+        .post()
+        .uri(PUBLISH_PATH, draftId)
+        .headers(this::addStaffHeaders)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isOk();
+
+    return draftId;
   }
 
   private void addStudentHeaders(HttpHeaders headers) {
