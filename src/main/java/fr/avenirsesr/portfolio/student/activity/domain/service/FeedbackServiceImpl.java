@@ -401,4 +401,9 @@ public class FeedbackServiceImpl implements FeedbackService {
     feedbackRepository.removeAllFromDatabase(pendingFeedbacks);
     attachmentIds.forEach(fileResourceService::delete);
   }
+
+  @Override
+  public void deleteByDeclaredActivityId(DeclaredActivity declaredActivity) {
+    feedbackRepository.deleteByDeclaredActivityId(declaredActivity);
+  }
 }

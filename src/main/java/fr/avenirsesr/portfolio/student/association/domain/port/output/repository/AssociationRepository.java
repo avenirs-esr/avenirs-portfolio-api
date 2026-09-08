@@ -19,4 +19,6 @@ public interface AssociationRepository extends GenericRepositoryPort<Association
       List<UUID> ids, Class<?> clazz, List<EAssociationType> associationTypes);
 
   Map<UUID, Long> countAllOf(List<UUID> ids, Class<?> clazz, EAssociationType associationType);
+
+  List<Association> findByTypeTouching(EAssociationType type, UUID id);
 }

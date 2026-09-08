@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.data.domain.port.output.repository.GenericRepositoryPort;
 import fr.avenirsesr.portfolio.notification.domain.model.Notification;
+import fr.avenirsesr.portfolio.notification.domain.model.enums.ENotificationType;
 import java.util.UUID;
 
 public interface NotificationRepository extends GenericRepositoryPort<Notification> {
@@ -12,4 +13,6 @@ public interface NotificationRepository extends GenericRepositoryPort<Notificati
       UUID userId, EUserCategory userCategory, PageCriteria pageCriteria);
 
   long countUnreadByUserAndCategory(UUID userId, EUserCategory userCategory);
+
+  void deleteByTypeAndElementId(ENotificationType type, UUID elementId);
 }

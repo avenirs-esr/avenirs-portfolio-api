@@ -20,4 +20,6 @@ public interface AssociationService {
   void deleteAllByIds(List<UUID> ids);
 
   void deleteAllOf(List<UUID> ids, Class<?> clazz);
+
+  void deleteAssociationsOf(Class<?> subjectClass, UUID subjectId);
 }

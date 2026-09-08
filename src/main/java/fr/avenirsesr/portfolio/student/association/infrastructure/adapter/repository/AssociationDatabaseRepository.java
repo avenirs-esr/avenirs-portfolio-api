@@ -100,6 +100,13 @@ public class AssociationDatabaseRepository
   }
 
   @Override
+  public List<Association> findByTypeTouching(EAssociationType type, UUID id) {
+    return jpaRepository.findByTypeTouching(type, id).stream()
+        .map(AssociationMapper.INSTANCE::toDomain)
+        .toList();
+  }
+
+  @Override
   public List<Association> findAllOf(
       UUID id, Class<?> clazz, List<EAssociationType> associationTypes) {
     Specification<AssociationEntity> specification = null;
