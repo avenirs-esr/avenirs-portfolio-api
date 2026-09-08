@@ -805,17 +805,17 @@ public class TraceServiceImpl implements TraceService {
   @Override
   public File uploadAttachment(
       UUID traceId, String fileName, String mimeType, long size, byte[] content) {
-<span class="nc" id="L808">    var loggedInStudent = loggedInUserService.getLoggedInStudent();</span>
-<span class="nc" id="L809">    var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);</span>
-<span class="nc" id="L810">    checkIfStudentIsAuthorizedOnTrace(loggedInStudent, trace);</span>
-<span class="nc bnc" id="L811" title="All 2 branches missed.">    if (trace.getLink().isPresent()) {</span>
+<span class="fc" id="L808">    var loggedInStudent = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L809">    var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);</span>
+<span class="fc" id="L810">    checkIfStudentIsAuthorizedOnTrace(loggedInStudent, trace);</span>
+<span class="pc bpc" id="L811" title="1 of 2 branches missed.">    if (trace.getLink().isPresent()) {</span>
 <span class="nc" id="L812">      throw new InvalidTraceTypeException();</span>
     }
 
-<span class="nc" id="L815">    var file = fileResourceService.upload(fileName, mimeType, size, content, true);</span>
-<span class="nc" id="L816">    trace.setAttachment(file);</span>
-<span class="nc" id="L817">    traceRepository.save(trace);</span>
-<span class="nc" id="L818">    return file;</span>
+<span class="fc" id="L815">    var file = fileResourceService.upload(fileName, mimeType, size, content, true);</span>
+<span class="fc" id="L816">    trace.setAttachment(file);</span>
+<span class="fc" id="L817">    traceRepository.save(trace);</span>
+<span class="fc" id="L818">    return file;</span>
   }
 
   @Override
