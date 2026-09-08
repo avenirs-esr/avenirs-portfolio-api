@@ -178,6 +178,7 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
 
     checkDeclaredExperienceDataValidity(
         title,
+        experienceType,
         organization,
         activitySector,
         location,
@@ -242,6 +243,7 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
     }
     checkDeclaredExperienceDataValidity(
         title,
+        experienceType,
         organization,
         activitySector,
         location,
@@ -274,6 +276,7 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
 
   private void checkDeclaredExperienceDataValidity(
       String title,
+      EExperienceType experienceType,
       String organization,
       String activitySector,
       String location,
@@ -285,6 +288,7 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
       LocalDate startDate,
       LocalDate endDate) {
     requireNotBlankAndMaxLength("title", title, TITLE_LENGTH);
+    requireNotNull("experienceType", experienceType);
     requireNotBlankAndMaxLength("organization", organization, ORGANIZATION_LENGTH);
     validateOptionalTextMaxLength("activitySector", activitySector, ACTIVITY_SECTOR_LENGTH);
     validateOptionalTextMaxLength("location", location, LOCATION_LENGTH);

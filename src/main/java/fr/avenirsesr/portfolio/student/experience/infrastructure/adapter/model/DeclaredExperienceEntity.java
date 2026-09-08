@@ -37,7 +37,7 @@ public class DeclaredExperienceEntity extends PeriodEntity<LocalDate> {
   private String title;
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "experience_type")
+  @Column(name = "experience_type", nullable = false)
   private EExperienceType experienceType;
 
   @Column(nullable = false)
