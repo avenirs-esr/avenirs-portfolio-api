@@ -115,4 +115,16 @@ public class TraceDatabaseRepository extends GenericUserJpaRepositoryAdapter<Tra
 
     return findAll(specification);
   }
+
+  @Override
+  public List<Trace> findAll(Student student, TraceFilter filter) {
+    Specification<TraceEntity> specification = hasStudent(student);
+
+    var filterSpecification = new TraceFilterSpecificationBuilder().build(filter.toMap());
+    if (filterSpecification.isPresent()) {
+      specification = specification.and(filterSpecification.get());
+    }
+
+    return findAll(specification);
+  }
 }

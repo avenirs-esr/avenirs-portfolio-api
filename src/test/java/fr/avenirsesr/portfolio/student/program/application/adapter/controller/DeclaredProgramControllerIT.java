@@ -11,7 +11,6 @@ import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
 import fr.avenirsesr.portfolio.student.program.application.adapter.dto.DeclaredProgramRequestDTO;
 import fr.avenirsesr.portfolio.student.program.domain.model.enums.EProgramStatus;
-import fr.avenirsesr.portfolio.student.program.infrastructure.adapter.repository.DeclaredProgramJpaRepository;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,8 +28,6 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 class DeclaredProgramControllerIT extends ContainerConfigurationTest {
 
   private static final String BASE_PATH = "/me/declared/programs";
-
-  @Autowired private DeclaredProgramJpaRepository declaredProgramJpaRepository;
 
   @Autowired private WebTestClient webTestClient;
 
@@ -133,7 +130,7 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
       void shouldReturn404WhenUserNotFound() {
         BddLogger.given("the " + BASE_PATH + " POST endpoint");
         BddLogger.when("performing a POST with an unknown user");
-        BddLogger.then("it should return a 404 USER_NOT_FOUND");
+        BddLogger.then("it should return a 404 EXTERNAL_USER_NOT_FOUND");
 
         DeclaredProgramRequestDTO body =
             new DeclaredProgramRequestDTO(
@@ -156,12 +153,10 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
             .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, unknownUserSignature)
             .exchange()
             .expectStatus()
-            .isUnauthorized()
+            .isNotFound()
             .expectBody()
             .jsonPath("$.code")
-            .isEqualTo("USER_NOT_AUTHORIZED")
-            .jsonPath("$.message")
-            .isEqualTo("User not authorized");
+            .isEqualTo("EXTERNAL_USER_NOT_FOUND");
       }
 
       @Test
@@ -880,7 +875,7 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
       void shouldReturn404WhenUserNotFound() {
         BddLogger.given("the " + BASE_PATH + "/{declaredProgramId} PUT endpoint");
         BddLogger.when("performing a PUT with an unknown user");
-        BddLogger.then("it should return 404 USER_NOT_FOUND");
+        BddLogger.then("it should return 404 EXTERNAL_USER_NOT_FOUND");
 
         String id =
             createDeclaredProgramAndReturnId(
@@ -917,10 +912,10 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
             .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, unknownUserSignature)
             .exchange()
             .expectStatus()
-            .isUnauthorized()
+            .isNotFound()
             .expectBody()
             .jsonPath("$.code")
-            .isEqualTo("USER_NOT_AUTHORIZED");
+            .isEqualTo("EXTERNAL_USER_NOT_FOUND");
       }
     }
 
@@ -1040,7 +1035,7 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
       void shouldReturn404WhenUserNotFound() {
         BddLogger.given("the " + BASE_PATH + " DELETE endpoint");
         BddLogger.when("performing a DELETE with an unknown user");
-        BddLogger.then("it should return 404 USER_NOT_FOUND");
+        BddLogger.then("it should return 404 EXTERNAL_USER_NOT_FOUND");
 
         webTestClient
             .method(HttpMethod.DELETE)
@@ -1052,10 +1047,10 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
             .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, unknownUserSignature)
             .exchange()
             .expectStatus()
-            .isUnauthorized()
+            .isNotFound()
             .expectBody()
             .jsonPath("$.code")
-            .isEqualTo("USER_NOT_AUTHORIZED");
+            .isEqualTo("EXTERNAL_USER_NOT_FOUND");
       }
 
       @Test

@@ -24,5 +24,7 @@ public interface TraceRepository extends GenericRepositoryPort<Trace> {
 
   List<Trace> findAll(Student student, boolean isAssociated);
 
+  List<Trace> findAll(Student student, TraceFilter filter);
+
   Map<Trace, Boolean> isAssociated(List<Trace> traces);
 }
