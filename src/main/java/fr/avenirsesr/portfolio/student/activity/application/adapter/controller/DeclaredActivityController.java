@@ -120,6 +120,13 @@ public class DeclaredActivityController {
     return ResponseEntity.ok("Declared activities successfully unsubscribed");
   }
 
+  @DeleteMapping("/{declaredActivityId}/content")
+  public ResponseEntity<String> deleteActivityContent(@PathVariable UUID declaredActivityId){
+    declaredActivityService.deleteContentActivity(declaredActivityId);
+
+    return ResponseEntity.ok("Activity content successfully deleted");
+  }
+
   @PreAuthorize("hasAuthority('declared-activity:update:own')")
   @PutMapping("/finish/{declaredActivityId}")
   public ResponseEntity<Void> finish(
