@@ -78,4 +78,9 @@ public class AssociationServiceImpl implements AssociationService {
         ids.stream().flatMap(id -> getAllOf(id, clazz, associationTypes).stream()).toList();
     deleteAllByIds(associations.stream().map(Association::getId).toList());
   }
+
+  @Override
+  public int deleteAllByEndpontId(UUID id) {
+    return associationRepository.deleteAllByEndpontId(id);
+  }
 }

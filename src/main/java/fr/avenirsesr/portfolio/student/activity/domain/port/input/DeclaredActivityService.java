@@ -83,4 +83,6 @@ public interface DeclaredActivityService {
   List<DeclaredActivity> getEnrolledStudents(Activity activity);
 
   boolean isEnrolled(Activity activity, Student student);
+
+  void deleteContentActivity(UUID declaredActivityId);
 }

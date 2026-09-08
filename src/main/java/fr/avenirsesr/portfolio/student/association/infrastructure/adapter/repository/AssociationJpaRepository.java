@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -37,4 +38,8 @@ public interface AssociationJpaRepository
 
     Long getTotal();
   }
+  @Modifying
+  @Query("delete from AssociationEntity a where a.id1 = :id or a.id2 = :id")
+  int deleteAllByEndpontId(@Param("id") UUID id);
+
 }

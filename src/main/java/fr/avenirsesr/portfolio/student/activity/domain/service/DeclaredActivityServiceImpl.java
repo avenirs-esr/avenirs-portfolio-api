@@ -24,6 +24,7 @@ import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivi
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.FeedbackService;
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.FeedbackRepository;
+import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.mapper.DeclaredActivityMapper;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.exception.MaximumAssociationReachedException;
@@ -635,6 +636,28 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
         .findByActivity(student, activity)
         .filter(declaredActivity -> !declaredActivity.isUnsubscribed())
         .isPresent();
+  }
+
+  @Override
+  public void deleteContentActivity(UUID declaredActivityId) {
+
+    Student student = loggedInUserService.getLoggedInStudent();
+     UUID currentStudentId = student.getId();
+    DeclaredActivity  declaredActivity = declaredActivityRepository.findByIdAndStudentId(declaredActivityId,currentStudentId)
+            .map(DeclaredActivityMapper.INSTANCE::toDomain)
+             .orElseThrow(() ->  new DeclaredActivityNotFoundException(
+                                     "DeclaredActivity not found with id: " + declaredActivityId));
+
+    if (declaredActivity.isUnsubscribed()) {
+      throw new DeclaredActivityUnsubscribedException();
+    }
+   // Suppression les lignes de LIEN jamais les traces/skills/experiences pointés.
+    associationService.deleteAllByEndpontId(declaredActivityId);
+
+    feedbackService.deleteByDeclaredActivityId(declaredActivityId);
+
+    declaredActivityRepository.deleteByIdAndStudentId(declaredActivityId,currentStudentId);
+
   }
 
   private EAssociationType getAssociationType(EAssociationContextType contextType) {

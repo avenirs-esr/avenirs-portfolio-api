@@ -4,6 +4,8 @@ import fr.avenirsesr.portfolio.common.data.domain.port.output.repository.Generic
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationData;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
+import org.springframework.data.repository.query.Param;
+
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -19,4 +21,6 @@ public interface AssociationRepository extends GenericRepositoryPort<Association
       List<UUID> ids, Class<?> clazz, List<EAssociationType> associationTypes);
 
   Map<UUID, Long> countAllOf(List<UUID> ids, Class<?> clazz, EAssociationType associationType);
+
+  int deleteAllByEndpontId(UUID id);
 }

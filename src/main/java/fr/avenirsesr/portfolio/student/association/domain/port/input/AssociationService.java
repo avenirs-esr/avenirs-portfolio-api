@@ -3,6 +3,8 @@ package fr.avenirsesr.portfolio.student.association.domain.port.input;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationData;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
+import org.springframework.data.repository.query.Param;
+
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -20,4 +22,5 @@ public interface AssociationService {
   void deleteAllByIds(List<UUID> ids);
 
   void deleteAllOf(List<UUID> ids, Class<?> clazz);
+  int deleteAllByEndpontId(UUID id);
 }

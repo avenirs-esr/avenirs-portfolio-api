@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -37,4 +38,7 @@ public interface FeedbackJpaRepository
   Set<UUID> findAttachmentIdsUsedByTraceSnapshots(
       @Param("declaredActivityIds") List<UUID> declaredActivityIds,
       @Param("traceIds") List<UUID> traceIds);
+  @Modifying
+  @Query("delete from FeedbackEntity f where f.declaredActivity.id = :declaredActivityId")
+  int deleteByDeclaredActivityId(@Param("declaredActivityId") UUID declaredActivityId);
 }

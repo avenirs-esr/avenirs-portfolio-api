@@ -104,4 +104,14 @@ public class DeclaredActivityDatabaseRepository
             .and(DeclaredActivitySpecification.isNotUnsubscribed()),
         fetchGraph);
   }
+
+  @Override
+  public Optional<DeclaredActivityEntity> findByIdAndStudentId(UUID id, UUID studentId) {
+    return jpaRepository.findByIdAndStudentId(id,studentId);
+  }
+
+  @Override
+  public int deleteByIdAndStudentId(UUID id, UUID studentId) {
+    return jpaRepository.deleteByIdAndStudentId(id,studentId);
+  }
 }
