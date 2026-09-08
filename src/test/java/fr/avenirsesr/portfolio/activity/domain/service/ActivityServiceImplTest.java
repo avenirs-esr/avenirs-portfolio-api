@@ -1560,24 +1560,23 @@ class ActivityServiceImplTest {
     class WhenGettingActivityDashboard {
 
       UUID activityId;
-      Staff author;
+      Staff staff;
       Activity activity;
 
       @BeforeEach
       void setupWhen() {
         BddLogger.when("getting the activity dashboard");
         activityId = UUID.randomUUID();
-        author = mock(Staff.class);
+        staff = mock(Staff.class);
         activity = mock(Activity.class);
       }
 
       @Test
-      void thenItShouldReturnTheThreeKeyFiguresWhenTheStaffIsTheAuthor() {
+      void thenItShouldReturnTheThreeKeyFigures() {
         BddLogger.then("the key figures of the activity should be returned");
 
-        when(loggedInUserService.getLoggedInStaff()).thenReturn(author);
+        when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
         when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
-        when(activity.getAuthor()).thenReturn(author);
         when(activityViewRepository.countUniqueViews(activityId)).thenReturn(128);
         when(declaredActivityService.countEnrolledStudents(activity)).thenReturn(42);
         when(declaredActivityService.countUnsubscriptionsSince(eq(activity), any())).thenReturn(3);
@@ -1593,9 +1592,8 @@ class ActivityServiceImplTest {
       void thenItShouldCountUnsubscriptionsOverTheLastThirtyDays() {
         BddLogger.then("only the unsubscriptions of the last 30 days should be counted");
 
-        when(loggedInUserService.getLoggedInStaff()).thenReturn(author);
+        when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
         when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
-        when(activity.getAuthor()).thenReturn(author);
 
         Instant beforeCall = Instant.now();
         activityService.getActivityDashboard(activityId);
@@ -1610,25 +1608,24 @@ class ActivityServiceImplTest {
       }
 
       @Test
-      void thenItShouldThrowUserNotAuthorizedExceptionWhenTheStaffIsNotTheAuthor() {
-        BddLogger.then("the service should throw UserNotAuthorizedException");
+      void thenItShouldReturnTheKeyFiguresWhenTheStaffIsNotTheAuthor() {
+        BddLogger.then("the key figures should be returned to any logged in staff");
 
-        when(loggedInUserService.getLoggedInStaff()).thenReturn(mock(Staff.class));
+        when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
         when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
-        when(activity.getAuthor()).thenReturn(author);
+        when(activity.getAuthor()).thenReturn(mock(Staff.class));
+        when(activityViewRepository.countUniqueViews(activityId)).thenReturn(7);
 
-        assertThrows(
-            UserNotAuthorizedException.class,
-            () -> activityService.getActivityDashboard(activityId));
+        ActivityDashboardData result = activityService.getActivityDashboard(activityId);
 
-        verify(activityViewRepository, never()).countUniqueViews(any());
+        assertEquals(7, result.uniqueStudentViews());
       }
 
       @Test
       void thenItShouldThrowActivityNotFoundExceptionWhenTheActivityDoesNotExist() {
         BddLogger.then("the service should throw ActivityNotFoundException");
 
-        when(loggedInUserService.getLoggedInStaff()).thenReturn(author);
+        when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
         when(activityRepository.findById(activityId)).thenReturn(Optional.empty());
 
         assertThrows(
