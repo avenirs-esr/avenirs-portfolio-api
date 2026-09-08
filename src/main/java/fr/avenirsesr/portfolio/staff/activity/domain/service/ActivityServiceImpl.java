@@ -59,7 +59,7 @@ public class ActivityServiceImpl implements ActivityService {
 
   private static final Duration DURATION_FOR_LATEST = Duration.ofDays(90);
   private static final Duration DURATION_FOR_RECENT_UNSUBSCRIPTIONS = Duration.ofDays(30);
-  private static final EnumSet<EFileType> ALLOWED_DRAFT_FILE_TYPES =
+  private static final Set<EFileType> ALLOWED_DRAFT_FILE_TYPES =
       EnumSet.of(
           EFileType.PDF,
           EFileType.DOC,

@@ -39,6 +39,9 @@ public class StudentEntity extends AvenirsBaseEntity {
   @Column(name = "has_unseen_notification", nullable = false)
   private boolean hasUnseenNotification;
 
+  // The initializer is what the JPA/Lombok no-arg constructor relies on; PMD only sees the
+  // all-args constructor overwriting it.
+  @SuppressWarnings("PMD.UnusedAssignment")
   @Convert(converter = SelfKnowledgeCategoryListJsonConverter.class)
   @Column(name = "self_knowledge_categories", columnDefinition = "TEXT")
   private List<ESelfKnowledgeCategory> selfKnowledgeCategories = new ArrayList<>();

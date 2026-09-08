@@ -50,7 +50,7 @@ public class NotificationServiceImpl implements NotificationService {
       switch (savedNotification.getUserCategory()) {
         case STAFF -> staffIds.add(userId);
         case STUDENT -> studentIds.add(userId);
-        case null -> {
+        case null, default -> {
           staffIds.add(userId);
           studentIds.add(userId);
         }
@@ -81,7 +81,7 @@ public class NotificationServiceImpl implements NotificationService {
     switch (userCategory) {
       case STAFF -> setStaffUnseenNotification(List.of(userId), false);
       case STUDENT -> setStudentUnseenNotification(List.of(userId), false);
-      default -> throw new IllegalArgumentException("Invalid user category");
+      case null, default -> throw new IllegalArgumentException("Invalid user category");
     }
 
     return notificationRepository.findByUserAndCategory(userId, userCategory, pageCriteria);

@@ -103,7 +103,7 @@ public class StaffActivityOverviewQueryRepository implements StaffActivityOvervi
             """;
       }
 
-      case null -> {
+      case null, default -> {
         unionSql =
             """
             SELECT *

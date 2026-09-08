@@ -60,7 +60,9 @@ public class S3FileStorageService implements FileStorageService {
       return object.asByteArray();
     } catch (NoSuchKeyException e) {
       log.error("No object found for key {}", locator);
-      throw new FileNotFoundException();
+      FileNotFoundException notFound = new FileNotFoundException();
+      notFound.initCause(e);
+      throw notFound;
     } catch (S3Exception e) {
       throw new FileStorageException("Failed to read object with key " + locator, e);
     }
