@@ -475,11 +475,11 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       }
 
       @Test
-      void thenItShouldReturn403WhenTheStaffIsNotTheAuthor() throws Exception {
+      void thenItShouldReturnTheDashboardWhenTheStaffIsNotTheAuthor() throws Exception {
         BddLogger.and("given an activity of the library the staff did not author");
         UUID activityId = findActivityNotAuthoredByStaff();
 
-        BddLogger.then("it should return 403");
+        BddLogger.then("it should return 200 with the key figures");
 
         webTestClient
             .get()
@@ -489,7 +489,14 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus()
-            .isForbidden();
+            .isOk()
+            .expectBody()
+            .jsonPath("$.uniqueStudentViews")
+            .exists()
+            .jsonPath("$.enrolledStudents")
+            .exists()
+            .jsonPath("$.unsubscriptionsLast30Days")
+            .exists();
       }
 
       @Test

@@ -335,12 +335,9 @@ public class ActivityServiceImpl implements ActivityService {
 
   @Override
   public ActivityDashboardData getActivityDashboard(UUID activityId) {
-    var staff = loggedInUserService.getLoggedInStaff();
+    loggedInUserService.getLoggedInStaff();
     var activity =
         activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);
-    if (!activity.getAuthor().equals(staff)) {
-      throw new UserNotAuthorizedException();
-    }
 
     return new ActivityDashboardData(
         activityViewRepository.countUniqueViews(activityId),
