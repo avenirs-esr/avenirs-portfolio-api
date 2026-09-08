@@ -40,6 +40,6 @@ public interface AssociationJpaRepository
   }
   @Modifying
   @Query("delete from AssociationEntity a where a.id1 = :id or a.id2 = :id")
-  int deleteAllByEndpontId(@Param("id") UUID id);
+  int deleteAllByEndpointId(@Param("id") UUID id);
 
 }

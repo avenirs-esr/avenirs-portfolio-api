@@ -652,12 +652,20 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
       throw new DeclaredActivityUnsubscribedException();
     }
    // Suppression les lignes de LIEN jamais les traces/skills/experiences pointés.
-    associationService.deleteAllByEndpontId(declaredActivityId);
+    int deletedAssociations = associationService.deleteAllByEndpointId(declaredActivityId);
+    log.debug("{} association supprimée pour la declaredActivity {}",
+            deletedAssociations, declaredActivityId);
 
-    feedbackService.deleteByDeclaredActivityId(declaredActivityId);
+    int deletedFeedbacks = feedbackService.deleteByDeclaredActivityId(declaredActivityId);
+    log.debug("{} feedback supprimé pour la declaredActivity {}",
+            deletedFeedbacks, declaredActivityId);
 
-    declaredActivityRepository.deleteByIdAndStudentId(declaredActivityId,currentStudentId);
+    int deletedActivities = declaredActivityRepository.deleteByIdAndStudentId(declaredActivityId, currentStudentId);
+    log.debug("declaredActivity {} supprimée pour l'étudiant {} (lignes affectées : {})",
+            declaredActivityId, currentStudentId, deletedActivities);
 
+    log.info("Contenu supprimé pour la declaredActivity {} (étudiant {}) : {} association(s), {} feedback(s), {} activité déclarée",
+            declaredActivityId, currentStudentId, deletedAssociations, deletedFeedbacks, deletedActivities);
   }
 
   private EAssociationType getAssociationType(EAssociationContextType contextType) {

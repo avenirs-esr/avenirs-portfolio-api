@@ -100,8 +100,8 @@ public class AssociationDatabaseRepository
   }
 
   @Override
-  public int deleteAllByEndpontId(UUID id) {
-    return jpaRepository.deleteAllByEndpontId(id);
+  public int deleteAllByEndpointId(UUID id) {
+    return jpaRepository.deleteAllByEndpointId(id);
   }
 
   @Override

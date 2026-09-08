@@ -80,7 +80,7 @@ public class AssociationServiceImpl implements AssociationService {
   }
 
   @Override
-  public int deleteAllByEndpontId(UUID id) {
-    return associationRepository.deleteAllByEndpontId(id);
+  public int deleteAllByEndpointId(UUID id) {
+    return associationRepository.deleteAllByEndpointId(id);
   }
 }

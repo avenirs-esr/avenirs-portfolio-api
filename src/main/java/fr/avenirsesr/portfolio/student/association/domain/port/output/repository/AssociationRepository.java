@@ -22,5 +22,5 @@ public interface AssociationRepository extends GenericRepositoryPort<Association
 
   Map<UUID, Long> countAllOf(List<UUID> ids, Class<?> clazz, EAssociationType associationType);
 
-  int deleteAllByEndpontId(UUID id);
+  int deleteAllByEndpointId(UUID id);
 }
