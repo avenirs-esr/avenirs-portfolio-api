@@ -8,12 +8,15 @@ import fr.avenirsesr.portfolio.shared.application.adapter.Utils;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
 import java.util.Collections;
+import java.util.List;
+import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -77,7 +80,9 @@ public class UserControllerIT extends ContainerConfigurationTest {
           .jsonPath("$.roles")
           .isArray()
           .jsonPath("$.roles")
-          .value(Matchers.hasItem("ROLE_STUDENT"));
+          .value(
+              new ParameterizedTypeReference<List<String>>() {},
+              roles -> MatcherAssert.assertThat(roles, Matchers.hasItem("ROLE_STUDENT")));
     }
 
     @Test
