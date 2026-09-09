@@ -173,10 +173,10 @@ public class UserControllerIT extends ContainerConfigurationTest {
         .header("X-Context-Signature", unknownSignature)
         .exchange()
         .expectStatus()
-        .isUnauthorized()
+        .isNotFound()
         .expectBody()
         .jsonPath("$.code")
-        .isEqualTo("USER_NOT_AUTHORIZED");
+        .isEqualTo("EXTERNAL_USER_NOT_FOUND");
   }
 
   @Test
@@ -343,7 +343,7 @@ public class UserControllerIT extends ContainerConfigurationTest {
     void shouldReturnUnauthorizedForUnknownUserOnQuickLinks() {
       BddLogger.given("the /me/STUDENT/quick-links endpoint");
       BddLogger.when("performing a GET with an unknown user");
-      BddLogger.then("it should return 401");
+      BddLogger.then("it should return 404");
 
       webTestClient
           .get()
@@ -352,10 +352,10 @@ public class UserControllerIT extends ContainerConfigurationTest {
           .header("X-Context-Signature", unknownSignature)
           .exchange()
           .expectStatus()
-          .isUnauthorized()
+          .isNotFound()
           .expectBody()
           .jsonPath("$.code")
-          .isEqualTo("USER_NOT_AUTHORIZED");
+          .isEqualTo("EXTERNAL_USER_NOT_FOUND");
     }
   }
 
@@ -408,7 +408,7 @@ public class UserControllerIT extends ContainerConfigurationTest {
       String payloadJson = loadJson("user/mock-update-notification-preferences.json");
 
       BddLogger.when("performing a PATCH with an unknown user");
-      BddLogger.then("it should return 401");
+      BddLogger.then("it should return 404");
 
       webTestClient
           .patch()
@@ -419,10 +419,10 @@ public class UserControllerIT extends ContainerConfigurationTest {
           .bodyValue(payloadJson)
           .exchange()
           .expectStatus()
-          .isUnauthorized()
+          .isNotFound()
           .expectBody()
           .jsonPath("$.code")
-          .isEqualTo("USER_NOT_AUTHORIZED");
+          .isEqualTo("EXTERNAL_USER_NOT_FOUND");
     }
   }
 
