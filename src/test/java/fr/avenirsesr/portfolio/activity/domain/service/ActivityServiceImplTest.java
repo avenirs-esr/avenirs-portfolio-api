@@ -1517,6 +1517,42 @@ class ActivityServiceImplTest {
           assertTrue(result.banner().id().isPresent());
           assertEquals(bannerId, result.banner().id().get());
           assertEquals("filename.png", result.banner().name().get());
+          assertTrue(result.subscribedDeclaredActivity().isEmpty());
+          assertTrue(result.subscribedDeclaredActivityStatus().isEmpty());
+        }
+
+        @Test
+        void thenItShouldIncludeTheDeclaredActivityAndItsStatusWhenStudentHasOne() {
+          BddLogger.then(
+              "the declared activity id and its status should be returned when the student has a"
+                  + " declared activity");
+
+          UUID declaredActivityId = UUID.randomUUID();
+          Activity activity = mock(Activity.class);
+          File banner = mock(File.class);
+          Student student = mock(Student.class);
+          DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
+
+          when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
+          when(activity.getBanner()).thenReturn(Optional.of(banner));
+          when(declaredActivityService.getByActivity(activity))
+              .thenReturn(Optional.of(declaredActivity));
+          when(declaredActivity.getId()).thenReturn(declaredActivityId);
+          when(declaredActivityService.getDeclaredActivityStatus(declaredActivity))
+              .thenReturn(EDeclaredActivityStatus.UNSUBSCRIBED);
+          when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+          when(activity.getId()).thenReturn(activityId);
+          when(activity.getRecommendedCompletionContexts()).thenReturn(Optional.empty());
+
+          ActivityPresentationData result =
+              activityService.getActivityPresentation(EActivityStatus.PUBLISHED, activityId);
+
+          assertTrue(result.subscribedDeclaredActivity().isPresent());
+          assertEquals(declaredActivityId, result.subscribedDeclaredActivity().get());
+          assertTrue(result.subscribedDeclaredActivityStatus().isPresent());
+          assertEquals(
+              EDeclaredActivityStatus.UNSUBSCRIBED,
+              result.subscribedDeclaredActivityStatus().get());
         }
 
         @Test
