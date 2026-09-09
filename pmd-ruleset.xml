@@ -10,6 +10,15 @@
     <rule ref="category/java/bestpractices.xml">
         <exclude name="GuardLogStatement"/>
         <exclude name="ImplicitFunctionalInterface"/>
+        <!--
+          These two contradict each other on an enum switch that also handles null:
+          NonExhaustiveSwitch does not accept a bare `case null` as total and asks for a
+          `default`, while ExhaustiveSwitchHasDefault rejects that `default` as redundant.
+          The only form satisfying both, `case null, default ->`, cannot be parsed by the
+          google-java-format version the lint pipeline runs, so the formatter rejects it.
+        -->
+        <exclude name="NonExhaustiveSwitch"/>
+        <exclude name="ExhaustiveSwitchHasDefault"/>
     </rule>
 
 </ruleset>

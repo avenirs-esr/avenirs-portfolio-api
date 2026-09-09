@@ -96,7 +96,7 @@ public class UserServiceImpl implements UserService {
     switch (userCategory) {
       case STUDENT -> studentService.updateProfile(user, bio);
       case STAFF -> staffService.updateProfile(user, bio);
-      case null, default -> throw new UserNotAuthorizedException();
+      default -> throw new UserNotAuthorizedException();
     }
   }
 
