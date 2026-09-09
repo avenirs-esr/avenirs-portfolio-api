@@ -24,32 +24,31 @@ public class TraceKitDownloadAdapter implements KitDownloadPort {
   @Override
   public List&lt;KitMediaEntry&gt; getMedia() {
     // Requires the same authorization as the TraceController::downloadAttachment endpoint, to keep
-    // access consistent. Having permission to download the kit's media content does not necessarily
-    // mean that all visible media content is downloadable.
-<span class="fc bfc" id="L29" title="All 2 branches covered.">    if (!hasRequiredAuthority(&quot;trace:list:own&quot;)) {</span>
-<span class="fc" id="L30">      return List.of();</span>
+    // access consistent.
+<span class="fc bfc" id="L28" title="All 2 branches covered.">    if (!hasRequiredAuthority(&quot;trace:list:own&quot;)) {</span>
+<span class="fc" id="L29">      return List.of();</span>
     }
 
     // TODO: Remove the explicit `Student` relationship and switch to a role and/or permission check
     // (see #2473)
-<span class="fc" id="L35">    Student student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L36">    TraceFilter filter = new TraceFilter(null, null, null, true);</span>
-<span class="fc" id="L37">    List&lt;Trace&gt; traces = traceRepository.findAll(student, filter);</span>
-<span class="fc" id="L38">    return traces.stream().flatMap(this::toEntry).toList();</span>
+<span class="fc" id="L34">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L35">    TraceFilter filter = new TraceFilter(null, null, null, true);</span>
+<span class="fc" id="L36">    List&lt;Trace&gt; traces = traceRepository.findAll(student, filter);</span>
+<span class="fc" id="L37">    return traces.stream().flatMap(this::toEntry).toList();</span>
   }
 
   // TODO: Create generic helpers to check the permissions/roles of the currently logged-in user
   // (see #2473)
   private boolean hasRequiredAuthority(String authority) {
-<span class="fc" id="L44">    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();</span>
-<span class="fc bfc" id="L45" title="All 2 branches covered.">    return authentication != null</span>
-<span class="fc" id="L46">        &amp;&amp; authentication.getAuthorities().stream()</span>
-<span class="fc bfc" id="L47" title="All 2 branches covered.">            .anyMatch(grantedAuthority -&gt; grantedAuthority.getAuthority().equals(authority));</span>
+<span class="fc" id="L43">    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();</span>
+<span class="fc bfc" id="L44" title="All 2 branches covered.">    return authentication != null</span>
+<span class="fc" id="L45">        &amp;&amp; authentication.getAuthorities().stream()</span>
+<span class="fc bfc" id="L46" title="All 2 branches covered.">            .anyMatch(grantedAuthority -&gt; grantedAuthority.getAuthority().equals(authority));</span>
   }
 
   private Stream&lt;KitMediaEntry&gt; toEntry(Trace trace) {
-<span class="fc" id="L51">    Stream&lt;File&gt; attachment = trace.getAttachment().stream();</span>
-<span class="fc" id="L52">    return attachment.map(file -&gt; new KitMediaEntry(file, List.of(&quot;traces&quot;, trace.getTitle())));</span>
+<span class="fc" id="L50">    Stream&lt;File&gt; attachment = trace.getAttachment().stream();</span>
+<span class="fc" id="L51">    return attachment.map(file -&gt; new KitMediaEntry(file, List.of(&quot;traces&quot;, trace.getTitle())));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

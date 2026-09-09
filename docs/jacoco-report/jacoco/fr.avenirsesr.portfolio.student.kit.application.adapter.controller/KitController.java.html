@@ -24,16 +24,11 @@ public class KitController {
   @GetMapping(value = &quot;/download-media&quot;, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   public ResponseEntity&lt;StreamingResponseBody&gt; downloadMedia(Principal principal) {
 <span class="fc" id="L26">    log.debug(&quot;Received request to download kit media by user [{}]&quot;, principal.getName());</span>
-    // The controller returns via StreamingResponseBody, which dispatches the actual write onto a
-    // different thread. RequestContext/SecurityContext survive that hop only because
-    // RequestContextInterceptor and RequestAttributeSecurityContextRepository carry them across,
-    // swapping this back to a buffered response removes that requirement, but so would any change
-    // to those two pieces silently breaking this endpoint.
-<span class="fc" id="L32">    StreamingResponseBody body = kitService::downloadMedia;</span>
-<span class="fc" id="L33">    return ResponseEntity.ok()</span>
-<span class="fc" id="L34">        .contentType(MediaType.APPLICATION_OCTET_STREAM)</span>
-<span class="fc" id="L35">        .header(HttpHeaders.CONTENT_DISPOSITION, &quot;attachment; filename=\&quot;kit.zip\&quot;&quot;)</span>
-<span class="fc" id="L36">        .body(body);</span>
+<span class="fc" id="L27">    StreamingResponseBody body = kitService::downloadMedia;</span>
+<span class="fc" id="L28">    return ResponseEntity.ok()</span>
+<span class="fc" id="L29">        .contentType(MediaType.APPLICATION_OCTET_STREAM)</span>
+<span class="fc" id="L30">        .header(HttpHeaders.CONTENT_DISPOSITION, &quot;attachment; filename=\&quot;kit.zip\&quot;&quot;)</span>
+<span class="fc" id="L31">        .body(body);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

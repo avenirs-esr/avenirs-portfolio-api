@@ -26,7 +26,7 @@ public class KitServiceImpl implements KitService {
   private final List&lt;KitDownloadPort&gt; kitDownloadPorts;
 
   @Override
-  public void downloadMedia(OutputStream out) throws BusinessException, IOException {
+  public void downloadMedia(OutputStream out) throws BusinessException {
 <span class="fc" id="L30">    List&lt;KitMediaEntry&gt; valorizedMedia =</span>
 <span class="fc" id="L31">        kitDownloadPorts.stream().flatMap(port -&gt; port.getMedia().stream()).toList();</span>
 
@@ -46,61 +46,61 @@ public class KitServiceImpl implements KitService {
 <span class="fc" id="L46">        zos.write(fileStorageService.get(entry.file().getUri()));</span>
 <span class="fc" id="L47">        zos.closeEntry();</span>
 <span class="fc" id="L48">      }</span>
-      // Once an entry has been written to the stream, response headers are already committed: a
-      // failure here can no longer be turned into a clean HTTP error for the client, only logged.
-      // The client may see a 200 with a truncated zip.
-<span class="fc" id="L52">    } catch (IOException e) {</span>
-<span class="fc" id="L53">      log.error(&quot;Failed to write kit zip&quot;, e);</span>
-<span class="fc" id="L54">      throw new KitDownloadMediaFailed();</span>
-<span class="fc" id="L55">    }</span>
-<span class="fc" id="L56">  }</span>
+<span class="fc" id="L49">    } catch (IOException e) {</span>
+<span class="fc" id="L50">      log.error(&quot;Failed to write kit zip&quot;, e);</span>
+<span class="fc" id="L51">      throw new KitDownloadMediaFailed();</span>
+<span class="fc" id="L52">    }</span>
+<span class="fc" id="L53">  }</span>
 
   private String resolveFolder(List&lt;String&gt; path, Map&lt;String, Set&lt;String&gt;&gt; usedNames) {
-<span class="pc bpc" id="L59" title="2 of 4 branches missed.">    if (path == null || path.isEmpty()) {</span>
-<span class="nc" id="L60">      return &quot;&quot;;</span>
+<span class="pc bpc" id="L56" title="2 of 4 branches missed.">    if (path == null || path.isEmpty()) {</span>
+<span class="nc" id="L57">      return &quot;&quot;;</span>
     }
 
-    // Only the leaf segment is deduplicated. Parent segments (e.g. &quot;traces&quot;) are shared on purpose
-    // and must never be suffixed themselves, or every entry under them would get its own numbered
-    // copy of the parent folder.
-<span class="fc" id="L66">    List&lt;String&gt; parents = path.subList(0, path.size() - 1);</span>
-<span class="fc" id="L67">    String parentPrefix = parents.stream().map(this::sanitize).collect(Collectors.joining(&quot;/&quot;));</span>
+<span class="fc" id="L60">    List&lt;String&gt; parents = path.subList(0, path.size() - 1);</span>
+<span class="fc" id="L61">    String parentPrefix = parents.stream().map(this::sanitize).collect(Collectors.joining(&quot;/&quot;));</span>
 
-<span class="fc" id="L69">    String leaf = sanitize(path.get(path.size() - 1));</span>
-<span class="fc" id="L70">    Set&lt;String&gt; siblings = usedNames.computeIfAbsent(parentPrefix, k -&gt; new HashSet&lt;&gt;());</span>
-<span class="fc" id="L71">    String uniqueLeaf = uniqueFolderName(leaf, siblings);</span>
+<span class="fc" id="L63">    String leaf = sanitize(path.get(path.size() - 1));</span>
+<span class="fc" id="L64">    Set&lt;String&gt; siblings = usedNames.computeIfAbsent(parentPrefix, k -&gt; new HashSet&lt;&gt;());</span>
+<span class="fc" id="L65">    String uniqueLeaf = uniqueFolderName(leaf, siblings);</span>
 
-<span class="pc bpc" id="L73" title="1 of 2 branches missed.">    return parentPrefix.isEmpty() ? uniqueLeaf : parentPrefix + &quot;/&quot; + uniqueLeaf;</span>
+<span class="pc bpc" id="L67" title="1 of 2 branches missed.">    return parentPrefix.isEmpty() ? uniqueLeaf : parentPrefix + &quot;/&quot; + uniqueLeaf;</span>
   }
 
   private String uniqueFolderName(String name, Set&lt;String&gt; usedNames) {
-<span class="fc bfc" id="L77" title="All 2 branches covered.">    if (usedNames.add(name)) {</span>
-<span class="fc" id="L78">      return name;</span>
+<span class="fc bfc" id="L71" title="All 2 branches covered.">    if (usedNames.add(name)) {</span>
+<span class="fc" id="L72">      return name;</span>
     }
+
     String candidate;
-<span class="fc" id="L81">    int i = 1;</span>
+<span class="fc" id="L76">    int i = 1;</span>
     do {
-<span class="fc" id="L83">      candidate = &quot;%s (%d)&quot;.formatted(name, i++);</span>
-<span class="pc bpc" id="L84" title="1 of 2 branches missed.">    } while (!usedNames.add(candidate));</span>
-<span class="fc" id="L85">    return candidate;</span>
+<span class="fc" id="L78">      candidate = &quot;%s (%d)&quot;.formatted(name, i++);</span>
+<span class="pc bpc" id="L79" title="1 of 2 branches missed.">    } while (!usedNames.add(candidate));</span>
+
+<span class="fc" id="L81">    return candidate;</span>
   }
 
   private String uniqueFileName(String name, Set&lt;String&gt; usedNames) {
-<span class="pc bpc" id="L89" title="1 of 2 branches missed.">    if (usedNames.add(name)) {</span>
-<span class="fc" id="L90">      return name;</span>
+<span class="pc bpc" id="L85" title="1 of 2 branches missed.">    if (usedNames.add(name)) {</span>
+<span class="fc" id="L86">      return name;</span>
     }
-<span class="nc" id="L92">    String base = name;</span>
-<span class="nc" id="L93">    String ext = &quot;&quot;;</span>
-<span class="nc" id="L94">    int dot = name.lastIndexOf('.');</span>
-<span class="nc bnc" id="L95" title="All 2 branches missed.">    if (dot &gt; 0) {</span>
-<span class="nc" id="L96">      base = name.substring(0, dot);</span>
-<span class="nc" id="L97">      ext = name.substring(dot);</span>
+
+<span class="nc" id="L89">    String base = name;</span>
+<span class="nc" id="L90">    String ext = &quot;&quot;;</span>
+<span class="nc" id="L91">    int dot = name.lastIndexOf('.');</span>
+
+<span class="nc bnc" id="L93" title="All 2 branches missed.">    if (dot &gt; 0) {</span>
+<span class="nc" id="L94">      base = name.substring(0, dot);</span>
+<span class="nc" id="L95">      ext = name.substring(dot);</span>
     }
+
     String candidate;
-<span class="nc" id="L100">    int i = 1;</span>
+<span class="nc" id="L99">    int i = 1;</span>
     do {
-<span class="nc" id="L102">      candidate = &quot;%s (%d)%s&quot;.formatted(base, i++, ext);</span>
-<span class="nc bnc" id="L103" title="All 2 branches missed.">    } while (!usedNames.add(candidate));</span>
+<span class="nc" id="L101">      candidate = &quot;%s (%d)%s&quot;.formatted(base, i++, ext);</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">    } while (!usedNames.add(candidate));</span>
+
 <span class="nc" id="L104">    return candidate;</span>
   }
 
