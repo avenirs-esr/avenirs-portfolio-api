@@ -106,8 +106,8 @@ public class DeclaredActivityDatabaseRepository
   }
 
   @Override
-  public Optional<DeclaredActivityEntity> findByIdAndStudentId(UUID id, UUID studentId) {
-    return jpaRepository.findByIdAndStudentId(id,studentId);
+  public Optional<DeclaredActivity> findByIdAndStudentId(UUID id, UUID studentId) {
+    return jpaRepository.findByIdAndStudentId(id,studentId).map(DeclaredActivityMapper.INSTANCE::toDomain);
   }
 
   @Override

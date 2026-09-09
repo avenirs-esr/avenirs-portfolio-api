@@ -36,6 +36,6 @@ public interface DeclaredActivityRepository extends GenericRepositoryPort<Declar
 
   List<DeclaredActivity> findAllEnrolledByActivity(Activity activity, FetchGraph fetchGraph);
 
-  Optional<DeclaredActivityEntity> findByIdAndStudentId(UUID id, UUID studentId);
+  Optional<DeclaredActivity> findByIdAndStudentId(UUID id, UUID studentId);
   int deleteByIdAndStudentId(UUID id, UUID studentId);
 }

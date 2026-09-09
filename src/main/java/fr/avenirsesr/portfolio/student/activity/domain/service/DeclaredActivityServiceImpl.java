@@ -642,11 +642,9 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   public void deleteContentActivity(UUID declaredActivityId) {
 
     Student student = loggedInUserService.getLoggedInStudent();
-     UUID currentStudentId = student.getId();
+    UUID currentStudentId = student.getId();
     DeclaredActivity  declaredActivity = declaredActivityRepository.findByIdAndStudentId(declaredActivityId,currentStudentId)
-            .map(DeclaredActivityMapper.INSTANCE::toDomain)
-             .orElseThrow(() ->  new DeclaredActivityNotFoundException(
-                                     "DeclaredActivity not found with id: " + declaredActivityId));
+            .orElseThrow(() ->  new DeclaredActivityNotFoundException("DeclaredActivity not found with id: " + declaredActivityId));
 
     if (declaredActivity.isUnsubscribed()) {
       throw new DeclaredActivityUnsubscribedException();
