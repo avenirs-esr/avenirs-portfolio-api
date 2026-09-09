@@ -21,11 +21,12 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.domain.data,TraceDec
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.domain.data,TraceLockedDeclaredActivitiesData,0,12,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.domain.data,TracesSummaryData,0,15,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.application.adapter.controller,SeedingAdminController,88,0,14,0,22,0,9,0,2,0
-avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.domain.filter,ETraceFilterKey,0,27,0,0,0,5,0,1,0,1
-avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.domain.filter,TraceFilter,0,60,0,8,0,9,0,6,0,2
-avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.service,UserServiceImpl,72,311,13,20,15,86,13,25,4,15
+avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.service,UserServiceImpl,72,321,13,20,15,86,13,25,4,15
+avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.service,UserServiceImpl.NotificationState,0,9,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.service,StaffServiceImpl,109,108,4,2,25,29,10,7,7,7
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.service,StudentServiceImpl,123,107,3,3,29,30,11,8,9,7
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.domain.filter,ETraceFilterKey,0,27,0,0,0,5,0,1,0,1
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.domain.filter,TraceFilter,0,60,0,8,0,9,0,6,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.association.domain.service,AssociationServiceImpl,2,110,1,7,1,25,1,11,0,8
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.association.domain.service,AssociationSearchHelper,0,70,0,8,0,19,0,6,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.association.infrastructure.adapter.specification,AssociationSpecification,15,135,3,7,3,24,6,13,3,11
@@ -74,7 +75,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.notification.application.adapter.c
 avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.domain.service,ClockServiceImpl,7,24,0,0,3,8,2,5,2,5
 avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.domain.service,LoggedInUserServiceImpl,4,28,1,1,1,6,1,4,0,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.client,ExternalSkillClient,0,247,0,8,0,63,0,10,0,6
-avenirs-portfolio-api,fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.client,ExternalSkillClient.new ParameterizedTypeReference() {...},0,3,0,0,0,1,0,1,0,1
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.client,ExternalSkillClient.new ParameterizedTypeReference() {...},0,8,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.experience.domain.data,DeclaredExperienceData,0,9,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.experience.domain.data,DeclaredExperienceAssociationsData,0,9,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.experience.domain.data,DeclaredExperienceAssociationData,0,9,0,0,0,1,0,1,0,1

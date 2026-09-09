@@ -59,7 +59,7 @@ public class ActivityServiceImpl implements ActivityService {
 
 <span class="fc" id="L60">  private static final Duration DURATION_FOR_LATEST = Duration.ofDays(90);</span>
 <span class="fc" id="L61">  private static final Duration DURATION_FOR_RECENT_UNSUBSCRIPTIONS = Duration.ofDays(30);</span>
-<span class="fc" id="L62">  private static final EnumSet&lt;EFileType&gt; ALLOWED_DRAFT_FILE_TYPES =</span>
+<span class="fc" id="L62">  private static final Set&lt;EFileType&gt; ALLOWED_DRAFT_FILE_TYPES =</span>
 <span class="fc" id="L63">      EnumSet.of(</span>
           EFileType.PDF,
           EFileType.DOC,
@@ -714,4 +714,4 @@ public class ActivityServiceImpl implements ActivityService {
 <span class="fc" id="L714">    return activityRepository.findWithFeedbacks(staff.getId(), pageCriteria, statusArray);</span>
   }
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
