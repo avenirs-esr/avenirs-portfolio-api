@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TraceKitDownloadAdapter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.kit</a> &gt; <span class="el_source">TraceKitDownloadAdapter.java</span></div><h1>TraceKitDownloadAdapter.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.kit;
+
+import fr.avenirsesr.portfolio.file.domain.model.File;
+import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.student.kit.domain.model.KitMediaEntry;
+import fr.avenirsesr.portfolio.student.kit.domain.port.output.KitDownloadPort;
+import fr.avenirsesr.portfolio.student.trace.domain.filter.TraceFilter;
+import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
+import fr.avenirsesr.portfolio.student.trace.domain.port.output.repository.TraceRepository;
+import fr.avenirsesr.portfolio.user.domain.model.Student;
+import java.util.List;
+import java.util.stream.Stream;
+import lombok.AllArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
+
+@Component
+@AllArgsConstructor
+public class TraceKitDownloadAdapter implements KitDownloadPort {
+  private final LoggedInUserService loggedInUserService;
+  private final TraceRepository traceRepository;
+
+  @Override
+  public List&lt;KitMediaEntry&gt; getMedia() {
+    // Requires the same authorization as the TraceController::downloadAttachment endpoint, to keep
+    // access consistent.
+<span class="fc bfc" id="L28" title="All 2 branches covered.">    if (!hasRequiredAuthority(&quot;trace:list:own&quot;)) {</span>
+<span class="fc" id="L29">      return List.of();</span>
+    }
+
+    // TODO: Remove the explicit `Student` relationship and switch to a role and/or permission check
+    // (see #2473)
+<span class="fc" id="L34">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L35">    TraceFilter filter = new TraceFilter(null, null, null, true);</span>
+<span class="fc" id="L36">    List&lt;Trace&gt; traces = traceRepository.findAll(student, filter);</span>
+<span class="fc" id="L37">    return traces.stream().flatMap(this::toEntry).toList();</span>
+  }
+
+  // TODO: Create generic helpers to check the permissions/roles of the currently logged-in user
+  // (see #2473)
+  private boolean hasRequiredAuthority(String authority) {
+<span class="fc" id="L43">    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();</span>
+<span class="fc bfc" id="L44" title="All 2 branches covered.">    return authentication != null</span>
+<span class="fc" id="L45">        &amp;&amp; authentication.getAuthorities().stream()</span>
+<span class="fc bfc" id="L46" title="All 2 branches covered.">            .anyMatch(grantedAuthority -&gt; grantedAuthority.getAuthority().equals(authority));</span>
+  }
+
+  private Stream&lt;KitMediaEntry&gt; toEntry(Trace trace) {
+<span class="fc" id="L50">    Stream&lt;File&gt; attachment = trace.getAttachment().stream();</span>
+<span class="fc" id="L51">    return attachment.map(file -&gt; new KitMediaEntry(file, List.of(&quot;traces&quot;, trace.getTitle())));</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
