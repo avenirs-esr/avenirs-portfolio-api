@@ -312,13 +312,16 @@ public class ActivityServiceImpl implements ActivityService {
       case PUBLISHED, UNPUBLISHED -> {
         Activity activity =
             activityRepository.findById(id).orElseThrow(ActivityNotFoundException::new);
-        var declaredActivityId =
-            declaredActivityService.getByActivity(activity).map(DeclaredActivity::getId);
+        var declaredActivity = declaredActivityService.getByActivity(activity);
+        var declaredActivityId = declaredActivity.map(DeclaredActivity::getId);
+        var declaredActivityStatus =
+            declaredActivity.map(declaredActivityService::getDeclaredActivityStatus);
         activityViewRepository.recordView(
             activity.getId(), loggedInUserService.getLoggedInStudent().getId());
         yield ActivityPresentationDataMapper.toData(
             activity,
             declaredActivityId.orElse(null),
+            declaredActivityStatus.orElse(null),
             FileDataMapper.mapFileData(
                 activity.getBanner(), FileStorageConstants.DEFAULT_COVER_FILE_URL));
       }
