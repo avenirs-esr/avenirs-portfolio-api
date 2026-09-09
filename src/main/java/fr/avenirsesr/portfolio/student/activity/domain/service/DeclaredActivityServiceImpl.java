@@ -53,6 +53,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @AllArgsConstructor
@@ -637,7 +638,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
         .filter(declaredActivity -> !declaredActivity.isUnsubscribed())
         .isPresent();
   }
-
+  @Transactional
   @Override
   public void deleteContentActivity(UUID declaredActivityId) {
 

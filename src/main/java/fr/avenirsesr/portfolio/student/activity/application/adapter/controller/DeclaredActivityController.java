@@ -121,10 +121,10 @@ public class DeclaredActivityController {
   }
 
   @DeleteMapping("/{declaredActivityId}/content")
-  public ResponseEntity<String> deleteActivityContent(@PathVariable UUID declaredActivityId){
+  public ResponseEntity<Void> deleteActivityContent(@PathVariable UUID declaredActivityId){
     declaredActivityService.deleteContentActivity(declaredActivityId);
 
-    return ResponseEntity.ok("Activity content successfully deleted");
+    return ResponseEntity.noContent().build();
   }
 
   @PreAuthorize("hasAuthority('declared-activity:update:own')")
