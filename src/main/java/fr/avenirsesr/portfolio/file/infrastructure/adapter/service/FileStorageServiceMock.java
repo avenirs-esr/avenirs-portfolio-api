@@ -9,6 +9,7 @@ import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageCons
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -55,7 +56,7 @@ public class FileStorageServiceMock implements FileStorageService {
       return false;
     }
     try (FileOutputStream fos = new FileOutputStream(file)) {
-      fos.write("placeholder".getBytes());
+      fos.write("placeholder".getBytes(StandardCharsets.UTF_8));
       return true;
     } catch (IOException e) {
       log.debug("Could not create placeholder file at path {}", path, e);

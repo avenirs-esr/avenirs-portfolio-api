@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedExcepti
 import fr.avenirsesr.portfolio.file.domain.model.FileSize;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.Set;
 import lombok.Getter;
 
 @Getter
@@ -78,7 +79,7 @@ public enum EFileType {
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document"),
   ;
 
-  private static final EnumSet<EFileType> IMAGE_TYPES = EnumSet.of(PNG, JPEG, PJPEG, GIF, WEBP);
+  private static final Set<EFileType> IMAGE_TYPES = EnumSet.of(PNG, JPEG, PJPEG, GIF, WEBP);
 
   private final FileSize sizeLimit;
   private final String mimeType;

@@ -117,20 +117,19 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public UserQuickLinksData getQuickLinks(EUserCategory userCategory) {
-    User user;
-    boolean hasUnseenNotification =
+    var notificationState =
         switch (userCategory) {
           case STUDENT -> {
             var student = loggedInUserService.getLoggedInStudent();
-            user = student.getUser();
-            yield student.isHasUnseenNotification();
+            yield new NotificationState(student.getUser(), student.isHasUnseenNotification());
           }
           case STAFF -> {
             var staff = loggedInUserService.getLoggedInStaff();
-            user = staff.getUser();
-            yield staff.isHasUnseenNotification();
+            yield new NotificationState(staff.getUser(), staff.isHasUnseenNotification());
           }
         };
+    User user = notificationState.user();
+    boolean hasUnseenNotification = notificationState.hasUnseenNotification();
     int unreadNotifications =
         (int) notificationRepository.countUnreadByUserAndCategory(user.getId(), userCategory);
     return new UserQuickLinksData(
@@ -226,4 +225,7 @@ public class UserServiceImpl implements UserService {
               }
             });
   }
+
+  /** Carries the user and its unseen-notification flag out of the category switch. */
+  private record NotificationState(User user, boolean hasUnseenNotification) {}
 }

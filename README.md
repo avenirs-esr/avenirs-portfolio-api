@@ -2,7 +2,7 @@
 
 ## 🚀 Prérequis
 
-- **Java** 21
+- **Java** 25
 - **Maven** 4.0.0
 - **PostgreSQL**
 - **Docker** pour lancer la BDD en conteneur

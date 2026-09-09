@@ -27,7 +27,7 @@
         <url/>
     </scm>
     <properties>
-        <java.version>21</java.version>
+        <java.version>25</java.version>
         <maven.build.timestamp.format>yyyy-MM-dd__HH-mm-ss</maven.build.timestamp.format>
         <maven.build.timestamp>${maven.build.timestamp}</maven.build.timestamp>
         <mapstruct.version>1.6.3</mapstruct.version>
@@ -105,7 +105,6 @@
         <dependency>
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy-agent</artifactId>
-            <version>1.15.11</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -251,7 +250,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.12</version>
+                <version>0.8.15</version>
                 <executions>
                     <execution>
                         <id>default-prepare-agent</id>
@@ -291,7 +290,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>3.1.2</version>
+                <version>3.5.5</version>
                 <executions>
                     <execution>
                         <goals>
@@ -323,18 +322,18 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.1.2</version>
+                <version>3.5.5</version>
                 <configuration>
                     <argLine>
                         ${argLine}
-                        -javaagent:"${settings.localRepository}/net/bytebuddy/byte-buddy-agent/1.15.11/byte-buddy-agent-1.15.11.jar"
+                        -javaagent:"${settings.localRepository}/net/bytebuddy/byte-buddy-agent/${byte-buddy.version}/byte-buddy-agent-${byte-buddy.version}.jar"
                     </argLine>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.6.3</version>
+                <version>3.12.0</version>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
@@ -395,9 +394,15 @@
                     <rulesets>
                         <ruleset>pmd-ruleset.xml</ruleset>
                     </rulesets>
-                    <targetJdk>17</targetJdk>
+                    <targetJdk>25</targetJdk>
                     <failOnViolation>true</failOnViolation>
                     <printFailingErrors>true</printFailingErrors>
+                    <excludeRoots>
+                        <!-- MapStruct output: not ours to lint -->
+                        <excludeRoot>${project.build.directory}/generated-sources/annotations</excludeRoot>
+                        <!-- Owned by the avenirs-portfolio-common repository, which lints it itself -->
+                        <excludeRoot>libs/avenirs-portfolio-common/src/main/java</excludeRoot>
+                    </excludeRoots>
                 </configuration>
             </plugin>
         </plugins>
