@@ -26,12 +26,12 @@ import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.application.adapter.mapper.FileDTOMapper;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.controller.ActivityController;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityContentDTO;
-import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityItemNavigationDTO;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityFeedbacksPreviewDTO;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityOverviewDTO;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityStaffOverviewDTO;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.AuthorDTO;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityContentDtoMapper;
-import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityItemNavigationMapper;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityFeedbacksPreviewMapper;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityOverviewDtoMapper;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityStaffOverviewDtoMapper;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.response.ActivityDraftCreationResponse;
@@ -66,7 +66,7 @@ class ActivityControllerTest {
   @Mock private ActivityOverviewDtoMapper activityOverviewDtoMapper;
   @Mock private ActivityStaffOverviewDtoMapper activityStaffOverviewDtoMapper;
   @Mock private ActivityContentDtoMapper activityContentDtoMapper;
-  @Mock private ActivityItemNavigationMapper activityItemNavigationMapper;
+  @Mock private ActivityFeedbacksPreviewMapper activityFeedbacksPreviewMapper;
   @Mock private FileDTOMapper fileDTOMapper;
 
   @InjectMocks private ActivityController controller;
@@ -320,14 +320,14 @@ class ActivityControllerTest {
     BddLogger.given("an ActivityController with activities having feedbacks");
 
     PageInfo pageInfo = new PageInfo(0, 10, 1);
-    ActivityItemNavigationDTO dto = mock(ActivityItemNavigationDTO.class);
+    ActivityFeedbacksPreviewDTO dto = mock(ActivityFeedbacksPreviewDTO.class);
 
     PagedResult<Activity> pagedResult = new PagedResult<>(List.of(activity), pageInfo);
 
     when(activityService.getActivitiesWithFeedbacks(anyList(), any(PageCriteria.class)))
         .thenReturn(pagedResult);
 
-    when(activityItemNavigationMapper.toDTO(activity)).thenReturn(dto);
+    when(activityFeedbacksPreviewMapper.toDTO(activity)).thenReturn(dto);
 
     BddLogger.when("getting activities with feedbacks");
 
@@ -347,7 +347,7 @@ class ActivityControllerTest {
             eq(List.of(EFeedbackStatus.values()[0])),
             argThat(criteria -> criteria.page() == 0 && criteria.pageSize() == 10));
 
-    verify(activityItemNavigationMapper).toDTO(activity);
+    verify(activityFeedbacksPreviewMapper).toDTO(activity);
   }
 
   @Test
@@ -373,7 +373,7 @@ class ActivityControllerTest {
         .getActivitiesWithFeedbacks(
             eq(List.of()), argThat(criteria -> criteria.page() == 0 && criteria.pageSize() == 10));
 
-    verifyNoInteractions(activityItemNavigationMapper);
+    verifyNoInteractions(activityFeedbacksPreviewMapper);
   }
 
   @Test

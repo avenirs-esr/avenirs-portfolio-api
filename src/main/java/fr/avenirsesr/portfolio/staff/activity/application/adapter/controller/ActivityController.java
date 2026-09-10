@@ -53,7 +53,7 @@ public class ActivityController {
   private final ActivityNavigationMapper activityNavigationMapper;
   private final ActivityOverviewDtoMapper activityOverviewDtoMapper;
   private final ActivityStaffOverviewDtoMapper activityStaffOverviewDtoMapper;
-  private final ActivityItemNavigationMapper activityItemNavigationMapper;
+  private final ActivityFeedbacksPreviewMapper activityFeedbacksPreviewMapper;
   private final FileDTOMapper fileDTOMapper;
 
   @PreAuthorize("hasAuthority('activity:read:contextual')")
@@ -440,7 +440,7 @@ public class ActivityController {
 
   @PreAuthorize("hasAuthority('feedback:request:read:assigned')")
   @GetMapping("/with-feedbacks")
-  public ResponseEntity<PagedResponse<ActivityItemNavigationDTO>> getActivitiesWithFeedbacks(
+  public ResponseEntity<PagedResponse<ActivityFeedbacksPreviewDTO>> getActivitiesWithFeedbacks(
       Principal principal,
       @Parameter(
               array = @ArraySchema(schema = @Schema(ref = "#/components/schemas/EFeedbackStatus")))
@@ -462,7 +462,7 @@ public class ActivityController {
 
     var response =
         new PagedResponse<>(
-            pagedResult.content().stream().map(activityItemNavigationMapper::toDTO).toList(),
+            pagedResult.content().stream().map(activityFeedbacksPreviewMapper::toDTO).toList(),
             PageInfoDTO.fromDomain(pagedResult.pageInfo()));
 
     return ResponseEntity.ok(response);
