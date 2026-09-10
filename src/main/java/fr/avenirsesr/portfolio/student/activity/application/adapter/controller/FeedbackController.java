@@ -134,8 +134,11 @@ public class FeedbackController {
         "Received request to ask for feedback on declared activity [{}] by student [{}]",
         declaredActivityId,
         principal.getName());
+    var feedback = feedbackService.createFeedback(declaredActivityId);
     return ResponseEntity.status(HttpStatus.CREATED)
-        .body(feedbackDetailsDTOMapper.toDTO(feedbackService.createFeedback(declaredActivityId)));
+        .body(
+            feedbackDetailsDTOMapper.toDTO(
+                feedbackService.getFeedbackDetails(feedback.getId(), EUserCategory.STUDENT)));
   }
 
   @PreAuthorize("hasAuthority('feedback:dashboard:read:contextual')")
