@@ -77,7 +77,9 @@ class FeedbackControllerTest {
       BddLogger.given("A logged-in student and a valid declared activity ID");
 
       UUID declaredActivityId = UUID.randomUUID();
+      UUID feedbackId = UUID.randomUUID();
       Feedback feedback = mock(Feedback.class);
+      FeedbackData feedbackData = mock(FeedbackData.class);
       FeedbackDetailsDTO expectedDto =
           new FeedbackDetailsDTO(
               UUID.randomUUID(),
@@ -93,8 +95,11 @@ class FeedbackControllerTest {
               Instant.now(),
               Instant.now());
 
+      when(feedback.getId()).thenReturn(feedbackId);
       when(feedbackService.createFeedback(declaredActivityId)).thenReturn(feedback);
-      when(feedbackDetailsDTOMapper.toDTO(feedback)).thenReturn(expectedDto);
+      when(feedbackService.getFeedbackDetails(feedbackId, EUserCategory.STUDENT))
+          .thenReturn(feedbackData);
+      when(feedbackDetailsDTOMapper.toDTO(feedbackData)).thenReturn(expectedDto);
 
       BddLogger.when("askForFeedback is called");
       ResponseEntity<FeedbackDetailsDTO> response =
@@ -107,7 +112,8 @@ class FeedbackControllerTest {
       assertThat(response.getBody().activity()).isNotNull();
 
       verify(feedbackService).createFeedback(declaredActivityId);
-      verify(feedbackDetailsDTOMapper).toDTO(feedback);
+      verify(feedbackService).getFeedbackDetails(feedbackId, EUserCategory.STUDENT);
+      verify(feedbackDetailsDTOMapper).toDTO(feedbackData);
     }
 
     @Test
@@ -115,16 +121,22 @@ class FeedbackControllerTest {
       BddLogger.given("A declared activity ID");
 
       UUID declaredActivityId = UUID.randomUUID();
+      UUID feedbackId = UUID.randomUUID();
       Feedback feedback = mock(Feedback.class);
+      FeedbackData feedbackData = mock(FeedbackData.class);
 
+      when(feedback.getId()).thenReturn(feedbackId);
       when(feedbackService.createFeedback(declaredActivityId)).thenReturn(feedback);
-      when(feedbackDetailsDTOMapper.toDTO(feedback)).thenReturn(mock(FeedbackDetailsDTO.class));
+      when(feedbackService.getFeedbackDetails(feedbackId, EUserCategory.STUDENT))
+          .thenReturn(feedbackData);
+      when(feedbackDetailsDTOMapper.toDTO(feedbackData)).thenReturn(mock(FeedbackDetailsDTO.class));
 
       BddLogger.when("askForFeedback is called");
       controller.askForFeedback(principal, declaredActivityId);
 
       BddLogger.then("The service is called exactly once with the right ID");
       verify(feedbackService, times(1)).createFeedback(declaredActivityId);
+      verify(feedbackService, times(1)).getFeedbackDetails(feedbackId, EUserCategory.STUDENT);
       verifyNoMoreInteractions(feedbackService);
     }
   }

@@ -89,7 +89,7 @@ public class DeclaredSkillProgressServiceImplTest {
   void setUp() {
     student = StudentFixture.create().toModel();
 
-    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    lenient().when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
   }
 
   private DeclaredSkillProgress buildDeclaredSkillProgress() {
@@ -201,6 +201,40 @@ public class DeclaredSkillProgressServiceImplTest {
 
         BddLogger.then("it should return the expected declared skill progress details");
         assertEquals(declaredSkillProgressDetails.declaredSkillProgress(), declaredSkillProgress);
+      }
+
+      @Test
+      void
+          getDeclaredSkillProgressDetails_withAList_shouldReturnDeclaredSkillsProgressDetailsForEach() {
+        BddLogger.given("the method getDeclaredSkillProgressDetails(List<DeclaredSkillProgress>)");
+        DeclaredSkillProgress firstSkill =
+            DeclaredSkillProgressFixture.create().withStudent(student).toModel();
+        DeclaredSkillProgress secondSkill =
+            DeclaredSkillProgressFixture.create().withStudent(student).toModel();
+
+        List<ExternalSkillCategoryDTO> categories =
+            List.of(new ExternalSkillCategoryDTO("Domain", EExternalSkillCategoryType.DOMAIN));
+        when(externalSkillClient.getExternalSkillDetails(any(UUID.class)))
+            .thenAnswer(
+                invocation ->
+                    Optional.of(
+                        new ExternalSkillDetailsDTO(
+                            invocation.getArgument(0),
+                            "Test Skill",
+                            categories,
+                            EExternalSkillType.ROME4)));
+
+        BddLogger.when("calling the method with a list of declared skill progresses");
+        List<DeclaredSkillProgressDetails> result =
+            declaredSkillProgressService.getDeclaredSkillProgressDetails(
+                List.of(firstSkill, secondSkill));
+
+        BddLogger.then("it should return one enriched details entry per declared skill progress");
+        assertThat(result)
+            .extracting(DeclaredSkillProgressDetails::declaredSkillProgress)
+            .containsExactly(firstSkill, secondSkill);
+        assertThat(result)
+            .allSatisfy(details -> assertThat(details.externalCategories()).isEqualTo(categories));
       }
 
       @Test

@@ -185,6 +185,17 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
       throw new UserNotAuthorizedException();
     }
 
+    return toDeclaredSkillProgressDetails(declaredSkillProgress);
+  }
+
+  @Override
+  public List<DeclaredSkillProgressDetails> getDeclaredSkillProgressDetails(
+      List<DeclaredSkillProgress> declaredSkillProgresses) {
+    return declaredSkillProgresses.stream().map(this::toDeclaredSkillProgressDetails).toList();
+  }
+
+  private DeclaredSkillProgressDetails toDeclaredSkillProgressDetails(
+      DeclaredSkillProgress declaredSkillProgress) {
     UUID id = declaredSkillProgress.getSkill().getId();
     ExternalSkillDetailsDTO externalSkillDetails =
         externalSkillClient
