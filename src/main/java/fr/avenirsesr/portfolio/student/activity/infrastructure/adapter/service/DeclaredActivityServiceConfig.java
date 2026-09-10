@@ -33,15 +33,16 @@ public class DeclaredActivityServiceConfig {
       @Lazy ActivityService activityService,
       @Lazy TraceService traceService,
       @Lazy FeedbackService feedbackService) {
-    return new DeclaredActivityServiceImpl(
-        declaredActivityRepository,
-        activityService,
-        traceService,
-        declaredSkillProgressService,
-        associationService,
-        associationSearchHelper,
-        loggedInUserService,
-        feedbackRepository,
-        feedbackService);
+    return new TransactionalDeclaredActivityService(
+        new DeclaredActivityServiceImpl(
+            declaredActivityRepository,
+            activityService,
+            traceService,
+            declaredSkillProgressService,
+            associationService,
+            associationSearchHelper,
+            loggedInUserService,
+            feedbackRepository,
+            feedbackService));
   }
 }

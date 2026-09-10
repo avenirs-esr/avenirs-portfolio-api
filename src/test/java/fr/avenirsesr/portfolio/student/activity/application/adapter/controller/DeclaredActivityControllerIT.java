@@ -400,31 +400,32 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .expectStatus()
         .isOk();
   }
+
   @Test
-   void rejectContentDeletionIfStudentStillSubscribed() throws Exception {
+  void rejectContentDeletionIfStudentStillSubscribed() throws Exception {
     BddLogger.given("a declared activity the student is still subscribed to");
     String id = subscribeAndGetId(lockedInteractionsActivityId);
     webTestClient
-            .method(HttpMethod.DELETE)
-            .uri(BASE_PATH + "/" + id + "/content")
-            .header("X-Signed-Context", studentPayload)
-            .header("X-Context-Signature", studentSignature)
-            .exchange()
-            .expectStatus()
-            .isEqualTo(HttpStatus.CONFLICT)
-            .expectBody()
-            .jsonPath("$.code")
-            .isEqualTo("DECLARED_ACTIVITY_NOT_UNSUBSCRIBED");
+        .method(HttpMethod.DELETE)
+        .uri(BASE_PATH + "/" + id + "/content")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isEqualTo(HttpStatus.CONFLICT)
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("DECLARED_ACTIVITY_NOT_UNSUBSCRIBED");
 
     BddLogger.then("Verifying that the activity content has not been deleted");
     webTestClient
-            .get()
-            .uri(BASE_PATH + "/" + id )
-            .header("X-Signed-Context", studentPayload)
-            .header("X-Context-Signature", studentSignature)
-            .exchange()
-            .expectStatus()
-            .is2xxSuccessful();
+        .get()
+        .uri(BASE_PATH + "/" + id)
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .is2xxSuccessful();
   }
 
   @Test
@@ -434,19 +435,22 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
     unsubscribe(lockedInteractionsActivityId);
 
     webTestClient
-            .method(HttpMethod.DELETE)
-            .uri(BASE_PATH + "/" + id + "/content")
-            .header("X-Signed-Context", studentPayload)
-            .header("X-Context-Signature", studentSignature)
-            .exchange()
-            .expectStatus()
-            .isNoContent();
+        .method(HttpMethod.DELETE)
+        .uri(BASE_PATH + "/" + id + "/content")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isNoContent();
 
     BddLogger.then("Verifying that the activity content has  been deleted");
-    webTestClient.get()
-            .uri(BASE_PATH + "/" + id )
-            .header("X-Signed-Context", studentPayload)
-            .header("X-Context-Signature", studentSignature)
-            .exchange().expectStatus().isNotFound();
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/" + id)
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isNotFound();
   }
 }

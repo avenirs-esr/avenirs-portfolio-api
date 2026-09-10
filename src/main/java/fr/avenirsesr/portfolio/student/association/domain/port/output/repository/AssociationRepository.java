@@ -4,8 +4,6 @@ import fr.avenirsesr.portfolio.common.data.domain.port.output.repository.Generic
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationData;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
-import org.springframework.data.repository.query.Param;
-
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;

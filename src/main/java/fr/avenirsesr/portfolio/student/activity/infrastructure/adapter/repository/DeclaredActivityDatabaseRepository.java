@@ -107,11 +107,13 @@ public class DeclaredActivityDatabaseRepository
 
   @Override
   public Optional<DeclaredActivity> findByIdAndStudentId(UUID id, UUID studentId) {
-    return jpaRepository.findByIdAndStudentId(id,studentId).map(DeclaredActivityMapper.INSTANCE::toDomain);
+    return jpaRepository
+        .findByIdAndStudentId(id, studentId)
+        .map(DeclaredActivityMapper.INSTANCE::toDomain);
   }
 
   @Override
   public int deleteByIdAndStudentId(UUID id, UUID studentId) {
-    return jpaRepository.deleteByIdAndStudentId(id,studentId);
+    return jpaRepository.deleteByIdAndStudentId(id, studentId);
   }
 }

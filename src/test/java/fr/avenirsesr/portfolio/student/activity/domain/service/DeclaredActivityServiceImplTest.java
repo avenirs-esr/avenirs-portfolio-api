@@ -85,6 +85,7 @@ class DeclaredActivityServiceImplTest {
 
   private Student student;
   private final UUID declaredActivityId = UUID.randomUUID();
+
   @BeforeEach
   void setUp() {
     student = StudentFixture.create().toModel();
@@ -2051,64 +2052,72 @@ class DeclaredActivityServiceImplTest {
     assertThat(result).isEmpty();
   }
 
-  private void stubDeclaredActivity(Instant unsubscribe){
+  private void stubDeclaredActivity(Instant unsubscribe) {
     Activity activity = ActivityFixture.create().toModel();
     DeclaredActivity declaredActivity =
-            DeclaredActivity.create(
-                    declaredActivityId, student, activity, Instant.now(), "my reflection", null, null, null);
+        DeclaredActivity.create(
+            declaredActivityId,
+            student,
+            activity,
+            Instant.now(),
+            "my reflection",
+            null,
+            null,
+            null);
     declaredActivity.unsubscribe(unsubscribe);
 
-    UUID declaredActivityId= declaredActivity.getId();
-    UUID studentId= student.getId();
-    when(declaredActivityRepository.findByIdAndStudentId(declaredActivityId,studentId)).thenReturn(Optional.of(declaredActivity));
+    UUID declaredActivityId = declaredActivity.getId();
+    UUID studentId = student.getId();
+    when(declaredActivityRepository.findByIdAndStudentId(declaredActivityId, studentId))
+        .thenReturn(Optional.of(declaredActivity));
   }
 
   @Test
-  void deleteContentActivity_should_reject_content_activity_when_the_student_isUnsubscribed(){
-     UUID studentId= student.getId();
-     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-     when(declaredActivityRepository.findByIdAndStudentId(declaredActivityId,studentId)).thenReturn(Optional.empty());
-     assertThatThrownBy(()-> declaredActivityService.deleteContentActivity(declaredActivityId)).isInstanceOf(DeclaredActivityNotFoundException.class);
-     verifyNoInteractions(associationService,feedbackService);
-     verify(declaredActivityRepository, never()).deleteByIdAndStudentId(any(),any());
+  void deleteContentActivity_should_reject_content_activity_when_the_student_isUnsubscribed() {
+    UUID studentId = student.getId();
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findByIdAndStudentId(declaredActivityId, studentId))
+        .thenReturn(Optional.empty());
+    assertThatThrownBy(() -> declaredActivityService.deleteContentActivity(declaredActivityId))
+        .isInstanceOf(DeclaredActivityNotFoundException.class);
+    verifyNoInteractions(associationService, feedbackService);
+    verify(declaredActivityRepository, never()).deleteByIdAndStudentId(any(), any());
   }
 
   @Test
-  void deleteContentActivity_should_reject_if_activity_isUnsubscribed(){
+  void deleteContentActivity_should_reject_if_activity_isUnsubscribed() {
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     stubDeclaredActivity(null);
-    assertThatThrownBy(()->declaredActivityService.deleteContentActivity(declaredActivityId)).isInstanceOf(DeclaredActivityNotUnsubscribedException.class);
-    verifyNoInteractions(associationService,feedbackService);
-    verify(declaredActivityRepository, never()).deleteByIdAndStudentId(any(),any());
+    assertThatThrownBy(() -> declaredActivityService.deleteContentActivity(declaredActivityId))
+        .isInstanceOf(DeclaredActivityNotUnsubscribedException.class);
+    verifyNoInteractions(associationService, feedbackService);
+    verify(declaredActivityRepository, never()).deleteByIdAndStudentId(any(), any());
   }
 
   @Test
-  void deleteContentActivity_should_delete_associations_feedbacks_then_declared_activity_when_isUnsubscribed(){
-      UUID studentId= student.getId();
-      when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-      stubDeclaredActivity(Instant.now());
-      declaredActivityService.deleteContentActivity(declaredActivityId);
-    InOrder inOrder = inOrder(
-            associationService,
-            feedbackService,
-            declaredActivityRepository);
+  void
+      deleteContentActivity_should_delete_associations_feedbacks_then_declared_activity_when_isUnsubscribed() {
+    UUID studentId = student.getId();
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    stubDeclaredActivity(Instant.now());
+    declaredActivityService.deleteContentActivity(declaredActivityId);
+    InOrder inOrder = inOrder(associationService, feedbackService, declaredActivityRepository);
 
-    inOrder.verify(associationService)
-            .deleteAllByEndpointId(declaredActivityId);
+    inOrder.verify(associationService).deleteAllByEndpointId(declaredActivityId);
 
     inOrder.verify(feedbackService).deleteByDeclaredActivityId(declaredActivityId);
 
-    inOrder.verify(declaredActivityRepository).deleteByIdAndStudentId(declaredActivityId, studentId);
-
+    inOrder
+        .verify(declaredActivityRepository)
+        .deleteByIdAndStudentId(declaredActivityId, studentId);
   }
 
   @Test
-  void deleteContentActivity_should_delete_on_the_connected_student(){
-    UUID studentId= student.getId();
+  void deleteContentActivity_should_delete_on_the_connected_student() {
+    UUID studentId = student.getId();
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     stubDeclaredActivity(Instant.now());
     service.deleteContentActivity(declaredActivityId);
     verify(declaredActivityRepository).deleteByIdAndStudentId(declaredActivityId, studentId);
   }
-
 }
