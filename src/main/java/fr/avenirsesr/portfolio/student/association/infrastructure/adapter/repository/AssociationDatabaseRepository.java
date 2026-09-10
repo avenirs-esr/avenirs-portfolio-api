@@ -100,8 +100,10 @@ public class AssociationDatabaseRepository
   }
 
   @Override
-  public int deleteAllByEndpointId(UUID id) {
-    return jpaRepository.deleteAllByEndpointId(id);
+  public List<Association> findByTypeTouching(EAssociationType type, UUID id) {
+    return jpaRepository.findByTypeTouching(type, id).stream()
+        .map(AssociationMapper.INSTANCE::toDomain)
+        .toList();
   }
 
   @Override

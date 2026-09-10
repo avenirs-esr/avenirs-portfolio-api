@@ -395,7 +395,7 @@ public class FeedbackServiceImpl implements FeedbackService {
   }
 
   @Override
-  public int deleteByDeclaredActivityId(UUID declaredActivityId) {
-    return feedbackRepository.deleteByDeclaredActivityId(declaredActivityId);
+  public void deleteByDeclaredActivityId(UUID declaredActivityId) {
+    feedbackRepository.deleteByDeclaredActivityId(declaredActivityId);
   }
 }

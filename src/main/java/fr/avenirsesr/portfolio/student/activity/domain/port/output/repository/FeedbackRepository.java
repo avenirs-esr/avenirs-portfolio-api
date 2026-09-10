@@ -26,5 +26,5 @@ public interface FeedbackRepository extends GenericRepositoryPort<Feedback> {
 
   int countByStatus(Staff staff, Activity activity, EFeedbackStatus status);
 
-  int deleteByDeclaredActivityId(UUID declaredActivityId);
+  void deleteByDeclaredActivityId(UUID declaredActivityId);
 }

@@ -178,8 +178,8 @@ public class FeedbackDatabaseRepository
   }
 
   @Override
-  public int deleteByDeclaredActivityId(UUID declaredActivityId) {
-    return jpaRepository.deleteByDeclaredActivityId(declaredActivityId);
+  public void deleteByDeclaredActivityId(UUID declaredActivityId) {
+    jpaRepository.deleteByDeclaredActivityId(declaredActivityId);
   }
 
   // ── private helpers ─────────────────────────────────────────────────

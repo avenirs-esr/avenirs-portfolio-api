@@ -84,5 +84,5 @@ public interface DeclaredActivityService {
 
   boolean isEnrolled(Activity activity, Student student);
 
-  void deleteContentActivity(UUID declaredActivityId);
+  void deleteActivity(UUID declaredActivityId);
 }

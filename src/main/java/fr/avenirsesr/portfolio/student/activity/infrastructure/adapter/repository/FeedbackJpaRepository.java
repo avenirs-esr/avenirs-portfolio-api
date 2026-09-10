@@ -38,7 +38,8 @@ public interface FeedbackJpaRepository
   Set<UUID> findAttachmentIdsUsedByTraceSnapshots(
       @Param("declaredActivityIds") List<UUID> declaredActivityIds,
       @Param("traceIds") List<UUID> traceIds);
+
   @Modifying
   @Query("delete from FeedbackEntity f where f.declaredActivity.id = :declaredActivityId")
-  int deleteByDeclaredActivityId(@Param("declaredActivityId") UUID declaredActivityId);
+  void deleteByDeclaredActivityId(@Param("declaredActivityId") UUID declaredActivityId);
 }

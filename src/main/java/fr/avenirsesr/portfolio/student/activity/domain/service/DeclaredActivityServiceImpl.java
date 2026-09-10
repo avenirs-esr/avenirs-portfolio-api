@@ -9,6 +9,8 @@ import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
+import fr.avenirsesr.portfolio.notification.domain.model.enums.ENotificationType;
+import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityUnpublishedException;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
@@ -24,7 +26,6 @@ import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivi
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.FeedbackService;
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.FeedbackRepository;
-import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.mapper.DeclaredActivityMapper;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.exception.MaximumAssociationReachedException;
@@ -53,7 +54,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @AllArgsConstructor
@@ -67,6 +67,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   private final LoggedInUserService loggedInUserService;
   private final FeedbackRepository feedbackRepository;
   private final FeedbackService feedbackService;
+  private final NotificationService notificationService;
 
   @Override
   public PagedResult<DeclaredActivity> getDeclaredActivities(PageCriteria pageCriteria) {
@@ -638,33 +639,26 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
         .filter(declaredActivity -> !declaredActivity.isUnsubscribed())
         .isPresent();
   }
-  @Transactional
+
   @Override
-  public void deleteContentActivity(UUID declaredActivityId) {
+  public void deleteActivity(UUID declaredActivityId) {
+    DeclaredActivity declaredActivity =
+        fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
 
-    Student student = loggedInUserService.getLoggedInStudent();
-    UUID currentStudentId = student.getId();
-    DeclaredActivity  declaredActivity = declaredActivityRepository.findByIdAndStudentId(declaredActivityId,currentStudentId)
-            .orElseThrow(() ->  new DeclaredActivityNotFoundException("DeclaredActivity not found with id: " + declaredActivityId));
-
-    if (declaredActivity.isUnsubscribed()) {
-      throw new DeclaredActivityUnsubscribedException();
+    if (!declaredActivity.isUnsubscribed()) {
+      throw new DeclaredActivityNotUnsubscribedException();
     }
-   // Suppression les lignes de LIEN jamais les traces/skills/experiences pointés.
-    int deletedAssociations = associationService.deleteAllByEndpointId(declaredActivityId);
-    log.debug("{} association supprimée pour la declaredActivity {}",
-            deletedAssociations, declaredActivityId);
 
-    int deletedFeedbacks = feedbackService.deleteByDeclaredActivityId(declaredActivityId);
-    log.debug("{} feedback supprimé pour la declaredActivity {}",
-            deletedFeedbacks, declaredActivityId);
+    associationService.deleteAssociationsOf(DeclaredActivity.class, declaredActivityId);
+    notificationService.deleteNotificationsOf(
+        ENotificationType.ASK_FOR_FEEDBACK, declaredActivityId);
+    feedbackService.deleteByDeclaredActivityId(declaredActivityId);
+    declaredActivityRepository.removeFromDatabase(declaredActivity);
 
-    int deletedActivities = declaredActivityRepository.deleteByIdAndStudentId(declaredActivityId, currentStudentId);
-    log.debug("declaredActivity {} supprimée pour l'étudiant {} (lignes affectées : {})",
-            declaredActivityId, currentStudentId, deletedActivities);
-
-    log.info("Contenu supprimé pour la declaredActivity {} (étudiant {}) : {} association(s), {} feedback(s), {} activité déclarée",
-            declaredActivityId, currentStudentId, deletedAssociations, deletedFeedbacks, deletedActivities);
+    log.debug(
+        "Contenu supprimé pour la declaredActivity {} (étudiant {}) : {} association(s), {}"
+            + " feedback(s), {} activité déclarée",
+        declaredActivityId);
   }
 
   private EAssociationType getAssociationType(EAssociationContextType contextType) {

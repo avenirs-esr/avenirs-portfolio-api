@@ -15,7 +15,7 @@ public class AssociationServiceConfig {
 
   @Bean
   public AssociationService AssociationService() {
-    return new AssociationServiceImpl(associationRepository);
+    return new TransactionalAssociationService(new AssociationServiceImpl(associationRepository));
   }
 
   @Bean

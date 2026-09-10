@@ -18,6 +18,8 @@ import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationExce
 import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.notification.domain.model.enums.ENotificationType;
+import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityNotFoundException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityUnpublishedException;
@@ -76,7 +78,7 @@ class DeclaredActivityServiceImplTest {
   @Mock private LoggedInUserService loggedInUserService;
   @Mock private FeedbackRepository feedbackRepository;
   @Mock private FeedbackService feedbackService;
-
+  @Mock private NotificationService notificationService;
   @InjectMocks private DeclaredActivityServiceImpl service;
 
   private DeclaredActivityService declaredActivityService;
@@ -85,6 +87,7 @@ class DeclaredActivityServiceImplTest {
 
   private Student student;
   private final UUID declaredActivityId = UUID.randomUUID();
+
   @BeforeEach
   void setUp() {
     student = StudentFixture.create().toModel();
@@ -98,7 +101,8 @@ class DeclaredActivityServiceImplTest {
             associationSearchHelper,
             loggedInUserService,
             feedbackRepository,
-            feedbackService);
+            feedbackService,
+            notificationService);
   }
 
   @Test
@@ -2051,64 +2055,76 @@ class DeclaredActivityServiceImplTest {
     assertThat(result).isEmpty();
   }
 
-  private void stubDeclaredActivity(Instant unsubscribe){
+  private DeclaredActivity stubDeclaredActivity(Instant unsubscribe) {
     Activity activity = ActivityFixture.create().toModel();
     DeclaredActivity declaredActivity =
-            DeclaredActivity.create(
-                    declaredActivityId, student, activity, Instant.now(), "my reflection", null, null, null);
+        DeclaredActivity.create(
+            declaredActivityId,
+            student,
+            activity,
+            Instant.now(),
+            "my reflection",
+            null,
+            null,
+            null);
+
     declaredActivity.unsubscribe(unsubscribe);
 
-    UUID declaredActivityId= declaredActivity.getId();
-    UUID studentId= student.getId();
-    when(declaredActivityRepository.findByIdAndStudentId(declaredActivityId,studentId)).thenReturn(Optional.of(declaredActivity));
+    UUID declaredActivityId = declaredActivity.getId();
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any()))
+        .thenReturn(Optional.of(declaredActivity));
+    return declaredActivity;
   }
 
   @Test
-  void deleteContentActivity_should_reject_content_activity_when_the_student_isUnsubscribed(){
-     UUID studentId= student.getId();
-     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-     when(declaredActivityRepository.findByIdAndStudentId(declaredActivityId,studentId)).thenReturn(Optional.empty());
-     assertThatThrownBy(()-> declaredActivityService.deleteContentActivity(declaredActivityId)).isInstanceOf(DeclaredActivityNotFoundException.class);
-     verifyNoInteractions(associationService,feedbackService);
-     verify(declaredActivityRepository, never()).deleteByIdAndStudentId(any(),any());
+  void deleteActivity_should_throw_when_declaredActivity_not_found() {
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any()))
+        .thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> declaredActivityService.deleteActivity(declaredActivityId))
+        .isInstanceOf(DeclaredActivityNotFoundException.class);
+
+    verifyNoInteractions(associationService, feedbackService);
+    verify(declaredActivityRepository, never()).removeFromDatabase(any());
   }
 
   @Test
-  void deleteContentActivity_should_reject_if_activity_isUnsubscribed(){
+  void deleteActivity_should_throw_when_declaredActivity_not_unsubscribed() {
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     stubDeclaredActivity(null);
-    assertThatThrownBy(()->declaredActivityService.deleteContentActivity(declaredActivityId)).isInstanceOf(DeclaredActivityNotUnsubscribedException.class);
-    verifyNoInteractions(associationService,feedbackService);
-    verify(declaredActivityRepository, never()).deleteByIdAndStudentId(any(),any());
+    assertThatThrownBy(() -> declaredActivityService.deleteActivity(declaredActivityId))
+        .isInstanceOf(DeclaredActivityNotUnsubscribedException.class);
+    verifyNoInteractions(associationService, feedbackService);
+    verify(declaredActivityRepository, never()).removeFromDatabase(any());
   }
 
   @Test
-  void deleteContentActivity_should_delete_associations_feedbacks_then_declared_activity_when_isUnsubscribed(){
-      UUID studentId= student.getId();
-      when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-      stubDeclaredActivity(Instant.now());
-      declaredActivityService.deleteContentActivity(declaredActivityId);
-    InOrder inOrder = inOrder(
-            associationService,
-            feedbackService,
-            declaredActivityRepository);
-
-    inOrder.verify(associationService)
-            .deleteAllByEndpointId(declaredActivityId);
-
-    inOrder.verify(feedbackService).deleteByDeclaredActivityId(declaredActivityId);
-
-    inOrder.verify(declaredActivityRepository).deleteByIdAndStudentId(declaredActivityId, studentId);
-
-  }
-
-  @Test
-  void deleteContentActivity_should_delete_on_the_connected_student(){
-    UUID studentId= student.getId();
+  void
+      deleteContentActivity_should_delete_associations_feedbacks_then_declared_activity_when_isUnsubscribed() {
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-    stubDeclaredActivity(Instant.now());
-    service.deleteContentActivity(declaredActivityId);
-    verify(declaredActivityRepository).deleteByIdAndStudentId(declaredActivityId, studentId);
+    DeclaredActivity declaredActivity = stubDeclaredActivity(Instant.now());
+    declaredActivityService.deleteActivity(declaredActivityId);
+    InOrder inOrder =
+        inOrder(
+            associationService, notificationService, feedbackService, declaredActivityRepository);
+    inOrder
+        .verify(associationService)
+        .deleteAssociationsOf(DeclaredActivity.class, declaredActivityId);
+    inOrder
+        .verify(notificationService)
+        .deleteNotificationsOf(ENotificationType.ASK_FOR_FEEDBACK, declaredActivityId);
+    inOrder.verify(feedbackService).deleteByDeclaredActivityId(declaredActivityId);
+    inOrder.verify(declaredActivityRepository).removeFromDatabase(declaredActivity);
   }
 
+  @Test
+  void deleteActivity_should_reject_when_activity_is_not_owned_by_connected_student() {
+    Student connected = StudentFixture.create().toModel();
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(connected);
+    stubDeclaredActivity(Instant.now());
+    assertThatThrownBy(() -> declaredActivityService.deleteActivity(declaredActivityId))
+        .isInstanceOf(UserNotAuthorizedException.class);
+    verifyNoInteractions(associationService, feedbackService);
+    verify(declaredActivityRepository, never()).removeFromDatabase(any());
+  }
 }

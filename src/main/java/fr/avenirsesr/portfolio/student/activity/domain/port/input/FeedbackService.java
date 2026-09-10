@@ -46,5 +46,5 @@ public interface FeedbackService {
 
   void deletePendingFeedbacks(List<UUID> declaredActivityIds);
 
-  int deleteByDeclaredActivityId(UUID declaredActivityId);
+  void deleteByDeclaredActivityId(UUID declaredActivityId);
 }
