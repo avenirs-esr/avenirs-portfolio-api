@@ -1,6 +1,8 @@
 package fr.avenirsesr.portfolio.user.infrastructure.adapter.openapi;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
+import fr.avenirsesr.portfolio.common.group.domain.model.enums.EGroupType;
+import fr.avenirsesr.portfolio.common.institution.domain.model.enums.EInstitutionType;
 import fr.avenirsesr.portfolio.common.security.accesscontrol.domain.model.enums.ERole;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EContextType;
 import io.swagger.v3.oas.models.media.Schema;
@@ -27,4 +29,16 @@ public final class SwaggerSchema {
           .name("ERole")
           ._enum(Arrays.stream(ERole.values()).map(Enum::name).toList())
           .description("Enum for user role");
+
+  public static final Schema<String> institutionTypeSchema =
+      new StringSchema()
+          .name("EInstitutionType")
+          ._enum(Arrays.stream(EInstitutionType.values()).map(Enum::name).toList())
+          .description("Enum for institution type");
+
+  public static final Schema<String> groupTypeSchema =
+      new StringSchema()
+          .name("EGroupType")
+          ._enum(Arrays.stream(EGroupType.values()).map(Enum::name).toList())
+          .description("Enum for group type");
 }
