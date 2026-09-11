@@ -18,7 +18,7 @@ public interface FeedbackJpaRepository
       select distinct f.declaredActivity.id
       from FeedbackEntity f
       where f.declaredActivity.id in :declaredActivityIds
-      and f.status != 'SUBMITTED'
+      and f.status in ('NEW', 'IN_PROCESS')
       """)
   List<UUID> findDeclaredActivityIdsWithActiveFeedbacks(
       @Param("declaredActivityIds") List<UUID> declaredActivityIds);
