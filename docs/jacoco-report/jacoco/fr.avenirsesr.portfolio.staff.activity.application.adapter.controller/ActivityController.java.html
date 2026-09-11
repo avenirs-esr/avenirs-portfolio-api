@@ -53,7 +53,7 @@ public class ActivityController {
   private final ActivityNavigationMapper activityNavigationMapper;
   private final ActivityOverviewDtoMapper activityOverviewDtoMapper;
   private final ActivityStaffOverviewDtoMapper activityStaffOverviewDtoMapper;
-  private final ActivityFeedbacksPreviewMapper activityFeedbacksPreviewMapper;
+  private final ActivityItemNavigationMapper activityItemNavigationMapper;
   private final FileDTOMapper fileDTOMapper;
 
   @PreAuthorize(&quot;hasAuthority('activity:read:contextual')&quot;)
@@ -440,7 +440,7 @@ public class ActivityController {
 
   @PreAuthorize(&quot;hasAuthority('feedback:request:read:assigned')&quot;)
   @GetMapping(&quot;/with-feedbacks&quot;)
-  public ResponseEntity&lt;PagedResponse&lt;ActivityFeedbacksPreviewDTO&gt;&gt; getActivitiesWithFeedbacks(
+  public ResponseEntity&lt;PagedResponse&lt;ActivityItemNavigationDTO&gt;&gt; getActivitiesWithFeedbacks(
       Principal principal,
       @Parameter(
               array = @ArraySchema(schema = @Schema(ref = &quot;#/components/schemas/EFeedbackStatus&quot;)))
@@ -462,7 +462,7 @@ public class ActivityController {
 
 <span class="fc" id="L463">    var response =</span>
         new PagedResponse&lt;&gt;(
-<span class="fc" id="L465">            pagedResult.content().stream().map(activityFeedbacksPreviewMapper::toDTO).toList(),</span>
+<span class="fc" id="L465">            pagedResult.content().stream().map(activityItemNavigationMapper::toDTO).toList(),</span>
 <span class="fc" id="L466">            PageInfoDTO.fromDomain(pagedResult.pageInfo()));</span>
 
 <span class="fc" id="L468">    return ResponseEntity.ok(response);</span>

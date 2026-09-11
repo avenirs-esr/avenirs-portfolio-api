@@ -104,5 +104,17 @@ public class DeclaredActivityDatabaseRepository
 <span class="fc" id="L104">            .and(DeclaredActivitySpecification.isNotUnsubscribed()),</span>
         fetchGraph);
   }
+
+  @Override
+  public Optional&lt;DeclaredActivity&gt; findByIdAndStudentId(UUID id, UUID studentId) {
+<span class="fc" id="L110">    return jpaRepository</span>
+<span class="fc" id="L111">        .findByIdAndStudentId(id, studentId)</span>
+<span class="fc" id="L112">        .map(DeclaredActivityMapper.INSTANCE::toDomain);</span>
+  }
+
+  @Override
+  public int deleteByIdAndStudentId(UUID id, UUID studentId) {
+<span class="fc" id="L117">    return jpaRepository.deleteByIdAndStudentId(id, studentId);</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

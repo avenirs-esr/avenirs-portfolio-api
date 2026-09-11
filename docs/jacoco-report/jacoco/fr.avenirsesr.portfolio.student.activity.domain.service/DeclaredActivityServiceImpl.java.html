@@ -637,19 +637,64 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
 <span class="fc" id="L637">        .isPresent();</span>
   }
 
+  @Override
+  public void deleteContentActivity(UUID declaredActivityId) {
+
+<span class="fc" id="L643">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L644">    UUID currentStudentId = student.getId();</span>
+<span class="fc" id="L645">    DeclaredActivity declaredActivity =</span>
+        declaredActivityRepository
+<span class="fc" id="L647">            .findByIdAndStudentId(declaredActivityId, currentStudentId)</span>
+<span class="fc" id="L648">            .orElseThrow(</span>
+                () -&gt;
+<span class="fc" id="L650">                    new DeclaredActivityNotFoundException(</span>
+                        &quot;DeclaredActivity not found with id: &quot; + declaredActivityId));
+
+<span class="fc bfc" id="L653" title="All 2 branches covered.">    if (!declaredActivity.isUnsubscribed()) {</span>
+<span class="fc" id="L654">      throw new DeclaredActivityNotUnsubscribedException();</span>
+    }
+
+<span class="fc" id="L657">    int deletedAssociations = associationService.deleteAllByEndpointId(declaredActivityId);</span>
+<span class="fc" id="L658">    log.debug(</span>
+        &quot;{} association supprimée pour la declaredActivity {}&quot;,
+<span class="fc" id="L660">        deletedAssociations,</span>
+        declaredActivityId);
+
+<span class="fc" id="L663">    int deletedFeedbacks = feedbackService.deleteByDeclaredActivityId(declaredActivityId);</span>
+<span class="fc" id="L664">    log.debug(</span>
+<span class="fc" id="L665">        &quot;{} feedback supprimé pour la declaredActivity {}&quot;, deletedFeedbacks, declaredActivityId);</span>
+
+<span class="fc" id="L667">    int deletedActivities =</span>
+<span class="fc" id="L668">        declaredActivityRepository.deleteByIdAndStudentId(declaredActivityId, currentStudentId);</span>
+<span class="fc" id="L669">    log.debug(</span>
+        &quot;declaredActivity {} supprimée pour l'étudiant {} (lignes affectées : {})&quot;,
+        declaredActivityId,
+        currentStudentId,
+<span class="fc" id="L673">        deletedActivities);</span>
+
+<span class="fc" id="L675">    log.info(</span>
+        &quot;Contenu supprimé pour la declaredActivity {} (étudiant {}) : {} association(s), {}&quot;
+            + &quot; feedback(s), {} activité déclarée&quot;,
+        declaredActivityId,
+        currentStudentId,
+<span class="fc" id="L680">        deletedAssociations,</span>
+<span class="fc" id="L681">        deletedFeedbacks,</span>
+<span class="fc" id="L682">        deletedActivities);</span>
+<span class="fc" id="L683">  }</span>
+
   private EAssociationType getAssociationType(EAssociationContextType contextType) {
-<span class="pc bpc" id="L641" title="1 of 3 branches missed.">    return switch (contextType) {</span>
-<span class="fc" id="L642">      case TRACE -&gt; EAssociationType.DECLARED_ACTIVITY_TRACE;</span>
-<span class="fc" id="L643">      case DECLARED_SKILL -&gt; EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL;</span>
-<span class="nc" id="L644">      case DECLARED_ACTIVITY, DECLARED_EXPERIENCE -&gt; throw new UnsupportedOperationException();</span>
+<span class="pc bpc" id="L686" title="1 of 3 branches missed.">    return switch (contextType) {</span>
+<span class="fc" id="L687">      case TRACE -&gt; EAssociationType.DECLARED_ACTIVITY_TRACE;</span>
+<span class="fc" id="L688">      case DECLARED_SKILL -&gt; EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL;</span>
+<span class="nc" id="L689">      case DECLARED_ACTIVITY, DECLARED_EXPERIENCE -&gt; throw new UnsupportedOperationException();</span>
     };
   }
 
   private boolean isSubmittedOrFinished(
       DeclaredActivity declaredActivity, boolean hasActiveFeedback) {
-<span class="fc" id="L650">    EDeclaredActivityStatus status = getDeclaredActivityStatus(declaredActivity, hasActiveFeedback);</span>
+<span class="fc" id="L695">    EDeclaredActivityStatus status = getDeclaredActivityStatus(declaredActivity, hasActiveFeedback);</span>
 
-<span class="fc bfc" id="L652" title="All 4 branches covered.">    return status == EDeclaredActivityStatus.SUBMITTED</span>
+<span class="fc bfc" id="L697" title="All 4 branches covered.">    return status == EDeclaredActivityStatus.SUBMITTED</span>
         || status == EDeclaredActivityStatus.COMPLETED;
   }
 }

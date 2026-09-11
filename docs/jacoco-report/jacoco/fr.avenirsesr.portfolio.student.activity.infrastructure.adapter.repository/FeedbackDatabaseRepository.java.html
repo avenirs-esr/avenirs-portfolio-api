@@ -177,52 +177,57 @@ public class FeedbackDatabaseRepository
 <span class="fc" id="L177">    return (int) jpaRepository.count(spec);</span>
   }
 
+  @Override
+  public int deleteByDeclaredActivityId(UUID declaredActivityId) {
+<span class="fc" id="L182">    return jpaRepository.deleteByDeclaredActivityId(declaredActivityId);</span>
+  }
+
   // ── private helpers ─────────────────────────────────────────────────
 
   private Feedback toDomainWithDependencies(FeedbackEntity entity) {
-<span class="fc" id="L183">    AssociationsJson associations = entity.getAssociations();</span>
+<span class="fc" id="L188">    AssociationsJson associations = entity.getAssociations();</span>
 
-<span class="fc" id="L185">    Map&lt;UUID, File&gt; files = resolveFiles(associations);</span>
-<span class="fc" id="L186">    Map&lt;UUID, Student&gt; students = resolveStudents(associations);</span>
-<span class="fc" id="L187">    Map&lt;UUID, DeclaredSkill&gt; skills = resolveSkills(associations);</span>
+<span class="fc" id="L190">    Map&lt;UUID, File&gt; files = resolveFiles(associations);</span>
+<span class="fc" id="L191">    Map&lt;UUID, Student&gt; students = resolveStudents(associations);</span>
+<span class="fc" id="L192">    Map&lt;UUID, DeclaredSkill&gt; skills = resolveSkills(associations);</span>
 
-<span class="fc" id="L189">    return FeedbackMapper.INSTANCE.toDomain(entity, files, students, skills);</span>
+<span class="fc" id="L194">    return FeedbackMapper.INSTANCE.toDomain(entity, files, students, skills);</span>
   }
 
   private Map&lt;UUID, File&gt; resolveFiles(AssociationsJson associations) {
-<span class="fc" id="L193">    Set&lt;UUID&gt; ids =</span>
-<span class="fc" id="L194">        associations.traces().stream()</span>
-<span class="fc" id="L195">            .map(AssociationsJson.TraceSnapshot::attachmentId)</span>
-<span class="fc" id="L196">            .filter(Objects::nonNull)</span>
-<span class="fc" id="L197">            .collect(Collectors.toSet());</span>
+<span class="fc" id="L198">    Set&lt;UUID&gt; ids =</span>
+<span class="fc" id="L199">        associations.traces().stream()</span>
+<span class="fc" id="L200">            .map(AssociationsJson.TraceSnapshot::attachmentId)</span>
+<span class="fc" id="L201">            .filter(Objects::nonNull)</span>
+<span class="fc" id="L202">            .collect(Collectors.toSet());</span>
 
-<span class="fc bfc" id="L199" title="All 2 branches covered.">    if (ids.isEmpty()) return Map.of();</span>
+<span class="fc bfc" id="L204" title="All 2 branches covered.">    if (ids.isEmpty()) return Map.of();</span>
 
-<span class="fc" id="L201">    return fileJpaRepository.findAllById(ids).stream()</span>
-<span class="fc" id="L202">        .collect(Collectors.toMap(AvenirsBaseEntity::getId, FileMapper.INSTANCE::toDomain));</span>
+<span class="fc" id="L206">    return fileJpaRepository.findAllById(ids).stream()</span>
+<span class="fc" id="L207">        .collect(Collectors.toMap(AvenirsBaseEntity::getId, FileMapper.INSTANCE::toDomain));</span>
   }
 
   private Map&lt;UUID, Student&gt; resolveStudents(AssociationsJson associations) {
-<span class="fc" id="L206">    Set&lt;UUID&gt; ids =</span>
-<span class="fc" id="L207">        Stream.concat(</span>
-<span class="fc" id="L208">                associations.traces().stream().map(AssociationsJson.TraceSnapshot::studentId),</span>
-<span class="fc" id="L209">                associations.declaredSkillProgresses().stream()</span>
-<span class="fc" id="L210">                    .map(AssociationsJson.DeclaredSkillProgressSnapshot::studentId))</span>
-<span class="fc" id="L211">            .collect(Collectors.toSet());</span>
+<span class="fc" id="L211">    Set&lt;UUID&gt; ids =</span>
+<span class="fc" id="L212">        Stream.concat(</span>
+<span class="fc" id="L213">                associations.traces().stream().map(AssociationsJson.TraceSnapshot::studentId),</span>
+<span class="fc" id="L214">                associations.declaredSkillProgresses().stream()</span>
+<span class="fc" id="L215">                    .map(AssociationsJson.DeclaredSkillProgressSnapshot::studentId))</span>
+<span class="fc" id="L216">            .collect(Collectors.toSet());</span>
 
-<span class="fc" id="L213">    return studentJpaRepository.findAllById(ids).stream()</span>
-<span class="fc" id="L214">        .collect(Collectors.toMap(AvenirsBaseEntity::getId, StudentMapper.INSTANCE::toDomain));</span>
+<span class="fc" id="L218">    return studentJpaRepository.findAllById(ids).stream()</span>
+<span class="fc" id="L219">        .collect(Collectors.toMap(AvenirsBaseEntity::getId, StudentMapper.INSTANCE::toDomain));</span>
   }
 
   private Map&lt;UUID, DeclaredSkill&gt; resolveSkills(AssociationsJson associations) {
-<span class="fc" id="L218">    Set&lt;UUID&gt; ids =</span>
-<span class="fc" id="L219">        associations.declaredSkillProgresses().stream()</span>
-<span class="fc" id="L220">            .map(AssociationsJson.DeclaredSkillProgressSnapshot::skillId)</span>
-<span class="fc" id="L221">            .collect(Collectors.toSet());</span>
+<span class="fc" id="L223">    Set&lt;UUID&gt; ids =</span>
+<span class="fc" id="L224">        associations.declaredSkillProgresses().stream()</span>
+<span class="fc" id="L225">            .map(AssociationsJson.DeclaredSkillProgressSnapshot::skillId)</span>
+<span class="fc" id="L226">            .collect(Collectors.toSet());</span>
 
-<span class="fc" id="L223">    return declaredSkillJpaRepository.findAllById(ids).stream()</span>
-<span class="fc" id="L224">        .collect(</span>
-<span class="fc" id="L225">            Collectors.toMap(AvenirsBaseEntity::getId, DeclaredSkillMapper.INSTANCE::toDomain));</span>
+<span class="fc" id="L228">    return declaredSkillJpaRepository.findAllById(ids).stream()</span>
+<span class="fc" id="L229">        .collect(</span>
+<span class="fc" id="L230">            Collectors.toMap(AvenirsBaseEntity::getId, DeclaredSkillMapper.INSTANCE::toDomain));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
