@@ -78,10 +78,5 @@ public class AssociationServiceImpl implements AssociationService {
 <span class="fc" id="L78">        ids.stream().flatMap(id -&gt; getAllOf(id, clazz, associationTypes).stream()).toList();</span>
 <span class="fc" id="L79">    deleteAllByIds(associations.stream().map(Association::getId).toList());</span>
 <span class="fc" id="L80">  }</span>
-
-  @Override
-  public int deleteAllByEndpointId(UUID id) {
-<span class="fc" id="L84">    return associationRepository.deleteAllByEndpointId(id);</span>
-  }
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

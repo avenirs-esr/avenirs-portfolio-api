@@ -402,18 +402,18 @@ public class TraceController {
   @PostMapping(value = &quot;/{traceId}/attachment&quot;, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity&lt;FileDTO&gt; uploadAttachment(
       Principal principal, @PathVariable UUID traceId, @RequestParam(&quot;file&quot;) MultipartFile file) {
-<span class="fc" id="L405">    log.debug(</span>
+<span class="nc" id="L405">    log.debug(</span>
         &quot;Received request to upload attachment for trace [{}] by user [{}]&quot;,
         traceId,
-<span class="fc" id="L408">        principal.getName());</span>
-<span class="fc" id="L409">    var uploaded =</span>
-<span class="fc" id="L410">        traceService.uploadAttachment(</span>
+<span class="nc" id="L408">        principal.getName());</span>
+<span class="nc" id="L409">    var uploaded =</span>
+<span class="nc" id="L410">        traceService.uploadAttachment(</span>
             traceId,
-<span class="fc" id="L412">            file.getOriginalFilename(),</span>
-<span class="fc" id="L413">            file.getContentType(),</span>
-<span class="fc" id="L414">            file.getSize(),</span>
-<span class="fc" id="L415">            readBytes(file));</span>
-<span class="fc" id="L416">    return ResponseEntity.status(HttpStatus.CREATED).body(fileDtoMapper.fromDomain(uploaded));</span>
+<span class="nc" id="L412">            file.getOriginalFilename(),</span>
+<span class="nc" id="L413">            file.getContentType(),</span>
+<span class="nc" id="L414">            file.getSize(),</span>
+<span class="nc" id="L415">            readBytes(file));</span>
+<span class="nc" id="L416">    return ResponseEntity.status(HttpStatus.CREATED).body(fileDtoMapper.fromDomain(uploaded));</span>
   }
 
   @PreAuthorize(&quot;hasAuthority('trace:list:own')&quot;)
@@ -435,4 +435,4 @@ public class TraceController {
 <span class="nc" id="L435">        .body(downloadedFile.content());</span>
   }
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -100,38 +100,33 @@ public class AssociationDatabaseRepository
   }
 
   @Override
-  public int deleteAllByEndpointId(UUID id) {
-<span class="fc" id="L104">    return jpaRepository.deleteAllByEndpointId(id);</span>
-  }
-
-  @Override
   public List&lt;Association&gt; findAllOf(
       UUID id, Class&lt;?&gt; clazz, List&lt;EAssociationType&gt; associationTypes) {
-<span class="fc" id="L110">    Specification&lt;AssociationEntity&gt; specification = null;</span>
+<span class="fc" id="L105">    Specification&lt;AssociationEntity&gt; specification = null;</span>
 
-<span class="fc bfc" id="L112" title="All 2 branches covered.">    for (EAssociationType type : associationTypes) {</span>
-<span class="fc" id="L113">      Specification&lt;AssociationEntity&gt; typeSpec =</span>
-<span class="fc" id="L114">          AssociationSpecification.withTypeIn(List.of(type));</span>
+<span class="fc bfc" id="L107" title="All 2 branches covered.">    for (EAssociationType type : associationTypes) {</span>
+<span class="fc" id="L108">      Specification&lt;AssociationEntity&gt; typeSpec =</span>
+<span class="fc" id="L109">          AssociationSpecification.withTypeIn(List.of(type));</span>
 
-<span class="fc bfc" id="L116" title="All 2 branches covered.">      if (type.getKey1().equals(clazz)) {</span>
-<span class="fc" id="L117">        typeSpec = typeSpec.and(AssociationSpecification.key1(id));</span>
-<span class="pc bpc" id="L118" title="1 of 2 branches missed.">      } else if (type.getKey2().equals(clazz)) {</span>
-<span class="fc" id="L119">        typeSpec = typeSpec.and(AssociationSpecification.key2(id));</span>
+<span class="fc bfc" id="L111" title="All 2 branches covered.">      if (type.getKey1().equals(clazz)) {</span>
+<span class="fc" id="L112">        typeSpec = typeSpec.and(AssociationSpecification.key1(id));</span>
+<span class="pc bpc" id="L113" title="1 of 2 branches missed.">      } else if (type.getKey2().equals(clazz)) {</span>
+<span class="fc" id="L114">        typeSpec = typeSpec.and(AssociationSpecification.key2(id));</span>
       } else {
-<span class="nc" id="L121">        throw new IllegalArgumentException(</span>
+<span class="nc" id="L116">        throw new IllegalArgumentException(</span>
             &quot;Class &quot; + clazz + &quot; not compatible with association type &quot; + type);
       }
 
-<span class="fc bfc" id="L125" title="All 2 branches covered.">      if (specification == null) {</span>
-<span class="fc" id="L126">        specification = typeSpec;</span>
+<span class="fc bfc" id="L120" title="All 2 branches covered.">      if (specification == null) {</span>
+<span class="fc" id="L121">        specification = typeSpec;</span>
       } else {
-<span class="fc" id="L128">        specification = specification.or(typeSpec);</span>
+<span class="fc" id="L123">        specification = specification.or(typeSpec);</span>
       }
-<span class="fc" id="L130">    }</span>
+<span class="fc" id="L125">    }</span>
 
-<span class="fc" id="L132">    return jpaRepository.findAll(specification, DEFAULT_SORT).stream()</span>
-<span class="fc" id="L133">        .map(AssociationMapper.INSTANCE::toDomain)</span>
-<span class="fc" id="L134">        .toList();</span>
+<span class="fc" id="L127">    return jpaRepository.findAll(specification, DEFAULT_SORT).stream()</span>
+<span class="fc" id="L128">        .map(AssociationMapper.INSTANCE::toDomain)</span>
+<span class="fc" id="L129">        .toList();</span>
   }
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
