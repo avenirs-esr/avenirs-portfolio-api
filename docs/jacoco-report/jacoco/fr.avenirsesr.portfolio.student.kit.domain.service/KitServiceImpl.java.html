@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>KitServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.student.kit.domain.service</a> &gt; <span class="el_source">KitServiceImpl.java</span></div><h1>KitServiceImpl.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.student.kit.domain.service;
+
+import fr.avenirsesr.portfolio.common.error.domain.exception.BusinessException;
+import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
+import fr.avenirsesr.portfolio.student.kit.domain.exception.KitDownloadMediaFailed;
+import fr.avenirsesr.portfolio.student.kit.domain.model.KitMediaEntry;
+import fr.avenirsesr.portfolio.student.kit.domain.port.input.KitService;
+import fr.avenirsesr.portfolio.student.kit.domain.port.output.KitDownloadPort;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+<span class="fc" id="L22">@Slf4j</span>
+@AllArgsConstructor
+public class KitServiceImpl implements KitService {
+  private final FileStorageService fileStorageService;
+  private final List&lt;KitDownloadPort&gt; kitDownloadPorts;
+
+  @Override
+  public void downloadMedia(OutputStream out) throws BusinessException {
+<span class="fc" id="L30">    List&lt;KitMediaEntry&gt; valorizedMedia =</span>
+<span class="fc" id="L31">        kitDownloadPorts.stream().flatMap(port -&gt; port.getMedia().stream()).toList();</span>
+
+<span class="fc" id="L33">    Map&lt;String, Set&lt;String&gt;&gt; usedFolderNames = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L34">    Map&lt;String, Set&lt;String&gt;&gt; usedFileNames = new HashMap&lt;&gt;();</span>
+
+    // TODO: Create a utility class to simplify ZIP creation or file streaming
+<span class="fc" id="L37">    try (ZipOutputStream zos = new ZipOutputStream(out)) {</span>
+<span class="fc bfc" id="L38" title="All 2 branches covered.">      for (KitMediaEntry entry : valorizedMedia) {</span>
+<span class="fc" id="L39">        String folder = resolveFolder(entry.folderPath(), usedFolderNames);</span>
+<span class="fc" id="L40">        Set&lt;String&gt; filesHere = usedFileNames.computeIfAbsent(folder, k -&gt; new HashSet&lt;&gt;());</span>
+<span class="fc" id="L41">        String sanitizedFileName = sanitize(entry.file().getFileName());</span>
+<span class="fc" id="L42">        String uniqueFileName = uniqueFileName(sanitizedFileName, filesHere);</span>
+<span class="pc bpc" id="L43" title="1 of 2 branches missed.">        String entryPath = folder.isEmpty() ? uniqueFileName : folder + &quot;/&quot; + uniqueFileName;</span>
+
+<span class="fc" id="L45">        zos.putNextEntry(new ZipEntry(entryPath));</span>
+<span class="fc" id="L46">        zos.write(fileStorageService.get(entry.file().getUri()));</span>
+<span class="fc" id="L47">        zos.closeEntry();</span>
+<span class="fc" id="L48">      }</span>
+<span class="fc" id="L49">    } catch (IOException e) {</span>
+<span class="fc" id="L50">      log.error(&quot;Failed to write kit zip&quot;, e);</span>
+<span class="fc" id="L51">      throw new KitDownloadMediaFailed();</span>
+<span class="fc" id="L52">    }</span>
+<span class="fc" id="L53">  }</span>
+
+  private String resolveFolder(List&lt;String&gt; path, Map&lt;String, Set&lt;String&gt;&gt; usedNames) {
+<span class="pc bpc" id="L56" title="2 of 4 branches missed.">    if (path == null || path.isEmpty()) {</span>
+<span class="nc" id="L57">      return &quot;&quot;;</span>
+    }
+
+<span class="fc" id="L60">    List&lt;String&gt; parents = path.subList(0, path.size() - 1);</span>
+<span class="fc" id="L61">    String parentPrefix = parents.stream().map(this::sanitize).collect(Collectors.joining(&quot;/&quot;));</span>
+
+<span class="fc" id="L63">    String leaf = sanitize(path.get(path.size() - 1));</span>
+<span class="fc" id="L64">    Set&lt;String&gt; siblings = usedNames.computeIfAbsent(parentPrefix, k -&gt; new HashSet&lt;&gt;());</span>
+<span class="fc" id="L65">    String uniqueLeaf = uniqueFolderName(leaf, siblings);</span>
+
+<span class="pc bpc" id="L67" title="1 of 2 branches missed.">    return parentPrefix.isEmpty() ? uniqueLeaf : parentPrefix + &quot;/&quot; + uniqueLeaf;</span>
+  }
+
+  private String uniqueFolderName(String name, Set&lt;String&gt; usedNames) {
+<span class="fc bfc" id="L71" title="All 2 branches covered.">    if (usedNames.add(name)) {</span>
+<span class="fc" id="L72">      return name;</span>
+    }
+
+    String candidate;
+<span class="fc" id="L76">    int i = 1;</span>
+    do {
+<span class="fc" id="L78">      candidate = &quot;%s (%d)&quot;.formatted(name, i++);</span>
+<span class="pc bpc" id="L79" title="1 of 2 branches missed.">    } while (!usedNames.add(candidate));</span>
+
+<span class="fc" id="L81">    return candidate;</span>
+  }
+
+  private String uniqueFileName(String name, Set&lt;String&gt; usedNames) {
+<span class="pc bpc" id="L85" title="1 of 2 branches missed.">    if (usedNames.add(name)) {</span>
+<span class="fc" id="L86">      return name;</span>
+    }
+
+<span class="nc" id="L89">    String base = name;</span>
+<span class="nc" id="L90">    String ext = &quot;&quot;;</span>
+<span class="nc" id="L91">    int dot = name.lastIndexOf('.');</span>
+
+<span class="nc bnc" id="L93" title="All 2 branches missed.">    if (dot &gt; 0) {</span>
+<span class="nc" id="L94">      base = name.substring(0, dot);</span>
+<span class="nc" id="L95">      ext = name.substring(dot);</span>
+    }
+
+    String candidate;
+<span class="nc" id="L99">    int i = 1;</span>
+    do {
+<span class="nc" id="L101">      candidate = &quot;%s (%d)%s&quot;.formatted(base, i++, ext);</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">    } while (!usedNames.add(candidate));</span>
+
+<span class="nc" id="L104">    return candidate;</span>
+  }
+
+  private String sanitize(String segment) {
+<span class="fc" id="L108">    return segment.replaceAll(&quot;[/\\\\]&quot;, &quot;-&quot;).trim();</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

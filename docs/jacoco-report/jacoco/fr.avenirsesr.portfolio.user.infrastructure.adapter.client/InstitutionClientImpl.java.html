@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>InstitutionClientImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.user.infrastructure.adapter.client</a> &gt; <span class="el_source">InstitutionClientImpl.java</span></div><h1>InstitutionClientImpl.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.user.infrastructure.adapter.client;
+
+import fr.avenirsesr.portfolio.common.institution.application.adapter.dto.InstitutionDTO;
+import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.AvenirsSecurityHeaders;
+import fr.avenirsesr.portfolio.user.domain.port.output.client.InstitutionClient;
+import java.util.Optional;
+import java.util.UUID;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+
+<span class="fc" id="L15">@Slf4j</span>
+@Component
+public class InstitutionClientImpl implements InstitutionClient {
+
+  private final WebClient webClient;
+
+  @Value(&quot;${avenirs.back-office.api-key}&quot;)
+  private String apiKey;
+
+  @Value(&quot;${avenirs.back-office.institution.endpoint}&quot;)
+  private String institutionEndpoint;
+
+<span class="fc" id="L27">  public InstitutionClientImpl(WebClient webClient) {</span>
+<span class="fc" id="L28">    this.webClient = webClient;</span>
+<span class="fc" id="L29">  }</span>
+
+  @Override
+  @Cacheable(value = &quot;institutionById&quot;, key = &quot;#id&quot;, unless = &quot;#result == null&quot;)
+  public Optional&lt;InstitutionDTO&gt; getById(UUID id) {
+    try {
+<span class="fc" id="L35">      log.debug(&quot;Fetching institution {} from back-office&quot;, id);</span>
+<span class="fc" id="L36">      return Optional.ofNullable(</span>
+          webClient
+<span class="fc" id="L38">              .get()</span>
+<span class="fc" id="L39">              .uri(institutionEndpoint + &quot;/&quot; + id)</span>
+<span class="fc" id="L40">              .header(AvenirsSecurityHeaders.API_KEY, apiKey)</span>
+<span class="fc" id="L41">              .retrieve()</span>
+<span class="fc" id="L42">              .bodyToMono(InstitutionDTO.class)</span>
+<span class="fc" id="L43">              .block());</span>
+<span class="fc" id="L44">    } catch (WebClientResponseException.NotFound e) {</span>
+<span class="fc" id="L45">      log.debug(&quot;Back-office does not know the institution {}&quot;, id);</span>
+<span class="fc" id="L46">      return Optional.empty();</span>
+<span class="fc" id="L47">    } catch (Exception e) {</span>
+<span class="fc" id="L48">      log.error(</span>
+          &quot;Failed to fetch institution {} from back-office at '{}'. Error: {}&quot;,
+          id,
+          institutionEndpoint,
+<span class="fc" id="L52">          e.getMessage());</span>
+<span class="fc" id="L53">      log.debug(&quot;Full error details:&quot;, e);</span>
+<span class="fc" id="L54">      return Optional.empty();</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
