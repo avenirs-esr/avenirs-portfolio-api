@@ -6,6 +6,20 @@ and [Conventional Commits](https://www.conventionalcommits.org/) standard.
 
 ---
 
+## [1.4.11] - 2026-09-11
+
+- **Student info in the student feedback list**
+    - `StudentFeedbackItemListDTO` now returns a `StudentInfoDTO` instead of a `UserInfoDTO`, adding the program the
+      student belongs to.
+    - The program is resolved from the back office: the API sends the group id held by the student, the back office
+      returns the topmost ancestor of that group.
+    - New properties: `avenirs.back-office.institution.endpoint` and `avenirs.back-office.group.endpoint`.
+    - Added Redis caches (24h TTL) `institutionById`, `groupById` and `programByGroupId`.
+    - An unreachable back office leaves the program null instead of failing the whole list.
+- **Update process**
+    - Seeded students now carry an `institutionId` and a `groupId`. They hold the ids the back office derives from the
+      `hai` and the `id_si_sco`, so the back office database has to be recreated for the program to resolve.
+
 ## [1.4.10] - 2025-12-09
 
 - Unicity of additional skills (external_skill_id + type)
