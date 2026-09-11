@@ -177,6 +177,11 @@ public class FeedbackDatabaseRepository
     return (int) jpaRepository.count(spec);
   }
 
+  @Override
+  public int deleteByDeclaredActivityId(UUID declaredActivityId) {
+    return jpaRepository.deleteByDeclaredActivityId(declaredActivityId);
+  }
+
   // ── private helpers ─────────────────────────────────────────────────
 
   private Feedback toDomainWithDependencies(FeedbackEntity entity) {

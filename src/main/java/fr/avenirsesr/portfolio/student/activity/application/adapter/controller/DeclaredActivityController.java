@@ -121,6 +121,13 @@ public class DeclaredActivityController {
   }
 
   @PreAuthorize("hasAuthority('declared-activity:update:own')")
+  @DeleteMapping("/{declaredActivityId}/content")
+  public ResponseEntity<Void> deleteActivityContent(@PathVariable UUID declaredActivityId) {
+    declaredActivityService.deleteContentActivity(declaredActivityId);
+    return ResponseEntity.noContent().build();
+  }
+
+  @PreAuthorize("hasAuthority('declared-activity:update:own')")
   @PutMapping("/finish/{declaredActivityId}")
   public ResponseEntity<Void> finish(
       Principal principal, @Valid @PathVariable UUID declaredActivityId) {

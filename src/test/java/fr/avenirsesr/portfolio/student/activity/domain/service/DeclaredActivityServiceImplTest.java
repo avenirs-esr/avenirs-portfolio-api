@@ -84,6 +84,7 @@ class DeclaredActivityServiceImplTest {
   @Captor private ArgumentCaptor<DeclaredActivity> activityCaptor;
 
   private Student student;
+  private final UUID declaredActivityId = UUID.randomUUID();
 
   @BeforeEach
   void setUp() {
@@ -2049,5 +2050,74 @@ class DeclaredActivityServiceImplTest {
 
     BddLogger.then("it should return an empty list");
     assertThat(result).isEmpty();
+  }
+
+  private void stubDeclaredActivity(Instant unsubscribe) {
+    Activity activity = ActivityFixture.create().toModel();
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(
+            declaredActivityId,
+            student,
+            activity,
+            Instant.now(),
+            "my reflection",
+            null,
+            null,
+            null);
+    declaredActivity.unsubscribe(unsubscribe);
+
+    UUID declaredActivityId = declaredActivity.getId();
+    UUID studentId = student.getId();
+    when(declaredActivityRepository.findByIdAndStudentId(declaredActivityId, studentId))
+        .thenReturn(Optional.of(declaredActivity));
+  }
+
+  @Test
+  void deleteContentActivity_should_reject_content_activity_when_the_student_isUnsubscribed() {
+    UUID studentId = student.getId();
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findByIdAndStudentId(declaredActivityId, studentId))
+        .thenReturn(Optional.empty());
+    assertThatThrownBy(() -> declaredActivityService.deleteContentActivity(declaredActivityId))
+        .isInstanceOf(DeclaredActivityNotFoundException.class);
+    verifyNoInteractions(associationService, feedbackService);
+    verify(declaredActivityRepository, never()).deleteByIdAndStudentId(any(), any());
+  }
+
+  @Test
+  void deleteContentActivity_should_reject_if_activity_isUnsubscribed() {
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    stubDeclaredActivity(null);
+    assertThatThrownBy(() -> declaredActivityService.deleteContentActivity(declaredActivityId))
+        .isInstanceOf(DeclaredActivityNotUnsubscribedException.class);
+    verifyNoInteractions(associationService, feedbackService);
+    verify(declaredActivityRepository, never()).deleteByIdAndStudentId(any(), any());
+  }
+
+  @Test
+  void
+      deleteContentActivity_should_delete_associations_feedbacks_then_declared_activity_when_isUnsubscribed() {
+    UUID studentId = student.getId();
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    stubDeclaredActivity(Instant.now());
+    declaredActivityService.deleteContentActivity(declaredActivityId);
+    InOrder inOrder = inOrder(associationService, feedbackService, declaredActivityRepository);
+
+    inOrder.verify(associationService).deleteAllByEndpointId(declaredActivityId);
+
+    inOrder.verify(feedbackService).deleteByDeclaredActivityId(declaredActivityId);
+
+    inOrder
+        .verify(declaredActivityRepository)
+        .deleteByIdAndStudentId(declaredActivityId, studentId);
+  }
+
+  @Test
+  void deleteContentActivity_should_delete_on_the_connected_student() {
+    UUID studentId = student.getId();
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    stubDeclaredActivity(Instant.now());
+    service.deleteContentActivity(declaredActivityId);
+    verify(declaredActivityRepository).deleteByIdAndStudentId(declaredActivityId, studentId);
   }
 }

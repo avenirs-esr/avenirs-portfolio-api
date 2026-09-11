@@ -100,6 +100,11 @@ public class AssociationDatabaseRepository
   }
 
   @Override
+  public int deleteAllByEndpointId(UUID id) {
+    return jpaRepository.deleteAllByEndpointId(id);
+  }
+
+  @Override
   public List<Association> findAllOf(
       UUID id, Class<?> clazz, List<EAssociationType> associationTypes) {
     Specification<AssociationEntity> specification = null;

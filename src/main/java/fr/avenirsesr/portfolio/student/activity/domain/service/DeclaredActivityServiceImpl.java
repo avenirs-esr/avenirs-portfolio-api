@@ -637,6 +637,51 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
         .isPresent();
   }
 
+  @Override
+  public void deleteContentActivity(UUID declaredActivityId) {
+
+    Student student = loggedInUserService.getLoggedInStudent();
+    UUID currentStudentId = student.getId();
+    DeclaredActivity declaredActivity =
+        declaredActivityRepository
+            .findByIdAndStudentId(declaredActivityId, currentStudentId)
+            .orElseThrow(
+                () ->
+                    new DeclaredActivityNotFoundException(
+                        "DeclaredActivity not found with id: " + declaredActivityId));
+
+    if (!declaredActivity.isUnsubscribed()) {
+      throw new DeclaredActivityNotUnsubscribedException();
+    }
+
+    int deletedAssociations = associationService.deleteAllByEndpointId(declaredActivityId);
+    log.debug(
+        "{} association supprimée pour la declaredActivity {}",
+        deletedAssociations,
+        declaredActivityId);
+
+    int deletedFeedbacks = feedbackService.deleteByDeclaredActivityId(declaredActivityId);
+    log.debug(
+        "{} feedback supprimé pour la declaredActivity {}", deletedFeedbacks, declaredActivityId);
+
+    int deletedActivities =
+        declaredActivityRepository.deleteByIdAndStudentId(declaredActivityId, currentStudentId);
+    log.debug(
+        "declaredActivity {} supprimée pour l'étudiant {} (lignes affectées : {})",
+        declaredActivityId,
+        currentStudentId,
+        deletedActivities);
+
+    log.info(
+        "Contenu supprimé pour la declaredActivity {} (étudiant {}) : {} association(s), {}"
+            + " feedback(s), {} activité déclarée",
+        declaredActivityId,
+        currentStudentId,
+        deletedAssociations,
+        deletedFeedbacks,
+        deletedActivities);
+  }
+
   private EAssociationType getAssociationType(EAssociationContextType contextType) {
     return switch (contextType) {
       case TRACE -> EAssociationType.DECLARED_ACTIVITY_TRACE;
