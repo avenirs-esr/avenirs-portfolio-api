@@ -8,10 +8,6 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-/**
- * Builds the student identity exposed by the API. The program is owned by the back-office, which
- * resolves it from the group the student belongs to.
- */
 @Component
 @RequiredArgsConstructor
 public class StudentInfoDTOMapper {
