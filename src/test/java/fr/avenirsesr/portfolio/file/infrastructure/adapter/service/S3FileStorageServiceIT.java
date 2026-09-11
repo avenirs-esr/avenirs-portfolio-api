@@ -47,7 +47,8 @@ class S3FileStorageServiceIT {
   @BeforeAll
   void startBackend() {
     minio =
-        new GenericContainer<>(DockerImageName.parse("minio/minio:RELEASE.2025-04-22T22-12-26Z"))
+        new GenericContainer<>(
+                DockerImageName.parse("quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z"))
             .withEnv("MINIO_ROOT_USER", ACCESS_KEY)
             .withEnv("MINIO_ROOT_PASSWORD", SECRET_KEY)
             .withCommand("server", "/data")
