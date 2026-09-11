@@ -37,6 +37,7 @@ import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.Fe
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.association.domain.utils.AssociationUtils;
+import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillProgressDetails;
 import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
@@ -161,7 +162,7 @@ public class FeedbackServiceImpl implements FeedbackService {
         feedback.getStatus(),
         feedback.getIteration(),
         feedback.getAssociatedTraces(),
-        feedback.getAssociatedDeclaredSkills(),
+        enrichDeclaredSkills(feedback.getAssociatedDeclaredSkills()),
         feedback.getAttachments());
   }
 
@@ -189,8 +190,15 @@ public class FeedbackServiceImpl implements FeedbackService {
         feedback.getStatus(),
         feedback.getIteration(),
         feedback.getAssociatedTraces(),
-        feedback.getAssociatedDeclaredSkills(),
+        enrichDeclaredSkills(feedback.getAssociatedDeclaredSkills()),
         attachments);
+  }
+
+  private List<DeclaredSkillProgressDetails> enrichDeclaredSkills(
+      List<DeclaredSkillProgress> declaredSkillProgresses) {
+    return declaredSkillProgresses.isEmpty()
+        ? List.of()
+        : declaredSkillProgressService.getDeclaredSkillProgressDetails(declaredSkillProgresses);
   }
 
   @Override

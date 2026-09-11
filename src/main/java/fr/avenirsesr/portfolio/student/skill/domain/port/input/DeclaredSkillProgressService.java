@@ -29,6 +29,9 @@ public interface DeclaredSkillProgressService {
 
   DeclaredSkillProgressDetails getDeclaredSkillProgressDetails(UUID declaredSkillProgressId);
 
+  List<DeclaredSkillProgressDetails> getDeclaredSkillProgressDetails(
+      List<DeclaredSkillProgress> declaredSkillProgresses);
+
   void deleteDeclaredSkillProgresses(List<UUID> declaredSkillProgressIds);
 
   PagedResult<DeclaredSkillProgress> searchDeclaredSkill(String keyword, PageCriteria pageCriteria);
