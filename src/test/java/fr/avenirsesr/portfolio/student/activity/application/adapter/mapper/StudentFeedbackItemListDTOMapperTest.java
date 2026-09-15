@@ -33,6 +33,10 @@ class StudentFeedbackItemListDTOMapperTest {
   @InjectMocks private StudentFeedbackItemListDTOMapperImpl mapper;
 
   private Feedback buildFeedback(Student student) {
+    return buildFeedback(student, EFeedbackStatus.NEW);
+  }
+
+  private Feedback buildFeedback(Student student, EFeedbackStatus status) {
     var activity = ActivityFixture.create().toModel();
     DeclaredActivity declaredActivity =
         DeclaredActivity.create(UUID.randomUUID(), student, activity, null, null, null, null, null);
@@ -43,7 +47,7 @@ class StudentFeedbackItemListDTOMapperTest {
         declaredActivity,
         null,
         null,
-        EFeedbackStatus.NEW,
+        status,
         1,
         List.of(),
         List.of(),
@@ -60,7 +64,7 @@ class StudentFeedbackItemListDTOMapperTest {
   }
 
   @Test
-  void should_map_id_and_student_from_feedback() {
+  void should_map_id_student_and_status_from_feedback() {
     BddLogger.given("A feedback linked to a declared activity with a student");
     Student student = StudentFixture.create().toModel();
     Feedback feedback = buildFeedback(student);
@@ -69,14 +73,28 @@ class StudentFeedbackItemListDTOMapperTest {
     BddLogger.when("mapping to StudentFeedbackItemListDTO");
     StudentFeedbackItemListDTO dto = mapper.toDTO(feedback);
 
-    BddLogger.then("id and all student fields are correctly mapped");
+    BddLogger.then("id, status and all student fields are correctly mapped");
     assertThat(dto).isNotNull();
     assertThat(dto.feedbackId()).isEqualTo(feedback.getId());
+    assertThat(dto.status()).isEqualTo(EFeedbackStatus.NEW);
     assertThat(dto.student()).isNotNull();
     assertThat(dto.student().id()).isEqualTo(student.getUser().getId());
     assertThat(dto.student().firstName()).isEqualTo(student.getUser().getFirstName());
     assertThat(dto.student().lastName()).isEqualTo(student.getUser().getLastName());
     assertThat(dto.student().email()).isEqualTo(student.getUser().getEmail());
+  }
+
+  @Test
+  void should_map_every_status_of_the_feedback() {
+    BddLogger.given("A feedback for each possible status");
+    Student student = StudentFixture.create().toModel();
+    when(studentInfoDTOMapper.toDTO(student)).thenReturn(studentInfoOf(student));
+
+    BddLogger.when("mapping each feedback to StudentFeedbackItemListDTO");
+    BddLogger.then("the dto carries the status of its feedback");
+    for (EFeedbackStatus status : EFeedbackStatus.values()) {
+      assertThat(mapper.toDTO(buildFeedback(student, status)).status()).isEqualTo(status);
+    }
   }
 
   @Test
