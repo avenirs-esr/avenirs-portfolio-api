@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import fr.avenirsesr.portfolio.notification.domain.model.Notification;
+import fr.avenirsesr.portfolio.notification.domain.model.enums.ENotificationType;
 import fr.avenirsesr.portfolio.notification.domain.port.output.repository.NotificationRepository;
 import fr.avenirsesr.portfolio.notification.infrastructure.adapter.mapper.NotificationMapper;
 import fr.avenirsesr.portfolio.notification.infrastructure.adapter.model.NotificationEntity;
@@ -18,9 +19,11 @@ import org.springframework.stereotype.Repository;
 public class NotificationDatabaseRepository
     extends GenericJpaRepositoryAdapter<Notification, NotificationEntity>
     implements NotificationRepository {
+  private final NotificationJpaRepository notificationJpaRepository;
 
   public NotificationDatabaseRepository(NotificationJpaRepository jpaRepository) {
     super(jpaRepository, jpaRepository, NotificationEntity.class, NotificationMapper.INSTANCE);
+    this.notificationJpaRepository = jpaRepository;
   }
 
   @Override
@@ -42,5 +45,10 @@ public class NotificationDatabaseRepository
             .and(NotificationSpecification.hasUserCategoryNullOrEquals(userCategory))
             .and(NotificationSpecification.isNotSeen());
     return jpaSpecificationExecutor.count(specification);
+  }
+
+  @Override
+  public void deleteByTypeAndElementId(ENotificationType type, UUID elementId) {
+    notificationJpaRepository.deleteByTypeAndElementId(type, elementId);
   }
 }

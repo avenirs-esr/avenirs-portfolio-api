@@ -9,6 +9,8 @@ import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
+import fr.avenirsesr.portfolio.notification.domain.model.enums.ENotificationType;
+import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityUnpublishedException;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
@@ -65,6 +67,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   private final LoggedInUserService loggedInUserService;
   private final FeedbackRepository feedbackRepository;
   private final FeedbackService feedbackService;
+  private final NotificationService notificationService;
 
   @Override
   public PagedResult<DeclaredActivity> getDeclaredActivities(PageCriteria pageCriteria) {
@@ -635,6 +638,27 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
         .findByActivity(student, activity)
         .filter(declaredActivity -> !declaredActivity.isUnsubscribed())
         .isPresent();
+  }
+
+  @Override
+  public void deleteActivity(UUID declaredActivityId) {
+    DeclaredActivity declaredActivity =
+        fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
+
+    if (!declaredActivity.isUnsubscribed()) {
+      throw new DeclaredActivityNotUnsubscribedException();
+    }
+
+    associationService.deleteAssociationsOf(DeclaredActivity.class, declaredActivityId);
+    notificationService.deleteNotificationsOf(
+        ENotificationType.ASK_FOR_FEEDBACK, declaredActivityId);
+    feedbackService.deleteByDeclaredActivityId(declaredActivityId);
+    declaredActivityRepository.removeFromDatabase(declaredActivity);
+
+    log.debug(
+        "Content deleted for the declaredActivity {} (student {}): {} association(s), {}"
+            + " feedback(s), {} declared activity",
+        declaredActivityId);
   }
 
   private EAssociationType getAssociationType(EAssociationContextType contextType) {

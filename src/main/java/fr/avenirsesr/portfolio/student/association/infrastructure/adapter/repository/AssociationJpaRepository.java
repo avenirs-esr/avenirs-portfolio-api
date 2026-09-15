@@ -37,4 +37,13 @@ public interface AssociationJpaRepository
 
     Long getTotal();
   }
+
+  @Query(
+      """
+    select a from AssociationEntity a
+    where a.associationType = :type
+      and (a.id1 = :id or a.id2 = :id)
+    """)
+  List<AssociationEntity> findByTypeTouching(
+      @Param("type") EAssociationType type, @Param("id") UUID id);
 }
