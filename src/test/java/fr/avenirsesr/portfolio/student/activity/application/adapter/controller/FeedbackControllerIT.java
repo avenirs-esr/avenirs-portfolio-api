@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
+import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
@@ -674,8 +675,8 @@ public class FeedbackControllerIT extends ContainerConfigurationTest {
 
     BddLogger.when("performing a GET on the exhaustive list endpoint for the seeded activity");
     BddLogger.then(
-        "the item for that feedback has an id and a student with id, firstName, lastName, email and"
-            + " program");
+        "the item for that feedback has an id, a status and a student with id, firstName, lastName,"
+            + " email and program");
 
     String response =
         webTestClient
@@ -699,6 +700,7 @@ public class FeedbackControllerIT extends ContainerConfigurationTest {
     }
 
     assertThat(item).as("feedback %s in the exhaustive list", feedbackId).isNotNull();
+    assertThat(item.path("status").asText()).isEqualTo(EFeedbackStatus.NEW.name());
     JsonNode student = item.path("student");
     assertThat(student.path("id").asText()).isNotEmpty();
     assertThat(student.path("firstName").asText()).isNotEmpty();

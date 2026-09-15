@@ -16,6 +16,7 @@ and [Conventional Commits](https://www.conventionalcommits.org/) standard.
     - New properties: `avenirs.back-office.institution.endpoint` and `avenirs.back-office.group.endpoint`.
     - Added Redis caches (24h TTL) `institutionById`, `groupById` and `programByGroupId`.
     - An unreachable back office leaves the program null instead of failing the whole list.
+    - `StudentFeedbackItemListDTO` also returns the `status` of the feedback.
 - **Update process**
     - Seeded students now carry an `institutionId` and a `groupId`. They hold the ids the back office derives from the
       `hai` and the `id_si_sco`, so the back office database has to be recreated for the program to resolve.
