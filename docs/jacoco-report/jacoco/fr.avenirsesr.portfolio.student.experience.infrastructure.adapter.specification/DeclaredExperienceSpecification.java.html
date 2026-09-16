@@ -50,12 +50,12 @@ import org.springframework.data.jpa.domain.Specification;
   }
 
   public static Specification&lt;DeclaredExperienceEntity&gt; hasExperienceType(
-      List&lt;EExperienceType&gt; experienceTypes) {
+      EExperienceType experienceType) {
 <span class="fc" id="L54">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="pc bpc" id="L55" title="1 of 4 branches missed.">      if (experienceTypes == null || experienceTypes.isEmpty()) {</span>
+<span class="fc bfc" id="L55" title="All 2 branches covered.">      if (experienceType == null) {</span>
 <span class="fc" id="L56">        return criteriaBuilder.conjunction();</span>
       }
-<span class="fc" id="L58">      return root.get(&quot;experienceType&quot;).in(experienceTypes);</span>
+<span class="fc" id="L58">      return criteriaBuilder.equal(root.get(&quot;experienceType&quot;), experienceType);</span>
     };
   }
 }
