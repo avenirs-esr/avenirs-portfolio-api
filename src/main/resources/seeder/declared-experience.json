@@ -103,5 +103,35 @@
     "externalLink": null,
     "startDate": "2023-06-01",
     "endDate": null
+  },
+  {
+    "id": "7f3c2a91-6e84-4b15-a0d2-9c57e1f83b64",
+    "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
+    "title": "Développeur web",
+    "experienceType": "VOLUNTEER",
+    "organization": "AVENIR(s) Alumni",
+    "activitySector": "Informatique",
+    "location": "Toulouse",
+    "description": "Développement d'applications web",
+    "sourceOfInformation": null,
+    "summary": null,
+    "externalLink": null,
+    "startDate": "2023-06-01",
+    "endDate": null
+  },
+  {
+    "id": "d8a41f70-2c96-47be-91f5-63e8b2a4c709",
+    "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
+    "title": "Développeur mobile",
+    "experienceType": "PERSONAL",
+    "organization": "My home",
+    "activitySector": "Informatique",
+    "location": "Toulouse",
+    "description": "Développement d'applications mobiles",
+    "sourceOfInformation": null,
+    "summary": null,
+    "externalLink": null,
+    "startDate": "2023-06-01",
+    "endDate": null
   }
 ]

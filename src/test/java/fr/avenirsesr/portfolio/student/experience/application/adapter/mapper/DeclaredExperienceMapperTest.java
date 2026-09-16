@@ -63,6 +63,72 @@ class DeclaredExperienceMapperTest {
   }
 
   @Test
+  void shouldMapDeclaredExperienceToViewDTOWithVolunteerType() {
+    BddLogger.given("a declared experience");
+    Student student = StudentFixture.create().toModel();
+    DeclaredExperience experience =
+        DeclaredExperience.create(
+            student,
+            "Software Experience",
+            EExperienceType.VOLUNTEER,
+            "Tech Corp",
+            "Software",
+            "Paris",
+            "Backend development",
+            "LinkedIn",
+            "Built REST APIs",
+            "https://techcorp.com",
+            "Graduated with honors",
+            LocalDate.now().minusMonths(6),
+            LocalDate.now());
+
+    BddLogger.when("mapping to DeclaredExperienceViewDTO");
+    DeclaredExperienceViewDTO dto = mapper.toDTO(experience);
+
+    BddLogger.then("it should return a correct DeclaredExperienceViewDTO");
+    assertNotNull(dto);
+    assertEquals(experience.getId(), dto.id());
+    assertEquals(experience.getTitle(), dto.title());
+    assertEquals(EExperienceType.VOLUNTEER, dto.experienceType());
+    assertEquals("Tech Corp", dto.organization());
+    assertEquals("Graduated with honors", dto.result());
+    assertFalse(dto.valorized());
+  }
+
+  @Test
+  void shouldMapDeclaredExperienceToViewDTOWithPersonalType() {
+    BddLogger.given("a declared experience");
+    Student student = StudentFixture.create().toModel();
+    DeclaredExperience experience =
+        DeclaredExperience.create(
+            student,
+            "Software Experience",
+            EExperienceType.PERSONAL,
+            "Tech Corp",
+            "Software",
+            "Paris",
+            "Backend development",
+            "LinkedIn",
+            "Built REST APIs",
+            "https://techcorp.com",
+            "Graduated with honors",
+            LocalDate.now().minusMonths(6),
+            LocalDate.now());
+
+    BddLogger.when("mapping to DeclaredExperienceViewDTO");
+    DeclaredExperienceViewDTO dto = mapper.toDTO(experience);
+
+    BddLogger.then("it should return a correct DeclaredExperienceViewDTO");
+    assertNotNull(dto);
+    assertEquals(experience.getId(), dto.id());
+    assertEquals(experience.getTitle(), dto.title());
+    assertEquals(EExperienceType.PERSONAL, dto.experienceType());
+    assertEquals("Tech Corp", dto.organization());
+    assertEquals("Graduated with honors", dto.result());
+    assertFalse(dto.valorized());
+  }
+
+  @Test
   void shouldMapValorizedExperienceToViewDTO() {
     BddLogger.given("a valorized declared experience");
     Student student = StudentFixture.create().toModel();
