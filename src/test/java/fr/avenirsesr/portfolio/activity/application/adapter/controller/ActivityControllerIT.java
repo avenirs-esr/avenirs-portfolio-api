@@ -694,6 +694,119 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       }
 
       @Test
+      void thenItShouldNotModifyDatesWhenAbsentFromPayload() throws Exception {
+        BddLogger.and("given an existing activity draft with a completion period");
+        UUID draftId = createDraftAndGetId("Brouillon dates non transmises");
+        setCompletionPeriod(draftId, "2026-09-07", "2026-09-18");
+
+        BddLogger.then("a payload without startDate/endDate should leave the dates untouched");
+
+        webTestClient
+            .patch()
+            .uri(DRAFT_UPDATE_PATH, draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue("{\"title\": \"Titre sans dates\"}")
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk();
+
+        webTestClient
+            .get()
+            .uri(CONTENT_PATH, "DRAFT", draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.startDate")
+            .isEqualTo("2026-09-07")
+            .jsonPath("$.endDate")
+            .isEqualTo("2026-09-18");
+      }
+
+      @Test
+      void thenItShouldClearDatesWhenExplicitlyNull() throws Exception {
+        BddLogger.and("given an existing activity draft with a completion period");
+        UUID draftId = createDraftAndGetId("Brouillon dates explicitement nulles");
+        setCompletionPeriod(draftId, "2026-09-07", "2026-09-18");
+
+        BddLogger.then("explicit null startDate/endDate should clear the completion period");
+
+        webTestClient
+            .patch()
+            .uri(DRAFT_UPDATE_PATH, draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue("{\"startDate\": null, \"endDate\": null}")
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk();
+
+        webTestClient
+            .get()
+            .uri(CONTENT_PATH, "DRAFT", draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.startDate")
+            .doesNotExist()
+            .jsonPath("$.endDate")
+            .doesNotExist();
+      }
+
+      @Test
+      void thenItShouldReturn400WhenOnlyOneDateIsExplicitlyNull() throws Exception {
+        BddLogger.and("given an existing activity draft with a completion period");
+        UUID draftId = createDraftAndGetId("Brouillon une seule date nulle");
+        setCompletionPeriod(draftId, "2026-09-07", "2026-09-18");
+
+        BddLogger.then("clearing only one of the two dates should return 400");
+
+        webTestClient
+            .patch()
+            .uri(DRAFT_UPDATE_PATH, draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue("{\"startDate\": null}")
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isBadRequest()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("ACTIVITY_DATES");
+      }
+
+      @Test
+      void thenItShouldReturn400WhenOnlyOneDateIsProvided() throws Exception {
+        BddLogger.and("given an existing activity draft");
+        UUID draftId = createDraftAndGetId("Brouillon une seule date fournie");
+
+        BddLogger.then("providing only one of the two dates should return 400");
+
+        webTestClient
+            .patch()
+            .uri(DRAFT_UPDATE_PATH, draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue("{\"startDate\": \"2026-09-07\"}")
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isBadRequest()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("ACTIVITY_DATES");
+      }
+
+      @Test
       void thenItShouldReturn404WhenDraftNotFound() throws Exception {
         BddLogger.and("given a non-existent draft id");
         UUID unknownId = UUID.randomUUID();
@@ -765,6 +878,35 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             .exchange()
             .expectStatus()
             .isUnauthorized();
+      }
+
+      private void setCompletionPeriod(UUID draftId, String startDate, String endDate)
+          throws Exception {
+        String requestBody =
+            objectMapper.writeValueAsString(
+                new ActivityDraftUpdateRequest(
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    LocalDate.parse(startDate),
+                    LocalDate.parse(endDate),
+                    null,
+                    null,
+                    null,
+                    null));
+
+        webTestClient
+            .patch()
+            .uri(DRAFT_UPDATE_PATH, draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(requestBody)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk();
       }
     }
 

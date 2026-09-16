@@ -17,6 +17,7 @@ import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface ActivityService {
@@ -71,8 +72,8 @@ public interface ActivityService {
       String summary,
       String description,
       String recommendedCompletionContexts,
-      LocalDate startDate,
-      LocalDate endDate,
+      Optional<Optional<LocalDate>> startDate,
+      Optional<Optional<LocalDate>> endDate,
       Integer traceAllowedAssociations,
       Integer feedbackAllowedIterations,
       Boolean enableReflection,

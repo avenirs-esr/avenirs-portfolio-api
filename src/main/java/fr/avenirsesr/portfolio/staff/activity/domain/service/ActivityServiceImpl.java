@@ -450,8 +450,8 @@ public class ActivityServiceImpl implements ActivityService {
       String summary,
       String description,
       String recommendedCompletionContexts,
-      LocalDate startDate,
-      LocalDate endDate,
+      Optional<Optional<LocalDate>> startDate,
+      Optional<Optional<LocalDate>> endDate,
       Integer traceAllowedAssociations,
       Integer feedbackAllowedIterations,
       Boolean enableReflection,
@@ -470,10 +470,8 @@ public class ActivityServiceImpl implements ActivityService {
         "recommendedCompletionContexts",
         recommendedCompletionContexts,
         ACTIVITY_RECOMMENDED_COMPLETION_CONTEXTS);
-    if (startDate != null) {
-      validateDateOrder(startDate, endDate);
-    }
-    if ((startDate == null) != (endDate == null)) {
+
+    if (startDate.isPresent() != endDate.isPresent()) {
       throw new ActivityDatesException();
     }
 
@@ -486,8 +484,16 @@ public class ActivityServiceImpl implements ActivityService {
     if (description != null) draft.setDescription(description);
     if (recommendedCompletionContexts != null)
       draft.setRecommendedCompletionContexts(recommendedCompletionContexts);
-    if (startDate != null) draft.setStartDate(startDate);
-    if (endDate != null) draft.setEndDate(endDate);
+    if (startDate.isPresent()) {
+      var newStartDate = startDate.get();
+      var newEndDate = endDate.get();
+      if (newStartDate.isPresent() != newEndDate.isPresent()) {
+        throw new ActivityDatesException();
+      }
+      newStartDate.ifPresent(value -> validateDateOrder(value, newEndDate.orElse(null)));
+      draft.setStartDate(newStartDate.orElse(null));
+      draft.setEndDate(newEndDate.orElse(null));
+    }
 
     if (!hasEnrolledStudents(draft)) {
       if (traceAllowedAssociations != null)
