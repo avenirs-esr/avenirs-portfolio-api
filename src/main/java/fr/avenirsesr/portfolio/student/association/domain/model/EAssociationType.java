@@ -37,4 +37,14 @@ public enum EAssociationType {
     if (key2.equals(subjectClass)) return Association::getId2;
     throw new IllegalArgumentException(subjectClass.getSimpleName() + " is not part of " + name());
   }
+
+  public Class<?> associatedKeyOf(Class<?> subjectClass) {
+    if (key1.equals(subjectClass)) return key2;
+    if (key2.equals(subjectClass)) return key1;
+    throw new IllegalArgumentException(subjectClass.getSimpleName() + " is not part of " + name());
+  }
+
+  public Function<Association, UUID> associatedIdExtractorFor(Class<?> subjectClass) {
+    return idExtractorFor(associatedKeyOf(subjectClass));
+  }
 }

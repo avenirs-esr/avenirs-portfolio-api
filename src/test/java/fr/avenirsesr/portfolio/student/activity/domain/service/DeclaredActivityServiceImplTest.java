@@ -34,17 +34,20 @@ import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivi
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.FeedbackService;
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.FeedbackRepository;
+import fr.avenirsesr.portfolio.student.association.domain.data.AssociatedElementsData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.exception.MaximumAssociationReachedException;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
+import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociatedElementsService;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.association.domain.service.AssociationSearchHelper;
+import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillAssociationData;
 import fr.avenirsesr.portfolio.student.skill.domain.exception.DeclaredSkillProgressNotFoundException;
 import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
-import fr.avenirsesr.portfolio.student.trace.domain.exception.TraceNotFoundException;
+import fr.avenirsesr.portfolio.student.trace.domain.data.TraceAssociationData;
 import fr.avenirsesr.portfolio.student.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
@@ -70,6 +73,7 @@ class DeclaredActivityServiceImplTest {
   @Mock private ActivityService activityService;
 
   @Mock private AssociationService associationService;
+  @Mock private AssociatedElementsService associatedElementsService;
   @Mock private AssociationSearchHelper associationSearchHelper;
   @Mock private TraceService traceService;
   @Mock private DeclaredSkillProgressService declaredSkillProgressService;
@@ -95,6 +99,7 @@ class DeclaredActivityServiceImplTest {
             traceService,
             declaredSkillProgressService,
             associationService,
+            associatedElementsService,
             associationSearchHelper,
             loggedInUserService,
             feedbackRepository,
@@ -1174,12 +1179,6 @@ class DeclaredActivityServiceImplTest {
 
     DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
 
-    UUID traceId = UUID.randomUUID();
-    UUID skillId = UUID.randomUUID();
-
-    Association traceAssociation = mock(Association.class);
-    Association skillAssociation = mock(Association.class);
-
     Trace trace = mock(Trace.class);
     DeclaredSkillProgress skill = mock(DeclaredSkillProgress.class);
 
@@ -1189,30 +1188,14 @@ class DeclaredActivityServiceImplTest {
     when(declaredActivity.getStudent()).thenReturn(student);
     when(declaredActivity.getId()).thenReturn(declaredActivityId);
 
-    when(associationService.getAllOf(
-            declaredActivityId,
-            DeclaredActivity.class,
-            List.of(
-                EAssociationType.DECLARED_ACTIVITY_TRACE,
-                EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL)))
-        .thenReturn(List.of(traceAssociation, skillAssociation));
-
-    when(traceAssociation.getAssociationType())
-        .thenReturn(EAssociationType.DECLARED_ACTIVITY_TRACE);
-    when(traceAssociation.getId()).thenReturn(UUID.randomUUID());
-    when(traceAssociation.getId2()).thenReturn(traceId);
-
-    when(skillAssociation.getAssociationType())
-        .thenReturn(EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL);
-    when(skillAssociation.getId()).thenReturn(UUID.randomUUID());
-    when(skillAssociation.getId2()).thenReturn(skillId);
-
-    when(traceService.findAllTracesById(List.of(traceId))).thenReturn(List.of(trace));
-    when(trace.getId()).thenReturn(traceId);
-
-    when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of(skillId)))
-        .thenReturn(List.of(skill));
-    when(skill.getId()).thenReturn(skillId);
+    when(associatedElementsService.getAllAssociatedElementsOf(
+            declaredActivityId, DeclaredActivity.class))
+        .thenReturn(
+            new AssociatedElementsData(
+                List.of(new TraceAssociationData(UUID.randomUUID(), trace)),
+                List.of(),
+                List.of(new DeclaredSkillAssociationData(UUID.randomUUID(), skill)),
+                List.of()));
 
     BddLogger.when("getDeclaredActivityAssociations is called");
     var result = service.getDeclaredActivityAssociations(declaredActivityId);
@@ -1235,13 +1218,9 @@ class DeclaredActivityServiceImplTest {
     when(declaredActivity.getStudent()).thenReturn(student);
     when(declaredActivity.getId()).thenReturn(declaredActivityId);
 
-    when(associationService.getAllOf(
-            any(UUID.class), any(Class.class), ArgumentMatchers.<List<EAssociationType>>any()))
-        .thenReturn(List.of());
-
-    when(traceService.findAllTracesById(List.of())).thenReturn(List.of());
-    when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of()))
-        .thenReturn(List.of());
+    when(associatedElementsService.getAllAssociatedElementsOf(
+            declaredActivityId, DeclaredActivity.class))
+        .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
 
     BddLogger.when("getDeclaredActivityAssociations is called");
     var result = service.getDeclaredActivityAssociations(declaredActivityId);
@@ -1249,80 +1228,6 @@ class DeclaredActivityServiceImplTest {
     BddLogger.then("Empty lists are returned");
     assertThat(result.traceAssociations()).isEmpty();
     assertThat(result.declaredSkillAssociations()).isEmpty();
-  }
-
-  @Test
-  void getDeclaredActivityAssociations_should_throw_when_trace_not_found_in_fetched_data() {
-    BddLogger.given("An association referencing a trace that is not returned by traceService");
-
-    UUID declaredActivityId = UUID.randomUUID();
-    UUID traceId = UUID.randomUUID();
-
-    DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
-    Association traceAssociation = mock(Association.class);
-
-    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
-        .thenReturn(Optional.of(declaredActivity));
-    when(declaredActivity.getStudent()).thenReturn(student);
-    when(declaredActivity.getId()).thenReturn(declaredActivityId);
-
-    when(associationService.getAllOf(
-            any(UUID.class), any(Class.class), ArgumentMatchers.<List<EAssociationType>>any()))
-        .thenReturn(List.of(traceAssociation));
-
-    when(traceAssociation.getAssociationType())
-        .thenReturn(EAssociationType.DECLARED_ACTIVITY_TRACE);
-    when(traceAssociation.getId2()).thenReturn(traceId);
-
-    when(traceService.findAllTracesById(List.of(traceId))).thenReturn(List.of());
-
-    when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(any()))
-        .thenReturn(List.of());
-
-    BddLogger.when("getDeclaredActivityAssociations is called");
-
-    BddLogger.then("TraceNotFoundException is thrown");
-    assertThatThrownBy(() -> service.getDeclaredActivityAssociations(declaredActivityId))
-        .isInstanceOf(TraceNotFoundException.class);
-  }
-
-  @Test
-  void getDeclaredActivityAssociations_should_throw_when_declaredSkill_not_found_in_fetched_data() {
-    BddLogger.given(
-        "An association referencing a declared skill that is not returned by"
-            + " declaredSkillProgressService");
-
-    UUID declaredActivityId = UUID.randomUUID();
-    UUID skillId = UUID.randomUUID();
-
-    DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
-    Association skillAssociation = mock(Association.class);
-
-    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
-        .thenReturn(Optional.of(declaredActivity));
-    when(declaredActivity.getStudent()).thenReturn(student);
-    when(declaredActivity.getId()).thenReturn(declaredActivityId);
-
-    when(associationService.getAllOf(
-            any(UUID.class), any(Class.class), ArgumentMatchers.<List<EAssociationType>>any()))
-        .thenReturn(List.of(skillAssociation));
-
-    when(skillAssociation.getAssociationType())
-        .thenReturn(EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL);
-    when(skillAssociation.getId2()).thenReturn(skillId);
-
-    when(traceService.findAllTracesById(any())).thenReturn(List.of());
-
-    when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of(skillId)))
-        .thenReturn(List.of());
-
-    BddLogger.when("getDeclaredActivityAssociations is called");
-
-    BddLogger.then("DeclaredSkillProgressNotFoundException is thrown");
-    assertThatThrownBy(() -> service.getDeclaredActivityAssociations(declaredActivityId))
-        .isInstanceOf(DeclaredSkillProgressNotFoundException.class);
   }
 
   @Test
@@ -1395,14 +1300,9 @@ class DeclaredActivityServiceImplTest {
 
     when(declaredActivity.getId()).thenReturn(declaredActivityId);
 
-    when(associationService.getAllOf(
-            eq(declaredActivityId),
-            eq(DeclaredActivity.class),
-            eq(
-                List.of(
-                    EAssociationType.DECLARED_ACTIVITY_TRACE,
-                    EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL))))
-        .thenReturn(List.of());
+    when(associatedElementsService.getAllAssociatedElementsOf(
+            declaredActivityId, DeclaredActivity.class))
+        .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
 
     BddLogger.when("associateActivityWithDeclaredSkills is called");
     service.associateActivityWithDeclaredSkills(declaredActivityId, List.of(skillId1, skillId2));

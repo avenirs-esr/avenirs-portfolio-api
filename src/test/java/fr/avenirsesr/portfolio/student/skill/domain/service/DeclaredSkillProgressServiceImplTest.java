@@ -22,19 +22,23 @@ import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternal
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityAssociationData;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.DeclaredActivityNotFoundException;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
+import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
+import fr.avenirsesr.portfolio.student.association.domain.data.AssociatedElementsData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.exception.AssociationAlreadyExistException;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
+import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociatedElementsService;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.association.domain.service.AssociationSearchHelper;
+import fr.avenirsesr.portfolio.student.experience.domain.data.DeclaredExperienceAssociationData;
 import fr.avenirsesr.portfolio.student.experience.domain.exception.DeclaredExperienceNotFoundException;
 import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperience;
-import fr.avenirsesr.portfolio.student.experience.domain.model.enums.EExperienceType;
 import fr.avenirsesr.portfolio.student.experience.domain.port.input.DeclaredExperienceService;
 import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillAssociationCount;
 import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillAssociationsData;
@@ -50,13 +54,13 @@ import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillSync
 import fr.avenirsesr.portfolio.student.skill.domain.port.output.repository.DeclaredSkillProgressRepository;
 import fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.client.ExternalSkillClient;
 import fr.avenirsesr.portfolio.student.skill.infrastructure.fixture.DeclaredSkillProgressFixture;
+import fr.avenirsesr.portfolio.student.trace.domain.data.TraceAssociationData;
 import fr.avenirsesr.portfolio.student.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.student.trace.infrastructure.fixture.TraceFixture;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
-import java.time.LocalDate;
 import java.util.*;
 import java.util.random.RandomGenerator;
 import org.junit.jupiter.api.BeforeEach;
@@ -77,6 +81,7 @@ public class DeclaredSkillProgressServiceImplTest {
   @Mock private LoggedInUserService loggedInUserService;
   @Mock private DeclaredActivityService declaredActivityService;
   @Mock private AssociationService associationService;
+  @Mock private AssociatedElementsService associatedElementsService;
   @Mock private AssociationSearchHelper associationSearchHelper;
   @Mock private DeclaredExperienceService declaredExperienceService;
   @InjectMocks private DeclaredSkillProgressServiceImpl declaredSkillProgressService;
@@ -567,19 +572,9 @@ public class DeclaredSkillProgressServiceImplTest {
                 List.of(activityId1, activityId2)))
             .thenReturn(List.of(declaredActivity1, declaredActivity2));
 
-        when(associationService.getAllOf(
-                eq(declaredSkillProgress.getId()),
-                eq(DeclaredSkillProgress.class),
-                eq(
-                    List.of(
-                        EAssociationType.TRACE_DECLARED_SKILL,
-                        EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL,
-                        EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL))))
-            .thenReturn(List.of());
-        when(traceService.findAllTracesById(List.of())).thenReturn(List.of());
-        when(declaredActivityService.findAllDeclaredActivitiesByIds(List.of()))
-            .thenReturn(List.of());
-        when(declaredExperienceService.findAllByIds(List.of())).thenReturn(List.of());
+        when(associatedElementsService.getAllAssociatedElementsOf(
+                declaredSkillProgress.getId(), DeclaredSkillProgress.class))
+            .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
 
         DeclaredSkillAssociationsData result =
             declaredSkillProgressService.associateDeclaredSkillWithActivities(
@@ -741,19 +736,11 @@ public class DeclaredSkillProgressServiceImplTest {
         when(declaredActivityService.findAllDeclaredActivitiesByIds(List.of()))
             .thenReturn(List.of());
 
-        when(associationService.getAllOf(
-                eq(declaredSkillProgress.getId()),
-                eq(DeclaredSkillProgress.class),
-                eq(
-                    List.of(
-                        EAssociationType.TRACE_DECLARED_SKILL,
-                        EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL,
-                        EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL))))
-            .thenReturn(List.of());
-        when(traceService.findAllTracesById(List.of())).thenReturn(List.of());
+        when(associatedElementsService.getAllAssociatedElementsOf(
+                declaredSkillProgress.getId(), DeclaredSkillProgress.class))
+            .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
         when(declaredActivityService.findAllDeclaredActivitiesByIds(List.of()))
             .thenReturn(List.of());
-        when(declaredExperienceService.findAllByIds(List.of())).thenReturn(List.of());
 
         DeclaredSkillAssociationsData result =
             declaredSkillProgressService.associateDeclaredSkillWithActivities(
@@ -792,19 +779,9 @@ public class DeclaredSkillProgressServiceImplTest {
         when(declaredExperienceService.findAllByIds(List.of(experienceId1, experienceId2)))
             .thenReturn(List.of(declaredExperience1, declaredExperience2));
 
-        when(associationService.getAllOf(
-                eq(declaredSkillProgress.getId()),
-                eq(DeclaredSkillProgress.class),
-                eq(
-                    List.of(
-                        EAssociationType.TRACE_DECLARED_SKILL,
-                        EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL,
-                        EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL))))
-            .thenReturn(List.of());
-        when(traceService.findAllTracesById(List.of())).thenReturn(List.of());
-        when(declaredActivityService.findAllDeclaredActivitiesByIds(List.of()))
-            .thenReturn(List.of());
-        when(declaredExperienceService.findAllByIds(List.of())).thenReturn(List.of());
+        when(associatedElementsService.getAllAssociatedElementsOf(
+                declaredSkillProgress.getId(), DeclaredSkillProgress.class))
+            .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
 
         DeclaredSkillAssociationsData result =
             declaredSkillProgressService.associateDeclaredSkillWithDeclaredExperiences(
@@ -964,18 +941,9 @@ public class DeclaredSkillProgressServiceImplTest {
             .thenReturn(Optional.of(declaredSkillProgress));
         when(declaredExperienceService.findAllByIds(List.of())).thenReturn(List.of());
 
-        when(associationService.getAllOf(
-                eq(declaredSkillProgress.getId()),
-                eq(DeclaredSkillProgress.class),
-                eq(
-                    List.of(
-                        EAssociationType.TRACE_DECLARED_SKILL,
-                        EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL,
-                        EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL))))
-            .thenReturn(List.of());
-        when(traceService.findAllTracesById(List.of())).thenReturn(List.of());
-        when(declaredActivityService.findAllDeclaredActivitiesByIds(List.of()))
-            .thenReturn(List.of());
+        when(associatedElementsService.getAllAssociatedElementsOf(
+                declaredSkillProgress.getId(), DeclaredSkillProgress.class))
+            .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
 
         DeclaredSkillAssociationsData result =
             declaredSkillProgressService.associateDeclaredSkillWithDeclaredExperiences(
@@ -1008,19 +976,9 @@ public class DeclaredSkillProgressServiceImplTest {
         when(declaredExperienceService.findAllByIds(List.of(experienceId)))
             .thenReturn(List.of(declaredExperience));
 
-        when(associationService.getAllOf(
-                eq(declaredSkillProgress.getId()),
-                eq(DeclaredSkillProgress.class),
-                eq(
-                    List.of(
-                        EAssociationType.TRACE_DECLARED_SKILL,
-                        EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL,
-                        EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL))))
-            .thenReturn(List.of());
-        when(traceService.findAllTracesById(List.of())).thenReturn(List.of());
-        when(declaredActivityService.findAllDeclaredActivitiesByIds(List.of()))
-            .thenReturn(List.of());
-        when(declaredExperienceService.findAllByIds(List.of())).thenReturn(List.of());
+        when(associatedElementsService.getAllAssociatedElementsOf(
+                declaredSkillProgress.getId(), DeclaredSkillProgress.class))
+            .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
 
         declaredSkillProgressService.associateDeclaredSkillWithDeclaredExperiences(
             declaredSkillProgress.getId(), List.of(experienceId, experienceId));
@@ -1091,19 +1049,9 @@ public class DeclaredSkillProgressServiceImplTest {
         when(traceService.findAllTracesById(List.of(trace1.getId(), trace2.getId())))
             .thenReturn(List.of(trace1, trace2));
 
-        when(associationService.getAllOf(
-                eq(declaredSkillProgress.getId()),
-                eq(DeclaredSkillProgress.class),
-                eq(
-                    List.of(
-                        EAssociationType.TRACE_DECLARED_SKILL,
-                        EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL,
-                        EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL))))
-            .thenReturn(List.of());
-        when(traceService.findAllTracesById(List.of())).thenReturn(List.of());
-        when(declaredActivityService.findAllDeclaredActivitiesByIds(List.of()))
-            .thenReturn(List.of());
-        when(declaredExperienceService.findAllByIds(List.of())).thenReturn(List.of());
+        when(associatedElementsService.getAllAssociatedElementsOf(
+                declaredSkillProgress.getId(), DeclaredSkillProgress.class))
+            .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
 
         DeclaredSkillAssociationsData result =
             declaredSkillProgressService.associateDeclaredSkillWithTraces(
@@ -1251,18 +1199,9 @@ public class DeclaredSkillProgressServiceImplTest {
             .thenReturn(Optional.of(declaredSkillProgress));
         when(traceService.findAllTracesById(List.of())).thenReturn(List.of());
 
-        when(associationService.getAllOf(
-                eq(declaredSkillProgress.getId()),
-                eq(DeclaredSkillProgress.class),
-                eq(
-                    List.of(
-                        EAssociationType.TRACE_DECLARED_SKILL,
-                        EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL,
-                        EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL))))
-            .thenReturn(List.of());
-        when(declaredActivityService.findAllDeclaredActivitiesByIds(List.of()))
-            .thenReturn(List.of());
-        when(declaredExperienceService.findAllByIds(List.of())).thenReturn(List.of());
+        when(associatedElementsService.getAllAssociatedElementsOf(
+                declaredSkillProgress.getId(), DeclaredSkillProgress.class))
+            .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
 
         DeclaredSkillAssociationsData result =
             declaredSkillProgressService.associateDeclaredSkillWithTraces(
@@ -1290,18 +1229,9 @@ public class DeclaredSkillProgressServiceImplTest {
             .thenReturn(Optional.of(declaredSkillProgress));
         when(traceService.findAllTracesById(List.of(trace.getId()))).thenReturn(List.of(trace));
 
-        when(associationService.getAllOf(
-                eq(declaredSkillProgress.getId()),
-                eq(DeclaredSkillProgress.class),
-                eq(
-                    List.of(
-                        EAssociationType.TRACE_DECLARED_SKILL,
-                        EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL,
-                        EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL))))
-            .thenReturn(List.of());
-        when(declaredActivityService.findAllDeclaredActivitiesByIds(List.of()))
-            .thenReturn(List.of());
-        when(declaredExperienceService.findAllByIds(List.of())).thenReturn(List.of());
+        when(associatedElementsService.getAllAssociatedElementsOf(
+                declaredSkillProgress.getId(), DeclaredSkillProgress.class))
+            .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
 
         declaredSkillProgressService.associateDeclaredSkillWithTraces(
             declaredSkillProgress.getId(), List.of(trace.getId(), trace.getId()));
@@ -1352,6 +1282,7 @@ public class DeclaredSkillProgressServiceImplTest {
 
       @Mock private DeclaredActivityService declaredActivityService;
       @Mock private AssociationService associationService;
+      @Mock private AssociatedElementsService associatedElementsService;
       @Mock private AssociationSearchHelper associationSearchHelper;
       @Mock private DeclaredExperienceService declaredExperienceService;
 
@@ -1366,6 +1297,7 @@ public class DeclaredSkillProgressServiceImplTest {
                 loggedInUserService,
                 declaredActivityService,
                 associationService,
+                associatedElementsService,
                 associationSearchHelper,
                 declaredExperienceService);
       }
@@ -1417,27 +1349,9 @@ public class DeclaredSkillProgressServiceImplTest {
         verifyNoInteractions(associationService);
       }
 
-      private DeclaredExperience buildDeclaredExperience(
-          String title, EExperienceType type, LocalDate startDate, LocalDate endDate) {
-        return DeclaredExperience.create(
-            student,
-            title,
-            type,
-            "Organization",
-            "Sector",
-            "Paris",
-            "Description",
-            null,
-            null,
-            null,
-            null,
-            startDate,
-            endDate);
-      }
-
       @Test
-      void getAssociationsOf_should_return_empty_declaredExperienceAssociations_when_none() {
-        BddLogger.given("a declared skill progress without any declared experience association");
+      void getAssociationsOf_should_return_empty_associations_when_none() {
+        BddLogger.given("a declared skill progress without any association");
 
         DeclaredSkillProgress declaredSkillProgress =
             DeclaredSkillProgressFixture.create().withStudent(student).toModel();
@@ -1445,229 +1359,24 @@ public class DeclaredSkillProgressServiceImplTest {
 
         when(declaredSkillProgressRepository.findById(declaredSkillProgressId))
             .thenReturn(Optional.of(declaredSkillProgress));
-        when(associationService.getAllOf(
-                declaredSkillProgressId,
-                DeclaredSkillProgress.class,
-                List.of(
-                    EAssociationType.TRACE_DECLARED_SKILL,
-                    EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL,
-                    EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL)))
-            .thenReturn(List.of());
-        when(traceService.findAllTracesById(List.of())).thenReturn(List.of());
-        when(declaredActivityService.findAllDeclaredActivitiesByIds(List.of()))
-            .thenReturn(List.of());
-        when(declaredActivityService.getDeclaredActivityStatus(List.of())).thenReturn(Map.of());
-        when(declaredExperienceService.findAllByIds(List.of())).thenReturn(List.of());
+        when(associatedElementsService.getAllAssociatedElementsOf(
+                declaredSkillProgressId, DeclaredSkillProgress.class))
+            .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
 
         BddLogger.when("getAssociationsOf is called");
 
         DeclaredSkillAssociationsData result =
             declaredSkillProgressService.getAssociationsOf(declaredSkillProgressId);
 
-        BddLogger.then("it should return an empty declaredExperienceAssociations list");
+        BddLogger.then("it should return empty association lists");
 
-        assertNotNull(result.declaredExperienceAssociations());
+        assertTrue(result.traceAssociations().isEmpty());
+        assertTrue(result.declaredActivityAssociations().isEmpty());
         assertTrue(result.declaredExperienceAssociations().isEmpty());
       }
 
       @Test
-      void getAssociationsOf_should_return_associated_professional_declaredExperience() {
-        BddLogger.given("a declared skill progress associated with a professional experience");
-
-        DeclaredSkillProgress declaredSkillProgress =
-            DeclaredSkillProgressFixture.create().withStudent(student).toModel();
-        UUID declaredSkillProgressId = declaredSkillProgress.getId();
-
-        DeclaredExperience experience =
-            buildDeclaredExperience(
-                "Backend Developer", EExperienceType.PROFESSIONAL, LocalDate.of(2022, 1, 10), null);
-        UUID associationId = randomUUID();
-        Association association =
-            Association.create(
-                experience.getId(),
-                declaredSkillProgressId,
-                EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL);
-
-        when(declaredSkillProgressRepository.findById(declaredSkillProgressId))
-            .thenReturn(Optional.of(declaredSkillProgress));
-        when(associationService.getAllOf(
-                declaredSkillProgressId,
-                DeclaredSkillProgress.class,
-                List.of(
-                    EAssociationType.TRACE_DECLARED_SKILL,
-                    EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL,
-                    EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL)))
-            .thenReturn(List.of(association));
-        when(traceService.findAllTracesById(List.of())).thenReturn(List.of());
-        when(declaredActivityService.findAllDeclaredActivitiesByIds(List.of()))
-            .thenReturn(List.of());
-        when(declaredActivityService.getDeclaredActivityStatus(List.of())).thenReturn(Map.of());
-        when(declaredExperienceService.findAllByIds(List.of(experience.getId())))
-            .thenReturn(List.of(experience));
-
-        BddLogger.when("getAssociationsOf is called");
-
-        DeclaredSkillAssociationsData result =
-            declaredSkillProgressService.getAssociationsOf(declaredSkillProgressId);
-
-        BddLogger.then("it should return the professional declared experience association");
-
-        assertEquals(1, result.declaredExperienceAssociations().size());
-        var experienceAssociation = result.declaredExperienceAssociations().getFirst();
-        assertEquals(association.getId(), experienceAssociation.associationId());
-        assertEquals(experience, experienceAssociation.declaredExperience());
-        assertEquals(
-            EExperienceType.PROFESSIONAL,
-            experienceAssociation.declaredExperience().getExperienceType());
-      }
-
-      @Test
-      void getAssociationsOf_should_return_associated_personal_declaredExperience() {
-        BddLogger.given("a declared skill progress associated with a personal experience");
-
-        DeclaredSkillProgress declaredSkillProgress =
-            DeclaredSkillProgressFixture.create().withStudent(student).toModel();
-        UUID declaredSkillProgressId = declaredSkillProgress.getId();
-
-        DeclaredExperience experience =
-            buildDeclaredExperience(
-                "Bénévolat associatif",
-                EExperienceType.PERSONAL,
-                LocalDate.of(2023, 3, 1),
-                LocalDate.of(2023, 9, 1));
-        Association association =
-            Association.create(
-                experience.getId(),
-                declaredSkillProgressId,
-                EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL);
-
-        when(declaredSkillProgressRepository.findById(declaredSkillProgressId))
-            .thenReturn(Optional.of(declaredSkillProgress));
-        when(associationService.getAllOf(
-                declaredSkillProgressId,
-                DeclaredSkillProgress.class,
-                List.of(
-                    EAssociationType.TRACE_DECLARED_SKILL,
-                    EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL,
-                    EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL)))
-            .thenReturn(List.of(association));
-        when(traceService.findAllTracesById(List.of())).thenReturn(List.of());
-        when(declaredActivityService.findAllDeclaredActivitiesByIds(List.of()))
-            .thenReturn(List.of());
-        when(declaredActivityService.getDeclaredActivityStatus(List.of())).thenReturn(Map.of());
-        when(declaredExperienceService.findAllByIds(List.of(experience.getId())))
-            .thenReturn(List.of(experience));
-
-        BddLogger.when("getAssociationsOf is called");
-
-        DeclaredSkillAssociationsData result =
-            declaredSkillProgressService.getAssociationsOf(declaredSkillProgressId);
-
-        BddLogger.then("it should return the personal declared experience association");
-
-        assertEquals(1, result.declaredExperienceAssociations().size());
-        assertEquals(
-            EExperienceType.PERSONAL,
-            result
-                .declaredExperienceAssociations()
-                .getFirst()
-                .declaredExperience()
-                .getExperienceType());
-      }
-
-      @Test
-      void
-          getAssociationsOf_should_return_multiple_declaredExperienceAssociations_ordered_antichronologically() {
-        BddLogger.given(
-            "a declared skill progress associated with several experiences whose associations"
-                + " are returned from most to least recently created");
-
-        DeclaredSkillProgress declaredSkillProgress =
-            DeclaredSkillProgressFixture.create().withStudent(student).toModel();
-        UUID declaredSkillProgressId = declaredSkillProgress.getId();
-
-        DeclaredExperience professionalExperience =
-            buildDeclaredExperience(
-                "Backend Developer", EExperienceType.PROFESSIONAL, LocalDate.of(2022, 1, 10), null);
-        DeclaredExperience personalExperience =
-            buildDeclaredExperience(
-                "Projet personnel",
-                EExperienceType.PERSONAL,
-                LocalDate.of(2023, 1, 1),
-                LocalDate.of(2023, 6, 1));
-        DeclaredExperience volunteerExperience =
-            buildDeclaredExperience(
-                "Bénévolat associatif",
-                EExperienceType.VOLUNTEER,
-                LocalDate.of(2023, 3, 1),
-                LocalDate.of(2023, 9, 1));
-
-        Association mostRecentAssociation =
-            Association.create(
-                personalExperience.getId(),
-                declaredSkillProgressId,
-                EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL);
-        Association secondMostRecentAssociation =
-            Association.create(
-                volunteerExperience.getId(),
-                declaredSkillProgressId,
-                EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL);
-        Association oldestAssociation =
-            Association.create(
-                professionalExperience.getId(),
-                declaredSkillProgressId,
-                EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL);
-
-        // associationService already returns associations ordered by createdAt DESC (most recent
-        // first); the service must preserve that order rather than re-sort in memory.
-        List<Association> associationsInRepositoryOrder =
-            List.of(mostRecentAssociation, secondMostRecentAssociation, oldestAssociation);
-
-        when(declaredSkillProgressRepository.findById(declaredSkillProgressId))
-            .thenReturn(Optional.of(declaredSkillProgress));
-        when(associationService.getAllOf(
-                declaredSkillProgressId,
-                DeclaredSkillProgress.class,
-                List.of(
-                    EAssociationType.TRACE_DECLARED_SKILL,
-                    EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL,
-                    EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL)))
-            .thenReturn(associationsInRepositoryOrder);
-        when(traceService.findAllTracesById(List.of())).thenReturn(List.of());
-        when(declaredActivityService.findAllDeclaredActivitiesByIds(List.of()))
-            .thenReturn(List.of());
-        when(declaredActivityService.getDeclaredActivityStatus(List.of())).thenReturn(Map.of());
-        when(declaredExperienceService.findAllByIds(
-                List.of(
-                    personalExperience.getId(),
-                    volunteerExperience.getId(),
-                    professionalExperience.getId())))
-            .thenReturn(List.of(professionalExperience, volunteerExperience, personalExperience));
-
-        BddLogger.when("getAssociationsOf is called");
-
-        DeclaredSkillAssociationsData result =
-            declaredSkillProgressService.getAssociationsOf(declaredSkillProgressId);
-
-        BddLogger.then(
-            "it should return the declared experience associations in the same antichronological"
-                + " order, most recently associated first");
-
-        assertEquals(3, result.declaredExperienceAssociations().size());
-        assertEquals(
-            personalExperience,
-            result.declaredExperienceAssociations().get(0).declaredExperience());
-        assertEquals(
-            volunteerExperience,
-            result.declaredExperienceAssociations().get(1).declaredExperience());
-        assertEquals(
-            professionalExperience,
-            result.declaredExperienceAssociations().get(2).declaredExperience());
-      }
-
-      @Test
-      void
-          getAssociationsOf_should_not_regress_trace_and_declaredActivity_associations_when_experience_associations_present() {
+      void getAssociationsOf_should_return_the_associated_elements() {
         BddLogger.given(
             "a declared skill progress associated with a trace, a declared activity and a"
                 + " declared experience");
@@ -1678,57 +1387,33 @@ public class DeclaredSkillProgressServiceImplTest {
 
         Trace trace = TraceFixture.create().toModel();
         DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
-        UUID declaredActivityId = randomUUID();
-        when(declaredActivity.getId()).thenReturn(declaredActivityId);
-
-        DeclaredExperience experience =
-            buildDeclaredExperience(
-                "Backend Developer", EExperienceType.PROFESSIONAL, LocalDate.of(2022, 1, 10), null);
-
-        Association traceAssociation =
-            Association.create(
-                trace.getId(), declaredSkillProgressId, EAssociationType.TRACE_DECLARED_SKILL);
-        Association activityAssociation =
-            Association.create(
-                declaredActivityId,
-                declaredSkillProgressId,
-                EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL);
-        Association experienceAssociation =
-            Association.create(
-                experience.getId(),
-                declaredSkillProgressId,
-                EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL);
+        DeclaredExperience experience = mock(DeclaredExperience.class);
 
         when(declaredSkillProgressRepository.findById(declaredSkillProgressId))
             .thenReturn(Optional.of(declaredSkillProgress));
-        when(associationService.getAllOf(
-                declaredSkillProgressId,
-                DeclaredSkillProgress.class,
-                List.of(
-                    EAssociationType.TRACE_DECLARED_SKILL,
-                    EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL,
-                    EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL)))
-            .thenReturn(List.of(traceAssociation, activityAssociation, experienceAssociation));
-        when(traceService.findAllTracesById(List.of(trace.getId()))).thenReturn(List.of(trace));
-        when(declaredActivityService.findAllDeclaredActivitiesByIds(List.of(declaredActivityId)))
-            .thenReturn(List.of(declaredActivity));
-        when(declaredActivityService.getDeclaredActivityStatus(List.of(declaredActivity)))
-            .thenReturn(Map.of());
-        when(declaredExperienceService.findAllByIds(List.of(experience.getId())))
-            .thenReturn(List.of(experience));
+        when(associatedElementsService.getAllAssociatedElementsOf(
+                declaredSkillProgressId, DeclaredSkillProgress.class))
+            .thenReturn(
+                new AssociatedElementsData(
+                    List.of(new TraceAssociationData(randomUUID(), trace)),
+                    List.of(
+                        new DeclaredActivityAssociationData(
+                            randomUUID(), declaredActivity, EDeclaredActivityStatus.IN_PROGRESS)),
+                    List.of(),
+                    List.of(new DeclaredExperienceAssociationData(randomUUID(), experience))));
 
         BddLogger.when("getAssociationsOf is called");
 
         DeclaredSkillAssociationsData result =
             declaredSkillProgressService.getAssociationsOf(declaredSkillProgressId);
 
-        BddLogger.then(
-            "it should still return the trace and declared activity associations alongside the"
-                + " declared experience association");
+        BddLogger.then("it should return every associated element");
 
-        assertEquals(1, result.traceAssociations().size());
-        assertEquals(1, result.declaredActivityAssociations().size());
-        assertEquals(1, result.declaredExperienceAssociations().size());
+        assertEquals(trace, result.traceAssociations().getFirst().trace());
+        assertEquals(
+            declaredActivity, result.declaredActivityAssociations().getFirst().declaredActivity());
+        assertEquals(
+            experience, result.declaredExperienceAssociations().getFirst().declaredExperience());
       }
     }
 

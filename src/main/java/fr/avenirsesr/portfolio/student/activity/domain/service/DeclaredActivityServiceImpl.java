@@ -30,14 +30,12 @@ import fr.avenirsesr.portfolio.student.association.domain.exception.MaximumAssoc
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
+import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociatedElementsService;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.association.domain.service.AssociationSearchHelper;
-import fr.avenirsesr.portfolio.student.association.domain.utils.AssociationUtils;
-import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillAssociationData;
 import fr.avenirsesr.portfolio.student.skill.domain.exception.DeclaredSkillProgressNotFoundException;
 import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
-import fr.avenirsesr.portfolio.student.trace.domain.data.TraceAssociationData;
 import fr.avenirsesr.portfolio.student.trace.domain.data.TraceViewData;
 import fr.avenirsesr.portfolio.student.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.student.trace.domain.filter.TraceFilter;
@@ -61,6 +59,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   private final TraceService traceService;
   private final DeclaredSkillProgressService declaredSkillProgressService;
   private final AssociationService associationService;
+  private final AssociatedElementsService associatedElementsService;
   private final AssociationSearchHelper associationSearchHelper;
   private final LoggedInUserService loggedInUserService;
   private final FeedbackRepository feedbackRepository;
@@ -433,50 +432,12 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     DeclaredActivity declaredActivity =
         fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
 
-    var associations =
-        associationService.getAllOf(
-            declaredActivity.getId(),
-            DeclaredActivity.class,
-            List.of(
-                EAssociationType.DECLARED_ACTIVITY_TRACE,
-                EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL));
-
-    var traces =
-        traceService.findAllTracesById(
-            AssociationUtils.getIdsOf(
-                associations, EAssociationType.DECLARED_ACTIVITY_TRACE, Trace.class));
-
-    var declaredSkills =
-        declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(
-            AssociationUtils.getIdsOf(
-                associations,
-                EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL,
-                DeclaredSkillProgress.class));
+    var associatedElements =
+        associatedElementsService.getAllAssociatedElementsOf(
+            declaredActivity.getId(), DeclaredActivity.class);
 
     return new DeclaredActivityAssociationsData(
-        associations.stream()
-            .filter(a -> a.getAssociationType() == EAssociationType.DECLARED_ACTIVITY_TRACE)
-            .map(
-                a ->
-                    new TraceAssociationData(
-                        a.getId(),
-                        traces.stream()
-                            .filter(t -> t.getId().equals(a.getId2()))
-                            .findAny()
-                            .orElseThrow(TraceNotFoundException::new)))
-            .toList(),
-        associations.stream()
-            .filter(
-                a -> a.getAssociationType() == EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL)
-            .map(
-                a ->
-                    new DeclaredSkillAssociationData(
-                        a.getId(),
-                        declaredSkills.stream()
-                            .filter(s -> s.getId().equals(a.getId2()))
-                            .findAny()
-                            .orElseThrow(DeclaredSkillProgressNotFoundException::new)))
-            .toList());
+        associatedElements.traceAssociations(), associatedElements.declaredSkillAssociations());
   }
 
   @Override
