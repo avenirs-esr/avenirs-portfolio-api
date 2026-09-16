@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.student.skill.domain.service;
 
 import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.RICH_DESCRIPTION_LENGTH;
 import static java.util.UUID.randomUUID;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -1590,14 +1591,25 @@ public class DeclaredSkillProgressServiceImplTest {
                 "Backend Developer", EExperienceType.PROFESSIONAL, LocalDate.of(2022, 1, 10), null);
         DeclaredExperience personalExperience =
             buildDeclaredExperience(
-                "Bénévolat associatif",
+                "Projet personnel",
                 EExperienceType.PERSONAL,
+                LocalDate.of(2023, 1, 1),
+                LocalDate.of(2023, 6, 1));
+        DeclaredExperience volunteerExperience =
+            buildDeclaredExperience(
+                "Bénévolat associatif",
+                EExperienceType.VOLUNTEER,
                 LocalDate.of(2023, 3, 1),
                 LocalDate.of(2023, 9, 1));
 
         Association mostRecentAssociation =
             Association.create(
                 personalExperience.getId(),
+                declaredSkillProgressId,
+                EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL);
+        Association secondMostRecentAssociation =
+            Association.create(
+                volunteerExperience.getId(),
                 declaredSkillProgressId,
                 EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL);
         Association oldestAssociation =
@@ -1609,7 +1621,7 @@ public class DeclaredSkillProgressServiceImplTest {
         // associationService already returns associations ordered by createdAt DESC (most recent
         // first); the service must preserve that order rather than re-sort in memory.
         List<Association> associationsInRepositoryOrder =
-            List.of(mostRecentAssociation, oldestAssociation);
+            List.of(mostRecentAssociation, secondMostRecentAssociation, oldestAssociation);
 
         when(declaredSkillProgressRepository.findById(declaredSkillProgressId))
             .thenReturn(Optional.of(declaredSkillProgress));
@@ -1626,8 +1638,11 @@ public class DeclaredSkillProgressServiceImplTest {
             .thenReturn(List.of());
         when(declaredActivityService.getDeclaredActivityStatus(List.of())).thenReturn(Map.of());
         when(declaredExperienceService.findAllByIds(
-                List.of(personalExperience.getId(), professionalExperience.getId())))
-            .thenReturn(List.of(professionalExperience, personalExperience));
+                List.of(
+                    personalExperience.getId(),
+                    volunteerExperience.getId(),
+                    professionalExperience.getId())))
+            .thenReturn(List.of(professionalExperience, volunteerExperience, personalExperience));
 
         BddLogger.when("getAssociationsOf is called");
 
@@ -1638,13 +1653,16 @@ public class DeclaredSkillProgressServiceImplTest {
             "it should return the declared experience associations in the same antichronological"
                 + " order, most recently associated first");
 
-        assertEquals(2, result.declaredExperienceAssociations().size());
+        assertEquals(3, result.declaredExperienceAssociations().size());
         assertEquals(
             personalExperience,
             result.declaredExperienceAssociations().get(0).declaredExperience());
         assertEquals(
-            professionalExperience,
+            volunteerExperience,
             result.declaredExperienceAssociations().get(1).declaredExperience());
+        assertEquals(
+            professionalExperience,
+            result.declaredExperienceAssociations().get(2).declaredExperience());
       }
 
       @Test
