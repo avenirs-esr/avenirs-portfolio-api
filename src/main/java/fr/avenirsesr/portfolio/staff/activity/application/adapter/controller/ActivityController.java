@@ -27,13 +27,10 @@ import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStat
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
-import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.servlet.http.HttpServletRequest;
 import java.security.Principal;
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,8 +41,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 
 @Slf4j
 @AllArgsConstructor
@@ -60,7 +55,6 @@ public class ActivityController {
   private final ActivityStaffOverviewDtoMapper activityStaffOverviewDtoMapper;
   private final ActivityFeedbacksPreviewMapper activityFeedbacksPreviewMapper;
   private final FileDTOMapper fileDTOMapper;
-  private final ObjectMapper objectMapper;
 
   @PreAuthorize("hasAuthority('activity:read:contextual')")
   @GetMapping("/{activityStatus}/{activityId}/presentation")
@@ -323,12 +317,11 @@ public class ActivityController {
   }
 
   @PreAuthorize("hasAuthority('activity:update')")
-  @io.swagger.v3.oas.annotations.parameters.RequestBody(
-      content = @Content(schema = @Schema(implementation = ActivityDraftUpdateRequest.class)))
   @PatchMapping("/{activityDraftId}")
   public ResponseEntity<ActivityDraftUpdateResponse> updateActivityDraft(
-      Principal principal, @PathVariable UUID activityDraftId, @RequestBody JsonNode rawBody) {
-    var body = objectMapper.treeToValue(rawBody, ActivityDraftUpdateRequest.class);
+      Principal principal,
+      @PathVariable UUID activityDraftId,
+      @RequestBody ActivityDraftUpdateRequest body) {
     log.debug(
         "Received request to update activity draft by user [{}] for draft {} body : {}",
         principal.getName(),
@@ -343,24 +336,14 @@ public class ActivityController {
             body.summary(),
             body.description(),
             body.recommendedCompletionContexts(),
-            toPatchedDate(rawBody, "startDate"),
-            toPatchedDate(rawBody, "endDate"),
+            body.startDate(),
+            body.endDate(),
             body.traceAllowedAssociations(),
             body.feedbackAllowedIterations(),
             body.enableReflection(),
-            body.links());
+            body.links(),
+            body.enableCompletionPeriod());
     return ResponseEntity.ok(new ActivityDraftUpdateResponse(draft.getId()));
-  }
-
-  private Optional<Optional<LocalDate>> toPatchedDate(JsonNode body, String fieldName) {
-    if (!body.has(fieldName)) {
-      return Optional.empty();
-    }
-    var fieldNode = body.get(fieldName);
-    return Optional.of(
-        fieldNode.isNull()
-            ? Optional.empty()
-            : Optional.of(objectMapper.treeToValue(fieldNode, LocalDate.class)));
   }
 
   @PreAuthorize("hasAuthority('activity:update')")

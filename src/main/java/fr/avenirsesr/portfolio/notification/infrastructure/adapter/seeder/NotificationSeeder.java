@@ -150,12 +150,13 @@ public class NotificationSeeder {
         summary,
         description,
         recommendedCompletionContexts,
-        Optional.empty(),
-        Optional.empty(),
+        draft.getStartDate().orElse(null),
+        draft.getEndDate().orElse(null),
         null,
         null,
         null,
-        links);
+        links,
+        draft.getStartDate().isPresent() && draft.getEndDate().isPresent());
 
     activityService.publish(draft.getId());
   }

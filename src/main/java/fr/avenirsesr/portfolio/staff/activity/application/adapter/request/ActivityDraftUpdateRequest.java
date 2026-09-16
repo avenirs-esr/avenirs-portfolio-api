@@ -17,4 +17,5 @@ public record ActivityDraftUpdateRequest(
     Integer traceAllowedAssociations,
     Integer feedbackAllowedIterations,
     Boolean enableReflection,
-    List<String> links) {}
+    List<String> links,
+    boolean enableCompletionPeriod) {}
