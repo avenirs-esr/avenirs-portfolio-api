@@ -450,49 +450,49 @@ public class ActivityServiceImpl implements ActivityService {
       String summary,
       String description,
       String recommendedCompletionContexts,
-      Optional&lt;Optional&lt;LocalDate&gt;&gt; startDate,
-      Optional&lt;Optional&lt;LocalDate&gt;&gt; endDate,
+      LocalDate startDate,
+      LocalDate endDate,
       Integer traceAllowedAssociations,
       Integer feedbackAllowedIterations,
       Boolean enableReflection,
-      List&lt;String&gt; links) {
-<span class="fc" id="L459">    var loggedInStaff = loggedInUserService.getLoggedInStaff();</span>
-<span class="fc" id="L460">    var draft =</span>
-<span class="fc" id="L461">        activityDraftRepository.findById(id).orElseThrow(ActivityDraftNotFoundException::new);</span>
+      List&lt;String&gt; links,
+      Boolean clearCompletionPeriod) {
+<span class="fc" id="L460">    var loggedInStaff = loggedInUserService.getLoggedInStaff();</span>
+<span class="fc" id="L461">    var draft =</span>
+<span class="fc" id="L462">        activityDraftRepository.findById(id).orElseThrow(ActivityDraftNotFoundException::new);</span>
 
-<span class="fc bfc" id="L463" title="All 2 branches covered.">    if (!draft.getAuthor().equals(loggedInStaff)) {</span>
-<span class="fc" id="L464">      throw new UserNotAuthorizedException();</span>
+<span class="fc bfc" id="L464" title="All 2 branches covered.">    if (!draft.getAuthor().equals(loggedInStaff)) {</span>
+<span class="fc" id="L465">      throw new UserNotAuthorizedException();</span>
     }
 
-<span class="fc" id="L467">    validateOptionalTextMaxLength(&quot;summary&quot;, summary, SUMMARY_LENGTH);</span>
-<span class="fc" id="L468">    validateOptionalTextMaxLength(&quot;description&quot;, description, RICH_DESCRIPTION_LENGTH);</span>
-<span class="fc" id="L469">    validateOptionalTextMaxLength(</span>
+<span class="fc" id="L468">    validateOptionalTextMaxLength(&quot;summary&quot;, summary, SUMMARY_LENGTH);</span>
+<span class="fc" id="L469">    validateOptionalTextMaxLength(&quot;description&quot;, description, RICH_DESCRIPTION_LENGTH);</span>
+<span class="fc" id="L470">    validateOptionalTextMaxLength(</span>
         &quot;recommendedCompletionContexts&quot;,
         recommendedCompletionContexts,
         ACTIVITY_RECOMMENDED_COMPLETION_CONTEXTS);
-
-<span class="fc bfc" id="L474" title="All 2 branches covered.">    if (startDate.isPresent() != endDate.isPresent()) {</span>
-<span class="fc" id="L475">      throw new ActivityDatesException();</span>
+<span class="fc bfc" id="L474" title="All 2 branches covered.">    if (startDate != null) {</span>
+<span class="fc" id="L475">      validateDateOrder(startDate, endDate);</span>
+    }
+<span class="fc bfc" id="L477" title="All 6 branches covered.">    if ((startDate == null) != (endDate == null)) {</span>
+<span class="fc" id="L478">      throw new ActivityDatesException();</span>
     }
 
-<span class="fc bfc" id="L478" title="All 2 branches covered.">    if (title != null) {</span>
-<span class="fc" id="L479">      requireNotBlankAndMaxLength(&quot;title&quot;, title, TITLE_LENGTH);</span>
-<span class="fc" id="L480">      draft.setTitle(title);</span>
+<span class="fc bfc" id="L481" title="All 2 branches covered.">    if (title != null) {</span>
+<span class="fc" id="L482">      requireNotBlankAndMaxLength(&quot;title&quot;, title, TITLE_LENGTH);</span>
+<span class="fc" id="L483">      draft.setTitle(title);</span>
     }
-<span class="fc bfc" id="L482" title="All 2 branches covered.">    if (thematic != null) draft.setThematic(thematic);</span>
-<span class="fc bfc" id="L483" title="All 2 branches covered.">    if (summary != null) draft.setSummary(summary);</span>
-<span class="fc bfc" id="L484" title="All 2 branches covered.">    if (description != null) draft.setDescription(description);</span>
-<span class="fc bfc" id="L485" title="All 2 branches covered.">    if (recommendedCompletionContexts != null)</span>
-<span class="fc" id="L486">      draft.setRecommendedCompletionContexts(recommendedCompletionContexts);</span>
-<span class="fc bfc" id="L487" title="All 2 branches covered.">    if (startDate.isPresent()) {</span>
-<span class="fc" id="L488">      var newStartDate = startDate.get();</span>
-<span class="fc" id="L489">      var newEndDate = endDate.get();</span>
-<span class="fc bfc" id="L490" title="All 2 branches covered.">      if (newStartDate.isPresent() != newEndDate.isPresent()) {</span>
-<span class="fc" id="L491">        throw new ActivityDatesException();</span>
-      }
-<span class="fc" id="L493">      newStartDate.ifPresent(value -&gt; validateDateOrder(value, newEndDate.orElse(null)));</span>
-<span class="fc" id="L494">      draft.setStartDate(newStartDate.orElse(null));</span>
-<span class="fc" id="L495">      draft.setEndDate(newEndDate.orElse(null));</span>
+<span class="fc bfc" id="L485" title="All 2 branches covered.">    if (thematic != null) draft.setThematic(thematic);</span>
+<span class="fc bfc" id="L486" title="All 2 branches covered.">    if (summary != null) draft.setSummary(summary);</span>
+<span class="fc bfc" id="L487" title="All 2 branches covered.">    if (description != null) draft.setDescription(description);</span>
+<span class="fc bfc" id="L488" title="All 2 branches covered.">    if (recommendedCompletionContexts != null)</span>
+<span class="fc" id="L489">      draft.setRecommendedCompletionContexts(recommendedCompletionContexts);</span>
+<span class="fc bfc" id="L490" title="All 2 branches covered.">    if (Boolean.TRUE.equals(clearCompletionPeriod)) {</span>
+<span class="fc" id="L491">      draft.setStartDate(null);</span>
+<span class="fc" id="L492">      draft.setEndDate(null);</span>
+    } else {
+<span class="fc bfc" id="L494" title="All 2 branches covered.">      if (startDate != null) draft.setStartDate(startDate);</span>
+<span class="fc bfc" id="L495" title="All 2 branches covered.">      if (endDate != null) draft.setEndDate(endDate);</span>
     }
 
 <span class="fc bfc" id="L498" title="All 2 branches covered.">    if (!hasEnrolledStudents(draft)) {</span>
