@@ -342,12 +342,12 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
 
   @Override
   public PagedResult<DeclaredExperienceData> getView(
-      PageCriteria pageCriteria, Boolean isValorized, EExperienceType experienceType) {
+      PageCriteria pageCriteria, Boolean isValorized, List<EExperienceType> experienceTypes) {
     Student student = loggedInUserService.getLoggedInStudent();
     log.info("Get experience view by {}", student);
 
     var pagedExperiences =
-        experienceRepository.findAllByStudent(student, pageCriteria, isValorized, experienceType);
+        experienceRepository.findAllByStudent(student, pageCriteria, isValorized, experienceTypes);
 
     var associationsCountByExperience = getAssociationCounts(pagedExperiences.content());
 

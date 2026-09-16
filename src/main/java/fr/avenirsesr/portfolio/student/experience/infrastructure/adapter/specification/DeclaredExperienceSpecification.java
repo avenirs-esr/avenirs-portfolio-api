@@ -50,12 +50,12 @@ public class DeclaredExperienceSpecification {
   }
 
   public static Specification<DeclaredExperienceEntity> hasExperienceType(
-      EExperienceType experienceType) {
+      List<EExperienceType> experienceTypes) {
     return (root, query, criteriaBuilder) -> {
-      if (experienceType == null) {
+      if (experienceTypes == null || experienceTypes.isEmpty()) {
         return criteriaBuilder.conjunction();
       }
-      return criteriaBuilder.equal(root.get("experienceType"), experienceType);
+      return root.get("experienceType").in(experienceTypes);
     };
   }
 }
