@@ -22,6 +22,7 @@ import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityDashboardData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityPresentationData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityStaffOverviewData;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityDatesException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityDraftNotFoundException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityNotFoundException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityUnpublishedException;
@@ -230,8 +231,8 @@ class ActivityServiceImplTest {
                     "Nouveau summary",
                     "<p>Nouvelle description</p>",
                     "Avant entretien",
-                    LocalDate.parse("2026-06-01"),
-                    LocalDate.parse("2030-06-30"),
+                    Optional.of(Optional.of(LocalDate.parse("2026-06-01"))),
+                    Optional.of(Optional.of(LocalDate.parse("2030-06-30"))),
                     5,
                     3,
                     false,
@@ -257,7 +258,18 @@ class ActivityServiceImplTest {
             BddLogger.then("no field should be updated when null values are passed");
 
             activityService.updateActivityDraft(
-                draftId, null, null, null, null, null, null, null, null, null, null, null);
+                draftId,
+                null,
+                null,
+                null,
+                null,
+                null,
+                Optional.empty(),
+                Optional.empty(),
+                null,
+                null,
+                null,
+                null);
 
             verify(draft, never()).setTitle(any());
             verify(draft, never()).setThematic(any());
@@ -278,7 +290,18 @@ class ActivityServiceImplTest {
             BddLogger.then("only provided fields should be updated");
 
             activityService.updateActivityDraft(
-                draftId, "Titre seul", null, null, null, null, null, null, null, null, null, null);
+                draftId,
+                "Titre seul",
+                null,
+                null,
+                null,
+                null,
+                Optional.empty(),
+                Optional.empty(),
+                null,
+                null,
+                null,
+                null);
 
             verify(draft).setTitle("Titre seul");
             verify(draft, never()).setThematic(any());
@@ -294,6 +317,100 @@ class ActivityServiceImplTest {
           }
 
           @Test
+          void thenItShouldClearDatesWhenBothExplicitlyNull() {
+            BddLogger.then("startDate and endDate should be cleared");
+
+            activityService.updateActivityDraft(
+                draftId,
+                null,
+                null,
+                null,
+                null,
+                null,
+                Optional.of(Optional.empty()),
+                Optional.of(Optional.empty()),
+                null,
+                null,
+                null,
+                null);
+
+            verify(draft).setStartDate(null);
+            verify(draft).setEndDate(null);
+          }
+
+          @Test
+          void thenItShouldThrowActivityDatesExceptionWhenOnlyOneDateIsProvided() {
+            BddLogger.then("providing only one of the two dates should be rejected");
+
+            assertThrows(
+                ActivityDatesException.class,
+                () ->
+                    activityService.updateActivityDraft(
+                        draftId,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        Optional.of(Optional.of(LocalDate.parse("2026-06-01"))),
+                        Optional.empty(),
+                        null,
+                        null,
+                        null,
+                        null));
+
+            verify(activityDraftRepository, never()).save(any());
+          }
+
+          @Test
+          void thenItShouldThrowActivityDatesExceptionWhenOnlyOneDateIsExplicitlyNull() {
+            BddLogger.then("clearing only one of the two dates should be rejected");
+
+            assertThrows(
+                ActivityDatesException.class,
+                () ->
+                    activityService.updateActivityDraft(
+                        draftId,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        Optional.of(Optional.empty()),
+                        Optional.of(Optional.of(LocalDate.parse("2026-06-01"))),
+                        null,
+                        null,
+                        null,
+                        null));
+
+            verify(activityDraftRepository, never()).save(any());
+          }
+
+          @Test
+          void thenItShouldThrowFieldValidationExceptionWhenStartDateIsAfterEndDate() {
+            BddLogger.then("providing a startDate after the endDate should be rejected");
+
+            assertThrows(
+                FieldValidationException.class,
+                () ->
+                    activityService.updateActivityDraft(
+                        draftId,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        Optional.of(Optional.of(LocalDate.parse("2026-06-30"))),
+                        Optional.of(Optional.of(LocalDate.parse("2026-06-01"))),
+                        null,
+                        null,
+                        null,
+                        null));
+
+            verify(activityDraftRepository, never()).save(any());
+          }
+
+          @Test
           void thenItShouldReturnSavedDraft() {
             BddLogger.then("the saved draft should be returned");
 
@@ -302,7 +419,18 @@ class ActivityServiceImplTest {
 
             ActivityDraft result =
                 activityService.updateActivityDraft(
-                    draftId, "Titre", null, null, null, null, null, null, null, null, null, null);
+                    draftId,
+                    "Titre",
+                    null,
+                    null,
+                    null,
+                    null,
+                    Optional.empty(),
+                    Optional.empty(),
+                    null,
+                    null,
+                    null,
+                    null);
 
             assertEquals(savedDraft, result);
           }
@@ -325,7 +453,17 @@ class ActivityServiceImplTest {
                 UserNotAuthorizedException.class,
                 () ->
                     activityService.updateActivityDraft(
-                        draftId, "Titre", null, null, null, null, null, null, null, null, null,
+                        draftId,
+                        "Titre",
+                        null,
+                        null,
+                        null,
+                        null,
+                        Optional.empty(),
+                        Optional.empty(),
+                        null,
+                        null,
+                        null,
                         null));
 
             verify(activityDraftRepository, never()).save(any());
@@ -350,7 +488,17 @@ class ActivityServiceImplTest {
               ActivityDraftNotFoundException.class,
               () ->
                   activityService.updateActivityDraft(
-                      draftId, "Titre", null, null, null, null, null, null, null, null, null,
+                      draftId,
+                      "Titre",
+                      null,
+                      null,
+                      null,
+                      null,
+                      Optional.empty(),
+                      Optional.empty(),
+                      null,
+                      null,
+                      null,
                       null));
 
           verify(activityDraftRepository, never()).save(any());
