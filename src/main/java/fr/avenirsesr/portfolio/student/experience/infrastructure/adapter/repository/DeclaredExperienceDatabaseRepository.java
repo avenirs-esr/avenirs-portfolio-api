@@ -10,6 +10,7 @@ import fr.avenirsesr.portfolio.student.experience.infrastructure.adapter.model.D
 import fr.avenirsesr.portfolio.student.experience.infrastructure.adapter.specification.DeclaredExperienceSpecification;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.repository.GenericUserJpaRepositoryAdapter;
+import java.util.List;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
@@ -31,12 +32,12 @@ public class DeclaredExperienceDatabaseRepository
       Student student,
       PageCriteria pageCriteria,
       Boolean isValorized,
-      EExperienceType experienceType) {
+      List<EExperienceType> experienceTypes) {
     return findAll(
         hasStudent(student)
             .and(DeclaredExperienceSpecification.ordered())
             .and(DeclaredExperienceSpecification.isValorized(isValorized))
-            .and(DeclaredExperienceSpecification.hasExperienceType(experienceType)),
+            .and(DeclaredExperienceSpecification.hasExperienceType(experienceTypes)),
         PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()));
   }
 

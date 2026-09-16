@@ -480,7 +480,7 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
 
   @Transactional
   @Test
-  void shouldFilterDeclaredExperienceViewByExperienceType() throws Exception {
+  void shouldFilterDeclaredExperienceViewByExperienceTypes() throws Exception {
     BddLogger.given("a professional declared experience and a personal declared experience");
 
     String professionalResponse =
@@ -515,7 +515,23 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
             .getResponseBody();
     String personalId = extractIdFromResponse(personalResponse);
 
-    BddLogger.when("performing a GET on /view with experienceType=PROFESSIONAL");
+    String volunteerResponse =
+        webTestClient
+            .post()
+            .uri(BASE_PATH + "/")
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Signature", studentSignature)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(buildCreateExperienceJson("VOLUNTEER"))
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+    String volunteerId = extractIdFromResponse(volunteerResponse);
+
+    BddLogger.when("performing a GET on /view with experienceTypes=[PROFESSIONAL]");
 
     String professionalOnlyResponse =
         webTestClient
@@ -524,7 +540,7 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
                 uriBuilder ->
                     uriBuilder
                         .path(BASE_PATH + "/view")
-                        .queryParam("experienceType", "PROFESSIONAL")
+                        .queryParam("experienceTypes", List.of("PROFESSIONAL"))
                         .queryParam("pageSize", 100)
                         .build())
             .header("X-Signed-Context", studentPayload)
@@ -542,9 +558,12 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .readTree(professionalOnlyResponse)
         .get("data")
         .forEach(node -> professionalIds.add(node.get("id").asText()));
-    assertThat(professionalIds).contains(professionalId).doesNotContain(personalId);
+    assertThat(professionalIds)
+        .contains(professionalId)
+        .doesNotContain(personalId)
+        .doesNotContain(volunteerId);
 
-    BddLogger.when("performing a GET on /view with experienceType=PERSONAL");
+    BddLogger.when("performing a GET on /view with experienceTypes=[PERSONAL]");
 
     String personalOnlyResponse =
         webTestClient
@@ -553,7 +572,7 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
                 uriBuilder ->
                     uriBuilder
                         .path(BASE_PATH + "/view")
-                        .queryParam("experienceType", "PERSONAL")
+                        .queryParam("experienceTypes", List.of("PERSONAL"))
                         .queryParam("pageSize", 100)
                         .build())
             .header("X-Signed-Context", studentPayload)
@@ -571,7 +590,74 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .readTree(personalOnlyResponse)
         .get("data")
         .forEach(node -> personalIds.add(node.get("id").asText()));
-    assertThat(personalIds).contains(personalId).doesNotContain(professionalId);
+    assertThat(personalIds)
+        .contains(personalId)
+        .doesNotContain(professionalId)
+        .doesNotContain(volunteerId);
+
+    BddLogger.when("performing a GET on /view with experienceTypes=[VOLUNTEER]");
+
+    String volunteerOnlyResponse =
+        webTestClient
+            .get()
+            .uri(
+                uriBuilder ->
+                    uriBuilder
+                        .path(BASE_PATH + "/view")
+                        .queryParam("experienceTypes", List.of("VOLUNTEER"))
+                        .queryParam("pageSize", 100)
+                        .build())
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Signature", studentSignature)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    BddLogger.then("it should only contain the volunteer declared experience");
+    List<String> volunteerIds = new ArrayList<>();
+    objectMapper
+        .readTree(volunteerOnlyResponse)
+        .get("data")
+        .forEach(node -> volunteerIds.add(node.get("id").asText()));
+    assertThat(volunteerIds)
+        .contains(volunteerId)
+        .doesNotContain(professionalId)
+        .doesNotContain(personalId);
+
+    BddLogger.when("performing a GET on /view with experienceTypes=[PROFESSIONAL, PERSONAL]");
+
+    String professionalAndPersonalOnlyResponse =
+        webTestClient
+            .get()
+            .uri(
+                uriBuilder ->
+                    uriBuilder
+                        .path(BASE_PATH + "/view")
+                        .queryParam("experienceTypes", List.of("PROFESSIONAL", "PERSONAL"))
+                        .queryParam("pageSize", 100)
+                        .build())
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Signature", studentSignature)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    BddLogger.then("it should only contain the professional and personal declared experience");
+    List<String> professionalAndPersonalIds = new ArrayList<>();
+    objectMapper
+        .readTree(professionalAndPersonalOnlyResponse)
+        .get("data")
+        .forEach(node -> professionalAndPersonalIds.add(node.get("id").asText()));
+    assertThat(professionalAndPersonalIds)
+        .contains(professionalId)
+        .contains(personalId)
+        .doesNotContain(volunteerId);
   }
 
   @Transactional

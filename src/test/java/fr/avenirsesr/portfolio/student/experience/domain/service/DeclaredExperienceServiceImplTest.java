@@ -1106,6 +1106,41 @@ class DeclaredExperienceServiceImplTest {
   }
 
   @Test
+  void getView_shouldDelegateExperienceTypesFilterToRepository() {
+    Student loggedIn = student;
+    PageCriteria criteria = new PageCriteria(1, 8);
+    DeclaredExperience experience = mock(DeclaredExperience.class);
+    UUID experienceId = UUID.randomUUID();
+    when(experience.getId()).thenReturn(experienceId);
+    PagedResult<DeclaredExperience> repositoryResult =
+        new PagedResult<>(List.of(experience), new PageInfo(1, 8, 1));
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedIn);
+    when(experienceRepository.findAllByStudent(
+            loggedIn,
+            criteria,
+            true,
+            List.of(EExperienceType.PROFESSIONAL, EExperienceType.PERSONAL)))
+        .thenReturn(repositoryResult);
+
+    PagedResult<DeclaredExperienceData> result =
+        service.getView(
+            criteria, true, List.of(EExperienceType.PROFESSIONAL, EExperienceType.PERSONAL));
+
+    assertSame(repositoryResult.pageInfo(), result.pageInfo());
+    assertEquals(
+        List.of(
+            new DeclaredExperienceData(experience, new DeclaredExperienceAssociationCount(0, 0))),
+        result.content());
+    verify(experienceRepository)
+        .findAllByStudent(
+            loggedIn,
+            criteria,
+            true,
+            List.of(EExperienceType.PROFESSIONAL, EExperienceType.PERSONAL));
+  }
+
+  @Test
   void getAssociations_should_return_trace_associations() {
     BddLogger.given("a declared experience with trace associations");
 

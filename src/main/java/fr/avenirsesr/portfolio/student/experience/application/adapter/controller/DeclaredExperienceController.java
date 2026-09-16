@@ -20,6 +20,7 @@ import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperienc
 import fr.avenirsesr.portfolio.student.experience.domain.model.enums.EExperienceType;
 import fr.avenirsesr.portfolio.student.experience.domain.port.input.DeclaredExperienceService;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -79,12 +80,13 @@ public class DeclaredExperienceController {
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize,
       @RequestParam(required = false) Boolean isValorized,
-      @Parameter(schema = @Schema(ref = "#/components/schemas/EExperienceType"))
+      @Parameter(
+              array = @ArraySchema(schema = @Schema(ref = "#/components/schemas/EExperienceType")))
           @RequestParam(required = false)
-          EExperienceType experienceType) {
+          List<EExperienceType> experienceTypes) {
     PagedResult<DeclaredExperienceData> pagedExperiences =
         declaredExperienceService.getView(
-            new PageCriteria(page, pageSize), isValorized, experienceType);
+            new PageCriteria(page, pageSize), isValorized, experienceTypes);
 
     return ResponseEntity.ok(
         new PagedResponse<>(

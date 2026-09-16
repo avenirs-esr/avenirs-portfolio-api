@@ -6,13 +6,14 @@ import fr.avenirsesr.portfolio.common.data.domain.port.output.repository.Generic
 import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.experience.domain.model.enums.EExperienceType;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
+import java.util.List;
 
 public interface DeclaredExperienceRepository extends GenericRepositoryPort<DeclaredExperience> {
   PagedResult<DeclaredExperience> findAllByStudent(
       Student student,
       PageCriteria pageCriteria,
       Boolean isValorized,
-      EExperienceType experienceType);
+      List<EExperienceType> experienceTypes);
 
   PagedResult<DeclaredExperience> findAllByStudent(
       Student student, PageCriteria pageCriteria, String keyword);
