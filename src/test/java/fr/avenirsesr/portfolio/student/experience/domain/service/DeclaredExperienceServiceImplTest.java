@@ -15,11 +15,13 @@ import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationExce
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.student.association.domain.data.AssociatedElementsData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.exception.AssociationAlreadyExistException;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
+import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociatedElementsService;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.association.domain.service.AssociationSearchHelper;
 import fr.avenirsesr.portfolio.student.experience.domain.data.DeclaredExperienceAssociationCount;
@@ -31,6 +33,7 @@ import fr.avenirsesr.portfolio.student.experience.domain.port.output.repository.
 import fr.avenirsesr.portfolio.student.skill.domain.exception.DeclaredSkillProgressNotFoundException;
 import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
+import fr.avenirsesr.portfolio.student.trace.domain.data.TraceAssociationData;
 import fr.avenirsesr.portfolio.student.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.student.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
@@ -58,6 +61,7 @@ class DeclaredExperienceServiceImplTest {
 
   @Mock private LoggedInUserService loggedInUserService;
   @Mock private AssociationService associationService;
+  @Mock private AssociatedElementsService associatedElementsService;
   @Mock private AssociationSearchHelper associationSearchHelper;
   @Mock private TraceService traceService;
   @Mock private DeclaredExperienceRepository experienceRepository;
@@ -1154,21 +1158,16 @@ class DeclaredExperienceServiceImplTest {
     when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedIn);
     when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
 
-    Association association = mock(Association.class);
-    UUID traceId = UUID.randomUUID();
+    Trace trace = TraceFixture.create().withId(UUID.randomUUID()).toModel();
 
-    when(association.getId()).thenReturn(UUID.randomUUID());
-    when(association.getId1()).thenReturn(traceId);
-    when(association.getAssociationType()).thenReturn(EAssociationType.TRACE_DECLARED_EXPERIENCE);
-
-    when(associationService.getAllOf(
-            experienceId,
-            DeclaredExperience.class,
-            EAssociationType.getAllBy(DeclaredExperience.class)))
-        .thenReturn(List.of(association));
-
-    Trace trace = TraceFixture.create().withId(traceId).toModel();
-    when(traceService.findAllTracesById(List.of(traceId))).thenReturn(List.of(trace));
+    when(associatedElementsService.getAllAssociatedElementsOf(
+            experienceId, DeclaredExperience.class))
+        .thenReturn(
+            new AssociatedElementsData(
+                List.of(new TraceAssociationData(UUID.randomUUID(), trace)),
+                List.of(),
+                List.of(),
+                List.of()));
 
     BddLogger.when("getting associations");
 
@@ -1232,13 +1231,9 @@ class DeclaredExperienceServiceImplTest {
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
 
-    when(associationService.getAllOf(
-            experienceId,
-            DeclaredExperience.class,
-            EAssociationType.getAllBy(DeclaredExperience.class)))
-        .thenReturn(List.of());
-
-    when(traceService.findAllTracesById(any())).thenReturn(List.of());
+    when(associatedElementsService.getAllAssociatedElementsOf(
+            experienceId, DeclaredExperience.class))
+        .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
 
     BddLogger.when("getting associations");
 
@@ -1271,14 +1266,9 @@ class DeclaredExperienceServiceImplTest {
               List.of(skill1.getId(), skill2.getId())))
           .thenReturn(List.of(skill1, skill2));
 
-      when(associationService.getAllOf(
-              experienceId,
-              DeclaredExperience.class,
-              EAssociationType.getAllBy(DeclaredExperience.class)))
-          .thenReturn(List.of());
-      when(traceService.findAllTracesById(List.of())).thenReturn(List.of());
-      when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of()))
-          .thenReturn(List.of());
+      when(associatedElementsService.getAllAssociatedElementsOf(
+              experienceId, DeclaredExperience.class))
+          .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
 
       BddLogger.when("associating the experience with both declared skill progresses");
 
@@ -1428,12 +1418,9 @@ class DeclaredExperienceServiceImplTest {
       when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
       when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of()))
           .thenReturn(List.of());
-      when(associationService.getAllOf(
-              experienceId,
-              DeclaredExperience.class,
-              EAssociationType.getAllBy(DeclaredExperience.class)))
-          .thenReturn(List.of());
-      when(traceService.findAllTracesById(List.of())).thenReturn(List.of());
+      when(associatedElementsService.getAllAssociatedElementsOf(
+              experienceId, DeclaredExperience.class))
+          .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
 
       BddLogger.when("associating with an empty list");
 
@@ -1460,14 +1447,9 @@ class DeclaredExperienceServiceImplTest {
       when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
       when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of(skill.getId())))
           .thenReturn(List.of(skill));
-      when(associationService.getAllOf(
-              experienceId,
-              DeclaredExperience.class,
-              EAssociationType.getAllBy(DeclaredExperience.class)))
-          .thenReturn(List.of());
-      when(traceService.findAllTracesById(List.of())).thenReturn(List.of());
-      when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of()))
-          .thenReturn(List.of());
+      when(associatedElementsService.getAllAssociatedElementsOf(
+              experienceId, DeclaredExperience.class))
+          .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
 
       BddLogger.when("associating with the duplicated id");
 
@@ -1537,14 +1519,9 @@ class DeclaredExperienceServiceImplTest {
       when(traceService.findAllTracesById(List.of(trace1.getId(), trace2.getId())))
           .thenReturn(List.of(trace1, trace2));
 
-      when(associationService.getAllOf(
-              experienceId,
-              DeclaredExperience.class,
-              EAssociationType.getAllBy(DeclaredExperience.class)))
-          .thenReturn(List.of());
-      when(traceService.findAllTracesById(List.of())).thenReturn(List.of());
-      when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of()))
-          .thenReturn(List.of());
+      when(associatedElementsService.getAllAssociatedElementsOf(
+              experienceId, DeclaredExperience.class))
+          .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
 
       BddLogger.when("associating the experience with both traces");
 
@@ -1686,13 +1663,9 @@ class DeclaredExperienceServiceImplTest {
       when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
       when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
       when(traceService.findAllTracesById(List.of())).thenReturn(List.of());
-      when(associationService.getAllOf(
-              experienceId,
-              DeclaredExperience.class,
-              EAssociationType.getAllBy(DeclaredExperience.class)))
-          .thenReturn(List.of());
-      when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of()))
-          .thenReturn(List.of());
+      when(associatedElementsService.getAllAssociatedElementsOf(
+              experienceId, DeclaredExperience.class))
+          .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
 
       BddLogger.when("associating with an empty list");
 
@@ -1718,14 +1691,9 @@ class DeclaredExperienceServiceImplTest {
       when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
       when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
       when(traceService.findAllTracesById(List.of(trace.getId()))).thenReturn(List.of(trace));
-      when(associationService.getAllOf(
-              experienceId,
-              DeclaredExperience.class,
-              EAssociationType.getAllBy(DeclaredExperience.class)))
-          .thenReturn(List.of());
-      when(traceService.findAllTracesById(List.of())).thenReturn(List.of());
-      when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of()))
-          .thenReturn(List.of());
+      when(associatedElementsService.getAllAssociatedElementsOf(
+              experienceId, DeclaredExperience.class))
+          .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
 
       BddLogger.when("associating with the duplicated id");
 

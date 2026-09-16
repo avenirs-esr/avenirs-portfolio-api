@@ -34,16 +34,19 @@ import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityAssociationData;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.DeclaredActivityAlreadyFinishedException;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.FeedbackService;
+import fr.avenirsesr.portfolio.student.association.domain.data.AssociatedElementsData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.exception.AssociationDoesNotExistException;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
+import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociatedElementsService;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.association.domain.service.AssociationSearchHelper;
 import fr.avenirsesr.portfolio.student.experience.domain.exception.DeclaredExperienceNotFoundException;
@@ -100,6 +103,7 @@ class TraceServiceImplTest {
   @Mock private TraceConfigurationClient traceConfigurationClient;
   @Mock private LoggedInUserService loggedInUserService;
   @Mock private AssociationService associationService;
+  @Mock private AssociatedElementsService associatedElementsService;
   @Mock private AssociationSearchHelper associationSearchHelper;
   @Mock private FeedbackService feedbackService;
   @Mock private FileResourceService fileResourceService;
@@ -1195,19 +1199,18 @@ class TraceServiceImplTest {
 
         Trace trace = TraceFixture.create().withStudent(student).withId(traceId).toModel();
 
-        Association association = mock(Association.class);
-        when(association.getAssociationType()).thenReturn(EAssociationType.DECLARED_ACTIVITY_TRACE);
-        when(association.getId1()).thenReturn(activityId);
-
         DeclaredActivity activity = mock(DeclaredActivity.class);
-        when(activity.getId()).thenReturn(activityId);
 
         when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
-        when(associationService.getAllOf(
-                traceId, Trace.class, EAssociationType.getAllBy(Trace.class)))
-            .thenReturn(List.of(association));
-        when(declaredActivityService.findAllDeclaredActivitiesByIds(List.of(activityId)))
-            .thenReturn(List.of(activity));
+        when(associatedElementsService.getAllAssociatedElementsOf(traceId, Trace.class, false))
+            .thenReturn(
+                new AssociatedElementsData(
+                    List.of(),
+                    List.of(
+                        new DeclaredActivityAssociationData(
+                            UUID.randomUUID(), activity, EDeclaredActivityStatus.IN_PROGRESS)),
+                    List.of(),
+                    List.of()));
 
         TraceAssociationsData result = traceService.getTraceAssociations(traceId, false);
 
@@ -1225,26 +1228,24 @@ class TraceServiceImplTest {
 
         Trace trace = TraceFixture.create().withStudent(student).withId(traceId).toModel();
 
-        Association association = mock(Association.class);
-        when(association.getAssociationType()).thenReturn(EAssociationType.DECLARED_ACTIVITY_TRACE);
-        when(association.getId1()).thenReturn(activityId);
-
         DeclaredActivity activity = mock(DeclaredActivity.class);
-        when(activity.getId()).thenReturn(activityId);
 
         when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
-        when(associationService.getAllOf(
-                traceId, Trace.class, EAssociationType.getAllBy(Trace.class)))
-            .thenReturn(List.of(association));
-        when(declaredActivityService.findAllNotCompletedActivitiesByIds(List.of(activityId)))
-            .thenReturn(List.of(activity));
+        when(associatedElementsService.getAllAssociatedElementsOf(traceId, Trace.class, true))
+            .thenReturn(
+                new AssociatedElementsData(
+                    List.of(),
+                    List.of(
+                        new DeclaredActivityAssociationData(
+                            UUID.randomUUID(), activity, EDeclaredActivityStatus.IN_PROGRESS)),
+                    List.of(),
+                    List.of()));
 
         TraceAssociationsData result = traceService.getTraceAssociations(traceId, true);
 
-        BddLogger.then("it should call the not completed method and return the data");
+        BddLogger.then("it should ask for the not completed activities only");
 
-        verify(declaredActivityService).findAllNotCompletedActivitiesByIds(List.of(activityId));
-        verify(declaredActivityService, never()).findAllDeclaredActivitiesByIds(any());
+        verify(associatedElementsService).getAllAssociatedElementsOf(traceId, Trace.class, true);
         assertEquals(1, result.declaredActivityAssociations().size());
       }
 
@@ -1301,9 +1302,8 @@ class TraceServiceImplTest {
         when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
         when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of(skillId)))
             .thenReturn(List.of(skill));
-        when(associationService.getAllOf(
-                traceId, Trace.class, EAssociationType.getAllBy(Trace.class)))
-            .thenReturn(List.of());
+        when(associatedElementsService.getAllAssociatedElementsOf(traceId, Trace.class, false))
+            .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
 
         TraceAssociationsData result =
             traceService.associateTraceWithDeclaredSkill(traceId, List.of(skillId));
@@ -1378,9 +1378,8 @@ class TraceServiceImplTest {
         when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
         when(declaredExperienceService.findAllByIds(List.of(experienceId)))
             .thenReturn(List.of(experience));
-        when(associationService.getAllOf(
-                traceId, Trace.class, EAssociationType.getAllBy(Trace.class)))
-            .thenReturn(List.of());
+        when(associatedElementsService.getAllAssociatedElementsOf(traceId, Trace.class, false))
+            .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
 
         TraceAssociationsData result =
             traceService.associateTraceWithDeclaredExperience(traceId, List.of(experienceId));

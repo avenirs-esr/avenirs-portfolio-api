@@ -17,7 +17,6 @@ import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.file.domain.model.FileDownload;
 import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
-import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityAssociationData;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.DeclaredActivityAlreadyFinishedException;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.DeclaredActivityNotFoundException;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
@@ -30,13 +29,12 @@ import fr.avenirsesr.portfolio.student.association.domain.exception.AssociationD
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
+import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociatedElementsService;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.association.domain.service.AssociationSearchHelper;
-import fr.avenirsesr.portfolio.student.experience.domain.data.DeclaredExperienceAssociationData;
 import fr.avenirsesr.portfolio.student.experience.domain.exception.DeclaredExperienceNotFoundException;
 import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.experience.domain.port.input.DeclaredExperienceService;
-import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillAssociationData;
 import fr.avenirsesr.portfolio.student.skill.domain.exception.DeclaredSkillProgressNotFoundException;
 import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
@@ -71,6 +69,7 @@ public class TraceServiceImpl implements TraceService {
   private final TraceConfigurationClient traceConfigurationClient;
   private final LoggedInUserService loggedInUserService;
   private final AssociationService associationService;
+  private final AssociatedElementsService associatedElementsService;
   private final AssociationSearchHelper associationSearchHelper;
   private final FeedbackService feedbackService;
   private final FileResourceService fileResourceService;
@@ -249,53 +248,14 @@ public class TraceServiceImpl implements TraceService {
 
     checkIfStudentIsAuthorizedOnTrace(studentLoggedIn, trace);
 
-    var associations =
-        associationService.getAllOf(
-            trace.getId(), Trace.class, EAssociationType.getAllBy(Trace.class));
-
-    var declaredActivityAssociations =
-        associations.stream()
-            .filter(a -> a.getAssociationType() == EAssociationType.DECLARED_ACTIVITY_TRACE)
-            .toList();
-
-    List<DeclaredActivity> activities;
-
-    if (onlyNotCompleted) {
-      activities =
-          declaredActivityService.findAllNotCompletedActivitiesByIds(
-              declaredActivityAssociations.stream().map(Association::getId1).toList());
-    } else {
-      activities =
-          declaredActivityService.findAllDeclaredActivitiesByIds(
-              declaredActivityAssociations.stream().map(Association::getId1).toList());
-    }
-
-    var declaredSkillAssociations =
-        associations.stream()
-            .filter(a -> a.getAssociationType() == EAssociationType.TRACE_DECLARED_SKILL)
-            .toList();
-    var skills =
-        declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(
-            declaredSkillAssociations.stream().map(Association::getId2).toList());
-
-    var declaredExperienceAssociations =
-        associations.stream()
-            .filter(a -> a.getAssociationType() == EAssociationType.TRACE_DECLARED_EXPERIENCE)
-            .toList();
-    var experiences =
-        declaredExperienceService.findAllByIds(
-            declaredExperienceAssociations.stream().map(Association::getId2).toList());
-
-    var activityStatuses = declaredActivityService.getDeclaredActivityStatus(activities);
+    var associatedElements =
+        associatedElementsService.getAllAssociatedElementsOf(
+            trace.getId(), Trace.class, onlyNotCompleted);
 
     return new TraceAssociationsData(
-        declaredActivityAssociations.stream()
-            .map(a -> declaredActivityMapper(a, activities, activityStatuses))
-            .toList(),
-        declaredSkillAssociations.stream().map(a -> declaredSkillMapper(a, skills)).toList(),
-        declaredExperienceAssociations.stream()
-            .map(a -> declaredExperienceMapper(a, experiences))
-            .toList());
+        associatedElements.declaredActivityAssociations(),
+        associatedElements.declaredSkillAssociations(),
+        associatedElements.declaredExperienceAssociations());
   }
 
   @Override
@@ -453,41 +413,6 @@ public class TraceServiceImpl implements TraceService {
             .toList());
 
     return getTraceAssociations(traceId, false);
-  }
-
-  private DeclaredActivityAssociationData declaredActivityMapper(
-      Association association,
-      List<DeclaredActivity> activities,
-      Map<DeclaredActivity, EDeclaredActivityStatus> activityStatuses) {
-
-    DeclaredActivity activity =
-        activities.stream()
-            .filter(a -> a.getId().equals(association.getId1()))
-            .findAny()
-            .orElseThrow(DeclaredActivityNotFoundException::new);
-
-    return new DeclaredActivityAssociationData(
-        association.getId(), activity, activityStatuses.get(activity));
-  }
-
-  private DeclaredSkillAssociationData declaredSkillMapper(
-      Association association, List<DeclaredSkillProgress> skills) {
-    return new DeclaredSkillAssociationData(
-        association.getId(),
-        skills.stream()
-            .filter(skill -> skill.getId().equals(association.getId2()))
-            .findAny()
-            .orElseThrow(DeclaredSkillProgressNotFoundException::new));
-  }
-
-  private DeclaredExperienceAssociationData declaredExperienceMapper(
-      Association association, List<DeclaredExperience> experiences) {
-    return new DeclaredExperienceAssociationData(
-        association.getId(),
-        experiences.stream()
-            .filter(experience -> experience.getId().equals(association.getId2()))
-            .findAny()
-            .orElseThrow(DeclaredExperienceNotFoundException::new));
   }
 
   @Override
