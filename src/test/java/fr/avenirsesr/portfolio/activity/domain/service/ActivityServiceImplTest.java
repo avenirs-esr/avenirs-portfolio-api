@@ -231,12 +231,13 @@ class ActivityServiceImplTest {
                     "Nouveau summary",
                     "<p>Nouvelle description</p>",
                     "Avant entretien",
-                    Optional.of(Optional.of(LocalDate.parse("2026-06-01"))),
-                    Optional.of(Optional.of(LocalDate.parse("2030-06-30"))),
+                    LocalDate.parse("2026-06-01"),
+                    LocalDate.parse("2030-06-30"),
                     5,
                     3,
                     false,
-                    links);
+                    links,
+                    true);
 
             verify(draft).setTitle("Nouveau titre");
             verify(draft).setThematic(EActivityThematic.EXPERIENCES);
@@ -258,26 +259,13 @@ class ActivityServiceImplTest {
             BddLogger.then("no field should be updated when null values are passed");
 
             activityService.updateActivityDraft(
-                draftId,
-                null,
-                null,
-                null,
-                null,
-                null,
-                Optional.empty(),
-                Optional.empty(),
-                null,
-                null,
-                null,
-                null);
+                draftId, null, null, null, null, null, null, null, null, null, null, null, false);
 
             verify(draft, never()).setTitle(any());
             verify(draft, never()).setThematic(any());
             verify(draft, never()).setSummary(any());
             verify(draft, never()).setDescription(any());
             verify(draft, never()).setRecommendedCompletionContexts(any());
-            verify(draft, never()).setStartDate(any());
-            verify(draft, never()).setEndDate(any());
             verify(draft, never()).setTraceAllowedAssociations(anyInt());
             verify(draft, never()).setFeedbackAllowedIterations(anyInt());
             verify(draft, never()).setEnableReflection(anyBoolean());
@@ -296,20 +284,19 @@ class ActivityServiceImplTest {
                 null,
                 null,
                 null,
-                Optional.empty(),
-                Optional.empty(),
                 null,
                 null,
                 null,
-                null);
+                null,
+                null,
+                null,
+                false);
 
             verify(draft).setTitle("Titre seul");
             verify(draft, never()).setThematic(any());
             verify(draft, never()).setSummary(any());
             verify(draft, never()).setDescription(any());
             verify(draft, never()).setRecommendedCompletionContexts(any());
-            verify(draft, never()).setStartDate(any());
-            verify(draft, never()).setEndDate(any());
             verify(draft, never()).setTraceAllowedAssociations(anyInt());
             verify(draft, never()).setFeedbackAllowedIterations(anyInt());
             verify(draft, never()).setEnableReflection(anyBoolean());
@@ -317,8 +304,19 @@ class ActivityServiceImplTest {
           }
 
           @Test
-          void thenItShouldClearDatesWhenBothExplicitlyNull() {
+          void thenItShouldClearDatesWhenEnableCompletionPeriodIsFalse() {
             BddLogger.then("startDate and endDate should be cleared");
+
+            activityService.updateActivityDraft(
+                draftId, null, null, null, null, null, null, null, null, null, null, null, false);
+
+            verify(draft).setStartDate(null);
+            verify(draft).setEndDate(null);
+          }
+
+          @Test
+          void thenItShouldIgnoreProvidedDatesWhenEnableCompletionPeriodIsFalse() {
+            BddLogger.then("provided dates should be ignored when the period is disabled");
 
             activityService.updateActivityDraft(
                 draftId,
@@ -327,15 +325,39 @@ class ActivityServiceImplTest {
                 null,
                 null,
                 null,
-                Optional.of(Optional.empty()),
-                Optional.of(Optional.empty()),
+                LocalDate.parse("2026-06-01"),
+                LocalDate.parse("2030-06-30"),
                 null,
                 null,
                 null,
-                null);
+                null,
+                false);
 
             verify(draft).setStartDate(null);
             verify(draft).setEndDate(null);
+          }
+
+          @Test
+          void thenItShouldSetDatesWhenEnableCompletionPeriodIsTrue() {
+            BddLogger.then("startDate and endDate should be set");
+
+            activityService.updateActivityDraft(
+                draftId,
+                null,
+                null,
+                null,
+                null,
+                null,
+                LocalDate.parse("2026-06-01"),
+                LocalDate.parse("2030-06-30"),
+                null,
+                null,
+                null,
+                null,
+                true);
+
+            verify(draft).setStartDate(LocalDate.parse("2026-06-01"));
+            verify(draft).setEndDate(LocalDate.parse("2030-06-30"));
           }
 
           @Test
@@ -352,36 +374,27 @@ class ActivityServiceImplTest {
                         null,
                         null,
                         null,
-                        Optional.of(Optional.of(LocalDate.parse("2026-06-01"))),
-                        Optional.empty(),
+                        LocalDate.parse("2026-06-01"),
                         null,
                         null,
                         null,
-                        null));
+                        null,
+                        null,
+                        true));
 
             verify(activityDraftRepository, never()).save(any());
           }
 
           @Test
-          void thenItShouldThrowActivityDatesExceptionWhenOnlyOneDateIsExplicitlyNull() {
-            BddLogger.then("clearing only one of the two dates should be rejected");
+          void thenItShouldThrowActivityDatesExceptionWhenEnablingWithoutDates() {
+            BddLogger.then("enabling the completion period without dates should be rejected");
 
             assertThrows(
                 ActivityDatesException.class,
                 () ->
                     activityService.updateActivityDraft(
-                        draftId,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        Optional.of(Optional.empty()),
-                        Optional.of(Optional.of(LocalDate.parse("2026-06-01"))),
-                        null,
-                        null,
-                        null,
-                        null));
+                        draftId, null, null, null, null, null, null, null, null, null, null, null,
+                        true));
 
             verify(activityDraftRepository, never()).save(any());
           }
@@ -400,12 +413,13 @@ class ActivityServiceImplTest {
                         null,
                         null,
                         null,
-                        Optional.of(Optional.of(LocalDate.parse("2026-06-30"))),
-                        Optional.of(Optional.of(LocalDate.parse("2026-06-01"))),
+                        LocalDate.parse("2026-06-30"),
+                        LocalDate.parse("2026-06-01"),
                         null,
                         null,
                         null,
-                        null));
+                        null,
+                        true));
 
             verify(activityDraftRepository, never()).save(any());
           }
@@ -419,18 +433,8 @@ class ActivityServiceImplTest {
 
             ActivityDraft result =
                 activityService.updateActivityDraft(
-                    draftId,
-                    "Titre",
-                    null,
-                    null,
-                    null,
-                    null,
-                    Optional.empty(),
-                    Optional.empty(),
-                    null,
-                    null,
-                    null,
-                    null);
+                    draftId, "Titre", null, null, null, null, null, null, null, null, null, null,
+                    false);
 
             assertEquals(savedDraft, result);
           }
@@ -453,18 +457,8 @@ class ActivityServiceImplTest {
                 UserNotAuthorizedException.class,
                 () ->
                     activityService.updateActivityDraft(
-                        draftId,
-                        "Titre",
-                        null,
-                        null,
-                        null,
-                        null,
-                        Optional.empty(),
-                        Optional.empty(),
-                        null,
-                        null,
-                        null,
-                        null));
+                        draftId, "Titre", null, null, null, null, null, null, null, null, null,
+                        null, false));
 
             verify(activityDraftRepository, never()).save(any());
           }
@@ -488,18 +482,8 @@ class ActivityServiceImplTest {
               ActivityDraftNotFoundException.class,
               () ->
                   activityService.updateActivityDraft(
-                      draftId,
-                      "Titre",
-                      null,
-                      null,
-                      null,
-                      null,
-                      Optional.empty(),
-                      Optional.empty(),
-                      null,
-                      null,
-                      null,
-                      null));
+                      draftId, "Titre", null, null, null, null, null, null, null, null, null, null,
+                      false));
 
           verify(activityDraftRepository, never()).save(any());
         }

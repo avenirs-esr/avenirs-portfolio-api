@@ -135,12 +135,13 @@ public class ActivityDraftSeeder {
                     data.summary().orElse(null),
                     data.description().orElse(null),
                     data.recommendedCompletionContexts().orElse(null),
-                    data.startDate().map(Optional::of),
-                    data.endDate().map(Optional::of),
+                    data.startDate().orElse(null),
+                    data.endDate().orElse(null),
                     data.traceAllowedAssociations().orElse(null),
                     data.feedbackAllowedIterations().orElse(null),
                     data.enableReflection(),
-                    data.links());
+                    data.links(),
+                    data.startDate().isPresent() && data.endDate().isPresent());
 
             entityManager.flush();
 

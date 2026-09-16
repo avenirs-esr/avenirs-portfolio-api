@@ -639,7 +639,8 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                     5,
                     3,
                     false,
-                    List.of("https://example.com", "https://avenirs-esr.fr")));
+                    List.of("https://example.com", "https://avenirs-esr.fr"),
+                    true));
 
         webTestClient
             .patch()
@@ -676,7 +677,8 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                     null,
                     null,
                     null,
-                    null));
+                    null,
+                    false));
 
         webTestClient
             .patch()
@@ -694,53 +696,24 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       }
 
       @Test
-      void thenItShouldNotModifyDatesWhenAbsentFromPayload() throws Exception {
+      void thenItShouldClearCompletionPeriodWhenDisabled() throws Exception {
         BddLogger.and("given an existing activity draft with a completion period");
-        UUID draftId = createDraftAndGetId("Brouillon dates non transmises");
+        UUID draftId = createDraftAndGetId("Brouillon avec période de réalisation");
         setCompletionPeriod(draftId, "2026-09-07", "2026-09-18");
 
-        BddLogger.then("a payload without startDate/endDate should leave the dates untouched");
+        BddLogger.then("enableCompletionPeriod=false should clear the dates");
+
+        String requestBody =
+            objectMapper.writeValueAsString(
+                new ActivityDraftUpdateRequest(
+                    null, null, null, null, null, null, null, null, null, null, null, false));
 
         webTestClient
             .patch()
             .uri(DRAFT_UPDATE_PATH, draftId)
             .headers(ActivityControllerIT.this::addStaffHeaders)
             .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue("{\"title\": \"Titre sans dates\"}")
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isOk();
-
-        webTestClient
-            .get()
-            .uri(CONTENT_PATH, "DRAFT", draftId)
-            .headers(ActivityControllerIT.this::addStaffHeaders)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody()
-            .jsonPath("$.startDate")
-            .isEqualTo("2026-09-07")
-            .jsonPath("$.endDate")
-            .isEqualTo("2026-09-18");
-      }
-
-      @Test
-      void thenItShouldClearDatesWhenExplicitlyNull() throws Exception {
-        BddLogger.and("given an existing activity draft with a completion period");
-        UUID draftId = createDraftAndGetId("Brouillon dates explicitement nulles");
-        setCompletionPeriod(draftId, "2026-09-07", "2026-09-18");
-
-        BddLogger.then("explicit null startDate/endDate should clear the completion period");
-
-        webTestClient
-            .patch()
-            .uri(DRAFT_UPDATE_PATH, draftId)
-            .headers(ActivityControllerIT.this::addStaffHeaders)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue("{\"startDate\": null, \"endDate\": null}")
+            .bodyValue(requestBody)
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus()
@@ -762,26 +735,53 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       }
 
       @Test
-      void thenItShouldReturn400WhenOnlyOneDateIsExplicitlyNull() throws Exception {
+      void thenItShouldIgnoreProvidedDatesWhenCompletionPeriodIsDisabled() throws Exception {
         BddLogger.and("given an existing activity draft with a completion period");
-        UUID draftId = createDraftAndGetId("Brouillon une seule date nulle");
+        UUID draftId = createDraftAndGetId("Brouillon dates ignorées à l'effacement");
         setCompletionPeriod(draftId, "2026-09-07", "2026-09-18");
 
-        BddLogger.then("clearing only one of the two dates should return 400");
+        BddLogger.then("provided dates should be ignored when enableCompletionPeriod is false");
+
+        String requestBody =
+            objectMapper.writeValueAsString(
+                new ActivityDraftUpdateRequest(
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    LocalDate.parse("2027-01-01"),
+                    LocalDate.parse("2027-01-31"),
+                    null,
+                    null,
+                    null,
+                    null,
+                    false));
 
         webTestClient
             .patch()
             .uri(DRAFT_UPDATE_PATH, draftId)
             .headers(ActivityControllerIT.this::addStaffHeaders)
             .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue("{\"startDate\": null}")
+            .bodyValue(requestBody)
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus()
-            .isBadRequest()
+            .isOk();
+
+        webTestClient
+            .get()
+            .uri(CONTENT_PATH, "DRAFT", draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
             .expectBody()
-            .jsonPath("$.code")
-            .isEqualTo("ACTIVITY_DATES");
+            .jsonPath("$.startDate")
+            .doesNotExist()
+            .jsonPath("$.endDate")
+            .doesNotExist();
       }
 
       @Test
@@ -791,12 +791,28 @@ class ActivityControllerIT extends ContainerConfigurationTest {
 
         BddLogger.then("providing only one of the two dates should return 400");
 
+        String requestBody =
+            objectMapper.writeValueAsString(
+                new ActivityDraftUpdateRequest(
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    LocalDate.parse("2026-09-07"),
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    true));
+
         webTestClient
             .patch()
             .uri(DRAFT_UPDATE_PATH, draftId)
             .headers(ActivityControllerIT.this::addStaffHeaders)
             .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue("{\"startDate\": \"2026-09-07\"}")
+            .bodyValue(requestBody)
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus()
@@ -816,7 +832,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         String requestBody =
             objectMapper.writeValueAsString(
                 new ActivityDraftUpdateRequest(
-                    "Titre", null, null, null, null, null, null, null, null, null, null));
+                    "Titre", null, null, null, null, null, null, null, null, null, null, false));
 
         webTestClient
             .patch()
@@ -843,7 +859,18 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         String requestBody =
             objectMapper.writeValueAsString(
                 new ActivityDraftUpdateRequest(
-                    "Titre étudiant", null, null, null, null, null, null, null, null, null, null));
+                    "Titre étudiant",
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    false));
 
         webTestClient
             .patch()
@@ -867,7 +894,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         String requestBody =
             objectMapper.writeValueAsString(
                 new ActivityDraftUpdateRequest(
-                    "Titre", null, null, null, null, null, null, null, null, null, null));
+                    "Titre", null, null, null, null, null, null, null, null, null, null, false));
 
         webTestClient
             .patch()
@@ -895,7 +922,8 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                     null,
                     null,
                     null,
-                    null));
+                    null,
+                    true));
 
         webTestClient
             .patch()
@@ -2280,7 +2308,8 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                 null,
                 null,
                 null,
-                null));
+                null,
+                false));
 
     webTestClient
         .patch()
@@ -2308,7 +2337,8 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                 null,
                 null,
                 null,
-                null));
+                null,
+                false));
 
     webTestClient
         .patch()

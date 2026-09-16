@@ -458,12 +458,13 @@ public class ActivityServiceImpl implements ActivityService {
       String summary,
       String description,
       String recommendedCompletionContexts,
-      Optional<Optional<LocalDate>> startDate,
-      Optional<Optional<LocalDate>> endDate,
+      LocalDate startDate,
+      LocalDate endDate,
       Integer traceAllowedAssociations,
       Integer feedbackAllowedIterations,
       Boolean enableReflection,
-      List<String> links) {
+      List<String> links,
+      boolean enableCompletionPeriod) {
     var loggedInStaff = loggedInUserService.getLoggedInStaff();
     var draft =
         activityDraftRepository.findById(id).orElseThrow(ActivityDraftNotFoundException::new);
@@ -478,8 +479,10 @@ public class ActivityServiceImpl implements ActivityService {
         "recommendedCompletionContexts",
         recommendedCompletionContexts,
         ACTIVITY_RECOMMENDED_COMPLETION_CONTEXTS);
-
-    if (startDate.isPresent() != endDate.isPresent()) {
+    if (startDate != null) {
+      validateDateOrder(startDate, endDate);
+    }
+    if ((startDate == null) != (endDate == null) || (enableCompletionPeriod && startDate == null)) {
       throw new ActivityDatesException();
     }
 
@@ -492,15 +495,12 @@ public class ActivityServiceImpl implements ActivityService {
     if (description != null) draft.setDescription(description);
     if (recommendedCompletionContexts != null)
       draft.setRecommendedCompletionContexts(recommendedCompletionContexts);
-    if (startDate.isPresent()) {
-      var newStartDate = startDate.get();
-      var newEndDate = endDate.get();
-      if (newStartDate.isPresent() != newEndDate.isPresent()) {
-        throw new ActivityDatesException();
-      }
-      newStartDate.ifPresent(value -> validateDateOrder(value, newEndDate.orElse(null)));
-      draft.setStartDate(newStartDate.orElse(null));
-      draft.setEndDate(newEndDate.orElse(null));
+    if (enableCompletionPeriod) {
+      draft.setStartDate(startDate);
+      draft.setEndDate(endDate);
+    } else {
+      draft.setStartDate(null);
+      draft.setEndDate(null);
     }
 
     if (!hasEnrolledStudents(draft)) {
