@@ -9,6 +9,7 @@ import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.file.domain.model.FileDownload;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
+import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.trace.domain.data.*;
 import fr.avenirsesr.portfolio.student.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
@@ -65,12 +66,8 @@ public interface TraceService {
       String link,
       boolean valorized);
 
-  TraceAssociationsData associateTraceWithActivities(UUID traceId, List<UUID> activityIds);
-
-  TraceAssociationsData associateTraceWithDeclaredSkill(UUID traceId, List<UUID> skillIds);
-
-  TraceAssociationsData associateTraceWithDeclaredExperience(
-      UUID traceId, List<UUID> experienceIds);
+  TraceAssociationsData associate(
+      UUID traceId, List<UUID> associatedIds, EAssociationType associationType);
 
   TraceAssociationsData getTraceAssociations(UUID traceId, boolean onlyNotCompleted);
 

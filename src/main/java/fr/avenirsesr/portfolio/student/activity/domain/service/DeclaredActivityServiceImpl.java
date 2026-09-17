@@ -24,18 +24,13 @@ import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivi
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.FeedbackService;
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.FeedbackRepository;
-import fr.avenirsesr.portfolio.student.association.domain.data.AssociationData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.exception.MaximumAssociationReachedException;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.association.domain.service.AssociationSearchHelper;
-import fr.avenirsesr.portfolio.student.skill.domain.exception.DeclaredSkillProgressNotFoundException;
-import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
-import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.student.trace.domain.data.TraceViewData;
-import fr.avenirsesr.portfolio.student.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.student.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
@@ -55,7 +50,6 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   private final DeclaredActivityRepository declaredActivityRepository;
   private final ActivityService activityService;
   private final TraceService traceService;
-  private final DeclaredSkillProgressService declaredSkillProgressService;
   private final AssociationService associationService;
   private final AssociationSearchHelper associationSearchHelper;
   private final LoggedInUserService loggedInUserService;
@@ -288,76 +282,42 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   }
 
   @Override
-  public DeclaredActivityAssociationsData associateActivityWithTraces(
-      UUID declaredActivityId, List<UUID> traceIds) {
-    Student student = loggedInUserService.getLoggedInStudent();
+  public DeclaredActivityAssociationsData associate(
+      UUID declaredActivityId, List<UUID> associatedIds, EAssociationType associationType) {
     DeclaredActivity declaredActivity =
         fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
+
     if (declaredActivity.isUnsubscribed()) {
       throw new DeclaredActivityUnsubscribedException();
     }
-    var traces = traceService.findAllTracesById(traceIds);
 
-    if (!new HashSet<>(traces.stream().map(Trace::getId).toList()).containsAll(traceIds)) {
-      throw new TraceNotFoundException();
+    if (associationType == EAssociationType.DECLARED_ACTIVITY_TRACE) {
+      checkMaximumAllowedTraceAssociations(declaredActivity, associatedIds);
     }
 
-    if (!traces.stream().allMatch(trace -> trace.getStudent().equals(student))) {
-      throw new UserNotAuthorizedException();
-    }
-
-    var traceAssociations =
-        associationService.getAllOf(
-            declaredActivityId,
-            DeclaredActivity.class,
-            List.of(EAssociationType.DECLARED_ACTIVITY_TRACE));
-    var activity = declaredActivity.getActivity();
-    if (activity.getTraceAllowedAssociations() != -1
-        && traceAssociations.size() + traceIds.size() > activity.getTraceAllowedAssociations()) {
-      throw new MaximumAssociationReachedException();
-    }
-
-    associationService.createAll(
-        traceIds.stream()
-            .map(
-                traceId ->
-                    new AssociationData(
-                        declaredActivityId, traceId, EAssociationType.DECLARED_ACTIVITY_TRACE))
-            .toList());
+    associationService.associate(
+        declaredActivity.getId(), DeclaredActivity.class, associatedIds, associationType);
 
     return getDeclaredActivityAssociations(declaredActivityId);
   }
 
-  @Override
-  public DeclaredActivityAssociationsData associateActivityWithDeclaredSkills(
-      UUID declaredActivityId, List<UUID> declaredSkillIds) {
-    Student student = loggedInUserService.getLoggedInStudent();
-    if (fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId).isUnsubscribed()) {
-      throw new DeclaredActivityUnsubscribedException();
-    }
-    var declaredSkills =
-        declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(declaredSkillIds);
+  private void checkMaximumAllowedTraceAssociations(
+      DeclaredActivity declaredActivity, List<UUID> traceIds) {
+    var allowedAssociations = declaredActivity.getActivity().getTraceAllowedAssociations();
 
-    if (!new HashSet<>(declaredSkills.stream().map(DeclaredSkillProgress::getId).toList())
-        .containsAll(declaredSkillIds)) {
-      throw new DeclaredSkillProgressNotFoundException();
+    if (allowedAssociations == -1) {
+      return;
     }
 
-    if (!declaredSkills.stream().allMatch(skill -> skill.getStudent().equals(student))) {
-      throw new UserNotAuthorizedException();
+    var traceAssociations =
+        associationService.getAllOf(
+            declaredActivity.getId(),
+            DeclaredActivity.class,
+            List.of(EAssociationType.DECLARED_ACTIVITY_TRACE));
+
+    if (traceAssociations.size() + traceIds.size() > allowedAssociations) {
+      throw new MaximumAssociationReachedException();
     }
-
-    associationService.createAll(
-        declaredSkillIds.stream()
-            .map(
-                skillId ->
-                    new AssociationData(
-                        declaredActivityId,
-                        skillId,
-                        EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL))
-            .toList());
-
-    return getDeclaredActivityAssociations(declaredActivityId);
   }
 
   @Override

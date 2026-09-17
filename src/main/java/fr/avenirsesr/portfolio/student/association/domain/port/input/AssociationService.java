@@ -23,6 +23,9 @@ public interface AssociationService {
   AssociatedElementsData getAllAssociatedElementsOf(
       UUID id, Class<?> clazz, boolean onlyNotCompletedActivities);
 
+  void associate(
+      UUID id, Class<?> clazz, List<UUID> associatedIds, EAssociationType associationType);
+
   void unassociate(UUID id, Class<?> clazz, List<UUID> associationIds);
 
   void deleteAllByIds(List<UUID> ids);

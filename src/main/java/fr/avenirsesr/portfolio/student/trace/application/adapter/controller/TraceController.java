@@ -17,6 +17,7 @@ import fr.avenirsesr.portfolio.student.association.application.adapter.dto.Assoc
 import fr.avenirsesr.portfolio.student.association.application.adapter.mapper.AssociationSearchResultDTOMapper;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
+import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.trace.application.adapter.dto.*;
 import fr.avenirsesr.portfolio.student.trace.application.adapter.mapper.*;
 import fr.avenirsesr.portfolio.student.trace.application.adapter.response.TracesCreationResponse;
@@ -313,7 +314,8 @@ public class TraceController {
         body.idsToAssociate(),
         principal.getName());
     var traceAssociations =
-        traceService.associateTraceWithActivities(traceId, body.idsToAssociate());
+        traceService.associate(
+            traceId, body.idsToAssociate(), EAssociationType.DECLARED_ACTIVITY_TRACE);
     return ResponseEntity.ok(traceAssociationsMapper.toDTO(traceAssociations));
   }
 
@@ -329,7 +331,8 @@ public class TraceController {
         body.idsToAssociate(),
         principal.getName());
     var traceAssociations =
-        traceService.associateTraceWithDeclaredSkill(traceId, body.idsToAssociate());
+        traceService.associate(
+            traceId, body.idsToAssociate(), EAssociationType.TRACE_DECLARED_SKILL);
     return ResponseEntity.ok(traceAssociationsMapper.toDTO(traceAssociations));
   }
 
@@ -345,7 +348,8 @@ public class TraceController {
         body.idsToAssociate(),
         principal.getName());
     var traceAssociations =
-        traceService.associateTraceWithDeclaredExperience(traceId, body.idsToAssociate());
+        traceService.associate(
+            traceId, body.idsToAssociate(), EAssociationType.TRACE_DECLARED_EXPERIENCE);
     return ResponseEntity.ok(traceAssociationsMapper.toDTO(traceAssociations));
   }
 
