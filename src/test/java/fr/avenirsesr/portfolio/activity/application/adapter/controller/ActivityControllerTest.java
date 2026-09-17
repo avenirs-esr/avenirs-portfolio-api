@@ -719,9 +719,17 @@ class ActivityControllerTest {
             staff,
             EActivityStatus.DRAFT,
             Instant.now());
+    var data4 =
+        new ActivityStaffOverviewData(
+            UUID.randomUUID(),
+            "A4",
+            EActivityThematic.OTHER,
+            staff,
+            EActivityStatus.DRAFT,
+            Instant.now());
 
     when(activityService.staffActivityWorkingSpace(any(PageCriteria.class), eq(null)))
-        .thenReturn(new PagedResult<>(List.of(data1, data2, data3), pageInfo));
+        .thenReturn(new PagedResult<>(List.of(data1, data2, data3, data4), pageInfo));
 
     when(activityStaffOverviewDtoMapper.toDTO(any()))
         .thenReturn(
@@ -733,10 +741,11 @@ class ActivityControllerTest {
 
     BddLogger.then("the mapper should be called once per item");
 
-    assertEquals(3, response.getBody().data().size());
+    assertEquals(4, response.getBody().data().size());
     verify(activityStaffOverviewDtoMapper).toDTO(data1);
     verify(activityStaffOverviewDtoMapper).toDTO(data2);
     verify(activityStaffOverviewDtoMapper).toDTO(data3);
+    verify(activityStaffOverviewDtoMapper).toDTO(data4);
   }
 
   @Test

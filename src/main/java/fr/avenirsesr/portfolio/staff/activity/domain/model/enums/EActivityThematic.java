@@ -7,5 +7,6 @@ public enum EActivityThematic {
   EXPERIENCES,
   TRAJECTORIES,
   RESUMES,
-  TRANSVERSAL
+  TRANSVERSAL,
+  OTHER
 }
