@@ -127,7 +127,7 @@ public class NotificationSeeder {
     for (var field : updatedFields) {
       switch (field) {
         case ACTIVITY_TITLE -> title = draft.getTitle() + " (modifié)";
-        case THEMATIC -> thematic = nextThematic(draft.getThematic());
+        case THEMATIC -> thematic = nextThematic(draft.getThematic().orElse(null));
         case SUMMARY -> summary = draft.getSummary().orElse("") + " (modifié)";
         case DESCRIPTION -> description = draft.getDescription().orElse("") + " (modifié)";
         case RECOMMENDED_COMPLETION_CONTEXTS ->

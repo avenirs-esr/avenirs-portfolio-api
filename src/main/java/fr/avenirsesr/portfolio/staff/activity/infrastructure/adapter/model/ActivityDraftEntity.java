@@ -35,7 +35,7 @@ public class ActivityDraftEntity extends PeriodEntity<LocalDate> {
   private StaffEntity author;
 
   @Enumerated(EnumType.STRING)
-  @Column(nullable = false)
+  @Column
   private EActivityThematic thematic;
 
   @Column(length = SUMMARY_LENGTH)

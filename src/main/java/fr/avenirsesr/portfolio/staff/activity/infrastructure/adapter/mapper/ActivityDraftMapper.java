@@ -16,7 +16,7 @@ public class ActivityDraftMapper implements Mapper<ActivityDraftEntity, Activity
         activityDraft.getId(),
         activityDraft.getTitle(),
         StaffMapper.INSTANCE.fromDomain(activityDraft.getAuthor()),
-        activityDraft.getThematic(),
+        activityDraft.getThematic().orElse(null),
         activityDraft.getSummary().orElse(null),
         activityDraft.getDescription().orElse(null),
         activityDraft.getRecommendedCompletionContexts().orElse(null),

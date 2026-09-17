@@ -140,6 +140,11 @@ public class ActivityServiceImpl implements ActivityService {
       throw new UserNotAuthorizedException();
     }
 
+    if (draft.getThematic().isEmpty()) {
+      throw new FieldValidationException(
+          EErrorCode.NOT_BLANK, "thematic must be defined to publish an activity");
+    }
+
     if (draft.getSummary().isEmpty()) {
       throw new FieldValidationException(
           EErrorCode.NOT_BLANK, "summary must be defined to publish an activity");
@@ -158,7 +163,7 @@ public class ActivityServiceImpl implements ActivityService {
                 draft.getId(),
                 draft.getAuthor(),
                 draft.getTitle(),
-                draft.getThematic(),
+                draft.getThematic().orElseThrow(),
                 draft.getSummary().orElseThrow(),
                 draft.getDescription().orElseThrow(),
                 draft.getRecommendedCompletionContexts().orElse(null),
@@ -217,7 +222,10 @@ public class ActivityServiceImpl implements ActivityService {
                 draft.getRecommendedCompletionContexts().orElse(null),
                 activity::setRecommendedCompletionContexts),
             new FieldSync<>(
-                THEMATIC, activity.getThematic(), draft.getThematic(), activity::setThematic),
+                THEMATIC,
+                activity.getThematic(),
+                draft.getThematic().orElse(null),
+                activity::setThematic),
             new FieldSync<>(
                 BANNER,
                 activity.getBanner().orElse(null),
@@ -600,7 +608,7 @@ public class ActivityServiceImpl implements ActivityService {
             now,
             source.getTitle(),
             staff,
-            source.getThematic(),
+            source.getThematic().orElse(null),
             source.getSummary().orElse(null),
             source.getDescription().orElse(null),
             source.getRecommendedCompletionContexts().orElse(null),

@@ -32,7 +32,7 @@ public interface ActivityPresentationDataMapper {
     return new ActivityPresentationData(
         draft.getId(),
         draft.getTitle(),
-        draft.getThematic(),
+        draft.getThematic().orElse(null),
         Optional.empty(),
         Optional.empty(),
         draft.getSummary().orElse(null),

@@ -12,7 +12,6 @@ import java.util.UUID;
     requiredProperties = {
       "id",
       "title",
-      "thematic",
       "summary",
       "enableReflection",
       "traceAllowedAssociations",

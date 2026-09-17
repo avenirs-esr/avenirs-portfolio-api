@@ -18,4 +18,8 @@ public interface OptionalMapper {
   default Integer unwrapInteger(Optional<Integer> value) {
     return value == null ? null : value.orElse(null);
   }
+
+  default <T> T unwrapT(Optional<T> value) {
+    return value == null ? null : value.orElse(null);
+  }
 }

@@ -6,15 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
 import java.util.UUID;
 
-@Schema(
-    requiredProperties = {
-      "activityId",
-      "title",
-      "author",
-      "thematic",
-      "activityStatus",
-      "updatedAt"
-    })
+@Schema(requiredProperties = {"activityId", "title", "author", "activityStatus", "updatedAt"})
 public record ActivityStaffOverviewDTO(
     UUID activityId,
     AuthorDTO author,
