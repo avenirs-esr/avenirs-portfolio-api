@@ -707,49 +707,6 @@ class TraceServiceImplTest {
     class WhenUpdatingTrace {
 
       @Test
-      void thenItShouldUpdateAndSaveTrace() {
-        BddLogger.when("updating a trace");
-
-        Trace trace =
-            TraceFixture.create()
-                .withStudent(student)
-                .withTitle("Test Title")
-                .withLanguage(ELanguage.ENGLISH)
-                .withAuthorType(ETraceAuthorType.PERSONAL)
-                .withPersonalNote("Some personal note")
-                .withAiUseJustification("Justified by AI")
-                .toModel();
-
-        when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
-        when(traceRepository.save(trace)).thenReturn(trace);
-        when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
-
-        traceService.updateTrace(
-            trace.getId(),
-            "Test Title - Updated",
-            ELanguage.FRENCH,
-            ETraceAuthorType.COLLECTIVE,
-            "Some personal note - Updated",
-            "Justified by AI - Updated");
-
-        BddLogger.then("it should update and save the trace");
-
-        ArgumentCaptor<Trace> captor = ArgumentCaptor.forClass(Trace.class);
-        verify(traceRepository).save(captor.capture());
-
-        Trace updatedTrace = captor.getValue();
-
-        assertEquals(student, updatedTrace.getStudent());
-        assertEquals("Test Title - Updated", updatedTrace.getTitle());
-        assertEquals(ELanguage.FRENCH, updatedTrace.getLanguage());
-        assertEquals(ETraceAuthorType.COLLECTIVE, updatedTrace.getAuthorType());
-        assertTrue(updatedTrace.getPersonalNote().isPresent());
-        assertTrue(updatedTrace.getAiUseJustification().isPresent());
-        assertEquals("Some personal note - Updated", updatedTrace.getPersonalNote().get());
-        assertEquals("Justified by AI - Updated", updatedTrace.getAiUseJustification().get());
-      }
-
-      @Test
       void thenItShouldUpdateTraceWithLink() {
         BddLogger.when("updating a trace with link");
 
@@ -778,81 +735,6 @@ class TraceServiceImplTest {
         assertTrue(captor.getValue().getLink().isPresent());
         assertEquals("https://example.com/updated", captor.getValue().getLink().get());
         assertEquals(ETraceAuthorType.THIRD_PARTY, captor.getValue().getAuthorType());
-      }
-
-      @Test
-      void thenItShouldUpdateTraceWithNullFields() {
-        BddLogger.when("updating a trace with null optional fields");
-
-        Trace trace =
-            TraceFixture.create()
-                .withStudent(student)
-                .withPersonalNote("Some personal note")
-                .withAiUseJustification("Justified by AI")
-                .toModel();
-
-        when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
-        when(traceRepository.save(trace)).thenReturn(trace);
-        when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
-
-        traceService.updateTrace(
-            trace.getId(),
-            "Updated title",
-            ELanguage.FRENCH,
-            ETraceAuthorType.PERSONAL,
-            null,
-            null);
-
-        BddLogger.then("it should update and clear nullable fields");
-
-        ArgumentCaptor<Trace> captor = ArgumentCaptor.forClass(Trace.class);
-        verify(traceRepository).save(captor.capture());
-
-        Trace updatedTrace = captor.getValue();
-
-        assertEquals("Updated title", updatedTrace.getTitle());
-        assertEquals(ELanguage.FRENCH, updatedTrace.getLanguage());
-        assertEquals(ETraceAuthorType.PERSONAL, updatedTrace.getAuthorType());
-        assertTrue(updatedTrace.getPersonalNote().isEmpty());
-        assertTrue(updatedTrace.getAiUseJustification().isEmpty());
-      }
-
-      @Test
-      void thenItShouldReturnDeletableFalseWhenAssociatedTraceIsLocked() {
-        BddLogger.when("updating an associated locked trace");
-
-        Trace trace = TraceFixture.create().withStudent(student).toModel();
-
-        when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
-        when(traceRepository.save(trace)).thenReturn(trace);
-        when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, true));
-
-        TraceDetailData result =
-            traceService.updateTrace(
-                trace.getId(), "Updated", ELanguage.FRENCH, ETraceAuthorType.PERSONAL, null, null);
-
-        BddLogger.then("it should return a non deletable trace detail");
-
-        assertTrue(result.isAssociated());
-      }
-
-      @Test
-      void thenItShouldReturnDeletableTrueWhenAssociatedTraceIsUnlocked() {
-        BddLogger.when("updating an associated unlocked trace");
-
-        Trace trace = TraceFixture.create().withStudent(student).toModel();
-
-        when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
-        when(traceRepository.save(trace)).thenReturn(trace);
-        when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, true));
-
-        TraceDetailData result =
-            traceService.updateTrace(
-                trace.getId(), "Updated", ELanguage.FRENCH, ETraceAuthorType.PERSONAL, null, null);
-
-        BddLogger.then("it should return a deletable trace detail");
-
-        assertTrue(result.isAssociated());
       }
 
       @Test

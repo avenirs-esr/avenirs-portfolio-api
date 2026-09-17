@@ -359,30 +359,6 @@ public class TraceServiceImpl implements TraceService {
   }
 
   @Override
-  public TraceDetailData updateTrace(
-      UUID traceId,
-      String title,
-      ELanguage language,
-      ETraceAuthorType authorType,
-      String personalNote,
-      String aiJustification) {
-    boolean currentValorized =
-        traceRepository
-            .findById(traceId)
-            .map(Trace::isValorized)
-            .orElseThrow(TraceNotFoundException::new);
-    return updateTrace(
-        traceId,
-        title,
-        language,
-        authorType,
-        personalNote,
-        aiJustification,
-        null,
-        currentValorized);
-  }
-
-  @Override
   public TraceAssociationsData associateTraceWithActivities(UUID traceId, List<UUID> activityIds) {
     Student loggedInStudent = loggedInUserService.getLoggedInStudent();
     var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
