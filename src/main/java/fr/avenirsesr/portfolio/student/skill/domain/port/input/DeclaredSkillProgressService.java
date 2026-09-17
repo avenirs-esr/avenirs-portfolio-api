@@ -44,6 +44,8 @@ public interface DeclaredSkillProgressService {
 
   List<DeclaredSkillProgress> findAllDeclaredSkillProgressesByIds(List<UUID> ids);
 
+  List<UUID> getAssociatedExternalSkillIds();
+
   DeclaredSkillAssociationsData getAssociationsOf(UUID declaredSkillId);
 
   DeclaredSkillAssociationsData associateDeclaredSkillWithActivities(
