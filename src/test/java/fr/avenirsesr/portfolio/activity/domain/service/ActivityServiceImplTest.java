@@ -163,7 +163,6 @@ class ActivityServiceImplTest {
         ActivityDraft result =
             activityService.createActivityDraft("Brouillon avec valeurs par défaut");
 
-        assertEquals(EActivityThematic.TRANSVERSAL, result.getThematic());
         assertEquals(-1, result.getTraceAllowedAssociations());
         assertEquals(-1, result.getFeedbackAllowedIterations());
         assertTrue(result.isEnableReflection());
@@ -507,112 +506,149 @@ class ActivityServiceImplTest {
           @BeforeEach
           void setupAnd() {
             BddLogger.and("the logged-in staff is the author");
-            mockPublishableDraft(draft, draftId, loggedInStaff, List.of("https://example.com"));
-            when(activityRepository.save(any()))
-                .thenAnswer(invocation -> invocation.getArgument(0));
           }
 
-          @Test
-          void thenItShouldCreateActivityFromDraftAndSaveIt() {
-            BddLogger.then("an activity should be created from the draft and saved");
+          @Nested
+          class AndTheThematicIsPresent {
 
-            Activity result = activityService.publish(draftId);
+            @BeforeEach
+            void setupAnd() {
+              BddLogger.and("the thematic is present");
+              mockPublishableDraft(
+                  draft,
+                  draftId,
+                  loggedInStaff,
+                  List.of("https://example.com"),
+                  EActivityThematic.EXPERIENCES);
+              when(activityRepository.save(any()))
+                  .thenAnswer(invocation -> invocation.getArgument(0));
+            }
 
-            assertNotNull(result);
-            assertEquals(draftId, result.getId());
-            assertEquals("Mon activité", result.getTitle());
-            assertEquals(EActivityThematic.EXPERIENCES, result.getThematic());
-            assertEquals("Un résumé", result.getSummary());
-            assertEquals(List.of("https://example.com"), result.getLinks());
+            @Test
+            void thenItShouldCreateActivityFromDraftAndSaveIt() {
+              BddLogger.then("an activity should be created from the draft and saved");
 
-            verify(activityRepository).save(any(Activity.class));
-            verify(activityDraftRepository).removeFromDatabase(draft);
+              Activity result = activityService.publish(draftId);
+
+              assertNotNull(result);
+              assertEquals(draftId, result.getId());
+              assertEquals("Mon activité", result.getTitle());
+              assertEquals(EActivityThematic.EXPERIENCES, result.getThematic());
+              assertEquals("Un résumé", result.getSummary());
+              assertEquals(List.of("https://example.com"), result.getLinks());
+
+              verify(activityRepository).save(any(Activity.class));
+              verify(activityDraftRepository).removeFromDatabase(draft);
+            }
+
+            @Test
+            void thenItShouldRemoveDraftAfterPublishing() {
+              BddLogger.then("the draft should be removed after publishing");
+
+              activityService.publish(draftId);
+
+              InOrder inOrder = inOrder(activityRepository, activityDraftRepository);
+              inOrder.verify(activityRepository).save(any(Activity.class));
+              inOrder.verify(activityDraftRepository).removeFromDatabase(draft);
+            }
+
+            @Test
+            void thenItShouldMapOptionalFieldsAsEmptyOptionalsWhenNotPresent() {
+              BddLogger.then("optional fields should be empty when absent from draft");
+
+              when(draft.getRecommendedCompletionContexts()).thenReturn(Optional.empty());
+
+              when(draft.getStartDate()).thenReturn(Optional.empty());
+              when(draft.getEndDate()).thenReturn(Optional.empty());
+
+              Activity result = activityService.publish(draftId);
+
+              assertNotNull(result);
+              assertTrue(result.getRecommendedCompletionContexts().isEmpty());
+              assertTrue(result.getStartDate().isEmpty());
+              assertTrue(result.getEndDate().isEmpty());
+            }
+
+            @Test
+            void thenItShouldPreserveAllDraftFields() {
+              BddLogger.then("all draft fields should be preserved");
+
+              List<String> links = List.of("https://example.com", "https://avenirs-esr.fr");
+              when(draft.getTitle()).thenReturn("Titre complet");
+              when(draft.getThematic()).thenReturn(Optional.of(EActivityThematic.SELF_KNOWLEDGE));
+              when(draft.getSummary()).thenReturn(Optional.of("Résumé complet"));
+              when(draft.getDescription()).thenReturn(Optional.of("<p>Description complète</p>"));
+              when(draft.getRecommendedCompletionContexts())
+                  .thenReturn(Optional.of("Avant entretien"));
+              when(draft.getStartDate()).thenReturn(Optional.of(LocalDate.parse("2026-06-01")));
+              when(draft.getEndDate()).thenReturn(Optional.of(LocalDate.parse("2030-06-30")));
+              when(draft.isEnableReflection()).thenReturn(false);
+              when(draft.getTraceAllowedAssociations()).thenReturn(3);
+              when(draft.getFeedbackAllowedIterations()).thenReturn(5);
+              when(draft.getLinks()).thenReturn(links);
+
+              Activity result = activityService.publish(draftId);
+
+              assertEquals(draftId, result.getId());
+              assertEquals("Titre complet", result.getTitle());
+              assertEquals(EActivityThematic.SELF_KNOWLEDGE, result.getThematic());
+              assertEquals("Résumé complet", result.getSummary());
+              assertEquals("<p>Description complète</p>", result.getDescription());
+              assertEquals("Avant entretien", result.getRecommendedCompletionContexts().get());
+              assertEquals(LocalDate.parse("2026-06-01"), result.getStartDate().get());
+              assertEquals(LocalDate.parse("2030-06-30"), result.getEndDate().get());
+              assertFalse(result.isEnableReflection());
+              assertEquals(3, result.getTraceAllowedAssociations());
+              assertEquals(5, result.getFeedbackAllowedIterations());
+              assertEquals(links, result.getLinks());
+            }
+
+            @Test
+            void thenItShouldThrowFieldValidationExceptionWhenSummaryIsEmpty() {
+              BddLogger.then("the service should throw FieldValidationException");
+
+              when(draft.getSummary()).thenReturn(Optional.empty());
+
+              assertThrows(FieldValidationException.class, () -> activityService.publish(draftId));
+
+              verify(activityRepository, never()).save(any());
+              verify(activityDraftRepository, never()).removeFromDatabase(any());
+            }
+
+            @Test
+            void thenItShouldThrowFieldValidationExceptionWhenDescriptionIsEmpty() {
+              BddLogger.then("the service should throw FieldValidationException");
+
+              when(draft.getDescription()).thenReturn(Optional.empty());
+
+              assertThrows(FieldValidationException.class, () -> activityService.publish(draftId));
+
+              verify(activityRepository, never()).save(any());
+              verify(activityDraftRepository, never()).removeFromDatabase(any());
+            }
           }
 
-          @Test
-          void thenItShouldRemoveDraftAfterPublishing() {
-            BddLogger.then("the draft should be removed after publishing");
+          @Nested
+          class AndTheThematicIsEmpty {
 
-            activityService.publish(draftId);
+            @BeforeEach
+            void setupAnd() {
+              BddLogger.and("the thematic is empty");
+              mockPublishableDraft(
+                  draft, draftId, loggedInStaff, List.of("https://example.com"), null);
+              when(activityRepository.save(any()))
+                  .thenAnswer(invocation -> invocation.getArgument(0));
+            }
 
-            InOrder inOrder = inOrder(activityRepository, activityDraftRepository);
-            inOrder.verify(activityRepository).save(any(Activity.class));
-            inOrder.verify(activityDraftRepository).removeFromDatabase(draft);
-          }
+            @Test
+            void thenItShouldThrowFieldValidationExceptionWhenThematicIsEmpty() {
+              BddLogger.then("the service should throw FieldValidationException");
 
-          @Test
-          void thenItShouldMapOptionalFieldsAsEmptyOptionalsWhenNotPresent() {
-            BddLogger.then("optional fields should be empty when absent from draft");
+              assertThrows(FieldValidationException.class, () -> activityService.publish(draftId));
 
-            when(draft.getRecommendedCompletionContexts()).thenReturn(Optional.empty());
-
-            when(draft.getStartDate()).thenReturn(Optional.empty());
-            when(draft.getEndDate()).thenReturn(Optional.empty());
-
-            Activity result = activityService.publish(draftId);
-
-            assertNotNull(result);
-            assertTrue(result.getRecommendedCompletionContexts().isEmpty());
-            assertTrue(result.getStartDate().isEmpty());
-            assertTrue(result.getEndDate().isEmpty());
-          }
-
-          @Test
-          void thenItShouldPreserveAllDraftFields() {
-            BddLogger.then("all draft fields should be preserved");
-
-            List<String> links = List.of("https://example.com", "https://avenirs-esr.fr");
-            when(draft.getTitle()).thenReturn("Titre complet");
-            when(draft.getThematic()).thenReturn(EActivityThematic.SELF_KNOWLEDGE);
-            when(draft.getSummary()).thenReturn(Optional.of("Résumé complet"));
-            when(draft.getDescription()).thenReturn(Optional.of("<p>Description complète</p>"));
-            when(draft.getRecommendedCompletionContexts())
-                .thenReturn(Optional.of("Avant entretien"));
-            when(draft.getStartDate()).thenReturn(Optional.of(LocalDate.parse("2026-06-01")));
-            when(draft.getEndDate()).thenReturn(Optional.of(LocalDate.parse("2030-06-30")));
-            when(draft.isEnableReflection()).thenReturn(false);
-            when(draft.getTraceAllowedAssociations()).thenReturn(3);
-            when(draft.getFeedbackAllowedIterations()).thenReturn(5);
-            when(draft.getLinks()).thenReturn(links);
-
-            Activity result = activityService.publish(draftId);
-
-            assertEquals(draftId, result.getId());
-            assertEquals("Titre complet", result.getTitle());
-            assertEquals(EActivityThematic.SELF_KNOWLEDGE, result.getThematic());
-            assertEquals("Résumé complet", result.getSummary());
-            assertEquals("<p>Description complète</p>", result.getDescription());
-            assertEquals("Avant entretien", result.getRecommendedCompletionContexts().get());
-            assertEquals(LocalDate.parse("2026-06-01"), result.getStartDate().get());
-            assertEquals(LocalDate.parse("2030-06-30"), result.getEndDate().get());
-            assertFalse(result.isEnableReflection());
-            assertEquals(3, result.getTraceAllowedAssociations());
-            assertEquals(5, result.getFeedbackAllowedIterations());
-            assertEquals(links, result.getLinks());
-          }
-
-          @Test
-          void thenItShouldThrowFieldValidationExceptionWhenSummaryIsEmpty() {
-            BddLogger.then("the service should throw FieldValidationException");
-
-            when(draft.getSummary()).thenReturn(Optional.empty());
-
-            assertThrows(FieldValidationException.class, () -> activityService.publish(draftId));
-
-            verify(activityRepository, never()).save(any());
-            verify(activityDraftRepository, never()).removeFromDatabase(any());
-          }
-
-          @Test
-          void thenItShouldThrowFieldValidationExceptionWhenDescriptionIsEmpty() {
-            BddLogger.then("the service should throw FieldValidationException");
-
-            when(draft.getDescription()).thenReturn(Optional.empty());
-
-            assertThrows(FieldValidationException.class, () -> activityService.publish(draftId));
-
-            verify(activityRepository, never()).save(any());
-            verify(activityDraftRepository, never()).removeFromDatabase(any());
+              verify(activityRepository, never()).save(any());
+              verify(activityDraftRepository, never()).removeFromDatabase(any());
+            }
           }
         }
 
@@ -681,7 +717,7 @@ class ActivityServiceImplTest {
         when(draft.getAuthor()).thenReturn(staff);
         when(draft.getSummary()).thenReturn(Optional.of("Nouveau résumé"));
         when(draft.getTitle()).thenReturn("Nouveau titre");
-        when(draft.getThematic()).thenReturn(EActivityThematic.EXPERIENCES);
+        when(draft.getThematic()).thenReturn(Optional.of(EActivityThematic.EXPERIENCES));
         when(draft.getDescription()).thenReturn(Optional.of("Nouvelle description"));
         when(draft.getRecommendedCompletionContexts()).thenReturn(Optional.of("Nouvelle période"));
         when(draft.getStartDate()).thenReturn(Optional.of(LocalDate.parse("2026-06-01")));
@@ -1933,7 +1969,7 @@ class ActivityServiceImplTest {
           ActivityDraft result = activityService.duplicateActivity(activityId);
 
           assertEquals("Activité à dupliquer", result.getTitle());
-          assertEquals(EActivityThematic.EXPERIENCES, result.getThematic());
+          assertEquals(EActivityThematic.EXPERIENCES, result.getThematic().orElseThrow());
           assertEquals("Un résumé", result.getSummary().orElseThrow());
           assertEquals("<p>Une description</p>", result.getDescription().orElseThrow());
           assertEquals("2026", result.getRecommendedCompletionContexts().orElseThrow());
@@ -2066,7 +2102,7 @@ class ActivityServiceImplTest {
           ActivityDraft result = activityService.duplicateActivity(activityId);
 
           assertEquals("Brouillon à dupliquer", result.getTitle());
-          assertEquals(EActivityThematic.EXPERIENCES, result.getThematic());
+          assertEquals(EActivityThematic.EXPERIENCES, result.getThematic().orElseThrow());
           assertEquals("Un résumé", result.getSummary().orElseThrow());
           assertEquals("<p>Une description</p>", result.getDescription().orElseThrow());
           assertEquals("2026", result.getRecommendedCompletionContexts().orElseThrow());
@@ -2196,11 +2232,15 @@ class ActivityServiceImplTest {
   }
 
   private void mockPublishableDraft(
-      ActivityDraft draft, UUID draftId, Staff staff, List<String> links) {
+      ActivityDraft draft,
+      UUID draftId,
+      Staff staff,
+      List<String> links,
+      EActivityThematic thematic) {
     when(draft.getAuthor()).thenReturn(staff);
     when(draft.getId()).thenReturn(draftId);
     when(draft.getTitle()).thenReturn("Mon activité");
-    when(draft.getThematic()).thenReturn(EActivityThematic.EXPERIENCES);
+    when(draft.getThematic()).thenReturn(Optional.ofNullable(thematic));
     when(draft.getSummary()).thenReturn(Optional.of("Un résumé"));
     when(draft.getDescription()).thenReturn(Optional.of("<p>Description</p>"));
     when(draft.getRecommendedCompletionContexts()).thenReturn(Optional.of("2026"));

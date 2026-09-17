@@ -17,8 +17,8 @@ import lombok.Setter;
 public class ActivityDraft extends AvenirsBaseModel {
   @Getter private final Staff author;
   @Getter private String title;
-  @Getter private EActivityThematic thematic;
 
+  private EActivityThematic thematic;
   private String summary;
   private String description;
   private String recommendedCompletionContexts;
@@ -76,7 +76,7 @@ public class ActivityDraft extends AvenirsBaseModel {
         Instant.now(),
         title,
         createdBy,
-        EActivityThematic.TRANSVERSAL,
+        null,
         null,
         null,
         null,
@@ -126,6 +126,10 @@ public class ActivityDraft extends AvenirsBaseModel {
         banner,
         links,
         files);
+  }
+
+  public Optional<EActivityThematic> getThematic() {
+    return Optional.ofNullable(thematic);
   }
 
   public Optional<String> getSummary() {

@@ -164,10 +164,11 @@ public class StaffActivityOverviewQueryRepository implements StaffActivityOvervi
   }
 
   private ActivityStaffOverviewData mapRow(Object[] row, Staff author) {
+    String thematic = toNullableString(row[2]);
     return new ActivityStaffOverviewData(
         toUUID(row[0]),
         toString(row[1]),
-        EActivityThematic.valueOf(toString(row[2])),
+        thematic == null ? null : EActivityThematic.valueOf(thematic),
         author,
         EActivityStatus.valueOf(toString(row[4])),
         toInstant(row[5]));
@@ -180,6 +181,10 @@ public class StaffActivityOverviewQueryRepository implements StaffActivityOvervi
       default ->
           throw new IllegalArgumentException("Type inattendu pour String : " + value.getClass());
     };
+  }
+
+  private String toNullableString(Object value) {
+    return value == null ? null : toString(value);
   }
 
   private UUID toUUID(Object value) {

@@ -5,6 +5,7 @@ import static org.mockito.Mockito.when;
 
 import fr.avenirsesr.portfolio.activity.infrastructure.fixture.ActivityFixture;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.shared.application.adapter.mapper.OptionalMapper;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityContentDTO;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityContentDtoMapper;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
@@ -30,6 +31,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class DeclaredActivityPresentationDTOMapperTest {
+
+  @Spy private OptionalMapper optionalMapper = Mappers.getMapper(OptionalMapper.class);
 
   @Mock private ActivityContentDtoMapper activityContentDtoMapper;
 
