@@ -147,6 +147,33 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
   }
 
   @Test
+  void shouldReturnAssociatedExternalSkillIds() throws Exception {
+    BddLogger.given("a declared skill progress for the logged-in student");
+    UUID declaredSkillId = createAvailableDeclaredSkillProgress().declaredSkillId();
+
+    BddLogger.when("performing a GET on " + BASE_PATH + "/external-ids");
+    var response =
+        webTestClient
+            .get()
+            .uri(BASE_PATH + "/external-ids")
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Signature", studentSignature)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    BddLogger.then("it should contain the external id of the declared skill");
+    List<UUID> externalIds = new ArrayList<>();
+    objectMapper
+        .readTree(response)
+        .forEach(node -> externalIds.add(UUID.fromString(node.asText())));
+    assertThat(externalIds).contains(declaredSkillId);
+  }
+
+  @Test
   void shouldReturnConflictWhenDeclaredSkillAlreadyExists() throws Exception {
     UUID id = createAvailableDeclaredSkillProgress().declaredSkillId();
 

@@ -101,6 +101,15 @@ public class DeclaredSkillProgressController {
   }
 
   @PreAuthorize("hasAuthority('declared-skill:list:own')")
+  @GetMapping("/external-ids")
+  public ResponseEntity<List<UUID>> getAssociatedExternalSkillIds(Principal principal) {
+    log.debug(
+        "Received request to get associated external skill ids for student [{}]",
+        principal.getName());
+    return ResponseEntity.ok(declaredSkillProgressService.getAssociatedExternalSkillIds());
+  }
+
+  @PreAuthorize("hasAuthority('declared-skill:list:own')")
   @GetMapping("/{declaredSkillProgressId}")
   public ResponseEntity<DeclaredSkillProgressDetailsDTO> getDeclaredSkillProgressDetails(
       Principal principal, @PathVariable UUID declaredSkillProgressId) {

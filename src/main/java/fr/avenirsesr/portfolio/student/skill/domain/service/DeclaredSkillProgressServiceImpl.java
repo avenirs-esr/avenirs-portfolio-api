@@ -481,6 +481,15 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
     return declaredSkillProgressRepository.findAllById(ids);
   }
 
+  @Override
+  public List<UUID> getAssociatedExternalSkillIds() {
+    Student student = loggedInUserService.getLoggedInStudent();
+    return declaredSkillProgressRepository.findAllByStudent(student).stream()
+        .map(declaredSkillProgress -> declaredSkillProgress.getSkill().getId())
+        .distinct()
+        .toList();
+  }
+
   private EAssociationType getAssociationType(EAssociationContextType contextType) {
     return switch (contextType) {
       case TRACE -> EAssociationType.TRACE_DECLARED_SKILL;
