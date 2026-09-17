@@ -401,10 +401,5 @@ public class FeedbackServiceImpl implements FeedbackService {
 <span class="fc" id="L401">    feedbackRepository.removeAllFromDatabase(pendingFeedbacks);</span>
 <span class="fc" id="L402">    attachmentIds.forEach(fileResourceService::delete);</span>
 <span class="fc" id="L403">  }</span>
-
-  @Override
-  public void deleteByDeclaredActivityId(UUID declaredActivityId) {
-<span class="fc" id="L407">    feedbackRepository.deleteByDeclaredActivityId(declaredActivityId);</span>
-<span class="fc" id="L408">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
