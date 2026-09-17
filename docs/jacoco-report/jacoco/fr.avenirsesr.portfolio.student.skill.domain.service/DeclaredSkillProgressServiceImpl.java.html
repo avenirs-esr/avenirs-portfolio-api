@@ -481,12 +481,21 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
 <span class="fc" id="L481">    return declaredSkillProgressRepository.findAllById(ids);</span>
   }
 
+  @Override
+  public List&lt;UUID&gt; getAssociatedExternalSkillIds() {
+<span class="fc" id="L486">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L487">    return declaredSkillProgressRepository.findAllByStudent(student).stream()</span>
+<span class="fc" id="L488">        .map(declaredSkillProgress -&gt; declaredSkillProgress.getSkill().getId())</span>
+<span class="fc" id="L489">        .distinct()</span>
+<span class="fc" id="L490">        .toList();</span>
+  }
+
   private EAssociationType getAssociationType(EAssociationContextType contextType) {
-<span class="pc bpc" id="L485" title="2 of 4 branches missed.">    return switch (contextType) {</span>
-<span class="fc" id="L486">      case TRACE -&gt; EAssociationType.TRACE_DECLARED_SKILL;</span>
-<span class="fc" id="L487">      case DECLARED_ACTIVITY -&gt; EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL;</span>
-<span class="nc" id="L488">      case DECLARED_EXPERIENCE -&gt; EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL;</span>
-<span class="nc" id="L489">      case DECLARED_SKILL -&gt; throw new UnsupportedOperationException();</span>
+<span class="pc bpc" id="L494" title="2 of 4 branches missed.">    return switch (contextType) {</span>
+<span class="fc" id="L495">      case TRACE -&gt; EAssociationType.TRACE_DECLARED_SKILL;</span>
+<span class="fc" id="L496">      case DECLARED_ACTIVITY -&gt; EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL;</span>
+<span class="nc" id="L497">      case DECLARED_EXPERIENCE -&gt; EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL;</span>
+<span class="nc" id="L498">      case DECLARED_SKILL -&gt; throw new UnsupportedOperationException();</span>
     };
   }
 }

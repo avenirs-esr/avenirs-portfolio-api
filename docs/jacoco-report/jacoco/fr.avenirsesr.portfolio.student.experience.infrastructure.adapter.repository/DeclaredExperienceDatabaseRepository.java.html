@@ -10,6 +10,7 @@ import fr.avenirsesr.portfolio.student.experience.infrastructure.adapter.model.D
 import fr.avenirsesr.portfolio.student.experience.infrastructure.adapter.specification.DeclaredExperienceSpecification;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.repository.GenericUserJpaRepositoryAdapter;
+import java.util.List;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
@@ -19,36 +20,36 @@ public class DeclaredExperienceDatabaseRepository
     implements DeclaredExperienceRepository {
 
   public DeclaredExperienceDatabaseRepository(DeclaredExperienceJpaRepository jpaRepository) {
-<span class="fc" id="L22">    super(</span>
+<span class="fc" id="L23">    super(</span>
         jpaRepository,
         jpaRepository,
         DeclaredExperienceEntity.class,
         DeclaredExperienceMapper.INSTANCE);
-<span class="fc" id="L27">  }</span>
+<span class="fc" id="L28">  }</span>
 
   @Override
   public PagedResult&lt;DeclaredExperience&gt; findAllByStudent(
       Student student,
       PageCriteria pageCriteria,
       Boolean isValorized,
-      EExperienceType experienceType) {
-<span class="fc" id="L35">    return findAll(</span>
-<span class="fc" id="L36">        hasStudent(student)</span>
-<span class="fc" id="L37">            .and(DeclaredExperienceSpecification.ordered())</span>
-<span class="fc" id="L38">            .and(DeclaredExperienceSpecification.isValorized(isValorized))</span>
-<span class="fc" id="L39">            .and(DeclaredExperienceSpecification.hasExperienceType(experienceType)),</span>
-<span class="fc" id="L40">        PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()));</span>
+      List&lt;EExperienceType&gt; experienceTypes) {
+<span class="fc" id="L36">    return findAll(</span>
+<span class="fc" id="L37">        hasStudent(student)</span>
+<span class="fc" id="L38">            .and(DeclaredExperienceSpecification.ordered())</span>
+<span class="fc" id="L39">            .and(DeclaredExperienceSpecification.isValorized(isValorized))</span>
+<span class="fc" id="L40">            .and(DeclaredExperienceSpecification.hasExperienceType(experienceTypes)),</span>
+<span class="fc" id="L41">        PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()));</span>
   }
 
   @Override
   public PagedResult&lt;DeclaredExperience&gt; findAllByStudent(
       Student student, PageCriteria pageCriteria, String keyword) {
-<span class="fc" id="L46">    var specification =</span>
-<span class="fc" id="L47">        hasStudent(student)</span>
-<span class="fc" id="L48">            .and(DeclaredExperienceSpecification.ordered())</span>
-<span class="fc" id="L49">            .and(DeclaredExperienceSpecification.search(keyword));</span>
+<span class="fc" id="L47">    var specification =</span>
+<span class="fc" id="L48">        hasStudent(student)</span>
+<span class="fc" id="L49">            .and(DeclaredExperienceSpecification.ordered())</span>
+<span class="fc" id="L50">            .and(DeclaredExperienceSpecification.search(keyword));</span>
 
-<span class="fc" id="L51">    return findAll(specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()));</span>
+<span class="fc" id="L52">    return findAll(specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
