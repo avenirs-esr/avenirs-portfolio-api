@@ -1,459 +1,82 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AssociationServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.student.association.domain.service</a> &gt; <span class="el_source">AssociationServiceImpl.java</span></div><h1>AssociationServiceImpl.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.student.association.domain.service;
 
-import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
-import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
-import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
-import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortField;
-import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
-import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
-import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
-import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityAssociationData;
-import fr.avenirsesr.portfolio.student.activity.domain.exception.DeclaredActivityAlreadyFinishedException;
-import fr.avenirsesr.portfolio.student.activity.domain.exception.DeclaredActivityNotFoundException;
-import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
-import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
-import fr.avenirsesr.portfolio.student.association.domain.data.AssociatedElementsData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationData;
-import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.exception.AssociationAlreadyExistException;
 import fr.avenirsesr.portfolio.student.association.domain.exception.AssociationDoesNotExistException;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
-import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.association.domain.port.output.repository.AssociationRepository;
-import fr.avenirsesr.portfolio.student.experience.domain.data.DeclaredExperienceAssociationData;
-import fr.avenirsesr.portfolio.student.experience.domain.exception.DeclaredExperienceNotFoundException;
-import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperience;
-import fr.avenirsesr.portfolio.student.experience.domain.port.input.DeclaredExperienceService;
-import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillAssociationData;
-import fr.avenirsesr.portfolio.student.skill.domain.exception.DeclaredSkillProgressNotFoundException;
-import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
-import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
-import fr.avenirsesr.portfolio.student.trace.domain.data.TraceAssociationData;
-import fr.avenirsesr.portfolio.student.trace.domain.data.TraceViewData;
-import fr.avenirsesr.portfolio.student.trace.domain.exception.TraceNotFoundException;
-import fr.avenirsesr.portfolio.student.trace.domain.filter.TraceFilter;
-import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
-import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
-import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class AssociationServiceImpl implements AssociationService {
   private final AssociationRepository associationRepository;
-  private final LoggedInUserService loggedInUserService;
-  private final TraceService traceService;
-  private final DeclaredActivityService declaredActivityService;
-  private final DeclaredSkillProgressService declaredSkillProgressService;
-  private final DeclaredExperienceService declaredExperienceService;
 
   @Override
   public List&lt;Association&gt; createAll(List&lt;AssociationData&gt; associationsData) {
-<span class="fc bfc" id="L63" title="All 2 branches covered.">    if (!associationRepository.findAllIn(associationsData).isEmpty()) {</span>
-<span class="fc" id="L64">      throw new AssociationAlreadyExistException();</span>
+<span class="fc bfc" id="L22" title="All 2 branches covered.">    if (!associationRepository.findAllIn(associationsData).isEmpty()) {</span>
+<span class="fc" id="L23">      throw new AssociationAlreadyExistException();</span>
     }
 
-<span class="fc" id="L67">    var associations =</span>
-<span class="fc" id="L68">        associationsData.stream()</span>
-<span class="fc" id="L69">            .map(</span>
+<span class="fc" id="L26">    var associations =</span>
+<span class="fc" id="L27">        associationsData.stream()</span>
+<span class="fc" id="L28">            .map(</span>
                 association -&gt;
-<span class="fc" id="L71">                    Association.create(</span>
-<span class="fc" id="L72">                        association.id1(), association.id2(), association.associationType()))</span>
-<span class="fc" id="L73">            .toList();</span>
+<span class="fc" id="L30">                    Association.create(</span>
+<span class="fc" id="L31">                        association.id1(), association.id2(), association.associationType()))</span>
+<span class="fc" id="L32">            .toList();</span>
 
-<span class="fc" id="L75">    return associationRepository.saveAll(associations);</span>
+<span class="fc" id="L34">    return associationRepository.saveAll(associations);</span>
   }
 
   @Override
   public List&lt;Association&gt; getAllOf(
       UUID id, Class&lt;?&gt; clazz, List&lt;EAssociationType&gt; associationTypes) {
-<span class="fc" id="L81">    return associationRepository.findAllOf(id, clazz, associationTypes);</span>
+<span class="fc" id="L40">    return associationRepository.findAllOf(id, clazz, associationTypes);</span>
   }
 
   @Override
   public List&lt;Association&gt; getAllOf(
       List&lt;UUID&gt; ids, Class&lt;?&gt; clazz, List&lt;EAssociationType&gt; associationTypes) {
-<span class="pc bpc" id="L87" title="1 of 2 branches missed.">    if (ids.isEmpty()) {</span>
-<span class="nc" id="L88">      return List.of();</span>
+<span class="pc bpc" id="L46" title="1 of 2 branches missed.">    if (ids.isEmpty()) {</span>
+<span class="nc" id="L47">      return List.of();</span>
     }
 
-<span class="fc" id="L91">    return associationRepository.findAllOf(ids, clazz, associationTypes);</span>
+<span class="fc" id="L50">    return associationRepository.findAllOf(ids, clazz, associationTypes);</span>
   }
 
   @Override
   public Map&lt;UUID, Long&gt; countAllOf(
       List&lt;UUID&gt; ids, Class&lt;?&gt; clazz, EAssociationType associationType) {
-<span class="fc bfc" id="L97" title="All 2 branches covered.">    if (ids.isEmpty()) {</span>
-<span class="fc" id="L98">      return Map.of();</span>
+<span class="fc bfc" id="L56" title="All 2 branches covered.">    if (ids.isEmpty()) {</span>
+<span class="fc" id="L57">      return Map.of();</span>
     }
 
-<span class="fc" id="L101">    return associationRepository.countAllOf(ids, clazz, associationType);</span>
-  }
-
-  @Override
-  public AssociatedElementsData getAllAssociatedElementsOf(UUID id, Class&lt;?&gt; clazz) {
-<span class="fc" id="L106">    return getAllAssociatedElementsOf(id, clazz, false);</span>
-  }
-
-  @Override
-  public AssociatedElementsData getAllAssociatedElementsOf(
-      UUID id, Class&lt;?&gt; clazz, boolean onlyNotCompletedActivities) {
-<span class="fc" id="L112">    Map&lt;Class&lt;?&gt;, List&lt;Association&gt;&gt; associationsByAssociatedClass =</span>
-<span class="fc" id="L113">        getAllOf(id, clazz, EAssociationType.getAllBy(clazz)).stream()</span>
-<span class="fc" id="L114">            .collect(</span>
-<span class="fc" id="L115">                Collectors.groupingBy(</span>
-<span class="fc" id="L116">                    association -&gt; association.getAssociationType().associatedKeyOf(clazz)));</span>
-
-<span class="fc" id="L118">    return new AssociatedElementsData(</span>
-<span class="fc" id="L119">        toTraceAssociations(associationsOf(associationsByAssociatedClass, Trace.class), clazz),</span>
-<span class="fc" id="L120">        toDeclaredActivityAssociations(</span>
-<span class="fc" id="L121">            associationsOf(associationsByAssociatedClass, DeclaredActivity.class),</span>
-            clazz,
-            onlyNotCompletedActivities),
-<span class="fc" id="L124">        toDeclaredSkillAssociations(</span>
-<span class="fc" id="L125">            associationsOf(associationsByAssociatedClass, DeclaredSkillProgress.class), clazz),</span>
-<span class="fc" id="L126">        toDeclaredExperienceAssociations(</span>
-<span class="fc" id="L127">            associationsOf(associationsByAssociatedClass, DeclaredExperience.class), clazz));</span>
-  }
-
-  @Override
-  public void associate(
-      UUID id, Class&lt;?&gt; clazz, List&lt;UUID&gt; associatedIds, EAssociationType associationType) {
-<span class="fc" id="L133">    var uniqueAssociatedIds = associatedIds.stream().distinct().toList();</span>
-
-<span class="fc" id="L135">    checkAssociatedElements(associationType.associatedKeyOf(clazz), uniqueAssociatedIds);</span>
-
-<span class="fc" id="L137">    createAll(</span>
-<span class="fc" id="L138">        uniqueAssociatedIds.stream()</span>
-<span class="fc" id="L139">            .map(associatedId -&gt; associationDataOf(id, clazz, associatedId, associationType))</span>
-<span class="fc" id="L140">            .toList());</span>
-<span class="fc" id="L141">  }</span>
-
-  @Override
-  public void unassociate(UUID id, Class&lt;?&gt; clazz, List&lt;UUID&gt; associationIds) {
-<span class="fc" id="L145">    var associations =</span>
-<span class="fc" id="L146">        getAllOf(id, clazz, EAssociationType.getAllBy(clazz)).stream()</span>
-<span class="fc" id="L147">            .filter(association -&gt; associationIds.contains(association.getId()))</span>
-<span class="fc" id="L148">            .toList();</span>
-
-<span class="fc" id="L150">    if (!new HashSet&lt;&gt;(associations.stream().map(Association::getId).toList())</span>
-<span class="fc bfc" id="L151" title="All 2 branches covered.">        .containsAll(associationIds)) {</span>
-<span class="fc" id="L152">      throw new AssociationDoesNotExistException();</span>
-    }
-
-<span class="fc" id="L155">    checkIfDeclaredActivitiesAssociationsAreDeletable(associations);</span>
-
-<span class="fc" id="L157">    deleteAllByIds(associationIds);</span>
-<span class="fc" id="L158">  }</span>
-
-  @Override
-  public PagedResult&lt;AssociationSearchResultData&gt; searchForAssociation(
-      UUID id,
-      Class&lt;?&gt; clazz,
-      EAssociationContextType contextType,
-      String keyword,
-      PageCriteria pageCriteria) {
-<span class="fc" id="L167">    var associationType = EAssociationType.of(clazz, contextType.toClass());</span>
-
-<span class="fc" id="L169">    var associatedIds =</span>
-<span class="fc" id="L170">        getAllOf(id, clazz, List.of(associationType)).stream()</span>
-<span class="fc" id="L171">            .map(associationType.associatedIdExtractorFor(clazz))</span>
-<span class="fc" id="L172">            .collect(Collectors.toSet());</span>
-
-<span class="fc bfc" id="L174" title="All 4 branches covered.">    return switch (contextType) {</span>
-      case TRACE -&gt;
-<span class="fc" id="L176">          toSearchResults(</span>
-<span class="fc" id="L177">              traceService.getTracesView(</span>
-                  keyword,
-                  new TraceFilter(null, null, null, null),
-                  null,
-                  pageCriteria,
-                  new SortCriteria(ESortField.DATE, ESortOrder.DESC)),
-              associatedIds,
-              TraceViewData::id,
-              TraceViewData::title,
-<span class="fc" id="L186">              trace -&gt; null,</span>
-<span class="fc" id="L187">              trace -&gt; false);</span>
-      case DECLARED_ACTIVITY -&gt;
-<span class="fc" id="L189">          toSearchResults(</span>
-<span class="fc" id="L190">              declaredActivityService.searchDeclaredActivity(keyword, pageCriteria),</span>
-              associatedIds,
-              AvenirsBaseModel::getId,
-<span class="fc" id="L193">              declaredActivity -&gt; declaredActivity.getActivity().getTitle(),</span>
-<span class="fc" id="L194">              declaredActivity -&gt; declaredActivity.getActivity().getThematic().name(),</span>
-<span class="fc" id="L195">              declaredActivity -&gt; declaredActivity.getFinishedAt().isPresent());</span>
-      case DECLARED_SKILL -&gt;
-<span class="fc" id="L197">          toSearchResults(</span>
-<span class="fc" id="L198">              declaredSkillProgressService.searchDeclaredSkill(keyword, pageCriteria),</span>
-              associatedIds,
-              AvenirsBaseModel::getId,
-<span class="fc" id="L201">              declaredSkillProgress -&gt; declaredSkillProgress.getSkill().getLibelle(),</span>
-<span class="fc" id="L202">              declaredSkillProgress -&gt; declaredSkillProgress.getSkill().getType().name(),</span>
-<span class="fc" id="L203">              declaredSkillProgress -&gt; false);</span>
-      case DECLARED_EXPERIENCE -&gt;
-<span class="fc" id="L205">          toSearchResults(</span>
-<span class="fc" id="L206">              declaredExperienceService.search(keyword, pageCriteria),</span>
-              associatedIds,
-              AvenirsBaseModel::getId,
-              DeclaredExperience::getTitle,
-              declaredExperience -&gt;
-<span class="pc bpc" id="L211" title="1 of 2 branches missed.">                  declaredExperience.getExperienceType() != null</span>
-<span class="fc" id="L212">                      ? declaredExperience.getExperienceType().name()</span>
-<span class="nc" id="L213">                      : null,</span>
-<span class="fc" id="L214">              declaredExperience -&gt; false);</span>
-    };
+<span class="fc" id="L60">    return associationRepository.countAllOf(ids, clazz, associationType);</span>
   }
 
   @Override
   public void deleteAllByIds(List&lt;UUID&gt; ids) {
-<span class="fc" id="L220">    var activities = associationRepository.findAllById(ids);</span>
+<span class="fc" id="L65">    var activities = associationRepository.findAllById(ids);</span>
 
-<span class="fc bfc" id="L222" title="All 2 branches covered.">    if (!new HashSet&lt;&gt;(activities.stream().map(Association::getId).toList()).containsAll(ids)) {</span>
-<span class="fc" id="L223">      throw new AssociationDoesNotExistException();</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">    if (!new HashSet&lt;&gt;(activities.stream().map(Association::getId).toList()).containsAll(ids)) {</span>
+<span class="fc" id="L68">      throw new AssociationDoesNotExistException();</span>
     }
 
-<span class="fc" id="L226">    associationRepository.removeAllFromDatabase(activities);</span>
-<span class="fc" id="L227">  }</span>
+<span class="fc" id="L71">    associationRepository.removeAllFromDatabase(activities);</span>
+<span class="fc" id="L72">  }</span>
 
   @Override
   public void deleteAllOf(List&lt;UUID&gt; ids, Class&lt;?&gt; clazz) {
-<span class="fc" id="L231">    var associationTypes = EAssociationType.getAllBy(clazz);</span>
-<span class="fc" id="L232">    var associations =</span>
-<span class="fc" id="L233">        ids.stream().flatMap(id -&gt; getAllOf(id, clazz, associationTypes).stream()).toList();</span>
-<span class="fc" id="L234">    deleteAllByIds(associations.stream().map(Association::getId).toList());</span>
-<span class="fc" id="L235">  }</span>
-
-  private &lt;T&gt; PagedResult&lt;AssociationSearchResultData&gt; toSearchResults(
-      PagedResult&lt;T&gt; searchResults,
-      Set&lt;UUID&gt; associatedIds,
-      Function&lt;T, UUID&gt; idExtractor,
-      Function&lt;T, String&gt; titleExtractor,
-      Function&lt;T, String&gt; categoryExtractor,
-      Predicate&lt;T&gt; disabledCondition) {
-<span class="fc" id="L244">    return new PagedResult&lt;&gt;(</span>
-<span class="fc" id="L245">        searchResults.content().stream()</span>
-<span class="fc" id="L246">            .map(</span>
-                element -&gt;
-<span class="fc" id="L248">                    new AssociationSearchResultData(</span>
-<span class="fc" id="L249">                        idExtractor.apply(element),</span>
-<span class="fc" id="L250">                        titleExtractor.apply(element),</span>
-<span class="fc" id="L251">                        categoryExtractor.apply(element),</span>
-<span class="fc bfc" id="L252" title="All 2 branches covered.">                        associatedIds.contains(idExtractor.apply(element))</span>
-<span class="fc bfc" id="L253" title="All 2 branches covered.">                            || disabledCondition.test(element)))</span>
-<span class="fc" id="L254">            .toList(),</span>
-<span class="fc" id="L255">        searchResults.pageInfo());</span>
-  }
-
-  private AssociationData associationDataOf(
-      UUID id, Class&lt;?&gt; clazz, UUID associatedId, EAssociationType associationType) {
-<span class="fc bfc" id="L260" title="All 2 branches covered.">    return associationType.getKey1().equals(clazz)</span>
-<span class="fc" id="L261">        ? new AssociationData(id, associatedId, associationType)</span>
-<span class="fc" id="L262">        : new AssociationData(associatedId, id, associationType);</span>
-  }
-
-  private void checkAssociatedElements(Class&lt;?&gt; clazz, List&lt;UUID&gt; ids) {
-<span class="fc bfc" id="L266" title="All 2 branches covered.">    if (Trace.class.equals(clazz)) {</span>
-<span class="fc" id="L267">      checkElements(</span>
-<span class="fc" id="L268">          ids, traceService.findAllTracesById(ids), Trace::getStudent, TraceNotFoundException::new);</span>
-<span class="fc" id="L269">      return;</span>
-    }
-
-<span class="fc bfc" id="L272" title="All 2 branches covered.">    if (DeclaredActivity.class.equals(clazz)) {</span>
-<span class="fc" id="L273">      checkElements(</span>
-          ids,
-<span class="fc" id="L275">          declaredActivityService.findAllDeclaredActivitiesByIds(ids),</span>
-          DeclaredActivity::getStudent,
-          DeclaredActivityNotFoundException::new);
-<span class="fc" id="L278">      return;</span>
-    }
-
-<span class="fc bfc" id="L281" title="All 2 branches covered.">    if (DeclaredSkillProgress.class.equals(clazz)) {</span>
-<span class="fc" id="L282">      checkElements(</span>
-          ids,
-<span class="fc" id="L284">          declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(ids),</span>
-          DeclaredSkillProgress::getStudent,
-          DeclaredSkillProgressNotFoundException::new);
-<span class="fc" id="L287">      return;</span>
-    }
-
-<span class="pc bpc" id="L290" title="1 of 2 branches missed.">    if (DeclaredExperience.class.equals(clazz)) {</span>
-<span class="fc" id="L291">      checkElements(</span>
-          ids,
-<span class="fc" id="L293">          declaredExperienceService.findAllByIds(ids),</span>
-          DeclaredExperience::getStudent,
-          DeclaredExperienceNotFoundException::new);
-<span class="fc" id="L296">      return;</span>
-    }
-
-<span class="nc" id="L299">    throw new IllegalArgumentException(clazz.getSimpleName() + &quot; cannot be associated&quot;);</span>
-  }
-
-  private &lt;T extends AvenirsBaseModel&gt; void checkElements(
-      List&lt;UUID&gt; ids,
-      List&lt;T&gt; elements,
-      Function&lt;T, Student&gt; studentExtractor,
-      Supplier&lt;RuntimeException&gt; notFoundException) {
-<span class="fc bfc" id="L307" title="All 2 branches covered.">    if (!new HashSet&lt;&gt;(elements.stream().map(AvenirsBaseModel::getId).toList()).containsAll(ids)) {</span>
-<span class="fc" id="L308">      throw notFoundException.get();</span>
-    }
-
-<span class="fc" id="L311">    var loggedInStudent = loggedInUserService.getLoggedInStudent();</span>
-
-<span class="fc" id="L313">    if (!elements.stream()</span>
-<span class="fc bfc" id="L314" title="All 2 branches covered.">        .allMatch(element -&gt; studentExtractor.apply(element).equals(loggedInStudent))) {</span>
-<span class="fc" id="L315">      throw new UserNotAuthorizedException();</span>
-    }
-<span class="fc" id="L317">  }</span>
-
-  private void checkIfDeclaredActivitiesAssociationsAreDeletable(List&lt;Association&gt; associations) {
-<span class="fc" id="L320">    var declaredActivityIds =</span>
-<span class="fc" id="L321">        associations.stream()</span>
-<span class="fc" id="L322">            .filter(</span>
-<span class="fc" id="L323">                association -&gt; association.getAssociationType().involves(DeclaredActivity.class))</span>
-<span class="fc" id="L324">            .map(</span>
-                association -&gt;
-                    association
-<span class="fc" id="L327">                        .getAssociationType()</span>
-<span class="fc" id="L328">                        .idExtractorFor(DeclaredActivity.class)</span>
-<span class="fc" id="L329">                        .apply(association))</span>
-<span class="fc" id="L330">            .toList();</span>
-
-<span class="fc bfc" id="L332" title="All 2 branches covered.">    if (declaredActivityIds.isEmpty()) {</span>
-<span class="fc" id="L333">      return;</span>
-    }
-
-<span class="fc" id="L336">    if (declaredActivityService.findAllDeclaredActivitiesByIds(declaredActivityIds).stream()</span>
-<span class="fc bfc" id="L337" title="All 2 branches covered.">        .anyMatch(declaredActivity -&gt; declaredActivity.getFinishedAt().isPresent())) {</span>
-<span class="fc" id="L338">      throw new DeclaredActivityAlreadyFinishedException();</span>
-    }
-<span class="fc" id="L340">  }</span>
-
-  private List&lt;Association&gt; associationsOf(
-      Map&lt;Class&lt;?&gt;, List&lt;Association&gt;&gt; associationsByAssociatedClass, Class&lt;?&gt; associatedClass) {
-<span class="fc" id="L344">    return associationsByAssociatedClass.getOrDefault(associatedClass, List.of());</span>
-  }
-
-  private List&lt;TraceAssociationData&gt; toTraceAssociations(
-      List&lt;Association&gt; associations, Class&lt;?&gt; clazz) {
-<span class="fc bfc" id="L349" title="All 2 branches covered.">    if (associations.isEmpty()) {</span>
-<span class="fc" id="L350">      return List.of();</span>
-    }
-
-<span class="fc" id="L353">    var traces = traceService.findAllTracesById(associatedIdsOf(associations, clazz));</span>
-
-<span class="fc" id="L355">    return associations.stream()</span>
-<span class="fc" id="L356">        .map(</span>
-            association -&gt;
-<span class="fc" id="L358">                new TraceAssociationData(</span>
-<span class="fc" id="L359">                    association.getId(),</span>
-<span class="fc" id="L360">                    associatedElementOf(traces, association, clazz, TraceNotFoundException::new)))</span>
-<span class="fc" id="L361">        .toList();</span>
-  }
-
-  private List&lt;DeclaredActivityAssociationData&gt; toDeclaredActivityAssociations(
-      List&lt;Association&gt; associations, Class&lt;?&gt; clazz, boolean onlyNotCompletedActivities) {
-<span class="fc bfc" id="L366" title="All 2 branches covered.">    if (associations.isEmpty()) {</span>
-<span class="fc" id="L367">      return List.of();</span>
-    }
-
-<span class="fc" id="L370">    var ids = associatedIdsOf(associations, clazz);</span>
-    var declaredActivities =
-<span class="fc bfc" id="L372" title="All 2 branches covered.">        onlyNotCompletedActivities</span>
-<span class="fc" id="L373">            ? declaredActivityService.findAllNotCompletedActivitiesByIds(ids)</span>
-<span class="fc" id="L374">            : declaredActivityService.findAllDeclaredActivitiesByIds(ids);</span>
-<span class="fc" id="L375">    var statuses = declaredActivityService.getDeclaredActivityStatus(declaredActivities);</span>
-
-<span class="fc" id="L377">    return associations.stream()</span>
-<span class="fc" id="L378">        .map(</span>
-            association -&gt; {
-<span class="fc" id="L380">              var declaredActivity =</span>
-<span class="fc" id="L381">                  associatedElementOf(</span>
-                      declaredActivities,
-                      association,
-                      clazz,
-                      DeclaredActivityNotFoundException::new);
-
-<span class="fc" id="L387">              return new DeclaredActivityAssociationData(</span>
-<span class="fc" id="L388">                  association.getId(), declaredActivity, statuses.get(declaredActivity));</span>
-            })
-<span class="fc" id="L390">        .toList();</span>
-  }
-
-  private List&lt;DeclaredSkillAssociationData&gt; toDeclaredSkillAssociations(
-      List&lt;Association&gt; associations, Class&lt;?&gt; clazz) {
-<span class="fc bfc" id="L395" title="All 2 branches covered.">    if (associations.isEmpty()) {</span>
-<span class="fc" id="L396">      return List.of();</span>
-    }
-
-<span class="fc" id="L399">    var declaredSkillProgresses =</span>
-<span class="fc" id="L400">        declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(</span>
-<span class="fc" id="L401">            associatedIdsOf(associations, clazz));</span>
-
-<span class="fc" id="L403">    return associations.stream()</span>
-<span class="fc" id="L404">        .map(</span>
-            association -&gt;
-<span class="fc" id="L406">                new DeclaredSkillAssociationData(</span>
-<span class="fc" id="L407">                    association.getId(),</span>
-<span class="fc" id="L408">                    associatedElementOf(</span>
-                        declaredSkillProgresses,
-                        association,
-                        clazz,
-                        DeclaredSkillProgressNotFoundException::new)))
-<span class="fc" id="L413">        .toList();</span>
-  }
-
-  private List&lt;DeclaredExperienceAssociationData&gt; toDeclaredExperienceAssociations(
-      List&lt;Association&gt; associations, Class&lt;?&gt; clazz) {
-<span class="fc bfc" id="L418" title="All 2 branches covered.">    if (associations.isEmpty()) {</span>
-<span class="fc" id="L419">      return List.of();</span>
-    }
-
-<span class="fc" id="L422">    var declaredExperiences =</span>
-<span class="fc" id="L423">        declaredExperienceService.findAllByIds(associatedIdsOf(associations, clazz));</span>
-
-<span class="fc" id="L425">    return associations.stream()</span>
-<span class="fc" id="L426">        .map(</span>
-            association -&gt;
-<span class="fc" id="L428">                new DeclaredExperienceAssociationData(</span>
-<span class="fc" id="L429">                    association.getId(),</span>
-<span class="fc" id="L430">                    associatedElementOf(</span>
-                        declaredExperiences,
-                        association,
-                        clazz,
-                        DeclaredExperienceNotFoundException::new)))
-<span class="fc" id="L435">        .toList();</span>
-  }
-
-  private List&lt;UUID&gt; associatedIdsOf(List&lt;Association&gt; associations, Class&lt;?&gt; clazz) {
-<span class="fc" id="L439">    return associations.stream().map(association -&gt; associatedIdOf(association, clazz)).toList();</span>
-  }
-
-  private UUID associatedIdOf(Association association, Class&lt;?&gt; clazz) {
-<span class="fc" id="L443">    return association.getAssociationType().associatedIdExtractorFor(clazz).apply(association);</span>
-  }
-
-  private &lt;T extends AvenirsBaseModel&gt; T associatedElementOf(
-      List&lt;T&gt; elements,
-      Association association,
-      Class&lt;?&gt; clazz,
-      Supplier&lt;RuntimeException&gt; notFoundException) {
-<span class="fc" id="L451">    var associatedId = associatedIdOf(association, clazz);</span>
-
-<span class="fc" id="L453">    return elements.stream()</span>
-<span class="fc" id="L454">        .filter(element -&gt; element.getId().equals(associatedId))</span>
-<span class="fc" id="L455">        .findAny()</span>
-<span class="fc" id="L456">        .orElseThrow(notFoundException);</span>
-  }
+<span class="fc" id="L76">    var associationTypes = EAssociationType.getAllBy(clazz);</span>
+<span class="fc" id="L77">    var associations =</span>
+<span class="fc" id="L78">        ids.stream().flatMap(id -&gt; getAllOf(id, clazz, associationTypes).stream()).toList();</span>
+<span class="fc" id="L79">    deleteAllByIds(associations.stream().map(Association::getId).toList());</span>
+<span class="fc" id="L80">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
