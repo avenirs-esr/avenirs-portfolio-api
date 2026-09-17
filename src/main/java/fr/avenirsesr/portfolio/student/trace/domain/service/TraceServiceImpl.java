@@ -9,8 +9,6 @@ import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValida
 
 import fr.avenirsesr.portfolio.common.configuration.domain.model.TraceConfiguration;
 import fr.avenirsesr.portfolio.common.data.domain.model.*;
-import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortField;
-import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.file.domain.model.FileDownload;
@@ -25,11 +23,6 @@ import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
-import fr.avenirsesr.portfolio.student.association.domain.service.AssociationSearchHelper;
-import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperience;
-import fr.avenirsesr.portfolio.student.experience.domain.port.input.DeclaredExperienceService;
-import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
-import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.student.trace.domain.data.*;
 import fr.avenirsesr.portfolio.student.trace.domain.exception.InvalidTraceTypeException;
 import fr.avenirsesr.portfolio.student.trace.domain.exception.TraceNotFoundException;
@@ -56,12 +49,9 @@ public class TraceServiceImpl implements TraceService {
   private final TraceRepository traceRepository;
   private final StudentService studentService;
   private final DeclaredActivityService declaredActivityService;
-  private final DeclaredSkillProgressService declaredSkillProgressService;
-  private final DeclaredExperienceService declaredExperienceService;
   private final TraceConfigurationClient traceConfigurationClient;
   private final LoggedInUserService loggedInUserService;
   private final AssociationService associationService;
-  private final AssociationSearchHelper associationSearchHelper;
   private final FeedbackService feedbackService;
   private final FileResourceService fileResourceService;
 
@@ -376,109 +366,15 @@ public class TraceServiceImpl implements TraceService {
   }
 
   @Override
-  public PagedResult<AssociationSearchResultData> searchTracesForAssociation(
-      UUID excludeAssociatedWithElementId,
+  public PagedResult<AssociationSearchResultData> searchForAssociation(
+      UUID traceId,
       EAssociationContextType contextType,
-      Boolean isAssociated,
       String keyword,
       PageCriteria pageCriteria) {
-    EAssociationType associationType = null;
-    if (contextType != null) {
-      associationType = getAssociationTypeForTraceCandidate(contextType);
-    }
-
-    var traces =
-        getTracesView(
-            keyword,
-            new TraceFilter(isAssociated, null, null, null),
-            null,
-            pageCriteria,
-            new SortCriteria(ESortField.DATE, ESortOrder.DESC));
-
-    if (contextType == null) {
-      return associationSearchHelper.searchForAssociation(
-          null,
-          null,
-          null,
-          null,
-          traces,
-          TraceViewData::id,
-          TraceViewData::title,
-          null,
-          trace -> false);
-    }
-
-    return associationSearchHelper.searchForAssociation(
-        excludeAssociatedWithElementId,
-        contextType.toClass(),
-        associationType,
-        associationType.idExtractorFor(Trace.class),
-        traces,
-        TraceViewData::id,
-        TraceViewData::title,
-        null,
-        trace -> false);
-  }
-
-  @Override
-  public PagedResult<AssociationSearchResultData> searchDeclaredActivityForAssociation(
-      UUID traceId, String keyword, PageCriteria pageCriteria) {
     checkTraceOwnership(traceId);
-    var associationType = EAssociationType.DECLARED_ACTIVITY_TRACE;
-    return associationSearchHelper.searchForAssociation(
-        traceId,
-        Trace.class,
-        associationType,
-        associationType.idExtractorFor(DeclaredActivity.class),
-        declaredActivityService.searchDeclaredActivity(keyword, pageCriteria),
-        AvenirsBaseModel::getId,
-        da -> da.getActivity().getTitle(),
-        da -> da.getActivity().getThematic().name(),
-        da -> da.getFinishedAt().isPresent());
-  }
 
-  @Override
-  public PagedResult<AssociationSearchResultData> searchDeclaredSkillForAssociation(
-      UUID traceId, String keyword, PageCriteria pageCriteria) {
-    checkTraceOwnership(traceId);
-    var associationType = EAssociationType.TRACE_DECLARED_SKILL;
-    return associationSearchHelper.searchForAssociation(
-        traceId,
-        Trace.class,
-        associationType,
-        associationType.idExtractorFor(DeclaredSkillProgress.class),
-        declaredSkillProgressService.searchDeclaredSkill(keyword, pageCriteria),
-        AvenirsBaseModel::getId,
-        ds -> ds.getSkill().getLibelle(),
-        ds -> ds.getSkill().getType().name(),
-        ds -> false);
-  }
-
-  @Override
-  public PagedResult<AssociationSearchResultData> searchDeclaredExperienceForAssociation(
-      UUID traceId, String keyword, PageCriteria pageCriteria) {
-    checkTraceOwnership(traceId);
-    var associationType = EAssociationType.TRACE_DECLARED_EXPERIENCE;
-    return associationSearchHelper.searchForAssociation(
-        traceId,
-        Trace.class,
-        associationType,
-        associationType.idExtractorFor(DeclaredExperience.class),
-        declaredExperienceService.search(keyword, pageCriteria),
-        AvenirsBaseModel::getId,
-        DeclaredExperience::getTitle,
-        de -> de.getExperienceType() != null ? de.getExperienceType().name() : null,
-        de -> false);
-  }
-
-  private EAssociationType getAssociationTypeForTraceCandidate(
-      EAssociationContextType contextType) {
-    return switch (contextType) {
-      case DECLARED_ACTIVITY -> EAssociationType.DECLARED_ACTIVITY_TRACE;
-      case DECLARED_EXPERIENCE -> EAssociationType.TRACE_DECLARED_EXPERIENCE;
-      case DECLARED_SKILL -> EAssociationType.TRACE_DECLARED_SKILL;
-      case TRACE -> throw new UnsupportedOperationException();
-    };
+    return associationService.searchForAssociation(
+        traceId, Trace.class, contextType, keyword, pageCriteria);
   }
 
   @Override

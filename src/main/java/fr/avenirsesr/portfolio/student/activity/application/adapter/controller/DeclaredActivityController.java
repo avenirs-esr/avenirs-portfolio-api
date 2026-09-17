@@ -16,8 +16,7 @@ import fr.avenirsesr.portfolio.student.activity.application.adapter.mapper.Decla
 import fr.avenirsesr.portfolio.student.activity.application.adapter.mapper.DeclaredActivityViewDTOMapper;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
-import fr.avenirsesr.portfolio.student.association.application.adapter.dto.AssociationSearchResultDeclaredActivityDTO;
-import fr.avenirsesr.portfolio.student.association.application.adapter.dto.AssociationSearchResultTraceDTO;
+import fr.avenirsesr.portfolio.student.association.application.adapter.dto.AssociationSearchResultDTO;
 import fr.avenirsesr.portfolio.student.association.application.adapter.mapper.AssociationSearchResultDTOMapper;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
@@ -242,74 +241,35 @@ public class DeclaredActivityController {
     return ResponseEntity.ok(declaredActivityAssociationsDTOMapper.toDTO(newAssociations));
   }
 
-  @PreAuthorize("hasAuthority('declared-activity:list:own')")
-  @GetMapping("/search-for-association")
-  public ResponseEntity<PagedResponse<AssociationSearchResultDeclaredActivityDTO>>
-      searchDeclaredActivitiesForAssociation(
-          Principal principal,
-          @RequestParam(required = false) UUID excludeAssociatedWithElementId,
-          @Parameter(schema = @Schema(ref = "#/components/schemas/EAssociationContextType"))
-              @RequestParam(required = false)
-              EAssociationContextType contextType,
-          @RequestParam(required = false) String keyword,
-          @RequestParam(required = false) Integer page,
-          @RequestParam(required = false) Integer pageSize) {
+  @PreAuthorize("hasAuthority('declared-activity:association:manage:own')")
+  @GetMapping("/{declaredActivityId}/search-for-association")
+  public ResponseEntity<PagedResponse<AssociationSearchResultDTO>> searchForAssociation(
+      Principal principal,
+      @Valid @PathVariable UUID declaredActivityId,
+      @Parameter(schema = @Schema(ref = "#/components/schemas/EAssociationContextType"))
+          @RequestParam
+          EAssociationContextType contextType,
+      @RequestParam(required = false) String keyword,
+      @RequestParam(required = false) Integer page,
+      @RequestParam(required = false) Integer pageSize) {
     var pageCriteria = new PageCriteria(page, pageSize);
     log.debug(
-        "Received request to search declared activities for association (contextType={},"
-            + " excludeAssociatedWithElementId={}) by student [{}] (keyword={}, page={},"
-            + " pageSize={})",
+        "Received request to search {} for association with declared activity [{}] by student [{}]"
+            + " (keyword={}, page={}, pageSize={})",
         contextType,
-        excludeAssociatedWithElementId,
+        declaredActivityId,
         principal.getName(),
         keyword,
         pageCriteria.page(),
         pageCriteria.pageSize());
 
     PagedResult<AssociationSearchResultData> pagedResult =
-        declaredActivityService.searchDeclaredActivitiesForAssociation(
-            excludeAssociatedWithElementId, contextType, keyword, pageCriteria);
+        declaredActivityService.searchForAssociation(
+            declaredActivityId, contextType, keyword, pageCriteria);
 
     return ResponseEntity.ok(
         new PagedResponse<>(
-            pagedResult.content().stream()
-                .map(associationSearchResultDTOMapper::toDeclaredActivityDTO)
-                .toList(),
+            pagedResult.content().stream().map(associationSearchResultDTOMapper::toDTO).toList(),
             PageInfoDTO.fromDomain(pagedResult.pageInfo())));
-  }
-
-  @PreAuthorize("hasAuthority('trace:association:manage:own')")
-  @GetMapping("/{declaredActivityId}/search-for-association/traces")
-  public ResponseEntity<PagedResponse<AssociationSearchResultTraceDTO>>
-      searchTracesForAssociationWithDeclaredActivity(
-          Principal principal,
-          @Valid @PathVariable UUID declaredActivityId,
-          @RequestParam(required = false) Boolean isAssociated,
-          @RequestParam(required = false) String keyword,
-          @RequestParam(required = false) Integer page,
-          @RequestParam(required = false) Integer pageSize) {
-    var pageCriteria = new PageCriteria(page, pageSize);
-    log.debug(
-        "Received request to search traces for association with declared activity [{}] by student"
-            + " [{}] (isAssociated={}, keyword={}, page={}, pageSize={})",
-        declaredActivityId,
-        principal.getName(),
-        isAssociated,
-        keyword,
-        pageCriteria.page(),
-        pageCriteria.pageSize());
-
-    PagedResult<AssociationSearchResultData> pagedResult =
-        declaredActivityService.searchTracesForAssociation(
-            declaredActivityId, keyword, pageCriteria, isAssociated);
-
-    var response =
-        new PagedResponse<>(
-            pagedResult.content().stream()
-                .map(associationSearchResultDTOMapper::toTraceDTO)
-                .toList(),
-            PageInfoDTO.fromDomain(pagedResult.pageInfo()));
-
-    return ResponseEntity.ok(response);
   }
 }

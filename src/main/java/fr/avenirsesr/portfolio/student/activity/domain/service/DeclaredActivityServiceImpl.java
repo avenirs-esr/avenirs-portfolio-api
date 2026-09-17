@@ -5,7 +5,6 @@ import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValida
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateOptionalEnrichedTextMaxLength;
 
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
-import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
@@ -29,11 +28,6 @@ import fr.avenirsesr.portfolio.student.association.domain.exception.MaximumAssoc
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
-import fr.avenirsesr.portfolio.student.association.domain.service.AssociationSearchHelper;
-import fr.avenirsesr.portfolio.student.trace.domain.data.TraceViewData;
-import fr.avenirsesr.portfolio.student.trace.domain.filter.TraceFilter;
-import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
-import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -49,9 +43,7 @@ import lombok.extern.slf4j.Slf4j;
 public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   private final DeclaredActivityRepository declaredActivityRepository;
   private final ActivityService activityService;
-  private final TraceService traceService;
   private final AssociationService associationService;
-  private final AssociationSearchHelper associationSearchHelper;
   private final LoggedInUserService loggedInUserService;
   private final FeedbackRepository feedbackRepository;
   private final FeedbackService feedbackService;
@@ -321,56 +313,15 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   }
 
   @Override
-  public PagedResult<AssociationSearchResultData> searchTracesForAssociation(
-      UUID declaredActivityId, String keyword, PageCriteria pageCriteria, Boolean isAssociated) {
-    fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
-    var associationType = EAssociationType.DECLARED_ACTIVITY_TRACE;
-    return associationSearchHelper.searchForAssociation(
-        declaredActivityId,
-        DeclaredActivity.class,
-        associationType,
-        associationType.idExtractorFor(Trace.class),
-        traceService.getTracesView(
-            keyword, new TraceFilter(isAssociated, null, null, null), null, pageCriteria, null),
-        TraceViewData::id,
-        TraceViewData::title,
-        null,
-        trace -> false);
-  }
-
-  @Override
-  public PagedResult<AssociationSearchResultData> searchDeclaredActivitiesForAssociation(
-      UUID excludeAssociatedWithElementId,
+  public PagedResult<AssociationSearchResultData> searchForAssociation(
+      UUID declaredActivityId,
       EAssociationContextType contextType,
       String keyword,
       PageCriteria pageCriteria) {
-    var activities = searchDeclaredActivity(keyword, pageCriteria);
+    fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
 
-    if (contextType == null) {
-      return associationSearchHelper.searchForAssociation(
-          null,
-          null,
-          null,
-          null,
-          activities,
-          AvenirsBaseModel::getId,
-          da -> da.getActivity().getTitle(),
-          da -> da.getActivity().getThematic().name(),
-          da -> da.getFinishedAt().isPresent());
-    }
-
-    EAssociationType associationType = getAssociationType(contextType);
-
-    return associationSearchHelper.searchForAssociation(
-        excludeAssociatedWithElementId,
-        contextType.toClass(),
-        associationType,
-        associationType.idExtractorFor(DeclaredActivity.class),
-        activities,
-        AvenirsBaseModel::getId,
-        da -> da.getActivity().getTitle(),
-        da -> da.getActivity().getThematic().name(),
-        da -> da.getFinishedAt().isPresent());
+    return associationService.searchForAssociation(
+        declaredActivityId, DeclaredActivity.class, contextType, keyword, pageCriteria);
   }
 
   @Override
@@ -537,14 +488,6 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
         .findByActivity(student, activity)
         .filter(declaredActivity -> !declaredActivity.isUnsubscribed())
         .isPresent();
-  }
-
-  private EAssociationType getAssociationType(EAssociationContextType contextType) {
-    return switch (contextType) {
-      case TRACE -> EAssociationType.DECLARED_ACTIVITY_TRACE;
-      case DECLARED_SKILL -> EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL;
-      case DECLARED_ACTIVITY, DECLARED_EXPERIENCE -> throw new UnsupportedOperationException();
-    };
   }
 
   private boolean isSubmittedOrFinished(

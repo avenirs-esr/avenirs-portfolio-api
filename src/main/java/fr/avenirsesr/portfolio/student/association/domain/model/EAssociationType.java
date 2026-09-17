@@ -26,6 +26,21 @@ public enum EAssociationType {
     this.key2 = key2;
   }
 
+  public static EAssociationType of(Class<?> clazz, Class<?> associatedClass) {
+    return Arrays.stream(values())
+        .filter(
+            type ->
+                (type.key1.equals(clazz) && type.key2.equals(associatedClass))
+                    || (type.key2.equals(clazz) && type.key1.equals(associatedClass)))
+        .findFirst()
+        .orElseThrow(
+            () ->
+                new IllegalArgumentException(
+                    clazz.getSimpleName()
+                        + " cannot be associated with "
+                        + associatedClass.getSimpleName()));
+  }
+
   public static List<EAssociationType> getAllBy(Class<?> clazz) {
     return Arrays.stream(values()).filter(type -> type.involves(clazz)).toList();
   }

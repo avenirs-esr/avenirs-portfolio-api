@@ -8,8 +8,6 @@ import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.De
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.FeedbackRepository;
 import fr.avenirsesr.portfolio.student.activity.domain.service.DeclaredActivityServiceImpl;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
-import fr.avenirsesr.portfolio.student.association.domain.service.AssociationSearchHelper;
-import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -23,20 +21,15 @@ public class DeclaredActivityServiceConfig {
   private final DeclaredActivityRepository declaredActivityRepository;
   private final LoggedInUserService loggedInUserService;
   private final AssociationService associationService;
-  private final AssociationSearchHelper associationSearchHelper;
   private final FeedbackRepository feedbackRepository;
 
   @Bean
   public DeclaredActivityService declaredActivityService(
-      @Lazy ActivityService activityService,
-      @Lazy TraceService traceService,
-      @Lazy FeedbackService feedbackService) {
+      @Lazy ActivityService activityService, @Lazy FeedbackService feedbackService) {
     return new DeclaredActivityServiceImpl(
         declaredActivityRepository,
         activityService,
-        traceService,
         associationService,
-        associationSearchHelper,
         loggedInUserService,
         feedbackRepository,
         feedbackService);

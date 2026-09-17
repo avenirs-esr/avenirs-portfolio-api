@@ -1,8 +1,12 @@
 package fr.avenirsesr.portfolio.student.association.domain.port.input;
 
+import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociatedElementsData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationData;
+import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
+import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +31,13 @@ public interface AssociationService {
       UUID id, Class<?> clazz, List<UUID> associatedIds, EAssociationType associationType);
 
   void unassociate(UUID id, Class<?> clazz, List<UUID> associationIds);
+
+  PagedResult<AssociationSearchResultData> searchForAssociation(
+      UUID id,
+      Class<?> clazz,
+      EAssociationContextType contextType,
+      String keyword,
+      PageCriteria pageCriteria);
 
   void deleteAllByIds(List<UUID> ids);
 

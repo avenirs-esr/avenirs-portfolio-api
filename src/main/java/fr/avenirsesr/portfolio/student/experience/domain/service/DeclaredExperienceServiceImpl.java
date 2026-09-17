@@ -6,16 +6,12 @@ import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValida
 import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
-import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortField;
-import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
-import fr.avenirsesr.portfolio.student.association.domain.service.AssociationSearchHelper;
 import fr.avenirsesr.portfolio.student.experience.domain.data.DeclaredExperienceAssociationCount;
 import fr.avenirsesr.portfolio.student.experience.domain.data.DeclaredExperienceAssociationsData;
 import fr.avenirsesr.portfolio.student.experience.domain.data.DeclaredExperienceData;
@@ -24,10 +20,6 @@ import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperienc
 import fr.avenirsesr.portfolio.student.experience.domain.model.enums.EExperienceType;
 import fr.avenirsesr.portfolio.student.experience.domain.port.input.DeclaredExperienceService;
 import fr.avenirsesr.portfolio.student.experience.domain.port.output.repository.DeclaredExperienceRepository;
-import fr.avenirsesr.portfolio.student.trace.domain.data.TraceViewData;
-import fr.avenirsesr.portfolio.student.trace.domain.filter.TraceFilter;
-import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
-import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import java.time.Instant;
@@ -47,8 +39,6 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
 
   private final LoggedInUserService loggedInUserService;
   private final AssociationService associationService;
-  private final AssociationSearchHelper associationSearchHelper;
-  private final TraceService traceService;
   private final DeclaredExperienceRepository experienceRepository;
   private final StudentService studentService;
 
@@ -387,41 +377,6 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
   }
 
   @Override
-  public PagedResult<AssociationSearchResultData> searchDeclaredExperiencesForAssociation(
-      UUID excludeAssociatedWithElementId,
-      EAssociationContextType contextType,
-      String keyword,
-      PageCriteria pageCriteria) {
-    var experiences = search(keyword, pageCriteria);
-
-    if (contextType == null) {
-      return associationSearchHelper.searchForAssociation(
-          null,
-          null,
-          null,
-          null,
-          experiences,
-          AvenirsBaseModel::getId,
-          DeclaredExperience::getTitle,
-          de -> de.getExperienceType() != null ? de.getExperienceType().name() : null,
-          de -> false);
-    }
-
-    EAssociationType associationType = getAssociationType(contextType);
-
-    return associationSearchHelper.searchForAssociation(
-        excludeAssociatedWithElementId,
-        contextType.toClass(),
-        associationType,
-        associationType.idExtractorFor(DeclaredExperience.class),
-        experiences,
-        AvenirsBaseModel::getId,
-        DeclaredExperience::getTitle,
-        de -> de.getExperienceType() != null ? de.getExperienceType().name() : null,
-        de -> false);
-  }
-
-  @Override
   public DeclaredExperienceAssociationsData getAssociations(UUID experienceId) {
     var experience = fetchAndCheckLoggedInStudentAuthorization(experienceId);
 
@@ -444,25 +399,15 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
   }
 
   @Override
-  public PagedResult<AssociationSearchResultData> searchTracesForAssociation(
-      UUID declaredExperienceId, String keyword, PageCriteria pageCriteria, Boolean isAssociated) {
+  public PagedResult<AssociationSearchResultData> searchForAssociation(
+      UUID declaredExperienceId,
+      EAssociationContextType contextType,
+      String keyword,
+      PageCriteria pageCriteria) {
     fetchAndCheckLoggedInStudentAuthorization(declaredExperienceId);
-    var associationType = EAssociationType.TRACE_DECLARED_EXPERIENCE;
-    return associationSearchHelper.searchForAssociation(
-        declaredExperienceId,
-        DeclaredExperience.class,
-        associationType,
-        associationType.idExtractorFor(Trace.class),
-        traceService.getTracesView(
-            keyword,
-            new TraceFilter(isAssociated, null, null, null),
-            null,
-            pageCriteria,
-            new SortCriteria(ESortField.DATE, ESortOrder.DESC)),
-        TraceViewData::id,
-        TraceViewData::title,
-        null,
-        trace -> false);
+
+    return associationService.searchForAssociation(
+        declaredExperienceId, DeclaredExperience.class, contextType, keyword, pageCriteria);
   }
 
   @Override
@@ -482,13 +427,5 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
       throw new UserNotAuthorizedException();
     }
     return experience;
-  }
-
-  private EAssociationType getAssociationType(EAssociationContextType contextType) {
-    return switch (contextType) {
-      case TRACE -> EAssociationType.TRACE_DECLARED_EXPERIENCE;
-      case DECLARED_SKILL -> EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL;
-      case DECLARED_ACTIVITY, DECLARED_EXPERIENCE -> throw new UnsupportedOperationException();
-    };
   }
 }

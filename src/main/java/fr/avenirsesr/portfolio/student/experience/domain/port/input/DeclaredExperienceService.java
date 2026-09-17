@@ -88,17 +88,14 @@ public interface DeclaredExperienceService {
 
   DeclaredExperienceAssociationsData getAssociations(UUID experienceId);
 
-  PagedResult<AssociationSearchResultData> searchDeclaredExperiencesForAssociation(
-      UUID excludeAssociatedWithElementId,
-      EAssociationContextType contextType,
-      String keyword,
-      PageCriteria pageCriteria);
-
   DeclaredExperienceAssociationsData associate(
       UUID declaredExperienceId, List<UUID> associatedIds, EAssociationType associationType);
 
-  PagedResult<AssociationSearchResultData> searchTracesForAssociation(
-      UUID declaredExperienceId, String keyword, PageCriteria pageCriteria, Boolean isAssociated);
+  PagedResult<AssociationSearchResultData> searchForAssociation(
+      UUID declaredExperienceId,
+      EAssociationContextType contextType,
+      String keyword,
+      PageCriteria pageCriteria);
 
   void deleteAssociations(UUID declaredExperienceId, List<UUID> idsToDelete);
 }

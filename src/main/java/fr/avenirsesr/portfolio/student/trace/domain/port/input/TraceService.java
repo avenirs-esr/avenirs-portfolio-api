@@ -73,21 +73,8 @@ public interface TraceService {
 
   void unassociate(UUID traceId, List<UUID> associationIds);
 
-  PagedResult<AssociationSearchResultData> searchTracesForAssociation(
-      UUID excludeAssociatedWithElementId,
-      EAssociationContextType contextType,
-      Boolean isAssociated,
-      String keyword,
-      PageCriteria pageCriteria);
-
-  PagedResult<AssociationSearchResultData> searchDeclaredActivityForAssociation(
-      UUID traceId, String keyword, PageCriteria pageCriteria);
-
-  PagedResult<AssociationSearchResultData> searchDeclaredSkillForAssociation(
-      UUID traceId, String keyword, PageCriteria pageCriteria);
-
-  PagedResult<AssociationSearchResultData> searchDeclaredExperienceForAssociation(
-      UUID traceId, String keyword, PageCriteria pageCriteria);
+  PagedResult<AssociationSearchResultData> searchForAssociation(
+      UUID traceId, EAssociationContextType contextType, String keyword, PageCriteria pageCriteria);
 
   List<TraceLockedDeclaredActivitiesData> getLockedDeclaredActivities(List<UUID> traceIds);
 

@@ -50,11 +50,8 @@ public interface DeclaredActivityService {
   DeclaredActivityAssociationsData associate(
       UUID declaredActivityId, List<UUID> associatedIds, EAssociationType associationType);
 
-  PagedResult<AssociationSearchResultData> searchTracesForAssociation(
-      UUID declaredActivityId, String keyword, PageCriteria pageCriteria, Boolean isAssociated);
-
-  PagedResult<AssociationSearchResultData> searchDeclaredActivitiesForAssociation(
-      UUID excludeAssociatedWithElementId,
+  PagedResult<AssociationSearchResultData> searchForAssociation(
+      UUID declaredActivityId,
       EAssociationContextType contextType,
       String keyword,
       PageCriteria pageCriteria);

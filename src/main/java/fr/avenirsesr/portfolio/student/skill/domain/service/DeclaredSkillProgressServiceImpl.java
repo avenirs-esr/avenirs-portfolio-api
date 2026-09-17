@@ -5,7 +5,6 @@ import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValida
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateOptionalEnrichedTextMaxLength;
 
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
-import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
@@ -19,7 +18,6 @@ import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearch
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
-import fr.avenirsesr.portfolio.student.association.domain.service.AssociationSearchHelper;
 import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillAssociationCount;
 import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillAssociationsData;
 import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillProgressData;
@@ -49,7 +47,6 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
   private final ExternalSkillClient externalSkillClient;
   private final LoggedInUserService loggedInUserService;
   private final AssociationService associationService;
-  private final AssociationSearchHelper associationSearchHelper;
 
   @Override
   public PagedResult<DeclaredSkillProgressData> getDeclaredSkillsProgresses(
@@ -268,38 +265,15 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
   }
 
   @Override
-  public PagedResult<AssociationSearchResultData> searchDeclaredSkillsForAssociation(
-      UUID excludeAssociatedWithElementId,
+  public PagedResult<AssociationSearchResultData> searchForAssociation(
+      UUID declaredSkillId,
       EAssociationContextType contextType,
       String keyword,
       PageCriteria pageCriteria) {
-    var skills = searchDeclaredSkill(keyword, pageCriteria);
+    fetchAndCheckLoggedInStudentAuthorization(declaredSkillId);
 
-    if (contextType == null) {
-      return associationSearchHelper.searchForAssociation(
-          null,
-          null,
-          null,
-          null,
-          skills,
-          AvenirsBaseModel::getId,
-          ds -> ds.getSkill().getLibelle(),
-          ds -> ds.getSkill().getType().name(),
-          ds -> false);
-    }
-
-    EAssociationType associationType = getAssociationType(contextType);
-
-    return associationSearchHelper.searchForAssociation(
-        excludeAssociatedWithElementId,
-        contextType.toClass(),
-        associationType,
-        associationType.idExtractorFor(DeclaredSkillProgress.class),
-        skills,
-        AvenirsBaseModel::getId,
-        ds -> ds.getSkill().getLibelle(),
-        ds -> ds.getSkill().getType().name(),
-        ds -> false);
+    return associationService.searchForAssociation(
+        declaredSkillId, DeclaredSkillProgress.class, contextType, keyword, pageCriteria);
   }
 
   @Override
@@ -314,14 +288,5 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
         .map(declaredSkillProgress -> declaredSkillProgress.getSkill().getId())
         .distinct()
         .toList();
-  }
-
-  private EAssociationType getAssociationType(EAssociationContextType contextType) {
-    return switch (contextType) {
-      case TRACE -> EAssociationType.TRACE_DECLARED_SKILL;
-      case DECLARED_ACTIVITY -> EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL;
-      case DECLARED_EXPERIENCE -> EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL;
-      case DECLARED_SKILL -> throw new UnsupportedOperationException();
-    };
   }
 }

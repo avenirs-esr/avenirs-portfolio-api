@@ -2,7 +2,6 @@ package fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.service;
 
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
-import fr.avenirsesr.portfolio.student.association.domain.service.AssociationSearchHelper;
 import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillSyncService;
 import fr.avenirsesr.portfolio.student.skill.domain.service.DeclaredSkillProgressServiceImpl;
@@ -22,7 +21,6 @@ public class DeclaredSkillProgressServiceConfig {
   private final ExternalSkillClient externalSkillClient;
   private final LoggedInUserService loggedInUserService;
   private final AssociationService associationService;
-  private final AssociationSearchHelper associationSearchHelper;
 
   @Bean
   public DeclaredSkillProgressService declaredSkillProgressService() {
@@ -31,7 +29,6 @@ public class DeclaredSkillProgressServiceConfig {
         declaredSkillProgressRepository,
         externalSkillClient,
         loggedInUserService,
-        associationService,
-        associationSearchHelper);
+        associationService);
   }
 }

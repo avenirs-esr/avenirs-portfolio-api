@@ -37,8 +37,8 @@ public interface DeclaredSkillProgressService {
 
   PagedResult<DeclaredSkillProgress> searchDeclaredSkill(String keyword, PageCriteria pageCriteria);
 
-  PagedResult<AssociationSearchResultData> searchDeclaredSkillsForAssociation(
-      UUID excludeAssociatedWithElementId,
+  PagedResult<AssociationSearchResultData> searchForAssociation(
+      UUID declaredSkillId,
       EAssociationContextType contextType,
       String keyword,
       PageCriteria pageCriteria);

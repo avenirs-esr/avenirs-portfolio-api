@@ -5,17 +5,27 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.*;
 
+import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortField;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.DeclaredActivityAlreadyFinishedException;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.DeclaredActivityNotFoundException;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationData;
+import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.exception.AssociationAlreadyExistException;
 import fr.avenirsesr.portfolio.student.association.domain.exception.AssociationDoesNotExistException;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
+import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.association.domain.port.output.repository.AssociationRepository;
 import fr.avenirsesr.portfolio.student.experience.domain.exception.DeclaredExperienceNotFoundException;
@@ -24,7 +34,9 @@ import fr.avenirsesr.portfolio.student.experience.domain.port.input.DeclaredExpe
 import fr.avenirsesr.portfolio.student.skill.domain.exception.DeclaredSkillProgressNotFoundException;
 import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
+import fr.avenirsesr.portfolio.student.trace.domain.data.TraceViewData;
 import fr.avenirsesr.portfolio.student.trace.domain.exception.TraceNotFoundException;
+import fr.avenirsesr.portfolio.student.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
@@ -62,6 +74,11 @@ class AssociationServiceImplTest {
     lenient().when(declaredSkillProgress.getStudent()).thenReturn(student);
 
     return declaredSkillProgress;
+  }
+
+  private static TraceViewData traceViewData(UUID id, String title) {
+    return new TraceViewData(
+        id, title, false, null, null, Optional.empty(), Optional.empty(), null, null, null);
   }
 
   private void givenAssociationsOf(UUID id, Class<?> clazz, List<Association> associations) {
@@ -610,5 +627,97 @@ class AssociationServiceImplTest {
         declaredSkillProgressId, DeclaredSkillProgress.class, List.of(activityAssociation.getId()));
 
     verify(associationRepository).removeAllFromDatabase(List.of(activityAssociation));
+  }
+
+  @Test
+  void searchForAssociation_should_disable_the_elements_already_associated_with_the_element() {
+    UUID declaredSkillProgressId = UUID.randomUUID();
+    UUID associatedTraceId = UUID.randomUUID();
+    UUID availableTraceId = UUID.randomUUID();
+    var pageCriteria = new PageCriteria(0, 10);
+
+    when(associationRepository.findAllOf(
+            declaredSkillProgressId,
+            DeclaredSkillProgress.class,
+            List.of(EAssociationType.TRACE_DECLARED_SKILL)))
+        .thenReturn(
+            List.of(
+                association(
+                    associatedTraceId,
+                    declaredSkillProgressId,
+                    EAssociationType.TRACE_DECLARED_SKILL)));
+    when(traceService.getTracesView(
+            "kw",
+            new TraceFilter(null, null, null, null),
+            null,
+            pageCriteria,
+            new SortCriteria(ESortField.DATE, ESortOrder.DESC)))
+        .thenReturn(
+            new PagedResult<>(
+                List.of(
+                    traceViewData(associatedTraceId, "associated"),
+                    traceViewData(availableTraceId, "available")),
+                new PageInfo(0, 10, 2)));
+
+    var result =
+        service.searchForAssociation(
+            declaredSkillProgressId,
+            DeclaredSkillProgress.class,
+            EAssociationContextType.TRACE,
+            "kw",
+            pageCriteria);
+
+    assertThat(result.content())
+        .containsExactly(
+            new AssociationSearchResultData(associatedTraceId, "associated", null, true),
+            new AssociationSearchResultData(availableTraceId, "available", null, false));
+  }
+
+  @Test
+  void searchForAssociation_should_disable_a_finished_declared_activity() {
+    UUID traceId = UUID.randomUUID();
+    UUID declaredActivityId = UUID.randomUUID();
+    var pageCriteria = new PageCriteria(0, 10);
+
+    var activity = mock(Activity.class);
+    when(activity.getTitle()).thenReturn("Activity");
+    when(activity.getThematic()).thenReturn(EActivityThematic.EXPERIENCES);
+
+    var declaredActivity = mock(DeclaredActivity.class);
+    when(declaredActivity.getId()).thenReturn(declaredActivityId);
+    when(declaredActivity.getActivity()).thenReturn(activity);
+    when(declaredActivity.getFinishedAt()).thenReturn(Optional.of(Instant.now()));
+
+    when(associationRepository.findAllOf(
+            traceId, Trace.class, List.of(EAssociationType.DECLARED_ACTIVITY_TRACE)))
+        .thenReturn(List.of());
+    when(declaredActivityService.searchDeclaredActivity("kw", pageCriteria))
+        .thenReturn(new PagedResult<>(List.of(declaredActivity), new PageInfo(0, 10, 1)));
+
+    var result =
+        service.searchForAssociation(
+            traceId, Trace.class, EAssociationContextType.DECLARED_ACTIVITY, "kw", pageCriteria);
+
+    assertThat(result.content())
+        .containsExactly(
+            new AssociationSearchResultData(
+                declaredActivityId, "Activity", EActivityThematic.EXPERIENCES.name(), true));
+  }
+
+  @Test
+  void searchForAssociation_should_throw_when_the_context_cannot_be_associated_with_the_element() {
+    UUID traceId = UUID.randomUUID();
+
+    assertThatThrownBy(
+            () ->
+                service.searchForAssociation(
+                    traceId,
+                    Trace.class,
+                    EAssociationContextType.TRACE,
+                    "kw",
+                    new PageCriteria(0, 10)))
+        .isInstanceOf(IllegalArgumentException.class);
+
+    verifyNoInteractions(traceService);
   }
 }
