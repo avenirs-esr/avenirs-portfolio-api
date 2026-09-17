@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.student.association.domain.port.input;
 
+import fr.avenirsesr.portfolio.student.association.domain.data.AssociatedElementsData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationData;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
@@ -16,6 +17,13 @@ public interface AssociationService {
       List<UUID> ids, Class<?> clazz, List<EAssociationType> associationTypes);
 
   Map<UUID, Long> countAllOf(List<UUID> ids, Class<?> clazz, EAssociationType associationType);
+
+  AssociatedElementsData getAllAssociatedElementsOf(UUID id, Class<?> clazz);
+
+  AssociatedElementsData getAllAssociatedElementsOf(
+      UUID id, Class<?> clazz, boolean onlyNotCompletedActivities);
+
+  void unassociate(UUID id, Class<?> clazz, List<UUID> associationIds);
 
   void deleteAllByIds(List<UUID> ids);
 

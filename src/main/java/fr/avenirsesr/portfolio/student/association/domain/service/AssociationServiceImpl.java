@@ -1,5 +1,12 @@
 package fr.avenirsesr.portfolio.student.association.domain.service;
 
+import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
+import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityAssociationData;
+import fr.avenirsesr.portfolio.student.activity.domain.exception.DeclaredActivityAlreadyFinishedException;
+import fr.avenirsesr.portfolio.student.activity.domain.exception.DeclaredActivityNotFoundException;
+import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
+import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
+import fr.avenirsesr.portfolio.student.association.domain.data.AssociatedElementsData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationData;
 import fr.avenirsesr.portfolio.student.association.domain.exception.AssociationAlreadyExistException;
 import fr.avenirsesr.portfolio.student.association.domain.exception.AssociationDoesNotExistException;
@@ -7,15 +14,33 @@ import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.association.domain.port.output.repository.AssociationRepository;
+import fr.avenirsesr.portfolio.student.experience.domain.data.DeclaredExperienceAssociationData;
+import fr.avenirsesr.portfolio.student.experience.domain.exception.DeclaredExperienceNotFoundException;
+import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperience;
+import fr.avenirsesr.portfolio.student.experience.domain.port.input.DeclaredExperienceService;
+import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillAssociationData;
+import fr.avenirsesr.portfolio.student.skill.domain.exception.DeclaredSkillProgressNotFoundException;
+import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
+import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
+import fr.avenirsesr.portfolio.student.trace.domain.data.TraceAssociationData;
+import fr.avenirsesr.portfolio.student.trace.domain.exception.TraceNotFoundException;
+import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
+import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class AssociationServiceImpl implements AssociationService {
   private final AssociationRepository associationRepository;
+  private final TraceService traceService;
+  private final DeclaredActivityService declaredActivityService;
+  private final DeclaredSkillProgressService declaredSkillProgressService;
+  private final DeclaredExperienceService declaredExperienceService;
 
   @Override
   public List<Association> createAll(List<AssociationData> associationsData) {
@@ -61,6 +86,49 @@ public class AssociationServiceImpl implements AssociationService {
   }
 
   @Override
+  public AssociatedElementsData getAllAssociatedElementsOf(UUID id, Class<?> clazz) {
+    return getAllAssociatedElementsOf(id, clazz, false);
+  }
+
+  @Override
+  public AssociatedElementsData getAllAssociatedElementsOf(
+      UUID id, Class<?> clazz, boolean onlyNotCompletedActivities) {
+    Map<Class<?>, List<Association>> associationsByAssociatedClass =
+        getAllOf(id, clazz, EAssociationType.getAllBy(clazz)).stream()
+            .collect(
+                Collectors.groupingBy(
+                    association -> association.getAssociationType().associatedKeyOf(clazz)));
+
+    return new AssociatedElementsData(
+        toTraceAssociations(associationsOf(associationsByAssociatedClass, Trace.class), clazz),
+        toDeclaredActivityAssociations(
+            associationsOf(associationsByAssociatedClass, DeclaredActivity.class),
+            clazz,
+            onlyNotCompletedActivities),
+        toDeclaredSkillAssociations(
+            associationsOf(associationsByAssociatedClass, DeclaredSkillProgress.class), clazz),
+        toDeclaredExperienceAssociations(
+            associationsOf(associationsByAssociatedClass, DeclaredExperience.class), clazz));
+  }
+
+  @Override
+  public void unassociate(UUID id, Class<?> clazz, List<UUID> associationIds) {
+    var associations =
+        getAllOf(id, clazz, EAssociationType.getAllBy(clazz)).stream()
+            .filter(association -> associationIds.contains(association.getId()))
+            .toList();
+
+    if (!new HashSet<>(associations.stream().map(Association::getId).toList())
+        .containsAll(associationIds)) {
+      throw new AssociationDoesNotExistException();
+    }
+
+    checkIfDeclaredActivitiesAssociationsAreDeletable(associations);
+
+    deleteAllByIds(associationIds);
+  }
+
+  @Override
   public void deleteAllByIds(List<UUID> ids) {
     var activities = associationRepository.findAllById(ids);
 
@@ -77,5 +145,145 @@ public class AssociationServiceImpl implements AssociationService {
     var associations =
         ids.stream().flatMap(id -> getAllOf(id, clazz, associationTypes).stream()).toList();
     deleteAllByIds(associations.stream().map(Association::getId).toList());
+  }
+
+  private void checkIfDeclaredActivitiesAssociationsAreDeletable(List<Association> associations) {
+    var declaredActivityIds =
+        associations.stream()
+            .filter(
+                association -> association.getAssociationType().involves(DeclaredActivity.class))
+            .map(
+                association ->
+                    association
+                        .getAssociationType()
+                        .idExtractorFor(DeclaredActivity.class)
+                        .apply(association))
+            .toList();
+
+    if (declaredActivityIds.isEmpty()) {
+      return;
+    }
+
+    if (declaredActivityService.findAllDeclaredActivitiesByIds(declaredActivityIds).stream()
+        .anyMatch(declaredActivity -> declaredActivity.getFinishedAt().isPresent())) {
+      throw new DeclaredActivityAlreadyFinishedException();
+    }
+  }
+
+  private List<Association> associationsOf(
+      Map<Class<?>, List<Association>> associationsByAssociatedClass, Class<?> associatedClass) {
+    return associationsByAssociatedClass.getOrDefault(associatedClass, List.of());
+  }
+
+  private List<TraceAssociationData> toTraceAssociations(
+      List<Association> associations, Class<?> clazz) {
+    if (associations.isEmpty()) {
+      return List.of();
+    }
+
+    var traces = traceService.findAllTracesById(associatedIdsOf(associations, clazz));
+
+    return associations.stream()
+        .map(
+            association ->
+                new TraceAssociationData(
+                    association.getId(),
+                    associatedElementOf(traces, association, clazz, TraceNotFoundException::new)))
+        .toList();
+  }
+
+  private List<DeclaredActivityAssociationData> toDeclaredActivityAssociations(
+      List<Association> associations, Class<?> clazz, boolean onlyNotCompletedActivities) {
+    if (associations.isEmpty()) {
+      return List.of();
+    }
+
+    var ids = associatedIdsOf(associations, clazz);
+    var declaredActivities =
+        onlyNotCompletedActivities
+            ? declaredActivityService.findAllNotCompletedActivitiesByIds(ids)
+            : declaredActivityService.findAllDeclaredActivitiesByIds(ids);
+    var statuses = declaredActivityService.getDeclaredActivityStatus(declaredActivities);
+
+    return associations.stream()
+        .map(
+            association -> {
+              var declaredActivity =
+                  associatedElementOf(
+                      declaredActivities,
+                      association,
+                      clazz,
+                      DeclaredActivityNotFoundException::new);
+
+              return new DeclaredActivityAssociationData(
+                  association.getId(), declaredActivity, statuses.get(declaredActivity));
+            })
+        .toList();
+  }
+
+  private List<DeclaredSkillAssociationData> toDeclaredSkillAssociations(
+      List<Association> associations, Class<?> clazz) {
+    if (associations.isEmpty()) {
+      return List.of();
+    }
+
+    var declaredSkillProgresses =
+        declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(
+            associatedIdsOf(associations, clazz));
+
+    return associations.stream()
+        .map(
+            association ->
+                new DeclaredSkillAssociationData(
+                    association.getId(),
+                    associatedElementOf(
+                        declaredSkillProgresses,
+                        association,
+                        clazz,
+                        DeclaredSkillProgressNotFoundException::new)))
+        .toList();
+  }
+
+  private List<DeclaredExperienceAssociationData> toDeclaredExperienceAssociations(
+      List<Association> associations, Class<?> clazz) {
+    if (associations.isEmpty()) {
+      return List.of();
+    }
+
+    var declaredExperiences =
+        declaredExperienceService.findAllByIds(associatedIdsOf(associations, clazz));
+
+    return associations.stream()
+        .map(
+            association ->
+                new DeclaredExperienceAssociationData(
+                    association.getId(),
+                    associatedElementOf(
+                        declaredExperiences,
+                        association,
+                        clazz,
+                        DeclaredExperienceNotFoundException::new)))
+        .toList();
+  }
+
+  private List<UUID> associatedIdsOf(List<Association> associations, Class<?> clazz) {
+    return associations.stream().map(association -> associatedIdOf(association, clazz)).toList();
+  }
+
+  private UUID associatedIdOf(Association association, Class<?> clazz) {
+    return association.getAssociationType().associatedIdExtractorFor(clazz).apply(association);
+  }
+
+  private <T extends AvenirsBaseModel> T associatedElementOf(
+      List<T> elements,
+      Association association,
+      Class<?> clazz,
+      Supplier<RuntimeException> notFoundException) {
+    var associatedId = associatedIdOf(association, clazz);
+
+    return elements.stream()
+        .filter(element -> element.getId().equals(associatedId))
+        .findAny()
+        .orElseThrow(notFoundException);
   }
 }

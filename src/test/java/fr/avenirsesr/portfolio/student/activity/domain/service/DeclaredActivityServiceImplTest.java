@@ -40,7 +40,6 @@ import fr.avenirsesr.portfolio.student.association.domain.exception.MaximumAssoc
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
-import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociatedElementsService;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.association.domain.service.AssociationSearchHelper;
 import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillAssociationData;
@@ -73,7 +72,6 @@ class DeclaredActivityServiceImplTest {
   @Mock private ActivityService activityService;
 
   @Mock private AssociationService associationService;
-  @Mock private AssociatedElementsService associatedElementsService;
   @Mock private AssociationSearchHelper associationSearchHelper;
   @Mock private TraceService traceService;
   @Mock private DeclaredSkillProgressService declaredSkillProgressService;
@@ -99,7 +97,6 @@ class DeclaredActivityServiceImplTest {
             traceService,
             declaredSkillProgressService,
             associationService,
-            associatedElementsService,
             associationSearchHelper,
             loggedInUserService,
             feedbackRepository,
@@ -813,26 +810,14 @@ class DeclaredActivityServiceImplTest {
   }
 
   @Test
-  void deleteAssociations_should_delete_when_associations_belong_to_declaredActivity() {
+  void deleteAssociations_should_unassociate_the_given_associations() {
 
-    BddLogger.given("A logged-in student and a declared activity with associated traces");
+    BddLogger.given("A logged-in student and a declared activity with associations");
 
     UUID declaredActivityId = UUID.randomUUID();
-    UUID associationId1 = UUID.randomUUID();
-    UUID associationId2 = UUID.randomUUID();
-    UUID associationId3 = UUID.randomUUID();
-    UUID associationId4 = UUID.randomUUID();
+    List<UUID> idsToDelete = List.of(UUID.randomUUID(), UUID.randomUUID());
 
     DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
-    Trace trace1 = mock(Trace.class);
-    Trace trace2 = mock(Trace.class);
-    DeclaredSkillProgress declaredSkill1 = mock(DeclaredSkillProgress.class);
-    DeclaredSkillProgress declaredSkill2 = mock(DeclaredSkillProgress.class);
-
-    Association association1 = mock(Association.class);
-    Association association2 = mock(Association.class);
-    Association association3 = mock(Association.class);
-    Association association4 = mock(Association.class);
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
 
@@ -842,26 +827,13 @@ class DeclaredActivityServiceImplTest {
     when(declaredActivity.getStudent()).thenReturn(student);
     when(declaredActivity.getId()).thenReturn(declaredActivityId);
 
-    when(associationService.getAllOf(
-            declaredActivityId,
-            DeclaredActivity.class,
-            List.of(
-                EAssociationType.DECLARED_ACTIVITY_TRACE,
-                EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL)))
-        .thenReturn(List.of(association1, association2, association3, association4));
-
-    when(association1.getId()).thenReturn(associationId1);
-    when(association2.getId()).thenReturn(associationId2);
-    when(association3.getId()).thenReturn(associationId3);
-    when(association4.getId()).thenReturn(associationId4);
-
     BddLogger.when("deleteAssociations is called");
 
-    service.deleteAssociations(declaredActivityId, List.of(associationId1, associationId1));
+    service.deleteAssociations(declaredActivityId, idsToDelete);
 
-    BddLogger.then("deleteAllByIds should be called");
+    BddLogger.then("the association service should unassociate them");
 
-    verify(associationService).deleteAllByIds(List.of(associationId1, associationId1));
+    verify(associationService).unassociate(declaredActivityId, DeclaredActivity.class, idsToDelete);
   }
 
   @Test
@@ -1099,48 +1071,6 @@ class DeclaredActivityServiceImplTest {
   }
 
   @Test
-  void deleteAssociations_should_throw_when_ids_not_associated() {
-
-    BddLogger.given("Trace ids not associated to declaredActivity");
-
-    UUID declaredActivityId = UUID.randomUUID();
-    UUID traceId1 = UUID.randomUUID();
-    UUID traceIdNotAssociated = UUID.randomUUID();
-
-    DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
-    Trace trace1 = mock(Trace.class);
-
-    Association association1 = mock(Association.class);
-
-    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-
-    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
-        .thenReturn(Optional.of(declaredActivity));
-
-    when(declaredActivity.getStudent()).thenReturn(student);
-
-    when(associationService.getAllOf(
-            declaredActivity.getId(),
-            DeclaredActivity.class,
-            List.of(
-                EAssociationType.DECLARED_ACTIVITY_TRACE,
-                EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL)))
-        .thenReturn(List.of(association1));
-
-    BddLogger.when("deleteAssociations is called with non associated id");
-
-    BddLogger.then("UserNotAuthorizedException is thrown");
-
-    assertThatThrownBy(
-            () ->
-                service.deleteAssociations(
-                    declaredActivityId, List.of(traceId1, traceIdNotAssociated)))
-        .isInstanceOf(UserNotAuthorizedException.class);
-
-    verify(associationService, never()).deleteAllByIds(anyList());
-  }
-
-  @Test
   void searchDeclaredActivity_should_return_paged_result_from_repository_with_correct_graph() {
     BddLogger.given("A logged-in student, a keyword and page criteria");
     String keyword = "recherche";
@@ -1188,8 +1118,7 @@ class DeclaredActivityServiceImplTest {
     when(declaredActivity.getStudent()).thenReturn(student);
     when(declaredActivity.getId()).thenReturn(declaredActivityId);
 
-    when(associatedElementsService.getAllAssociatedElementsOf(
-            declaredActivityId, DeclaredActivity.class))
+    when(associationService.getAllAssociatedElementsOf(declaredActivityId, DeclaredActivity.class))
         .thenReturn(
             new AssociatedElementsData(
                 List.of(new TraceAssociationData(UUID.randomUUID(), trace)),
@@ -1218,8 +1147,7 @@ class DeclaredActivityServiceImplTest {
     when(declaredActivity.getStudent()).thenReturn(student);
     when(declaredActivity.getId()).thenReturn(declaredActivityId);
 
-    when(associatedElementsService.getAllAssociatedElementsOf(
-            declaredActivityId, DeclaredActivity.class))
+    when(associationService.getAllAssociatedElementsOf(declaredActivityId, DeclaredActivity.class))
         .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
 
     BddLogger.when("getDeclaredActivityAssociations is called");
@@ -1300,8 +1228,7 @@ class DeclaredActivityServiceImplTest {
 
     when(declaredActivity.getId()).thenReturn(declaredActivityId);
 
-    when(associatedElementsService.getAllAssociatedElementsOf(
-            declaredActivityId, DeclaredActivity.class))
+    when(associationService.getAllAssociatedElementsOf(declaredActivityId, DeclaredActivity.class))
         .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
 
     BddLogger.when("associateActivityWithDeclaredSkills is called");

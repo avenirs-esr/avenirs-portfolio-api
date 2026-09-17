@@ -27,10 +27,8 @@ import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.Fe
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.exception.MaximumAssociationReachedException;
-import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
-import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociatedElementsService;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.association.domain.service.AssociationSearchHelper;
 import fr.avenirsesr.portfolio.student.skill.domain.exception.DeclaredSkillProgressNotFoundException;
@@ -59,7 +57,6 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   private final TraceService traceService;
   private final DeclaredSkillProgressService declaredSkillProgressService;
   private final AssociationService associationService;
-  private final AssociatedElementsService associatedElementsService;
   private final AssociationSearchHelper associationSearchHelper;
   private final LoggedInUserService loggedInUserService;
   private final FeedbackRepository feedbackRepository;
@@ -433,7 +430,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
         fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
 
     var associatedElements =
-        associatedElementsService.getAllAssociatedElementsOf(
+        associationService.getAllAssociatedElementsOf(
             declaredActivity.getId(), DeclaredActivity.class);
 
     return new DeclaredActivityAssociationsData(
@@ -448,23 +445,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
       throw new DeclaredActivityUnsubscribedException();
     }
 
-    var associatedElementsIds =
-        associationService
-            .getAllOf(
-                declaredActivity.getId(),
-                DeclaredActivity.class,
-                List.of(
-                    EAssociationType.DECLARED_ACTIVITY_TRACE,
-                    EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL))
-            .stream()
-            .map(Association::getId)
-            .toList();
-
-    if (!new HashSet<>(associatedElementsIds).containsAll(idsToDelete)) {
-      throw new UserNotAuthorizedException();
-    }
-
-    associationService.deleteAllByIds(idsToDelete);
+    associationService.unassociate(declaredActivity.getId(), DeclaredActivity.class, idsToDelete);
   }
 
   @Override

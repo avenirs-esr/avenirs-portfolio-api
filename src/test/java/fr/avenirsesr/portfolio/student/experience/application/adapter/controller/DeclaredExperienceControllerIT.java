@@ -1808,7 +1808,7 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldReturn403WhenAssociationIdDoesNotBelongToExperience() throws Exception {
+  void shouldReturn404WhenAssociationIdDoesNotBelongToExperience() throws Exception {
     BddLogger.given("a declared experience with no matching association for the given id");
 
     String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
@@ -1825,12 +1825,12 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
             objectMapper.writeValueAsString(Map.of("idsToDelete", List.of(UUID.randomUUID()))))
         .exchange()
         .expectStatus()
-        .isForbidden()
+        .isNotFound()
         .expectBody()
         .jsonPath("$.code")
-        .isEqualTo("USER_NOT_AUTHORIZED");
+        .isEqualTo("ASSOCIATION_NOT_FOUND");
 
-    BddLogger.then("it should return forbidden, since the association does not belong to it");
+    BddLogger.then("it should return not found, since the association does not belong to it");
   }
 
   @Test
@@ -1854,7 +1854,7 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
                 Map.of("idsToDelete", List.of(associationId, UUID.randomUUID()))))
         .exchange()
         .expectStatus()
-        .isForbidden();
+        .isNotFound();
 
     BddLogger.then("the valid association should not have been deleted");
 

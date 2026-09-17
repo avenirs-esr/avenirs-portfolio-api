@@ -17,7 +17,6 @@ import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.file.domain.model.FileDownload;
 import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
-import fr.avenirsesr.portfolio.student.activity.domain.exception.DeclaredActivityAlreadyFinishedException;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.DeclaredActivityNotFoundException;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
@@ -25,11 +24,9 @@ import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivi
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.FeedbackService;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
-import fr.avenirsesr.portfolio.student.association.domain.exception.AssociationDoesNotExistException;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
-import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociatedElementsService;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.association.domain.service.AssociationSearchHelper;
 import fr.avenirsesr.portfolio.student.experience.domain.exception.DeclaredExperienceNotFoundException;
@@ -69,7 +66,6 @@ public class TraceServiceImpl implements TraceService {
   private final TraceConfigurationClient traceConfigurationClient;
   private final LoggedInUserService loggedInUserService;
   private final AssociationService associationService;
-  private final AssociatedElementsService associatedElementsService;
   private final AssociationSearchHelper associationSearchHelper;
   private final FeedbackService feedbackService;
   private final FileResourceService fileResourceService;
@@ -249,8 +245,7 @@ public class TraceServiceImpl implements TraceService {
     checkIfStudentIsAuthorizedOnTrace(studentLoggedIn, trace);
 
     var associatedElements =
-        associatedElementsService.getAllAssociatedElementsOf(
-            trace.getId(), Trace.class, onlyNotCompleted);
+        associationService.getAllAssociatedElementsOf(trace.getId(), Trace.class, onlyNotCompleted);
 
     return new TraceAssociationsData(
         associatedElements.declaredActivityAssociations(),
@@ -478,37 +473,7 @@ public class TraceServiceImpl implements TraceService {
 
     checkIfStudentIsAuthorizedOnTrace(loggedInStudent, trace);
 
-    List<Association> associationList =
-        associationService
-            .getAllOf(traceId, Trace.class, EAssociationType.getAllBy(Trace.class))
-            .stream()
-            .filter(association -> associationIds.contains(association.getId()))
-            .toList();
-
-    if (!new HashSet<>(associationList.stream().map(Association::getId).toList())
-        .containsAll(associationIds)) {
-      throw new AssociationDoesNotExistException();
-    }
-
-    checkIfDeclaredActivitiesAssociationsAreDeletable(associationList);
-
-    associationService.deleteAllByIds(associationIds);
-  }
-
-  private void checkIfDeclaredActivitiesAssociationsAreDeletable(
-      List<Association> associationList) {
-    List<UUID> declaredActivityIds =
-        associationList.stream()
-            .filter(
-                association ->
-                    association.getAssociationType() == EAssociationType.DECLARED_ACTIVITY_TRACE)
-            .map(Association::getId1)
-            .toList();
-
-    if (declaredActivityService.findAllDeclaredActivitiesByIds(declaredActivityIds).stream()
-        .anyMatch(a -> a.getFinishedAt().isPresent())) {
-      throw new DeclaredActivityAlreadyFinishedException();
-    }
+    associationService.unassociate(trace.getId(), Trace.class, associationIds);
   }
 
   @Override

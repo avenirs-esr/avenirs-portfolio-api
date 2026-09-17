@@ -7,7 +7,6 @@ import fr.avenirsesr.portfolio.student.activity.domain.port.input.FeedbackServic
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.FeedbackRepository;
 import fr.avenirsesr.portfolio.student.activity.domain.service.DeclaredActivityServiceImpl;
-import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociatedElementsService;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.association.domain.service.AssociationSearchHelper;
 import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
@@ -26,7 +25,6 @@ public class DeclaredActivityServiceConfig {
   private final DeclaredSkillProgressService declaredSkillProgressService;
   private final LoggedInUserService loggedInUserService;
   private final AssociationService associationService;
-  private final AssociatedElementsService associatedElementsService;
   private final AssociationSearchHelper associationSearchHelper;
   private final FeedbackRepository feedbackRepository;
 
@@ -41,7 +39,6 @@ public class DeclaredActivityServiceConfig {
         traceService,
         declaredSkillProgressService,
         associationService,
-        associatedElementsService,
         associationSearchHelper,
         loggedInUserService,
         feedbackRepository,

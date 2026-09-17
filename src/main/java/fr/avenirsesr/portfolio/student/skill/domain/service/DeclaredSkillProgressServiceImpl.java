@@ -20,10 +20,8 @@ import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
-import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
-import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociatedElementsService;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.association.domain.service.AssociationSearchHelper;
 import fr.avenirsesr.portfolio.student.experience.domain.exception.DeclaredExperienceNotFoundException;
@@ -63,7 +61,6 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
   private final LoggedInUserService loggedInUserService;
   private final DeclaredActivityService declaredActivityService;
   private final AssociationService associationService;
-  private final AssociatedElementsService associatedElementsService;
   private final AssociationSearchHelper associationSearchHelper;
   private final DeclaredExperienceService declaredExperienceService;
 
@@ -318,23 +315,8 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
   public void deleteAssociations(UUID declaredSkillProgressId, List<UUID> idsToDelete) {
     var declaredSkillProgress = fetchAndCheckLoggedInStudentAuthorization(declaredSkillProgressId);
 
-    var associationIds =
-        associationService
-            .getAllOf(
-                declaredSkillProgress.getId(),
-                DeclaredSkillProgress.class,
-                List.of(
-                    EAssociationType.TRACE_DECLARED_SKILL,
-                    EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL))
-            .stream()
-            .map(Association::getId)
-            .toList();
-
-    if (!new HashSet<>(associationIds).containsAll(idsToDelete)) {
-      throw new UserNotAuthorizedException();
-    }
-
-    associationService.deleteAllByIds(idsToDelete);
+    associationService.unassociate(
+        declaredSkillProgress.getId(), DeclaredSkillProgress.class, idsToDelete);
   }
 
   private DeclaredSkillProgress fetchAndCheckLoggedInStudentAuthorization(UUID declaredSkillId) {
@@ -356,8 +338,7 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
     var skill = fetchAndCheckLoggedInStudentAuthorization(declaredSkillId);
 
     var associatedElements =
-        associatedElementsService.getAllAssociatedElementsOf(
-            skill.getId(), DeclaredSkillProgress.class);
+        associationService.getAllAssociatedElementsOf(skill.getId(), DeclaredSkillProgress.class);
 
     return new DeclaredSkillAssociationsData(
         associatedElements.traceAssociations(),
