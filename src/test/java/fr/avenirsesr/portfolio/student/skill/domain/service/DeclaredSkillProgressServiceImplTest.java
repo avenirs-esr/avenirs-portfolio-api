@@ -30,10 +30,8 @@ import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivi
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociatedElementsData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.exception.AssociationAlreadyExistException;
-import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
-import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociatedElementsService;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.association.domain.service.AssociationSearchHelper;
 import fr.avenirsesr.portfolio.student.experience.domain.data.DeclaredExperienceAssociationData;
@@ -81,7 +79,6 @@ public class DeclaredSkillProgressServiceImplTest {
   @Mock private LoggedInUserService loggedInUserService;
   @Mock private DeclaredActivityService declaredActivityService;
   @Mock private AssociationService associationService;
-  @Mock private AssociatedElementsService associatedElementsService;
   @Mock private AssociationSearchHelper associationSearchHelper;
   @Mock private DeclaredExperienceService declaredExperienceService;
   @InjectMocks private DeclaredSkillProgressServiceImpl declaredSkillProgressService;
@@ -572,7 +569,7 @@ public class DeclaredSkillProgressServiceImplTest {
                 List.of(activityId1, activityId2)))
             .thenReturn(List.of(declaredActivity1, declaredActivity2));
 
-        when(associatedElementsService.getAllAssociatedElementsOf(
+        when(associationService.getAllAssociatedElementsOf(
                 declaredSkillProgress.getId(), DeclaredSkillProgress.class))
             .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
 
@@ -736,7 +733,7 @@ public class DeclaredSkillProgressServiceImplTest {
         when(declaredActivityService.findAllDeclaredActivitiesByIds(List.of()))
             .thenReturn(List.of());
 
-        when(associatedElementsService.getAllAssociatedElementsOf(
+        when(associationService.getAllAssociatedElementsOf(
                 declaredSkillProgress.getId(), DeclaredSkillProgress.class))
             .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
         when(declaredActivityService.findAllDeclaredActivitiesByIds(List.of()))
@@ -779,7 +776,7 @@ public class DeclaredSkillProgressServiceImplTest {
         when(declaredExperienceService.findAllByIds(List.of(experienceId1, experienceId2)))
             .thenReturn(List.of(declaredExperience1, declaredExperience2));
 
-        when(associatedElementsService.getAllAssociatedElementsOf(
+        when(associationService.getAllAssociatedElementsOf(
                 declaredSkillProgress.getId(), DeclaredSkillProgress.class))
             .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
 
@@ -941,7 +938,7 @@ public class DeclaredSkillProgressServiceImplTest {
             .thenReturn(Optional.of(declaredSkillProgress));
         when(declaredExperienceService.findAllByIds(List.of())).thenReturn(List.of());
 
-        when(associatedElementsService.getAllAssociatedElementsOf(
+        when(associationService.getAllAssociatedElementsOf(
                 declaredSkillProgress.getId(), DeclaredSkillProgress.class))
             .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
 
@@ -976,7 +973,7 @@ public class DeclaredSkillProgressServiceImplTest {
         when(declaredExperienceService.findAllByIds(List.of(experienceId)))
             .thenReturn(List.of(declaredExperience));
 
-        when(associatedElementsService.getAllAssociatedElementsOf(
+        when(associationService.getAllAssociatedElementsOf(
                 declaredSkillProgress.getId(), DeclaredSkillProgress.class))
             .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
 
@@ -1049,7 +1046,7 @@ public class DeclaredSkillProgressServiceImplTest {
         when(traceService.findAllTracesById(List.of(trace1.getId(), trace2.getId())))
             .thenReturn(List.of(trace1, trace2));
 
-        when(associatedElementsService.getAllAssociatedElementsOf(
+        when(associationService.getAllAssociatedElementsOf(
                 declaredSkillProgress.getId(), DeclaredSkillProgress.class))
             .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
 
@@ -1199,7 +1196,7 @@ public class DeclaredSkillProgressServiceImplTest {
             .thenReturn(Optional.of(declaredSkillProgress));
         when(traceService.findAllTracesById(List.of())).thenReturn(List.of());
 
-        when(associatedElementsService.getAllAssociatedElementsOf(
+        when(associationService.getAllAssociatedElementsOf(
                 declaredSkillProgress.getId(), DeclaredSkillProgress.class))
             .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
 
@@ -1229,7 +1226,7 @@ public class DeclaredSkillProgressServiceImplTest {
             .thenReturn(Optional.of(declaredSkillProgress));
         when(traceService.findAllTracesById(List.of(trace.getId()))).thenReturn(List.of(trace));
 
-        when(associatedElementsService.getAllAssociatedElementsOf(
+        when(associationService.getAllAssociatedElementsOf(
                 declaredSkillProgress.getId(), DeclaredSkillProgress.class))
             .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
 
@@ -1282,7 +1279,6 @@ public class DeclaredSkillProgressServiceImplTest {
 
       @Mock private DeclaredActivityService declaredActivityService;
       @Mock private AssociationService associationService;
-      @Mock private AssociatedElementsService associatedElementsService;
       @Mock private AssociationSearchHelper associationSearchHelper;
       @Mock private DeclaredExperienceService declaredExperienceService;
 
@@ -1297,7 +1293,6 @@ public class DeclaredSkillProgressServiceImplTest {
                 loggedInUserService,
                 declaredActivityService,
                 associationService,
-                associatedElementsService,
                 associationSearchHelper,
                 declaredExperienceService);
       }
@@ -1359,7 +1354,7 @@ public class DeclaredSkillProgressServiceImplTest {
 
         when(declaredSkillProgressRepository.findById(declaredSkillProgressId))
             .thenReturn(Optional.of(declaredSkillProgress));
-        when(associatedElementsService.getAllAssociatedElementsOf(
+        when(associationService.getAllAssociatedElementsOf(
                 declaredSkillProgressId, DeclaredSkillProgress.class))
             .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
 
@@ -1391,7 +1386,7 @@ public class DeclaredSkillProgressServiceImplTest {
 
         when(declaredSkillProgressRepository.findById(declaredSkillProgressId))
             .thenReturn(Optional.of(declaredSkillProgress));
-        when(associatedElementsService.getAllAssociatedElementsOf(
+        when(associationService.getAllAssociatedElementsOf(
                 declaredSkillProgressId, DeclaredSkillProgress.class))
             .thenReturn(
                 new AssociatedElementsData(
@@ -1421,38 +1416,25 @@ public class DeclaredSkillProgressServiceImplTest {
     class WhenDeletingAssociations {
 
       @Test
-      void deleteAssociations_should_delete_when_associations_belong_to_declaredSkillProgress() {
+      void deleteAssociations_should_unassociate_the_given_associations() {
         BddLogger.given("A logged-in student and a declared skill progress with associations");
 
         DeclaredSkillProgress declaredSkillProgress =
             DeclaredSkillProgressFixture.create().withStudent(student).toModel();
         UUID declaredSkillProgressId = declaredSkillProgress.getId();
-        UUID associationId1 = randomUUID();
-        UUID associationId2 = randomUUID();
-
-        Association association1 = mock(Association.class);
-        Association association2 = mock(Association.class);
+        List<UUID> idsToDelete = List.of(randomUUID(), randomUUID());
 
         when(declaredSkillProgressRepository.findById(declaredSkillProgressId))
             .thenReturn(Optional.of(declaredSkillProgress));
-        when(associationService.getAllOf(
-                declaredSkillProgressId,
-                DeclaredSkillProgress.class,
-                List.of(
-                    EAssociationType.TRACE_DECLARED_SKILL,
-                    EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL)))
-            .thenReturn(List.of(association1, association2));
-        when(association1.getId()).thenReturn(associationId1);
-        when(association2.getId()).thenReturn(associationId2);
 
         BddLogger.when("deleteAssociations is called");
 
-        declaredSkillProgressService.deleteAssociations(
-            declaredSkillProgressId, List.of(associationId1));
+        declaredSkillProgressService.deleteAssociations(declaredSkillProgressId, idsToDelete);
 
-        BddLogger.then("deleteAllByIds should be called with the given ids");
+        BddLogger.then("the association service should unassociate them");
 
-        verify(associationService).deleteAllByIds(List.of(associationId1));
+        verify(associationService)
+            .unassociate(declaredSkillProgressId, DeclaredSkillProgress.class, idsToDelete);
       }
 
       @Test
@@ -1474,7 +1456,7 @@ public class DeclaredSkillProgressServiceImplTest {
                 declaredSkillProgressService.deleteAssociations(
                     declaredSkillProgressId, List.of(randomUUID())));
 
-        verify(associationService, never()).deleteAllByIds(anyList());
+        verify(associationService, never()).unassociate(any(), any(), anyList());
       }
 
       @Test
@@ -1499,42 +1481,7 @@ public class DeclaredSkillProgressServiceImplTest {
                 declaredSkillProgressService.deleteAssociations(
                     declaredSkillProgressId, List.of(randomUUID())));
 
-        verify(associationService, never()).deleteAllByIds(anyList());
-      }
-
-      @Test
-      void deleteAssociations_should_throw_when_ids_not_associated() {
-        BddLogger.given("A declared skill progress and an id that is not one of its associations");
-
-        DeclaredSkillProgress declaredSkillProgress =
-            DeclaredSkillProgressFixture.create().withStudent(student).toModel();
-        UUID declaredSkillProgressId = declaredSkillProgress.getId();
-        UUID associationId = randomUUID();
-
-        Association association = mock(Association.class);
-
-        when(declaredSkillProgressRepository.findById(declaredSkillProgressId))
-            .thenReturn(Optional.of(declaredSkillProgress));
-        when(associationService.getAllOf(
-                declaredSkillProgressId,
-                DeclaredSkillProgress.class,
-                List.of(
-                    EAssociationType.TRACE_DECLARED_SKILL,
-                    EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL)))
-            .thenReturn(List.of(association));
-        when(association.getId()).thenReturn(associationId);
-
-        BddLogger.when("deleteAssociations is called with a non associated id");
-
-        BddLogger.then("it should throw UserNotAuthorizedException");
-
-        assertThrows(
-            UserNotAuthorizedException.class,
-            () ->
-                declaredSkillProgressService.deleteAssociations(
-                    declaredSkillProgressId, List.of(randomUUID())));
-
-        verify(associationService, never()).deleteAllByIds(anyList());
+        verify(associationService, never()).unassociate(any(), any(), anyList());
       }
     }
   }

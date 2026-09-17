@@ -18,10 +18,8 @@ import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociatedElementsData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.exception.AssociationAlreadyExistException;
-import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
-import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociatedElementsService;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.association.domain.service.AssociationSearchHelper;
 import fr.avenirsesr.portfolio.student.experience.domain.data.DeclaredExperienceAssociationCount;
@@ -61,7 +59,6 @@ class DeclaredExperienceServiceImplTest {
 
   @Mock private LoggedInUserService loggedInUserService;
   @Mock private AssociationService associationService;
-  @Mock private AssociatedElementsService associatedElementsService;
   @Mock private AssociationSearchHelper associationSearchHelper;
   @Mock private TraceService traceService;
   @Mock private DeclaredExperienceRepository experienceRepository;
@@ -1160,8 +1157,7 @@ class DeclaredExperienceServiceImplTest {
 
     Trace trace = TraceFixture.create().withId(UUID.randomUUID()).toModel();
 
-    when(associatedElementsService.getAllAssociatedElementsOf(
-            experienceId, DeclaredExperience.class))
+    when(associationService.getAllAssociatedElementsOf(experienceId, DeclaredExperience.class))
         .thenReturn(
             new AssociatedElementsData(
                 List.of(new TraceAssociationData(UUID.randomUUID(), trace)),
@@ -1231,8 +1227,7 @@ class DeclaredExperienceServiceImplTest {
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
 
-    when(associatedElementsService.getAllAssociatedElementsOf(
-            experienceId, DeclaredExperience.class))
+    when(associationService.getAllAssociatedElementsOf(experienceId, DeclaredExperience.class))
         .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
 
     BddLogger.when("getting associations");
@@ -1266,8 +1261,7 @@ class DeclaredExperienceServiceImplTest {
               List.of(skill1.getId(), skill2.getId())))
           .thenReturn(List.of(skill1, skill2));
 
-      when(associatedElementsService.getAllAssociatedElementsOf(
-              experienceId, DeclaredExperience.class))
+      when(associationService.getAllAssociatedElementsOf(experienceId, DeclaredExperience.class))
           .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
 
       BddLogger.when("associating the experience with both declared skill progresses");
@@ -1418,8 +1412,7 @@ class DeclaredExperienceServiceImplTest {
       when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
       when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of()))
           .thenReturn(List.of());
-      when(associatedElementsService.getAllAssociatedElementsOf(
-              experienceId, DeclaredExperience.class))
+      when(associationService.getAllAssociatedElementsOf(experienceId, DeclaredExperience.class))
           .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
 
       BddLogger.when("associating with an empty list");
@@ -1447,8 +1440,7 @@ class DeclaredExperienceServiceImplTest {
       when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
       when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of(skill.getId())))
           .thenReturn(List.of(skill));
-      when(associatedElementsService.getAllAssociatedElementsOf(
-              experienceId, DeclaredExperience.class))
+      when(associationService.getAllAssociatedElementsOf(experienceId, DeclaredExperience.class))
           .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
 
       BddLogger.when("associating with the duplicated id");
@@ -1519,8 +1511,7 @@ class DeclaredExperienceServiceImplTest {
       when(traceService.findAllTracesById(List.of(trace1.getId(), trace2.getId())))
           .thenReturn(List.of(trace1, trace2));
 
-      when(associatedElementsService.getAllAssociatedElementsOf(
-              experienceId, DeclaredExperience.class))
+      when(associationService.getAllAssociatedElementsOf(experienceId, DeclaredExperience.class))
           .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
 
       BddLogger.when("associating the experience with both traces");
@@ -1663,8 +1654,7 @@ class DeclaredExperienceServiceImplTest {
       when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
       when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
       when(traceService.findAllTracesById(List.of())).thenReturn(List.of());
-      when(associatedElementsService.getAllAssociatedElementsOf(
-              experienceId, DeclaredExperience.class))
+      when(associationService.getAllAssociatedElementsOf(experienceId, DeclaredExperience.class))
           .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
 
       BddLogger.when("associating with an empty list");
@@ -1691,8 +1681,7 @@ class DeclaredExperienceServiceImplTest {
       when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
       when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
       when(traceService.findAllTracesById(List.of(trace.getId()))).thenReturn(List.of(trace));
-      when(associatedElementsService.getAllAssociatedElementsOf(
-              experienceId, DeclaredExperience.class))
+      when(associationService.getAllAssociatedElementsOf(experienceId, DeclaredExperience.class))
           .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
 
       BddLogger.when("associating with the duplicated id");
@@ -1876,40 +1865,26 @@ class DeclaredExperienceServiceImplTest {
   class WhenDeletingAssociations {
 
     @Test
-    void deleteAssociations_should_delete_when_associations_belong_to_declaredExperience() {
+    void deleteAssociations_should_unassociate_the_given_associations() {
       BddLogger.given("a logged-in student and a declared experience with associations");
 
       UUID experienceId = UUID.randomUUID();
-      UUID associationId1 = UUID.randomUUID();
-      UUID associationId2 = UUID.randomUUID();
+      List<UUID> idsToDelete = List.of(UUID.randomUUID(), UUID.randomUUID());
 
       DeclaredExperience experience = mock(DeclaredExperience.class);
       when(experience.getId()).thenReturn(experienceId);
       when(experience.getStudent()).thenReturn(student);
 
-      Association association1 = mock(Association.class);
-      when(association1.getId()).thenReturn(associationId1);
-
-      Association association2 = mock(Association.class);
-      when(association2.getId()).thenReturn(associationId2);
-
       when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
       when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
-      when(associationService.getAllOf(
-              experienceId,
-              DeclaredExperience.class,
-              List.of(
-                  EAssociationType.TRACE_DECLARED_EXPERIENCE,
-                  EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL)))
-          .thenReturn(List.of(association1, association2));
 
       BddLogger.when("deleteAssociations is called");
 
-      service.deleteAssociations(experienceId, List.of(associationId1));
+      service.deleteAssociations(experienceId, idsToDelete);
 
-      BddLogger.then("deleteAllByIds should be called with the given ids");
+      BddLogger.then("the association service should unassociate them");
 
-      verify(associationService).deleteAllByIds(List.of(associationId1));
+      verify(associationService).unassociate(experienceId, DeclaredExperience.class, idsToDelete);
     }
 
     @Test
@@ -1929,7 +1904,7 @@ class DeclaredExperienceServiceImplTest {
           DeclaredExperienceNotFoundException.class,
           () -> service.deleteAssociations(experienceId, List.of(UUID.randomUUID())));
 
-      verify(associationService, never()).deleteAllByIds(anyList());
+      verify(associationService, never()).unassociate(any(), any(), anyList());
     }
 
     @Test
@@ -1953,42 +1928,7 @@ class DeclaredExperienceServiceImplTest {
           UserNotAuthorizedException.class,
           () -> service.deleteAssociations(experienceId, List.of(UUID.randomUUID())));
 
-      verify(associationService, never()).deleteAllByIds(anyList());
-    }
-
-    @Test
-    void deleteAssociations_should_throw_when_ids_not_associated() {
-      BddLogger.given("a declared experience and an id that is not one of its associations");
-
-      UUID experienceId = UUID.randomUUID();
-      UUID associationId = UUID.randomUUID();
-
-      DeclaredExperience experience = mock(DeclaredExperience.class);
-      when(experience.getId()).thenReturn(experienceId);
-      when(experience.getStudent()).thenReturn(student);
-
-      Association association = mock(Association.class);
-      when(association.getId()).thenReturn(associationId);
-
-      when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-      when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
-      when(associationService.getAllOf(
-              experienceId,
-              DeclaredExperience.class,
-              List.of(
-                  EAssociationType.TRACE_DECLARED_EXPERIENCE,
-                  EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL)))
-          .thenReturn(List.of(association));
-
-      BddLogger.when("deleteAssociations is called with a non associated id");
-
-      BddLogger.then("it should throw UserNotAuthorizedException");
-
-      assertThrows(
-          UserNotAuthorizedException.class,
-          () -> service.deleteAssociations(experienceId, List.of(UUID.randomUUID())));
-
-      verify(associationService, never()).deleteAllByIds(anyList());
+      verify(associationService, never()).unassociate(any(), any(), anyList());
     }
   }
 

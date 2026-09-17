@@ -13,10 +13,8 @@ import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorize
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
-import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
-import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociatedElementsService;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.association.domain.service.AssociationSearchHelper;
 import fr.avenirsesr.portfolio.student.experience.domain.data.DeclaredExperienceAssociationCount;
@@ -54,7 +52,6 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
 
   private final LoggedInUserService loggedInUserService;
   private final AssociationService associationService;
-  private final AssociatedElementsService associatedElementsService;
   private final AssociationSearchHelper associationSearchHelper;
   private final TraceService traceService;
   private final DeclaredExperienceRepository experienceRepository;
@@ -435,8 +432,7 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
     var experience = fetchAndCheckLoggedInStudentAuthorization(experienceId);
 
     var associatedElements =
-        associatedElementsService.getAllAssociatedElementsOf(
-            experience.getId(), DeclaredExperience.class);
+        associationService.getAllAssociatedElementsOf(experience.getId(), DeclaredExperience.class);
 
     return new DeclaredExperienceAssociationsData(
         associatedElements.traceAssociations(), associatedElements.declaredSkillAssociations());
@@ -530,23 +526,7 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
   public void deleteAssociations(UUID declaredExperienceId, List<UUID> idsToDelete) {
     var experience = fetchAndCheckLoggedInStudentAuthorization(declaredExperienceId);
 
-    var associationIds =
-        associationService
-            .getAllOf(
-                experience.getId(),
-                DeclaredExperience.class,
-                List.of(
-                    EAssociationType.TRACE_DECLARED_EXPERIENCE,
-                    EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL))
-            .stream()
-            .map(Association::getId)
-            .toList();
-
-    if (!new HashSet<>(associationIds).containsAll(idsToDelete)) {
-      throw new UserNotAuthorizedException();
-    }
-
-    associationService.deleteAllByIds(idsToDelete);
+    associationService.unassociate(experience.getId(), DeclaredExperience.class, idsToDelete);
   }
 
   private DeclaredExperience fetchAndCheckLoggedInStudentAuthorization(UUID experienceId) {

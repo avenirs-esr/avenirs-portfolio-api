@@ -27,9 +27,11 @@ public enum EAssociationType {
   }
 
   public static List<EAssociationType> getAllBy(Class<?> clazz) {
-    return Arrays.stream(values())
-        .filter(type -> type.key1.equals(clazz) || type.key2.equals(clazz))
-        .toList();
+    return Arrays.stream(values()).filter(type -> type.involves(clazz)).toList();
+  }
+
+  public boolean involves(Class<?> clazz) {
+    return key1.equals(clazz) || key2.equals(clazz);
   }
 
   public Function<Association, UUID> idExtractorFor(Class<?> subjectClass) {

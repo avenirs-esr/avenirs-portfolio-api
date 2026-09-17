@@ -1,7 +1,6 @@
 package fr.avenirsesr.portfolio.student.experience.infrastructure.adapter.service;
 
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
-import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociatedElementsService;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.association.domain.service.AssociationSearchHelper;
 import fr.avenirsesr.portfolio.student.experience.domain.port.input.DeclaredExperienceService;
@@ -20,7 +19,6 @@ import org.springframework.context.annotation.Lazy;
 public class DeclaredExperienceServiceConfig {
   private final LoggedInUserService loggedInUserService;
   private final AssociationService associationService;
-  private final AssociatedElementsService associatedElementsService;
   private final AssociationSearchHelper associationSearchHelper;
   private final DeclaredExperienceRepository experienceRepository;
   private final StudentService studentService;
@@ -32,7 +30,6 @@ public class DeclaredExperienceServiceConfig {
     return new DeclaredExperienceServiceImpl(
         loggedInUserService,
         associationService,
-        associatedElementsService,
         associationSearchHelper,
         traceService,
         experienceRepository,
