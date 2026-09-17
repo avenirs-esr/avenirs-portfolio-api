@@ -1,6 +1,11 @@
 package fr.avenirsesr.portfolio.student.association.domain.service;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
+import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortField;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityAssociationData;
@@ -10,9 +15,11 @@ import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociatedElementsData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationData;
+import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.exception.AssociationAlreadyExistException;
 import fr.avenirsesr.portfolio.student.association.domain.exception.AssociationDoesNotExistException;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
+import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.association.domain.port.output.repository.AssociationRepository;
@@ -25,15 +32,19 @@ import fr.avenirsesr.portfolio.student.skill.domain.exception.DeclaredSkillProgr
 import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.student.trace.domain.data.TraceAssociationData;
+import fr.avenirsesr.portfolio.student.trace.domain.data.TraceViewData;
 import fr.avenirsesr.portfolio.student.trace.domain.exception.TraceNotFoundException;
+import fr.avenirsesr.portfolio.student.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -147,6 +158,64 @@ public class AssociationServiceImpl implements AssociationService {
   }
 
   @Override
+  public PagedResult<AssociationSearchResultData> searchForAssociation(
+      UUID id,
+      Class<?> clazz,
+      EAssociationContextType contextType,
+      String keyword,
+      PageCriteria pageCriteria) {
+    var associationType = EAssociationType.of(clazz, contextType.toClass());
+
+    var associatedIds =
+        getAllOf(id, clazz, List.of(associationType)).stream()
+            .map(associationType.associatedIdExtractorFor(clazz))
+            .collect(Collectors.toSet());
+
+    return switch (contextType) {
+      case TRACE ->
+          toSearchResults(
+              traceService.getTracesView(
+                  keyword,
+                  new TraceFilter(null, null, null, null),
+                  null,
+                  pageCriteria,
+                  new SortCriteria(ESortField.DATE, ESortOrder.DESC)),
+              associatedIds,
+              TraceViewData::id,
+              TraceViewData::title,
+              trace -> null,
+              trace -> false);
+      case DECLARED_ACTIVITY ->
+          toSearchResults(
+              declaredActivityService.searchDeclaredActivity(keyword, pageCriteria),
+              associatedIds,
+              AvenirsBaseModel::getId,
+              declaredActivity -> declaredActivity.getActivity().getTitle(),
+              declaredActivity -> declaredActivity.getActivity().getThematic().name(),
+              declaredActivity -> declaredActivity.getFinishedAt().isPresent());
+      case DECLARED_SKILL ->
+          toSearchResults(
+              declaredSkillProgressService.searchDeclaredSkill(keyword, pageCriteria),
+              associatedIds,
+              AvenirsBaseModel::getId,
+              declaredSkillProgress -> declaredSkillProgress.getSkill().getLibelle(),
+              declaredSkillProgress -> declaredSkillProgress.getSkill().getType().name(),
+              declaredSkillProgress -> false);
+      case DECLARED_EXPERIENCE ->
+          toSearchResults(
+              declaredExperienceService.search(keyword, pageCriteria),
+              associatedIds,
+              AvenirsBaseModel::getId,
+              DeclaredExperience::getTitle,
+              declaredExperience ->
+                  declaredExperience.getExperienceType() != null
+                      ? declaredExperience.getExperienceType().name()
+                      : null,
+              declaredExperience -> false);
+    };
+  }
+
+  @Override
   public void deleteAllByIds(List<UUID> ids) {
     var activities = associationRepository.findAllById(ids);
 
@@ -163,6 +232,27 @@ public class AssociationServiceImpl implements AssociationService {
     var associations =
         ids.stream().flatMap(id -> getAllOf(id, clazz, associationTypes).stream()).toList();
     deleteAllByIds(associations.stream().map(Association::getId).toList());
+  }
+
+  private <T> PagedResult<AssociationSearchResultData> toSearchResults(
+      PagedResult<T> searchResults,
+      Set<UUID> associatedIds,
+      Function<T, UUID> idExtractor,
+      Function<T, String> titleExtractor,
+      Function<T, String> categoryExtractor,
+      Predicate<T> disabledCondition) {
+    return new PagedResult<>(
+        searchResults.content().stream()
+            .map(
+                element ->
+                    new AssociationSearchResultData(
+                        idExtractor.apply(element),
+                        titleExtractor.apply(element),
+                        categoryExtractor.apply(element),
+                        associatedIds.contains(idExtractor.apply(element))
+                            || disabledCondition.test(element)))
+            .toList(),
+        searchResults.pageInfo());
   }
 
   private AssociationData associationDataOf(

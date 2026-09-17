@@ -25,16 +25,13 @@ import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityAssociationData;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
-import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociatedElementsData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
-import fr.avenirsesr.portfolio.student.association.domain.service.AssociationSearchHelper;
 import fr.avenirsesr.portfolio.student.experience.domain.data.DeclaredExperienceAssociationData;
 import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperience;
-import fr.avenirsesr.portfolio.student.experience.domain.port.input.DeclaredExperienceService;
 import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillAssociationCount;
 import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillAssociationsData;
 import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillProgressData;
@@ -51,7 +48,6 @@ import fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.client.Exter
 import fr.avenirsesr.portfolio.student.skill.infrastructure.fixture.DeclaredSkillProgressFixture;
 import fr.avenirsesr.portfolio.student.trace.domain.data.TraceAssociationData;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
-import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.student.trace.infrastructure.fixture.TraceFixture;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
@@ -68,15 +64,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 public class DeclaredSkillProgressServiceImplTest {
-  @Mock private TraceService traceService;
   @Mock private DeclaredSkillSyncService declaredSkillSyncService;
   @Mock private DeclaredSkillProgressRepository declaredSkillProgressRepository;
   @Mock private ExternalSkillClient externalSkillClient;
   @Mock private LoggedInUserService loggedInUserService;
-  @Mock private DeclaredActivityService declaredActivityService;
   @Mock private AssociationService associationService;
-  @Mock private AssociationSearchHelper associationSearchHelper;
-  @Mock private DeclaredExperienceService declaredExperienceService;
   @InjectMocks private DeclaredSkillProgressServiceImpl declaredSkillProgressService;
   private static final String CHARSET =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -632,7 +624,6 @@ public class DeclaredSkillProgressServiceImplTest {
     class WhenGettingAssociations {
 
       @Mock private AssociationService associationService;
-      @Mock private AssociationSearchHelper associationSearchHelper;
 
       @BeforeEach
       void setUp() {
@@ -642,8 +633,7 @@ public class DeclaredSkillProgressServiceImplTest {
                 declaredSkillProgressRepository,
                 externalSkillClient,
                 loggedInUserService,
-                associationService,
-                associationSearchHelper);
+                associationService);
       }
 
       @Test
@@ -836,99 +826,81 @@ public class DeclaredSkillProgressServiceImplTest {
   }
 
   @Test
-  void searchDeclaredSkillsForAssociation_should_use_TRACE_DECLARED_SKILL_when_context_is_Trace() {
-    UUID contextId = randomUUID();
+  void searchForAssociation_should_search_the_elements_of_the_given_context() {
+    BddLogger.given("a declared skill owned by the logged-in student");
+
+    DeclaredSkillProgress declaredSkillProgress = buildDeclaredSkillProgress();
     PageCriteria pageCriteria = new PageCriteria(0, 10);
-    PagedResult<DeclaredSkillProgress> skillSearch =
-        new PagedResult<>(List.of(), new PageInfo(0, 10, 0));
-
-    when(declaredSkillProgressRepository.findAllByStudent(
-            eq(student),
-            eq(pageCriteria),
-            eq("kw"),
-            eq(new SortCriteria(ESortField.NAME, ESortOrder.ASC))))
-        .thenReturn(skillSearch);
-
     PagedResult<AssociationSearchResultData> expected =
         new PagedResult<>(List.of(), new PageInfo(0, 10, 0));
-    when(associationSearchHelper.searchForAssociation(
-            eq(contextId),
-            eq(Trace.class),
-            eq(EAssociationType.TRACE_DECLARED_SKILL),
-            any(),
-            eq(skillSearch),
-            any(),
-            any(),
-            any(),
-            any()))
+
+    when(declaredSkillProgressRepository.findById(declaredSkillProgress.getId()))
+        .thenReturn(Optional.of(declaredSkillProgress));
+    when(associationService.searchForAssociation(
+            declaredSkillProgress.getId(),
+            DeclaredSkillProgress.class,
+            EAssociationContextType.TRACE,
+            "kw",
+            pageCriteria))
         .thenReturn(expected);
 
+    BddLogger.when("searchForAssociation is called with the TRACE context");
+
     var result =
-        declaredSkillProgressService.searchDeclaredSkillsForAssociation(
-            contextId, EAssociationContextType.TRACE, "kw", pageCriteria);
+        declaredSkillProgressService.searchForAssociation(
+            declaredSkillProgress.getId(), EAssociationContextType.TRACE, "kw", pageCriteria);
+
+    BddLogger.then("it should return the results of the association service");
 
     assertThat(result).isSameAs(expected);
   }
 
   @Test
-  void
-      searchDeclaredSkillsForAssociation_should_use_DECLARED_ACTIVITY_DECLARED_SKILL_when_context_is_Activity() {
-    UUID contextId = randomUUID();
-    PageCriteria pageCriteria = new PageCriteria(0, 10);
-    PagedResult<DeclaredSkillProgress> skillSearch =
-        new PagedResult<>(List.of(), new PageInfo(0, 10, 0));
+  void searchForAssociation_should_throw_DeclaredSkillProgressNotFoundException_when_not_found() {
+    BddLogger.given("a non-existing declared skill");
 
-    when(declaredSkillProgressRepository.findAllByStudent(
-            eq(student),
-            eq(pageCriteria),
-            eq("kw"),
-            eq(new SortCriteria(ESortField.NAME, ESortOrder.ASC))))
-        .thenReturn(skillSearch);
+    UUID declaredSkillId = randomUUID();
 
-    PagedResult<AssociationSearchResultData> expected =
-        new PagedResult<>(List.of(), new PageInfo(0, 10, 0));
-    when(associationSearchHelper.searchForAssociation(
-            eq(contextId),
-            eq(DeclaredActivity.class),
-            eq(EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL),
-            any(),
-            eq(skillSearch),
-            any(),
-            any(),
-            any(),
-            any()))
-        .thenReturn(expected);
+    when(declaredSkillProgressRepository.findById(declaredSkillId)).thenReturn(Optional.empty());
 
-    var result =
-        declaredSkillProgressService.searchDeclaredSkillsForAssociation(
-            contextId, EAssociationContextType.DECLARED_ACTIVITY, "kw", pageCriteria);
+    BddLogger.when("searchForAssociation is called");
 
-    assertThat(result).isSameAs(expected);
+    BddLogger.then("it should throw DeclaredSkillProgressNotFoundException");
+
+    assertThrows(
+        DeclaredSkillProgressNotFoundException.class,
+        () ->
+            declaredSkillProgressService.searchForAssociation(
+                declaredSkillId, EAssociationContextType.TRACE, "kw", new PageCriteria(0, 10)));
+
+    verifyNoInteractions(associationService);
   }
 
   @Test
-  void searchDeclaredSkillsForAssociation_should_pass_nulls_when_context_class_unknown() {
-    PageCriteria pageCriteria = new PageCriteria(0, 10);
-    PagedResult<DeclaredSkillProgress> skillSearch =
-        new PagedResult<>(List.of(), new PageInfo(0, 10, 0));
+  void searchForAssociation_should_throw_UserNotAuthorizedException_when_not_owner() {
+    BddLogger.given("a declared skill belonging to another student");
 
-    when(declaredSkillProgressRepository.findAllByStudent(
-            eq(student),
-            eq(pageCriteria),
-            eq("kw"),
-            eq(new SortCriteria(ESortField.NAME, ESortOrder.ASC))))
-        .thenReturn(skillSearch);
+    DeclaredSkillProgress declaredSkillProgress =
+        DeclaredSkillProgressFixture.create()
+            .withStudent(StudentFixture.create().toModel())
+            .toModel();
 
-    PagedResult<AssociationSearchResultData> expected =
-        new PagedResult<>(List.of(), new PageInfo(0, 10, 0));
-    when(associationSearchHelper.searchForAssociation(
-            eq(null), eq(null), eq(null), eq(null), eq(skillSearch), any(), any(), any(), any()))
-        .thenReturn(expected);
+    when(declaredSkillProgressRepository.findById(declaredSkillProgress.getId()))
+        .thenReturn(Optional.of(declaredSkillProgress));
 
-    var result =
-        declaredSkillProgressService.searchDeclaredSkillsForAssociation(
-            null, null, "kw", pageCriteria);
+    BddLogger.when("searchForAssociation is called");
 
-    assertThat(result).isSameAs(expected);
+    BddLogger.then("it should throw UserNotAuthorizedException");
+
+    assertThrows(
+        UserNotAuthorizedException.class,
+        () ->
+            declaredSkillProgressService.searchForAssociation(
+                declaredSkillProgress.getId(),
+                EAssociationContextType.TRACE,
+                "kw",
+                new PageCriteria(0, 10)));
+
+    verifyNoInteractions(associationService);
   }
 }

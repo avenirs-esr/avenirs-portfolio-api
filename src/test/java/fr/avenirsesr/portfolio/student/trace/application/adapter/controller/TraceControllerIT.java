@@ -38,22 +38,10 @@ class TraceControllerIT extends ContainerConfigurationTest {
   private static final String LOCKED_DECLARED_ACTIVITIES_BASE_PATH =
       BASE_PATH + "/locked-declared-activities";
 
-  private static final String SEARCH_ASSOCIATION_DECLARED_SKILL_BASE_PATH =
-      BASE_PATH + "/{traceId}/search-for-association/declared-skills";
-  private static final String SEARCH_ASSOCIATION_DECLARED_ACTIVITY_BASE_PATH =
-      BASE_PATH + "/{traceId}/search-for-association/declared-activities";
-  private static final String SEARCH_ASSOCIATION_DECLARED_EXPERIENCE_BASE_PATH =
-      BASE_PATH + "/{traceId}/search-for-association/declared-experiences";
-  private static final String SEARCH_TRACES_FOR_ASSOCIATION_BASE_PATH =
-      BASE_PATH + "/search-for-association";
+  private static final String SEARCH_FOR_ASSOCIATION_BASE_PATH =
+      BASE_PATH + "/{traceId}/search-for-association";
 
   private static final String DECLARED_EXPERIENCE_VIEW_URL = "/me/declared/experiences/view";
-  private static final UUID DECLARED_EXPERIENCE_WITH_ASSOCIATED_TRACE_ID =
-      UUID.fromString("a12fb8b6-b24c-4858-ad67-c6c6c7e0e97a");
-  private static final UUID TRACE_ASSOCIATED_WITH_DECLARED_EXPERIENCE_ID =
-      UUID.fromString("f3d22e78-e827-4bae-8831-44168c176198");
-  private static final String TRACE_ASSOCIATED_WITH_DECLARED_EXPERIENCE_TITLE =
-      "Rapport de stage – Analyse organisationnelle";
 
   @Autowired private WebTestClient webTestClient;
   @Autowired private ObjectMapper objectMapper;
@@ -121,7 +109,8 @@ class TraceControllerIT extends ContainerConfigurationTest {
             .uri(
                 uriBuilder ->
                     uriBuilder
-                        .path(SEARCH_ASSOCIATION_DECLARED_SKILL_BASE_PATH)
+                        .path(SEARCH_FOR_ASSOCIATION_BASE_PATH)
+                        .queryParam("contextType", "DECLARED_SKILL")
                         .queryParam("page", "0")
                         .queryParam("pageSize", "8")
                         .build(traceId))
@@ -153,7 +142,8 @@ class TraceControllerIT extends ContainerConfigurationTest {
             .uri(
                 uriBuilder ->
                     uriBuilder
-                        .path(SEARCH_ASSOCIATION_DECLARED_ACTIVITY_BASE_PATH)
+                        .path(SEARCH_FOR_ASSOCIATION_BASE_PATH)
+                        .queryParam("contextType", "DECLARED_ACTIVITY")
                         .queryParam("page", "0")
                         .queryParam("pageSize", "8")
                         .build(traceId))
@@ -567,120 +557,19 @@ class TraceControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldSearchTracesForAssociation() {
-    BddLogger.given("existing traces");
-
-    when("searching traces for association");
-
-    webTestClient
-        .get()
-        .uri(
-            uriBuilder ->
-                uriBuilder
-                    .path(SEARCH_TRACES_FOR_ASSOCIATION_BASE_PATH)
-                    .queryParam("page", "0")
-                    .queryParam("pageSize", "8")
-                    .build())
-        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
-        .accept(APPLICATION_JSON)
-        .exchange()
-        .expectStatus()
-        .isOk()
-        .expectBody()
-        .jsonPath("$.data")
-        .isArray()
-        .jsonPath("$.data[0].id")
-        .exists()
-        .jsonPath("$.data[0].title")
-        .exists()
-        .jsonPath("$.data[0].disabled")
-        .exists()
-        .jsonPath("$.page.page")
-        .isEqualTo(0)
-        .jsonPath("$.page.pageSize")
-        .isEqualTo(8);
-
-    BddLogger.then("it should return paged trace results with correct structure");
-  }
-
-  @Test
-  void shouldSearchTracesForAssociationWithKeyword() {
-    BddLogger.given("existing traces and a keyword");
-
-    when("searching traces with a keyword that matches nothing");
-
-    webTestClient
-        .get()
-        .uri(
-            uriBuilder ->
-                uriBuilder
-                    .path(SEARCH_TRACES_FOR_ASSOCIATION_BASE_PATH)
-                    .queryParam("keyword", "zzzzzznonexistent")
-                    .queryParam("page", "0")
-                    .queryParam("pageSize", "8")
-                    .build())
-        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
-        .accept(APPLICATION_JSON)
-        .exchange()
-        .expectStatus()
-        .isOk()
-        .expectBody()
-        .jsonPath("$.data")
-        .isArray()
-        .jsonPath("$.data.length()")
-        .isEqualTo(0);
-
-    BddLogger.then("it should return empty results");
-  }
-
-  @Test
-  void shouldDisableTraceAlreadyAssociatedWithDeclaredExperience() {
-    BddLogger.given("a seeded trace already associated with a declared experience");
-
-    when("searching traces for association in declared experience context");
-
-    webTestClient
-        .get()
-        .uri(
-            uriBuilder ->
-                uriBuilder
-                    .path(SEARCH_TRACES_FOR_ASSOCIATION_BASE_PATH)
-                    .queryParam("contextType", "DECLARED_EXPERIENCE")
-                    .queryParam(
-                        "excludeAssociatedWithElementId",
-                        DECLARED_EXPERIENCE_WITH_ASSOCIATED_TRACE_ID.toString())
-                    .queryParam("keyword", TRACE_ASSOCIATED_WITH_DECLARED_EXPERIENCE_TITLE)
-                    .queryParam("page", "0")
-                    .queryParam("pageSize", "8")
-                    .build())
-        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
-        .accept(APPLICATION_JSON)
-        .exchange()
-        .expectStatus()
-        .isOk()
-        .expectBody()
-        .jsonPath("$.data.length()")
-        .isEqualTo(1)
-        .jsonPath("$.data[0].id")
-        .isEqualTo(TRACE_ASSOCIATED_WITH_DECLARED_EXPERIENCE_ID.toString())
-        .jsonPath("$.data[0].disabled")
-        .isEqualTo(true);
-
-    BddLogger.then("it should return the already associated trace disabled");
-  }
-
-  @Test
-  void shouldReturn403WhenSearchingTracesForAssociationWithoutPermission() {
+  void shouldReturn403WhenSearchingForAssociationWithoutPermission() {
     BddLogger.given("an authenticated user without the trace association permission");
 
-    when("searching traces for association");
+    when("searching declared skills for association");
 
     webTestClient
         .get()
-        .uri(SEARCH_TRACES_FOR_ASSOCIATION_BASE_PATH)
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(SEARCH_FOR_ASSOCIATION_BASE_PATH)
+                    .queryParam("contextType", "DECLARED_SKILL")
+                    .build(UUID.randomUUID()))
         .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, noPermissionPayload)
         .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, noPermissionSignature)
         .accept(APPLICATION_JSON)
@@ -703,7 +592,8 @@ class TraceControllerIT extends ContainerConfigurationTest {
         .uri(
             uriBuilder ->
                 uriBuilder
-                    .path(SEARCH_ASSOCIATION_DECLARED_ACTIVITY_BASE_PATH)
+                    .path(SEARCH_FOR_ASSOCIATION_BASE_PATH)
+                    .queryParam("contextType", "DECLARED_ACTIVITY")
                     .queryParam("page", "0")
                     .queryParam("pageSize", "8")
                     .build(traceId))
@@ -720,7 +610,7 @@ class TraceControllerIT extends ContainerConfigurationTest {
         .exists()
         .jsonPath("$.data[0].title")
         .exists()
-        .jsonPath("$.data[0].thematic")
+        .jsonPath("$.data[0].category")
         .exists()
         .jsonPath("$.data[0].disabled")
         .exists()
@@ -744,7 +634,8 @@ class TraceControllerIT extends ContainerConfigurationTest {
         .uri(
             uriBuilder ->
                 uriBuilder
-                    .path(SEARCH_ASSOCIATION_DECLARED_ACTIVITY_BASE_PATH)
+                    .path(SEARCH_FOR_ASSOCIATION_BASE_PATH)
+                    .queryParam("contextType", "DECLARED_ACTIVITY")
                     .queryParam("keyword", "zzzzzznonexistent")
                     .queryParam("page", "0")
                     .queryParam("pageSize", "8")
@@ -776,7 +667,8 @@ class TraceControllerIT extends ContainerConfigurationTest {
         .uri(
             uriBuilder ->
                 uriBuilder
-                    .path(SEARCH_ASSOCIATION_DECLARED_ACTIVITY_BASE_PATH)
+                    .path(SEARCH_FOR_ASSOCIATION_BASE_PATH)
+                    .queryParam("contextType", "DECLARED_ACTIVITY")
                     .queryParam("page", "0")
                     .queryParam("pageSize", "8")
                     .build(nonExistentTraceId))
@@ -802,7 +694,8 @@ class TraceControllerIT extends ContainerConfigurationTest {
         .uri(
             uriBuilder ->
                 uriBuilder
-                    .path(SEARCH_ASSOCIATION_DECLARED_SKILL_BASE_PATH)
+                    .path(SEARCH_FOR_ASSOCIATION_BASE_PATH)
+                    .queryParam("contextType", "DECLARED_SKILL")
                     .queryParam("page", "0")
                     .queryParam("pageSize", "8")
                     .build(traceId))
@@ -819,7 +712,7 @@ class TraceControllerIT extends ContainerConfigurationTest {
         .exists()
         .jsonPath("$.data[0].title")
         .exists()
-        .jsonPath("$.data[0].type")
+        .jsonPath("$.data[0].category")
         .exists()
         .jsonPath("$.data[0].disabled")
         .exists()
@@ -843,7 +736,8 @@ class TraceControllerIT extends ContainerConfigurationTest {
         .uri(
             uriBuilder ->
                 uriBuilder
-                    .path(SEARCH_ASSOCIATION_DECLARED_SKILL_BASE_PATH)
+                    .path(SEARCH_FOR_ASSOCIATION_BASE_PATH)
+                    .queryParam("contextType", "DECLARED_SKILL")
                     .queryParam("page", "0")
                     .queryParam("pageSize", "8")
                     .build(nonExistentTraceId))
@@ -944,7 +838,8 @@ class TraceControllerIT extends ContainerConfigurationTest {
         .uri(
             uriBuilder ->
                 uriBuilder
-                    .path(SEARCH_ASSOCIATION_DECLARED_EXPERIENCE_BASE_PATH)
+                    .path(SEARCH_FOR_ASSOCIATION_BASE_PATH)
+                    .queryParam("contextType", "DECLARED_EXPERIENCE")
                     .queryParam("page", "0")
                     .queryParam("pageSize", "8")
                     .build(traceId))
@@ -961,7 +856,7 @@ class TraceControllerIT extends ContainerConfigurationTest {
         .exists()
         .jsonPath("$.data[0].title")
         .exists()
-        .jsonPath("$.data[0].experienceType")
+        .jsonPath("$.data[0].category")
         .exists()
         .jsonPath("$.data[0].disabled")
         .exists()
@@ -985,7 +880,8 @@ class TraceControllerIT extends ContainerConfigurationTest {
         .uri(
             uriBuilder ->
                 uriBuilder
-                    .path(SEARCH_ASSOCIATION_DECLARED_EXPERIENCE_BASE_PATH)
+                    .path(SEARCH_FOR_ASSOCIATION_BASE_PATH)
+                    .queryParam("contextType", "DECLARED_EXPERIENCE")
                     .queryParam("keyword", "zzzzzznonexistent")
                     .queryParam("page", "0")
                     .queryParam("pageSize", "8")
@@ -1017,7 +913,8 @@ class TraceControllerIT extends ContainerConfigurationTest {
         .uri(
             uriBuilder ->
                 uriBuilder
-                    .path(SEARCH_ASSOCIATION_DECLARED_EXPERIENCE_BASE_PATH)
+                    .path(SEARCH_FOR_ASSOCIATION_BASE_PATH)
+                    .queryParam("contextType", "DECLARED_EXPERIENCE")
                     .queryParam("page", "0")
                     .queryParam("pageSize", "8")
                     .build(nonExistentTraceId))

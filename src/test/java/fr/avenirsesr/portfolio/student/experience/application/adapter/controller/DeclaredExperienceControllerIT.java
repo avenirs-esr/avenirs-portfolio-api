@@ -2015,7 +2015,8 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .uri(
             uriBuilder ->
                 uriBuilder
-                    .path(BASE_PATH + "/" + experienceId + "/search-for-association/traces")
+                    .path(BASE_PATH + "/" + experienceId + "/search-for-association")
+                    .queryParam("contextType", "TRACE")
                     .queryParam("page", "0")
                     .queryParam("pageSize", "8")
                     .build())
@@ -2055,7 +2056,8 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .uri(
             uriBuilder ->
                 uriBuilder
-                    .path(BASE_PATH + "/" + experienceId + "/search-for-association/traces")
+                    .path(BASE_PATH + "/" + experienceId + "/search-for-association")
+                    .queryParam("contextType", "TRACE")
                     .queryParam("keyword", "zzzzzznonexistent")
                     .queryParam("page", "0")
                     .queryParam("pageSize", "8")
@@ -2090,7 +2092,8 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .uri(
             uriBuilder ->
                 uriBuilder
-                    .path(BASE_PATH + "/" + experienceId + "/search-for-association/traces")
+                    .path(BASE_PATH + "/" + experienceId + "/search-for-association")
+                    .queryParam("contextType", "TRACE")
                     .queryParam("keyword", "Trace already associated for search")
                     .queryParam("page", "0")
                     .queryParam("pageSize", "8")
@@ -2121,10 +2124,8 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
             uriBuilder ->
                 uriBuilder
                     .path(
-                        BASE_PATH
-                            + "/"
-                            + notFoundDeclaredExperienceId
-                            + "/search-for-association/traces")
+                        BASE_PATH + "/" + notFoundDeclaredExperienceId + "/search-for-association")
+                    .queryParam("contextType", "TRACE")
                     .queryParam("page", "0")
                     .queryParam("pageSize", "8")
                     .build())
@@ -2150,7 +2151,8 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .uri(
             uriBuilder ->
                 uriBuilder
-                    .path(BASE_PATH + "/" + experienceId + "/search-for-association/traces")
+                    .path(BASE_PATH + "/" + experienceId + "/search-for-association")
+                    .queryParam("contextType", "TRACE")
                     .queryParam("page", "0")
                     .queryParam("pageSize", "8")
                     .build())

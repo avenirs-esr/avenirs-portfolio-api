@@ -240,7 +240,8 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .uri(
             uriBuilder ->
                 uriBuilder
-                    .path(BASE_PATH + "/" + notFoundId + "/search-for-association/traces")
+                    .path(BASE_PATH + "/" + notFoundId + "/search-for-association")
+                    .queryParam("contextType", "TRACE")
                     .queryParam("page", "0")
                     .queryParam("pageSize", "8")
                     .build())
@@ -265,7 +266,8 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .uri(
             uriBuilder ->
                 uriBuilder
-                    .path(BASE_PATH + "/" + id + "/search-for-association/traces")
+                    .path(BASE_PATH + "/" + id + "/search-for-association")
+                    .queryParam("contextType", "TRACE")
                     .queryParam("page", "0")
                     .queryParam("pageSize", "8")
                     .build())

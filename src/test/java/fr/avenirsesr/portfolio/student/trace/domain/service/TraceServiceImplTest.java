@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doThrow;
@@ -45,11 +44,6 @@ import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
-import fr.avenirsesr.portfolio.student.association.domain.service.AssociationSearchHelper;
-import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperience;
-import fr.avenirsesr.portfolio.student.experience.domain.port.input.DeclaredExperienceService;
-import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
-import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.student.trace.domain.data.TraceAssociationsData;
 import fr.avenirsesr.portfolio.student.trace.domain.data.TraceDetailData;
 import fr.avenirsesr.portfolio.student.trace.domain.data.TraceLockedDeclaredActivitiesData;
@@ -92,12 +86,9 @@ class TraceServiceImplTest {
   @Mock private TraceRepository traceRepository;
   @Mock private StudentService studentService;
   @Mock private DeclaredActivityService declaredActivityService;
-  @Mock private DeclaredSkillProgressService declaredSkillProgressService;
-  @Mock private DeclaredExperienceService declaredExperienceService;
   @Mock private TraceConfigurationClient traceConfigurationClient;
   @Mock private LoggedInUserService loggedInUserService;
   @Mock private AssociationService associationService;
-  @Mock private AssociationSearchHelper associationSearchHelper;
   @Mock private FeedbackService feedbackService;
   @Mock private FileResourceService fileResourceService;
 
@@ -262,315 +253,79 @@ class TraceServiceImplTest {
     }
 
     @Nested
-    class WhenSearchingTracesForAssociation {
+    class WhenSearchingForAssociation {
 
       @Test
-      void thenItShouldSearchTracesWithoutDisabledAssociationsWhenContextIsNull() {
-        BddLogger.when("searching traces for association without context");
+      void thenItShouldSearchTheElementsOfTheGivenContext() {
+        BddLogger.when("searching declared activities for association with a trace");
 
-        Trace trace = TraceFixture.create().withStudent(student).toModel();
+        UUID traceId = UUID.randomUUID();
         var pageCriteria = new PageCriteria(0, 8);
-        var sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.DESC);
+        Trace trace = TraceFixture.create().withStudent(student).withId(traceId).toModel();
         PagedResult<AssociationSearchResultData> expected =
-            new PagedResult<>(
-                List.of(
-                    new AssociationSearchResultData(trace.getId(), trace.getTitle(), null, false)),
-                new PageInfo(0, 8, 1));
+            new PagedResult<>(List.of(), new PageInfo(0, 8, 0));
 
-        when(traceRepository.findAll(
-                eq(student),
-                anyString(),
-                any(TraceFilter.class),
-                isNull(),
-                eq(pageCriteria),
-                eq(sortCriteria)))
-            .thenReturn(new PagedResult<>(List.of(trace), new PageInfo(0, 8, 1)));
-        when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
-        when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
-        when(associationSearchHelper.searchForAssociation(
-                isNull(), isNull(), isNull(), isNull(), any(), any(), any(), isNull(), any()))
+        when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
+        when(associationService.searchForAssociation(
+                traceId,
+                Trace.class,
+                EAssociationContextType.DECLARED_ACTIVITY,
+                "kw",
+                pageCriteria))
             .thenReturn(expected);
 
         PagedResult<AssociationSearchResultData> result =
-            traceService.searchTracesForAssociation(null, null, null, "kw", pageCriteria);
+            traceService.searchForAssociation(
+                traceId, EAssociationContextType.DECLARED_ACTIVITY, "kw", pageCriteria);
 
-        BddLogger.then("it should return the helper results");
+        BddLogger.then("it should return the results of the association service");
+
         assertSame(expected, result);
-        verify(traceRepository)
-            .findAll(
-                eq(student),
-                eq("kw"),
-                eq(new TraceFilter(null, null, null, null)),
-                isNull(),
-                eq(pageCriteria),
-                eq(sortCriteria));
-        verify(associationSearchHelper)
-            .searchForAssociation(
-                isNull(), isNull(), isNull(), isNull(), any(), any(), any(), isNull(), any());
       }
 
       @Test
-      void thenItShouldUseDeclaredActivityAssociationTypeWhenContextIsDeclaredActivity() {
-        BddLogger.when("searching traces for association with declared activity context");
+      void thenItShouldThrowTraceNotFoundWhenTraceDoesNotExist() {
+        BddLogger.when("searching for association with an unknown trace");
 
-        UUID contextId = UUID.randomUUID();
-        Trace trace = TraceFixture.create().withStudent(student).toModel();
+        UUID traceId = UUID.randomUUID();
         var pageCriteria = new PageCriteria(0, 8);
-        var sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.DESC);
-        PagedResult<AssociationSearchResultData> expected =
-            new PagedResult<>(
-                List.of(
-                    new AssociationSearchResultData(trace.getId(), trace.getTitle(), null, false)),
-                new PageInfo(0, 8, 1));
 
-        when(traceRepository.findAll(
-                eq(student),
-                anyString(),
-                any(TraceFilter.class),
-                isNull(),
-                eq(pageCriteria),
-                eq(sortCriteria)))
-            .thenReturn(new PagedResult<>(List.of(trace), new PageInfo(0, 8, 1)));
-        when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
-        when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
-        when(associationSearchHelper.searchForAssociation(
-                eq(contextId),
-                eq(DeclaredActivity.class),
-                eq(EAssociationType.DECLARED_ACTIVITY_TRACE),
-                any(),
-                any(),
-                any(),
-                any(),
-                isNull(),
-                any()))
-            .thenReturn(expected);
+        when(traceRepository.findById(traceId)).thenReturn(Optional.empty());
 
-        PagedResult<AssociationSearchResultData> result =
-            traceService.searchTracesForAssociation(
-                contextId, EAssociationContextType.DECLARED_ACTIVITY, null, "kw", pageCriteria);
-
-        BddLogger.then("it should use the declared activity trace association type");
-        assertSame(expected, result);
-        verify(associationSearchHelper)
-            .searchForAssociation(
-                eq(contextId),
-                eq(DeclaredActivity.class),
-                eq(EAssociationType.DECLARED_ACTIVITY_TRACE),
-                any(),
-                any(),
-                any(),
-                any(),
-                isNull(),
-                any());
-      }
-
-      @Test
-      void thenItShouldUseTraceDeclaredExperienceAssociationTypeWhenContextIsDeclaredExperience() {
-        BddLogger.when("searching traces for association with declared experience context");
-
-        UUID contextId = UUID.randomUUID();
-        Trace trace = TraceFixture.create().withStudent(student).toModel();
-        var pageCriteria = new PageCriteria(0, 8);
-        var sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.DESC);
-        PagedResult<AssociationSearchResultData> expected =
-            new PagedResult<>(
-                List.of(
-                    new AssociationSearchResultData(trace.getId(), trace.getTitle(), null, false)),
-                new PageInfo(0, 8, 1));
-
-        when(traceRepository.findAll(
-                eq(student),
-                anyString(),
-                any(TraceFilter.class),
-                isNull(),
-                eq(pageCriteria),
-                eq(sortCriteria)))
-            .thenReturn(new PagedResult<>(List.of(trace), new PageInfo(0, 8, 1)));
-        when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
-        when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
-        when(associationSearchHelper.searchForAssociation(
-                eq(contextId),
-                eq(DeclaredExperience.class),
-                eq(EAssociationType.TRACE_DECLARED_EXPERIENCE),
-                any(),
-                any(),
-                any(),
-                any(),
-                isNull(),
-                any()))
-            .thenReturn(expected);
-
-        PagedResult<AssociationSearchResultData> result =
-            traceService.searchTracesForAssociation(
-                contextId, EAssociationContextType.DECLARED_EXPERIENCE, null, "kw", pageCriteria);
-
-        BddLogger.then("it should use the trace declared experience association type");
-        assertSame(expected, result);
-        verify(associationSearchHelper)
-            .searchForAssociation(
-                eq(contextId),
-                eq(DeclaredExperience.class),
-                eq(EAssociationType.TRACE_DECLARED_EXPERIENCE),
-                any(),
-                any(),
-                any(),
-                any(),
-                isNull(),
-                any());
-      }
-
-      @Test
-      void thenItShouldUseTraceDeclaredSkillAssociationTypeWhenContextIsDeclaredSkill() {
-        BddLogger.when("searching traces for association with declared skill context");
-
-        UUID contextId = UUID.randomUUID();
-        Trace trace = TraceFixture.create().withStudent(student).toModel();
-        var pageCriteria = new PageCriteria(0, 8);
-        var sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.DESC);
-        PagedResult<AssociationSearchResultData> expected =
-            new PagedResult<>(
-                List.of(
-                    new AssociationSearchResultData(trace.getId(), trace.getTitle(), null, false)),
-                new PageInfo(0, 8, 1));
-
-        when(traceRepository.findAll(
-                eq(student),
-                anyString(),
-                any(TraceFilter.class),
-                isNull(),
-                eq(pageCriteria),
-                eq(sortCriteria)))
-            .thenReturn(new PagedResult<>(List.of(trace), new PageInfo(0, 8, 1)));
-        when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
-        when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
-        when(associationSearchHelper.searchForAssociation(
-                eq(contextId),
-                eq(DeclaredSkillProgress.class),
-                eq(EAssociationType.TRACE_DECLARED_SKILL),
-                any(),
-                any(),
-                any(),
-                any(),
-                isNull(),
-                any()))
-            .thenReturn(expected);
-
-        PagedResult<AssociationSearchResultData> result =
-            traceService.searchTracesForAssociation(
-                contextId, EAssociationContextType.DECLARED_SKILL, null, "kw", pageCriteria);
-
-        BddLogger.then("it should use the trace declared skill association type");
-        assertSame(expected, result);
-        verify(associationSearchHelper)
-            .searchForAssociation(
-                eq(contextId),
-                eq(DeclaredSkillProgress.class),
-                eq(EAssociationType.TRACE_DECLARED_SKILL),
-                any(),
-                any(),
-                any(),
-                any(),
-                isNull(),
-                any());
-      }
-
-      @Test
-      void thenItShouldThrowUnsupportedOperationExceptionWhenContextIsTrace() {
         assertThrows(
-            UnsupportedOperationException.class,
+            TraceNotFoundException.class,
             () ->
-                traceService.searchTracesForAssociation(
-                    UUID.randomUUID(),
-                    EAssociationContextType.TRACE,
-                    null,
-                    "kw",
-                    new PageCriteria(0, 8)));
+                traceService.searchForAssociation(
+                    traceId, EAssociationContextType.DECLARED_ACTIVITY, "kw", pageCriteria));
+
+        BddLogger.then("it should throw TraceNotFoundException");
+
+        verifyNoInteractions(associationService);
       }
 
       @Test
-      void thenItShouldSearchOnlyAssociatedTracesWhenIsAssociatedIsTrue() {
-        BddLogger.when("searching only associated traces");
+      void thenItShouldThrowTraceNotFoundWhenTraceBelongsToAnotherStudent() {
+        BddLogger.when("searching for association with a trace of another student");
 
-        Trace trace = TraceFixture.create().withStudent(student).toModel();
+        UUID traceId = UUID.randomUUID();
         var pageCriteria = new PageCriteria(0, 8);
-        var sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.DESC);
-        PagedResult<AssociationSearchResultData> expected =
-            new PagedResult<>(
-                List.of(
-                    new AssociationSearchResultData(trace.getId(), trace.getTitle(), null, false)),
-                new PageInfo(0, 8, 1));
+        Trace trace =
+            TraceFixture.create()
+                .withStudent(StudentFixture.create().toModel())
+                .withId(traceId)
+                .toModel();
 
-        when(traceRepository.findAll(
-                eq(student),
-                anyString(),
-                any(TraceFilter.class),
-                isNull(),
-                eq(pageCriteria),
-                eq(sortCriteria)))
-            .thenReturn(new PagedResult<>(List.of(trace), new PageInfo(0, 8, 1)));
-        when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
-        when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, true));
-        when(associationSearchHelper.searchForAssociation(
-                isNull(), isNull(), isNull(), isNull(), any(), any(), any(), isNull(), any()))
-            .thenReturn(expected);
+        when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
 
-        PagedResult<AssociationSearchResultData> result =
-            traceService.searchTracesForAssociation(null, null, true, "kw", pageCriteria);
+        assertThrows(
+            TraceNotFoundException.class,
+            () ->
+                traceService.searchForAssociation(
+                    traceId, EAssociationContextType.DECLARED_ACTIVITY, "kw", pageCriteria));
 
-        BddLogger.then("it should return only associated traces");
+        BddLogger.then("it should throw TraceNotFoundException");
 
-        assertSame(expected, result);
-        verify(traceRepository)
-            .findAll(
-                eq(student),
-                eq("kw"),
-                eq(new TraceFilter(true, null, null, null)),
-                isNull(),
-                eq(pageCriteria),
-                eq(sortCriteria));
-      }
-
-      @Test
-      void thenItShouldSearchOnlyUnassociatedTracesWhenIsAssociatedIsFalse() {
-        BddLogger.when("searching only unassociated traces");
-
-        Trace trace = TraceFixture.create().withStudent(student).toModel();
-        var pageCriteria = new PageCriteria(0, 8);
-        var sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.DESC);
-        PagedResult<AssociationSearchResultData> expected =
-            new PagedResult<>(
-                List.of(
-                    new AssociationSearchResultData(trace.getId(), trace.getTitle(), null, false)),
-                new PageInfo(0, 8, 1));
-
-        when(traceRepository.findAll(
-                eq(student),
-                anyString(),
-                any(TraceFilter.class),
-                isNull(),
-                eq(pageCriteria),
-                eq(sortCriteria)))
-            .thenReturn(new PagedResult<>(List.of(trace), new PageInfo(0, 8, 1)));
-        when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
-        when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
-        when(associationSearchHelper.searchForAssociation(
-                isNull(), isNull(), isNull(), isNull(), any(), any(), any(), isNull(), any()))
-            .thenReturn(expected);
-
-        PagedResult<AssociationSearchResultData> result =
-            traceService.searchTracesForAssociation(null, null, false, "kw", pageCriteria);
-
-        BddLogger.then("it should return only unassociated traces");
-
-        assertSame(expected, result);
-        verify(traceRepository)
-            .findAll(
-                eq(student),
-                eq("kw"),
-                eq(new TraceFilter(false, null, null, null)),
-                isNull(),
-                eq(pageCriteria),
-                eq(sortCriteria));
+        verifyNoInteractions(associationService);
       }
     }
 

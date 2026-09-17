@@ -84,4 +84,31 @@ class EAssociationTypeTest {
             DeclaredSkillProgress.class);
     assertEquals(skillProgressId, extractor.apply(association));
   }
+
+  @Test
+  void of_should_resolve_the_association_type_whatever_the_order_of_the_classes() {
+    BddLogger.given("the DeclaredExperience and DeclaredSkillProgress classes");
+
+    BddLogger.when("calling of");
+
+    BddLogger.then("it should return EXPERIENCE_DECLARED_SKILL for both orders");
+    assertEquals(
+        EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL,
+        EAssociationType.of(DeclaredExperience.class, DeclaredSkillProgress.class));
+    assertEquals(
+        EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL,
+        EAssociationType.of(DeclaredSkillProgress.class, DeclaredExperience.class));
+  }
+
+  @Test
+  void of_should_throw_when_the_classes_cannot_be_associated() {
+    BddLogger.given("two classes without association type");
+
+    BddLogger.when("calling of");
+
+    BddLogger.then("it should throw IllegalArgumentException");
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> EAssociationType.of(DeclaredExperience.class, DeclaredExperience.class));
+  }
 }

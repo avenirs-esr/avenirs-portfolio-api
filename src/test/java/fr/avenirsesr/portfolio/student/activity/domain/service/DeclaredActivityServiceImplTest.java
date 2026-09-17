@@ -40,14 +40,10 @@ import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
-import fr.avenirsesr.portfolio.student.association.domain.service.AssociationSearchHelper;
 import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillAssociationData;
 import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
-import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.student.trace.domain.data.TraceAssociationData;
-import fr.avenirsesr.portfolio.student.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
-import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.Duration;
@@ -70,9 +66,6 @@ class DeclaredActivityServiceImplTest {
   @Mock private ActivityService activityService;
 
   @Mock private AssociationService associationService;
-  @Mock private AssociationSearchHelper associationSearchHelper;
-  @Mock private TraceService traceService;
-  @Mock private DeclaredSkillProgressService declaredSkillProgressService;
   @Mock private LoggedInUserService loggedInUserService;
   @Mock private FeedbackRepository feedbackRepository;
   @Mock private FeedbackService feedbackService;
@@ -92,9 +85,7 @@ class DeclaredActivityServiceImplTest {
         new DeclaredActivityServiceImpl(
             declaredActivityRepository,
             activityService,
-            traceService,
             associationService,
-            associationSearchHelper,
             loggedInUserService,
             feedbackRepository,
             feedbackService);
@@ -885,97 +876,38 @@ class DeclaredActivityServiceImplTest {
   }
 
   @Test
-  void searchTracesForAssociation_should_return_traces_with_correct_disabled_status() {
-
-    BddLogger.given(
-        "A logged-in student, a declared activity owned by him, 2 already-associated traces and 1"
-            + " not");
+  void searchForAssociation_should_search_the_elements_of_the_given_context() {
+    BddLogger.given("A logged-in student and a declared activity owned by him");
 
     UUID declaredActivityId = UUID.randomUUID();
-    UUID traceId1 = UUID.randomUUID();
-    UUID traceId2 = UUID.randomUUID();
-    UUID traceId3 = UUID.randomUUID();
-
+    PageCriteria pageCriteria = new PageCriteria(0, 10);
     DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
+    PagedResult<AssociationSearchResultData> expected =
+        new PagedResult<>(List.of(), new PageInfo(0, 10, 0));
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
         .thenReturn(Optional.of(declaredActivity));
     when(declaredActivity.getStudent()).thenReturn(student);
+    when(associationService.searchForAssociation(
+            declaredActivityId,
+            DeclaredActivity.class,
+            EAssociationContextType.TRACE,
+            "kw",
+            pageCriteria))
+        .thenReturn(expected);
 
-    var pageInfo = new PageInfo(0, 10, 3);
-    var pageCriteria = new PageCriteria(0, 10);
+    BddLogger.when("searchForAssociation is called with the TRACE context");
+    var result =
+        service.searchForAssociation(
+            declaredActivityId, EAssociationContextType.TRACE, "kw", pageCriteria);
 
-    var expectedResults =
-        List.of(
-            new AssociationSearchResultData(traceId1, "Trace 1", null, true),
-            new AssociationSearchResultData(traceId2, "Trace 2", null, true),
-            new AssociationSearchResultData(traceId3, "Trace 3", null, false));
-
-    when(associationSearchHelper.searchForAssociation(
-            eq(declaredActivityId),
-            eq(DeclaredActivity.class),
-            eq(EAssociationType.DECLARED_ACTIVITY_TRACE),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any()))
-        .thenReturn(new PagedResult<>(expectedResults, pageInfo));
-
-    BddLogger.when("searchTracesForAssociation is called");
-    PagedResult<AssociationSearchResultData> result =
-        service.searchTracesForAssociation(declaredActivityId, "keyword", pageCriteria, null);
-
-    BddLogger.then("The result contains 3 items: 2 with disabled=true, 1 with disabled=false");
-    assertThat(result.content()).hasSize(3);
-    assertThat(result.pageInfo()).isEqualTo(pageInfo);
-    assertThat(result.content().get(0).disabled()).isTrue();
-    assertThat(result.content().get(1).disabled()).isTrue();
-    assertThat(result.content().get(2).disabled()).isFalse();
+    BddLogger.then("The results of the association service are returned");
+    assertThat(result).isSameAs(expected);
   }
 
   @Test
-  void searchTracesForAssociation_should_return_empty_result_when_no_traces() {
-
-    BddLogger.given("A logged-in student and a declared activity with no traces returned");
-
-    UUID declaredActivityId = UUID.randomUUID();
-    DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
-
-    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
-        .thenReturn(Optional.of(declaredActivity));
-    when(declaredActivity.getStudent()).thenReturn(student);
-
-    var pageInfo = new PageInfo(0, 10, 0);
-    var pageCriteria = new PageCriteria(0, 10);
-
-    when(associationSearchHelper.searchForAssociation(
-            eq(declaredActivityId),
-            eq(DeclaredActivity.class),
-            eq(EAssociationType.DECLARED_ACTIVITY_TRACE),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any()))
-        .thenReturn(new PagedResult<>(List.of(), pageInfo));
-
-    BddLogger.when("searchTracesForAssociation is called");
-    PagedResult<AssociationSearchResultData> result =
-        service.searchTracesForAssociation(declaredActivityId, null, pageCriteria, null);
-
-    BddLogger.then("The result is empty");
-    assertThat(result.content()).isEmpty();
-    assertThat(result.pageInfo()).isEqualTo(pageInfo);
-  }
-
-  @Test
-  void searchTracesForAssociation_should_throw_DeclaredActivityNotFoundException_when_not_found() {
-
+  void searchForAssociation_should_throw_DeclaredActivityNotFoundException_when_not_found() {
     BddLogger.given("A logged-in student and a non-existent declared activity");
 
     UUID declaredActivityId = UUID.randomUUID();
@@ -984,87 +916,46 @@ class DeclaredActivityServiceImplTest {
     when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
         .thenReturn(Optional.empty());
 
-    BddLogger.when("searchTracesForAssociation is called");
+    BddLogger.when("searchForAssociation is called");
 
     BddLogger.then("A DeclaredActivityNotFoundException is thrown");
     assertThatThrownBy(
             () ->
-                service.searchTracesForAssociation(
-                    declaredActivityId, null, new PageCriteria(0, 10), null))
+                service.searchForAssociation(
+                    declaredActivityId,
+                    EAssociationContextType.TRACE,
+                    null,
+                    new PageCriteria(0, 10)))
         .isInstanceOf(DeclaredActivityNotFoundException.class);
 
-    verify(traceService, never()).getTracesView(any(), any(), any(), any(), any());
+    verify(associationService, never()).searchForAssociation(any(), any(), any(), any(), any());
   }
 
   @Test
-  void
-      searchTracesForAssociation_should_throw_UserNotAuthorizedException_when_belonging_to_another_student() {
-
+  void searchForAssociation_should_throw_UserNotAuthorizedException_when_not_owner() {
     BddLogger.given("A logged-in student and a declared activity belonging to another student");
 
     UUID declaredActivityId = UUID.randomUUID();
-    Student anotherStudent = StudentFixture.create().toModel();
     DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
         .thenReturn(Optional.of(declaredActivity));
-    when(declaredActivity.getStudent()).thenReturn(anotherStudent);
+    when(declaredActivity.getStudent()).thenReturn(StudentFixture.create().toModel());
 
-    BddLogger.when("searchTracesForAssociation is called");
+    BddLogger.when("searchForAssociation is called");
 
     BddLogger.then("A UserNotAuthorizedException is thrown");
     assertThatThrownBy(
             () ->
-                service.searchTracesForAssociation(
-                    declaredActivityId, null, new PageCriteria(0, 10), null))
+                service.searchForAssociation(
+                    declaredActivityId,
+                    EAssociationContextType.TRACE,
+                    null,
+                    new PageCriteria(0, 10)))
         .isInstanceOf(UserNotAuthorizedException.class);
 
-    verify(traceService, never()).getTracesView(any(), any(), any(), any(), any());
-  }
-
-  @Test
-  void searchTracesForAssociation_should_pass_isAssociated_filter_and_keyword_to_traceService() {
-
-    BddLogger.given("A logged-in student and a declared activity owned by him");
-
-    UUID declaredActivityId = UUID.randomUUID();
-    DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
-
-    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
-        .thenReturn(Optional.of(declaredActivity));
-    when(declaredActivity.getStudent()).thenReturn(student);
-
-    var pageCriteria = new PageCriteria(1, 5);
-
-    when(associationSearchHelper.searchForAssociation(
-            eq(declaredActivityId),
-            eq(DeclaredActivity.class),
-            eq(EAssociationType.DECLARED_ACTIVITY_TRACE),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any()))
-        .thenReturn(new PagedResult<>(List.of(), new PageInfo(1, 5, 0)));
-
-    BddLogger.when(
-        "searchTracesForAssociation is called with keyword='java' and isAssociated=true");
-    service.searchTracesForAssociation(declaredActivityId, "java", pageCriteria, true);
-
-    BddLogger.then(
-        "traceService.getTracesView is called with the keyword, isAssociated=true in the filter,"
-            + " null dateFilter and correct pageCriteria");
-    var traceFilterCaptor = ArgumentCaptor.forClass(TraceFilter.class);
-    verify(traceService)
-        .getTracesView(
-            eq("java"), traceFilterCaptor.capture(), eq(null), eq(pageCriteria), eq(null));
-
-    assertThat(traceFilterCaptor.getValue().isAssociated()).isTrue();
-    assertThat(traceFilterCaptor.getValue().fileTypes()).isNull();
-    assertThat(traceFilterCaptor.getValue().skillIds()).isNull();
+    verify(associationService, never()).searchForAssociation(any(), any(), any(), any(), any());
   }
 
   @Test
@@ -1301,122 +1192,6 @@ class DeclaredActivityServiceImplTest {
         .isInstanceOf(DeclaredActivityUnsubscribedException.class);
 
     verify(associationService, never()).associate(any(), any(), anyList(), any());
-  }
-
-  @Test
-  void searchDeclaredActivitiesForAssociation_should_use_trace_association_when_context_is_Trace() {
-    BddLogger.given("A Trace context id and class");
-    UUID contextId = UUID.randomUUID();
-    PageCriteria pageCriteria = new PageCriteria(0, 10);
-    PageInfo pageInfo = new PageInfo(0, 10, 0);
-
-    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-    when(declaredActivityRepository.findAllByStudent(
-            eq(student), eq("kw"), eq(pageCriteria), any(FetchGraph.class)))
-        .thenReturn(new PagedResult<>(List.of(), pageInfo));
-
-    PagedResult<AssociationSearchResultData> expected = new PagedResult<>(List.of(), pageInfo);
-    when(associationSearchHelper.searchForAssociation(
-            eq(contextId),
-            eq(Trace.class),
-            eq(EAssociationType.DECLARED_ACTIVITY_TRACE),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any()))
-        .thenReturn(expected);
-
-    BddLogger.when("searchDeclaredActivitiesForAssociation is called with TRACE context");
-    var result =
-        service.searchDeclaredActivitiesForAssociation(
-            contextId, EAssociationContextType.TRACE, "kw", pageCriteria);
-
-    BddLogger.then("The helper is invoked with DECLARED_ACTIVITY_TRACE and Trace.class");
-    assertThat(result).isSameAs(expected);
-    verify(associationSearchHelper)
-        .searchForAssociation(
-            eq(contextId),
-            eq(Trace.class),
-            eq(EAssociationType.DECLARED_ACTIVITY_TRACE),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any());
-  }
-
-  @Test
-  void searchDeclaredActivitiesForAssociation_should_use_skill_association_when_context_is_Skill() {
-    BddLogger.given("A DeclaredSkillProgress context id and class");
-    UUID contextId = UUID.randomUUID();
-    PageCriteria pageCriteria = new PageCriteria(0, 10);
-    PageInfo pageInfo = new PageInfo(0, 10, 0);
-
-    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-    when(declaredActivityRepository.findAllByStudent(
-            eq(student), eq("kw"), eq(pageCriteria), any(FetchGraph.class)))
-        .thenReturn(new PagedResult<>(List.of(), pageInfo));
-
-    PagedResult<AssociationSearchResultData> expected = new PagedResult<>(List.of(), pageInfo);
-    when(associationSearchHelper.searchForAssociation(
-            eq(contextId),
-            eq(DeclaredSkillProgress.class),
-            eq(EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any()))
-        .thenReturn(expected);
-
-    BddLogger.when("searchDeclaredActivitiesForAssociation is called with DECLARED_SKILL context");
-    var result =
-        service.searchDeclaredActivitiesForAssociation(
-            contextId, EAssociationContextType.DECLARED_SKILL, "kw", pageCriteria);
-
-    BddLogger.then("The helper is invoked with DECLARED_ACTIVITY_DECLARED_SKILL");
-    assertThat(result).isSameAs(expected);
-    verify(associationSearchHelper)
-        .searchForAssociation(
-            eq(contextId),
-            eq(DeclaredSkillProgress.class),
-            eq(EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any());
-  }
-
-  @Test
-  void searchDeclaredActivitiesForAssociation_should_use_null_context_when_class_unknown() {
-    BddLogger.given("A null context class");
-    PageCriteria pageCriteria = new PageCriteria(0, 10);
-    PageInfo pageInfo = new PageInfo(0, 10, 0);
-
-    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-    when(declaredActivityRepository.findAllByStudent(
-            eq(student), eq("kw"), eq(pageCriteria), any(FetchGraph.class)))
-        .thenReturn(new PagedResult<>(List.of(), pageInfo));
-
-    PagedResult<AssociationSearchResultData> expected = new PagedResult<>(List.of(), pageInfo);
-    when(associationSearchHelper.searchForAssociation(
-            eq(null), eq(null), eq(null), eq(null), any(), any(), any(), any(), any()))
-        .thenReturn(expected);
-
-    BddLogger.when("searchDeclaredActivitiesForAssociation is called with null context class");
-    var result = service.searchDeclaredActivitiesForAssociation(null, null, "kw", pageCriteria);
-
-    BddLogger.then("The helper is invoked with all association parameters null");
-    assertThat(result).isSameAs(expected);
-    verify(associationSearchHelper)
-        .searchForAssociation(
-            eq(null), eq(null), eq(null), eq(null), any(), any(), any(), any(), any());
   }
 
   @Test
