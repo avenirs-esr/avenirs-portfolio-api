@@ -65,14 +65,6 @@ public interface TraceService {
       String link,
       boolean valorized);
 
-  TraceDetailData updateTrace(
-      UUID traceId,
-      String title,
-      ELanguage language,
-      ETraceAuthorType authorType,
-      String personalNote,
-      String aiJustification);
-
   TraceAssociationsData associateTraceWithActivities(UUID traceId, List<UUID> activityIds);
 
   TraceAssociationsData associateTraceWithDeclaredSkill(UUID traceId, List<UUID> skillIds);
