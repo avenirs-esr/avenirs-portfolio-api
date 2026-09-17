@@ -11,6 +11,7 @@ import fr.avenirsesr.portfolio.student.association.application.adapter.dto.Assoc
 import fr.avenirsesr.portfolio.student.association.application.adapter.mapper.AssociationSearchResultDTOMapper;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
+import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.experience.application.adapter.dto.DeclaredExperienceAssociationsDTO;
 import fr.avenirsesr.portfolio.student.experience.application.adapter.dto.DeclaredExperienceRequest;
 import fr.avenirsesr.portfolio.student.experience.application.adapter.dto.DeclaredExperienceViewDTO;
@@ -190,8 +191,10 @@ public class DeclaredExperienceController {
         body.idsToAssociate(),
         principal.getName());
     var associations =
-        declaredExperienceService.associateDeclaredExperienceWithDeclaredSkills(
-            experienceId, body.idsToAssociate());
+        declaredExperienceService.associate(
+            experienceId,
+            body.idsToAssociate(),
+            EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL);
     return ResponseEntity.ok(declaredExperienceMapper.toAssociationsDTO(associations));
   }
 
@@ -207,8 +210,8 @@ public class DeclaredExperienceController {
         body.idsToAssociate(),
         principal.getName());
     var associations =
-        declaredExperienceService.associateDeclaredExperienceWithTraces(
-            experienceId, body.idsToAssociate());
+        declaredExperienceService.associate(
+            experienceId, body.idsToAssociate(), EAssociationType.TRACE_DECLARED_EXPERIENCE);
     return ResponseEntity.ok(declaredExperienceMapper.toAssociationsDTO(associations));
   }
 

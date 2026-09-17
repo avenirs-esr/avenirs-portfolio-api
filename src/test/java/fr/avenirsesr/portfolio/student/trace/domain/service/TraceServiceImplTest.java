@@ -28,7 +28,6 @@ import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortField;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
-import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.file.domain.model.File;
@@ -47,10 +46,8 @@ import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationCont
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.association.domain.service.AssociationSearchHelper;
-import fr.avenirsesr.portfolio.student.experience.domain.exception.DeclaredExperienceNotFoundException;
 import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.experience.domain.port.input.DeclaredExperienceService;
-import fr.avenirsesr.portfolio.student.skill.domain.exception.DeclaredSkillProgressNotFoundException;
 import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.student.trace.domain.data.TraceAssociationsData;
@@ -87,7 +84,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -1163,154 +1159,71 @@ class TraceServiceImplTest {
     }
 
     @Nested
-    class WhenAssociatingTraceWithDeclaredSkill {
+    class WhenAssociatingTrace {
 
       @Test
-      void thenItShouldCreateAssociation() {
-        BddLogger.when("associating trace with declared skills");
+      void thenItShouldAssociateTheGivenElementsWithTheTrace() {
+        BddLogger.when("associating a trace with declared skills");
 
         UUID traceId = UUID.randomUUID();
-        UUID skillId = UUID.randomUUID();
+        List<UUID> skillIds = List.of(UUID.randomUUID(), UUID.randomUUID());
 
         Trace trace = TraceFixture.create().withStudent(student).withId(traceId).toModel();
 
-        DeclaredSkillProgress skill = mock(DeclaredSkillProgress.class);
-        when(skill.getId()).thenReturn(skillId);
-        when(skill.getStudent()).thenReturn(student);
-
         when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
-        when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of(skillId)))
-            .thenReturn(List.of(skill));
         when(associationService.getAllAssociatedElementsOf(traceId, Trace.class, false))
             .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
 
         TraceAssociationsData result =
-            traceService.associateTraceWithDeclaredSkill(traceId, List.of(skillId));
+            traceService.associate(traceId, skillIds, EAssociationType.TRACE_DECLARED_SKILL);
 
-        BddLogger.then("it should create association");
+        BddLogger.then("it should associate them through the association service");
 
-        verify(associationService).createAll(any());
+        verify(associationService)
+            .associate(traceId, Trace.class, skillIds, EAssociationType.TRACE_DECLARED_SKILL);
         assertNotNull(result);
       }
 
       @Test
-      void thenItShouldThrowDeclaredSkillProgressNotFoundWhenSkillIsMissing() {
-        BddLogger.when("associating trace with missing declared skill");
+      void thenItShouldThrowTraceNotFoundWhenTraceDoesNotExist() {
+        BddLogger.when("associating an unknown trace");
 
         UUID traceId = UUID.randomUUID();
-        UUID skillId = UUID.randomUUID();
+        List<UUID> skillIds = List.of(UUID.randomUUID());
 
-        Trace trace = TraceFixture.create().withStudent(student).withId(traceId).toModel();
-
-        when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
-        when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of(skillId)))
-            .thenReturn(List.of());
+        when(traceRepository.findById(traceId)).thenReturn(Optional.empty());
 
         assertThrows(
-            DeclaredSkillProgressNotFoundException.class,
-            () -> traceService.associateTraceWithDeclaredSkill(traceId, List.of(skillId)));
+            TraceNotFoundException.class,
+            () -> traceService.associate(traceId, skillIds, EAssociationType.TRACE_DECLARED_SKILL));
 
-        BddLogger.then("it should throw DeclaredSkillProgressNotFoundException");
+        BddLogger.then("it should throw TraceNotFoundException");
+
+        verifyNoInteractions(associationService);
       }
 
       @Test
-      void thenItShouldThrowUserNotAuthorizedWhenSkillBelongsToAnotherUser() {
-        BddLogger.when("associating trace with skill of another user");
+      void thenItShouldThrowTraceNotFoundWhenTraceBelongsToAnotherStudent() {
+        BddLogger.when("associating a trace of another student");
 
         UUID traceId = UUID.randomUUID();
-        UUID skillId = UUID.randomUUID();
+        List<UUID> skillIds = List.of(UUID.randomUUID());
 
-        Trace trace = TraceFixture.create().withStudent(student).withId(traceId).toModel();
-
-        DeclaredSkillProgress skill = mock(DeclaredSkillProgress.class);
-        when(skill.getId()).thenReturn(skillId);
-        when(skill.getStudent()).thenReturn(StudentFixture.create().toModel());
+        Trace trace =
+            TraceFixture.create()
+                .withStudent(StudentFixture.create().toModel())
+                .withId(traceId)
+                .toModel();
 
         when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
-        when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of(skillId)))
-            .thenReturn(List.of(skill));
 
         assertThrows(
-            UserNotAuthorizedException.class,
-            () -> traceService.associateTraceWithDeclaredSkill(traceId, List.of(skillId)));
+            TraceNotFoundException.class,
+            () -> traceService.associate(traceId, skillIds, EAssociationType.TRACE_DECLARED_SKILL));
 
-        BddLogger.then("it should throw UserNotAuthorizedException");
-      }
-    }
+        BddLogger.then("it should throw TraceNotFoundException");
 
-    @Nested
-    class WhenAssociatingTraceWithDeclaredExperience {
-
-      @Test
-      void thenItShouldCreateAssociation() {
-        BddLogger.when("associating trace with declared experiences");
-
-        UUID traceId = UUID.randomUUID();
-        UUID experienceId = UUID.randomUUID();
-
-        Trace trace = TraceFixture.create().withStudent(student).withId(traceId).toModel();
-
-        DeclaredExperience experience = mock(DeclaredExperience.class);
-        when(experience.getId()).thenReturn(experienceId);
-        when(experience.getStudent()).thenReturn(student);
-
-        when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
-        when(declaredExperienceService.findAllByIds(List.of(experienceId)))
-            .thenReturn(List.of(experience));
-        when(associationService.getAllAssociatedElementsOf(traceId, Trace.class, false))
-            .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
-
-        TraceAssociationsData result =
-            traceService.associateTraceWithDeclaredExperience(traceId, List.of(experienceId));
-
-        BddLogger.then("it should create association");
-
-        verify(associationService).createAll(any());
-        assertNotNull(result);
-      }
-
-      @Test
-      void thenItShouldThrowDeclaredExperienceNotFoundWhenExperienceIsMissing() {
-        BddLogger.when("associating trace with missing declared experience");
-
-        UUID traceId = UUID.randomUUID();
-        UUID experienceId = UUID.randomUUID();
-
-        Trace trace = TraceFixture.create().withStudent(student).withId(traceId).toModel();
-
-        when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
-        when(declaredExperienceService.findAllByIds(List.of(experienceId))).thenReturn(List.of());
-
-        assertThrows(
-            DeclaredExperienceNotFoundException.class,
-            () ->
-                traceService.associateTraceWithDeclaredExperience(traceId, List.of(experienceId)));
-
-        BddLogger.then("it should throw DeclaredExperienceNotFoundException");
-      }
-
-      @Test
-      void thenItShouldThrowUserNotAuthorizedWhenExperienceBelongsToAnotherUser() {
-        BddLogger.when("associating trace with experience of another user");
-
-        UUID traceId = UUID.randomUUID();
-        UUID experienceId = UUID.randomUUID();
-
-        Trace trace = TraceFixture.create().withStudent(student).withId(traceId).toModel();
-        DeclaredExperience experience = Mockito.mock(DeclaredExperience.class);
-
-        when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
-        when(declaredExperienceService.findAllByIds(List.of(experienceId)))
-            .thenReturn(List.of(experience));
-        when(experience.getId()).thenReturn(experienceId);
-        when(experience.getStudent()).thenReturn(StudentFixture.create().toModel());
-
-        assertThrows(
-            UserNotAuthorizedException.class,
-            () ->
-                traceService.associateTraceWithDeclaredExperience(traceId, List.of(experienceId)));
-
-        BddLogger.then("it should throw UserNotAuthorizedException");
+        verifyNoInteractions(associationService);
       }
     }
 

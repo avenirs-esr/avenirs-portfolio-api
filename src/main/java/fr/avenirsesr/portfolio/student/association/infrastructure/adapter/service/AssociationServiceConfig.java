@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.student.association.infrastructure.adapter.service;
 
+import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.association.domain.port.output.repository.AssociationRepository;
@@ -17,6 +18,7 @@ import org.springframework.context.annotation.Lazy;
 @RequiredArgsConstructor
 public class AssociationServiceConfig {
   private final AssociationRepository associationRepository;
+  private final LoggedInUserService loggedInUserService;
 
   @Bean
   public AssociationService AssociationService(
@@ -26,6 +28,7 @@ public class AssociationServiceConfig {
       @Lazy DeclaredExperienceService declaredExperienceService) {
     return new AssociationServiceImpl(
         associationRepository,
+        loggedInUserService,
         traceService,
         declaredActivityService,
         declaredSkillProgressService,

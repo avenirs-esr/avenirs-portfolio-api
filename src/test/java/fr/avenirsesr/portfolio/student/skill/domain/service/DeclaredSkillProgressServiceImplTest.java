@@ -23,19 +23,16 @@ import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorize
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityAssociationData;
-import fr.avenirsesr.portfolio.student.activity.domain.exception.DeclaredActivityNotFoundException;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociatedElementsData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
-import fr.avenirsesr.portfolio.student.association.domain.exception.AssociationAlreadyExistException;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.association.domain.service.AssociationSearchHelper;
 import fr.avenirsesr.portfolio.student.experience.domain.data.DeclaredExperienceAssociationData;
-import fr.avenirsesr.portfolio.student.experience.domain.exception.DeclaredExperienceNotFoundException;
 import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.experience.domain.port.input.DeclaredExperienceService;
 import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillAssociationCount;
@@ -53,7 +50,6 @@ import fr.avenirsesr.portfolio.student.skill.domain.port.output.repository.Decla
 import fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.client.ExternalSkillClient;
 import fr.avenirsesr.portfolio.student.skill.infrastructure.fixture.DeclaredSkillProgressFixture;
 import fr.avenirsesr.portfolio.student.trace.domain.data.TraceAssociationData;
-import fr.avenirsesr.portfolio.student.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.student.trace.infrastructure.fixture.TraceFixture;
@@ -543,63 +539,45 @@ public class DeclaredSkillProgressServiceImplTest {
     }
 
     @Nested
-    class WhenAssociatingDeclaredSkillWithActivities {
+    class WhenAssociatingDeclaredSkill {
 
       @Test
-      void associateDeclaredSkillWithActivities_shouldCreateAssociationsSuccessfully() {
-        BddLogger.given("the method associateDeclaredSkillWithActivities");
+      void associate_shouldAssociateTheGivenElementsWithTheDeclaredSkill() {
+        BddLogger.given("the method associate");
 
         DeclaredSkillProgress declaredSkillProgress =
             DeclaredSkillProgressFixture.create().withStudent(student).toModel();
+        List<UUID> activityIds = List.of(randomUUID(), randomUUID());
 
-        DeclaredActivity declaredActivity1 = mock(DeclaredActivity.class);
-        DeclaredActivity declaredActivity2 = mock(DeclaredActivity.class);
-        UUID activityId1 = randomUUID();
-        UUID activityId2 = randomUUID();
-
-        BddLogger.when("calling the method with valid skill and activity ids");
+        BddLogger.when("calling the method with a valid skill id");
 
         when(declaredSkillProgressRepository.findById(declaredSkillProgress.getId()))
             .thenReturn(Optional.of(declaredSkillProgress));
-        when(declaredActivity1.getId()).thenReturn(activityId1);
-        when(declaredActivity1.getStudent()).thenReturn(student);
-        when(declaredActivity2.getId()).thenReturn(activityId2);
-        when(declaredActivity2.getStudent()).thenReturn(student);
-        when(declaredActivityService.findAllDeclaredActivitiesByIds(
-                List.of(activityId1, activityId2)))
-            .thenReturn(List.of(declaredActivity1, declaredActivity2));
-
         when(associationService.getAllAssociatedElementsOf(
                 declaredSkillProgress.getId(), DeclaredSkillProgress.class))
             .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
 
         DeclaredSkillAssociationsData result =
-            declaredSkillProgressService.associateDeclaredSkillWithActivities(
-                declaredSkillProgress.getId(), List.of(activityId1, activityId2));
+            declaredSkillProgressService.associate(
+                declaredSkillProgress.getId(),
+                activityIds,
+                EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL);
 
-        BddLogger.then("it should create associations and return association data");
+        BddLogger.then("it should associate them through the association service");
 
         verify(associationService)
-            .createAll(
-                argThat(
-                    list ->
-                        list.size() == 2
-                            && list.stream()
-                                .allMatch(
-                                    assocData ->
-                                        assocData.associationType()
-                                                == EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL
-                                            && assocData.id2().equals(declaredSkillProgress.getId())
-                                            && (assocData.id1().equals(activityId1)
-                                                || assocData.id1().equals(activityId2)))));
+            .associate(
+                declaredSkillProgress.getId(),
+                DeclaredSkillProgress.class,
+                activityIds,
+                EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL);
 
         assertNotNull(result);
       }
 
       @Test
-      void
-          associateDeclaredSkillWithActivities_shouldThrowDeclaredSkillProgressNotFoundException() {
-        BddLogger.given("the method associateDeclaredSkillWithActivities");
+      void associate_shouldThrowDeclaredSkillProgressNotFoundException() {
+        BddLogger.given("the method associate");
 
         UUID declaredSkillId = randomUUID();
         UUID activityId = randomUUID();
@@ -614,24 +592,24 @@ public class DeclaredSkillProgressServiceImplTest {
         assertThrows(
             DeclaredSkillProgressNotFoundException.class,
             () ->
-                declaredSkillProgressService.associateDeclaredSkillWithActivities(
-                    declaredSkillId, List.of(activityId)));
+                declaredSkillProgressService.associate(
+                    declaredSkillId,
+                    List.of(activityId),
+                    EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL));
 
-        verify(declaredSkillProgressRepository).findById(declaredSkillId);
-        verifyNoInteractions(declaredActivityService);
         verifyNoInteractions(associationService);
       }
 
       @Test
-      void associateDeclaredSkillWithActivities_shouldThrowUserNotAuthorizedForSkill() {
-        BddLogger.given("the method associateDeclaredSkillWithActivities");
+      void associate_shouldThrowUserNotAuthorizedWhenSkillBelongsToAnotherStudent() {
+        BddLogger.given("the method associate");
 
         Student anotherStudent = StudentFixture.create().toModel();
         DeclaredSkillProgress declaredSkillProgress =
             DeclaredSkillProgressFixture.create().withStudent(anotherStudent).toModel();
         UUID activityId = randomUUID();
 
-        BddLogger.when("calling the method with skill belonging to another student");
+        BddLogger.when("calling the method with a skill belonging to another student");
 
         when(declaredSkillProgressRepository.findById(declaredSkillProgress.getId()))
             .thenReturn(Optional.of(declaredSkillProgress));
@@ -641,660 +619,31 @@ public class DeclaredSkillProgressServiceImplTest {
         assertThrows(
             UserNotAuthorizedException.class,
             () ->
-                declaredSkillProgressService.associateDeclaredSkillWithActivities(
-                    declaredSkillProgress.getId(), List.of(activityId)));
+                declaredSkillProgressService.associate(
+                    declaredSkillProgress.getId(),
+                    List.of(activityId),
+                    EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL));
 
-        verify(declaredSkillProgressRepository).findById(declaredSkillProgress.getId());
-        verifyNoInteractions(declaredActivityService);
         verifyNoInteractions(associationService);
-      }
-
-      @Test
-      void associateDeclaredSkillWithActivities_shouldThrowDeclaredActivityNotFoundException() {
-        BddLogger.given("the method associateDeclaredSkillWithActivities");
-
-        DeclaredSkillProgress declaredSkillProgress =
-            DeclaredSkillProgressFixture.create().withStudent(student).toModel();
-        UUID activityId1 = randomUUID();
-        UUID activityId2 = randomUUID();
-        DeclaredActivity declaredActivity1 = mock(DeclaredActivity.class);
-
-        BddLogger.when("calling the method with some non-existing activity ids");
-
-        when(declaredSkillProgressRepository.findById(declaredSkillProgress.getId()))
-            .thenReturn(Optional.of(declaredSkillProgress));
-        when(declaredActivity1.getId()).thenReturn(activityId1);
-        when(declaredActivityService.findAllDeclaredActivitiesByIds(
-                List.of(activityId1, activityId2)))
-            .thenReturn(List.of(declaredActivity1)); // Only returns one activity, not both
-
-        BddLogger.then("it should throw DeclaredActivityNotFoundException");
-
-        assertThrows(
-            DeclaredActivityNotFoundException.class,
-            () ->
-                declaredSkillProgressService.associateDeclaredSkillWithActivities(
-                    declaredSkillProgress.getId(), List.of(activityId1, activityId2)));
-
-        verify(declaredActivityService)
-            .findAllDeclaredActivitiesByIds(List.of(activityId1, activityId2));
-        verifyNoInteractions(associationService);
-      }
-
-      @Test
-      void associateDeclaredSkillWithActivities_shouldThrowUserNotAuthorizedForActivities() {
-        BddLogger.given("the method associateDeclaredSkillWithActivities");
-
-        Student anotherStudent = StudentFixture.create().toModel();
-        DeclaredSkillProgress declaredSkillProgress =
-            DeclaredSkillProgressFixture.create().withStudent(student).toModel();
-
-        DeclaredActivity declaredActivity1 = mock(DeclaredActivity.class);
-        DeclaredActivity declaredActivity2 = mock(DeclaredActivity.class);
-        UUID activityId1 = randomUUID();
-        UUID activityId2 = randomUUID();
-
-        BddLogger.when("calling the method with activities belonging to another student");
-
-        when(declaredSkillProgressRepository.findById(declaredSkillProgress.getId()))
-            .thenReturn(Optional.of(declaredSkillProgress));
-        when(declaredActivity1.getId()).thenReturn(activityId1);
-        when(declaredActivity1.getStudent()).thenReturn(student);
-        when(declaredActivity2.getId()).thenReturn(activityId2);
-        when(declaredActivity2.getStudent()).thenReturn(anotherStudent); // Different student
-        when(declaredActivityService.findAllDeclaredActivitiesByIds(
-                List.of(activityId1, activityId2)))
-            .thenReturn(List.of(declaredActivity1, declaredActivity2));
-
-        BddLogger.then("it should throw UserNotAuthorizedException");
-
-        assertThrows(
-            UserNotAuthorizedException.class,
-            () ->
-                declaredSkillProgressService.associateDeclaredSkillWithActivities(
-                    declaredSkillProgress.getId(), List.of(activityId1, activityId2)));
-
-        verify(declaredActivityService)
-            .findAllDeclaredActivitiesByIds(List.of(activityId1, activityId2));
-        verifyNoInteractions(associationService);
-      }
-
-      @Test
-      void associateDeclaredSkillWithActivities_shouldHandleEmptyActivityList() {
-        BddLogger.given("the method associateDeclaredSkillWithActivities");
-
-        DeclaredSkillProgress declaredSkillProgress =
-            DeclaredSkillProgressFixture.create().withStudent(student).toModel();
-
-        BddLogger.when("calling the method with empty activity list");
-
-        when(declaredSkillProgressRepository.findById(declaredSkillProgress.getId()))
-            .thenReturn(Optional.of(declaredSkillProgress));
-        when(declaredActivityService.findAllDeclaredActivitiesByIds(List.of()))
-            .thenReturn(List.of());
-
-        when(associationService.getAllAssociatedElementsOf(
-                declaredSkillProgress.getId(), DeclaredSkillProgress.class))
-            .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
-        when(declaredActivityService.findAllDeclaredActivitiesByIds(List.of()))
-            .thenReturn(List.of());
-
-        DeclaredSkillAssociationsData result =
-            declaredSkillProgressService.associateDeclaredSkillWithActivities(
-                declaredSkillProgress.getId(), List.of());
-
-        BddLogger.then("it should create no associations and return empty association data");
-
-        verify(associationService).createAll(argThat(List::isEmpty));
-        assertNotNull(result);
-      }
-    }
-
-    @Nested
-    class WhenAssociatingDeclaredSkillWithDeclaredExperiences {
-
-      @Test
-      void associateDeclaredSkillWithDeclaredExperiences_shouldCreateAssociationsSuccessfully() {
-        BddLogger.given("the method associateDeclaredSkillWithDeclaredExperiences");
-
-        DeclaredSkillProgress declaredSkillProgress =
-            DeclaredSkillProgressFixture.create().withStudent(student).toModel();
-
-        DeclaredExperience declaredExperience1 = mock(DeclaredExperience.class);
-        DeclaredExperience declaredExperience2 = mock(DeclaredExperience.class);
-        UUID experienceId1 = randomUUID();
-        UUID experienceId2 = randomUUID();
-
-        BddLogger.when("calling the method with valid skill and experience ids");
-
-        when(declaredSkillProgressRepository.findById(declaredSkillProgress.getId()))
-            .thenReturn(Optional.of(declaredSkillProgress));
-        when(declaredExperience1.getId()).thenReturn(experienceId1);
-        when(declaredExperience1.getStudent()).thenReturn(student);
-        when(declaredExperience2.getId()).thenReturn(experienceId2);
-        when(declaredExperience2.getStudent()).thenReturn(student);
-        when(declaredExperienceService.findAllByIds(List.of(experienceId1, experienceId2)))
-            .thenReturn(List.of(declaredExperience1, declaredExperience2));
-
-        when(associationService.getAllAssociatedElementsOf(
-                declaredSkillProgress.getId(), DeclaredSkillProgress.class))
-            .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
-
-        DeclaredSkillAssociationsData result =
-            declaredSkillProgressService.associateDeclaredSkillWithDeclaredExperiences(
-                declaredSkillProgress.getId(), List.of(experienceId1, experienceId2));
-
-        BddLogger.then("it should create associations and return association data");
-
-        verify(associationService)
-            .createAll(
-                argThat(
-                    list ->
-                        list.size() == 2
-                            && list.stream()
-                                .allMatch(
-                                    assocData ->
-                                        assocData.associationType()
-                                                == EAssociationType
-                                                    .DECLARED_EXPERIENCE_DECLARED_SKILL
-                                            && assocData.id2().equals(declaredSkillProgress.getId())
-                                            && (assocData.id1().equals(experienceId1)
-                                                || assocData.id1().equals(experienceId2)))));
-
-        assertNotNull(result);
-      }
-
-      @Test
-      void
-          associateDeclaredSkillWithDeclaredExperiences_shouldThrowDeclaredSkillProgressNotFoundException() {
-        BddLogger.given("the method associateDeclaredSkillWithDeclaredExperiences");
-
-        UUID declaredSkillId = randomUUID();
-        UUID experienceId = randomUUID();
-
-        BddLogger.when("calling the method with non-existing skill id");
-
-        when(declaredSkillProgressRepository.findById(declaredSkillId))
-            .thenReturn(Optional.empty());
-
-        BddLogger.then("it should throw DeclaredSkillProgressNotFoundException");
-
-        assertThrows(
-            DeclaredSkillProgressNotFoundException.class,
-            () ->
-                declaredSkillProgressService.associateDeclaredSkillWithDeclaredExperiences(
-                    declaredSkillId, List.of(experienceId)));
-
-        verify(declaredSkillProgressRepository).findById(declaredSkillId);
-        verifyNoInteractions(declaredExperienceService);
-        verifyNoInteractions(associationService);
-      }
-
-      @Test
-      void associateDeclaredSkillWithDeclaredExperiences_shouldThrowUserNotAuthorizedForSkill() {
-        BddLogger.given("the method associateDeclaredSkillWithDeclaredExperiences");
-
-        Student anotherStudent = StudentFixture.create().toModel();
-        DeclaredSkillProgress declaredSkillProgress =
-            DeclaredSkillProgressFixture.create().withStudent(anotherStudent).toModel();
-        UUID experienceId = randomUUID();
-
-        BddLogger.when("calling the method with skill belonging to another student");
-
-        when(declaredSkillProgressRepository.findById(declaredSkillProgress.getId()))
-            .thenReturn(Optional.of(declaredSkillProgress));
-
-        BddLogger.then("it should throw UserNotAuthorizedException");
-
-        assertThrows(
-            UserNotAuthorizedException.class,
-            () ->
-                declaredSkillProgressService.associateDeclaredSkillWithDeclaredExperiences(
-                    declaredSkillProgress.getId(), List.of(experienceId)));
-
-        verify(declaredSkillProgressRepository).findById(declaredSkillProgress.getId());
-        verifyNoInteractions(declaredExperienceService);
-        verifyNoInteractions(associationService);
-      }
-
-      @Test
-      void
-          associateDeclaredSkillWithDeclaredExperiences_shouldThrowDeclaredExperienceNotFoundException() {
-        BddLogger.given("the method associateDeclaredSkillWithDeclaredExperiences");
-
-        DeclaredSkillProgress declaredSkillProgress =
-            DeclaredSkillProgressFixture.create().withStudent(student).toModel();
-        UUID experienceId1 = randomUUID();
-        UUID experienceId2 = randomUUID();
-        DeclaredExperience declaredExperience1 = mock(DeclaredExperience.class);
-
-        BddLogger.when("calling the method with some non-existing experience ids");
-
-        when(declaredSkillProgressRepository.findById(declaredSkillProgress.getId()))
-            .thenReturn(Optional.of(declaredSkillProgress));
-        when(declaredExperience1.getId()).thenReturn(experienceId1);
-        when(declaredExperienceService.findAllByIds(List.of(experienceId1, experienceId2)))
-            .thenReturn(List.of(declaredExperience1)); // Only returns one experience, not both
-
-        BddLogger.then("it should throw DeclaredExperienceNotFoundException");
-
-        assertThrows(
-            DeclaredExperienceNotFoundException.class,
-            () ->
-                declaredSkillProgressService.associateDeclaredSkillWithDeclaredExperiences(
-                    declaredSkillProgress.getId(), List.of(experienceId1, experienceId2)));
-
-        verify(declaredExperienceService).findAllByIds(List.of(experienceId1, experienceId2));
-        verifyNoInteractions(associationService);
-      }
-
-      @Test
-      void
-          associateDeclaredSkillWithDeclaredExperiences_shouldThrowUserNotAuthorizedForExperiences() {
-        BddLogger.given("the method associateDeclaredSkillWithDeclaredExperiences");
-
-        Student anotherStudent = StudentFixture.create().toModel();
-        DeclaredSkillProgress declaredSkillProgress =
-            DeclaredSkillProgressFixture.create().withStudent(student).toModel();
-
-        DeclaredExperience declaredExperience1 = mock(DeclaredExperience.class);
-        DeclaredExperience declaredExperience2 = mock(DeclaredExperience.class);
-        UUID experienceId1 = randomUUID();
-        UUID experienceId2 = randomUUID();
-
-        BddLogger.when("calling the method with an experience belonging to another student");
-
-        when(declaredSkillProgressRepository.findById(declaredSkillProgress.getId()))
-            .thenReturn(Optional.of(declaredSkillProgress));
-        when(declaredExperience1.getId()).thenReturn(experienceId1);
-        when(declaredExperience1.getStudent()).thenReturn(student);
-        when(declaredExperience2.getId()).thenReturn(experienceId2);
-        when(declaredExperience2.getStudent()).thenReturn(anotherStudent); // Different student
-        when(declaredExperienceService.findAllByIds(List.of(experienceId1, experienceId2)))
-            .thenReturn(List.of(declaredExperience1, declaredExperience2));
-
-        BddLogger.then("it should throw UserNotAuthorizedException");
-
-        assertThrows(
-            UserNotAuthorizedException.class,
-            () ->
-                declaredSkillProgressService.associateDeclaredSkillWithDeclaredExperiences(
-                    declaredSkillProgress.getId(), List.of(experienceId1, experienceId2)));
-
-        verify(declaredExperienceService).findAllByIds(List.of(experienceId1, experienceId2));
-        verifyNoInteractions(associationService);
-      }
-
-      @Test
-      void associateDeclaredSkillWithDeclaredExperiences_shouldHandleEmptyExperienceList() {
-        BddLogger.given("the method associateDeclaredSkillWithDeclaredExperiences");
-
-        DeclaredSkillProgress declaredSkillProgress =
-            DeclaredSkillProgressFixture.create().withStudent(student).toModel();
-
-        BddLogger.when("calling the method with empty experience list");
-
-        when(declaredSkillProgressRepository.findById(declaredSkillProgress.getId()))
-            .thenReturn(Optional.of(declaredSkillProgress));
-        when(declaredExperienceService.findAllByIds(List.of())).thenReturn(List.of());
-
-        when(associationService.getAllAssociatedElementsOf(
-                declaredSkillProgress.getId(), DeclaredSkillProgress.class))
-            .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
-
-        DeclaredSkillAssociationsData result =
-            declaredSkillProgressService.associateDeclaredSkillWithDeclaredExperiences(
-                declaredSkillProgress.getId(), List.of());
-
-        BddLogger.then("it should create no associations and return empty association data");
-
-        verify(associationService).createAll(argThat(List::isEmpty));
-        assertNotNull(result);
-      }
-
-      @Test
-      void associateDeclaredSkillWithDeclaredExperiences_shouldDeduplicateRepeatedIdsInRequest() {
-        BddLogger.given(
-            "the method associateDeclaredSkillWithDeclaredExperiences called with the same"
-                + " experience id twice");
-
-        DeclaredSkillProgress declaredSkillProgress =
-            DeclaredSkillProgressFixture.create().withStudent(student).toModel();
-
-        DeclaredExperience declaredExperience = mock(DeclaredExperience.class);
-        UUID experienceId = randomUUID();
-
-        BddLogger.when("calling the method with a duplicated experience id");
-
-        when(declaredSkillProgressRepository.findById(declaredSkillProgress.getId()))
-            .thenReturn(Optional.of(declaredSkillProgress));
-        when(declaredExperience.getId()).thenReturn(experienceId);
-        when(declaredExperience.getStudent()).thenReturn(student);
-        when(declaredExperienceService.findAllByIds(List.of(experienceId)))
-            .thenReturn(List.of(declaredExperience));
-
-        when(associationService.getAllAssociatedElementsOf(
-                declaredSkillProgress.getId(), DeclaredSkillProgress.class))
-            .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
-
-        declaredSkillProgressService.associateDeclaredSkillWithDeclaredExperiences(
-            declaredSkillProgress.getId(), List.of(experienceId, experienceId));
-
-        BddLogger.then("it should create a single association, not two");
-
-        verify(declaredExperienceService).findAllByIds(List.of(experienceId));
-        verify(associationService)
-            .createAll(
-                argThat(
-                    list ->
-                        list.size() == 1
-                            && list.get(0).id1().equals(experienceId)
-                            && list.get(0).id2().equals(declaredSkillProgress.getId())
-                            && list.get(0).associationType()
-                                == EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL));
-      }
-
-      @Test
-      void
-          associateDeclaredSkillWithDeclaredExperiences_shouldPropagateAssociationAlreadyExistException() {
-        BddLogger.given("an experience already associated with the declared skill progress");
-
-        DeclaredSkillProgress declaredSkillProgress =
-            DeclaredSkillProgressFixture.create().withStudent(student).toModel();
-
-        DeclaredExperience declaredExperience = mock(DeclaredExperience.class);
-        UUID experienceId = randomUUID();
-
-        when(declaredSkillProgressRepository.findById(declaredSkillProgress.getId()))
-            .thenReturn(Optional.of(declaredSkillProgress));
-        when(declaredExperience.getId()).thenReturn(experienceId);
-        when(declaredExperience.getStudent()).thenReturn(student);
-        when(declaredExperienceService.findAllByIds(List.of(experienceId)))
-            .thenReturn(List.of(declaredExperience));
-        when(associationService.createAll(anyList()))
-            .thenThrow(new AssociationAlreadyExistException());
-
-        BddLogger.when("calling the method with an already associated experience");
-
-        BddLogger.then("it should propagate AssociationAlreadyExistException");
-
-        assertThrows(
-            AssociationAlreadyExistException.class,
-            () ->
-                declaredSkillProgressService.associateDeclaredSkillWithDeclaredExperiences(
-                    declaredSkillProgress.getId(), List.of(experienceId)));
-      }
-    }
-
-    @Nested
-    class WhenAssociatingDeclaredSkillWithTraces {
-
-      @Test
-      void associateDeclaredSkillWithTraces_shouldCreateAssociationsSuccessfully() {
-        BddLogger.given("the method associateDeclaredSkillWithTraces");
-
-        DeclaredSkillProgress declaredSkillProgress =
-            DeclaredSkillProgressFixture.create().withStudent(student).toModel();
-
-        Trace trace1 = TraceFixture.create().withStudent(student).toModel();
-        Trace trace2 = TraceFixture.create().withStudent(student).toModel();
-
-        BddLogger.when("calling the method with valid skill and trace ids");
-
-        when(declaredSkillProgressRepository.findById(declaredSkillProgress.getId()))
-            .thenReturn(Optional.of(declaredSkillProgress));
-        when(traceService.findAllTracesById(List.of(trace1.getId(), trace2.getId())))
-            .thenReturn(List.of(trace1, trace2));
-
-        when(associationService.getAllAssociatedElementsOf(
-                declaredSkillProgress.getId(), DeclaredSkillProgress.class))
-            .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
-
-        DeclaredSkillAssociationsData result =
-            declaredSkillProgressService.associateDeclaredSkillWithTraces(
-                declaredSkillProgress.getId(), List.of(trace1.getId(), trace2.getId()));
-
-        BddLogger.then("it should create associations and return association data");
-
-        verify(associationService)
-            .createAll(
-                argThat(
-                    list ->
-                        list.size() == 2
-                            && list.stream()
-                                .allMatch(
-                                    assocData ->
-                                        assocData.associationType()
-                                                == EAssociationType.TRACE_DECLARED_SKILL
-                                            && assocData.id2().equals(declaredSkillProgress.getId())
-                                            && (assocData.id1().equals(trace1.getId())
-                                                || assocData.id1().equals(trace2.getId())))));
-
-        assertNotNull(result);
-      }
-
-      @Test
-      void associateDeclaredSkillWithTraces_shouldThrowDeclaredSkillProgressNotFoundException() {
-        BddLogger.given("the method associateDeclaredSkillWithTraces");
-
-        UUID declaredSkillId = randomUUID();
-        UUID traceId = randomUUID();
-
-        BddLogger.when("calling the method with non-existing skill id");
-
-        when(declaredSkillProgressRepository.findById(declaredSkillId))
-            .thenReturn(Optional.empty());
-
-        BddLogger.then("it should throw DeclaredSkillProgressNotFoundException");
-
-        assertThrows(
-            DeclaredSkillProgressNotFoundException.class,
-            () ->
-                declaredSkillProgressService.associateDeclaredSkillWithTraces(
-                    declaredSkillId, List.of(traceId)));
-
-        verify(declaredSkillProgressRepository).findById(declaredSkillId);
-        verifyNoInteractions(traceService);
-        verifyNoInteractions(associationService);
-      }
-
-      @Test
-      void associateDeclaredSkillWithTraces_shouldThrowUserNotAuthorizedForSkill() {
-        BddLogger.given("the method associateDeclaredSkillWithTraces");
-
-        Student anotherStudent = StudentFixture.create().toModel();
-        DeclaredSkillProgress declaredSkillProgress =
-            DeclaredSkillProgressFixture.create().withStudent(anotherStudent).toModel();
-        UUID traceId = randomUUID();
-
-        BddLogger.when("calling the method with skill belonging to another student");
-
-        when(declaredSkillProgressRepository.findById(declaredSkillProgress.getId()))
-            .thenReturn(Optional.of(declaredSkillProgress));
-
-        BddLogger.then("it should throw UserNotAuthorizedException");
-
-        assertThrows(
-            UserNotAuthorizedException.class,
-            () ->
-                declaredSkillProgressService.associateDeclaredSkillWithTraces(
-                    declaredSkillProgress.getId(), List.of(traceId)));
-
-        verify(declaredSkillProgressRepository).findById(declaredSkillProgress.getId());
-        verifyNoInteractions(traceService);
-        verifyNoInteractions(associationService);
-      }
-
-      @Test
-      void associateDeclaredSkillWithTraces_shouldThrowTraceNotFoundException() {
-        BddLogger.given("the method associateDeclaredSkillWithTraces");
-
-        DeclaredSkillProgress declaredSkillProgress =
-            DeclaredSkillProgressFixture.create().withStudent(student).toModel();
-        Trace trace1 = TraceFixture.create().withStudent(student).toModel();
-        UUID traceId2 = randomUUID();
-
-        BddLogger.when("calling the method with some non-existing trace ids");
-
-        when(declaredSkillProgressRepository.findById(declaredSkillProgress.getId()))
-            .thenReturn(Optional.of(declaredSkillProgress));
-        when(traceService.findAllTracesById(List.of(trace1.getId(), traceId2)))
-            .thenReturn(List.of(trace1)); // Only returns one trace, not both
-
-        BddLogger.then("it should throw TraceNotFoundException");
-
-        assertThrows(
-            TraceNotFoundException.class,
-            () ->
-                declaredSkillProgressService.associateDeclaredSkillWithTraces(
-                    declaredSkillProgress.getId(), List.of(trace1.getId(), traceId2)));
-
-        verify(traceService).findAllTracesById(List.of(trace1.getId(), traceId2));
-        verifyNoInteractions(associationService);
-      }
-
-      @Test
-      void associateDeclaredSkillWithTraces_shouldThrowUserNotAuthorizedForTraces() {
-        BddLogger.given("the method associateDeclaredSkillWithTraces");
-
-        Student anotherStudent = StudentFixture.create().toModel();
-        DeclaredSkillProgress declaredSkillProgress =
-            DeclaredSkillProgressFixture.create().withStudent(student).toModel();
-
-        Trace trace1 = TraceFixture.create().withStudent(student).toModel();
-        Trace trace2 = TraceFixture.create().withStudent(anotherStudent).toModel();
-
-        BddLogger.when("calling the method with a trace belonging to another student");
-
-        when(declaredSkillProgressRepository.findById(declaredSkillProgress.getId()))
-            .thenReturn(Optional.of(declaredSkillProgress));
-        when(traceService.findAllTracesById(List.of(trace1.getId(), trace2.getId())))
-            .thenReturn(List.of(trace1, trace2));
-
-        BddLogger.then("it should throw UserNotAuthorizedException");
-
-        assertThrows(
-            UserNotAuthorizedException.class,
-            () ->
-                declaredSkillProgressService.associateDeclaredSkillWithTraces(
-                    declaredSkillProgress.getId(), List.of(trace1.getId(), trace2.getId())));
-
-        verify(traceService).findAllTracesById(List.of(trace1.getId(), trace2.getId()));
-        verifyNoInteractions(associationService);
-      }
-
-      @Test
-      void associateDeclaredSkillWithTraces_shouldHandleEmptyTraceList() {
-        BddLogger.given("the method associateDeclaredSkillWithTraces");
-
-        DeclaredSkillProgress declaredSkillProgress =
-            DeclaredSkillProgressFixture.create().withStudent(student).toModel();
-
-        BddLogger.when("calling the method with empty trace list");
-
-        when(declaredSkillProgressRepository.findById(declaredSkillProgress.getId()))
-            .thenReturn(Optional.of(declaredSkillProgress));
-        when(traceService.findAllTracesById(List.of())).thenReturn(List.of());
-
-        when(associationService.getAllAssociatedElementsOf(
-                declaredSkillProgress.getId(), DeclaredSkillProgress.class))
-            .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
-
-        DeclaredSkillAssociationsData result =
-            declaredSkillProgressService.associateDeclaredSkillWithTraces(
-                declaredSkillProgress.getId(), List.of());
-
-        BddLogger.then("it should create no associations and return empty association data");
-
-        verify(associationService).createAll(argThat(List::isEmpty));
-        assertNotNull(result);
-      }
-
-      @Test
-      void associateDeclaredSkillWithTraces_shouldDeduplicateRepeatedIdsInRequest() {
-        BddLogger.given(
-            "the method associateDeclaredSkillWithTraces called with the same trace id twice");
-
-        DeclaredSkillProgress declaredSkillProgress =
-            DeclaredSkillProgressFixture.create().withStudent(student).toModel();
-
-        Trace trace = TraceFixture.create().withStudent(student).toModel();
-
-        BddLogger.when("calling the method with a duplicated trace id");
-
-        when(declaredSkillProgressRepository.findById(declaredSkillProgress.getId()))
-            .thenReturn(Optional.of(declaredSkillProgress));
-        when(traceService.findAllTracesById(List.of(trace.getId()))).thenReturn(List.of(trace));
-
-        when(associationService.getAllAssociatedElementsOf(
-                declaredSkillProgress.getId(), DeclaredSkillProgress.class))
-            .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
-
-        declaredSkillProgressService.associateDeclaredSkillWithTraces(
-            declaredSkillProgress.getId(), List.of(trace.getId(), trace.getId()));
-
-        BddLogger.then("it should create a single association, not two");
-
-        verify(traceService).findAllTracesById(List.of(trace.getId()));
-        verify(associationService)
-            .createAll(
-                argThat(
-                    list ->
-                        list.size() == 1
-                            && list.get(0).id1().equals(trace.getId())
-                            && list.get(0).id2().equals(declaredSkillProgress.getId())
-                            && list.get(0).associationType()
-                                == EAssociationType.TRACE_DECLARED_SKILL));
-      }
-
-      @Test
-      void associateDeclaredSkillWithTraces_shouldPropagateAssociationAlreadyExistException() {
-        BddLogger.given("a trace already associated with the declared skill progress");
-
-        DeclaredSkillProgress declaredSkillProgress =
-            DeclaredSkillProgressFixture.create().withStudent(student).toModel();
-
-        Trace trace = TraceFixture.create().withStudent(student).toModel();
-
-        when(declaredSkillProgressRepository.findById(declaredSkillProgress.getId()))
-            .thenReturn(Optional.of(declaredSkillProgress));
-        when(traceService.findAllTracesById(List.of(trace.getId()))).thenReturn(List.of(trace));
-        when(associationService.createAll(anyList()))
-            .thenThrow(new AssociationAlreadyExistException());
-
-        BddLogger.when("calling the method with an already associated trace");
-
-        BddLogger.then("it should propagate AssociationAlreadyExistException");
-
-        assertThrows(
-            AssociationAlreadyExistException.class,
-            () ->
-                declaredSkillProgressService.associateDeclaredSkillWithTraces(
-                    declaredSkillProgress.getId(), List.of(trace.getId())));
       }
     }
 
     @Nested
     class WhenGettingAssociations {
 
-      @Mock private DeclaredActivityService declaredActivityService;
       @Mock private AssociationService associationService;
       @Mock private AssociationSearchHelper associationSearchHelper;
-      @Mock private DeclaredExperienceService declaredExperienceService;
 
       @BeforeEach
       void setUp() {
         declaredSkillProgressService =
             new DeclaredSkillProgressServiceImpl(
-                traceService,
                 declaredSkillSyncService,
                 declaredSkillProgressRepository,
                 externalSkillClient,
                 loggedInUserService,
-                declaredActivityService,
                 associationService,
-                associationSearchHelper,
-                declaredExperienceService);
+                associationSearchHelper);
       }
 
       @Test

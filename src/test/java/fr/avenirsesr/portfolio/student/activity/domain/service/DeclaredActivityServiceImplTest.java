@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -43,7 +42,6 @@ import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.association.domain.service.AssociationSearchHelper;
 import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillAssociationData;
-import fr.avenirsesr.portfolio.student.skill.domain.exception.DeclaredSkillProgressNotFoundException;
 import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.student.trace.domain.data.TraceAssociationData;
@@ -95,7 +93,6 @@ class DeclaredActivityServiceImplTest {
             declaredActivityRepository,
             activityService,
             traceService,
-            declaredSkillProgressService,
             associationService,
             associationSearchHelper,
             loggedInUserService,
@@ -1197,58 +1194,37 @@ class DeclaredActivityServiceImplTest {
   }
 
   @Test
-  void associateActivityWithDeclaredSkills_should_create_associations_and_return_data_when_valid() {
-    BddLogger.given(
-        "A logged-in student, a declared activity owned by him and valid declared skills");
+  void associate_should_associate_the_given_elements_with_the_declared_activity() {
+    BddLogger.given("A logged-in student and a declared activity owned by him");
 
     UUID declaredActivityId = UUID.randomUUID();
-    UUID skillId1 = UUID.randomUUID();
-    UUID skillId2 = UUID.randomUUID();
+    List<UUID> skillIds = List.of(UUID.randomUUID(), UUID.randomUUID());
 
     DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
 
-    var skill1 = mock(DeclaredSkillProgress.class);
-    var skill2 = mock(DeclaredSkillProgress.class);
-
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-
     when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
         .thenReturn(Optional.of(declaredActivity));
     when(declaredActivity.getStudent()).thenReturn(student);
-
-    when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(
-            List.of(skillId1, skillId2)))
-        .thenReturn(List.of(skill1, skill2));
-
-    when(skill1.getId()).thenReturn(skillId1);
-    when(skill2.getId()).thenReturn(skillId2);
-
-    when(skill1.getStudent()).thenReturn(student);
-    when(skill2.getStudent()).thenReturn(student);
-
     when(declaredActivity.getId()).thenReturn(declaredActivityId);
-
     when(associationService.getAllAssociatedElementsOf(declaredActivityId, DeclaredActivity.class))
         .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
 
-    BddLogger.when("associateActivityWithDeclaredSkills is called");
-    service.associateActivityWithDeclaredSkills(declaredActivityId, List.of(skillId1, skillId2));
+    BddLogger.when("associate is called");
+    service.associate(
+        declaredActivityId, skillIds, EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL);
 
-    BddLogger.then("Associations are created with correct type");
+    BddLogger.then("They are associated through the association service");
     verify(associationService)
-        .createAll(
-            argThat(
-                list ->
-                    list.size() == 2
-                        && list.stream()
-                            .allMatch(
-                                a ->
-                                    a.associationType()
-                                        == EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL)));
+        .associate(
+            declaredActivityId,
+            DeclaredActivity.class,
+            skillIds,
+            EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL);
   }
 
   @Test
-  void associateActivityWithDeclaredSkills_should_throw_when_declaredActivity_not_found() {
+  void associate_should_throw_when_declaredActivity_not_found() {
     BddLogger.given("A logged-in student and a non-existent declared activity");
 
     UUID declaredActivityId = UUID.randomUUID();
@@ -1257,20 +1233,22 @@ class DeclaredActivityServiceImplTest {
     when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
         .thenReturn(Optional.empty());
 
-    BddLogger.when("associateActivityWithDeclaredSkills is called");
+    BddLogger.when("associate is called");
 
     BddLogger.then("DeclaredActivityNotFoundException is thrown");
     assertThatThrownBy(
             () ->
-                service.associateActivityWithDeclaredSkills(
-                    declaredActivityId, List.of(UUID.randomUUID())))
+                service.associate(
+                    declaredActivityId,
+                    List.of(UUID.randomUUID()),
+                    EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL))
         .isInstanceOf(DeclaredActivityNotFoundException.class);
 
-    verify(associationService, never()).createAll(any());
+    verify(associationService, never()).associate(any(), any(), anyList(), any());
   }
 
   @Test
-  void associateActivityWithDeclaredSkills_should_throw_when_not_owner() {
+  void associate_should_throw_when_not_owner() {
     BddLogger.given("A logged-in student and a declared activity belonging to another student");
 
     UUID declaredActivityId = UUID.randomUUID();
@@ -1283,84 +1261,46 @@ class DeclaredActivityServiceImplTest {
         .thenReturn(Optional.of(declaredActivity));
     when(declaredActivity.getStudent()).thenReturn(anotherStudent);
 
-    BddLogger.when("associateActivityWithDeclaredSkills is called");
+    BddLogger.when("associate is called");
 
     BddLogger.then("UserNotAuthorizedException is thrown");
     assertThatThrownBy(
             () ->
-                service.associateActivityWithDeclaredSkills(
-                    declaredActivityId, List.of(UUID.randomUUID())))
+                service.associate(
+                    declaredActivityId,
+                    List.of(UUID.randomUUID()),
+                    EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL))
         .isInstanceOf(UserNotAuthorizedException.class);
 
-    verify(associationService, never()).createAll(any());
+    verify(associationService, never()).associate(any(), any(), anyList(), any());
   }
 
   @Test
-  void associateActivityWithDeclaredSkills_should_throw_when_some_skills_not_found() {
-    BddLogger.given("Some declared skill ids are not found");
+  void associate_should_throw_when_the_declared_activity_is_unsubscribed() {
+    BddLogger.given("An unsubscribed declared activity owned by the logged-in student");
 
     UUID declaredActivityId = UUID.randomUUID();
-    UUID skillId1 = UUID.randomUUID();
-    UUID skillIdMissing = UUID.randomUUID();
 
     DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
-    var skill1 = mock(DeclaredSkillProgress.class);
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-
     when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
         .thenReturn(Optional.of(declaredActivity));
     when(declaredActivity.getStudent()).thenReturn(student);
+    when(declaredActivity.isUnsubscribed()).thenReturn(true);
 
-    when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(
-            List.of(skillId1, skillIdMissing)))
-        .thenReturn(List.of(skill1));
+    BddLogger.when("associate is called");
 
-    when(skill1.getId()).thenReturn(skillId1);
-
-    BddLogger.when("associateActivityWithDeclaredSkills is called");
-
-    BddLogger.then("DeclaredSkillProgressNotFoundException is thrown");
+    BddLogger.then("DeclaredActivityUnsubscribedException is thrown");
     assertThatThrownBy(
             () ->
-                service.associateActivityWithDeclaredSkills(
-                    declaredActivityId, List.of(skillId1, skillIdMissing)))
-        .isInstanceOf(DeclaredSkillProgressNotFoundException.class);
+                service.associate(
+                    declaredActivityId,
+                    List.of(UUID.randomUUID()),
+                    EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL))
+        .isInstanceOf(DeclaredActivityUnsubscribedException.class);
 
-    verify(associationService, never()).createAll(any());
-  }
-
-  @Test
-  void associateActivityWithDeclaredSkills_should_throw_when_skill_not_owned_by_student() {
-    BddLogger.given("A declared skill not owned by the logged-in student");
-
-    UUID declaredActivityId = UUID.randomUUID();
-    UUID skillId = UUID.randomUUID();
-
-    DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
-    var skill = mock(DeclaredSkillProgress.class);
-    Student anotherStudent = StudentFixture.create().toModel();
-
-    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-
-    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
-        .thenReturn(Optional.of(declaredActivity));
-    when(declaredActivity.getStudent()).thenReturn(student);
-
-    when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of(skillId)))
-        .thenReturn(List.of(skill));
-
-    when(skill.getId()).thenReturn(skillId);
-    when(skill.getStudent()).thenReturn(anotherStudent);
-
-    BddLogger.when("associateActivityWithDeclaredSkills is called");
-
-    BddLogger.then("UserNotAuthorizedException is thrown");
-    assertThatThrownBy(
-            () -> service.associateActivityWithDeclaredSkills(declaredActivityId, List.of(skillId)))
-        .isInstanceOf(UserNotAuthorizedException.class);
-
-    verify(associationService, never()).createAll(any());
+    verify(associationService, never()).associate(any(), any(), anyList(), any());
   }
 
   @Test
@@ -1502,8 +1442,7 @@ class DeclaredActivityServiceImplTest {
   }
 
   @Test
-  void
-      associateActivityWithTraces_should_throw_MaximumAssociationReachedException_when_limit_reached() {
+  void associate_should_throw_MaximumAssociationReachedException_when_limit_reached() {
     BddLogger.given(
         "A declared activity with traceAllowedAssociations=1 and already 1 existing association");
 
@@ -1514,18 +1453,13 @@ class DeclaredActivityServiceImplTest {
     DeclaredActivity declaredActivity =
         DeclaredActivity.create(UUID.randomUUID(), student, activity, null, null, null, null, null);
 
-    Trace trace = mock(Trace.class);
-    when(trace.getId()).thenReturn(traceId);
-    when(trace.getStudent()).thenReturn(student);
-
     Association existingAssociation = mock(Association.class);
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
         .thenReturn(Optional.of(declaredActivity));
-    when(traceService.findAllTracesById(List.of(traceId))).thenReturn(List.of(trace));
     when(associationService.getAllOf(
-            declaredActivityId,
+            declaredActivity.getId(),
             DeclaredActivity.class,
             List.of(EAssociationType.DECLARED_ACTIVITY_TRACE)))
         .thenReturn(List.of(existingAssociation));
@@ -1534,10 +1468,12 @@ class DeclaredActivityServiceImplTest {
 
     BddLogger.then("A MaximumAssociationReachedException is thrown and no association is created");
     assertThatThrownBy(
-            () -> service.associateActivityWithTraces(declaredActivityId, List.of(traceId)))
+            () ->
+                service.associate(
+                    declaredActivityId, List.of(traceId), EAssociationType.DECLARED_ACTIVITY_TRACE))
         .isInstanceOf(MaximumAssociationReachedException.class);
 
-    verify(associationService, never()).createAll(any());
+    verify(associationService, never()).associate(any(), any(), anyList(), any());
   }
 
   @Test

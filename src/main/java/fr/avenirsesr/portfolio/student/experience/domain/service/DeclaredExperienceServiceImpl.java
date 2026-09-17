@@ -11,7 +11,6 @@ import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortField;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
-import fr.avenirsesr.portfolio.student.association.domain.data.AssociationData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
@@ -25,11 +24,7 @@ import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperienc
 import fr.avenirsesr.portfolio.student.experience.domain.model.enums.EExperienceType;
 import fr.avenirsesr.portfolio.student.experience.domain.port.input.DeclaredExperienceService;
 import fr.avenirsesr.portfolio.student.experience.domain.port.output.repository.DeclaredExperienceRepository;
-import fr.avenirsesr.portfolio.student.skill.domain.exception.DeclaredSkillProgressNotFoundException;
-import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
-import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.student.trace.domain.data.TraceViewData;
-import fr.avenirsesr.portfolio.student.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.student.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
@@ -56,7 +51,6 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
   private final TraceService traceService;
   private final DeclaredExperienceRepository experienceRepository;
   private final StudentService studentService;
-  private final DeclaredSkillProgressService declaredSkillProgressService;
 
   @Override
   public DeclaredExperience create(
@@ -439,63 +433,12 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
   }
 
   @Override
-  public DeclaredExperienceAssociationsData associateDeclaredExperienceWithDeclaredSkills(
-      UUID declaredExperienceId, List<UUID> declaredSkillProgressIds) {
+  public DeclaredExperienceAssociationsData associate(
+      UUID declaredExperienceId, List<UUID> associatedIds, EAssociationType associationType) {
     var experience = fetchAndCheckLoggedInStudentAuthorization(declaredExperienceId);
-    Student student = experience.getStudent();
 
-    var uniqueDeclaredSkillProgressIds = declaredSkillProgressIds.stream().distinct().toList();
-    var declaredSkillProgresses =
-        declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(
-            uniqueDeclaredSkillProgressIds);
-
-    if (!new HashSet<>(declaredSkillProgresses.stream().map(DeclaredSkillProgress::getId).toList())
-        .containsAll(uniqueDeclaredSkillProgressIds)) {
-      throw new DeclaredSkillProgressNotFoundException();
-    }
-
-    if (!declaredSkillProgresses.stream()
-        .allMatch(declaredSkillProgress -> declaredSkillProgress.getStudent().equals(student))) {
-      throw new UserNotAuthorizedException();
-    }
-
-    associationService.createAll(
-        uniqueDeclaredSkillProgressIds.stream()
-            .map(
-                declaredSkillProgressId ->
-                    new AssociationData(
-                        experience.getId(),
-                        declaredSkillProgressId,
-                        EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL))
-            .toList());
-
-    return getAssociations(experience.getId());
-  }
-
-  @Override
-  public DeclaredExperienceAssociationsData associateDeclaredExperienceWithTraces(
-      UUID declaredExperienceId, List<UUID> traceIds) {
-    var experience = fetchAndCheckLoggedInStudentAuthorization(declaredExperienceId);
-    Student student = experience.getStudent();
-
-    var uniqueTraceIds = traceIds.stream().distinct().toList();
-    var traces = traceService.findAllTracesById(uniqueTraceIds);
-
-    if (!new HashSet<>(traces.stream().map(Trace::getId).toList()).containsAll(uniqueTraceIds)) {
-      throw new TraceNotFoundException();
-    }
-
-    if (!traces.stream().allMatch(trace -> trace.getStudent().equals(student))) {
-      throw new UserNotAuthorizedException();
-    }
-
-    associationService.createAll(
-        uniqueTraceIds.stream()
-            .map(
-                traceId ->
-                    new AssociationData(
-                        traceId, experience.getId(), EAssociationType.TRACE_DECLARED_EXPERIENCE))
-            .toList());
+    associationService.associate(
+        experience.getId(), DeclaredExperience.class, associatedIds, associationType);
 
     return getAssociations(experience.getId());
   }

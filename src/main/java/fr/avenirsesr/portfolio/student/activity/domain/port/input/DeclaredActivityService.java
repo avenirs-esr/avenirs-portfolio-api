@@ -9,6 +9,7 @@ import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
+import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -46,11 +47,8 @@ public interface DeclaredActivityService {
 
   PagedResult<DeclaredActivity> searchDeclaredActivity(String keyword, PageCriteria pageCriteria);
 
-  DeclaredActivityAssociationsData associateActivityWithTraces(
-      UUID declaredActivityId, List<UUID> traceIds);
-
-  DeclaredActivityAssociationsData associateActivityWithDeclaredSkills(
-      UUID declaredActivityId, List<UUID> declaredSkillIds);
+  DeclaredActivityAssociationsData associate(
+      UUID declaredActivityId, List<UUID> associatedIds, EAssociationType associationType);
 
   PagedResult<AssociationSearchResultData> searchTracesForAssociation(
       UUID declaredActivityId, String keyword, PageCriteria pageCriteria, Boolean isAssociated);

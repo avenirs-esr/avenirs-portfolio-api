@@ -5,6 +5,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.*;
 
+import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
+import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.DeclaredActivityAlreadyFinishedException;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.DeclaredActivityNotFoundException;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
@@ -25,6 +27,8 @@ import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProg
 import fr.avenirsesr.portfolio.student.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
+import fr.avenirsesr.portfolio.user.domain.model.Student;
+import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +44,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class AssociationServiceImplTest {
 
   @Mock private AssociationRepository associationRepository;
+  @Mock private LoggedInUserService loggedInUserService;
   @Mock private TraceService traceService;
   @Mock private DeclaredActivityService declaredActivityService;
   @Mock private DeclaredSkillProgressService declaredSkillProgressService;
@@ -49,6 +54,14 @@ class AssociationServiceImplTest {
 
   private static Association association(UUID id1, UUID id2, EAssociationType associationType) {
     return Association.create(id1, id2, associationType);
+  }
+
+  private DeclaredSkillProgress declaredSkillProgressOf(UUID id, Student student) {
+    var declaredSkillProgress = mock(DeclaredSkillProgress.class);
+    when(declaredSkillProgress.getId()).thenReturn(id);
+    lenient().when(declaredSkillProgress.getStudent()).thenReturn(student);
+
+    return declaredSkillProgress;
   }
 
   private void givenAssociationsOf(UUID id, Class<?> clazz, List<Association> associations) {
@@ -399,6 +412,117 @@ class AssociationServiceImplTest {
 
     assertThatThrownBy(() -> service.getAllAssociatedElementsOf(traceId, Trace.class))
         .isInstanceOf(DeclaredExperienceNotFoundException.class);
+  }
+
+  @Test
+  void associate_should_create_the_associations_of_the_element() {
+    var student = StudentFixture.create().toModel();
+    UUID traceId = UUID.randomUUID();
+    UUID skillId = UUID.randomUUID();
+
+    var declaredSkillProgress = declaredSkillProgressOf(skillId, student);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of(skillId)))
+        .thenReturn(List.of(declaredSkillProgress));
+    when(associationRepository.findAllIn(anyList())).thenReturn(List.of());
+    when(associationRepository.saveAll(anyList())).thenAnswer(i -> i.getArguments()[0]);
+
+    service.associate(
+        traceId, Trace.class, List.of(skillId), EAssociationType.TRACE_DECLARED_SKILL);
+
+    verify(associationRepository)
+        .findAllIn(
+            List.of(new AssociationData(traceId, skillId, EAssociationType.TRACE_DECLARED_SKILL)));
+    verify(associationRepository).saveAll(anyList());
+  }
+
+  @Test
+  void associate_should_create_the_associations_when_the_element_is_the_second_key() {
+    var student = StudentFixture.create().toModel();
+    UUID traceId = UUID.randomUUID();
+    UUID declaredActivityId = UUID.randomUUID();
+
+    var declaredActivity = mock(DeclaredActivity.class);
+    when(declaredActivity.getId()).thenReturn(declaredActivityId);
+    when(declaredActivity.getStudent()).thenReturn(student);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityService.findAllDeclaredActivitiesByIds(List.of(declaredActivityId)))
+        .thenReturn(List.of(declaredActivity));
+    when(associationRepository.findAllIn(anyList())).thenReturn(List.of());
+    when(associationRepository.saveAll(anyList())).thenAnswer(i -> i.getArguments()[0]);
+
+    service.associate(
+        traceId,
+        Trace.class,
+        List.of(declaredActivityId),
+        EAssociationType.DECLARED_ACTIVITY_TRACE);
+
+    verify(associationRepository)
+        .findAllIn(
+            List.of(
+                new AssociationData(
+                    declaredActivityId, traceId, EAssociationType.DECLARED_ACTIVITY_TRACE)));
+  }
+
+  @Test
+  void associate_should_create_a_single_association_for_a_duplicated_id() {
+    var student = StudentFixture.create().toModel();
+    UUID traceId = UUID.randomUUID();
+    UUID skillId = UUID.randomUUID();
+
+    var declaredSkillProgress = declaredSkillProgressOf(skillId, student);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of(skillId)))
+        .thenReturn(List.of(declaredSkillProgress));
+    when(associationRepository.findAllIn(anyList())).thenReturn(List.of());
+    when(associationRepository.saveAll(anyList())).thenAnswer(i -> i.getArguments()[0]);
+
+    service.associate(
+        traceId, Trace.class, List.of(skillId, skillId), EAssociationType.TRACE_DECLARED_SKILL);
+
+    verify(associationRepository)
+        .findAllIn(
+            List.of(new AssociationData(traceId, skillId, EAssociationType.TRACE_DECLARED_SKILL)));
+  }
+
+  @Test
+  void associate_should_throw_when_an_associated_element_does_not_exist() {
+    UUID traceId = UUID.randomUUID();
+    UUID skillId = UUID.randomUUID();
+
+    when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of(skillId)))
+        .thenReturn(List.of());
+
+    assertThatThrownBy(
+            () ->
+                service.associate(
+                    traceId, Trace.class, List.of(skillId), EAssociationType.TRACE_DECLARED_SKILL))
+        .isInstanceOf(DeclaredSkillProgressNotFoundException.class);
+
+    verify(associationRepository, never()).saveAll(anyList());
+  }
+
+  @Test
+  void associate_should_throw_when_an_associated_element_belongs_to_another_student() {
+    UUID traceId = UUID.randomUUID();
+    UUID skillId = UUID.randomUUID();
+
+    var declaredSkillProgress = declaredSkillProgressOf(skillId, StudentFixture.create().toModel());
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(StudentFixture.create().toModel());
+    when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of(skillId)))
+        .thenReturn(List.of(declaredSkillProgress));
+
+    assertThatThrownBy(
+            () ->
+                service.associate(
+                    traceId, Trace.class, List.of(skillId), EAssociationType.TRACE_DECLARED_SKILL))
+        .isInstanceOf(UserNotAuthorizedException.class);
+
+    verify(associationRepository, never()).saveAll(anyList());
   }
 
   @Test

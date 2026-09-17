@@ -1,6 +1,8 @@
 package fr.avenirsesr.portfolio.student.association.domain.service;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
+import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
+import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityAssociationData;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.DeclaredActivityAlreadyFinishedException;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.DeclaredActivityNotFoundException;
@@ -26,10 +28,12 @@ import fr.avenirsesr.portfolio.student.trace.domain.data.TraceAssociationData;
 import fr.avenirsesr.portfolio.student.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
+import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +41,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AssociationServiceImpl implements AssociationService {
   private final AssociationRepository associationRepository;
+  private final LoggedInUserService loggedInUserService;
   private final TraceService traceService;
   private final DeclaredActivityService declaredActivityService;
   private final DeclaredSkillProgressService declaredSkillProgressService;
@@ -112,6 +117,19 @@ public class AssociationServiceImpl implements AssociationService {
   }
 
   @Override
+  public void associate(
+      UUID id, Class<?> clazz, List<UUID> associatedIds, EAssociationType associationType) {
+    var uniqueAssociatedIds = associatedIds.stream().distinct().toList();
+
+    checkAssociatedElements(associationType.associatedKeyOf(clazz), uniqueAssociatedIds);
+
+    createAll(
+        uniqueAssociatedIds.stream()
+            .map(associatedId -> associationDataOf(id, clazz, associatedId, associationType))
+            .toList());
+  }
+
+  @Override
   public void unassociate(UUID id, Class<?> clazz, List<UUID> associationIds) {
     var associations =
         getAllOf(id, clazz, EAssociationType.getAllBy(clazz)).stream()
@@ -145,6 +163,67 @@ public class AssociationServiceImpl implements AssociationService {
     var associations =
         ids.stream().flatMap(id -> getAllOf(id, clazz, associationTypes).stream()).toList();
     deleteAllByIds(associations.stream().map(Association::getId).toList());
+  }
+
+  private AssociationData associationDataOf(
+      UUID id, Class<?> clazz, UUID associatedId, EAssociationType associationType) {
+    return associationType.getKey1().equals(clazz)
+        ? new AssociationData(id, associatedId, associationType)
+        : new AssociationData(associatedId, id, associationType);
+  }
+
+  private void checkAssociatedElements(Class<?> clazz, List<UUID> ids) {
+    if (Trace.class.equals(clazz)) {
+      checkElements(
+          ids, traceService.findAllTracesById(ids), Trace::getStudent, TraceNotFoundException::new);
+      return;
+    }
+
+    if (DeclaredActivity.class.equals(clazz)) {
+      checkElements(
+          ids,
+          declaredActivityService.findAllDeclaredActivitiesByIds(ids),
+          DeclaredActivity::getStudent,
+          DeclaredActivityNotFoundException::new);
+      return;
+    }
+
+    if (DeclaredSkillProgress.class.equals(clazz)) {
+      checkElements(
+          ids,
+          declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(ids),
+          DeclaredSkillProgress::getStudent,
+          DeclaredSkillProgressNotFoundException::new);
+      return;
+    }
+
+    if (DeclaredExperience.class.equals(clazz)) {
+      checkElements(
+          ids,
+          declaredExperienceService.findAllByIds(ids),
+          DeclaredExperience::getStudent,
+          DeclaredExperienceNotFoundException::new);
+      return;
+    }
+
+    throw new IllegalArgumentException(clazz.getSimpleName() + " cannot be associated");
+  }
+
+  private <T extends AvenirsBaseModel> void checkElements(
+      List<UUID> ids,
+      List<T> elements,
+      Function<T, Student> studentExtractor,
+      Supplier<RuntimeException> notFoundException) {
+    if (!new HashSet<>(elements.stream().map(AvenirsBaseModel::getId).toList()).containsAll(ids)) {
+      throw notFoundException.get();
+    }
+
+    var loggedInStudent = loggedInUserService.getLoggedInStudent();
+
+    if (!elements.stream()
+        .allMatch(element -> studentExtractor.apply(element).equals(loggedInStudent))) {
+      throw new UserNotAuthorizedException();
+    }
   }
 
   private void checkIfDeclaredActivitiesAssociationsAreDeletable(List<Association> associations) {

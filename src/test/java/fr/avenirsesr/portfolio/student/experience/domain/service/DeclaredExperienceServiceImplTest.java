@@ -17,7 +17,6 @@ import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociatedElementsData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
-import fr.avenirsesr.portfolio.student.association.domain.exception.AssociationAlreadyExistException;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
@@ -28,11 +27,9 @@ import fr.avenirsesr.portfolio.student.experience.domain.exception.DeclaredExper
 import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.experience.domain.model.enums.EExperienceType;
 import fr.avenirsesr.portfolio.student.experience.domain.port.output.repository.DeclaredExperienceRepository;
-import fr.avenirsesr.portfolio.student.skill.domain.exception.DeclaredSkillProgressNotFoundException;
 import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.student.trace.domain.data.TraceAssociationData;
-import fr.avenirsesr.portfolio.student.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.student.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
@@ -1241,491 +1238,90 @@ class DeclaredExperienceServiceImplTest {
   }
 
   @Nested
-  class WhenAssociatingDeclaredExperienceWithDeclaredSkills {
+  class WhenAssociatingDeclaredExperience {
 
     @Test
-    void shouldCreateAssociationsSuccessfully() {
-      BddLogger.given("a declared experience and two declared skill progresses of the student");
+    void shouldAssociateTheGivenElementsWithTheExperience() {
+      BddLogger.given("a declared experience of the student");
 
       UUID experienceId = UUID.randomUUID();
       DeclaredExperience experience = mock(DeclaredExperience.class);
       when(experience.getId()).thenReturn(experienceId);
       when(experience.getStudent()).thenReturn(student);
 
-      DeclaredSkillProgress skill1 = mockDeclaredSkillProgress(student);
-      DeclaredSkillProgress skill2 = mockDeclaredSkillProgress(student);
+      List<UUID> skillIds = List.of(UUID.randomUUID(), UUID.randomUUID());
 
       when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
       when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
-      when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(
-              List.of(skill1.getId(), skill2.getId())))
-          .thenReturn(List.of(skill1, skill2));
-
       when(associationService.getAllAssociatedElementsOf(experienceId, DeclaredExperience.class))
           .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
 
-      BddLogger.when("associating the experience with both declared skill progresses");
+      BddLogger.when("associating the experience with declared skill progresses");
 
       var result =
-          service.associateDeclaredExperienceWithDeclaredSkills(
-              experienceId, List.of(skill1.getId(), skill2.getId()));
+          service.associate(
+              experienceId, skillIds, EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL);
 
-      BddLogger.then("it should create both DECLARED_EXPERIENCE_DECLARED_SKILL associations");
+      BddLogger.then("it should associate them through the association service");
 
       verify(associationService)
-          .createAll(
-              argThat(
-                  list ->
-                      list.size() == 2
-                          && list.stream()
-                              .allMatch(
-                                  assocData ->
-                                      assocData.associationType()
-                                              == EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL
-                                          && assocData.id1().equals(experienceId)
-                                          && (assocData.id2().equals(skill1.getId())
-                                              || assocData.id2().equals(skill2.getId())))));
+          .associate(
+              experienceId,
+              DeclaredExperience.class,
+              skillIds,
+              EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL);
+
       assertNotNull(result);
     }
 
     @Test
-    void shouldThrowDeclaredExperienceNotFoundException() {
-      BddLogger.given("a non-existent declared experience");
+    void shouldThrowDeclaredExperienceNotFoundWhenExperienceDoesNotExist() {
+      BddLogger.given("an unknown declared experience");
 
       UUID experienceId = UUID.randomUUID();
-      UUID skillId = UUID.randomUUID();
 
       when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
       when(experienceRepository.findById(experienceId)).thenReturn(Optional.empty());
 
-      BddLogger.when("associating with a declared skill progress");
+      BddLogger.when("associating the experience");
 
       BddLogger.then("it should throw DeclaredExperienceNotFoundException");
 
       assertThrows(
           DeclaredExperienceNotFoundException.class,
           () ->
-              service.associateDeclaredExperienceWithDeclaredSkills(
-                  experienceId, List.of(skillId)));
+              service.associate(
+                  experienceId,
+                  List.of(UUID.randomUUID()),
+                  EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL));
 
-      verifyNoInteractions(declaredSkillProgressService);
-      verifyNoInteractions(associationService);
+      verify(associationService, never()).associate(any(), any(), anyList(), any());
     }
 
     @Test
-    void shouldThrowUserNotAuthorizedException_whenExperienceBelongsToAnotherStudent() {
-      BddLogger.given("a declared experience belonging to another student");
+    void shouldThrowUserNotAuthorizedWhenExperienceBelongsToAnotherStudent() {
+      BddLogger.given("a declared experience of another student");
 
       UUID experienceId = UUID.randomUUID();
-      UUID skillId = UUID.randomUUID();
-      Student anotherStudent = StudentFixture.create().toModel();
-
       DeclaredExperience experience = mock(DeclaredExperience.class);
-      when(experience.getStudent()).thenReturn(anotherStudent);
+      when(experience.getStudent()).thenReturn(StudentFixture.create().toModel());
 
       when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
       when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
 
-      BddLogger.when("associating with a declared skill progress");
+      BddLogger.when("associating the experience");
 
       BddLogger.then("it should throw UserNotAuthorizedException");
 
       assertThrows(
           UserNotAuthorizedException.class,
           () ->
-              service.associateDeclaredExperienceWithDeclaredSkills(
-                  experienceId, List.of(skillId)));
-
-      verifyNoInteractions(declaredSkillProgressService);
-      verifyNoInteractions(associationService);
-    }
-
-    @Test
-    void shouldThrowDeclaredSkillProgressNotFoundException_whenSomeIdsAreMissing() {
-      BddLogger.given("a declared experience and some non-existing declared skill progress ids");
-
-      UUID experienceId = UUID.randomUUID();
-      DeclaredExperience experience = mock(DeclaredExperience.class);
-      when(experience.getStudent()).thenReturn(student);
-
-      DeclaredSkillProgress skill1 = mockDeclaredSkillProgress(student);
-      UUID missingSkillId = UUID.randomUUID();
-
-      when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-      when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
-      when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(
-              List.of(skill1.getId(), missingSkillId)))
-          .thenReturn(List.of(skill1));
-
-      BddLogger.when("associating with a mix of valid and non-existing declared skill ids");
-
-      BddLogger.then("it should throw DeclaredSkillProgressNotFoundException");
-
-      assertThrows(
-          DeclaredSkillProgressNotFoundException.class,
-          () ->
-              service.associateDeclaredExperienceWithDeclaredSkills(
-                  experienceId, List.of(skill1.getId(), missingSkillId)));
-
-      verifyNoInteractions(associationService);
-    }
-
-    @Test
-    void shouldThrowUserNotAuthorizedException_whenDeclaredSkillBelongsToAnotherStudent() {
-      BddLogger.given("a declared skill progress belonging to another student");
-
-      UUID experienceId = UUID.randomUUID();
-      DeclaredExperience experience = mock(DeclaredExperience.class);
-      when(experience.getStudent()).thenReturn(student);
-
-      Student anotherStudent = StudentFixture.create().toModel();
-      DeclaredSkillProgress skill = mockDeclaredSkillProgress(anotherStudent);
-
-      when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-      when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
-      when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of(skill.getId())))
-          .thenReturn(List.of(skill));
-
-      BddLogger.when("associating with a declared skill progress owned by another student");
-
-      BddLogger.then("it should throw UserNotAuthorizedException");
-
-      assertThrows(
-          UserNotAuthorizedException.class,
-          () ->
-              service.associateDeclaredExperienceWithDeclaredSkills(
-                  experienceId, List.of(skill.getId())));
-
-      verifyNoInteractions(associationService);
-    }
-
-    @Test
-    void shouldHandleEmptyDeclaredSkillProgressList() {
-      BddLogger.given("a declared experience and an empty declared skill progress list");
-
-      UUID experienceId = UUID.randomUUID();
-      DeclaredExperience experience = mock(DeclaredExperience.class);
-      when(experience.getId()).thenReturn(experienceId);
-      when(experience.getStudent()).thenReturn(student);
-
-      when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-      when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
-      when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of()))
-          .thenReturn(List.of());
-      when(associationService.getAllAssociatedElementsOf(experienceId, DeclaredExperience.class))
-          .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
-
-      BddLogger.when("associating with an empty list");
-
-      var result = service.associateDeclaredExperienceWithDeclaredSkills(experienceId, List.of());
-
-      BddLogger.then("it should create no association and return the current associations");
-
-      verify(associationService).createAll(argThat(List::isEmpty));
-      assertNotNull(result);
-    }
-
-    @Test
-    void shouldCreateOnlyOneAssociation_whenRequestContainsDuplicatedId() {
-      BddLogger.given("a request containing the same declared skill progress id twice");
-
-      UUID experienceId = UUID.randomUUID();
-      DeclaredExperience experience = mock(DeclaredExperience.class);
-      when(experience.getId()).thenReturn(experienceId);
-      when(experience.getStudent()).thenReturn(student);
-
-      DeclaredSkillProgress skill = mockDeclaredSkillProgress(student);
-
-      when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-      when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
-      when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of(skill.getId())))
-          .thenReturn(List.of(skill));
-      when(associationService.getAllAssociatedElementsOf(experienceId, DeclaredExperience.class))
-          .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
-
-      BddLogger.when("associating with the duplicated id");
-
-      service.associateDeclaredExperienceWithDeclaredSkills(
-          experienceId, List.of(skill.getId(), skill.getId()));
-
-      BddLogger.then("it should create a single association, not two");
-
-      verify(declaredSkillProgressService)
-          .findAllDeclaredSkillProgressesByIds(List.of(skill.getId()));
-      verify(associationService)
-          .createAll(
-              argThat(
-                  list ->
-                      list.size() == 1
-                          && list.get(0).id1().equals(experienceId)
-                          && list.get(0).id2().equals(skill.getId())));
-    }
-
-    @Test
-    void shouldPropagateAssociationAlreadyExistException() {
-      BddLogger.given("a declared skill progress already associated with the experience");
-
-      UUID experienceId = UUID.randomUUID();
-      DeclaredExperience experience = mock(DeclaredExperience.class);
-      when(experience.getId()).thenReturn(experienceId);
-      when(experience.getStudent()).thenReturn(student);
-
-      DeclaredSkillProgress skill = mockDeclaredSkillProgress(student);
-
-      when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-      when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
-      when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of(skill.getId())))
-          .thenReturn(List.of(skill));
-      when(associationService.createAll(anyList()))
-          .thenThrow(new AssociationAlreadyExistException());
-
-      BddLogger.when("associating with an already associated declared skill progress");
-
-      BddLogger.then("it should propagate AssociationAlreadyExistException");
-
-      assertThrows(
-          AssociationAlreadyExistException.class,
-          () ->
-              service.associateDeclaredExperienceWithDeclaredSkills(
-                  experienceId, List.of(skill.getId())));
-    }
-  }
-
-  @Nested
-  class WhenAssociatingDeclaredExperienceWithTraces {
-
-    @Test
-    void shouldCreateAssociationsSuccessfully() {
-      BddLogger.given("a declared experience and two traces of the student");
-
-      UUID experienceId = UUID.randomUUID();
-      DeclaredExperience experience = mock(DeclaredExperience.class);
-      when(experience.getId()).thenReturn(experienceId);
-      when(experience.getStudent()).thenReturn(student);
-
-      Trace trace1 = TraceFixture.create().withStudent(student).toModel();
-      Trace trace2 = TraceFixture.create().withStudent(student).toModel();
-
-      when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-      when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
-      when(traceService.findAllTracesById(List.of(trace1.getId(), trace2.getId())))
-          .thenReturn(List.of(trace1, trace2));
-
-      when(associationService.getAllAssociatedElementsOf(experienceId, DeclaredExperience.class))
-          .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
-
-      BddLogger.when("associating the experience with both traces");
-
-      var result =
-          service.associateDeclaredExperienceWithTraces(
-              experienceId, List.of(trace1.getId(), trace2.getId()));
-
-      BddLogger.then("it should create both TRACE_DECLARED_EXPERIENCE associations");
-
-      verify(associationService)
-          .createAll(
-              argThat(
-                  list ->
-                      list.size() == 2
-                          && list.stream()
-                              .allMatch(
-                                  assocData ->
-                                      assocData.associationType()
-                                              == EAssociationType.TRACE_DECLARED_EXPERIENCE
-                                          && assocData.id2().equals(experienceId)
-                                          && (assocData.id1().equals(trace1.getId())
-                                              || assocData.id1().equals(trace2.getId())))));
-      assertNotNull(result);
-    }
-
-    @Test
-    void shouldThrowDeclaredExperienceNotFoundException() {
-      BddLogger.given("a non-existent declared experience");
-
-      UUID experienceId = UUID.randomUUID();
-      UUID traceId = UUID.randomUUID();
-
-      when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-      when(experienceRepository.findById(experienceId)).thenReturn(Optional.empty());
-
-      BddLogger.when("associating with a trace");
-
-      BddLogger.then("it should throw DeclaredExperienceNotFoundException");
-
-      assertThrows(
-          DeclaredExperienceNotFoundException.class,
-          () -> service.associateDeclaredExperienceWithTraces(experienceId, List.of(traceId)));
-
-      verifyNoInteractions(traceService);
-      verifyNoInteractions(associationService);
-    }
-
-    @Test
-    void shouldThrowUserNotAuthorizedException_whenExperienceBelongsToAnotherStudent() {
-      BddLogger.given("a declared experience belonging to another student");
-
-      UUID experienceId = UUID.randomUUID();
-      UUID traceId = UUID.randomUUID();
-      Student anotherStudent = StudentFixture.create().toModel();
-
-      DeclaredExperience experience = mock(DeclaredExperience.class);
-      when(experience.getStudent()).thenReturn(anotherStudent);
-
-      when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-      when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
-
-      BddLogger.when("associating with a trace");
-
-      BddLogger.then("it should throw UserNotAuthorizedException");
-
-      assertThrows(
-          UserNotAuthorizedException.class,
-          () -> service.associateDeclaredExperienceWithTraces(experienceId, List.of(traceId)));
-
-      verifyNoInteractions(traceService);
-      verifyNoInteractions(associationService);
-    }
-
-    @Test
-    void shouldThrowTraceNotFoundException_whenSomeIdsAreMissing() {
-      BddLogger.given("a declared experience and some non-existing trace ids");
-
-      UUID experienceId = UUID.randomUUID();
-      DeclaredExperience experience = mock(DeclaredExperience.class);
-      when(experience.getStudent()).thenReturn(student);
-
-      Trace trace1 = TraceFixture.create().withStudent(student).toModel();
-      UUID missingTraceId = UUID.randomUUID();
-
-      when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-      when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
-      when(traceService.findAllTracesById(List.of(trace1.getId(), missingTraceId)))
-          .thenReturn(List.of(trace1));
-
-      BddLogger.when("associating with a mix of valid and non-existing trace ids");
-
-      BddLogger.then("it should throw TraceNotFoundException");
-
-      assertThrows(
-          TraceNotFoundException.class,
-          () ->
-              service.associateDeclaredExperienceWithTraces(
-                  experienceId, List.of(trace1.getId(), missingTraceId)));
-
-      verifyNoInteractions(associationService);
-    }
-
-    @Test
-    void shouldThrowUserNotAuthorizedException_whenTraceBelongsToAnotherStudent() {
-      BddLogger.given("a trace belonging to another student");
-
-      UUID experienceId = UUID.randomUUID();
-      DeclaredExperience experience = mock(DeclaredExperience.class);
-      when(experience.getStudent()).thenReturn(student);
-
-      Student anotherStudent = StudentFixture.create().toModel();
-      Trace trace = TraceFixture.create().withStudent(anotherStudent).toModel();
-
-      when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-      when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
-      when(traceService.findAllTracesById(List.of(trace.getId()))).thenReturn(List.of(trace));
-
-      BddLogger.when("associating with a trace owned by another student");
-
-      BddLogger.then("it should throw UserNotAuthorizedException");
-
-      assertThrows(
-          UserNotAuthorizedException.class,
-          () ->
-              service.associateDeclaredExperienceWithTraces(experienceId, List.of(trace.getId())));
-
-      verifyNoInteractions(associationService);
-    }
-
-    @Test
-    void shouldHandleEmptyTraceList() {
-      BddLogger.given("a declared experience and an empty trace list");
-
-      UUID experienceId = UUID.randomUUID();
-      DeclaredExperience experience = mock(DeclaredExperience.class);
-      when(experience.getId()).thenReturn(experienceId);
-      when(experience.getStudent()).thenReturn(student);
-
-      when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-      when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
-      when(traceService.findAllTracesById(List.of())).thenReturn(List.of());
-      when(associationService.getAllAssociatedElementsOf(experienceId, DeclaredExperience.class))
-          .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
-
-      BddLogger.when("associating with an empty list");
-
-      var result = service.associateDeclaredExperienceWithTraces(experienceId, List.of());
-
-      BddLogger.then("it should create no association and return the current associations");
-
-      verify(associationService).createAll(argThat(List::isEmpty));
-      assertNotNull(result);
-    }
-
-    @Test
-    void shouldCreateOnlyOneAssociation_whenRequestContainsDuplicatedId() {
-      BddLogger.given("a request containing the same trace id twice");
-
-      UUID experienceId = UUID.randomUUID();
-      DeclaredExperience experience = mock(DeclaredExperience.class);
-      when(experience.getId()).thenReturn(experienceId);
-      when(experience.getStudent()).thenReturn(student);
-
-      Trace trace = TraceFixture.create().withStudent(student).toModel();
-
-      when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-      when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
-      when(traceService.findAllTracesById(List.of(trace.getId()))).thenReturn(List.of(trace));
-      when(associationService.getAllAssociatedElementsOf(experienceId, DeclaredExperience.class))
-          .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
-
-      BddLogger.when("associating with the duplicated id");
-
-      service.associateDeclaredExperienceWithTraces(
-          experienceId, List.of(trace.getId(), trace.getId()));
-
-      BddLogger.then("it should create a single association, not two");
-
-      verify(traceService).findAllTracesById(List.of(trace.getId()));
-      verify(associationService)
-          .createAll(
-              argThat(
-                  list ->
-                      list.size() == 1
-                          && list.get(0).id1().equals(trace.getId())
-                          && list.get(0).id2().equals(experienceId)));
-    }
-
-    @Test
-    void shouldPropagateAssociationAlreadyExistException() {
-      BddLogger.given("a trace already associated with the experience");
-
-      UUID experienceId = UUID.randomUUID();
-      DeclaredExperience experience = mock(DeclaredExperience.class);
-      when(experience.getId()).thenReturn(experienceId);
-      when(experience.getStudent()).thenReturn(student);
-
-      Trace trace = TraceFixture.create().withStudent(student).toModel();
-
-      when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-      when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
-      when(traceService.findAllTracesById(List.of(trace.getId()))).thenReturn(List.of(trace));
-      when(associationService.createAll(anyList()))
-          .thenThrow(new AssociationAlreadyExistException());
-
-      BddLogger.when("associating with an already associated trace");
-
-      BddLogger.then("it should propagate AssociationAlreadyExistException");
-
-      assertThrows(
-          AssociationAlreadyExistException.class,
-          () ->
-              service.associateDeclaredExperienceWithTraces(experienceId, List.of(trace.getId())));
+              service.associate(
+                  experienceId,
+                  List.of(UUID.randomUUID()),
+                  EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL));
+
+      verify(associationService, never()).associate(any(), any(), anyList(), any());
     }
   }
 

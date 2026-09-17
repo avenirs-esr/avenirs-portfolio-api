@@ -21,6 +21,7 @@ import fr.avenirsesr.portfolio.student.association.application.adapter.dto.Assoc
 import fr.avenirsesr.portfolio.student.association.application.adapter.mapper.AssociationSearchResultDTOMapper;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
+import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.servlet.http.HttpServletRequest;
@@ -216,8 +217,8 @@ public class DeclaredActivityController {
         body.idsToAssociate(),
         principal.getName());
     var newAssociations =
-        declaredActivityService.associateActivityWithTraces(
-            declaredActivityId, body.idsToAssociate());
+        declaredActivityService.associate(
+            declaredActivityId, body.idsToAssociate(), EAssociationType.DECLARED_ACTIVITY_TRACE);
     return ResponseEntity.ok(declaredActivityAssociationsDTOMapper.toDTO(newAssociations));
   }
 
@@ -234,8 +235,10 @@ public class DeclaredActivityController {
         body.idsToAssociate(),
         principal.getName());
     var newAssociations =
-        declaredActivityService.associateActivityWithDeclaredSkills(
-            declaredActivityId, body.idsToAssociate());
+        declaredActivityService.associate(
+            declaredActivityId,
+            body.idsToAssociate(),
+            EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL);
     return ResponseEntity.ok(declaredActivityAssociationsDTOMapper.toDTO(newAssociations));
   }
 

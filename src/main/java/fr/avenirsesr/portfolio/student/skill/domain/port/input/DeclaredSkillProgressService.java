@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillType;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
+import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillAssociationsData;
 import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillProgressData;
 import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillProgressDetails;
@@ -48,14 +49,8 @@ public interface DeclaredSkillProgressService {
 
   DeclaredSkillAssociationsData getAssociationsOf(UUID declaredSkillId);
 
-  DeclaredSkillAssociationsData associateDeclaredSkillWithActivities(
-      UUID declaredSkillIId, List<UUID> declaredActivityIds);
-
-  DeclaredSkillAssociationsData associateDeclaredSkillWithDeclaredExperiences(
-      UUID declaredSkillId, List<UUID> declaredExperienceIds);
-
-  DeclaredSkillAssociationsData associateDeclaredSkillWithTraces(
-      UUID declaredSkillId, List<UUID> traceIds);
+  DeclaredSkillAssociationsData associate(
+      UUID declaredSkillId, List<UUID> associatedIds, EAssociationType associationType);
 
   void deleteAssociations(UUID declaredSkillProgressId, List<UUID> idsToDelete);
 }

@@ -10,6 +10,7 @@ import fr.avenirsesr.portfolio.student.association.application.adapter.dto.Assoc
 import fr.avenirsesr.portfolio.student.association.application.adapter.mapper.AssociationSearchResultDTOMapper;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
+import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.skill.application.adapter.dto.DeclaredSkillAssociationsDTO;
 import fr.avenirsesr.portfolio.student.skill.application.adapter.dto.DeclaredSkillProgressDTO;
 import fr.avenirsesr.portfolio.student.skill.application.adapter.dto.DeclaredSkillProgressDetailsDTO;
@@ -225,8 +226,10 @@ public class DeclaredSkillProgressController {
         body.idsToAssociate(),
         principal.getName());
     var newAssociations =
-        declaredSkillProgressService.associateDeclaredSkillWithActivities(
-            declaredSkillProgressId, body.idsToAssociate());
+        declaredSkillProgressService.associate(
+            declaredSkillProgressId,
+            body.idsToAssociate(),
+            EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL);
     return ResponseEntity.ok(declaredSkillAssociationsDTOMapper.toDTO(newAssociations));
   }
 
@@ -243,8 +246,10 @@ public class DeclaredSkillProgressController {
         body.idsToAssociate(),
         principal.getName());
     var newAssociations =
-        declaredSkillProgressService.associateDeclaredSkillWithDeclaredExperiences(
-            declaredSkillProgressId, body.idsToAssociate());
+        declaredSkillProgressService.associate(
+            declaredSkillProgressId,
+            body.idsToAssociate(),
+            EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL);
     return ResponseEntity.ok(declaredSkillAssociationsDTOMapper.toDTO(newAssociations));
   }
 
@@ -260,8 +265,8 @@ public class DeclaredSkillProgressController {
         body.idsToAssociate(),
         principal.getName());
     var newAssociations =
-        declaredSkillProgressService.associateDeclaredSkillWithTraces(
-            declaredSkillProgressId, body.idsToAssociate());
+        declaredSkillProgressService.associate(
+            declaredSkillProgressId, body.idsToAssociate(), EAssociationType.TRACE_DECLARED_SKILL);
     return ResponseEntity.ok(declaredSkillAssociationsDTOMapper.toDTO(newAssociations));
   }
 }

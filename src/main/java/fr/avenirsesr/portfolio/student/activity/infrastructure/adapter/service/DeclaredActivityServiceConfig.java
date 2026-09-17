@@ -9,7 +9,6 @@ import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.Fe
 import fr.avenirsesr.portfolio.student.activity.domain.service.DeclaredActivityServiceImpl;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.association.domain.service.AssociationSearchHelper;
-import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +21,6 @@ import org.springframework.context.annotation.Lazy;
 @RequiredArgsConstructor
 public class DeclaredActivityServiceConfig {
   private final DeclaredActivityRepository declaredActivityRepository;
-  private final DeclaredSkillProgressService declaredSkillProgressService;
   private final LoggedInUserService loggedInUserService;
   private final AssociationService associationService;
   private final AssociationSearchHelper associationSearchHelper;
@@ -37,7 +35,6 @@ public class DeclaredActivityServiceConfig {
         declaredActivityRepository,
         activityService,
         traceService,
-        declaredSkillProgressService,
         associationService,
         associationSearchHelper,
         loggedInUserService,

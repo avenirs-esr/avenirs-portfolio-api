@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
+import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.experience.domain.data.DeclaredExperienceAssociationsData;
 import fr.avenirsesr.portfolio.student.experience.domain.data.DeclaredExperienceData;
 import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperience;
@@ -93,11 +94,8 @@ public interface DeclaredExperienceService {
       String keyword,
       PageCriteria pageCriteria);
 
-  DeclaredExperienceAssociationsData associateDeclaredExperienceWithDeclaredSkills(
-      UUID declaredExperienceId, List<UUID> declaredSkillProgressIds);
-
-  DeclaredExperienceAssociationsData associateDeclaredExperienceWithTraces(
-      UUID declaredExperienceId, List<UUID> traceIds);
+  DeclaredExperienceAssociationsData associate(
+      UUID declaredExperienceId, List<UUID> associatedIds, EAssociationType associationType);
 
   PagedResult<AssociationSearchResultData> searchTracesForAssociation(
       UUID declaredExperienceId, String keyword, PageCriteria pageCriteria, Boolean isAssociated);
