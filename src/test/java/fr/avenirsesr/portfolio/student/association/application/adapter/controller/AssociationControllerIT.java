@@ -3328,4 +3328,155 @@ class AssociationControllerIT extends ContainerConfigurationTest {
     assertThat(found.get("category").asText()).isEqualTo("INRAE");
     assertThat(found.get("disabled").asBoolean()).isFalse();
   }
+
+  @Test
+  void shouldAssociateSeveralDeclaredExperiencesWithADeclaredProgram() throws Exception {
+    BddLogger.given("an existing declared program and two declared experiences");
+    UUID declaredProgramId = createDeclaredProgram("Master RH", "Université");
+    UUID firstExperienceId =
+        createDeclaredExperience("Chargé de recrutement", "PROFESSIONAL", "2023-01-10", null);
+    UUID secondExperienceId =
+        createDeclaredExperience("Tuteur étudiant", "PERSONAL", "2023-09-01", "2024-06-30");
+
+    when("associating the declared program with both declared experiences");
+
+    JsonNode associations =
+        associate(
+            declaredProgramId,
+            "DECLARED_PROGRAM",
+            "DECLARED_EXPERIENCE",
+            List.of(firstExperienceId, secondExperienceId));
+
+    BddLogger.then(
+        "it should return the two declared experiences associated with the declared program");
+    assertThat(associations.get("declaredExperienceAssociations")).hasSize(2);
+  }
+
+  @Test
+  void shouldReturnTheDeclaredProgramInTheAssociationsOfItsDeclaredExperience() throws Exception {
+    BddLogger.given("a declared experience associated with a declared program");
+    UUID declaredProgramId = createDeclaredProgram("Master géographie", "Université");
+    UUID declaredExperienceId =
+        createDeclaredExperience("Cartographe stagiaire", "PROFESSIONAL", "2024-02-01", null);
+
+    associate(
+        declaredProgramId,
+        "DECLARED_PROGRAM",
+        "DECLARED_EXPERIENCE",
+        List.of(declaredExperienceId));
+
+    when("getting the associations of the declared experience");
+
+    var associations = getAssociations("DECLARED_EXPERIENCE", declaredExperienceId);
+
+    BddLogger.then("it should return the declared program on the declared experience side");
+    assertThat(associations.get("declaredProgramAssociations")).hasSize(1);
+    assertThat(
+            associations
+                .get("declaredProgramAssociations")
+                .get(0)
+                .get("declaredProgram")
+                .get("id")
+                .asText())
+        .isEqualTo(declaredProgramId.toString());
+  }
+
+  @Test
+  void shouldUnassociateTheDeclaredExperiencesOfADeclaredProgram() throws Exception {
+    BddLogger.given("a declared program associated with a declared experience");
+    UUID declaredProgramId = createDeclaredProgram("DUT mesures physiques", "IUT");
+    UUID declaredExperienceId =
+        createDeclaredExperience("Technicien laboratoire", "PROFESSIONAL", "2022-06-01", null);
+
+    JsonNode associations =
+        associate(
+            declaredProgramId,
+            "DECLARED_PROGRAM",
+            "DECLARED_EXPERIENCE",
+            List.of(declaredExperienceId));
+    UUID associationId =
+        UUID.fromString(
+            associations
+                .get("declaredExperienceAssociations")
+                .get(0)
+                .get("associationId")
+                .asText());
+
+    when("unassociating the association from the declared program");
+
+    webTestClient
+        .method(HttpMethod.DELETE)
+        .uri(ASSOCIATIONS_PATH, "DECLARED_PROGRAM", declaredProgramId)
+        .contentType(APPLICATION_JSON)
+        .bodyValue(
+            objectMapper.writeValueAsString(new AssociationsDeleteRequest(List.of(associationId))))
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .exchange()
+        .expectStatus()
+        .isNoContent();
+
+    BddLogger.then("the declared experience should not reference the declared program anymore");
+    assertThat(
+            getAssociations("DECLARED_EXPERIENCE", declaredExperienceId)
+                .get("declaredProgramAssociations"))
+        .isEmpty();
+  }
+
+  @Test
+  void shouldSearchTheDeclaredExperiencesToAssociateWithADeclaredProgram() throws Exception {
+    BddLogger.given("a declared program already associated with a declared experience");
+    UUID declaredProgramId = createDeclaredProgram("Master santé publique", "EHESP");
+    UUID declaredExperienceId =
+        createDeclaredExperience("Épidémiologiste junior", "PROFESSIONAL", "2023-04-01", null);
+
+    associate(
+        declaredProgramId,
+        "DECLARED_PROGRAM",
+        "DECLARED_EXPERIENCE",
+        List.of(declaredExperienceId));
+
+    when("searching the declared experiences to associate");
+
+    var results =
+        searchForAssociation(
+            "DECLARED_PROGRAM", declaredProgramId, "DECLARED_EXPERIENCE", "Épidémiologiste");
+
+    BddLogger.then("the already associated declared experience should be disabled with its type");
+    var alreadyAssociated =
+        StreamSupport.stream(results.spliterator(), false)
+            .filter(result -> result.get("id").asText().equals(declaredExperienceId.toString()))
+            .findFirst()
+            .orElseThrow();
+
+    assertThat(alreadyAssociated.get("title").asText()).isEqualTo("Épidémiologiste junior");
+    assertThat(alreadyAssociated.get("category").asText()).isEqualTo("PROFESSIONAL");
+    assertThat(alreadyAssociated.get("disabled").asBoolean()).isTrue();
+  }
+
+  @Test
+  void shouldSearchTheDeclaredProgramsToAssociateWithADeclaredExperience() throws Exception {
+    BddLogger.given("a declared experience and a declared program matching the keyword");
+    UUID declaredProgramId =
+        createDeclaredProgram("Formation viticulture", "Chambre d'agriculture");
+    UUID declaredExperienceId =
+        createDeclaredExperience("Vendangeur", "PERSONAL", "2021-09-01", "2021-10-01");
+
+    when("searching the declared programs to associate");
+
+    var results =
+        searchForAssociation(
+            "DECLARED_EXPERIENCE", declaredExperienceId, "DECLARED_PROGRAM", "viticulture");
+
+    BddLogger.then("it should return the matching declared program with its organization");
+    var found =
+        StreamSupport.stream(results.spliterator(), false)
+            .filter(result -> result.get("id").asText().equals(declaredProgramId.toString()))
+            .findFirst()
+            .orElseThrow();
+
+    assertThat(found.get("title").asText()).isEqualTo("Formation viticulture");
+    assertThat(found.get("category").asText()).isEqualTo("Chambre d'agriculture");
+    assertThat(found.get("disabled").asBoolean()).isFalse();
+  }
 }
