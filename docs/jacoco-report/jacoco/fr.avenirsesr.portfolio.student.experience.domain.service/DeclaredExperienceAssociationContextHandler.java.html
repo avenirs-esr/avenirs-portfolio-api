@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DeclaredExperienceAssociationContextHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.student.experience.domain.service</a> &gt; <span class="el_source">DeclaredExperienceAssociationContextHandler.java</span></div><h1>DeclaredExperienceAssociationContextHandler.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.student.experience.domain.service;
+
+import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.student.association.domain.data.AssociatedElementsData;
+import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
+import fr.avenirsesr.portfolio.student.association.domain.model.Association;
+import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
+import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
+import fr.avenirsesr.portfolio.student.association.domain.port.output.handler.AssociationContextHandler;
+import fr.avenirsesr.portfolio.student.association.domain.utils.AssociationUtils;
+import fr.avenirsesr.portfolio.student.experience.domain.data.DeclaredExperienceAssociationData;
+import fr.avenirsesr.portfolio.student.experience.domain.exception.DeclaredExperienceNotFoundException;
+import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperience;
+import fr.avenirsesr.portfolio.student.experience.domain.port.input.DeclaredExperienceService;
+import java.util.List;
+import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
+public class DeclaredExperienceAssociationContextHandler implements AssociationContextHandler {
+  private final DeclaredExperienceService declaredExperienceService;
+  private final LoggedInUserService loggedInUserService;
+
+  @Override
+  public EAssociationContextType getContextType() {
+<span class="fc" id="L28">    return EAssociationContextType.DECLARED_EXPERIENCE;</span>
+  }
+
+  @Override
+  public void checkLoggedInStudentOwns(List&lt;UUID&gt; elementIds) {
+<span class="fc" id="L33">    fetchAndCheckOwnership(elementIds);</span>
+<span class="fc" id="L34">  }</span>
+
+  @Override
+  public void checkLoggedInStudentCanAssociate(
+      UUID elementId, EAssociationType associationType, int associationsToAdd) {
+<span class="fc" id="L39">    checkLoggedInStudentOwns(List.of(elementId));</span>
+<span class="fc" id="L40">  }</span>
+
+  @Override
+  public void checkLoggedInStudentCanUnassociate(List&lt;UUID&gt; elementIds) {
+<span class="fc" id="L44">    checkLoggedInStudentOwns(elementIds);</span>
+<span class="fc" id="L45">  }</span>
+
+  @Override
+  public PagedResult&lt;AssociationSearchResultData&gt; search(
+      String keyword, PageCriteria pageCriteria) {
+<span class="fc" id="L50">    var declaredExperiences = declaredExperienceService.search(keyword, pageCriteria);</span>
+
+<span class="fc" id="L52">    return new PagedResult&lt;&gt;(</span>
+<span class="fc" id="L53">        declaredExperiences.content().stream()</span>
+<span class="fc" id="L54">            .map(</span>
+                declaredExperience -&gt;
+<span class="fc" id="L56">                    new AssociationSearchResultData(</span>
+<span class="fc" id="L57">                        declaredExperience.getId(),</span>
+<span class="fc" id="L58">                        declaredExperience.getTitle(),</span>
+<span class="fc bfc" id="L59" title="All 2 branches covered.">                        declaredExperience.getExperienceType() != null</span>
+<span class="fc" id="L60">                            ? declaredExperience.getExperienceType().name()</span>
+<span class="fc" id="L61">                            : null,</span>
+                        false))
+<span class="fc" id="L63">            .toList(),</span>
+<span class="fc" id="L64">        declaredExperiences.pageInfo());</span>
+  }
+
+  @Override
+  public AssociatedElementsData toAssociatedElements(
+      List&lt;Association&gt; associations, Class&lt;?&gt; subjectClass, boolean onlyNotCompleted) {
+<span class="fc" id="L70">    var declaredExperiences =</span>
+<span class="fc" id="L71">        declaredExperienceService.findAllByIds(</span>
+<span class="fc" id="L72">            associations.stream()</span>
+<span class="fc" id="L73">                .map(association -&gt; association.associatedIdOf(subjectClass))</span>
+<span class="fc" id="L74">                .toList());</span>
+
+<span class="fc" id="L76">    return AssociatedElementsData.ofDeclaredExperiences(</span>
+<span class="fc" id="L77">        associations.stream()</span>
+<span class="fc" id="L78">            .map(</span>
+                association -&gt;
+<span class="fc" id="L80">                    new DeclaredExperienceAssociationData(</span>
+<span class="fc" id="L81">                        association.getId(),</span>
+<span class="fc" id="L82">                        AssociationUtils.elementOf(</span>
+                            declaredExperiences,
+<span class="fc" id="L84">                            association.associatedIdOf(subjectClass),</span>
+                            DeclaredExperienceNotFoundException::new)))
+<span class="fc" id="L86">            .toList());</span>
+  }
+
+  private List&lt;DeclaredExperience&gt; fetchAndCheckOwnership(List&lt;UUID&gt; elementIds) {
+<span class="fc" id="L90">    var declaredExperiences = declaredExperienceService.findAllByIds(elementIds);</span>
+
+<span class="fc" id="L92">    AssociationUtils.checkOwnership(</span>
+        elementIds,
+        declaredExperiences,
+        DeclaredExperience::getStudent,
+<span class="fc" id="L96">        loggedInUserService.getLoggedInStudent(),</span>
+        DeclaredExperienceNotFoundException::new);
+
+<span class="fc" id="L99">    return declaredExperiences;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TraceAssociationContextHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.student.trace.domain.service</a> &gt; <span class="el_source">TraceAssociationContextHandler.java</span></div><h1>TraceAssociationContextHandler.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.student.trace.domain.service;
+
+import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortField;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
+import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.student.association.domain.data.AssociatedElementsData;
+import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
+import fr.avenirsesr.portfolio.student.association.domain.model.Association;
+import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
+import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
+import fr.avenirsesr.portfolio.student.association.domain.port.output.handler.AssociationContextHandler;
+import fr.avenirsesr.portfolio.student.association.domain.utils.AssociationUtils;
+import fr.avenirsesr.portfolio.student.trace.domain.data.TraceAssociationData;
+import fr.avenirsesr.portfolio.student.trace.domain.exception.TraceNotFoundException;
+import fr.avenirsesr.portfolio.student.trace.domain.filter.TraceFilter;
+import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
+import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
+import java.util.List;
+import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
+public class TraceAssociationContextHandler implements AssociationContextHandler {
+  private final TraceService traceService;
+  private final LoggedInUserService loggedInUserService;
+
+  @Override
+  public EAssociationContextType getContextType() {
+<span class="fc" id="L32">    return EAssociationContextType.TRACE;</span>
+  }
+
+  @Override
+  public void checkLoggedInStudentOwns(List&lt;UUID&gt; elementIds) {
+<span class="fc" id="L37">    fetchAndCheckOwnership(elementIds);</span>
+<span class="fc" id="L38">  }</span>
+
+  @Override
+  public void checkLoggedInStudentCanAssociate(
+      UUID elementId, EAssociationType associationType, int associationsToAdd) {
+<span class="fc" id="L43">    checkLoggedInStudentOwns(List.of(elementId));</span>
+<span class="fc" id="L44">  }</span>
+
+  @Override
+  public void checkLoggedInStudentCanUnassociate(List&lt;UUID&gt; elementIds) {
+<span class="fc" id="L48">    checkLoggedInStudentOwns(elementIds);</span>
+<span class="fc" id="L49">  }</span>
+
+  @Override
+  public PagedResult&lt;AssociationSearchResultData&gt; search(
+      String keyword, PageCriteria pageCriteria) {
+<span class="fc" id="L54">    var traces =</span>
+<span class="fc" id="L55">        traceService.getTracesView(</span>
+            keyword,
+            new TraceFilter(null, null, null, null),
+            null,
+            pageCriteria,
+            new SortCriteria(ESortField.DATE, ESortOrder.DESC));
+
+<span class="fc" id="L62">    return new PagedResult&lt;&gt;(</span>
+<span class="fc" id="L63">        traces.content().stream()</span>
+<span class="fc" id="L64">            .map(trace -&gt; new AssociationSearchResultData(trace.id(), trace.title(), null, false))</span>
+<span class="fc" id="L65">            .toList(),</span>
+<span class="fc" id="L66">        traces.pageInfo());</span>
+  }
+
+  @Override
+  public AssociatedElementsData toAssociatedElements(
+      List&lt;Association&gt; associations, Class&lt;?&gt; subjectClass, boolean onlyNotCompleted) {
+<span class="fc" id="L72">    var traces =</span>
+<span class="fc" id="L73">        traceService.findAllTracesById(</span>
+<span class="fc" id="L74">            associations.stream()</span>
+<span class="fc" id="L75">                .map(association -&gt; association.associatedIdOf(subjectClass))</span>
+<span class="fc" id="L76">                .toList());</span>
+
+<span class="fc" id="L78">    return AssociatedElementsData.ofTraces(</span>
+<span class="fc" id="L79">        associations.stream()</span>
+<span class="fc" id="L80">            .map(</span>
+                association -&gt;
+<span class="fc" id="L82">                    new TraceAssociationData(</span>
+<span class="fc" id="L83">                        association.getId(),</span>
+<span class="fc" id="L84">                        AssociationUtils.elementOf(</span>
+                            traces,
+<span class="fc" id="L86">                            association.associatedIdOf(subjectClass),</span>
+                            TraceNotFoundException::new)))
+<span class="fc" id="L88">            .toList());</span>
+  }
+
+  private List&lt;Trace&gt; fetchAndCheckOwnership(List&lt;UUID&gt; elementIds) {
+<span class="fc" id="L92">    var traces = traceService.findAllTracesById(elementIds);</span>
+
+<span class="fc" id="L94">    AssociationUtils.checkOwnership(</span>
+        elementIds,
+        traces,
+        Trace::getStudent,
+<span class="fc" id="L98">        loggedInUserService.getLoggedInStudent(),</span>
+        TraceNotFoundException::new);
+
+<span class="fc" id="L101">    return traces;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
