@@ -682,7 +682,7 @@ class AssociationServiceImplTest {
     assertThatThrownBy(
             () ->
                 service.searchForAssociationWithNewElement(
-                    EAssociationContextType.DECLARED_ACTIVITY,
+                    EAssociationContextType.DECLARED_EXPERIENCE,
                     EAssociationContextType.DECLARED_EXPERIENCE,
                     "kw",
                     AssociationSearchFilter.NONE,
