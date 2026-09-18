@@ -3,7 +3,6 @@ package fr.avenirsesr.portfolio.student.trace.domain.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -15,7 +14,6 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import fr.avenirsesr.portfolio.common.configuration.domain.model.TraceConfiguration;
@@ -33,18 +31,13 @@ import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
-import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityAssociationData;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.FeedbackService;
-import fr.avenirsesr.portfolio.student.association.domain.data.AssociatedElementsData;
-import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
-import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
-import fr.avenirsesr.portfolio.student.trace.domain.data.TraceAssociationsData;
 import fr.avenirsesr.portfolio.student.trace.domain.data.TraceDetailData;
 import fr.avenirsesr.portfolio.student.trace.domain.data.TraceLockedDeclaredActivitiesData;
 import fr.avenirsesr.portfolio.student.trace.domain.data.TraceViewData;
@@ -249,83 +242,6 @@ class TraceServiceImplTest {
         verify(traceRepository)
             .findAll(
                 eq(student), isNull(), eq(filter), isNull(), eq(pageCriteria), eq(sortCriteria));
-      }
-    }
-
-    @Nested
-    class WhenSearchingForAssociation {
-
-      @Test
-      void thenItShouldSearchTheElementsOfTheGivenContext() {
-        BddLogger.when("searching declared activities for association with a trace");
-
-        UUID traceId = UUID.randomUUID();
-        var pageCriteria = new PageCriteria(0, 8);
-        Trace trace = TraceFixture.create().withStudent(student).withId(traceId).toModel();
-        PagedResult<AssociationSearchResultData> expected =
-            new PagedResult<>(List.of(), new PageInfo(0, 8, 0));
-
-        when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
-        when(associationService.searchForAssociation(
-                traceId,
-                Trace.class,
-                EAssociationContextType.DECLARED_ACTIVITY,
-                "kw",
-                pageCriteria))
-            .thenReturn(expected);
-
-        PagedResult<AssociationSearchResultData> result =
-            traceService.searchForAssociation(
-                traceId, EAssociationContextType.DECLARED_ACTIVITY, "kw", pageCriteria);
-
-        BddLogger.then("it should return the results of the association service");
-
-        assertSame(expected, result);
-      }
-
-      @Test
-      void thenItShouldThrowTraceNotFoundWhenTraceDoesNotExist() {
-        BddLogger.when("searching for association with an unknown trace");
-
-        UUID traceId = UUID.randomUUID();
-        var pageCriteria = new PageCriteria(0, 8);
-
-        when(traceRepository.findById(traceId)).thenReturn(Optional.empty());
-
-        assertThrows(
-            TraceNotFoundException.class,
-            () ->
-                traceService.searchForAssociation(
-                    traceId, EAssociationContextType.DECLARED_ACTIVITY, "kw", pageCriteria));
-
-        BddLogger.then("it should throw TraceNotFoundException");
-
-        verifyNoInteractions(associationService);
-      }
-
-      @Test
-      void thenItShouldThrowTraceNotFoundWhenTraceBelongsToAnotherStudent() {
-        BddLogger.when("searching for association with a trace of another student");
-
-        UUID traceId = UUID.randomUUID();
-        var pageCriteria = new PageCriteria(0, 8);
-        Trace trace =
-            TraceFixture.create()
-                .withStudent(StudentFixture.create().toModel())
-                .withId(traceId)
-                .toModel();
-
-        when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
-
-        assertThrows(
-            TraceNotFoundException.class,
-            () ->
-                traceService.searchForAssociation(
-                    traceId, EAssociationContextType.DECLARED_ACTIVITY, "kw", pageCriteria));
-
-        BddLogger.then("it should throw TraceNotFoundException");
-
-        verifyNoInteractions(associationService);
       }
     }
 
@@ -814,228 +730,6 @@ class TraceServiceImplTest {
         BddLogger.then("it should throw TRACE_NOT_FOUND");
 
         assertEquals(EErrorCode.TRACE_NOT_FOUND, exception.getErrorCode());
-      }
-    }
-
-    @Nested
-    class WhenGettingTraceAssociations {
-
-      @Test
-      void thenItShouldReturnDeclaredActivityAssociations() {
-        BddLogger.when("getting trace associations");
-
-        UUID traceId = UUID.randomUUID();
-        UUID activityId = UUID.randomUUID();
-
-        Trace trace = TraceFixture.create().withStudent(student).withId(traceId).toModel();
-
-        DeclaredActivity activity = mock(DeclaredActivity.class);
-
-        when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
-        when(associationService.getAllAssociatedElementsOf(traceId, Trace.class, false))
-            .thenReturn(
-                new AssociatedElementsData(
-                    List.of(),
-                    List.of(
-                        new DeclaredActivityAssociationData(
-                            UUID.randomUUID(), activity, EDeclaredActivityStatus.IN_PROGRESS)),
-                    List.of(),
-                    List.of()));
-
-        TraceAssociationsData result = traceService.getTraceAssociations(traceId, false);
-
-        BddLogger.then("it should return declared activity associations");
-
-        assertEquals(1, result.declaredActivityAssociations().size());
-      }
-
-      @Test
-      void thenItShouldCallFindAllNotCompletedWhenOnlyNotCompletedIsTrue() {
-        BddLogger.when("getting only not completed trace associations");
-
-        UUID traceId = UUID.randomUUID();
-        UUID activityId = UUID.randomUUID();
-
-        Trace trace = TraceFixture.create().withStudent(student).withId(traceId).toModel();
-
-        DeclaredActivity activity = mock(DeclaredActivity.class);
-
-        when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
-        when(associationService.getAllAssociatedElementsOf(traceId, Trace.class, true))
-            .thenReturn(
-                new AssociatedElementsData(
-                    List.of(),
-                    List.of(
-                        new DeclaredActivityAssociationData(
-                            UUID.randomUUID(), activity, EDeclaredActivityStatus.IN_PROGRESS)),
-                    List.of(),
-                    List.of()));
-
-        TraceAssociationsData result = traceService.getTraceAssociations(traceId, true);
-
-        BddLogger.then("it should ask for the not completed activities only");
-
-        verify(associationService).getAllAssociatedElementsOf(traceId, Trace.class, true);
-        assertEquals(1, result.declaredActivityAssociations().size());
-      }
-
-      @Test
-      void thenItShouldThrowTraceNotFoundWhenTraceDoesNotExist() {
-        BddLogger.when("getting trace associations for unknown trace");
-
-        UUID traceId = UUID.randomUUID();
-
-        when(traceRepository.findById(traceId)).thenReturn(Optional.empty());
-
-        assertThrows(
-            TraceNotFoundException.class, () -> traceService.getTraceAssociations(traceId, false));
-
-        BddLogger.then("it should throw TraceNotFoundException");
-      }
-
-      @Test
-      void thenItShouldThrowTraceNotFoundWhenTraceBelongsToAnotherUser() {
-        BddLogger.when("getting trace associations of another user");
-
-        UUID traceId = UUID.randomUUID();
-        Trace trace =
-            TraceFixture.create()
-                .withStudent(StudentFixture.create().toModel())
-                .withId(traceId)
-                .toModel();
-
-        when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
-
-        assertThrows(
-            TraceNotFoundException.class, () -> traceService.getTraceAssociations(traceId, false));
-
-        BddLogger.then("it should throw TraceNotFoundException");
-      }
-    }
-
-    @Nested
-    class WhenAssociatingTrace {
-
-      @Test
-      void thenItShouldAssociateTheGivenElementsWithTheTrace() {
-        BddLogger.when("associating a trace with declared skills");
-
-        UUID traceId = UUID.randomUUID();
-        List<UUID> skillIds = List.of(UUID.randomUUID(), UUID.randomUUID());
-
-        Trace trace = TraceFixture.create().withStudent(student).withId(traceId).toModel();
-
-        when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
-        when(associationService.getAllAssociatedElementsOf(traceId, Trace.class, false))
-            .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
-
-        TraceAssociationsData result =
-            traceService.associate(traceId, skillIds, EAssociationType.TRACE_DECLARED_SKILL);
-
-        BddLogger.then("it should associate them through the association service");
-
-        verify(associationService)
-            .associate(traceId, Trace.class, skillIds, EAssociationType.TRACE_DECLARED_SKILL);
-        assertNotNull(result);
-      }
-
-      @Test
-      void thenItShouldThrowTraceNotFoundWhenTraceDoesNotExist() {
-        BddLogger.when("associating an unknown trace");
-
-        UUID traceId = UUID.randomUUID();
-        List<UUID> skillIds = List.of(UUID.randomUUID());
-
-        when(traceRepository.findById(traceId)).thenReturn(Optional.empty());
-
-        assertThrows(
-            TraceNotFoundException.class,
-            () -> traceService.associate(traceId, skillIds, EAssociationType.TRACE_DECLARED_SKILL));
-
-        BddLogger.then("it should throw TraceNotFoundException");
-
-        verifyNoInteractions(associationService);
-      }
-
-      @Test
-      void thenItShouldThrowTraceNotFoundWhenTraceBelongsToAnotherStudent() {
-        BddLogger.when("associating a trace of another student");
-
-        UUID traceId = UUID.randomUUID();
-        List<UUID> skillIds = List.of(UUID.randomUUID());
-
-        Trace trace =
-            TraceFixture.create()
-                .withStudent(StudentFixture.create().toModel())
-                .withId(traceId)
-                .toModel();
-
-        when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
-
-        assertThrows(
-            TraceNotFoundException.class,
-            () -> traceService.associate(traceId, skillIds, EAssociationType.TRACE_DECLARED_SKILL));
-
-        BddLogger.then("it should throw TraceNotFoundException");
-
-        verifyNoInteractions(associationService);
-      }
-    }
-
-    @Nested
-    class WhenUnassociatingTrace {
-
-      @Test
-      void thenItShouldUnassociateTheAssociationsOfTheTrace() {
-        BddLogger.when("unassociating associations from trace");
-
-        UUID traceId = UUID.randomUUID();
-        List<UUID> idsToDelete = List.of(UUID.randomUUID(), UUID.randomUUID());
-
-        Trace trace = TraceFixture.create().withStudent(student).withId(traceId).toModel();
-
-        when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
-
-        traceService.unassociate(traceId, idsToDelete);
-
-        BddLogger.then("it should unassociate them through the association service");
-
-        verify(associationService).unassociate(traceId, Trace.class, idsToDelete);
-      }
-
-      @Test
-      void thenItShouldThrowTraceNotFoundWhenTraceDoesNotExist() {
-        BddLogger.when("unassociating associations from an unknown trace");
-
-        UUID traceId = UUID.randomUUID();
-
-        when(traceRepository.findById(traceId)).thenReturn(Optional.empty());
-
-        assertThrows(
-            TraceNotFoundException.class,
-            () -> traceService.unassociate(traceId, List.of(UUID.randomUUID())));
-
-        BddLogger.then("it should not unassociate anything");
-
-        verifyNoInteractions(associationService);
-      }
-
-      @Test
-      void thenItShouldThrowTraceNotFoundWhenTraceBelongsToAnotherStudent() {
-        BddLogger.when("unassociating associations from a trace of another student");
-
-        Trace trace =
-            TraceFixture.create().withStudent(StudentFixture.create().toModel()).toModel();
-
-        when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
-
-        assertThrows(
-            TraceNotFoundException.class,
-            () -> traceService.unassociate(trace.getId(), List.of(UUID.randomUUID())));
-
-        BddLogger.then("it should not unassociate anything");
-
-        verifyNoInteractions(associationService);
       }
     }
 

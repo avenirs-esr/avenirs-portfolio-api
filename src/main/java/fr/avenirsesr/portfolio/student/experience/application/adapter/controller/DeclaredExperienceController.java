@@ -4,14 +4,6 @@ import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsCreationRequest;
-import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsDeleteRequest;
-import fr.avenirsesr.portfolio.student.association.application.adapter.dto.AssociationSearchResultDTO;
-import fr.avenirsesr.portfolio.student.association.application.adapter.mapper.AssociationSearchResultDTOMapper;
-import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
-import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
-import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
-import fr.avenirsesr.portfolio.student.experience.application.adapter.dto.DeclaredExperienceAssociationsDTO;
 import fr.avenirsesr.portfolio.student.experience.application.adapter.dto.DeclaredExperienceRequest;
 import fr.avenirsesr.portfolio.student.experience.application.adapter.dto.DeclaredExperienceViewDTO;
 import fr.avenirsesr.portfolio.student.experience.application.adapter.mapper.DeclaredExperienceMapper;
@@ -24,7 +16,6 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import java.net.URI;
-import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -40,7 +31,6 @@ import org.springframework.web.bind.annotation.*;
 public class DeclaredExperienceController {
   private final DeclaredExperienceService declaredExperienceService;
   private final DeclaredExperienceMapper declaredExperienceMapper;
-  private final AssociationSearchResultDTOMapper associationSearchResultDTOMapper;
 
   @PreAuthorize("hasAuthority('declared-experience:create:own')")
   @PostMapping("/")
@@ -124,103 +114,5 @@ public class DeclaredExperienceController {
   public ResponseEntity<String> deleteDeclaredExperiences(@RequestBody List<UUID> experienceIds) {
     declaredExperienceService.delete(experienceIds);
     return ResponseEntity.ok("Declared experiences successfully deleted");
-  }
-
-  @PreAuthorize("hasAuthority('declared-experience:list:own')")
-  @GetMapping("/{experienceId}/associations")
-  public ResponseEntity<DeclaredExperienceAssociationsDTO> getDeclaredExperienceAssociations(
-      Principal principal, @PathVariable UUID experienceId) {
-    log.debug(
-        "Received request to get declared experience[{}] associations by student [{}]",
-        experienceId,
-        principal.getName());
-
-    var associations = declaredExperienceService.getAssociations(experienceId);
-
-    return ResponseEntity.ok(declaredExperienceMapper.toAssociationsDTO(associations));
-  }
-
-  @PreAuthorize("hasAuthority('declared-experience:association:manage:own')")
-  @PostMapping("/{experienceId}/associate/declared-skills")
-  public ResponseEntity<DeclaredExperienceAssociationsDTO>
-      associateDeclaredExperienceWithDeclaredSkills(
-          Principal principal,
-          @Valid @PathVariable UUID experienceId,
-          @Valid @RequestBody AssociationsCreationRequest body) {
-    log.debug(
-        "Received request to associate declared experience [{}] with declared skills [{}] by"
-            + " student [{}]",
-        experienceId,
-        body.idsToAssociate(),
-        principal.getName());
-    var associations =
-        declaredExperienceService.associate(
-            experienceId,
-            body.idsToAssociate(),
-            EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL);
-    return ResponseEntity.ok(declaredExperienceMapper.toAssociationsDTO(associations));
-  }
-
-  @PreAuthorize("hasAuthority('declared-experience:association:manage:own')")
-  @PostMapping("/{experienceId}/associate/traces")
-  public ResponseEntity<DeclaredExperienceAssociationsDTO> associateDeclaredExperienceWithTraces(
-      Principal principal,
-      @Valid @PathVariable UUID experienceId,
-      @Valid @RequestBody AssociationsCreationRequest body) {
-    log.debug(
-        "Received request to associate declared experience [{}] with traces [{}] by student [{}]",
-        experienceId,
-        body.idsToAssociate(),
-        principal.getName());
-    var associations =
-        declaredExperienceService.associate(
-            experienceId, body.idsToAssociate(), EAssociationType.TRACE_DECLARED_EXPERIENCE);
-    return ResponseEntity.ok(declaredExperienceMapper.toAssociationsDTO(associations));
-  }
-
-  @PreAuthorize("hasAuthority('declared-experience:association:manage:own')")
-  @DeleteMapping("/{experienceId}/associations")
-  public ResponseEntity<Void> deleteDeclaredExperienceAssociations(
-      Principal principal,
-      @Valid @PathVariable UUID experienceId,
-      @Valid @RequestBody AssociationsDeleteRequest body) {
-    log.debug(
-        "Received request to delete declared experience [{}] associations for student [{}]",
-        experienceId,
-        principal.getName());
-    declaredExperienceService.deleteAssociations(experienceId, body.idsToDelete());
-    return ResponseEntity.noContent().build();
-  }
-
-  @PreAuthorize("hasAuthority('declared-experience:association:manage:own')")
-  @GetMapping("/{experienceId}/search-for-association")
-  public ResponseEntity<PagedResponse<AssociationSearchResultDTO>> searchForAssociation(
-      Principal principal,
-      @Valid @PathVariable UUID experienceId,
-      @Parameter(schema = @Schema(ref = "#/components/schemas/EAssociationContextType"))
-          @RequestParam
-          EAssociationContextType contextType,
-      @RequestParam(required = false) String keyword,
-      @RequestParam(required = false) Integer page,
-      @RequestParam(required = false) Integer pageSize) {
-    var pageCriteria = new PageCriteria(page, pageSize);
-    log.debug(
-        "Received request to search {} for association with declared experience [{}] by student"
-            + " [{}] (keyword={}, page={}, pageSize={})",
-        contextType,
-        experienceId,
-        principal.getName(),
-        keyword,
-        pageCriteria.page(),
-        pageCriteria.pageSize());
-
-    PagedResult<AssociationSearchResultData> pagedResult =
-        declaredExperienceService.searchForAssociation(
-            experienceId, contextType, keyword, pageCriteria);
-
-    return ResponseEntity.ok(
-        new PagedResponse<>(
-            pagedResult.content().stream().map(associationSearchResultDTOMapper::toDTO).toList(),
-            PageInfoDTO.fromDomain(pagedResult.pageInfo())));
   }
 }

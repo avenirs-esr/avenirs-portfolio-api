@@ -14,12 +14,9 @@ import fr.avenirsesr.portfolio.common.externalskill.application.adapter.dto.Exte
 import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillType;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
-import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
-import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillAssociationCount;
-import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillAssociationsData;
 import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillProgressData;
 import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillProgressDetails;
 import fr.avenirsesr.portfolio.student.skill.domain.exception.DeclaredSkillNotFoundException;
@@ -211,69 +208,11 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
   }
 
   @Override
-  public DeclaredSkillAssociationsData associate(
-      UUID declaredSkillId, List<UUID> associatedIds, EAssociationType associationType) {
-    var declaredSkillProgress = fetchAndCheckLoggedInStudentAuthorization(declaredSkillId);
-
-    associationService.associate(
-        declaredSkillProgress.getId(), DeclaredSkillProgress.class, associatedIds, associationType);
-
-    return getAssociationsOf(declaredSkillId);
-  }
-
-  @Override
-  public void deleteAssociations(UUID declaredSkillProgressId, List<UUID> idsToDelete) {
-    var declaredSkillProgress = fetchAndCheckLoggedInStudentAuthorization(declaredSkillProgressId);
-
-    associationService.unassociate(
-        declaredSkillProgress.getId(), DeclaredSkillProgress.class, idsToDelete);
-  }
-
-  private DeclaredSkillProgress fetchAndCheckLoggedInStudentAuthorization(UUID declaredSkillId) {
-    Student student = loggedInUserService.getLoggedInStudent();
-    var skill =
-        declaredSkillProgressRepository
-            .findById(declaredSkillId)
-            .orElseThrow(DeclaredSkillProgressNotFoundException::new);
-
-    if (!skill.getStudent().equals(student)) {
-      throw new UserNotAuthorizedException();
-    }
-
-    return skill;
-  }
-
-  @Override
-  public DeclaredSkillAssociationsData getAssociationsOf(UUID declaredSkillId) {
-    var skill = fetchAndCheckLoggedInStudentAuthorization(declaredSkillId);
-
-    var associatedElements =
-        associationService.getAllAssociatedElementsOf(skill.getId(), DeclaredSkillProgress.class);
-
-    return new DeclaredSkillAssociationsData(
-        associatedElements.traceAssociations(),
-        associatedElements.declaredActivityAssociations(),
-        associatedElements.declaredExperienceAssociations());
-  }
-
-  @Override
   public PagedResult<DeclaredSkillProgress> searchDeclaredSkill(
       String keyword, PageCriteria pageCriteria) {
     Student student = loggedInUserService.getLoggedInStudent();
     return declaredSkillProgressRepository.findAllByStudent(
         student, pageCriteria, keyword, new SortCriteria(ESortField.NAME, ESortOrder.ASC));
-  }
-
-  @Override
-  public PagedResult<AssociationSearchResultData> searchForAssociation(
-      UUID declaredSkillId,
-      EAssociationContextType contextType,
-      String keyword,
-      PageCriteria pageCriteria) {
-    fetchAndCheckLoggedInStudentAuthorization(declaredSkillId);
-
-    return associationService.searchForAssociation(
-        declaredSkillId, DeclaredSkillProgress.class, contextType, keyword, pageCriteria);
   }
 
   @Override

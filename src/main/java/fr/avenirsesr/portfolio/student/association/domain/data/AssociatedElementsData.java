@@ -5,9 +5,48 @@ import fr.avenirsesr.portfolio.student.experience.domain.data.DeclaredExperience
 import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillAssociationData;
 import fr.avenirsesr.portfolio.student.trace.domain.data.TraceAssociationData;
 import java.util.List;
+import java.util.stream.Stream;
 
 public record AssociatedElementsData(
     List<TraceAssociationData> traceAssociations,
     List<DeclaredActivityAssociationData> declaredActivityAssociations,
     List<DeclaredSkillAssociationData> declaredSkillAssociations,
-    List<DeclaredExperienceAssociationData> declaredExperienceAssociations) {}
+    List<DeclaredExperienceAssociationData> declaredExperienceAssociations) {
+
+  public static AssociatedElementsData empty() {
+    return new AssociatedElementsData(List.of(), List.of(), List.of(), List.of());
+  }
+
+  public static AssociatedElementsData ofTraces(List<TraceAssociationData> traceAssociations) {
+    return new AssociatedElementsData(traceAssociations, List.of(), List.of(), List.of());
+  }
+
+  public static AssociatedElementsData ofDeclaredActivities(
+      List<DeclaredActivityAssociationData> declaredActivityAssociations) {
+    return new AssociatedElementsData(
+        List.of(), declaredActivityAssociations, List.of(), List.of());
+  }
+
+  public static AssociatedElementsData ofDeclaredSkills(
+      List<DeclaredSkillAssociationData> declaredSkillAssociations) {
+    return new AssociatedElementsData(List.of(), List.of(), declaredSkillAssociations, List.of());
+  }
+
+  public static AssociatedElementsData ofDeclaredExperiences(
+      List<DeclaredExperienceAssociationData> declaredExperienceAssociations) {
+    return new AssociatedElementsData(
+        List.of(), List.of(), List.of(), declaredExperienceAssociations);
+  }
+
+  public AssociatedElementsData merge(AssociatedElementsData other) {
+    return new AssociatedElementsData(
+        concat(traceAssociations, other.traceAssociations),
+        concat(declaredActivityAssociations, other.declaredActivityAssociations),
+        concat(declaredSkillAssociations, other.declaredSkillAssociations),
+        concat(declaredExperienceAssociations, other.declaredExperienceAssociations));
+  }
+
+  private static <T> List<T> concat(List<T> elements, List<T> otherElements) {
+    return Stream.concat(elements.stream(), otherElements.stream()).toList();
+  }
+}

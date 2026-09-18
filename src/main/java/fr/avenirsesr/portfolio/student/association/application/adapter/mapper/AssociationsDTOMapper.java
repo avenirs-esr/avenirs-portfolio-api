@@ -1,20 +1,22 @@
-package fr.avenirsesr.portfolio.student.trace.application.adapter.mapper;
+package fr.avenirsesr.portfolio.student.association.application.adapter.mapper;
 
 import fr.avenirsesr.portfolio.student.activity.application.adapter.mapper.DeclaredActivityAssociationMapper;
+import fr.avenirsesr.portfolio.student.association.application.adapter.dto.AssociationsDTO;
+import fr.avenirsesr.portfolio.student.association.domain.data.AssociatedElementsData;
 import fr.avenirsesr.portfolio.student.experience.application.adapter.mapper.DeclaredExperienceMapper;
 import fr.avenirsesr.portfolio.student.skill.application.adapter.mapper.DeclaredSkillProgressMapper;
-import fr.avenirsesr.portfolio.student.trace.application.adapter.dto.TraceAssociationsDTO;
-import fr.avenirsesr.portfolio.student.trace.domain.data.TraceAssociationsData;
+import fr.avenirsesr.portfolio.student.trace.application.adapter.mapper.TraceOverviewMapper;
 import org.mapstruct.Mapper;
 
 @Mapper(
     componentModel = "spring",
     uses = {
+      TraceOverviewMapper.class,
       DeclaredActivityAssociationMapper.class,
       DeclaredSkillProgressMapper.class,
       DeclaredExperienceMapper.class
     })
-public interface TraceAssociationsMapper {
+public interface AssociationsDTOMapper {
 
-  TraceAssociationsDTO toDTO(TraceAssociationsData traceAssociations);
+  AssociationsDTO toDTO(AssociatedElementsData associatedElements);
 }
