@@ -33,17 +33,6 @@ import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivi
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.FeedbackService;
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.FeedbackRepository;
-import fr.avenirsesr.portfolio.student.association.domain.data.AssociatedElementsData;
-import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
-import fr.avenirsesr.portfolio.student.association.domain.exception.MaximumAssociationReachedException;
-import fr.avenirsesr.portfolio.student.association.domain.model.Association;
-import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
-import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
-import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
-import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillAssociationData;
-import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
-import fr.avenirsesr.portfolio.student.trace.domain.data.TraceAssociationData;
-import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.Duration;
@@ -65,7 +54,6 @@ class DeclaredActivityServiceImplTest {
   @Mock private DeclaredActivityRepository declaredActivityRepository;
   @Mock private ActivityService activityService;
 
-  @Mock private AssociationService associationService;
   @Mock private LoggedInUserService loggedInUserService;
   @Mock private FeedbackRepository feedbackRepository;
   @Mock private FeedbackService feedbackService;
@@ -85,7 +73,6 @@ class DeclaredActivityServiceImplTest {
         new DeclaredActivityServiceImpl(
             declaredActivityRepository,
             activityService,
-            associationService,
             loggedInUserService,
             feedbackRepository,
             feedbackService);
@@ -325,9 +312,6 @@ class DeclaredActivityServiceImplTest {
     BddLogger.and("Their pending feedbacks are deleted");
     verify(feedbackService)
         .deletePendingFeedbacks(List.of(declaredActivity1.getId(), declaredActivity2.getId()));
-
-    BddLogger.and("Their associations are kept for a future re-subscription");
-    verify(associationService, never()).deleteAllOf(anyList(), any());
   }
 
   @Test
@@ -798,167 +782,6 @@ class DeclaredActivityServiceImplTest {
   }
 
   @Test
-  void deleteAssociations_should_unassociate_the_given_associations() {
-
-    BddLogger.given("A logged-in student and a declared activity with associations");
-
-    UUID declaredActivityId = UUID.randomUUID();
-    List<UUID> idsToDelete = List.of(UUID.randomUUID(), UUID.randomUUID());
-
-    DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
-
-    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-
-    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
-        .thenReturn(Optional.of(declaredActivity));
-
-    when(declaredActivity.getStudent()).thenReturn(student);
-    when(declaredActivity.getId()).thenReturn(declaredActivityId);
-
-    BddLogger.when("deleteAssociations is called");
-
-    service.deleteAssociations(declaredActivityId, idsToDelete);
-
-    BddLogger.then("the association service should unassociate them");
-
-    verify(associationService).unassociate(declaredActivityId, DeclaredActivity.class, idsToDelete);
-  }
-
-  @Test
-  void deleteAssociations_should_throw_when_declaredActivity_not_found() {
-
-    BddLogger.given("DeclaredActivity does not exist");
-
-    UUID declaredActivityId = UUID.randomUUID();
-
-    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-
-    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
-        .thenReturn(Optional.empty());
-
-    BddLogger.when("deleteAssociations is called");
-
-    BddLogger.then("DeclaredActivityNotFoundException is thrown");
-
-    assertThatThrownBy(
-            () -> service.deleteAssociations(declaredActivityId, List.of(UUID.randomUUID())))
-        .isInstanceOf(DeclaredActivityNotFoundException.class);
-
-    verify(associationService, never()).deleteAllByIds(anyList());
-  }
-
-  @Test
-  void deleteAssociations_should_throw_when_activity_belongs_to_other_student() {
-
-    BddLogger.given("DeclaredActivity belongs to another student");
-
-    UUID declaredActivityId = UUID.randomUUID();
-
-    Student otherStudent = mock(Student.class);
-    DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
-
-    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-
-    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
-        .thenReturn(Optional.of(declaredActivity));
-
-    when(declaredActivity.getStudent()).thenReturn(otherStudent);
-
-    BddLogger.when("deleteAssociations is called");
-
-    BddLogger.then("UserNotAuthorizedException is thrown");
-
-    assertThatThrownBy(
-            () -> service.deleteAssociations(declaredActivityId, List.of(UUID.randomUUID())))
-        .isInstanceOf(UserNotAuthorizedException.class);
-
-    verify(associationService, never()).deleteAllByIds(anyList());
-  }
-
-  @Test
-  void searchForAssociation_should_search_the_elements_of_the_given_context() {
-    BddLogger.given("A logged-in student and a declared activity owned by him");
-
-    UUID declaredActivityId = UUID.randomUUID();
-    PageCriteria pageCriteria = new PageCriteria(0, 10);
-    DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
-    PagedResult<AssociationSearchResultData> expected =
-        new PagedResult<>(List.of(), new PageInfo(0, 10, 0));
-
-    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
-        .thenReturn(Optional.of(declaredActivity));
-    when(declaredActivity.getStudent()).thenReturn(student);
-    when(associationService.searchForAssociation(
-            declaredActivityId,
-            DeclaredActivity.class,
-            EAssociationContextType.TRACE,
-            "kw",
-            pageCriteria))
-        .thenReturn(expected);
-
-    BddLogger.when("searchForAssociation is called with the TRACE context");
-    var result =
-        service.searchForAssociation(
-            declaredActivityId, EAssociationContextType.TRACE, "kw", pageCriteria);
-
-    BddLogger.then("The results of the association service are returned");
-    assertThat(result).isSameAs(expected);
-  }
-
-  @Test
-  void searchForAssociation_should_throw_DeclaredActivityNotFoundException_when_not_found() {
-    BddLogger.given("A logged-in student and a non-existent declared activity");
-
-    UUID declaredActivityId = UUID.randomUUID();
-
-    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
-        .thenReturn(Optional.empty());
-
-    BddLogger.when("searchForAssociation is called");
-
-    BddLogger.then("A DeclaredActivityNotFoundException is thrown");
-    assertThatThrownBy(
-            () ->
-                service.searchForAssociation(
-                    declaredActivityId,
-                    EAssociationContextType.TRACE,
-                    null,
-                    new PageCriteria(0, 10)))
-        .isInstanceOf(DeclaredActivityNotFoundException.class);
-
-    verify(associationService, never()).searchForAssociation(any(), any(), any(), any(), any());
-  }
-
-  @Test
-  void searchForAssociation_should_throw_UserNotAuthorizedException_when_not_owner() {
-    BddLogger.given("A logged-in student and a declared activity belonging to another student");
-
-    UUID declaredActivityId = UUID.randomUUID();
-    DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
-
-    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
-        .thenReturn(Optional.of(declaredActivity));
-    when(declaredActivity.getStudent()).thenReturn(StudentFixture.create().toModel());
-
-    BddLogger.when("searchForAssociation is called");
-
-    BddLogger.then("A UserNotAuthorizedException is thrown");
-    assertThatThrownBy(
-            () ->
-                service.searchForAssociation(
-                    declaredActivityId,
-                    EAssociationContextType.TRACE,
-                    null,
-                    new PageCriteria(0, 10)))
-        .isInstanceOf(UserNotAuthorizedException.class);
-
-    verify(associationService, never()).searchForAssociation(any(), any(), any(), any(), any());
-  }
-
-  @Test
   void searchDeclaredActivity_should_return_paged_result_from_repository_with_correct_graph() {
     BddLogger.given("A logged-in student, a keyword and page criteria");
     String keyword = "recherche";
@@ -988,213 +811,6 @@ class DeclaredActivityServiceImplTest {
   }
 
   @Test
-  void getDeclaredActivityAssociations_should_return_traces_and_declaredSkills_when_valid() {
-    BddLogger.given(
-        "A logged-in student, a declared activity owned by him with trace and declared skill"
-            + " associations");
-
-    UUID declaredActivityId = UUID.randomUUID();
-
-    DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
-
-    Trace trace = mock(Trace.class);
-    DeclaredSkillProgress skill = mock(DeclaredSkillProgress.class);
-
-    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
-        .thenReturn(Optional.of(declaredActivity));
-    when(declaredActivity.getStudent()).thenReturn(student);
-    when(declaredActivity.getId()).thenReturn(declaredActivityId);
-
-    when(associationService.getAllAssociatedElementsOf(declaredActivityId, DeclaredActivity.class))
-        .thenReturn(
-            new AssociatedElementsData(
-                List.of(new TraceAssociationData(UUID.randomUUID(), trace)),
-                List.of(),
-                List.of(new DeclaredSkillAssociationData(UUID.randomUUID(), skill)),
-                List.of()));
-
-    BddLogger.when("getDeclaredActivityAssociations is called");
-    var result = service.getDeclaredActivityAssociations(declaredActivityId);
-
-    BddLogger.then("Both trace and declared skill associations are returned");
-    assertThat(result.traceAssociations()).hasSize(1);
-    assertThat(result.declaredSkillAssociations()).hasSize(1);
-  }
-
-  @Test
-  void getDeclaredActivityAssociations_should_return_empty_lists_when_no_associations() {
-    BddLogger.given("A declared activity with no associations");
-
-    UUID declaredActivityId = UUID.randomUUID();
-    DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
-
-    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
-        .thenReturn(Optional.of(declaredActivity));
-    when(declaredActivity.getStudent()).thenReturn(student);
-    when(declaredActivity.getId()).thenReturn(declaredActivityId);
-
-    when(associationService.getAllAssociatedElementsOf(declaredActivityId, DeclaredActivity.class))
-        .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
-
-    BddLogger.when("getDeclaredActivityAssociations is called");
-    var result = service.getDeclaredActivityAssociations(declaredActivityId);
-
-    BddLogger.then("Empty lists are returned");
-    assertThat(result.traceAssociations()).isEmpty();
-    assertThat(result.declaredSkillAssociations()).isEmpty();
-  }
-
-  @Test
-  void getDeclaredActivityAssociations_should_throw_when_declaredActivity_not_found() {
-    BddLogger.given("A non-existent declared activity");
-
-    UUID declaredActivityId = UUID.randomUUID();
-
-    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
-        .thenReturn(Optional.empty());
-
-    BddLogger.when("getDeclaredActivityAssociations is called");
-
-    BddLogger.then("DeclaredActivityNotFoundException is thrown");
-    assertThatThrownBy(() -> service.getDeclaredActivityAssociations(declaredActivityId))
-        .isInstanceOf(DeclaredActivityNotFoundException.class);
-  }
-
-  @Test
-  void getDeclaredActivityAssociations_should_throw_when_not_owner() {
-    BddLogger.given("A declared activity belonging to another student");
-
-    UUID declaredActivityId = UUID.randomUUID();
-
-    Student anotherStudent = StudentFixture.create().toModel();
-    DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
-
-    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
-        .thenReturn(Optional.of(declaredActivity));
-    when(declaredActivity.getStudent()).thenReturn(anotherStudent);
-
-    BddLogger.when("getDeclaredActivityAssociations is called");
-
-    BddLogger.then("UserNotAuthorizedException is thrown");
-    assertThatThrownBy(() -> service.getDeclaredActivityAssociations(declaredActivityId))
-        .isInstanceOf(UserNotAuthorizedException.class);
-  }
-
-  @Test
-  void associate_should_associate_the_given_elements_with_the_declared_activity() {
-    BddLogger.given("A logged-in student and a declared activity owned by him");
-
-    UUID declaredActivityId = UUID.randomUUID();
-    List<UUID> skillIds = List.of(UUID.randomUUID(), UUID.randomUUID());
-
-    DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
-
-    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
-        .thenReturn(Optional.of(declaredActivity));
-    when(declaredActivity.getStudent()).thenReturn(student);
-    when(declaredActivity.getId()).thenReturn(declaredActivityId);
-    when(associationService.getAllAssociatedElementsOf(declaredActivityId, DeclaredActivity.class))
-        .thenReturn(new AssociatedElementsData(List.of(), List.of(), List.of(), List.of()));
-
-    BddLogger.when("associate is called");
-    service.associate(
-        declaredActivityId, skillIds, EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL);
-
-    BddLogger.then("They are associated through the association service");
-    verify(associationService)
-        .associate(
-            declaredActivityId,
-            DeclaredActivity.class,
-            skillIds,
-            EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL);
-  }
-
-  @Test
-  void associate_should_throw_when_declaredActivity_not_found() {
-    BddLogger.given("A logged-in student and a non-existent declared activity");
-
-    UUID declaredActivityId = UUID.randomUUID();
-
-    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
-        .thenReturn(Optional.empty());
-
-    BddLogger.when("associate is called");
-
-    BddLogger.then("DeclaredActivityNotFoundException is thrown");
-    assertThatThrownBy(
-            () ->
-                service.associate(
-                    declaredActivityId,
-                    List.of(UUID.randomUUID()),
-                    EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL))
-        .isInstanceOf(DeclaredActivityNotFoundException.class);
-
-    verify(associationService, never()).associate(any(), any(), anyList(), any());
-  }
-
-  @Test
-  void associate_should_throw_when_not_owner() {
-    BddLogger.given("A logged-in student and a declared activity belonging to another student");
-
-    UUID declaredActivityId = UUID.randomUUID();
-
-    Student anotherStudent = StudentFixture.create().toModel();
-    DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
-
-    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
-        .thenReturn(Optional.of(declaredActivity));
-    when(declaredActivity.getStudent()).thenReturn(anotherStudent);
-
-    BddLogger.when("associate is called");
-
-    BddLogger.then("UserNotAuthorizedException is thrown");
-    assertThatThrownBy(
-            () ->
-                service.associate(
-                    declaredActivityId,
-                    List.of(UUID.randomUUID()),
-                    EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL))
-        .isInstanceOf(UserNotAuthorizedException.class);
-
-    verify(associationService, never()).associate(any(), any(), anyList(), any());
-  }
-
-  @Test
-  void associate_should_throw_when_the_declared_activity_is_unsubscribed() {
-    BddLogger.given("An unsubscribed declared activity owned by the logged-in student");
-
-    UUID declaredActivityId = UUID.randomUUID();
-
-    DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
-
-    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
-        .thenReturn(Optional.of(declaredActivity));
-    when(declaredActivity.getStudent()).thenReturn(student);
-    when(declaredActivity.isUnsubscribed()).thenReturn(true);
-
-    BddLogger.when("associate is called");
-
-    BddLogger.then("DeclaredActivityUnsubscribedException is thrown");
-    assertThatThrownBy(
-            () ->
-                service.associate(
-                    declaredActivityId,
-                    List.of(UUID.randomUUID()),
-                    EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL))
-        .isInstanceOf(DeclaredActivityUnsubscribedException.class);
-
-    verify(associationService, never()).associate(any(), any(), anyList(), any());
-  }
-
-  @Test
   void updateReflection_should_throw_UserNotAuthorizedException_when_reflection_is_not_enabled() {
     BddLogger.given("A logged-in student and a declared activity where enableReflection is false");
 
@@ -1214,41 +830,6 @@ class DeclaredActivityServiceImplTest {
         .isInstanceOf(UserNotAuthorizedException.class);
 
     verify(declaredActivityRepository, never()).save(any());
-  }
-
-  @Test
-  void associate_should_throw_MaximumAssociationReachedException_when_limit_reached() {
-    BddLogger.given(
-        "A declared activity with traceAllowedAssociations=1 and already 1 existing association");
-
-    UUID declaredActivityId = UUID.randomUUID();
-    UUID traceId = UUID.randomUUID();
-
-    Activity activity = ActivityFixture.create().withTraceAllowedAssociations(1).toModel();
-    DeclaredActivity declaredActivity =
-        DeclaredActivity.create(UUID.randomUUID(), student, activity, null, null, null, null, null);
-
-    Association existingAssociation = mock(Association.class);
-
-    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
-        .thenReturn(Optional.of(declaredActivity));
-    when(associationService.getAllOf(
-            declaredActivity.getId(),
-            DeclaredActivity.class,
-            List.of(EAssociationType.DECLARED_ACTIVITY_TRACE)))
-        .thenReturn(List.of(existingAssociation));
-
-    BddLogger.when("He tries to associate a new trace");
-
-    BddLogger.then("A MaximumAssociationReachedException is thrown and no association is created");
-    assertThatThrownBy(
-            () ->
-                service.associate(
-                    declaredActivityId, List.of(traceId), EAssociationType.DECLARED_ACTIVITY_TRACE))
-        .isInstanceOf(MaximumAssociationReachedException.class);
-
-    verify(associationService, never()).associate(any(), any(), anyList(), any());
   }
 
   @Test

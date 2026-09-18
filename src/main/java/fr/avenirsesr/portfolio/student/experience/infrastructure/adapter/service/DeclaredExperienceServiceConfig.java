@@ -2,8 +2,10 @@ package fr.avenirsesr.portfolio.student.experience.infrastructure.adapter.servic
 
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
+import fr.avenirsesr.portfolio.student.association.domain.port.output.handler.AssociationContextHandler;
 import fr.avenirsesr.portfolio.student.experience.domain.port.input.DeclaredExperienceService;
 import fr.avenirsesr.portfolio.student.experience.domain.port.output.repository.DeclaredExperienceRepository;
+import fr.avenirsesr.portfolio.student.experience.domain.service.DeclaredExperienceAssociationContextHandler;
 import fr.avenirsesr.portfolio.student.experience.domain.service.DeclaredExperienceServiceImpl;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import lombok.AllArgsConstructor;
@@ -22,5 +24,11 @@ public class DeclaredExperienceServiceConfig {
   public DeclaredExperienceService declaredExperienceService() {
     return new DeclaredExperienceServiceImpl(
         loggedInUserService, associationService, experienceRepository, studentService);
+  }
+
+  @Bean
+  public AssociationContextHandler declaredExperienceAssociationContextHandler() {
+    return new DeclaredExperienceAssociationContextHandler(
+        declaredExperienceService(), loggedInUserService);
   }
 }

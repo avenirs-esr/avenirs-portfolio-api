@@ -38,4 +38,8 @@ public class Association extends AvenirsBaseModel {
       Instant updatedAt) {
     return new Association(id, id1, id2, associationType, createdAt, updatedAt);
   }
+
+  public UUID associatedIdOf(Class<?> subjectClass) {
+    return associationType.associatedIdExtractorFor(subjectClass).apply(this);
+  }
 }

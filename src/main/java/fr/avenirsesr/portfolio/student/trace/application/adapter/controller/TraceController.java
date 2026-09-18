@@ -9,12 +9,6 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.file.application.adapter.dto.FileDTO;
 import fr.avenirsesr.portfolio.file.application.adapter.mapper.FileDtoMapper;
-import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsCreationRequest;
-import fr.avenirsesr.portfolio.student.association.application.adapter.dto.AssociationSearchResultDTO;
-import fr.avenirsesr.portfolio.student.association.application.adapter.mapper.AssociationSearchResultDTOMapper;
-import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
-import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
-import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.trace.application.adapter.dto.*;
 import fr.avenirsesr.portfolio.student.trace.application.adapter.mapper.*;
 import fr.avenirsesr.portfolio.student.trace.application.adapter.response.TracesCreationResponse;
@@ -24,8 +18,6 @@ import fr.avenirsesr.portfolio.student.trace.domain.data.TracesSummaryData;
 import fr.avenirsesr.portfolio.student.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import java.security.Principal;
 import java.time.LocalDate;
@@ -52,8 +44,6 @@ public class TraceController {
   private final TraceDetailMapper traceDetailMapper;
   private final TraceLockedDeclaredActivitiesMapper traceLockedDeclaredActivitiesMapper;
   private final TracesSummaryMapper tracesSummaryMapper;
-  private final TraceAssociationsMapper traceAssociationsMapper;
-  private final AssociationSearchResultDTOMapper associationSearchResultDTOMapper;
   private final FileDtoMapper fileDtoMapper;
 
   @PreAuthorize("hasAuthority('trace:list:own')")
@@ -128,37 +118,6 @@ public class TraceController {
     return ResponseEntity.ok(traceDetailMapper.toDTO(traceDetail));
   }
 
-  @PreAuthorize("hasAuthority('trace:association:manage:own')")
-  @GetMapping("/{traceId}/search-for-association")
-  public ResponseEntity<PagedResponse<AssociationSearchResultDTO>> searchForAssociation(
-      Principal principal,
-      @Valid @PathVariable UUID traceId,
-      @Parameter(schema = @Schema(ref = "#/components/schemas/EAssociationContextType"))
-          @RequestParam
-          EAssociationContextType contextType,
-      @RequestParam(required = false) String keyword,
-      @RequestParam(required = false) Integer page,
-      @RequestParam(required = false) Integer pageSize) {
-    var pageCriteria = new PageCriteria(page, pageSize);
-    log.debug(
-        "Received request to search {} for association with trace [{}] by student [{}]"
-            + " (keyword={}, page={}, pageSize={})",
-        contextType,
-        traceId,
-        principal.getName(),
-        keyword,
-        pageCriteria.page(),
-        pageCriteria.pageSize());
-
-    PagedResult<AssociationSearchResultData> pagedResult =
-        traceService.searchForAssociation(traceId, contextType, keyword, pageCriteria);
-
-    return ResponseEntity.ok(
-        new PagedResponse<>(
-            pagedResult.content().stream().map(associationSearchResultDTOMapper::toDTO).toList(),
-            PageInfoDTO.fromDomain(pagedResult.pageInfo())));
-  }
-
   @PreAuthorize("hasAuthority('trace:create:own')")
   @PostMapping
   public ResponseEntity<TracesCreationResponse> createTrace(
@@ -196,92 +155,6 @@ public class TraceController {
             updateTraceDTO.valorized());
 
     return ResponseEntity.ok(traceDetailMapper.toDTO(trace));
-  }
-
-  @PreAuthorize("hasAuthority('trace:association:manage:own')")
-  @PostMapping("/{traceId}/associate/activities")
-  public ResponseEntity<TraceAssociationsDTO> associateTraceWithActivities(
-      Principal principal,
-      @Valid @PathVariable UUID traceId,
-      @Valid @RequestBody AssociationsCreationRequest body) {
-    log.debug(
-        "Received request to associate Trace[{}] with activities [{}] by student [{}]",
-        traceId,
-        body.idsToAssociate(),
-        principal.getName());
-    var traceAssociations =
-        traceService.associate(
-            traceId, body.idsToAssociate(), EAssociationType.DECLARED_ACTIVITY_TRACE);
-    return ResponseEntity.ok(traceAssociationsMapper.toDTO(traceAssociations));
-  }
-
-  @PreAuthorize("hasAuthority('trace:association:manage:own')")
-  @PostMapping("/{traceId}/associate/declared-skill")
-  public ResponseEntity<TraceAssociationsDTO> associateTraceWithDeclaredSkill(
-      Principal principal,
-      @Valid @PathVariable UUID traceId,
-      @Valid @RequestBody AssociationsCreationRequest body) {
-    log.debug(
-        "Received request to associate Trace[{}] with declared skill [{}] by student [{}]",
-        traceId,
-        body.idsToAssociate(),
-        principal.getName());
-    var traceAssociations =
-        traceService.associate(
-            traceId, body.idsToAssociate(), EAssociationType.TRACE_DECLARED_SKILL);
-    return ResponseEntity.ok(traceAssociationsMapper.toDTO(traceAssociations));
-  }
-
-  @PreAuthorize("hasAuthority('trace:association:manage:own')")
-  @PostMapping("/{traceId}/associate/declared-experiences")
-  public ResponseEntity<TraceAssociationsDTO> associateTraceWithDeclaredExperiences(
-      Principal principal,
-      @Valid @PathVariable UUID traceId,
-      @Valid @RequestBody AssociationsCreationRequest body) {
-    log.debug(
-        "Received request to associate Trace[{}] with declared experiences [{}] by student [{}]",
-        traceId,
-        body.idsToAssociate(),
-        principal.getName());
-    var traceAssociations =
-        traceService.associate(
-            traceId, body.idsToAssociate(), EAssociationType.TRACE_DECLARED_EXPERIENCE);
-    return ResponseEntity.ok(traceAssociationsMapper.toDTO(traceAssociations));
-  }
-
-  @PreAuthorize("hasAuthority('trace:list:own')")
-  @GetMapping("/{traceId}/associations")
-  public ResponseEntity<TraceAssociationsDTO> getTraceAssociations(
-      Principal principal,
-      @PathVariable UUID traceId,
-      @RequestParam(required = false, defaultValue = "false") boolean onlyNotCompleted) {
-    log.debug(
-        "Received request to get Trace[{}] associations by student [{}]"
-            + " (onlyNotCompleted= {})",
-        traceId,
-        principal.getName(),
-        onlyNotCompleted);
-
-    var traceAssociations = traceService.getTraceAssociations(traceId, onlyNotCompleted);
-
-    return ResponseEntity.ok(traceAssociationsMapper.toDTO(traceAssociations));
-  }
-
-  @PreAuthorize("hasAuthority('trace:association:manage:own')")
-  @DeleteMapping("/{traceId}/associations")
-  public ResponseEntity<String> deleteTraceAssociations(
-      Principal principal,
-      @Valid @PathVariable UUID traceId,
-      @RequestBody List<UUID> associationIds) {
-    log.debug(
-        "Received request to unassociate associations [{}] to trace [{}] for student [{}]",
-        associationIds,
-        traceId,
-        principal.getName());
-
-    traceService.unassociate(traceId, associationIds);
-
-    return ResponseEntity.ok("Associations successfully deleted.");
   }
 
   @PreAuthorize("hasAuthority('trace:list:own')")

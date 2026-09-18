@@ -6,23 +6,13 @@ import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsCreationRequest;
-import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsDeleteRequest;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.CreationResponse;
 import fr.avenirsesr.portfolio.shared.application.adapter.mapper.FileDTOMapper;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.*;
-import fr.avenirsesr.portfolio.student.activity.application.adapter.mapper.DeclaredActivityAssociationsDTOMapper;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.mapper.DeclaredActivityDetailsDTOMapper;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.mapper.DeclaredActivityViewDTOMapper;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
-import fr.avenirsesr.portfolio.student.association.application.adapter.dto.AssociationSearchResultDTO;
-import fr.avenirsesr.portfolio.student.association.application.adapter.mapper.AssociationSearchResultDTOMapper;
-import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
-import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
-import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.security.Principal;
@@ -54,8 +44,6 @@ public class DeclaredActivityController {
   private final DeclaredActivityService declaredActivityService;
   private final DeclaredActivityViewDTOMapper declaredActivityViewDTOMapper;
   private final DeclaredActivityDetailsDTOMapper declaredActivityDetailsDTOMapper;
-  private final DeclaredActivityAssociationsDTOMapper declaredActivityAssociationsDTOMapper;
-  private final AssociationSearchResultDTOMapper associationSearchResultDTOMapper;
   private final FileDTOMapper fileDTOMapper;
 
   @PreAuthorize("hasAuthority('declared-activity:list:own')")
@@ -164,33 +152,6 @@ public class DeclaredActivityController {
                 details.declaredActivity().getActivity().getFiles(), baseUrl)));
   }
 
-  @PreAuthorize("hasAuthority('declared-activity:list:own')")
-  @GetMapping("/{declaredActivityId}/associations")
-  public ResponseEntity<DeclaredActivityAssociationsDTO> getDeclaredActivityAssociations(
-      Principal principal, @Valid @PathVariable UUID declaredActivityId) {
-    log.debug(
-        "Received request to get declared activity [{}] associations for student [{}]",
-        declaredActivityId,
-        principal.getName());
-    return ResponseEntity.ok(
-        declaredActivityAssociationsDTOMapper.toDTO(
-            declaredActivityService.getDeclaredActivityAssociations(declaredActivityId)));
-  }
-
-  @PreAuthorize("hasAuthority('declared-activity:association:manage:own')")
-  @DeleteMapping("/{declaredActivityId}/associations")
-  public ResponseEntity<String> deleteDeclaredActivityAssociations(
-      Principal principal,
-      @Valid @PathVariable UUID declaredActivityId,
-      @Valid @RequestBody AssociationsDeleteRequest body) {
-    log.debug(
-        "Received request to delete declared activity [{}] associations for student [{}]",
-        declaredActivityId,
-        principal.getName());
-    declaredActivityService.deleteAssociations(declaredActivityId, body.idsToDelete());
-    return ResponseEntity.ok("Declared activities associations successfully deleted");
-  }
-
   @PreAuthorize("hasAuthority('declared-activity:update:own')")
   @PatchMapping("/{declaredActivityId}")
   public ResponseEntity<String> updateDeclaredActivity(
@@ -202,74 +163,5 @@ public class DeclaredActivityController {
     declaredActivityService.updateDeclaredActivity(
         declaredActivityId, startDate, endDate, declaredActivityUpdateRequest.valorized());
     return ResponseEntity.ok("Declared activity successfully updated");
-  }
-
-  @PreAuthorize("hasAuthority('trace:association:manage:own')")
-  @PostMapping("/{declaredActivityId}/associate/traces")
-  public ResponseEntity<DeclaredActivityAssociationsDTO> associateActivityWithTraces(
-      Principal principal,
-      @Valid @PathVariable UUID declaredActivityId,
-      @Valid @RequestBody AssociationsCreationRequest body) {
-    log.debug(
-        "Received request to associate declared activity [{}] with traces [{}] by student [{}]",
-        declaredActivityId,
-        body.idsToAssociate(),
-        principal.getName());
-    var newAssociations =
-        declaredActivityService.associate(
-            declaredActivityId, body.idsToAssociate(), EAssociationType.DECLARED_ACTIVITY_TRACE);
-    return ResponseEntity.ok(declaredActivityAssociationsDTOMapper.toDTO(newAssociations));
-  }
-
-  @PreAuthorize("hasAuthority('declared-skill:association:manage:own')")
-  @PostMapping("/{declaredActivityId}/associate/declared-skills")
-  public ResponseEntity<DeclaredActivityAssociationsDTO> associateActivityWithDeclaredSkills(
-      Principal principal,
-      @Valid @PathVariable UUID declaredActivityId,
-      @Valid @RequestBody AssociationsCreationRequest body) {
-    log.debug(
-        "Received request to associate declared activity [{}] with declared skills [{}] by student"
-            + " [{}]",
-        declaredActivityId,
-        body.idsToAssociate(),
-        principal.getName());
-    var newAssociations =
-        declaredActivityService.associate(
-            declaredActivityId,
-            body.idsToAssociate(),
-            EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL);
-    return ResponseEntity.ok(declaredActivityAssociationsDTOMapper.toDTO(newAssociations));
-  }
-
-  @PreAuthorize("hasAuthority('declared-activity:association:manage:own')")
-  @GetMapping("/{declaredActivityId}/search-for-association")
-  public ResponseEntity<PagedResponse<AssociationSearchResultDTO>> searchForAssociation(
-      Principal principal,
-      @Valid @PathVariable UUID declaredActivityId,
-      @Parameter(schema = @Schema(ref = "#/components/schemas/EAssociationContextType"))
-          @RequestParam
-          EAssociationContextType contextType,
-      @RequestParam(required = false) String keyword,
-      @RequestParam(required = false) Integer page,
-      @RequestParam(required = false) Integer pageSize) {
-    var pageCriteria = new PageCriteria(page, pageSize);
-    log.debug(
-        "Received request to search {} for association with declared activity [{}] by student [{}]"
-            + " (keyword={}, page={}, pageSize={})",
-        contextType,
-        declaredActivityId,
-        principal.getName(),
-        keyword,
-        pageCriteria.page(),
-        pageCriteria.pageSize());
-
-    PagedResult<AssociationSearchResultData> pagedResult =
-        declaredActivityService.searchForAssociation(
-            declaredActivityId, contextType, keyword, pageCriteria);
-
-    return ResponseEntity.ok(
-        new PagedResponse<>(
-            pagedResult.content().stream().map(associationSearchResultDTOMapper::toDTO).toList(),
-            PageInfoDTO.fromDomain(pagedResult.pageInfo())));
   }
 }
