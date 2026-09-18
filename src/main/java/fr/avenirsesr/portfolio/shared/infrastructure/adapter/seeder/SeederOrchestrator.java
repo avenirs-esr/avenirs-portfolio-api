@@ -101,13 +101,17 @@ public class SeederOrchestrator {
 
       selfKnowledgeElementSeeder.seed();
 
-      declaredProgramSeeder.seed(savedStudents);
+      var savedDeclaredPrograms = declaredProgramSeeder.seed(savedStudents);
 
       var savedActivityDrafts = activityDraftSeeder.seed(savedStaffs);
       var savedActivities = activitySeeder.seed(savedStaffs.getFirst());
       var declaredActivities = declaredActivitySeeder.seed(savedStudents, savedActivities);
       associationSeeder.seed(
-          declaredActivities, savedTraces, savedDeclaredSkillProgresses, savedDeclaredExperiences);
+          declaredActivities,
+          savedTraces,
+          savedDeclaredSkillProgresses,
+          savedDeclaredExperiences,
+          savedDeclaredPrograms);
 
       activityFileSeeder.seed(savedActivityDrafts, savedActivities);
 

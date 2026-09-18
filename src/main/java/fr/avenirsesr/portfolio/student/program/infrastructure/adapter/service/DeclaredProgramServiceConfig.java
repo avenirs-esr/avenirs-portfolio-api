@@ -1,8 +1,11 @@
 package fr.avenirsesr.portfolio.student.program.infrastructure.adapter.service;
 
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
+import fr.avenirsesr.portfolio.student.association.domain.port.output.handler.AssociationContextHandler;
 import fr.avenirsesr.portfolio.student.program.domain.port.input.DeclaredProgramService;
 import fr.avenirsesr.portfolio.student.program.domain.port.output.DeclaredProgramRepository;
+import fr.avenirsesr.portfolio.student.program.domain.service.DeclaredProgramAssociationContextHandler;
 import fr.avenirsesr.portfolio.student.program.domain.service.DeclaredProgramServiceImpl;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import lombok.AllArgsConstructor;
@@ -15,10 +18,17 @@ public class DeclaredProgramServiceConfig {
   private final StudentService studentService;
   private final DeclaredProgramRepository declaredProgramRepository;
   private final LoggedInUserService loggedInUserService;
+  private final AssociationService associationService;
 
   @Bean
   public DeclaredProgramService declaredProgramService() {
     return new DeclaredProgramServiceImpl(
-        studentService, declaredProgramRepository, loggedInUserService);
+        studentService, declaredProgramRepository, loggedInUserService, associationService);
+  }
+
+  @Bean
+  public AssociationContextHandler declaredProgramAssociationContextHandler() {
+    return new DeclaredProgramAssociationContextHandler(
+        declaredProgramService(), loggedInUserService);
   }
 }

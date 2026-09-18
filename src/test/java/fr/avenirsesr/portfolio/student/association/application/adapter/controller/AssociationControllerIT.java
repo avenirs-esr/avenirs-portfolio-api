@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.StreamSupport;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +50,7 @@ class AssociationControllerIT extends ContainerConfigurationTest {
   private static final String DECLARED_SKILL_ASSOCIATIONS_PATH = BASE_PATH + "/DECLARED_SKILL";
   private static final String DECLARED_EXPERIENCE_ASSOCIATIONS_PATH =
       BASE_PATH + "/DECLARED_EXPERIENCE";
+  private static final String DECLARED_PROGRAM_BASE_PATH = "/me/declared/programs";
 
   private static final String DECLARED_SKILL_BASE_PATH = "/me/declared/skill-progress";
   private static final String DECLARED_EXPERIENCE_BASE_PATH = "/me/declared/experiences";
@@ -224,6 +226,8 @@ class AssociationControllerIT extends ContainerConfigurationTest {
         .jsonPath("$.declaredSkillAssociations")
         .isArray()
         .jsonPath("$.declaredExperienceAssociations")
+        .isArray()
+        .jsonPath("$.declaredProgramAssociations")
         .isArray();
 
     BddLogger.then("it should return every associated element grouped by context");
@@ -2833,5 +2837,378 @@ class AssociationControllerIT extends ContainerConfigurationTest {
         .isForbidden();
 
     BddLogger.then("it should return 403");
+  }
+
+  private UUID createDeclaredProgramAs(
+      String title, String organization, String payload, String signature) throws Exception {
+    var body =
+        Map.of(
+            "title", title,
+            "organization", organization,
+            "startDate", "2024-01-01");
+
+    var response =
+        webTestClient
+            .post()
+            .uri(DECLARED_PROGRAM_BASE_PATH)
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, payload)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, signature)
+            .contentType(APPLICATION_JSON)
+            .bodyValue(objectMapper.writeValueAsString(body))
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    return UUID.fromString(objectMapper.readTree(response).get("id").asText());
+  }
+
+  private UUID createDeclaredProgram(String title, String organization) throws Exception {
+    return createDeclaredProgramAs(title, organization, studentPayload, studentSignature);
+  }
+
+  private JsonNode searchForAssociation(
+      String contextType, UUID elementId, String associatedContextType, String keyword)
+      throws Exception {
+    String body =
+        webTestClient
+            .get()
+            .uri(
+                uriBuilder ->
+                    uriBuilder
+                        .path(SEARCH_PATH)
+                        .queryParam("page", "0")
+                        .queryParam("pageSize", "100")
+                        .queryParam("keyword", keyword)
+                        .build(contextType, elementId, associatedContextType))
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+            .accept(APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    return objectMapper.readTree(body).get("data");
+  }
+
+  private JsonNode getAssociations(String contextType, UUID elementId) throws Exception {
+    String body =
+        webTestClient
+            .get()
+            .uri(ASSOCIATIONS_PATH, contextType, elementId)
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+            .accept(APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    return objectMapper.readTree(body);
+  }
+
+  @Test
+  void shouldGetTheAssociationsOfADeclaredProgram() throws Exception {
+    BddLogger.given("an existing declared program");
+    UUID declaredProgramId = createDeclaredProgram("Master informatique", "Université");
+
+    when("getting its associations");
+
+    var associations = getAssociations("DECLARED_PROGRAM", declaredProgramId);
+
+    BddLogger.then("it should return every associated element grouped by context");
+    assertThat(associations.get("traceAssociations").isArray()).isTrue();
+    assertThat(associations.get("declaredSkillAssociations").isArray()).isTrue();
+    assertThat(associations.get("declaredExperienceAssociations").isArray()).isTrue();
+    assertThat(associations.get("declaredProgramAssociations").isArray()).isTrue();
+  }
+
+  @Test
+  void shouldReturn404WhenGettingTheAssociationsOfAnUnknownDeclaredProgram() {
+    BddLogger.given("an unknown declared program");
+
+    when("getting its associations");
+
+    webTestClient
+        .get()
+        .uri(ASSOCIATIONS_PATH, "DECLARED_PROGRAM", UUID.randomUUID())
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .accept(APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isNotFound();
+
+    BddLogger.then("it should return 404");
+  }
+
+  @Test
+  void shouldReturn403WhenGettingTheAssociationsOfTheDeclaredProgramOfAnotherStudent()
+      throws Exception {
+    BddLogger.given("a declared program owned by another student");
+    UUID declaredProgramId =
+        createDeclaredProgramAs(
+            "Licence de droit", "Université", otherStudentPayload, otherStudentSignature);
+
+    when("getting its associations");
+
+    webTestClient
+        .get()
+        .uri(ASSOCIATIONS_PATH, "DECLARED_PROGRAM", declaredProgramId)
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .accept(APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isForbidden();
+
+    BddLogger.then("it should return 403");
+  }
+
+  @Test
+  void shouldAssociateSeveralDeclaredSkillsWithADeclaredProgram() throws Exception {
+    BddLogger.given("an existing declared program and two available declared skills");
+    UUID declaredProgramId = createDeclaredProgram("Mastère data", "Université");
+    UUID firstDeclaredSkillId = createAvailableDeclaredSkillProgress().progressId();
+    UUID secondDeclaredSkillId = createAvailableDeclaredSkillProgress().progressId();
+
+    when("associating the declared program with both declared skills");
+
+    JsonNode associations =
+        associate(
+            declaredProgramId,
+            "DECLARED_PROGRAM",
+            "DECLARED_SKILL",
+            List.of(firstDeclaredSkillId, secondDeclaredSkillId));
+
+    BddLogger.then("it should return the two declared skills associated with the declared program");
+    assertThat(associations.get("declaredSkillAssociations")).hasSize(2);
+    assertThat(associations.get("declaredSkillAssociations"))
+        .allSatisfy(association -> assertThat(association.get("associationId").isNull()).isFalse());
+  }
+
+  @Test
+  void shouldReturnTheDeclaredProgramInTheAssociationsOfItsDeclaredSkill() throws Exception {
+    BddLogger.given("a declared skill associated with a declared program");
+    UUID declaredProgramId = createDeclaredProgram("Diplôme ingénieur", "École centrale");
+    UUID declaredSkillId = createAvailableDeclaredSkillProgress().progressId();
+
+    associate(declaredProgramId, "DECLARED_PROGRAM", "DECLARED_SKILL", List.of(declaredSkillId));
+
+    when("getting the associations of the declared skill");
+
+    var associations = getAssociations("DECLARED_SKILL", declaredSkillId);
+
+    BddLogger.then("it should return the declared program on the declared skill side");
+    assertThat(associations.get("declaredProgramAssociations")).hasSize(1);
+    assertThat(
+            associations
+                .get("declaredProgramAssociations")
+                .get(0)
+                .get("declaredProgram")
+                .get("id")
+                .asText())
+        .isEqualTo(declaredProgramId.toString());
+    assertThat(
+            associations
+                .get("declaredProgramAssociations")
+                .get(0)
+                .get("declaredProgram")
+                .get("title")
+                .asText())
+        .isEqualTo("Diplôme ingénieur");
+  }
+
+  @Test
+  void shouldReturn409WhenAssociatingTwiceTheSameDeclaredSkillWithADeclaredProgram()
+      throws Exception {
+    BddLogger.given("a declared program already associated with a declared skill");
+    UUID declaredProgramId = createDeclaredProgram("DU communication", "Université");
+    UUID declaredSkillId = createAvailableDeclaredSkillProgress().progressId();
+
+    associate(declaredProgramId, "DECLARED_PROGRAM", "DECLARED_SKILL", List.of(declaredSkillId));
+
+    when("associating the same declared skill again");
+
+    webTestClient
+        .post()
+        .uri(ASSOCIATE_PATH, "DECLARED_PROGRAM", declaredProgramId, "DECLARED_SKILL")
+        .contentType(APPLICATION_JSON)
+        .bodyValue(
+            objectMapper.writeValueAsString(
+                new AssociationsCreationRequest(List.of(declaredSkillId))))
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .exchange()
+        .expectStatus()
+        .isEqualTo(409);
+
+    BddLogger.then("it should return 409");
+  }
+
+  @Test
+  void shouldReturn404WhenAssociatingADeclaredProgramWithAnUnknownDeclaredSkill() throws Exception {
+    BddLogger.given("an existing declared program and an unknown declared skill");
+    UUID declaredProgramId = createDeclaredProgram("Formation continue", "CNAM");
+
+    when("associating the declared program with the unknown declared skill");
+
+    webTestClient
+        .post()
+        .uri(ASSOCIATE_PATH, "DECLARED_PROGRAM", declaredProgramId, "DECLARED_SKILL")
+        .contentType(APPLICATION_JSON)
+        .bodyValue(
+            objectMapper.writeValueAsString(
+                new AssociationsCreationRequest(List.of(UUID.randomUUID()))))
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .exchange()
+        .expectStatus()
+        .isNotFound();
+
+    BddLogger.then("it should return 404");
+  }
+
+  @Test
+  void shouldUnassociateTheDeclaredSkillsOfADeclaredProgram() throws Exception {
+    BddLogger.given("a declared program associated with two declared skills");
+    UUID declaredProgramId = createDeclaredProgram("Certificat qualité", "AFNOR");
+    UUID firstDeclaredSkillId = createAvailableDeclaredSkillProgress().progressId();
+    UUID secondDeclaredSkillId = createAvailableDeclaredSkillProgress().progressId();
+
+    JsonNode associations =
+        associate(
+            declaredProgramId,
+            "DECLARED_PROGRAM",
+            "DECLARED_SKILL",
+            List.of(firstDeclaredSkillId, secondDeclaredSkillId));
+
+    List<UUID> associationIds = new ArrayList<>();
+    associations
+        .get("declaredSkillAssociations")
+        .forEach(
+            association ->
+                associationIds.add(UUID.fromString(association.get("associationId").asText())));
+
+    when("unassociating both associations");
+
+    webTestClient
+        .method(HttpMethod.DELETE)
+        .uri(ASSOCIATIONS_PATH, "DECLARED_PROGRAM", declaredProgramId)
+        .contentType(APPLICATION_JSON)
+        .bodyValue(objectMapper.writeValueAsString(new AssociationsDeleteRequest(associationIds)))
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .exchange()
+        .expectStatus()
+        .isNoContent();
+
+    BddLogger.then("the declared program should not have any declared skill left");
+    assertThat(
+            getAssociations("DECLARED_PROGRAM", declaredProgramId).get("declaredSkillAssociations"))
+        .isEmpty();
+  }
+
+  @Test
+  void shouldSearchTheDeclaredSkillsToAssociateWithADeclaredProgram() throws Exception {
+    BddLogger.given("a declared program already associated with a declared skill");
+    UUID declaredProgramId = createDeclaredProgram("BUT informatique", "IUT");
+    UUID declaredSkillId = createAvailableDeclaredSkillProgress().progressId();
+
+    associate(declaredProgramId, "DECLARED_PROGRAM", "DECLARED_SKILL", List.of(declaredSkillId));
+
+    when("searching the declared skills to associate");
+
+    var results = searchForAssociation("DECLARED_PROGRAM", declaredProgramId, "DECLARED_SKILL", "");
+
+    BddLogger.then("the already associated declared skill should be disabled");
+    var alreadyAssociated =
+        StreamSupport.stream(results.spliterator(), false)
+            .filter(result -> result.get("id").asText().equals(declaredSkillId.toString()))
+            .findFirst()
+            .orElseThrow();
+
+    assertThat(alreadyAssociated.get("disabled").asBoolean()).isTrue();
+  }
+
+  @Test
+  void shouldSearchTheDeclaredProgramsToAssociateWithADeclaredSkill() throws Exception {
+    BddLogger.given("a declared skill and a declared program matching the keyword");
+    UUID declaredProgramId = createDeclaredProgram("Alternance cybersécurité", "Orange");
+    UUID declaredSkillId = createAvailableDeclaredSkillProgress().progressId();
+
+    when("searching the declared programs to associate");
+
+    var results =
+        searchForAssociation(
+            "DECLARED_SKILL", declaredSkillId, "DECLARED_PROGRAM", "cybersécurité");
+
+    BddLogger.then("it should return the matching declared program with its organization");
+    var found =
+        StreamSupport.stream(results.spliterator(), false)
+            .filter(result -> result.get("id").asText().equals(declaredProgramId.toString()))
+            .findFirst()
+            .orElseThrow();
+
+    assertThat(found.get("title").asText()).isEqualTo("Alternance cybersécurité");
+    assertThat(found.get("category").asText()).isEqualTo("Orange");
+    assertThat(found.get("disabled").asBoolean()).isFalse();
+  }
+
+  @Test
+  void shouldDisableTheDeclaredProgramsAlreadyAssociatedWithADeclaredSkill() throws Exception {
+    BddLogger.given("a declared skill already associated with a declared program");
+    UUID declaredProgramId = createDeclaredProgram("Doctorat physique", "Sorbonne");
+    UUID declaredSkillId = createAvailableDeclaredSkillProgress().progressId();
+
+    associate(declaredProgramId, "DECLARED_PROGRAM", "DECLARED_SKILL", List.of(declaredSkillId));
+
+    when("searching the declared programs to associate");
+
+    var results =
+        searchForAssociation("DECLARED_SKILL", declaredSkillId, "DECLARED_PROGRAM", "Doctorat");
+
+    BddLogger.then("the already associated declared program should be disabled");
+    var found =
+        StreamSupport.stream(results.spliterator(), false)
+            .filter(result -> result.get("id").asText().equals(declaredProgramId.toString()))
+            .findFirst()
+            .orElseThrow();
+
+    assertThat(found.get("disabled").asBoolean()).isTrue();
+  }
+
+  @Test
+  void shouldDeleteTheAssociationsOfADeletedDeclaredProgram() throws Exception {
+    BddLogger.given("a declared program associated with a declared skill");
+    UUID declaredProgramId = createDeclaredProgram("Prépa scientifique", "Lycée Kléber");
+    UUID declaredSkillId = createAvailableDeclaredSkillProgress().progressId();
+
+    associate(declaredProgramId, "DECLARED_PROGRAM", "DECLARED_SKILL", List.of(declaredSkillId));
+
+    when("deleting the declared program");
+
+    webTestClient
+        .method(HttpMethod.DELETE)
+        .uri(DECLARED_PROGRAM_BASE_PATH)
+        .contentType(APPLICATION_JSON)
+        .bodyValue(objectMapper.writeValueAsString(List.of(declaredProgramId)))
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk();
+
+    BddLogger.then("the declared skill should not reference the declared program anymore");
+    assertThat(
+            getAssociations("DECLARED_SKILL", declaredSkillId).get("declaredProgramAssociations"))
+        .isEmpty();
   }
 }
