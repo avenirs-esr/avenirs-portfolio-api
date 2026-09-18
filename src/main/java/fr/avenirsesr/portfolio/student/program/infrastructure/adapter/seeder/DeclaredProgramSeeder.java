@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.ESeeder
 import fr.avenirsesr.portfolio.common.utils.FileReader;
 import fr.avenirsesr.portfolio.common.validation.infrastructure.adapter.utils.ValidationUtils;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
+import fr.avenirsesr.portfolio.student.program.domain.model.DeclaredProgram;
 import fr.avenirsesr.portfolio.student.program.domain.port.input.DeclaredProgramService;
 import fr.avenirsesr.portfolio.student.program.infrastructure.adapter.seeder.data.DeclaredProgramCreationData;
 import fr.avenirsesr.portfolio.student.program.infrastructure.adapter.seeder.fake.FakeDeclaredProgram;
@@ -29,7 +30,7 @@ public class DeclaredProgramSeeder {
   private ESeederSource seederSource;
 
   @Transactional
-  public List<DeclaredProgramCreationData> seed(List<StudentEntity> savedStudents) {
+  public List<DeclaredProgram> seed(List<StudentEntity> savedStudents) {
     ValidationUtils.requireNonEmpty(savedStudents, "savedStudents cannot be empty");
 
     log.info("Seeding declared programs...");
@@ -59,21 +60,23 @@ public class DeclaredProgramSeeder {
                   .toList();
         };
 
-    creationDataList.forEach(
-        creationData -> {
-          declaredProgramService.create(
-              creationData.studentId(),
-              creationData.status(),
-              creationData.title(),
-              creationData.description(),
-              creationData.organization(),
-              creationData.result(),
-              creationData.sourceOfInformation(),
-              creationData.startDate(),
-              creationData.endDate());
-        });
+    List<DeclaredProgram> declaredPrograms =
+        creationDataList.stream()
+            .map(
+                creationData ->
+                    declaredProgramService.create(
+                        creationData.studentId(),
+                        creationData.status(),
+                        creationData.title(),
+                        creationData.description(),
+                        creationData.organization(),
+                        creationData.result(),
+                        creationData.sourceOfInformation(),
+                        creationData.startDate(),
+                        creationData.endDate()))
+            .toList();
 
-    log.info("✔ {} declared programs created", creationDataList.size());
-    return creationDataList;
+    log.info("✔ {} declared programs created", declaredPrograms.size());
+    return declaredPrograms;
   }
 }

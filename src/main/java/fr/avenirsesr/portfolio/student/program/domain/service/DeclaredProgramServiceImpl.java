@@ -10,6 +10,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortField;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.program.domain.exception.DeclaredProgramNotFoundException;
 import fr.avenirsesr.portfolio.student.program.domain.model.DeclaredProgram;
 import fr.avenirsesr.portfolio.student.program.domain.model.enums.EPeriodStatus;
@@ -30,6 +31,7 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
   private final StudentService studentService;
   private final DeclaredProgramRepository declaredProgramRepository;
   private final LoggedInUserService loggedInUserService;
+  private final AssociationService associationService;
 
   private DeclaredProgram create(
       Student student,
@@ -192,7 +194,21 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
     if (!declaredPrograms.stream().allMatch(p -> p.getStudent().equals(student))) {
       throw new UserNotAuthorizedException();
     }
+
+    associationService.deleteAllOf(declaredProgramIds, DeclaredProgram.class);
+
     declaredProgramRepository.removeAllFromDatabase(declaredPrograms);
+  }
+
+  @Override
+  public List<DeclaredProgram> findAllByIds(List<UUID> declaredProgramIds) {
+    return declaredProgramRepository.findAllById(declaredProgramIds);
+  }
+
+  @Override
+  public PagedResult<DeclaredProgram> search(String keyword, PageCriteria pageCriteria) {
+    return declaredProgramRepository.findAllByStudent(
+        loggedInUserService.getLoggedInStudent(), pageCriteria, keyword);
   }
 
   private EProgramStatus getProgramStatus(LocalDate startDate, LocalDate endDate) {

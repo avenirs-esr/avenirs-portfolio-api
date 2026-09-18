@@ -44,13 +44,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class DeclaredActivityAssociationContextHandlerTest {
+class DeclaredActivityAssociationStrategyTest {
 
   @Mock private DeclaredActivityService declaredActivityService;
   @Mock private AssociationService associationService;
   @Mock private LoggedInUserService loggedInUserService;
 
-  @InjectMocks private DeclaredActivityAssociationContextHandler handler;
+  @InjectMocks private DeclaredActivityAssociationStrategy strategy;
 
   private DeclaredActivity declaredActivityOf(UUID id, Student student) {
     var declaredActivity = mock(DeclaredActivity.class);
@@ -62,7 +62,7 @@ class DeclaredActivityAssociationContextHandlerTest {
 
   @Test
   void getContextType_should_return_the_declared_activity_context() {
-    assertThat(handler.getContextType()).isEqualTo(EAssociationContextType.DECLARED_ACTIVITY);
+    assertThat(strategy.getContextType()).isEqualTo(EAssociationContextType.DECLARED_ACTIVITY);
   }
 
   @Test
@@ -72,7 +72,7 @@ class DeclaredActivityAssociationContextHandlerTest {
     when(declaredActivityService.findAllDeclaredActivitiesByIds(List.of(declaredActivityId)))
         .thenReturn(List.of());
 
-    assertThatThrownBy(() -> handler.checkLoggedInStudentOwns(List.of(declaredActivityId)))
+    assertThatThrownBy(() -> strategy.checkLoggedInStudentOwns(List.of(declaredActivityId)))
         .isInstanceOf(DeclaredActivityNotFoundException.class);
   }
 
@@ -87,7 +87,7 @@ class DeclaredActivityAssociationContextHandlerTest {
         .thenReturn(List.of(declaredActivity));
     when(loggedInUserService.getLoggedInStudent()).thenReturn(StudentFixture.create().toModel());
 
-    assertThatThrownBy(() -> handler.checkLoggedInStudentOwns(List.of(declaredActivityId)))
+    assertThatThrownBy(() -> strategy.checkLoggedInStudentOwns(List.of(declaredActivityId)))
         .isInstanceOf(UserNotAuthorizedException.class);
   }
 
@@ -105,7 +105,7 @@ class DeclaredActivityAssociationContextHandlerTest {
 
     assertThatThrownBy(
             () ->
-                handler.checkLoggedInStudentCanAssociate(
+                strategy.checkLoggedInStudentCanAssociate(
                     declaredActivityId, EAssociationType.DECLARED_ACTIVITY_TRACE, 1))
         .isInstanceOf(DeclaredActivityUnsubscribedException.class);
   }
@@ -132,7 +132,7 @@ class DeclaredActivityAssociationContextHandlerTest {
 
     assertThatThrownBy(
             () ->
-                handler.checkLoggedInStudentCanAssociate(
+                strategy.checkLoggedInStudentCanAssociate(
                     declaredActivityId, EAssociationType.DECLARED_ACTIVITY_TRACE, 2))
         .isInstanceOf(MaximumAssociationReachedException.class);
   }
@@ -152,7 +152,7 @@ class DeclaredActivityAssociationContextHandlerTest {
         .thenReturn(List.of(declaredActivity));
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
 
-    handler.checkLoggedInStudentCanAssociate(
+    strategy.checkLoggedInStudentCanAssociate(
         declaredActivityId, EAssociationType.DECLARED_ACTIVITY_TRACE, 10);
 
     verify(associationService, never()).getAllOf(any(UUID.class), any(), any());
@@ -169,7 +169,7 @@ class DeclaredActivityAssociationContextHandlerTest {
         .thenReturn(List.of(declaredActivity));
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
 
-    handler.checkLoggedInStudentCanAssociate(
+    strategy.checkLoggedInStudentCanAssociate(
         declaredActivityId, EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL, 1);
 
     verify(associationService, never()).getAllOf(any(UUID.class), any(), any());
@@ -188,7 +188,7 @@ class DeclaredActivityAssociationContextHandlerTest {
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
 
     assertThatThrownBy(
-            () -> handler.checkLoggedInStudentCanUnassociate(List.of(declaredActivityId)))
+            () -> strategy.checkLoggedInStudentCanUnassociate(List.of(declaredActivityId)))
         .isInstanceOf(DeclaredActivityAlreadyFinishedException.class);
   }
 
@@ -209,7 +209,7 @@ class DeclaredActivityAssociationContextHandlerTest {
     when(declaredActivityService.searchDeclaredActivity("kw", pageCriteria))
         .thenReturn(new PagedResult<>(List.of(declaredActivity), new PageInfo(0, 10, 1)));
 
-    var result = handler.search("kw", AssociationSearchFilter.NONE, pageCriteria);
+    var result = strategy.search("kw", AssociationSearchFilter.NONE, pageCriteria);
 
     assertThat(result.content())
         .containsExactly(
@@ -233,7 +233,7 @@ class DeclaredActivityAssociationContextHandlerTest {
     when(declaredActivityService.getDeclaredActivityStatus(List.of(declaredActivity)))
         .thenReturn(Map.of(declaredActivity, EDeclaredActivityStatus.IN_PROGRESS));
 
-    var result = handler.toAssociatedElements(List.of(association), Trace.class, false);
+    var result = strategy.toAssociatedElements(List.of(association), Trace.class, false);
 
     assertThat(result.declaredActivityAssociations())
         .singleElement()
@@ -261,7 +261,7 @@ class DeclaredActivityAssociationContextHandlerTest {
     when(declaredActivityService.getDeclaredActivityStatus(List.of(declaredActivity)))
         .thenReturn(Map.of(declaredActivity, EDeclaredActivityStatus.IN_PROGRESS));
 
-    handler.toAssociatedElements(List.of(association), Trace.class, true);
+    strategy.toAssociatedElements(List.of(association), Trace.class, true);
 
     verify(declaredActivityService, never()).findAllDeclaredActivitiesByIds(any());
   }
@@ -278,7 +278,8 @@ class DeclaredActivityAssociationContextHandlerTest {
         .thenReturn(List.of());
     when(declaredActivityService.getDeclaredActivityStatus(List.of())).thenReturn(Map.of());
 
-    assertThatThrownBy(() -> handler.toAssociatedElements(List.of(association), Trace.class, false))
+    assertThatThrownBy(
+            () -> strategy.toAssociatedElements(List.of(association), Trace.class, false))
         .isInstanceOf(DeclaredActivityNotFoundException.class);
   }
 }

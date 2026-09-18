@@ -31,12 +31,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class DeclaredExperienceAssociationContextHandlerTest {
+class DeclaredExperienceAssociationStrategyTest {
 
   @Mock private DeclaredExperienceService declaredExperienceService;
   @Mock private LoggedInUserService loggedInUserService;
 
-  @InjectMocks private DeclaredExperienceAssociationContextHandler handler;
+  @InjectMocks private DeclaredExperienceAssociationStrategy strategy;
 
   private DeclaredExperience declaredExperienceOf(UUID id, Student student) {
     var declaredExperience = mock(DeclaredExperience.class);
@@ -48,7 +48,7 @@ class DeclaredExperienceAssociationContextHandlerTest {
 
   @Test
   void getContextType_should_return_the_declared_experience_context() {
-    assertThat(handler.getContextType()).isEqualTo(EAssociationContextType.DECLARED_EXPERIENCE);
+    assertThat(strategy.getContextType()).isEqualTo(EAssociationContextType.DECLARED_EXPERIENCE);
   }
 
   @Test
@@ -58,7 +58,7 @@ class DeclaredExperienceAssociationContextHandlerTest {
     when(declaredExperienceService.findAllByIds(List.of(declaredExperienceId)))
         .thenReturn(List.of());
 
-    assertThatThrownBy(() -> handler.checkLoggedInStudentOwns(List.of(declaredExperienceId)))
+    assertThatThrownBy(() -> strategy.checkLoggedInStudentOwns(List.of(declaredExperienceId)))
         .isInstanceOf(DeclaredExperienceNotFoundException.class);
   }
 
@@ -75,7 +75,7 @@ class DeclaredExperienceAssociationContextHandlerTest {
 
     assertThatThrownBy(
             () ->
-                handler.checkLoggedInStudentCanAssociate(
+                strategy.checkLoggedInStudentCanAssociate(
                     declaredExperienceId, EAssociationType.TRACE_DECLARED_EXPERIENCE, 1))
         .isInstanceOf(UserNotAuthorizedException.class);
   }
@@ -93,7 +93,7 @@ class DeclaredExperienceAssociationContextHandlerTest {
     when(declaredExperienceService.search("kw", pageCriteria))
         .thenReturn(new PagedResult<>(List.of(declaredExperience), new PageInfo(0, 10, 1)));
 
-    var result = handler.search("kw", AssociationSearchFilter.NONE, pageCriteria);
+    var result = strategy.search("kw", AssociationSearchFilter.NONE, pageCriteria);
 
     assertThat(result.content())
         .containsExactly(
@@ -117,7 +117,7 @@ class DeclaredExperienceAssociationContextHandlerTest {
     when(declaredExperienceService.search("kw", pageCriteria))
         .thenReturn(new PagedResult<>(List.of(declaredExperience), new PageInfo(0, 10, 1)));
 
-    var result = handler.search("kw", AssociationSearchFilter.NONE, pageCriteria);
+    var result = strategy.search("kw", AssociationSearchFilter.NONE, pageCriteria);
 
     assertThat(result.content())
         .containsExactly(
@@ -140,7 +140,7 @@ class DeclaredExperienceAssociationContextHandlerTest {
     when(declaredExperienceService.findAllByIds(List.of(declaredExperienceId)))
         .thenReturn(List.of(declaredExperience));
 
-    var result = handler.toAssociatedElements(List.of(association), Trace.class, false);
+    var result = strategy.toAssociatedElements(List.of(association), Trace.class, false);
 
     assertThat(result.declaredExperienceAssociations())
         .singleElement()

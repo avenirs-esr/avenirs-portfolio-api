@@ -32,12 +32,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class DeclaredSkillAssociationContextHandlerTest {
+class DeclaredSkillAssociationStrategyTest {
 
   @Mock private DeclaredSkillProgressService declaredSkillProgressService;
   @Mock private LoggedInUserService loggedInUserService;
 
-  @InjectMocks private DeclaredSkillAssociationContextHandler handler;
+  @InjectMocks private DeclaredSkillAssociationStrategy strategy;
 
   private DeclaredSkillProgress declaredSkillProgressOf(UUID id, Student student) {
     var declaredSkillProgress = mock(DeclaredSkillProgress.class);
@@ -49,7 +49,7 @@ class DeclaredSkillAssociationContextHandlerTest {
 
   @Test
   void getContextType_should_return_the_declared_skill_context() {
-    assertThat(handler.getContextType()).isEqualTo(EAssociationContextType.DECLARED_SKILL);
+    assertThat(strategy.getContextType()).isEqualTo(EAssociationContextType.DECLARED_SKILL);
   }
 
   @Test
@@ -60,7 +60,7 @@ class DeclaredSkillAssociationContextHandlerTest {
             List.of(declaredSkillProgressId)))
         .thenReturn(List.of());
 
-    assertThatThrownBy(() -> handler.checkLoggedInStudentOwns(List.of(declaredSkillProgressId)))
+    assertThatThrownBy(() -> strategy.checkLoggedInStudentOwns(List.of(declaredSkillProgressId)))
         .isInstanceOf(DeclaredSkillProgressNotFoundException.class);
   }
 
@@ -77,7 +77,7 @@ class DeclaredSkillAssociationContextHandlerTest {
     when(loggedInUserService.getLoggedInStudent()).thenReturn(StudentFixture.create().toModel());
 
     assertThatThrownBy(
-            () -> handler.checkLoggedInStudentCanUnassociate(List.of(declaredSkillProgressId)))
+            () -> strategy.checkLoggedInStudentCanUnassociate(List.of(declaredSkillProgressId)))
         .isInstanceOf(UserNotAuthorizedException.class);
   }
 
@@ -97,7 +97,7 @@ class DeclaredSkillAssociationContextHandlerTest {
     when(declaredSkillProgressService.searchDeclaredSkill("kw", pageCriteria))
         .thenReturn(new PagedResult<>(List.of(declaredSkillProgress), new PageInfo(0, 10, 1)));
 
-    var result = handler.search("kw", AssociationSearchFilter.NONE, pageCriteria);
+    var result = strategy.search("kw", AssociationSearchFilter.NONE, pageCriteria);
 
     assertThat(result.content())
         .containsExactly(
@@ -120,7 +120,7 @@ class DeclaredSkillAssociationContextHandlerTest {
             List.of(declaredSkillProgressId)))
         .thenReturn(List.of(declaredSkillProgress));
 
-    var result = handler.toAssociatedElements(List.of(association), Trace.class, false);
+    var result = strategy.toAssociatedElements(List.of(association), Trace.class, false);
 
     assertThat(result.declaredSkillAssociations())
         .singleElement()

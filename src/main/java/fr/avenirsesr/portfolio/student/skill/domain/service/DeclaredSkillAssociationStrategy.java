@@ -1,37 +1,32 @@
-package fr.avenirsesr.portfolio.student.trace.domain.service;
+package fr.avenirsesr.portfolio.student.skill.domain.service;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
-import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortField;
-import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociatedElementsData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.filter.AssociationSearchFilter;
-import fr.avenirsesr.portfolio.student.association.domain.filter.TraceAssociationSearchFilter;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
-import fr.avenirsesr.portfolio.student.association.domain.port.output.handler.AssociationContextHandler;
+import fr.avenirsesr.portfolio.student.association.domain.port.output.strategy.AssociationStrategy;
 import fr.avenirsesr.portfolio.student.association.domain.utils.AssociationUtils;
-import fr.avenirsesr.portfolio.student.trace.domain.data.TraceAssociationData;
-import fr.avenirsesr.portfolio.student.trace.domain.exception.TraceNotFoundException;
-import fr.avenirsesr.portfolio.student.trace.domain.filter.TraceFilter;
-import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
-import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
+import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillAssociationData;
+import fr.avenirsesr.portfolio.student.skill.domain.exception.DeclaredSkillProgressNotFoundException;
+import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
+import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class TraceAssociationContextHandler implements AssociationContextHandler {
-  private final TraceService traceService;
+public class DeclaredSkillAssociationStrategy implements AssociationStrategy {
+  private final DeclaredSkillProgressService declaredSkillProgressService;
   private final LoggedInUserService loggedInUserService;
 
   @Override
   public EAssociationContextType getContextType() {
-    return EAssociationContextType.TRACE;
+    return EAssociationContextType.DECLARED_SKILL;
   }
 
   @Override
@@ -53,58 +48,55 @@ public class TraceAssociationContextHandler implements AssociationContextHandler
   @Override
   public PagedResult<AssociationSearchResultData> search(
       String keyword, AssociationSearchFilter filter, PageCriteria pageCriteria) {
-    var isAssociated =
-        filter instanceof TraceAssociationSearchFilter(var traceIsAssociated)
-            ? traceIsAssociated
-            : null;
-
-    var traces =
-        traceService.getTracesView(
-            keyword,
-            new TraceFilter(isAssociated, null, null, null),
-            null,
-            pageCriteria,
-            new SortCriteria(ESortField.DATE, ESortOrder.DESC));
+    var declaredSkillProgresses =
+        declaredSkillProgressService.searchDeclaredSkill(keyword, pageCriteria);
 
     return new PagedResult<>(
-        traces.content().stream()
-            .map(trace -> new AssociationSearchResultData(trace.id(), trace.title(), null, false))
+        declaredSkillProgresses.content().stream()
+            .map(
+                declaredSkillProgress ->
+                    new AssociationSearchResultData(
+                        declaredSkillProgress.getId(),
+                        declaredSkillProgress.getSkill().getLibelle(),
+                        declaredSkillProgress.getSkill().getType().name(),
+                        false))
             .toList(),
-        traces.pageInfo());
+        declaredSkillProgresses.pageInfo());
   }
 
   @Override
   public AssociatedElementsData toAssociatedElements(
       List<Association> associations, Class<?> subjectClass, boolean onlyNotCompleted) {
-    var traces =
-        traceService.findAllTracesById(
+    var declaredSkillProgresses =
+        declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(
             associations.stream()
                 .map(association -> association.associatedIdOf(subjectClass))
                 .toList());
 
-    return AssociatedElementsData.ofTraces(
+    return AssociatedElementsData.ofDeclaredSkills(
         associations.stream()
             .map(
                 association ->
-                    new TraceAssociationData(
+                    new DeclaredSkillAssociationData(
                         association.getId(),
                         AssociationUtils.elementOf(
-                            traces,
+                            declaredSkillProgresses,
                             association.associatedIdOf(subjectClass),
-                            TraceNotFoundException::new)))
+                            DeclaredSkillProgressNotFoundException::new)))
             .toList());
   }
 
-  private List<Trace> fetchAndCheckOwnership(List<UUID> elementIds) {
-    var traces = traceService.findAllTracesById(elementIds);
+  private List<DeclaredSkillProgress> fetchAndCheckOwnership(List<UUID> elementIds) {
+    var declaredSkillProgresses =
+        declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(elementIds);
 
     AssociationUtils.checkOwnership(
         elementIds,
-        traces,
-        Trace::getStudent,
+        declaredSkillProgresses,
+        DeclaredSkillProgress::getStudent,
         loggedInUserService.getLoggedInStudent(),
-        TraceNotFoundException::new);
+        DeclaredSkillProgressNotFoundException::new);
 
-    return traces;
+    return declaredSkillProgresses;
   }
 }

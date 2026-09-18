@@ -21,6 +21,17 @@ public class DeclaredProgramSpecification {
     };
   }
 
+  public static Specification<DeclaredProgramEntity> search(String keyword) {
+    return (root, query, criteriaBuilder) -> {
+      if (keyword == null || keyword.trim().isEmpty()) {
+        return criteriaBuilder.conjunction();
+      }
+
+      return criteriaBuilder.like(
+          criteriaBuilder.lower(root.get("title")), "%" + keyword.toLowerCase() + "%");
+    };
+  }
+
   public static Specification<DeclaredProgramEntity> isValorized(Boolean isValorized) {
     return (root, query, criteriaBuilder) -> {
       if (isValorized == null) {

@@ -12,8 +12,8 @@ import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
-import fr.avenirsesr.portfolio.student.association.domain.port.output.handler.AssociationContextHandler;
 import fr.avenirsesr.portfolio.student.association.domain.port.output.repository.AssociationRepository;
+import fr.avenirsesr.portfolio.student.association.domain.port.output.strategy.AssociationStrategy;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +24,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AssociationServiceImpl implements AssociationService {
   private final AssociationRepository associationRepository;
-  private final List<AssociationContextHandler> contextHandlers;
+  private final List<AssociationStrategy> strategies;
 
   @Override
   public List<Association> createAll(List<AssociationData> associationsData) {
@@ -72,7 +72,7 @@ public class AssociationServiceImpl implements AssociationService {
   @Override
   public AssociatedElementsData getAllAssociatedElementsOf(
       UUID id, EAssociationContextType contextType, boolean onlyNotCompleted) {
-    handlerOf(contextType).checkLoggedInStudentOwns(List.of(id));
+    strategyOf(contextType).checkLoggedInStudentOwns(List.of(id));
 
     var clazz = contextType.toClass();
 
@@ -82,7 +82,7 @@ public class AssociationServiceImpl implements AssociationService {
         .stream()
         .map(
             entry ->
-                handlerOf(EAssociationContextType.of(entry.getKey()))
+                strategyOf(EAssociationContextType.of(entry.getKey()))
                     .toAssociatedElements(entry.getValue(), clazz, onlyNotCompleted))
         .reduce(AssociatedElementsData.empty(), AssociatedElementsData::merge);
   }
@@ -97,9 +97,9 @@ public class AssociationServiceImpl implements AssociationService {
         EAssociationType.of(contextType.toClass(), associatedContextType.toClass());
     var uniqueAssociatedIds = associatedIds.stream().distinct().toList();
 
-    handlerOf(contextType)
+    strategyOf(contextType)
         .checkLoggedInStudentCanAssociate(id, associationType, uniqueAssociatedIds.size());
-    handlerOf(associatedContextType).checkLoggedInStudentOwns(uniqueAssociatedIds);
+    strategyOf(associatedContextType).checkLoggedInStudentOwns(uniqueAssociatedIds);
 
     createAll(
         uniqueAssociatedIds.stream()
@@ -113,7 +113,7 @@ public class AssociationServiceImpl implements AssociationService {
 
   @Override
   public void unassociate(UUID id, EAssociationContextType contextType, List<UUID> associationIds) {
-    handlerOf(contextType).checkLoggedInStudentCanUnassociate(List.of(id));
+    strategyOf(contextType).checkLoggedInStudentCanUnassociate(List.of(id));
 
     var clazz = contextType.toClass();
     var associations =
@@ -129,7 +129,7 @@ public class AssociationServiceImpl implements AssociationService {
     associationsByAssociatedClass(associations, clazz)
         .forEach(
             (associatedClass, associatedAssociations) ->
-                handlerOf(EAssociationContextType.of(associatedClass))
+                strategyOf(EAssociationContextType.of(associatedClass))
                     .checkLoggedInStudentCanUnassociate(
                         associatedIdsOf(associatedAssociations, clazz)));
 
@@ -147,7 +147,7 @@ public class AssociationServiceImpl implements AssociationService {
     var associationType =
         EAssociationType.of(contextType.toClass(), associatedContextType.toClass());
 
-    handlerOf(contextType).checkLoggedInStudentOwns(List.of(id));
+    strategyOf(contextType).checkLoggedInStudentOwns(List.of(id));
 
     var associatedIds =
         new HashSet<>(
@@ -155,7 +155,7 @@ public class AssociationServiceImpl implements AssociationService {
                 getAllOf(id, contextType.toClass(), List.of(associationType)),
                 contextType.toClass()));
 
-    var searchResults = handlerOf(associatedContextType).search(keyword, filter, pageCriteria);
+    var searchResults = strategyOf(associatedContextType).search(keyword, filter, pageCriteria);
 
     return new PagedResult<>(
         searchResults.content().stream()
@@ -179,7 +179,7 @@ public class AssociationServiceImpl implements AssociationService {
       PageCriteria pageCriteria) {
     EAssociationType.of(contextType.toClass(), associatedContextType.toClass());
 
-    return handlerOf(associatedContextType).search(keyword, filter, pageCriteria);
+    return strategyOf(associatedContextType).search(keyword, filter, pageCriteria);
   }
 
   @Override
@@ -201,13 +201,12 @@ public class AssociationServiceImpl implements AssociationService {
     deleteAllByIds(associations.stream().map(Association::getId).toList());
   }
 
-  private AssociationContextHandler handlerOf(EAssociationContextType contextType) {
-    return contextHandlers.stream()
-        .filter(handler -> handler.getContextType() == contextType)
+  private AssociationStrategy strategyOf(EAssociationContextType contextType) {
+    return strategies.stream()
+        .filter(strategy -> strategy.getContextType() == contextType)
         .findFirst()
         .orElseThrow(
-            () ->
-                new IllegalArgumentException(contextType + " has no association context handler"));
+            () -> new IllegalArgumentException(contextType + " has no association strategy"));
   }
 
   private Map<Class<?>, List<Association>> associationsByAssociatedClass(

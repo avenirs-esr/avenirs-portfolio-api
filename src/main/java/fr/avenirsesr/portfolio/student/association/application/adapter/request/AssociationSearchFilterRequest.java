@@ -8,7 +8,8 @@ public record AssociationSearchFilterRequest(Boolean isAssociated) {
   public AssociationSearchFilter toDomain(EAssociationContextType associatedContextType) {
     return switch (associatedContextType) {
       case TRACE -> new TraceAssociationSearchFilter(isAssociated);
-      case DECLARED_ACTIVITY, DECLARED_SKILL, DECLARED_EXPERIENCE -> AssociationSearchFilter.NONE;
+      case DECLARED_ACTIVITY, DECLARED_SKILL, DECLARED_EXPERIENCE, DECLARED_PROGRAM ->
+          AssociationSearchFilter.NONE;
     };
   }
 }

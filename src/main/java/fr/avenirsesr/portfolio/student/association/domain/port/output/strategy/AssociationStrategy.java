@@ -1,4 +1,4 @@
-package fr.avenirsesr.portfolio.student.association.domain.port.output.handler;
+package fr.avenirsesr.portfolio.student.association.domain.port.output.strategy;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
@@ -11,7 +11,7 @@ import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType
 import java.util.List;
 import java.util.UUID;
 
-public interface AssociationContextHandler {
+public interface AssociationStrategy {
   EAssociationContextType getContextType();
 
   void checkLoggedInStudentOwns(List<UUID> elementIds);

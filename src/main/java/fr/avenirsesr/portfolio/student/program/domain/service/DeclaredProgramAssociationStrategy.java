@@ -1,4 +1,4 @@
-package fr.avenirsesr.portfolio.student.skill.domain.service;
+package fr.avenirsesr.portfolio.student.program.domain.service;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
@@ -9,24 +9,24 @@ import fr.avenirsesr.portfolio.student.association.domain.filter.AssociationSear
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
-import fr.avenirsesr.portfolio.student.association.domain.port.output.handler.AssociationContextHandler;
+import fr.avenirsesr.portfolio.student.association.domain.port.output.strategy.AssociationStrategy;
 import fr.avenirsesr.portfolio.student.association.domain.utils.AssociationUtils;
-import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillAssociationData;
-import fr.avenirsesr.portfolio.student.skill.domain.exception.DeclaredSkillProgressNotFoundException;
-import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
-import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
+import fr.avenirsesr.portfolio.student.program.domain.data.DeclaredProgramAssociationData;
+import fr.avenirsesr.portfolio.student.program.domain.exception.DeclaredProgramNotFoundException;
+import fr.avenirsesr.portfolio.student.program.domain.model.DeclaredProgram;
+import fr.avenirsesr.portfolio.student.program.domain.port.input.DeclaredProgramService;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class DeclaredSkillAssociationContextHandler implements AssociationContextHandler {
-  private final DeclaredSkillProgressService declaredSkillProgressService;
+public class DeclaredProgramAssociationStrategy implements AssociationStrategy {
+  private final DeclaredProgramService declaredProgramService;
   private final LoggedInUserService loggedInUserService;
 
   @Override
   public EAssociationContextType getContextType() {
-    return EAssociationContextType.DECLARED_SKILL;
+    return EAssociationContextType.DECLARED_PROGRAM;
   }
 
   @Override
@@ -48,55 +48,51 @@ public class DeclaredSkillAssociationContextHandler implements AssociationContex
   @Override
   public PagedResult<AssociationSearchResultData> search(
       String keyword, AssociationSearchFilter filter, PageCriteria pageCriteria) {
-    var declaredSkillProgresses =
-        declaredSkillProgressService.searchDeclaredSkill(keyword, pageCriteria);
+    var declaredPrograms = declaredProgramService.search(keyword, pageCriteria);
 
     return new PagedResult<>(
-        declaredSkillProgresses.content().stream()
+        declaredPrograms.content().stream()
             .map(
-                declaredSkillProgress ->
+                declaredProgram ->
                     new AssociationSearchResultData(
-                        declaredSkillProgress.getId(),
-                        declaredSkillProgress.getSkill().getLibelle(),
-                        declaredSkillProgress.getSkill().getType().name(),
+                        declaredProgram.getId(),
+                        declaredProgram.getTitle(),
+                        declaredProgram.getOrganization(),
                         false))
             .toList(),
-        declaredSkillProgresses.pageInfo());
+        declaredPrograms.pageInfo());
   }
 
   @Override
   public AssociatedElementsData toAssociatedElements(
       List<Association> associations, Class<?> subjectClass, boolean onlyNotCompleted) {
-    var declaredSkillProgresses =
-        declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(
+    var declaredPrograms =
+        declaredProgramService.findAllByIds(
             associations.stream()
                 .map(association -> association.associatedIdOf(subjectClass))
                 .toList());
 
-    return AssociatedElementsData.ofDeclaredSkills(
+    return AssociatedElementsData.ofDeclaredPrograms(
         associations.stream()
             .map(
                 association ->
-                    new DeclaredSkillAssociationData(
+                    new DeclaredProgramAssociationData(
                         association.getId(),
                         AssociationUtils.elementOf(
-                            declaredSkillProgresses,
+                            declaredPrograms,
                             association.associatedIdOf(subjectClass),
-                            DeclaredSkillProgressNotFoundException::new)))
+                            DeclaredProgramNotFoundException::new)))
             .toList());
   }
 
-  private List<DeclaredSkillProgress> fetchAndCheckOwnership(List<UUID> elementIds) {
-    var declaredSkillProgresses =
-        declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(elementIds);
+  private void fetchAndCheckOwnership(List<UUID> elementIds) {
+    var declaredPrograms = declaredProgramService.findAllByIds(elementIds);
 
     AssociationUtils.checkOwnership(
         elementIds,
-        declaredSkillProgresses,
-        DeclaredSkillProgress::getStudent,
+        declaredPrograms,
+        DeclaredProgram::getStudent,
         loggedInUserService.getLoggedInStudent(),
-        DeclaredSkillProgressNotFoundException::new);
-
-    return declaredSkillProgresses;
+        DeclaredProgramNotFoundException::new);
   }
 }
