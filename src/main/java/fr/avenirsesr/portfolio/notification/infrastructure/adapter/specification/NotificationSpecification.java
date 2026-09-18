@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.notification.infrastructure.adapter.specification;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
+import fr.avenirsesr.portfolio.notification.domain.model.enums.ENotificationType;
 import fr.avenirsesr.portfolio.notification.infrastructure.adapter.model.NotificationEntity;
 import java.util.UUID;
 import org.springframework.data.jpa.domain.Specification;
@@ -21,5 +22,11 @@ public final class NotificationSpecification {
 
   public static Specification<NotificationEntity> isNotSeen() {
     return (root, query, cb) -> cb.isFalse(root.get("seen"));
+  }
+
+  public static Specification<NotificationEntity> ofTypeAndElement(
+      ENotificationType type, UUID elementId) {
+    return (root, query, cb) ->
+        cb.and(cb.equal(root.get("type"), type), cb.equal(root.get("elementId"), elementId));
   }
 }

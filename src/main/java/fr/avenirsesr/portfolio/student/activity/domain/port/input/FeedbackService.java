@@ -8,6 +8,7 @@ import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.file.domain.model.FileDownload;
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackDashboardData;
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackData;
+import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import java.util.List;
@@ -45,4 +46,6 @@ public interface FeedbackService {
   FeedbackDashboardData getFeedbackDashboard(UUID activityId);
 
   void deletePendingFeedbacks(List<UUID> declaredActivityIds);
+
+  void deleteByDeclaredActivityId(DeclaredActivity declaredActivity);
 }

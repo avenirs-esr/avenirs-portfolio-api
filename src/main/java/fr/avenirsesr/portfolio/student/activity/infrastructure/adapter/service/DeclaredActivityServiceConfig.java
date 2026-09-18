@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.service;
 
+import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
@@ -32,16 +33,19 @@ public class DeclaredActivityServiceConfig {
   public DeclaredActivityService declaredActivityService(
       @Lazy ActivityService activityService,
       @Lazy TraceService traceService,
-      @Lazy FeedbackService feedbackService) {
-    return new DeclaredActivityServiceImpl(
-        declaredActivityRepository,
-        activityService,
-        traceService,
-        declaredSkillProgressService,
-        associationService,
-        associationSearchHelper,
-        loggedInUserService,
-        feedbackRepository,
-        feedbackService);
+      @Lazy FeedbackService feedbackService,
+      @Lazy NotificationService notificationService) {
+    return new TransactionalDeclaredActivityService(
+        new DeclaredActivityServiceImpl(
+            declaredActivityRepository,
+            activityService,
+            traceService,
+            declaredSkillProgressService,
+            associationService,
+            associationSearchHelper,
+            loggedInUserService,
+            feedbackRepository,
+            feedbackService,
+            notificationService));
   }
 }

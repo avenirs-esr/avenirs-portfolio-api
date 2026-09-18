@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -77,5 +78,19 @@ public class AssociationServiceImpl implements AssociationService {
     var associations =
         ids.stream().flatMap(id -> getAllOf(id, clazz, associationTypes).stream()).toList();
     deleteAllByIds(associations.stream().map(Association::getId).toList());
+  }
+
+  @Override
+  public void deleteAssociationsOf(Class<?> subjectClass, UUID subjectId) {
+    for (EAssociationType type : EAssociationType.getAllBy(subjectClass)) {
+      Function<Association, UUID> extractedId = type.idExtractorFor(subjectClass);
+
+      List<Association> toDelete =
+          associationRepository.findByTypeTouching(type, subjectId).stream()
+              .filter(a -> subjectId.equals(extractedId.apply(a)))
+              .toList();
+
+      associationRepository.removeAllFromDatabase(toDelete);
+    }
   }
 }
