@@ -8,12 +8,9 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
-import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
-import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.experience.domain.data.DeclaredExperienceAssociationCount;
-import fr.avenirsesr.portfolio.student.experience.domain.data.DeclaredExperienceAssociationsData;
 import fr.avenirsesr.portfolio.student.experience.domain.data.DeclaredExperienceData;
 import fr.avenirsesr.portfolio.student.experience.domain.exception.DeclaredExperienceNotFoundException;
 import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperience;
@@ -374,58 +371,5 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
   public PagedResult<DeclaredExperience> search(String keyword, PageCriteria pageCriteria) {
     Student student = loggedInUserService.getLoggedInStudent();
     return experienceRepository.findAllByStudent(student, pageCriteria, keyword);
-  }
-
-  @Override
-  public DeclaredExperienceAssociationsData getAssociations(UUID experienceId) {
-    var experience = fetchAndCheckLoggedInStudentAuthorization(experienceId);
-
-    var associatedElements =
-        associationService.getAllAssociatedElementsOf(experience.getId(), DeclaredExperience.class);
-
-    return new DeclaredExperienceAssociationsData(
-        associatedElements.traceAssociations(), associatedElements.declaredSkillAssociations());
-  }
-
-  @Override
-  public DeclaredExperienceAssociationsData associate(
-      UUID declaredExperienceId, List<UUID> associatedIds, EAssociationType associationType) {
-    var experience = fetchAndCheckLoggedInStudentAuthorization(declaredExperienceId);
-
-    associationService.associate(
-        experience.getId(), DeclaredExperience.class, associatedIds, associationType);
-
-    return getAssociations(experience.getId());
-  }
-
-  @Override
-  public PagedResult<AssociationSearchResultData> searchForAssociation(
-      UUID declaredExperienceId,
-      EAssociationContextType contextType,
-      String keyword,
-      PageCriteria pageCriteria) {
-    fetchAndCheckLoggedInStudentAuthorization(declaredExperienceId);
-
-    return associationService.searchForAssociation(
-        declaredExperienceId, DeclaredExperience.class, contextType, keyword, pageCriteria);
-  }
-
-  @Override
-  public void deleteAssociations(UUID declaredExperienceId, List<UUID> idsToDelete) {
-    var experience = fetchAndCheckLoggedInStudentAuthorization(declaredExperienceId);
-
-    associationService.unassociate(experience.getId(), DeclaredExperience.class, idsToDelete);
-  }
-
-  private DeclaredExperience fetchAndCheckLoggedInStudentAuthorization(UUID experienceId) {
-    Student student = loggedInUserService.getLoggedInStudent();
-    var experience =
-        experienceRepository
-            .findById(experienceId)
-            .orElseThrow(DeclaredExperienceNotFoundException::new);
-    if (!experience.getStudent().equals(student)) {
-      throw new UserNotAuthorizedException();
-    }
-    return experience;
   }
 }

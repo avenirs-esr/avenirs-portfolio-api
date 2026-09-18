@@ -22,20 +22,21 @@ public interface AssociationService {
 
   Map<UUID, Long> countAllOf(List<UUID> ids, Class<?> clazz, EAssociationType associationType);
 
-  AssociatedElementsData getAllAssociatedElementsOf(UUID id, Class<?> clazz);
-
   AssociatedElementsData getAllAssociatedElementsOf(
-      UUID id, Class<?> clazz, boolean onlyNotCompletedActivities);
+      UUID id, EAssociationContextType contextType, boolean onlyNotCompleted);
 
-  void associate(
-      UUID id, Class<?> clazz, List<UUID> associatedIds, EAssociationType associationType);
+  AssociatedElementsData associate(
+      UUID id,
+      EAssociationContextType contextType,
+      EAssociationContextType associatedContextType,
+      List<UUID> associatedIds);
 
-  void unassociate(UUID id, Class<?> clazz, List<UUID> associationIds);
+  void unassociate(UUID id, EAssociationContextType contextType, List<UUID> associationIds);
 
   PagedResult<AssociationSearchResultData> searchForAssociation(
       UUID id,
-      Class<?> clazz,
       EAssociationContextType contextType,
+      EAssociationContextType associatedContextType,
       String keyword,
       PageCriteria pageCriteria);
 

@@ -3,13 +3,9 @@ package fr.avenirsesr.portfolio.student.activity.domain.port.input;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
-import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityAssociationsData;
 import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityDetailsData;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
-import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
-import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
-import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -38,23 +34,10 @@ public interface DeclaredActivityService {
 
   DeclaredActivityDetailsData getDeclaredActivityDetails(UUID declaredActivityId);
 
-  DeclaredActivityAssociationsData getDeclaredActivityAssociations(UUID declaredActivityId);
-
-  void deleteAssociations(UUID declaredActivityId, List<UUID> idsToDelete);
-
   void updateDeclaredActivity(
       UUID declaredActivityId, LocalDate startDate, LocalDate endDate, Boolean valorized);
 
   PagedResult<DeclaredActivity> searchDeclaredActivity(String keyword, PageCriteria pageCriteria);
-
-  DeclaredActivityAssociationsData associate(
-      UUID declaredActivityId, List<UUID> associatedIds, EAssociationType associationType);
-
-  PagedResult<AssociationSearchResultData> searchForAssociation(
-      UUID declaredActivityId,
-      EAssociationContextType contextType,
-      String keyword,
-      PageCriteria pageCriteria);
 
   List<DeclaredActivity> findAllDeclaredActivitiesByIds(List<UUID> ids);
 

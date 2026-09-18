@@ -2,8 +2,10 @@ package fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.service;
 
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
+import fr.avenirsesr.portfolio.student.association.domain.port.output.handler.AssociationContextHandler;
 import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillSyncService;
+import fr.avenirsesr.portfolio.student.skill.domain.service.DeclaredSkillAssociationContextHandler;
 import fr.avenirsesr.portfolio.student.skill.domain.service.DeclaredSkillProgressServiceImpl;
 import fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.client.ExternalSkillClient;
 import fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.repository.DeclaredSkillProgressDatabaseRepository;
@@ -30,5 +32,11 @@ public class DeclaredSkillProgressServiceConfig {
         externalSkillClient,
         loggedInUserService,
         associationService);
+  }
+
+  @Bean
+  public AssociationContextHandler declaredSkillAssociationContextHandler() {
+    return new DeclaredSkillAssociationContextHandler(
+        declaredSkillProgressService(), loggedInUserService);
   }
 }

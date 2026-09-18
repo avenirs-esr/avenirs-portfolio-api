@@ -13,7 +13,6 @@ import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityUnpublish
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
-import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityAssociationsData;
 import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityDetailsData;
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackData;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.*;
@@ -23,11 +22,6 @@ import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivi
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.FeedbackService;
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.FeedbackRepository;
-import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
-import fr.avenirsesr.portfolio.student.association.domain.exception.MaximumAssociationReachedException;
-import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
-import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
-import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -43,7 +37,6 @@ import lombok.extern.slf4j.Slf4j;
 public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   private final DeclaredActivityRepository declaredActivityRepository;
   private final ActivityService activityService;
-  private final AssociationService associationService;
   private final LoggedInUserService loggedInUserService;
   private final FeedbackRepository feedbackRepository;
   private final FeedbackService feedbackService;
@@ -274,57 +267,6 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   }
 
   @Override
-  public DeclaredActivityAssociationsData associate(
-      UUID declaredActivityId, List<UUID> associatedIds, EAssociationType associationType) {
-    DeclaredActivity declaredActivity =
-        fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
-
-    if (declaredActivity.isUnsubscribed()) {
-      throw new DeclaredActivityUnsubscribedException();
-    }
-
-    if (associationType == EAssociationType.DECLARED_ACTIVITY_TRACE) {
-      checkMaximumAllowedTraceAssociations(declaredActivity, associatedIds);
-    }
-
-    associationService.associate(
-        declaredActivity.getId(), DeclaredActivity.class, associatedIds, associationType);
-
-    return getDeclaredActivityAssociations(declaredActivityId);
-  }
-
-  private void checkMaximumAllowedTraceAssociations(
-      DeclaredActivity declaredActivity, List<UUID> traceIds) {
-    var allowedAssociations = declaredActivity.getActivity().getTraceAllowedAssociations();
-
-    if (allowedAssociations == -1) {
-      return;
-    }
-
-    var traceAssociations =
-        associationService.getAllOf(
-            declaredActivity.getId(),
-            DeclaredActivity.class,
-            List.of(EAssociationType.DECLARED_ACTIVITY_TRACE));
-
-    if (traceAssociations.size() + traceIds.size() > allowedAssociations) {
-      throw new MaximumAssociationReachedException();
-    }
-  }
-
-  @Override
-  public PagedResult<AssociationSearchResultData> searchForAssociation(
-      UUID declaredActivityId,
-      EAssociationContextType contextType,
-      String keyword,
-      PageCriteria pageCriteria) {
-    fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
-
-    return associationService.searchForAssociation(
-        declaredActivityId, DeclaredActivity.class, contextType, keyword, pageCriteria);
-  }
-
-  @Override
   public List<DeclaredActivity> findAllDeclaredActivitiesByIds(List<UUID> ids) {
     return declaredActivityRepository.findAllById(ids);
   }
@@ -333,30 +275,6 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   public List<DeclaredActivity> findAllNotCompletedActivitiesByIds(List<UUID> ids) {
     var graph = FetchGraph.init().fetch("activity");
     return declaredActivityRepository.findAllNotCompletedActivitiesByIds(ids, graph);
-  }
-
-  @Override
-  public DeclaredActivityAssociationsData getDeclaredActivityAssociations(UUID declaredActivityId) {
-    DeclaredActivity declaredActivity =
-        fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
-
-    var associatedElements =
-        associationService.getAllAssociatedElementsOf(
-            declaredActivity.getId(), DeclaredActivity.class);
-
-    return new DeclaredActivityAssociationsData(
-        associatedElements.traceAssociations(), associatedElements.declaredSkillAssociations());
-  }
-
-  @Override
-  public void deleteAssociations(UUID declaredActivityId, List<UUID> idsToDelete) {
-    DeclaredActivity declaredActivity =
-        fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
-    if (declaredActivity.isUnsubscribed()) {
-      throw new DeclaredActivityUnsubscribedException();
-    }
-
-    associationService.unassociate(declaredActivity.getId(), DeclaredActivity.class, idsToDelete);
   }
 
   @Override

@@ -3,25 +3,13 @@ package fr.avenirsesr.portfolio.student.skill.application.adapter.controller;
 import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
-import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsCreationRequest;
-import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsDeleteRequest;
-import fr.avenirsesr.portfolio.student.association.application.adapter.dto.AssociationSearchResultDTO;
-import fr.avenirsesr.portfolio.student.association.application.adapter.mapper.AssociationSearchResultDTOMapper;
-import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
-import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
-import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
-import fr.avenirsesr.portfolio.student.skill.application.adapter.dto.DeclaredSkillAssociationsDTO;
 import fr.avenirsesr.portfolio.student.skill.application.adapter.dto.DeclaredSkillProgressDTO;
 import fr.avenirsesr.portfolio.student.skill.application.adapter.dto.DeclaredSkillProgressDetailsDTO;
 import fr.avenirsesr.portfolio.student.skill.application.adapter.dto.DeclaredSkillProgressRequest;
-import fr.avenirsesr.portfolio.student.skill.application.adapter.mapper.DeclaredSkillAssociationsDTOMapper;
 import fr.avenirsesr.portfolio.student.skill.application.adapter.mapper.DeclaredSkillProgressMapper;
 import fr.avenirsesr.portfolio.student.skill.application.adapter.request.AddDeclaredSkillDTO;
 import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillProgressDetails;
 import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.security.Principal;
@@ -40,8 +28,6 @@ import org.springframework.web.bind.annotation.*;
 public class DeclaredSkillProgressController {
   private final DeclaredSkillProgressService declaredSkillProgressService;
   private final DeclaredSkillProgressMapper declaredSkillProgressMapper;
-  private final DeclaredSkillAssociationsDTOMapper declaredSkillAssociationsDTOMapper;
-  private final AssociationSearchResultDTOMapper associationSearchResultDTOMapper;
 
   @PreAuthorize("hasAuthority('declared-skill:list:own')")
   @GetMapping()
@@ -140,129 +126,5 @@ public class DeclaredSkillProgressController {
       @RequestBody List<UUID> declaredSkillProgressIds) {
     declaredSkillProgressService.deleteDeclaredSkillProgresses(declaredSkillProgressIds);
     return ResponseEntity.ok("Declared skill progresses successfully deleted");
-  }
-
-  @PreAuthorize("hasAuthority('declared-skill:association:manage:own')")
-  @PostMapping("/{declaredSkillProgressId}/unassociate/traces")
-  public ResponseEntity<String> unassociateTraces(
-      Principal principal,
-      @PathVariable UUID declaredSkillProgressId,
-      @RequestBody List<UUID> traceIds) {
-    return ResponseEntity.status(410).build();
-  }
-
-  @PreAuthorize("hasAuthority('declared-skill:association:manage:own')")
-  @GetMapping("/{declaredSkillProgressId}/search-for-association")
-  public ResponseEntity<PagedResponse<AssociationSearchResultDTO>> searchForAssociation(
-      Principal principal,
-      @Valid @PathVariable UUID declaredSkillProgressId,
-      @Parameter(schema = @Schema(ref = "#/components/schemas/EAssociationContextType"))
-          @RequestParam
-          EAssociationContextType contextType,
-      @RequestParam(required = false) String keyword,
-      @RequestParam(required = false) Integer page,
-      @RequestParam(required = false) Integer pageSize) {
-    var pageCriteria = new PageCriteria(page, pageSize);
-    log.debug(
-        "Received request to search {} for association with declared skill [{}] by student [{}]"
-            + " (keyword={}, page={}, pageSize={})",
-        contextType,
-        declaredSkillProgressId,
-        principal.getName(),
-        keyword,
-        pageCriteria.page(),
-        pageCriteria.pageSize());
-
-    PagedResult<AssociationSearchResultData> pagedResult =
-        declaredSkillProgressService.searchForAssociation(
-            declaredSkillProgressId, contextType, keyword, pageCriteria);
-
-    return ResponseEntity.ok(
-        new PagedResponse<>(
-            pagedResult.content().stream().map(associationSearchResultDTOMapper::toDTO).toList(),
-            PageInfoDTO.fromDomain(pagedResult.pageInfo())));
-  }
-
-  @PreAuthorize("hasAuthority('declared-skill:list:own')")
-  @GetMapping("/{declaredSkillProgressId}/associations")
-  public ResponseEntity<DeclaredSkillAssociationsDTO> getDeclaredSkillAssociations(
-      Principal principal, @Valid @PathVariable UUID declaredSkillProgressId) {
-    log.debug(
-        "Received request to get declared skill [{}] associations for student [{}]",
-        declaredSkillProgressId,
-        principal.getName());
-    var newAssociations = declaredSkillProgressService.getAssociationsOf(declaredSkillProgressId);
-    return ResponseEntity.ok(declaredSkillAssociationsDTOMapper.toDTO(newAssociations));
-  }
-
-  @PreAuthorize("hasAuthority('declared-skill:association:manage:own')")
-  @DeleteMapping("/{declaredSkillProgressId}/associations")
-  public ResponseEntity<Void> deleteDeclaredSkillAssociations(
-      Principal principal,
-      @Valid @PathVariable UUID declaredSkillProgressId,
-      @Valid @RequestBody AssociationsDeleteRequest body) {
-    log.debug(
-        "Received request to delete declared skill [{}] associations for student [{}]",
-        declaredSkillProgressId,
-        principal.getName());
-    declaredSkillProgressService.deleteAssociations(declaredSkillProgressId, body.idsToDelete());
-    return ResponseEntity.noContent().build();
-  }
-
-  @PreAuthorize("hasAuthority('declared-skill:association:manage:own')")
-  @PostMapping("/{declaredSkillProgressId}/associate/declared-activities")
-  public ResponseEntity<DeclaredSkillAssociationsDTO> associateDeclaredSkillWithDeclaredActivities(
-      Principal principal,
-      @Valid @PathVariable UUID declaredSkillProgressId,
-      @Valid @RequestBody AssociationsCreationRequest body) {
-    log.debug(
-        "Received request to associate declared skill [{}] with declared activities [{}] by student"
-            + " [{}]",
-        declaredSkillProgressId,
-        body.idsToAssociate(),
-        principal.getName());
-    var newAssociations =
-        declaredSkillProgressService.associate(
-            declaredSkillProgressId,
-            body.idsToAssociate(),
-            EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL);
-    return ResponseEntity.ok(declaredSkillAssociationsDTOMapper.toDTO(newAssociations));
-  }
-
-  @PreAuthorize("hasAuthority('declared-skill:association:manage:own')")
-  @PostMapping("/{declaredSkillProgressId}/associate/declared-experiences")
-  public ResponseEntity<DeclaredSkillAssociationsDTO> associateDeclaredSkillWithDeclaredExperiences(
-      Principal principal,
-      @Valid @PathVariable UUID declaredSkillProgressId,
-      @Valid @RequestBody AssociationsCreationRequest body) {
-    log.debug(
-        "Received request to associate declared skill [{}] with declared experiences [{}] by"
-            + " student [{}]",
-        declaredSkillProgressId,
-        body.idsToAssociate(),
-        principal.getName());
-    var newAssociations =
-        declaredSkillProgressService.associate(
-            declaredSkillProgressId,
-            body.idsToAssociate(),
-            EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL);
-    return ResponseEntity.ok(declaredSkillAssociationsDTOMapper.toDTO(newAssociations));
-  }
-
-  @PreAuthorize("hasAuthority('declared-skill:association:manage:own')")
-  @PostMapping("/{declaredSkillProgressId}/associate/traces")
-  public ResponseEntity<DeclaredSkillAssociationsDTO> associateDeclaredSkillWithTraces(
-      Principal principal,
-      @Valid @PathVariable UUID declaredSkillProgressId,
-      @Valid @RequestBody AssociationsCreationRequest body) {
-    log.debug(
-        "Received request to associate declared skill [{}] with traces [{}] by" + " student [{}]",
-        declaredSkillProgressId,
-        body.idsToAssociate(),
-        principal.getName());
-    var newAssociations =
-        declaredSkillProgressService.associate(
-            declaredSkillProgressId, body.idsToAssociate(), EAssociationType.TRACE_DECLARED_SKILL);
-    return ResponseEntity.ok(declaredSkillAssociationsDTOMapper.toDTO(newAssociations));
   }
 }

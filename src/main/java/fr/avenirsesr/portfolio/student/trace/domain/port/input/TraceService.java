@@ -7,9 +7,6 @@ import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.file.domain.model.FileDownload;
-import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
-import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
-import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.trace.domain.data.*;
 import fr.avenirsesr.portfolio.student.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
@@ -65,16 +62,6 @@ public interface TraceService {
       String aiJustification,
       String link,
       boolean valorized);
-
-  TraceAssociationsData associate(
-      UUID traceId, List<UUID> associatedIds, EAssociationType associationType);
-
-  TraceAssociationsData getTraceAssociations(UUID traceId, boolean onlyNotCompleted);
-
-  void unassociate(UUID traceId, List<UUID> associationIds);
-
-  PagedResult<AssociationSearchResultData> searchForAssociation(
-      UUID traceId, EAssociationContextType contextType, String keyword, PageCriteria pageCriteria);
 
   List<TraceLockedDeclaredActivitiesData> getLockedDeclaredActivities(List<UUID> traceIds);
 

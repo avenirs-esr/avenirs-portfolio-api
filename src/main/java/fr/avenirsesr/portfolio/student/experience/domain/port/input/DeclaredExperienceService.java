@@ -2,10 +2,6 @@ package fr.avenirsesr.portfolio.student.experience.domain.port.input;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
-import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
-import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
-import fr.avenirsesr.portfolio.student.experience.domain.data.DeclaredExperienceAssociationsData;
 import fr.avenirsesr.portfolio.student.experience.domain.data.DeclaredExperienceData;
 import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.experience.domain.model.enums.EExperienceType;
@@ -85,17 +81,4 @@ public interface DeclaredExperienceService {
   List<DeclaredExperience> findAllByIds(List<UUID> experienceIds);
 
   PagedResult<DeclaredExperience> search(String keyword, PageCriteria pageCriteria);
-
-  DeclaredExperienceAssociationsData getAssociations(UUID experienceId);
-
-  DeclaredExperienceAssociationsData associate(
-      UUID declaredExperienceId, List<UUID> associatedIds, EAssociationType associationType);
-
-  PagedResult<AssociationSearchResultData> searchForAssociation(
-      UUID declaredExperienceId,
-      EAssociationContextType contextType,
-      String keyword,
-      PageCriteria pageCriteria);
-
-  void deleteAssociations(UUID declaredExperienceId, List<UUID> idsToDelete);
 }

@@ -18,9 +18,7 @@ import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.FeedbackService;
-import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
-import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.trace.domain.data.*;
@@ -223,22 +221,6 @@ public class TraceServiceImpl implements TraceService {
   }
 
   @Override
-  public TraceAssociationsData getTraceAssociations(UUID traceId, boolean onlyNotCompleted) {
-    var studentLoggedIn = loggedInUserService.getLoggedInStudent();
-    var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
-
-    checkIfStudentIsAuthorizedOnTrace(studentLoggedIn, trace);
-
-    var associatedElements =
-        associationService.getAllAssociatedElementsOf(trace.getId(), Trace.class, onlyNotCompleted);
-
-    return new TraceAssociationsData(
-        associatedElements.declaredActivityAssociations(),
-        associatedElements.declaredSkillAssociations(),
-        associatedElements.declaredExperienceAssociations());
-  }
-
-  @Override
   public Trace createTrace(
       UUID traceId,
       UUID studentId,
@@ -344,40 +326,6 @@ public class TraceServiceImpl implements TraceService {
   }
 
   @Override
-  public TraceAssociationsData associate(
-      UUID traceId, List<UUID> associatedIds, EAssociationType associationType) {
-    Student loggedInStudent = loggedInUserService.getLoggedInStudent();
-    var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
-    checkIfStudentIsAuthorizedOnTrace(loggedInStudent, trace);
-
-    associationService.associate(trace.getId(), Trace.class, associatedIds, associationType);
-
-    return getTraceAssociations(traceId, false);
-  }
-
-  @Override
-  public void unassociate(UUID traceId, List<UUID> associationIds) {
-    Student loggedInStudent = loggedInUserService.getLoggedInStudent();
-    Trace trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
-
-    checkIfStudentIsAuthorizedOnTrace(loggedInStudent, trace);
-
-    associationService.unassociate(trace.getId(), Trace.class, associationIds);
-  }
-
-  @Override
-  public PagedResult<AssociationSearchResultData> searchForAssociation(
-      UUID traceId,
-      EAssociationContextType contextType,
-      String keyword,
-      PageCriteria pageCriteria) {
-    checkTraceOwnership(traceId);
-
-    return associationService.searchForAssociation(
-        traceId, Trace.class, contextType, keyword, pageCriteria);
-  }
-
-  @Override
   public List<TraceLockedDeclaredActivitiesData> getLockedDeclaredActivities(List<UUID> traceIds) {
     if (traceIds.isEmpty()) {
       return List.of();
@@ -445,12 +393,6 @@ public class TraceServiceImpl implements TraceService {
     if (!trace.getStudent().equals(student)) {
       throw new TraceNotFoundException("%s does not own this %s".formatted(student, trace));
     }
-  }
-
-  private void checkTraceOwnership(UUID traceId) {
-    var loggedInStudent = loggedInUserService.getLoggedInStudent();
-    var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
-    checkIfStudentIsAuthorizedOnTrace(loggedInStudent, trace);
   }
 
   private Map<UUID, List<UUID>> getAssociatedDeclaredActivityIdsByTraceId(List<UUID> traceIds) {

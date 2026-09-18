@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
+import java.util.Arrays;
 
 public enum EAssociationContextType {
   TRACE(Trace.class),
@@ -15,6 +16,16 @@ public enum EAssociationContextType {
 
   EAssociationContextType(Class<?> contextClass) {
     this.contextClass = contextClass;
+  }
+
+  public static EAssociationContextType of(Class<?> clazz) {
+    return Arrays.stream(values())
+        .filter(contextType -> contextType.contextClass.equals(clazz))
+        .findFirst()
+        .orElseThrow(
+            () ->
+                new IllegalArgumentException(
+                    clazz.getSimpleName() + " is not an association context"));
   }
 
   public Class<?> toClass() {

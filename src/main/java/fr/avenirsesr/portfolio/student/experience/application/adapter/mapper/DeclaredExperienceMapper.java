@@ -1,20 +1,14 @@
 package fr.avenirsesr.portfolio.student.experience.application.adapter.mapper;
 
 import fr.avenirsesr.portfolio.student.experience.application.adapter.dto.DeclaredExperienceAssociationCountDTO;
-import fr.avenirsesr.portfolio.student.experience.application.adapter.dto.DeclaredExperienceAssociationsDTO;
 import fr.avenirsesr.portfolio.student.experience.application.adapter.dto.DeclaredExperienceViewDTO;
 import fr.avenirsesr.portfolio.student.experience.domain.data.DeclaredExperienceAssociationCount;
-import fr.avenirsesr.portfolio.student.experience.domain.data.DeclaredExperienceAssociationsData;
 import fr.avenirsesr.portfolio.student.experience.domain.data.DeclaredExperienceData;
 import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperience;
-import fr.avenirsesr.portfolio.student.skill.application.adapter.mapper.DeclaredSkillProgressMapper;
-import fr.avenirsesr.portfolio.student.trace.application.adapter.mapper.TraceOverviewMapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(
-    componentModel = "spring",
-    uses = {TraceOverviewMapper.class, DeclaredSkillProgressMapper.class})
+@Mapper(componentModel = "spring")
 public interface DeclaredExperienceMapper {
 
   DeclaredExperienceViewDTO toDTO(DeclaredExperience experience);
@@ -40,7 +34,4 @@ public interface DeclaredExperienceMapper {
 
   DeclaredExperienceAssociationCountDTO toAssociationCountDTO(
       DeclaredExperienceAssociationCount associationsCount);
-
-  DeclaredExperienceAssociationsDTO toAssociationsDTO(
-      DeclaredExperienceAssociationsData declaredExperienceAssociations);
 }
