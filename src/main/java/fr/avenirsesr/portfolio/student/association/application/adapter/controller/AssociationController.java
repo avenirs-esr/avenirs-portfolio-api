@@ -109,6 +109,41 @@ public class AssociationController {
   }
 
   @PreAuthorize("hasAuthority('association:manage')")
+  @GetMapping("/{contextType}/{associatedContextType}/search")
+  public ResponseEntity<PagedResponse<AssociationSearchResultDTO>>
+      searchForAssociationWithNewElement(
+          Principal principal,
+          @Parameter(schema = @Schema(ref = "#/components/schemas/EAssociationContextType"))
+              @PathVariable
+              EAssociationContextType contextType,
+          @Parameter(schema = @Schema(ref = "#/components/schemas/EAssociationContextType"))
+              @PathVariable
+              EAssociationContextType associatedContextType,
+          @RequestParam(required = false) String keyword,
+          @RequestParam(required = false) Integer page,
+          @RequestParam(required = false) Integer pageSize) {
+    var pageCriteria = new PageCriteria(page, pageSize);
+    log.debug(
+        "Received request to search {} for association with a new {} by student [{}]"
+            + " (keyword={}, page={}, pageSize={})",
+        associatedContextType,
+        contextType,
+        principal.getName(),
+        keyword,
+        pageCriteria.page(),
+        pageCriteria.pageSize());
+
+    var pagedResult =
+        associationService.searchForAssociationWithNewElement(
+            contextType, associatedContextType, keyword, pageCriteria);
+
+    return ResponseEntity.ok(
+        new PagedResponse<>(
+            pagedResult.content().stream().map(associationSearchResultDTOMapper::toDTO).toList(),
+            PageInfoDTO.fromDomain(pagedResult.pageInfo())));
+  }
+
+  @PreAuthorize("hasAuthority('association:manage')")
   @GetMapping("/{contextType}/{elementId}/{associatedContextType}/search")
   public ResponseEntity<PagedResponse<AssociationSearchResultDTO>> searchForAssociation(
       Principal principal,

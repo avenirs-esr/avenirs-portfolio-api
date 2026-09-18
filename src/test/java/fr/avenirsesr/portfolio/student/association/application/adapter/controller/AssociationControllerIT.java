@@ -42,6 +42,8 @@ class AssociationControllerIT extends ContainerConfigurationTest {
       BASE_PATH + "/{contextType}/{elementId}/{associatedContextType}";
   private static final String SEARCH_PATH =
       BASE_PATH + "/{contextType}/{elementId}/{associatedContextType}/search";
+  private static final String NEW_ELEMENT_SEARCH_PATH =
+      BASE_PATH + "/{contextType}/{associatedContextType}/search";
 
   private static final String TRACE_ASSOCIATIONS_PATH = BASE_PATH + "/TRACE";
   private static final String DECLARED_ACTIVITY_ASSOCIATIONS_PATH =
@@ -94,6 +96,7 @@ class AssociationControllerIT extends ContainerConfigurationTest {
   private String noPermissionSignature;
 
   private final String notFoundDeclaredExperienceId = "00000000-0000-0000-0000-000000000000";
+  private final String finishedDeclaredActivityId = "9a1d7c55-2f6b-4e88-9c2a-1e7b3d4f6c44";
 
   @BeforeAll
   void setup(@Autowired SeederRunner seederRunner) {
@@ -614,6 +617,216 @@ class AssociationControllerIT extends ContainerConfigurationTest {
         .isForbidden();
 
     BddLogger.then("it should return 403");
+  }
+
+  @Test
+  void shouldSearchDeclaredSkillsForAssociationWithANewTrace() {
+    BddLogger.given("a trace that does not exist yet");
+
+    when("searching the declared skills to associate");
+
+    webTestClient
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(NEW_ELEMENT_SEARCH_PATH)
+                    .queryParam("page", "0")
+                    .queryParam("pageSize", "8")
+                    .build("TRACE", "DECLARED_SKILL"))
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .accept(APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.data")
+        .isArray()
+        .jsonPath("$.data[0].id")
+        .exists()
+        .jsonPath("$.data[0].title")
+        .exists()
+        .jsonPath("$.data[0].disabled")
+        .exists()
+        .jsonPath("$.page.page")
+        .isEqualTo(0)
+        .jsonPath("$.page.pageSize")
+        .isEqualTo(8);
+
+    BddLogger.then("it should return paged results without any source element");
+  }
+
+  @Test
+  void shouldReturnEmptyResultsWhenSearchingForANewElementWithAKeywordThatMatchesNothing() {
+    BddLogger.given("a declared experience that does not exist yet");
+
+    when("searching the traces to associate with a keyword matching nothing");
+
+    webTestClient
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(NEW_ELEMENT_SEARCH_PATH)
+                    .queryParam("keyword", "zzzzzznonexistent")
+                    .queryParam("page", "0")
+                    .queryParam("pageSize", "8")
+                    .build("DECLARED_EXPERIENCE", "TRACE"))
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .accept(APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.data")
+        .isArray()
+        .jsonPath("$.data.length()")
+        .isEqualTo(0);
+
+    BddLogger.then("it should return empty results");
+  }
+
+  @Test
+  void shouldNotDisableTheAlreadyAssociatedTracesWhenSearchingForANewDeclaredExperience()
+      throws Exception {
+    BddLogger.given("a trace already associated with another declared experience");
+
+    String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
+    UUID traceId =
+        createTraceAs("Trace associated before a new experience", studentPayload, studentSignature);
+    associateExperienceWithTraceAndGetAssociationId(experienceId, traceId);
+
+    when("searching the traces to associate with a declared experience that does not exist yet");
+
+    webTestClient
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(NEW_ELEMENT_SEARCH_PATH)
+                    .queryParam("keyword", "Trace associated before a new experience")
+                    .queryParam("page", "0")
+                    .queryParam("pageSize", "8")
+                    .build("DECLARED_EXPERIENCE", "TRACE"))
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .accept(APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.data[0].id")
+        .isEqualTo(traceId.toString())
+        .jsonPath("$.data[0].disabled")
+        .isEqualTo(false);
+
+    BddLogger.then("it should not mark the trace as already associated");
+  }
+
+  @Test
+  void shouldDisableTheFinishedDeclaredActivitiesWhenSearchingForANewTrace() throws Exception {
+    BddLogger.given("a finished declared activity of the student");
+
+    when("searching the declared activities to associate with a trace that does not exist yet");
+
+    String responseBody =
+        webTestClient
+            .get()
+            .uri(
+                uriBuilder ->
+                    uriBuilder
+                        .path(NEW_ELEMENT_SEARCH_PATH)
+                        .queryParam("keyword", "CV")
+                        .queryParam("page", "0")
+                        .queryParam("pageSize", "100")
+                        .build("TRACE", "DECLARED_ACTIVITY"))
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+            .accept(APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    JsonNode finishedDeclaredActivity =
+        findSearchResultById(
+            objectMapper.readTree(responseBody).get("data"), finishedDeclaredActivityId);
+
+    assertThat(finishedDeclaredActivity).isNotNull();
+    assertThat(finishedDeclaredActivity.get("disabled").asBoolean()).isTrue();
+
+    BddLogger.then("it should return the finished declared activity as disabled");
+  }
+
+  @Test
+  void shouldReturn400WhenSearchingForANewElementWithTwoContextsThatCannotBeAssociated() {
+    BddLogger.given("two context types that cannot be associated together");
+
+    when("searching the declared experiences to associate with a new declared activity");
+
+    webTestClient
+        .get()
+        .uri(NEW_ELEMENT_SEARCH_PATH, "DECLARED_ACTIVITY", "DECLARED_EXPERIENCE")
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .accept(APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isBadRequest();
+
+    BddLogger.then("it should return 400");
+  }
+
+  @Test
+  void shouldReturn400WhenSearchingForANewElementWithAnUnknownContextType() {
+    BddLogger.given("an unknown context type");
+
+    when("searching the elements to associate");
+
+    webTestClient
+        .get()
+        .uri(NEW_ELEMENT_SEARCH_PATH, "TRACE", "UNKNOWN")
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .accept(APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isBadRequest();
+
+    BddLogger.then("it should return 400");
+  }
+
+  @Test
+  void shouldReturn403WhenSearchingForANewElementWithoutPermission() {
+    BddLogger.given("an authenticated user without the association permission");
+
+    when("searching the declared skills to associate with a new trace");
+
+    webTestClient
+        .get()
+        .uri(NEW_ELEMENT_SEARCH_PATH, "TRACE", "DECLARED_SKILL")
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, noPermissionPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, noPermissionSignature)
+        .accept(APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isForbidden();
+
+    BddLogger.then("it should return 403");
+  }
+
+  private JsonNode findSearchResultById(JsonNode searchResults, String id) {
+    for (JsonNode searchResult : searchResults) {
+      if (id.equals(searchResult.get("id").asText())) {
+        return searchResult;
+      }
+    }
+
+    return null;
   }
 
   private String buildCreateExperienceJson() {

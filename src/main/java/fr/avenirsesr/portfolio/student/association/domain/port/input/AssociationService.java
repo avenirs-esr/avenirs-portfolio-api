@@ -40,6 +40,12 @@ public interface AssociationService {
       String keyword,
       PageCriteria pageCriteria);
 
+  PagedResult<AssociationSearchResultData> searchForAssociationWithNewElement(
+      EAssociationContextType contextType,
+      EAssociationContextType associatedContextType,
+      String keyword,
+      PageCriteria pageCriteria);
+
   void deleteAllByIds(List<UUID> ids);
 
   void deleteAllOf(List<UUID> ids, Class<?> clazz);
