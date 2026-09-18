@@ -118,5 +118,20 @@
     "id1": "DYNAMIC_STUDENT_DECLARED_PROGRAM_ID_0a8700ab-90b6-4a38-8338-acbdd4fbcd3d_1",
     "id2": "DYNAMIC_STUDENT_DECLARED_SKILL_ID_0a8700ab-90b6-4a38-8338-acbdd4fbcd3d_0",
     "associationType": "DECLARED_PROGRAM_DECLARED_SKILL"
+  },
+  {
+    "id1": "f3d22e78-e827-4bae-8831-44168c176198",
+    "id2": "DYNAMIC_STUDENT_DECLARED_PROGRAM_ID_0a8700ab-90b6-4a38-8338-acbdd4fbcd3d_0",
+    "associationType": "TRACE_DECLARED_PROGRAM"
+  },
+  {
+    "id1": "54ab9e1c-473d-4227-9c3e-c8c6adad6d88",
+    "id2": "DYNAMIC_STUDENT_DECLARED_PROGRAM_ID_0a8700ab-90b6-4a38-8338-acbdd4fbcd3d_1",
+    "associationType": "TRACE_DECLARED_PROGRAM"
+  },
+  {
+    "id1": "4b02b225-998a-4996-be52-8d9b2a5ab327",
+    "id2": "DYNAMIC_STUDENT_DECLARED_PROGRAM_ID_d999193b-1835-43ee-b739-bd3209e95756_0",
+    "associationType": "TRACE_DECLARED_PROGRAM"
   }
 ]

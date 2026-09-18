@@ -103,17 +103,12 @@ public class AssociationSeeder {
                 TRACE_DECLARED_SKILL,
                 DECLARED_ACTIVITY_DECLARED_SKILL,
                 TRACE_DECLARED_EXPERIENCE,
+                TRACE_DECLARED_PROGRAM,
                 DECLARED_EXPERIENCE_DECLARED_SKILL ->
                 UUID::fromString;
 
             case DECLARED_PROGRAM_DECLARED_SKILL ->
-                id ->
-                    resolveDynamicIdWithStudentParam(
-                        id,
-                        savedDeclaredPrograms,
-                        declaredProgram -> declaredProgram.getStudent().getId(),
-                        DeclaredProgram::getId,
-                        null);
+                declaredProgramIdResolver(savedDeclaredPrograms);
           };
 
       Function<String, UUID> mapperId2 =
@@ -143,11 +138,24 @@ public class AssociationSeeder {
                                 : null,
                         DeclaredExperienceEntity::getId,
                         declaredExperienceComparator());
+
+            case TRACE_DECLARED_PROGRAM -> declaredProgramIdResolver(savedDeclaredPrograms);
           };
 
       return new AssociationData(
           mapperId1.apply(data.id1()), mapperId2.apply(data.id2()), data.associationType());
     };
+  }
+
+  private Function<String, UUID> declaredProgramIdResolver(
+      List<DeclaredProgram> savedDeclaredPrograms) {
+    return id ->
+        resolveDynamicIdWithStudentParam(
+            id,
+            savedDeclaredPrograms,
+            declaredProgram -> declaredProgram.getStudent().getId(),
+            DeclaredProgram::getId,
+            null);
   }
 
   private <T> UUID resolveDynamicIdWithStudentParam(
