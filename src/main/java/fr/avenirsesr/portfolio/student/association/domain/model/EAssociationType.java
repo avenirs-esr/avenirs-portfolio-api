@@ -17,6 +17,7 @@ public enum EAssociationType {
   DECLARED_ACTIVITY_DECLARED_SKILL(DeclaredActivity.class, DeclaredSkillProgress.class),
   TRACE_DECLARED_SKILL(Trace.class, DeclaredSkillProgress.class),
   TRACE_DECLARED_EXPERIENCE(Trace.class, DeclaredExperience.class),
+  TRACE_DECLARED_PROGRAM(Trace.class, DeclaredProgram.class),
   DECLARED_EXPERIENCE_DECLARED_SKILL(DeclaredExperience.class, DeclaredSkillProgress.class),
   DECLARED_PROGRAM_DECLARED_SKILL(DeclaredProgram.class, DeclaredSkillProgress.class);
 
