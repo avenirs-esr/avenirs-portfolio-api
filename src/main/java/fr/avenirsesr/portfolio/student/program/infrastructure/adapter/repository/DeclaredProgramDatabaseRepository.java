@@ -3,6 +3,8 @@ package fr.avenirsesr.portfolio.student.program.infrastructure.adapter.repositor
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortField;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.student.program.domain.model.DeclaredProgram;
 import fr.avenirsesr.portfolio.student.program.domain.port.output.DeclaredProgramRepository;
 import fr.avenirsesr.portfolio.student.program.infrastructure.adapter.mapper.DeclaredProgramMapper;
@@ -38,5 +40,17 @@ public class DeclaredProgramDatabaseRepository
             Arrays.stream(sortCriterias)
                 .map(DeclaredProgramSpecification::toSort)
                 .reduce(Sort.unsorted(), Sort::and)));
+  }
+
+  @Override
+  public PagedResult<DeclaredProgram> findAllByStudent(
+      Student student, PageCriteria pageCriteria, String keyword) {
+    return findAll(
+        hasStudent(student).and(DeclaredProgramSpecification.search(keyword)),
+        PageRequest.of(
+            pageCriteria.page(),
+            pageCriteria.pageSize(),
+            DeclaredProgramSpecification.toSort(
+                new SortCriteria(ESortField.NAME, ESortOrder.ASC))));
   }
 }

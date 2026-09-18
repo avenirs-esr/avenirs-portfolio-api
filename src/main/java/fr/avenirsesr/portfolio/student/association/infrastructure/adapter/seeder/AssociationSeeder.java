@@ -13,6 +13,7 @@ import fr.avenirsesr.portfolio.student.association.infrastructure.adapter.mapper
 import fr.avenirsesr.portfolio.student.association.infrastructure.adapter.model.AssociationEntity;
 import fr.avenirsesr.portfolio.student.association.infrastructure.adapter.seeder.data.AssociationCreationData;
 import fr.avenirsesr.portfolio.student.experience.infrastructure.adapter.model.DeclaredExperienceEntity;
+import fr.avenirsesr.portfolio.student.program.domain.model.DeclaredProgram;
 import fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.model.DeclaredSkillProgressEntity;
 import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.model.TraceEntity;
 import java.util.Collections;
@@ -45,7 +46,8 @@ public class AssociationSeeder {
       List<DeclaredActivityEntity> savedActivities,
       List<TraceEntity> savedTraces,
       List<DeclaredSkillProgressEntity> savedDeclaredSkillProgresses,
-      List<DeclaredExperienceEntity> savedDeclaredExperiences) {
+      List<DeclaredExperienceEntity> savedDeclaredExperiences,
+      List<DeclaredProgram> savedDeclaredPrograms) {
     log.info("Seeding associations...");
 
     List<AssociationCreationData> creationData =
@@ -80,7 +82,9 @@ public class AssociationSeeder {
             creationData.stream()
                 .map(
                     mapToAssociationCreationData(
-                        savedDeclaredSkillProgresses, savedDeclaredExperiences))
+                        savedDeclaredSkillProgresses,
+                        savedDeclaredExperiences,
+                        savedDeclaredPrograms))
                 .toList());
 
     log.info("✔ {} associations created", associations.size());
@@ -89,7 +93,8 @@ public class AssociationSeeder {
 
   private Function<AssociationCreationData, AssociationData> mapToAssociationCreationData(
       List<DeclaredSkillProgressEntity> savedDeclaredSkillProgresses,
-      List<DeclaredExperienceEntity> savedDeclaredExperiences) {
+      List<DeclaredExperienceEntity> savedDeclaredExperiences,
+      List<DeclaredProgram> savedDeclaredPrograms) {
 
     return data -> {
       Function<String, UUID> mapperId1 =
@@ -100,6 +105,15 @@ public class AssociationSeeder {
                 TRACE_DECLARED_EXPERIENCE,
                 DECLARED_EXPERIENCE_DECLARED_SKILL ->
                 UUID::fromString;
+
+            case DECLARED_PROGRAM_DECLARED_SKILL ->
+                id ->
+                    resolveDynamicIdWithStudentParam(
+                        id,
+                        savedDeclaredPrograms,
+                        declaredProgram -> declaredProgram.getStudent().getId(),
+                        DeclaredProgram::getId,
+                        null);
           };
 
       Function<String, UUID> mapperId2 =
@@ -108,7 +122,8 @@ public class AssociationSeeder {
 
             case DECLARED_ACTIVITY_DECLARED_SKILL,
                 TRACE_DECLARED_SKILL,
-                DECLARED_EXPERIENCE_DECLARED_SKILL ->
+                DECLARED_EXPERIENCE_DECLARED_SKILL,
+                DECLARED_PROGRAM_DECLARED_SKILL ->
                 id ->
                     resolveDynamicIdWithStudentParam(
                         id,

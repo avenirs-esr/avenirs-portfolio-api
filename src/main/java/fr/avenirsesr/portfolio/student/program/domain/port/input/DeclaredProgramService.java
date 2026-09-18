@@ -45,4 +45,8 @@ public interface DeclaredProgramService {
       boolean valorized);
 
   void delete(List<UUID> declaredProgramIds);
+
+  List<DeclaredProgram> findAllByIds(List<UUID> declaredProgramIds);
+
+  PagedResult<DeclaredProgram> search(String keyword, PageCriteria pageCriteria);
 }
