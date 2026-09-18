@@ -8,6 +8,7 @@ import static org.mockito.Mockito.*;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.error.domain.exception.WrongClassTypeArgumentException;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityAssociationData;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
@@ -374,7 +375,7 @@ class AssociationServiceImplTest {
                     EAssociationContextType.TRACE,
                     EAssociationContextType.TRACE,
                     List.of(UUID.randomUUID())))
-        .isInstanceOf(IllegalArgumentException.class);
+        .isInstanceOf(WrongClassTypeArgumentException.class);
 
     verifyNoInteractions(associationRepository);
   }
@@ -531,8 +532,91 @@ class AssociationServiceImplTest {
                     EAssociationContextType.TRACE,
                     "kw",
                     new PageCriteria(0, 10)))
-        .isInstanceOf(IllegalArgumentException.class);
+        .isInstanceOf(WrongClassTypeArgumentException.class);
 
+    verifyNoInteractions(associationRepository);
+  }
+
+  @Test
+  void searchForAssociationWithNewElement_should_return_the_results_of_the_searched_context() {
+    UUID declaredSkillProgressId = UUID.randomUUID();
+    var pageCriteria = new PageCriteria(0, 10);
+
+    when(declaredSkillHandler.search("kw", pageCriteria))
+        .thenReturn(
+            new PagedResult<>(
+                List.of(
+                    new AssociationSearchResultData(
+                        declaredSkillProgressId, "Declared skill", "Referential", false)),
+                new PageInfo(0, 10, 1)));
+
+    var result =
+        service.searchForAssociationWithNewElement(
+            EAssociationContextType.DECLARED_EXPERIENCE,
+            EAssociationContextType.DECLARED_SKILL,
+            "kw",
+            pageCriteria);
+
+    assertThat(result.content())
+        .containsExactly(
+            new AssociationSearchResultData(
+                declaredSkillProgressId, "Declared skill", "Referential", false));
+    assertThat(result.pageInfo()).isEqualTo(new PageInfo(0, 10, 1));
+    verifyNoInteractions(associationRepository);
+  }
+
+  @Test
+  void searchForAssociationWithNewElement_should_keep_the_elements_disabled_by_their_own_context() {
+    UUID declaredActivityId = UUID.randomUUID();
+    var pageCriteria = new PageCriteria(0, 10);
+
+    when(declaredActivityHandler.search(null, pageCriteria))
+        .thenReturn(
+            new PagedResult<>(
+                List.of(
+                    new AssociationSearchResultData(
+                        declaredActivityId, "Finished activity", "EXPERIENCES", true)),
+                new PageInfo(0, 10, 1)));
+
+    var result =
+        service.searchForAssociationWithNewElement(
+            EAssociationContextType.TRACE,
+            EAssociationContextType.DECLARED_ACTIVITY,
+            null,
+            pageCriteria);
+
+    assertThat(result.content())
+        .containsExactly(
+            new AssociationSearchResultData(
+                declaredActivityId, "Finished activity", "EXPERIENCES", true));
+  }
+
+  @Test
+  void searchForAssociationWithNewElement_should_not_check_the_ownership_of_the_new_element() {
+    var pageCriteria = new PageCriteria(0, 10);
+
+    when(traceHandler.search("kw", pageCriteria))
+        .thenReturn(new PagedResult<>(List.of(), new PageInfo(0, 10, 0)));
+
+    service.searchForAssociationWithNewElement(
+        EAssociationContextType.DECLARED_SKILL, EAssociationContextType.TRACE, "kw", pageCriteria);
+
+    verify(declaredSkillHandler, never()).checkLoggedInStudentOwns(anyList());
+  }
+
+  @Test
+  void
+      searchForAssociationWithNewElement_should_throw_when_the_two_contexts_cannot_be_associated() {
+    assertThatThrownBy(
+            () ->
+                service.searchForAssociationWithNewElement(
+                    EAssociationContextType.DECLARED_ACTIVITY,
+                    EAssociationContextType.DECLARED_EXPERIENCE,
+                    "kw",
+                    new PageCriteria(0, 10)))
+        .isInstanceOf(WrongClassTypeArgumentException.class);
+
+    verify(declaredExperienceHandler, never()).search(any(), any());
     verifyNoInteractions(associationRepository);
   }
 }

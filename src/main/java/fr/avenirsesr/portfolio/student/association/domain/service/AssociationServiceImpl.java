@@ -169,6 +169,17 @@ public class AssociationServiceImpl implements AssociationService {
   }
 
   @Override
+  public PagedResult<AssociationSearchResultData> searchForAssociationWithNewElement(
+      EAssociationContextType contextType,
+      EAssociationContextType associatedContextType,
+      String keyword,
+      PageCriteria pageCriteria) {
+    EAssociationType.of(contextType.toClass(), associatedContextType.toClass());
+
+    return handlerOf(associatedContextType).search(keyword, pageCriteria);
+  }
+
+  @Override
   public void deleteAllByIds(List<UUID> ids) {
     var activities = associationRepository.findAllById(ids);
 

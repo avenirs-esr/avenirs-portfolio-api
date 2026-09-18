@@ -6,6 +6,22 @@ and [Conventional Commits](https://www.conventionalcommits.org/) standard.
 
 ---
 
+## [1.4.12] - 2026-09-18
+
+- **Search for association without a source element**
+    - New endpoint `GET /me/associations/{contextType}/{associatedContextType}/search` (query params `keyword`, `page`,
+      `pageSize`, authority `association:manage`), which completes the mutualized association endpoints introduced by
+      the association refactor (#2666).
+    - It searches the elements of type `associatedContextType` that can be associated with an element of type
+      `contextType` that does not exist yet, so the creation drawers of the front (#2708) can pick the elements to
+      associate before creating the element itself.
+    - It returns the same `PagedResponse<AssociationSearchResultDTO>` as
+      `GET /me/associations/{contextType}/{elementId}/{associatedContextType}/search`, with the `disabled` flag carried
+      by the element itself (a finished declared activity for instance) but without the "already associated" flag, which
+      has no meaning without a source element.
+    - Two context types that cannot be associated together are now rejected with a `400` instead of a `500`, on this
+      endpoint and on the existing association endpoints.
+
 ## [1.4.11] - 2026-09-11
 
 - **Student info in the student feedback list**
