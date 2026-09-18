@@ -104,7 +104,8 @@ public class AssociationSeeder {
                 DECLARED_ACTIVITY_DECLARED_SKILL,
                 TRACE_DECLARED_EXPERIENCE,
                 TRACE_DECLARED_PROGRAM,
-                DECLARED_EXPERIENCE_DECLARED_SKILL ->
+                DECLARED_EXPERIENCE_DECLARED_SKILL,
+                DECLARED_EXPERIENCE_DECLARED_PROGRAM ->
                 UUID::fromString;
 
             case DECLARED_PROGRAM_DECLARED_SKILL ->
@@ -139,7 +140,8 @@ public class AssociationSeeder {
                         DeclaredExperienceEntity::getId,
                         declaredExperienceComparator());
 
-            case TRACE_DECLARED_PROGRAM -> declaredProgramIdResolver(savedDeclaredPrograms);
+            case TRACE_DECLARED_PROGRAM, DECLARED_EXPERIENCE_DECLARED_PROGRAM ->
+                declaredProgramIdResolver(savedDeclaredPrograms);
           };
 
       return new AssociationData(
