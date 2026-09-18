@@ -3211,4 +3211,121 @@ class AssociationControllerIT extends ContainerConfigurationTest {
             getAssociations("DECLARED_SKILL", declaredSkillId).get("declaredProgramAssociations"))
         .isEmpty();
   }
+
+  @Test
+  void shouldAssociateSeveralTracesWithADeclaredProgram() throws Exception {
+    BddLogger.given("an existing declared program and two traces");
+    UUID declaredProgramId = createDeclaredProgram("Master MIAGE", "Université");
+    UUID firstTraceId = createTrace("Rapport de projet MIAGE");
+    UUID secondTraceId = createTrace("Soutenance MIAGE");
+
+    when("associating the declared program with both traces");
+
+    JsonNode associations =
+        associate(
+            declaredProgramId, "DECLARED_PROGRAM", "TRACE", List.of(firstTraceId, secondTraceId));
+
+    BddLogger.then("it should return the two traces associated with the declared program");
+    assertThat(associations.get("traceAssociations")).hasSize(2);
+  }
+
+  @Test
+  void shouldReturnTheDeclaredProgramInTheAssociationsOfItsTrace() throws Exception {
+    BddLogger.given("a trace associated with a declared program");
+    UUID declaredProgramId = createDeclaredProgram("Licence LEA", "Université");
+    UUID traceId = createTrace("Mémoire de traduction");
+
+    associate(declaredProgramId, "DECLARED_PROGRAM", "TRACE", List.of(traceId));
+
+    when("getting the associations of the trace");
+
+    var associations = getAssociations("TRACE", traceId);
+
+    BddLogger.then("it should return the declared program on the trace side");
+    assertThat(associations.get("declaredProgramAssociations")).hasSize(1);
+    assertThat(
+            associations
+                .get("declaredProgramAssociations")
+                .get(0)
+                .get("declaredProgram")
+                .get("id")
+                .asText())
+        .isEqualTo(declaredProgramId.toString());
+  }
+
+  @Test
+  void shouldUnassociateTheTracesOfADeclaredProgram() throws Exception {
+    BddLogger.given("a declared program associated with a trace");
+    UUID declaredProgramId = createDeclaredProgram("CAP pâtisserie", "CFA");
+    UUID traceId = createTrace("Carnet de recettes");
+
+    JsonNode associations =
+        associate(declaredProgramId, "DECLARED_PROGRAM", "TRACE", List.of(traceId));
+    UUID associationId =
+        UUID.fromString(associations.get("traceAssociations").get(0).get("associationId").asText());
+
+    when("unassociating the association from the trace");
+
+    webTestClient
+        .method(HttpMethod.DELETE)
+        .uri(ASSOCIATIONS_PATH, "TRACE", traceId)
+        .contentType(APPLICATION_JSON)
+        .bodyValue(
+            objectMapper.writeValueAsString(new AssociationsDeleteRequest(List.of(associationId))))
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .exchange()
+        .expectStatus()
+        .isNoContent();
+
+    BddLogger.then("the declared program should not reference the trace anymore");
+    assertThat(getAssociations("DECLARED_PROGRAM", declaredProgramId).get("traceAssociations"))
+        .isEmpty();
+  }
+
+  @Test
+  void shouldSearchTheTracesToAssociateWithADeclaredProgram() throws Exception {
+    BddLogger.given("a declared program already associated with a trace");
+    UUID declaredProgramId = createDeclaredProgram("BTS audiovisuel", "Lycée");
+    UUID traceId = createTrace("Court métrage documentaire");
+
+    associate(declaredProgramId, "DECLARED_PROGRAM", "TRACE", List.of(traceId));
+
+    when("searching the traces to associate");
+
+    var results =
+        searchForAssociation("DECLARED_PROGRAM", declaredProgramId, "TRACE", "Court métrage");
+
+    BddLogger.then("the already associated trace should be disabled");
+    var alreadyAssociated =
+        StreamSupport.stream(results.spliterator(), false)
+            .filter(result -> result.get("id").asText().equals(traceId.toString()))
+            .findFirst()
+            .orElseThrow();
+
+    assertThat(alreadyAssociated.get("title").asText()).isEqualTo("Court métrage documentaire");
+    assertThat(alreadyAssociated.get("disabled").asBoolean()).isTrue();
+  }
+
+  @Test
+  void shouldSearchTheDeclaredProgramsToAssociateWithATrace() throws Exception {
+    BddLogger.given("a trace and a declared program matching the keyword");
+    UUID declaredProgramId = createDeclaredProgram("Formation agroécologie", "INRAE");
+    UUID traceId = createTrace("Journal de terrain");
+
+    when("searching the declared programs to associate");
+
+    var results = searchForAssociation("TRACE", traceId, "DECLARED_PROGRAM", "agroécologie");
+
+    BddLogger.then("it should return the matching declared program with its organization");
+    var found =
+        StreamSupport.stream(results.spliterator(), false)
+            .filter(result -> result.get("id").asText().equals(declaredProgramId.toString()))
+            .findFirst()
+            .orElseThrow();
+
+    assertThat(found.get("title").asText()).isEqualTo("Formation agroécologie");
+    assertThat(found.get("category").asText()).isEqualTo("INRAE");
+    assertThat(found.get("disabled").asBoolean()).isFalse();
+  }
 }
