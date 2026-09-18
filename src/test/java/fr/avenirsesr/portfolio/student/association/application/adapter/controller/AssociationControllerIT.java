@@ -3479,4 +3479,195 @@ class AssociationControllerIT extends ContainerConfigurationTest {
     assertThat(found.get("category").asText()).isEqualTo("Chambre d'agriculture");
     assertThat(found.get("disabled").asBoolean()).isFalse();
   }
+
+  @Test
+  void shouldAssociateSeveralDeclaredExperiencesWithADeclaredActivity() throws Exception {
+    BddLogger.given("an active declared activity and two declared experiences");
+    UUID declaredActivityId = getFirstActiveDeclaredActivityId();
+    UUID firstExperienceId =
+        createDeclaredExperience("Animateur colonie", "PERSONAL", "2023-07-01", "2023-08-31");
+    UUID secondExperienceId =
+        createDeclaredExperience("Développeur mobile", "PROFESSIONAL", "2024-01-15", null);
+
+    when("associating the declared activity with both declared experiences");
+
+    JsonNode associations =
+        associate(
+            declaredActivityId,
+            "DECLARED_ACTIVITY",
+            "DECLARED_EXPERIENCE",
+            List.of(firstExperienceId, secondExperienceId));
+
+    BddLogger.then(
+        "it should return the two declared experiences associated with the declared activity");
+    var associatedExperienceIds =
+        StreamSupport.stream(
+                associations.get("declaredExperienceAssociations").spliterator(), false)
+            .map(association -> association.get("declaredExperience").get("id").asText())
+            .toList();
+
+    assertThat(associatedExperienceIds)
+        .contains(firstExperienceId.toString(), secondExperienceId.toString());
+  }
+
+  @Test
+  void shouldReturnTheDeclaredActivityInTheAssociationsOfItsDeclaredExperience() throws Exception {
+    BddLogger.given("a declared experience associated with a declared activity");
+    UUID declaredActivityId = getFirstActiveDeclaredActivityId();
+    UUID declaredExperienceId =
+        createDeclaredExperience("Médiateur culturel", "PROFESSIONAL", "2024-03-01", null);
+
+    associate(
+        declaredActivityId,
+        "DECLARED_ACTIVITY",
+        "DECLARED_EXPERIENCE",
+        List.of(declaredExperienceId));
+
+    when("getting the associations of the declared experience");
+
+    var associations = getAssociations("DECLARED_EXPERIENCE", declaredExperienceId);
+
+    BddLogger.then("it should return the declared activity on the declared experience side");
+    assertThat(associations.get("declaredActivityAssociations")).hasSize(1);
+    assertThat(
+            associations
+                .get("declaredActivityAssociations")
+                .get(0)
+                .get("declaredActivity")
+                .get("id")
+                .asText())
+        .isEqualTo(declaredActivityId.toString());
+  }
+
+  @Test
+  void shouldReturn409WhenAssociatingTwiceTheSameDeclaredExperienceWithADeclaredActivity()
+      throws Exception {
+    BddLogger.given("a declared activity already associated with a declared experience");
+    UUID declaredActivityId = getFirstActiveDeclaredActivityId();
+    UUID declaredExperienceId =
+        createDeclaredExperience("Bibliothécaire bénévole", "PERSONAL", "2022-11-01", null);
+
+    associate(
+        declaredActivityId,
+        "DECLARED_ACTIVITY",
+        "DECLARED_EXPERIENCE",
+        List.of(declaredExperienceId));
+
+    when("associating the same declared experience again");
+
+    webTestClient
+        .post()
+        .uri(ASSOCIATE_PATH, "DECLARED_ACTIVITY", declaredActivityId, "DECLARED_EXPERIENCE")
+        .contentType(APPLICATION_JSON)
+        .bodyValue(
+            objectMapper.writeValueAsString(
+                new AssociationsCreationRequest(List.of(declaredExperienceId))))
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .exchange()
+        .expectStatus()
+        .isEqualTo(409);
+
+    BddLogger.then("it should return 409");
+  }
+
+  @Test
+  void shouldUnassociateTheDeclaredExperiencesOfADeclaredActivity() throws Exception {
+    BddLogger.given("a declared activity associated with a declared experience");
+    UUID declaredActivityId = getFirstActiveDeclaredActivityId();
+    UUID declaredExperienceId =
+        createDeclaredExperience("Assistant de recherche", "PROFESSIONAL", "2024-05-01", null);
+
+    JsonNode associations =
+        associate(
+            declaredActivityId,
+            "DECLARED_ACTIVITY",
+            "DECLARED_EXPERIENCE",
+            List.of(declaredExperienceId));
+    UUID associationId =
+        UUID.fromString(
+            associations
+                .get("declaredExperienceAssociations")
+                .get(0)
+                .get("associationId")
+                .asText());
+
+    when("unassociating the association from the declared experience");
+
+    webTestClient
+        .method(HttpMethod.DELETE)
+        .uri(ASSOCIATIONS_PATH, "DECLARED_EXPERIENCE", declaredExperienceId)
+        .contentType(APPLICATION_JSON)
+        .bodyValue(
+            objectMapper.writeValueAsString(new AssociationsDeleteRequest(List.of(associationId))))
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .exchange()
+        .expectStatus()
+        .isNoContent();
+
+    BddLogger.then("the declared experience should not reference the declared activity anymore");
+    assertThat(
+            getAssociations("DECLARED_EXPERIENCE", declaredExperienceId)
+                .get("declaredActivityAssociations"))
+        .isEmpty();
+  }
+
+  @Test
+  void shouldSearchTheDeclaredExperiencesToAssociateWithADeclaredActivity() throws Exception {
+    BddLogger.given("a declared activity already associated with a declared experience");
+    UUID declaredActivityId = getFirstActiveDeclaredActivityId();
+    UUID declaredExperienceId =
+        createDeclaredExperience("Surveillant baignade", "PERSONAL", "2021-07-01", "2021-08-31");
+
+    associate(
+        declaredActivityId,
+        "DECLARED_ACTIVITY",
+        "DECLARED_EXPERIENCE",
+        List.of(declaredExperienceId));
+
+    when("searching the declared experiences to associate");
+
+    var results =
+        searchForAssociation(
+            "DECLARED_ACTIVITY", declaredActivityId, "DECLARED_EXPERIENCE", "Surveillant");
+
+    BddLogger.then("the already associated declared experience should be disabled");
+    var alreadyAssociated =
+        StreamSupport.stream(results.spliterator(), false)
+            .filter(result -> result.get("id").asText().equals(declaredExperienceId.toString()))
+            .findFirst()
+            .orElseThrow();
+
+    assertThat(alreadyAssociated.get("category").asText()).isEqualTo("PERSONAL");
+    assertThat(alreadyAssociated.get("disabled").asBoolean()).isTrue();
+  }
+
+  @Test
+  void shouldSearchTheDeclaredActivitiesToAssociateWithADeclaredExperience() throws Exception {
+    BddLogger.given("a declared experience already associated with a declared activity");
+    UUID declaredActivityId = getFirstActiveDeclaredActivityId();
+    UUID declaredExperienceId =
+        createDeclaredExperience("Rédacteur web", "PROFESSIONAL", "2022-02-01", null);
+
+    associate(
+        declaredActivityId,
+        "DECLARED_ACTIVITY",
+        "DECLARED_EXPERIENCE",
+        List.of(declaredExperienceId));
+
+    when("searching the declared activities to associate");
+
+    var results =
+        searchForAssociation("DECLARED_EXPERIENCE", declaredExperienceId, "DECLARED_ACTIVITY", "");
+
+    BddLogger.then("the already associated declared activity should be disabled");
+    var alreadyAssociated =
+        StreamSupport.stream(results.spliterator(), false)
+            .filter(result -> result.get("id").asText().equals(declaredActivityId.toString()))
+            .findFirst()
+            .orElseThrow();
+
+    assertThat(alreadyAssociated.get("disabled").asBoolean()).isTrue();
+  }
 }
