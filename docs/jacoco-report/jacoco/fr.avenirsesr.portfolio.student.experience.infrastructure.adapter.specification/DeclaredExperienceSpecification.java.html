@@ -32,11 +32,11 @@ import org.springframework.data.jpa.domain.Specification;
 
   public static Specification&lt;DeclaredExperienceEntity&gt; search(String keyword) {
 <span class="fc" id="L34">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="pc bpc" id="L35" title="3 of 4 branches missed.">      if (keyword == null || keyword.trim().isEmpty()) {</span>
+<span class="pc bpc" id="L35" title="1 of 4 branches missed.">      if (keyword == null || keyword.trim().isEmpty()) {</span>
 <span class="fc" id="L36">        return criteriaBuilder.conjunction();</span>
       }
-<span class="nc" id="L38">      return criteriaBuilder.like(</span>
-<span class="nc" id="L39">          criteriaBuilder.lower(root.get(&quot;title&quot;)), &quot;%&quot; + keyword.toLowerCase() + &quot;%&quot;);</span>
+<span class="fc" id="L38">      return criteriaBuilder.like(</span>
+<span class="fc" id="L39">          criteriaBuilder.lower(root.get(&quot;title&quot;)), &quot;%&quot; + keyword.toLowerCase() + &quot;%&quot;);</span>
     };
   }
 

@@ -1,47 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AssociationUtils.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.student.association.domain.utils</a> &gt; <span class="el_source">AssociationUtils.java</span></div><h1>AssociationUtils.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.student.association.domain.utils;
 
-import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
-import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
-import fr.avenirsesr.portfolio.user.domain.model.Student;
-import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 public interface AssociationUtils {
   static List&lt;UUID&gt; getIdsOf(
       List&lt;Association&gt; associations, EAssociationType associationType, Class&lt;?&gt; clazz) {
-<span class="fc" id="L17">    return associations.stream()</span>
-<span class="fc bfc" id="L18" title="All 2 branches covered.">        .filter(a -&gt; a.getAssociationType() == associationType)</span>
-<span class="fc" id="L19">        .map(associationType.idExtractorFor(clazz))</span>
-<span class="fc" id="L20">        .toList();</span>
-  }
-
-  static &lt;T extends AvenirsBaseModel&gt; void checkOwnership(
-      List&lt;UUID&gt; ids,
-      List&lt;T&gt; elements,
-      Function&lt;T, Student&gt; studentExtractor,
-      Student loggedInStudent,
-      Supplier&lt;RuntimeException&gt; notFoundException) {
-<span class="fc bfc" id="L29" title="All 2 branches covered.">    if (!new HashSet&lt;&gt;(elements.stream().map(AvenirsBaseModel::getId).toList()).containsAll(ids)) {</span>
-<span class="fc" id="L30">      throw notFoundException.get();</span>
-    }
-
-<span class="fc" id="L33">    if (!elements.stream()</span>
-<span class="fc bfc" id="L34" title="All 2 branches covered.">        .allMatch(element -&gt; studentExtractor.apply(element).equals(loggedInStudent))) {</span>
-<span class="fc" id="L35">      throw new UserNotAuthorizedException();</span>
-    }
-<span class="fc" id="L37">  }</span>
-
-  static &lt;T extends AvenirsBaseModel&gt; T elementOf(
-      List&lt;T&gt; elements, UUID id, Supplier&lt;RuntimeException&gt; notFoundException) {
-<span class="fc" id="L41">    return elements.stream()</span>
-<span class="fc" id="L42">        .filter(element -&gt; element.getId().equals(id))</span>
-<span class="fc" id="L43">        .findAny()</span>
-<span class="fc" id="L44">        .orElseThrow(notFoundException);</span>
+<span class="fc" id="L11">    return associations.stream()</span>
+<span class="fc bfc" id="L12" title="All 2 branches covered.">        .filter(a -&gt; a.getAssociationType() == associationType)</span>
+<span class="fc" id="L13">        .map(associationType.idExtractorFor(clazz))</span>
+<span class="fc" id="L14">        .toList();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
