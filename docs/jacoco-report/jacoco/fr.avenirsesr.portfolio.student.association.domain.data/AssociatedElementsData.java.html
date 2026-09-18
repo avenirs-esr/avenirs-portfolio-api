@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AssociatedElementsData.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.student.association.domain.data</a> &gt; <span class="el_source">AssociatedElementsData.java</span></div><h1>AssociatedElementsData.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.student.association.domain.data;
+
+import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityAssociationData;
+import fr.avenirsesr.portfolio.student.experience.domain.data.DeclaredExperienceAssociationData;
+import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillAssociationData;
+import fr.avenirsesr.portfolio.student.trace.domain.data.TraceAssociationData;
+import java.util.List;
+import java.util.stream.Stream;
+
+<span class="fc" id="L10">public record AssociatedElementsData(</span>
+    List&lt;TraceAssociationData&gt; traceAssociations,
+    List&lt;DeclaredActivityAssociationData&gt; declaredActivityAssociations,
+    List&lt;DeclaredSkillAssociationData&gt; declaredSkillAssociations,
+    List&lt;DeclaredExperienceAssociationData&gt; declaredExperienceAssociations) {
+
+  public static AssociatedElementsData empty() {
+<span class="fc" id="L17">    return new AssociatedElementsData(List.of(), List.of(), List.of(), List.of());</span>
+  }
+
+  public static AssociatedElementsData ofTraces(List&lt;TraceAssociationData&gt; traceAssociations) {
+<span class="fc" id="L21">    return new AssociatedElementsData(traceAssociations, List.of(), List.of(), List.of());</span>
+  }
+
+  public static AssociatedElementsData ofDeclaredActivities(
+      List&lt;DeclaredActivityAssociationData&gt; declaredActivityAssociations) {
+<span class="fc" id="L26">    return new AssociatedElementsData(</span>
+<span class="fc" id="L27">        List.of(), declaredActivityAssociations, List.of(), List.of());</span>
+  }
+
+  public static AssociatedElementsData ofDeclaredSkills(
+      List&lt;DeclaredSkillAssociationData&gt; declaredSkillAssociations) {
+<span class="fc" id="L32">    return new AssociatedElementsData(List.of(), List.of(), declaredSkillAssociations, List.of());</span>
+  }
+
+  public static AssociatedElementsData ofDeclaredExperiences(
+      List&lt;DeclaredExperienceAssociationData&gt; declaredExperienceAssociations) {
+<span class="fc" id="L37">    return new AssociatedElementsData(</span>
+<span class="fc" id="L38">        List.of(), List.of(), List.of(), declaredExperienceAssociations);</span>
+  }
+
+  public AssociatedElementsData merge(AssociatedElementsData other) {
+<span class="fc" id="L42">    return new AssociatedElementsData(</span>
+<span class="fc" id="L43">        concat(traceAssociations, other.traceAssociations),</span>
+<span class="fc" id="L44">        concat(declaredActivityAssociations, other.declaredActivityAssociations),</span>
+<span class="fc" id="L45">        concat(declaredSkillAssociations, other.declaredSkillAssociations),</span>
+<span class="fc" id="L46">        concat(declaredExperienceAssociations, other.declaredExperienceAssociations));</span>
+  }
+
+  private static &lt;T&gt; List&lt;T&gt; concat(List&lt;T&gt; elements, List&lt;T&gt; otherElements) {
+<span class="fc" id="L50">    return Stream.concat(elements.stream(), otherElements.stream()).toList();</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

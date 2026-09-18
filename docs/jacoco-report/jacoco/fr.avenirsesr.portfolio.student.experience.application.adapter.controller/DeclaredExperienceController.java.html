@@ -4,14 +4,6 @@ import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsCreationRequest;
-import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsDeleteRequest;
-import fr.avenirsesr.portfolio.student.association.application.adapter.dto.AssociationSearchResultDeclaredExperienceDTO;
-import fr.avenirsesr.portfolio.student.association.application.adapter.dto.AssociationSearchResultTraceDTO;
-import fr.avenirsesr.portfolio.student.association.application.adapter.mapper.AssociationSearchResultDTOMapper;
-import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
-import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
-import fr.avenirsesr.portfolio.student.experience.application.adapter.dto.DeclaredExperienceAssociationsDTO;
 import fr.avenirsesr.portfolio.student.experience.application.adapter.dto.DeclaredExperienceRequest;
 import fr.avenirsesr.portfolio.student.experience.application.adapter.dto.DeclaredExperienceViewDTO;
 import fr.avenirsesr.portfolio.student.experience.application.adapter.mapper.DeclaredExperienceMapper;
@@ -24,7 +16,6 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import java.net.URI;
-import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -33,45 +24,44 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-<span class="fc" id="L36">@Slf4j</span>
+<span class="fc" id="L27">@Slf4j</span>
 @AllArgsConstructor
 @RestController
 @RequestMapping(&quot;/me/declared/experiences&quot;)
 public class DeclaredExperienceController {
   private final DeclaredExperienceService declaredExperienceService;
   private final DeclaredExperienceMapper declaredExperienceMapper;
-  private final AssociationSearchResultDTOMapper associationSearchResultDTOMapper;
 
   @PreAuthorize(&quot;hasAuthority('declared-experience:create:own')&quot;)
   @PostMapping(&quot;/&quot;)
   public ResponseEntity&lt;DeclaredExperienceViewDTO&gt; createDeclaredExperience(
       @Valid @RequestBody DeclaredExperienceRequest request) {
-<span class="fc" id="L49">    DeclaredExperience experience =</span>
-<span class="fc" id="L50">        declaredExperienceService.create(</span>
-<span class="fc" id="L51">            request.title(),</span>
-<span class="fc" id="L52">            request.experienceType(),</span>
-<span class="fc" id="L53">            request.organization(),</span>
-<span class="fc" id="L54">            request.activitySector(),</span>
-<span class="fc" id="L55">            request.location(),</span>
-<span class="fc" id="L56">            request.description(),</span>
-<span class="fc" id="L57">            request.sourceOfInformation(),</span>
-<span class="fc" id="L58">            request.summary(),</span>
-<span class="fc" id="L59">            request.externalLink(),</span>
-<span class="fc" id="L60">            request.result(),</span>
-<span class="fc" id="L61">            request.startDate(),</span>
-<span class="fc" id="L62">            request.endDate());</span>
+<span class="fc" id="L39">    DeclaredExperience experience =</span>
+<span class="fc" id="L40">        declaredExperienceService.create(</span>
+<span class="fc" id="L41">            request.title(),</span>
+<span class="fc" id="L42">            request.experienceType(),</span>
+<span class="fc" id="L43">            request.organization(),</span>
+<span class="fc" id="L44">            request.activitySector(),</span>
+<span class="fc" id="L45">            request.location(),</span>
+<span class="fc" id="L46">            request.description(),</span>
+<span class="fc" id="L47">            request.sourceOfInformation(),</span>
+<span class="fc" id="L48">            request.summary(),</span>
+<span class="fc" id="L49">            request.externalLink(),</span>
+<span class="fc" id="L50">            request.result(),</span>
+<span class="fc" id="L51">            request.startDate(),</span>
+<span class="fc" id="L52">            request.endDate());</span>
 
-<span class="fc" id="L64">    return ResponseEntity.created(URI.create(&quot;/me/declared/experiences/&quot; + experience.getId()))</span>
-<span class="fc" id="L65">        .body(declaredExperienceMapper.toDTO(experience));</span>
+<span class="fc" id="L54">    return ResponseEntity.created(URI.create(&quot;/me/declared/experiences/&quot; + experience.getId()))</span>
+<span class="fc" id="L55">        .body(declaredExperienceMapper.toDTO(experience));</span>
   }
 
   @PreAuthorize(&quot;hasAuthority('declared-experience:list:own')&quot;)
   @GetMapping(&quot;/{experienceId}&quot;)
   public ResponseEntity&lt;DeclaredExperienceViewDTO&gt; getDeclaredExperience(
       @Valid @PathVariable UUID experienceId) {
-<span class="fc" id="L72">    DeclaredExperience experience = declaredExperienceService.get(experienceId);</span>
+<span class="fc" id="L62">    DeclaredExperience experience = declaredExperienceService.get(experienceId);</span>
 
-<span class="fc" id="L74">    return ResponseEntity.ok(declaredExperienceMapper.toDTO(experience));</span>
+<span class="fc" id="L64">    return ResponseEntity.ok(declaredExperienceMapper.toDTO(experience));</span>
   }
 
   @PreAuthorize(&quot;hasAuthority('declared-experience:list:own')&quot;)
@@ -84,14 +74,14 @@ public class DeclaredExperienceController {
               array = @ArraySchema(schema = @Schema(ref = &quot;#/components/schemas/EExperienceType&quot;)))
           @RequestParam(required = false)
           List&lt;EExperienceType&gt; experienceTypes) {
-<span class="fc" id="L87">    PagedResult&lt;DeclaredExperienceData&gt; pagedExperiences =</span>
-<span class="fc" id="L88">        declaredExperienceService.getView(</span>
+<span class="fc" id="L77">    PagedResult&lt;DeclaredExperienceData&gt; pagedExperiences =</span>
+<span class="fc" id="L78">        declaredExperienceService.getView(</span>
             new PageCriteria(page, pageSize), isValorized, experienceTypes);
 
-<span class="fc" id="L91">    return ResponseEntity.ok(</span>
+<span class="fc" id="L81">    return ResponseEntity.ok(</span>
         new PagedResponse&lt;&gt;(
-<span class="fc" id="L93">            pagedExperiences.content().stream().map(declaredExperienceMapper::toDTO).toList(),</span>
-<span class="fc" id="L94">            PageInfoDTO.fromDomain(pagedExperiences.pageInfo())));</span>
+<span class="fc" id="L83">            pagedExperiences.content().stream().map(declaredExperienceMapper::toDTO).toList(),</span>
+<span class="fc" id="L84">            PageInfoDTO.fromDomain(pagedExperiences.pageInfo())));</span>
   }
 
   @PreAuthorize(&quot;hasAuthority('declared-experience:update:own')&quot;)
@@ -99,164 +89,31 @@ public class DeclaredExperienceController {
   public ResponseEntity&lt;DeclaredExperienceViewDTO&gt; updateDeclaredExperience(
       @Valid @PathVariable UUID experienceId,
       @Valid @RequestBody DeclaredExperienceRequest request) {
-<span class="fc" id="L102">    var experience =</span>
-<span class="fc" id="L103">        declaredExperienceService.update(</span>
+<span class="fc" id="L92">    var experience =</span>
+<span class="fc" id="L93">        declaredExperienceService.update(</span>
             experienceId,
-<span class="fc" id="L105">            request.title(),</span>
-<span class="fc" id="L106">            request.experienceType(),</span>
-<span class="fc" id="L107">            request.organization(),</span>
-<span class="fc" id="L108">            request.activitySector(),</span>
-<span class="fc" id="L109">            request.location(),</span>
-<span class="fc" id="L110">            request.description(),</span>
-<span class="fc" id="L111">            request.sourceOfInformation(),</span>
-<span class="fc" id="L112">            request.summary(),</span>
-<span class="fc" id="L113">            request.externalLink(),</span>
-<span class="fc" id="L114">            request.result(),</span>
-<span class="fc" id="L115">            request.startDate(),</span>
-<span class="fc" id="L116">            request.endDate(),</span>
-<span class="fc" id="L117">            Boolean.TRUE.equals(request.valorized()));</span>
+<span class="fc" id="L95">            request.title(),</span>
+<span class="fc" id="L96">            request.experienceType(),</span>
+<span class="fc" id="L97">            request.organization(),</span>
+<span class="fc" id="L98">            request.activitySector(),</span>
+<span class="fc" id="L99">            request.location(),</span>
+<span class="fc" id="L100">            request.description(),</span>
+<span class="fc" id="L101">            request.sourceOfInformation(),</span>
+<span class="fc" id="L102">            request.summary(),</span>
+<span class="fc" id="L103">            request.externalLink(),</span>
+<span class="fc" id="L104">            request.result(),</span>
+<span class="fc" id="L105">            request.startDate(),</span>
+<span class="fc" id="L106">            request.endDate(),</span>
+<span class="fc" id="L107">            Boolean.TRUE.equals(request.valorized()));</span>
 
-<span class="fc" id="L119">    return ResponseEntity.ok(declaredExperienceMapper.toDTO(experience));</span>
+<span class="fc" id="L109">    return ResponseEntity.ok(declaredExperienceMapper.toDTO(experience));</span>
   }
 
   @PreAuthorize(&quot;hasAuthority('declared-experience:delete:own')&quot;)
   @DeleteMapping(&quot;/&quot;)
   public ResponseEntity&lt;String&gt; deleteDeclaredExperiences(@RequestBody List&lt;UUID&gt; experienceIds) {
-<span class="fc" id="L125">    declaredExperienceService.delete(experienceIds);</span>
-<span class="fc" id="L126">    return ResponseEntity.ok(&quot;Declared experiences successfully deleted&quot;);</span>
-  }
-
-  @PreAuthorize(&quot;hasAuthority('declared-experience:list:own')&quot;)
-  @GetMapping(&quot;/search-for-association&quot;)
-  public ResponseEntity&lt;PagedResponse&lt;AssociationSearchResultDeclaredExperienceDTO&gt;&gt;
-      searchDeclaredExperiencesForAssociation(
-          Principal principal,
-          @RequestParam(required = false) UUID excludeAssociatedWithElementId,
-          @Parameter(schema = @Schema(ref = &quot;#/components/schemas/EAssociationContextType&quot;))
-              @RequestParam(required = false)
-              EAssociationContextType contextType,
-          @RequestParam(required = false) String keyword,
-          @RequestParam(required = false) Integer page,
-          @RequestParam(required = false) Integer pageSize) {
-<span class="nc" id="L141">    var pageCriteria = new PageCriteria(page, pageSize);</span>
-<span class="nc" id="L142">    log.debug(</span>
-        &quot;Received request to search declared experiences for association (contextType={},&quot;
-            + &quot; excludeAssociatedWithElementId={}) by student [{}] (keyword={}, page={},&quot;
-            + &quot; pageSize={})&quot;,
-        contextType,
-        excludeAssociatedWithElementId,
-<span class="nc" id="L148">        principal.getName(),</span>
-        keyword,
-<span class="nc" id="L150">        pageCriteria.page(),</span>
-<span class="nc" id="L151">        pageCriteria.pageSize());</span>
-
-<span class="nc" id="L153">    PagedResult&lt;AssociationSearchResultData&gt; pagedResult =</span>
-<span class="nc" id="L154">        declaredExperienceService.searchDeclaredExperiencesForAssociation(</span>
-            excludeAssociatedWithElementId, contextType, keyword, pageCriteria);
-
-<span class="nc" id="L157">    return ResponseEntity.ok(</span>
-        new PagedResponse&lt;&gt;(
-<span class="nc" id="L159">            pagedResult.content().stream()</span>
-<span class="nc" id="L160">                .map(associationSearchResultDTOMapper::toDeclaredExperienceDTO)</span>
-<span class="nc" id="L161">                .toList(),</span>
-<span class="nc" id="L162">            PageInfoDTO.fromDomain(pagedResult.pageInfo())));</span>
-  }
-
-  @PreAuthorize(&quot;hasAuthority('declared-experience:list:own')&quot;)
-  @GetMapping(&quot;/{experienceId}/associations&quot;)
-  public ResponseEntity&lt;DeclaredExperienceAssociationsDTO&gt; getDeclaredExperienceAssociations(
-      Principal principal, @PathVariable UUID experienceId) {
-<span class="fc" id="L169">    log.debug(</span>
-        &quot;Received request to get declared experience[{}] associations by student [{}]&quot;,
-        experienceId,
-<span class="fc" id="L172">        principal.getName());</span>
-
-<span class="fc" id="L174">    var associations = declaredExperienceService.getAssociations(experienceId);</span>
-
-<span class="fc" id="L176">    return ResponseEntity.ok(declaredExperienceMapper.toAssociationsDTO(associations));</span>
-  }
-
-  @PreAuthorize(&quot;hasAuthority('declared-experience:association:manage:own')&quot;)
-  @PostMapping(&quot;/{experienceId}/associate/declared-skills&quot;)
-  public ResponseEntity&lt;DeclaredExperienceAssociationsDTO&gt;
-      associateDeclaredExperienceWithDeclaredSkills(
-          Principal principal,
-          @Valid @PathVariable UUID experienceId,
-          @Valid @RequestBody AssociationsCreationRequest body) {
-<span class="fc" id="L186">    log.debug(</span>
-        &quot;Received request to associate declared experience [{}] with declared skills [{}] by&quot;
-            + &quot; student [{}]&quot;,
-        experienceId,
-<span class="fc" id="L190">        body.idsToAssociate(),</span>
-<span class="fc" id="L191">        principal.getName());</span>
-<span class="fc" id="L192">    var associations =</span>
-<span class="fc" id="L193">        declaredExperienceService.associateDeclaredExperienceWithDeclaredSkills(</span>
-<span class="fc" id="L194">            experienceId, body.idsToAssociate());</span>
-<span class="fc" id="L195">    return ResponseEntity.ok(declaredExperienceMapper.toAssociationsDTO(associations));</span>
-  }
-
-  @PreAuthorize(&quot;hasAuthority('declared-experience:association:manage:own')&quot;)
-  @PostMapping(&quot;/{experienceId}/associate/traces&quot;)
-  public ResponseEntity&lt;DeclaredExperienceAssociationsDTO&gt; associateDeclaredExperienceWithTraces(
-      Principal principal,
-      @Valid @PathVariable UUID experienceId,
-      @Valid @RequestBody AssociationsCreationRequest body) {
-<span class="fc" id="L204">    log.debug(</span>
-        &quot;Received request to associate declared experience [{}] with traces [{}] by student [{}]&quot;,
-        experienceId,
-<span class="fc" id="L207">        body.idsToAssociate(),</span>
-<span class="fc" id="L208">        principal.getName());</span>
-<span class="fc" id="L209">    var associations =</span>
-<span class="fc" id="L210">        declaredExperienceService.associateDeclaredExperienceWithTraces(</span>
-<span class="fc" id="L211">            experienceId, body.idsToAssociate());</span>
-<span class="fc" id="L212">    return ResponseEntity.ok(declaredExperienceMapper.toAssociationsDTO(associations));</span>
-  }
-
-  @PreAuthorize(&quot;hasAuthority('declared-experience:association:manage:own')&quot;)
-  @DeleteMapping(&quot;/{experienceId}/associations&quot;)
-  public ResponseEntity&lt;Void&gt; deleteDeclaredExperienceAssociations(
-      Principal principal,
-      @Valid @PathVariable UUID experienceId,
-      @Valid @RequestBody AssociationsDeleteRequest body) {
-<span class="fc" id="L221">    log.debug(</span>
-        &quot;Received request to delete declared experience [{}] associations for student [{}]&quot;,
-        experienceId,
-<span class="fc" id="L224">        principal.getName());</span>
-<span class="fc" id="L225">    declaredExperienceService.deleteAssociations(experienceId, body.idsToDelete());</span>
-<span class="fc" id="L226">    return ResponseEntity.noContent().build();</span>
-  }
-
-  @PreAuthorize(&quot;hasAuthority('trace:association:manage:own')&quot;)
-  @GetMapping(&quot;/{experienceId}/search-for-association/traces&quot;)
-  public ResponseEntity&lt;PagedResponse&lt;AssociationSearchResultTraceDTO&gt;&gt;
-      searchTracesForAssociationWithDeclaredExperience(
-          Principal principal,
-          @Valid @PathVariable UUID experienceId,
-          @RequestParam(required = false) Boolean isAssociated,
-          @RequestParam(required = false) String keyword,
-          @RequestParam(required = false) Integer page,
-          @RequestParam(required = false) Integer pageSize) {
-<span class="fc" id="L239">    var pageCriteria = new PageCriteria(page, pageSize);</span>
-<span class="fc" id="L240">    log.debug(</span>
-        &quot;Received request to search traces for association with declared experience [{}] by&quot;
-            + &quot; student [{}] (isAssociated={}, keyword={}, page={}, pageSize={})&quot;,
-        experienceId,
-<span class="fc" id="L244">        principal.getName(),</span>
-        isAssociated,
-        keyword,
-<span class="fc" id="L247">        pageCriteria.page(),</span>
-<span class="fc" id="L248">        pageCriteria.pageSize());</span>
-
-<span class="fc" id="L250">    PagedResult&lt;AssociationSearchResultData&gt; pagedResult =</span>
-<span class="fc" id="L251">        declaredExperienceService.searchTracesForAssociation(</span>
-            experienceId, keyword, pageCriteria, isAssociated);
-
-<span class="fc" id="L254">    return ResponseEntity.ok(</span>
-        new PagedResponse&lt;&gt;(
-<span class="fc" id="L256">            pagedResult.content().stream()</span>
-<span class="fc" id="L257">                .map(associationSearchResultDTOMapper::toTraceDTO)</span>
-<span class="fc" id="L258">                .toList(),</span>
-<span class="fc" id="L259">            PageInfoDTO.fromDomain(pagedResult.pageInfo())));</span>
+<span class="fc" id="L115">    declaredExperienceService.delete(experienceIds);</span>
+<span class="fc" id="L116">    return ResponseEntity.ok(&quot;Declared experiences successfully deleted&quot;);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

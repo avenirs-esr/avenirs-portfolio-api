@@ -5,7 +5,6 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.notification.domain.exception.NotificationNotFoundException;
 import fr.avenirsesr.portfolio.notification.domain.model.Notification;
-import fr.avenirsesr.portfolio.notification.domain.model.enums.ENotificationType;
 import fr.avenirsesr.portfolio.notification.domain.model.notification.BaseNotification;
 import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.notification.domain.port.output.repository.NotificationRepository;
@@ -16,7 +15,7 @@ import java.util.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-<span class="fc" id="L19">@Slf4j</span>
+<span class="fc" id="L18">@Slf4j</span>
 @AllArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
 
@@ -27,88 +26,83 @@ public class NotificationServiceImpl implements NotificationService {
 
   @Override
   public void notify(BaseNotification notification) {
-<span class="fc" id="L30">    notifyAll(List.of(notification));</span>
-<span class="fc" id="L31">  }</span>
+<span class="fc" id="L29">    notifyAll(List.of(notification));</span>
+<span class="fc" id="L30">  }</span>
 
   @Override
   public void notifyAll(List&lt;? extends BaseNotification&gt; notifications) {
-<span class="fc" id="L35">    var builtNotifications =</span>
-<span class="fc" id="L36">        notifications.stream()</span>
-<span class="fc" id="L37">            .map(BaseNotification::build)</span>
-<span class="fc" id="L38">            .filter(n -&gt; n.getUser().isNotificationEnabled())</span>
-<span class="fc" id="L39">            .toList();</span>
+<span class="fc" id="L34">    var builtNotifications =</span>
+<span class="fc" id="L35">        notifications.stream()</span>
+<span class="fc" id="L36">            .map(BaseNotification::build)</span>
+<span class="fc" id="L37">            .filter(n -&gt; n.getUser().isNotificationEnabled())</span>
+<span class="fc" id="L38">            .toList();</span>
 
-<span class="fc bfc" id="L41" title="All 2 branches covered.">    if (builtNotifications.isEmpty()) {</span>
-<span class="fc" id="L42">      return;</span>
+<span class="fc bfc" id="L40" title="All 2 branches covered.">    if (builtNotifications.isEmpty()) {</span>
+<span class="fc" id="L41">      return;</span>
     }
 
-<span class="fc" id="L45">    var savedNotifications = notificationRepository.saveAll(builtNotifications);</span>
+<span class="fc" id="L44">    var savedNotifications = notificationRepository.saveAll(builtNotifications);</span>
 
-<span class="fc" id="L47">    List&lt;UUID&gt; staffIds = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L48">    List&lt;UUID&gt; studentIds = new ArrayList&lt;&gt;();</span>
-<span class="fc bfc" id="L49" title="All 2 branches covered.">    for (var savedNotification : savedNotifications) {</span>
-<span class="fc" id="L50">      var userId = savedNotification.getUser().getId();</span>
-<span class="fc bfc" id="L51" title="All 3 branches covered.">      switch (savedNotification.getUserCategory()) {</span>
-<span class="fc" id="L52">        case STAFF -&gt; staffIds.add(userId);</span>
-<span class="fc" id="L53">        case STUDENT -&gt; studentIds.add(userId);</span>
+<span class="fc" id="L46">    List&lt;UUID&gt; staffIds = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L47">    List&lt;UUID&gt; studentIds = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L48" title="All 2 branches covered.">    for (var savedNotification : savedNotifications) {</span>
+<span class="fc" id="L49">      var userId = savedNotification.getUser().getId();</span>
+<span class="fc bfc" id="L50" title="All 3 branches covered.">      switch (savedNotification.getUserCategory()) {</span>
+<span class="fc" id="L51">        case STAFF -&gt; staffIds.add(userId);</span>
+<span class="fc" id="L52">        case STUDENT -&gt; studentIds.add(userId);</span>
         case null -&gt; {
-<span class="fc" id="L55">          staffIds.add(userId);</span>
-<span class="fc" id="L56">          studentIds.add(userId);</span>
+<span class="fc" id="L54">          staffIds.add(userId);</span>
+<span class="fc" id="L55">          studentIds.add(userId);</span>
         }
       }
-<span class="fc" id="L59">    }</span>
+<span class="fc" id="L58">    }</span>
 
-<span class="fc" id="L61">    setStaffUnseenNotification(staffIds, true);</span>
-<span class="fc" id="L62">    setStudentUnseenNotification(studentIds, true);</span>
+<span class="fc" id="L60">    setStaffUnseenNotification(staffIds, true);</span>
+<span class="fc" id="L61">    setStudentUnseenNotification(studentIds, true);</span>
 
-<span class="fc" id="L64">    log.debug(&quot;[{}] notification(s) created&quot;, savedNotifications.size());</span>
-<span class="fc" id="L65">  }</span>
+<span class="fc" id="L63">    log.debug(&quot;[{}] notification(s) created&quot;, savedNotifications.size());</span>
+<span class="fc" id="L64">  }</span>
 
   @Override
   public void markAsSeen(UUID id) {
-<span class="fc" id="L69">    log.debug(&quot;Marking notification [{}] as seen&quot;, id);</span>
-<span class="fc" id="L70">    Notification notification =</span>
-<span class="fc" id="L71">        notificationRepository.findById(id).orElseThrow(NotificationNotFoundException::new);</span>
-<span class="fc" id="L72">    notification.setSeen(true);</span>
-<span class="fc" id="L73">    notificationRepository.save(notification);</span>
-<span class="fc" id="L74">  }</span>
+<span class="fc" id="L68">    log.debug(&quot;Marking notification [{}] as seen&quot;, id);</span>
+<span class="fc" id="L69">    Notification notification =</span>
+<span class="fc" id="L70">        notificationRepository.findById(id).orElseThrow(NotificationNotFoundException::new);</span>
+<span class="fc" id="L71">    notification.setSeen(true);</span>
+<span class="fc" id="L72">    notificationRepository.save(notification);</span>
+<span class="fc" id="L73">  }</span>
 
   @Override
   public PagedResult&lt;Notification&gt; getNotifications(
       EUserCategory userCategory, PageCriteria pageCriteria) {
-<span class="fc" id="L79">    UUID userId = loggedInUserService.getLoggedInUser().getId();</span>
-<span class="fc" id="L80">    log.debug(&quot;Fetching notifications for user [{}] with category [{}]&quot;, userId, userCategory);</span>
+<span class="fc" id="L78">    UUID userId = loggedInUserService.getLoggedInUser().getId();</span>
+<span class="fc" id="L79">    log.debug(&quot;Fetching notifications for user [{}] with category [{}]&quot;, userId, userCategory);</span>
 
-<span class="pc bpc" id="L82" title="1 of 3 branches missed.">    switch (userCategory) {</span>
-<span class="fc" id="L83">      case STAFF -&gt; setStaffUnseenNotification(List.of(userId), false);</span>
-<span class="fc" id="L84">      case STUDENT -&gt; setStudentUnseenNotification(List.of(userId), false);</span>
-<span class="nc" id="L85">      default -&gt; throw new IllegalArgumentException(&quot;Invalid user category&quot;);</span>
+<span class="pc bpc" id="L81" title="1 of 3 branches missed.">    switch (userCategory) {</span>
+<span class="fc" id="L82">      case STAFF -&gt; setStaffUnseenNotification(List.of(userId), false);</span>
+<span class="fc" id="L83">      case STUDENT -&gt; setStudentUnseenNotification(List.of(userId), false);</span>
+<span class="nc" id="L84">      default -&gt; throw new IllegalArgumentException(&quot;Invalid user category&quot;);</span>
     }
 
-<span class="fc" id="L88">    return notificationRepository.findByUserAndCategory(userId, userCategory, pageCriteria);</span>
+<span class="fc" id="L87">    return notificationRepository.findByUserAndCategory(userId, userCategory, pageCriteria);</span>
   }
 
-  @Override
-  public void deleteNotificationsOf(ENotificationType type, UUID elementID) {
-<span class="fc" id="L93">    notificationRepository.deleteByTypeAndElementId(type, elementID);</span>
-<span class="fc" id="L94">  }</span>
-
   private void setStaffUnseenNotification(List&lt;UUID&gt; staffIds, boolean seen) {
-<span class="fc bfc" id="L97" title="All 2 branches covered.">    if (staffIds.isEmpty()) {</span>
-<span class="fc" id="L98">      return;</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">    if (staffIds.isEmpty()) {</span>
+<span class="fc" id="L92">      return;</span>
     }
-<span class="fc" id="L100">    var staff = staffRepository.findAllById(List.copyOf(staffIds));</span>
-<span class="fc" id="L101">    staff.forEach(s -&gt; s.setHasUnseenNotification(seen));</span>
-<span class="fc" id="L102">    staffRepository.saveAll(staff);</span>
-<span class="fc" id="L103">  }</span>
+<span class="fc" id="L94">    var staff = staffRepository.findAllById(List.copyOf(staffIds));</span>
+<span class="fc" id="L95">    staff.forEach(s -&gt; s.setHasUnseenNotification(seen));</span>
+<span class="fc" id="L96">    staffRepository.saveAll(staff);</span>
+<span class="fc" id="L97">  }</span>
 
   private void setStudentUnseenNotification(List&lt;UUID&gt; studentIds, boolean seen) {
-<span class="fc bfc" id="L106" title="All 2 branches covered.">    if (studentIds.isEmpty()) {</span>
-<span class="fc" id="L107">      return;</span>
+<span class="fc bfc" id="L100" title="All 2 branches covered.">    if (studentIds.isEmpty()) {</span>
+<span class="fc" id="L101">      return;</span>
     }
-<span class="fc" id="L109">    var students = studentRepository.findAllById(List.copyOf(studentIds));</span>
-<span class="fc" id="L110">    students.forEach(s -&gt; s.setHasUnseenNotification(seen));</span>
-<span class="fc" id="L111">    studentRepository.saveAll(students);</span>
-<span class="fc" id="L112">  }</span>
+<span class="fc" id="L103">    var students = studentRepository.findAllById(List.copyOf(studentIds));</span>
+<span class="fc" id="L104">    students.forEach(s -&gt; s.setHasUnseenNotification(seen));</span>
+<span class="fc" id="L105">    studentRepository.saveAll(students);</span>
+<span class="fc" id="L106">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
