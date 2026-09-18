@@ -9,7 +9,7 @@ import fr.avenirsesr.portfolio.student.association.domain.filter.AssociationSear
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
-import fr.avenirsesr.portfolio.student.association.domain.port.output.handler.AssociationContextHandler;
+import fr.avenirsesr.portfolio.student.association.domain.port.output.strategy.AssociationStrategy;
 import fr.avenirsesr.portfolio.student.association.domain.utils.AssociationUtils;
 import fr.avenirsesr.portfolio.student.experience.domain.data.DeclaredExperienceAssociationData;
 import fr.avenirsesr.portfolio.student.experience.domain.exception.DeclaredExperienceNotFoundException;
@@ -20,7 +20,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class DeclaredExperienceAssociationContextHandler implements AssociationContextHandler {
+public class DeclaredExperienceAssociationStrategy implements AssociationStrategy {
   private final DeclaredExperienceService declaredExperienceService;
   private final LoggedInUserService loggedInUserService;
 

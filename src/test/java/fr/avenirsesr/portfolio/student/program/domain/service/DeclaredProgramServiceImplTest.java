@@ -14,6 +14,7 @@ import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationExce
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.program.domain.exception.DeclaredProgramNotFoundException;
 import fr.avenirsesr.portfolio.student.program.domain.model.DeclaredProgram;
 import fr.avenirsesr.portfolio.student.program.domain.model.enums.EProgramStatus;
@@ -41,6 +42,7 @@ class DeclaredProgramServiceImplTest {
   @Mock private StudentService studentService;
   @Mock private DeclaredProgramRepository declaredProgramRepository;
   @Mock private LoggedInUserService loggedInUserService;
+  @Mock private AssociationService associationService;
 
   private DeclaredProgramServiceImpl declaredProgramService;
 
@@ -48,7 +50,7 @@ class DeclaredProgramServiceImplTest {
   void setup() {
     declaredProgramService =
         new DeclaredProgramServiceImpl(
-            studentService, declaredProgramRepository, loggedInUserService);
+            studentService, declaredProgramRepository, loggedInUserService, associationService);
   }
 
   @Nested
@@ -918,6 +920,7 @@ class DeclaredProgramServiceImplTest {
 
             verify(loggedInUserService).getLoggedInStudent();
             verify(declaredProgramRepository).findAllById(declaredProgramIds);
+            verify(associationService).deleteAllOf(declaredProgramIds, DeclaredProgram.class);
             verify(declaredProgramRepository).removeAllFromDatabase(programs);
           }
         }
@@ -948,6 +951,7 @@ class DeclaredProgramServiceImplTest {
 
             verify(loggedInUserService).getLoggedInStudent();
             verify(declaredProgramRepository).findAllById(declaredProgramIds);
+            verify(associationService, never()).deleteAllOf(any(), any());
             verify(declaredProgramRepository, never()).removeAllFromDatabase(any());
           }
         }
@@ -992,6 +996,45 @@ class DeclaredProgramServiceImplTest {
           verify(declaredProgramRepository, never()).findAllById(any());
           verify(declaredProgramRepository, never()).removeAllFromDatabase(any());
         }
+      }
+    }
+
+    @Nested
+    class WhenFindAllByIdsIsCalled {
+
+      @Test
+      void thenItShouldReturnTheDeclaredProgramsOfTheGivenIds() {
+        BddLogger.when("findAllByIds(List<UUID> declaredProgramIds) is called");
+        BddLogger.then("it should return the declared programs of the given ids");
+
+        var declaredProgramIds = List.of(UUID.randomUUID());
+        var declaredPrograms = List.of(mock(DeclaredProgram.class));
+
+        when(declaredProgramRepository.findAllById(declaredProgramIds))
+            .thenReturn(declaredPrograms);
+
+        assertEquals(declaredPrograms, declaredProgramService.findAllByIds(declaredProgramIds));
+      }
+    }
+
+    @Nested
+    class WhenSearchIsCalled {
+
+      @Test
+      void thenItShouldReturnTheMatchingDeclaredProgramsOfTheLoggedInStudent() {
+        BddLogger.when("search(String keyword, PageCriteria pageCriteria) is called");
+        BddLogger.then("it should return the matching declared programs of the logged in student");
+
+        var loggedStudent = mock(Student.class);
+        var pageCriteria = new PageCriteria(0, 10);
+        var expected =
+            new PagedResult<>(List.of(mock(DeclaredProgram.class)), new PageInfo(0, 10, 1));
+
+        when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedStudent);
+        when(declaredProgramRepository.findAllByStudent(loggedStudent, pageCriteria, "stage"))
+            .thenReturn(expected);
+
+        assertEquals(expected, declaredProgramService.search("stage", pageCriteria));
       }
     }
   }

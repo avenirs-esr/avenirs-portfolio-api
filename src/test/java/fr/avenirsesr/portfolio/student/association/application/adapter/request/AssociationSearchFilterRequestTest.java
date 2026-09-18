@@ -48,5 +48,7 @@ class AssociationSearchFilterRequestTest {
         .isEqualTo(AssociationSearchFilter.NONE);
     assertThat(request.toDomain(EAssociationContextType.DECLARED_EXPERIENCE))
         .isEqualTo(AssociationSearchFilter.NONE);
+    assertThat(request.toDomain(EAssociationContextType.DECLARED_PROGRAM))
+        .isEqualTo(AssociationSearchFilter.NONE);
   }
 }

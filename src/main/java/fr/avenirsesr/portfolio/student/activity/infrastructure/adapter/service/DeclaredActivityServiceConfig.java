@@ -7,10 +7,10 @@ import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivi
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.FeedbackService;
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.FeedbackRepository;
-import fr.avenirsesr.portfolio.student.activity.domain.service.DeclaredActivityAssociationContextHandler;
+import fr.avenirsesr.portfolio.student.activity.domain.service.DeclaredActivityAssociationStrategy;
 import fr.avenirsesr.portfolio.student.activity.domain.service.DeclaredActivityServiceImpl;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
-import fr.avenirsesr.portfolio.student.association.domain.port.output.handler.AssociationContextHandler;
+import fr.avenirsesr.portfolio.student.association.domain.port.output.strategy.AssociationStrategy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -43,9 +43,9 @@ public class DeclaredActivityServiceConfig {
   }
 
   @Bean
-  public AssociationContextHandler declaredActivityAssociationContextHandler(
+  public AssociationStrategy declaredActivityAssociationStrategy(
       DeclaredActivityService declaredActivityService) {
-    return new DeclaredActivityAssociationContextHandler(
+    return new DeclaredActivityAssociationStrategy(
         declaredActivityService, associationService, loggedInUserService);
   }
 }

@@ -17,14 +17,14 @@ import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
-import fr.avenirsesr.portfolio.student.association.domain.port.output.handler.AssociationContextHandler;
+import fr.avenirsesr.portfolio.student.association.domain.port.output.strategy.AssociationStrategy;
 import fr.avenirsesr.portfolio.student.association.domain.utils.AssociationUtils;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class DeclaredActivityAssociationContextHandler implements AssociationContextHandler {
+public class DeclaredActivityAssociationStrategy implements AssociationStrategy {
   private final DeclaredActivityService declaredActivityService;
   private final AssociationService associationService;
   private final LoggedInUserService loggedInUserService;

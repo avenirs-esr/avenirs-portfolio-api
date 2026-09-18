@@ -23,8 +23,8 @@ import fr.avenirsesr.portfolio.student.association.domain.filter.TraceAssociatio
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
-import fr.avenirsesr.portfolio.student.association.domain.port.output.handler.AssociationContextHandler;
 import fr.avenirsesr.portfolio.student.association.domain.port.output.repository.AssociationRepository;
+import fr.avenirsesr.portfolio.student.association.domain.port.output.strategy.AssociationStrategy;
 import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillAssociationData;
 import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
@@ -41,34 +41,34 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class AssociationServiceImplTest {
 
   @Mock private AssociationRepository associationRepository;
-  @Mock private AssociationContextHandler traceHandler;
-  @Mock private AssociationContextHandler declaredActivityHandler;
-  @Mock private AssociationContextHandler declaredSkillHandler;
-  @Mock private AssociationContextHandler declaredExperienceHandler;
+  @Mock private AssociationStrategy traceStrategy;
+  @Mock private AssociationStrategy declaredActivityStrategy;
+  @Mock private AssociationStrategy declaredSkillStrategy;
+  @Mock private AssociationStrategy declaredExperienceStrategy;
 
   private AssociationServiceImpl service;
 
   @BeforeEach
   void setUp() {
-    lenient().when(traceHandler.getContextType()).thenReturn(EAssociationContextType.TRACE);
+    lenient().when(traceStrategy.getContextType()).thenReturn(EAssociationContextType.TRACE);
     lenient()
-        .when(declaredActivityHandler.getContextType())
+        .when(declaredActivityStrategy.getContextType())
         .thenReturn(EAssociationContextType.DECLARED_ACTIVITY);
     lenient()
-        .when(declaredSkillHandler.getContextType())
+        .when(declaredSkillStrategy.getContextType())
         .thenReturn(EAssociationContextType.DECLARED_SKILL);
     lenient()
-        .when(declaredExperienceHandler.getContextType())
+        .when(declaredExperienceStrategy.getContextType())
         .thenReturn(EAssociationContextType.DECLARED_EXPERIENCE);
 
     service =
         new AssociationServiceImpl(
             associationRepository,
             List.of(
-                traceHandler,
-                declaredActivityHandler,
-                declaredSkillHandler,
-                declaredExperienceHandler));
+                traceStrategy,
+                declaredActivityStrategy,
+                declaredSkillStrategy,
+                declaredExperienceStrategy));
   }
 
   private static Association association(UUID id1, UUID id2, EAssociationType associationType) {
@@ -190,7 +190,7 @@ class AssociationServiceImplTest {
   }
 
   @Test
-  void getAllAssociatedElementsOf_should_merge_what_every_context_handler_returns() {
+  void getAllAssociatedElementsOf_should_merge_what_every_strategy_returns() {
     UUID traceId = UUID.randomUUID();
     UUID declaredActivityId = UUID.randomUUID();
     UUID declaredSkillProgressId = UUID.randomUUID();
@@ -206,7 +206,7 @@ class AssociationServiceImplTest {
     givenAssociationsOf(
         traceId, Trace.class, List.of(declaredActivityAssociation, declaredSkillAssociation));
 
-    when(declaredActivityHandler.toAssociatedElements(
+    when(declaredActivityStrategy.toAssociatedElements(
             List.of(declaredActivityAssociation), Trace.class, false))
         .thenReturn(
             AssociatedElementsData.ofDeclaredActivities(
@@ -215,7 +215,7 @@ class AssociationServiceImplTest {
                         declaredActivityAssociation.getId(),
                         declaredActivity,
                         EDeclaredActivityStatus.IN_PROGRESS))));
-    when(declaredSkillHandler.toAssociatedElements(
+    when(declaredSkillStrategy.toAssociatedElements(
             List.of(declaredSkillAssociation), Trace.class, false))
         .thenReturn(
             AssociatedElementsData.ofDeclaredSkills(
@@ -225,7 +225,7 @@ class AssociationServiceImplTest {
 
     var result = service.getAllAssociatedElementsOf(traceId, EAssociationContextType.TRACE, false);
 
-    verify(traceHandler).checkLoggedInStudentOwns(List.of(traceId));
+    verify(traceStrategy).checkLoggedInStudentOwns(List.of(traceId));
     assertThat(result.traceAssociations()).isEmpty();
     assertThat(result.declaredExperienceAssociations()).isEmpty();
     assertThat(result.declaredActivityAssociations())
@@ -241,7 +241,7 @@ class AssociationServiceImplTest {
   }
 
   @Test
-  void getAllAssociatedElementsOf_should_ask_the_handlers_for_the_not_completed_elements_only() {
+  void getAllAssociatedElementsOf_should_ask_the_strategies_for_the_not_completed_elements_only() {
     UUID traceId = UUID.randomUUID();
     UUID declaredActivityId = UUID.randomUUID();
 
@@ -249,18 +249,18 @@ class AssociationServiceImplTest {
         association(declaredActivityId, traceId, EAssociationType.DECLARED_ACTIVITY_TRACE);
 
     givenAssociationsOf(traceId, Trace.class, List.of(declaredActivityAssociation));
-    when(declaredActivityHandler.toAssociatedElements(
+    when(declaredActivityStrategy.toAssociatedElements(
             List.of(declaredActivityAssociation), Trace.class, true))
         .thenReturn(AssociatedElementsData.empty());
 
     service.getAllAssociatedElementsOf(traceId, EAssociationContextType.TRACE, true);
 
-    verify(declaredActivityHandler)
+    verify(declaredActivityStrategy)
         .toAssociatedElements(List.of(declaredActivityAssociation), Trace.class, true);
   }
 
   @Test
-  void getAllAssociatedElementsOf_should_not_call_any_handler_when_there_is_no_association() {
+  void getAllAssociatedElementsOf_should_not_call_any_strategy_when_there_is_no_association() {
     UUID traceId = UUID.randomUUID();
 
     givenAssociationsOf(traceId, Trace.class, List.of());
@@ -268,9 +268,10 @@ class AssociationServiceImplTest {
     var result = service.getAllAssociatedElementsOf(traceId, EAssociationContextType.TRACE, false);
 
     assertThat(result).isEqualTo(AssociatedElementsData.empty());
-    verify(declaredActivityHandler, never()).toAssociatedElements(anyList(), any(), anyBoolean());
-    verify(declaredSkillHandler, never()).toAssociatedElements(anyList(), any(), anyBoolean());
-    verify(declaredExperienceHandler, never()).toAssociatedElements(anyList(), any(), anyBoolean());
+    verify(declaredActivityStrategy, never()).toAssociatedElements(anyList(), any(), anyBoolean());
+    verify(declaredSkillStrategy, never()).toAssociatedElements(anyList(), any(), anyBoolean());
+    verify(declaredExperienceStrategy, never())
+        .toAssociatedElements(anyList(), any(), anyBoolean());
   }
 
   @Test
@@ -288,9 +289,9 @@ class AssociationServiceImplTest {
         EAssociationContextType.DECLARED_SKILL,
         List.of(declaredSkillProgressId));
 
-    verify(traceHandler)
+    verify(traceStrategy)
         .checkLoggedInStudentCanAssociate(traceId, EAssociationType.TRACE_DECLARED_SKILL, 1);
-    verify(declaredSkillHandler).checkLoggedInStudentOwns(List.of(declaredSkillProgressId));
+    verify(declaredSkillStrategy).checkLoggedInStudentOwns(List.of(declaredSkillProgressId));
     verify(associationRepository)
         .findAllIn(
             List.of(
@@ -336,7 +337,7 @@ class AssociationServiceImplTest {
         EAssociationContextType.DECLARED_SKILL,
         List.of(declaredSkillProgressId, declaredSkillProgressId));
 
-    verify(traceHandler)
+    verify(traceStrategy)
         .checkLoggedInStudentCanAssociate(traceId, EAssociationType.TRACE_DECLARED_SKILL, 1);
     verify(associationRepository)
         .findAllIn(
@@ -351,7 +352,7 @@ class AssociationServiceImplTest {
     UUID declaredSkillProgressId = UUID.randomUUID();
 
     doThrow(new UserNotAuthorizedException())
-        .when(declaredSkillHandler)
+        .when(declaredSkillStrategy)
         .checkLoggedInStudentOwns(List.of(declaredSkillProgressId));
 
     assertThatThrownBy(
@@ -400,10 +401,10 @@ class AssociationServiceImplTest {
     service.unassociate(
         traceId, EAssociationContextType.TRACE, List.of(declaredSkillAssociation.getId()));
 
-    verify(traceHandler).checkLoggedInStudentCanUnassociate(List.of(traceId));
-    verify(declaredSkillHandler)
+    verify(traceStrategy).checkLoggedInStudentCanUnassociate(List.of(traceId));
+    verify(declaredSkillStrategy)
         .checkLoggedInStudentCanUnassociate(List.of(declaredSkillProgressId));
-    verify(declaredExperienceHandler, never()).checkLoggedInStudentCanUnassociate(anyList());
+    verify(declaredExperienceStrategy, never()).checkLoggedInStudentCanUnassociate(anyList());
     verify(associationRepository).removeAllFromDatabase(List.of(declaredSkillAssociation));
   }
 
@@ -438,7 +439,7 @@ class AssociationServiceImplTest {
 
     givenAssociationsOf(traceId, Trace.class, List.of(declaredActivityAssociation));
     doThrow(new UserNotAuthorizedException())
-        .when(declaredActivityHandler)
+        .when(declaredActivityStrategy)
         .checkLoggedInStudentCanUnassociate(List.of(declaredActivityId));
 
     assertThatThrownBy(
@@ -469,7 +470,7 @@ class AssociationServiceImplTest {
                     associatedTraceId,
                     declaredSkillProgressId,
                     EAssociationType.TRACE_DECLARED_SKILL)));
-    when(traceHandler.search("kw", AssociationSearchFilter.NONE, pageCriteria))
+    when(traceStrategy.search("kw", AssociationSearchFilter.NONE, pageCriteria))
         .thenReturn(
             new PagedResult<>(
                 List.of(
@@ -486,7 +487,7 @@ class AssociationServiceImplTest {
             AssociationSearchFilter.NONE,
             pageCriteria);
 
-    verify(declaredSkillHandler).checkLoggedInStudentOwns(List.of(declaredSkillProgressId));
+    verify(declaredSkillStrategy).checkLoggedInStudentOwns(List.of(declaredSkillProgressId));
     assertThat(result.content())
         .containsExactly(
             new AssociationSearchResultData(associatedTraceId, "associated", null, true),
@@ -502,7 +503,7 @@ class AssociationServiceImplTest {
     when(associationRepository.findAllOf(
             traceId, Trace.class, List.of(EAssociationType.DECLARED_ACTIVITY_TRACE)))
         .thenReturn(List.of());
-    when(declaredActivityHandler.search("kw", AssociationSearchFilter.NONE, pageCriteria))
+    when(declaredActivityStrategy.search("kw", AssociationSearchFilter.NONE, pageCriteria))
         .thenReturn(
             new PagedResult<>(
                 List.of(
@@ -536,7 +537,7 @@ class AssociationServiceImplTest {
             DeclaredSkillProgress.class,
             List.of(EAssociationType.TRACE_DECLARED_SKILL)))
         .thenReturn(List.of());
-    when(traceHandler.search("kw", filter, pageCriteria))
+    when(traceStrategy.search("kw", filter, pageCriteria))
         .thenReturn(
             new PagedResult<>(
                 List.of(
@@ -580,7 +581,7 @@ class AssociationServiceImplTest {
     UUID declaredSkillProgressId = UUID.randomUUID();
     var pageCriteria = new PageCriteria(0, 10);
 
-    when(declaredSkillHandler.search("kw", AssociationSearchFilter.NONE, pageCriteria))
+    when(declaredSkillStrategy.search("kw", AssociationSearchFilter.NONE, pageCriteria))
         .thenReturn(
             new PagedResult<>(
                 List.of(
@@ -609,7 +610,7 @@ class AssociationServiceImplTest {
     UUID declaredActivityId = UUID.randomUUID();
     var pageCriteria = new PageCriteria(0, 10);
 
-    when(declaredActivityHandler.search(null, AssociationSearchFilter.NONE, pageCriteria))
+    when(declaredActivityStrategy.search(null, AssociationSearchFilter.NONE, pageCriteria))
         .thenReturn(
             new PagedResult<>(
                 List.of(
@@ -637,7 +638,7 @@ class AssociationServiceImplTest {
     var filter = new TraceAssociationSearchFilter(false);
     var pageCriteria = new PageCriteria(0, 10);
 
-    when(traceHandler.search("kw", filter, pageCriteria))
+    when(traceStrategy.search("kw", filter, pageCriteria))
         .thenReturn(
             new PagedResult<>(
                 List.of(
@@ -662,7 +663,7 @@ class AssociationServiceImplTest {
   void searchForAssociationWithNewElement_should_not_check_the_ownership_of_the_new_element() {
     var pageCriteria = new PageCriteria(0, 10);
 
-    when(traceHandler.search("kw", AssociationSearchFilter.NONE, pageCriteria))
+    when(traceStrategy.search("kw", AssociationSearchFilter.NONE, pageCriteria))
         .thenReturn(new PagedResult<>(List.of(), new PageInfo(0, 10, 0)));
 
     service.searchForAssociationWithNewElement(
@@ -672,7 +673,7 @@ class AssociationServiceImplTest {
         AssociationSearchFilter.NONE,
         pageCriteria);
 
-    verify(declaredSkillHandler, never()).checkLoggedInStudentOwns(anyList());
+    verify(declaredSkillStrategy, never()).checkLoggedInStudentOwns(anyList());
   }
 
   @Test
@@ -688,7 +689,7 @@ class AssociationServiceImplTest {
                     new PageCriteria(0, 10)))
         .isInstanceOf(WrongClassTypeArgumentException.class);
 
-    verify(declaredExperienceHandler, never()).search(any(), any(), any());
+    verify(declaredExperienceStrategy, never()).search(any(), any(), any());
     verifyNoInteractions(associationRepository);
   }
 }

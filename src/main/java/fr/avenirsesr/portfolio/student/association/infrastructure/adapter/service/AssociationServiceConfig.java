@@ -1,8 +1,8 @@
 package fr.avenirsesr.portfolio.student.association.infrastructure.adapter.service;
 
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
-import fr.avenirsesr.portfolio.student.association.domain.port.output.handler.AssociationContextHandler;
 import fr.avenirsesr.portfolio.student.association.domain.port.output.repository.AssociationRepository;
+import fr.avenirsesr.portfolio.student.association.domain.port.output.strategy.AssociationStrategy;
 import fr.avenirsesr.portfolio.student.association.domain.service.AssociationServiceImpl;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -16,8 +16,7 @@ public class AssociationServiceConfig {
   private final AssociationRepository associationRepository;
 
   @Bean
-  public AssociationService associationService(
-      @Lazy List<AssociationContextHandler> contextHandlers) {
-    return new AssociationServiceImpl(associationRepository, contextHandlers);
+  public AssociationService associationService(@Lazy List<AssociationStrategy> strategies) {
+    return new AssociationServiceImpl(associationRepository, strategies);
   }
 }

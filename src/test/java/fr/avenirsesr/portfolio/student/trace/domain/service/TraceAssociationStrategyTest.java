@@ -37,12 +37,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class TraceAssociationContextHandlerTest {
+class TraceAssociationStrategyTest {
 
   @Mock private TraceService traceService;
   @Mock private LoggedInUserService loggedInUserService;
 
-  @InjectMocks private TraceAssociationContextHandler handler;
+  @InjectMocks private TraceAssociationStrategy strategy;
 
   private Trace traceOf(UUID id, Student student) {
     var trace = mock(Trace.class);
@@ -54,7 +54,7 @@ class TraceAssociationContextHandlerTest {
 
   @Test
   void getContextType_should_return_the_trace_context() {
-    assertThat(handler.getContextType()).isEqualTo(EAssociationContextType.TRACE);
+    assertThat(strategy.getContextType()).isEqualTo(EAssociationContextType.TRACE);
   }
 
   @Test
@@ -63,7 +63,7 @@ class TraceAssociationContextHandlerTest {
 
     when(traceService.findAllTracesById(List.of(traceId))).thenReturn(List.of());
 
-    assertThatThrownBy(() -> handler.checkLoggedInStudentOwns(List.of(traceId)))
+    assertThatThrownBy(() -> strategy.checkLoggedInStudentOwns(List.of(traceId)))
         .isInstanceOf(TraceNotFoundException.class);
   }
 
@@ -76,7 +76,7 @@ class TraceAssociationContextHandlerTest {
     when(traceService.findAllTracesById(List.of(traceId))).thenReturn(List.of(trace));
     when(loggedInUserService.getLoggedInStudent()).thenReturn(StudentFixture.create().toModel());
 
-    assertThatThrownBy(() -> handler.checkLoggedInStudentOwns(List.of(traceId)))
+    assertThatThrownBy(() -> strategy.checkLoggedInStudentOwns(List.of(traceId)))
         .isInstanceOf(UserNotAuthorizedException.class);
   }
 
@@ -90,7 +90,7 @@ class TraceAssociationContextHandlerTest {
     when(traceService.findAllTracesById(List.of(traceId))).thenReturn(List.of(trace));
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
 
-    handler.checkLoggedInStudentCanAssociate(traceId, EAssociationType.TRACE_DECLARED_SKILL, 1);
+    strategy.checkLoggedInStudentCanAssociate(traceId, EAssociationType.TRACE_DECLARED_SKILL, 1);
   }
 
   private UUID givenTracesViewFilteredOn(Boolean isAssociated, PageCriteria pageCriteria) {
@@ -126,7 +126,7 @@ class TraceAssociationContextHandlerTest {
     var pageCriteria = new PageCriteria(0, 10);
     UUID traceId = givenTracesViewFilteredOn(null, pageCriteria);
 
-    var result = handler.search("kw", AssociationSearchFilter.NONE, pageCriteria);
+    var result = strategy.search("kw", AssociationSearchFilter.NONE, pageCriteria);
 
     assertThat(result.content())
         .containsExactly(new AssociationSearchResultData(traceId, "My trace", null, false));
@@ -137,7 +137,7 @@ class TraceAssociationContextHandlerTest {
     var pageCriteria = new PageCriteria(0, 10);
     UUID traceId = givenTracesViewFilteredOn(true, pageCriteria);
 
-    var result = handler.search("kw", new TraceAssociationSearchFilter(true), pageCriteria);
+    var result = strategy.search("kw", new TraceAssociationSearchFilter(true), pageCriteria);
 
     assertThat(result.content())
         .extracting(AssociationSearchResultData::id)
@@ -149,7 +149,7 @@ class TraceAssociationContextHandlerTest {
     var pageCriteria = new PageCriteria(0, 10);
     UUID traceId = givenTracesViewFilteredOn(false, pageCriteria);
 
-    var result = handler.search("kw", new TraceAssociationSearchFilter(false), pageCriteria);
+    var result = strategy.search("kw", new TraceAssociationSearchFilter(false), pageCriteria);
 
     assertThat(result.content())
         .extracting(AssociationSearchResultData::id)
@@ -161,7 +161,7 @@ class TraceAssociationContextHandlerTest {
     var pageCriteria = new PageCriteria(0, 10);
     UUID traceId = givenTracesViewFilteredOn(null, pageCriteria);
 
-    var result = handler.search("kw", new TraceAssociationSearchFilter(null), pageCriteria);
+    var result = strategy.search("kw", new TraceAssociationSearchFilter(null), pageCriteria);
 
     assertThat(result.content())
         .extracting(AssociationSearchResultData::id)
@@ -182,7 +182,7 @@ class TraceAssociationContextHandlerTest {
     when(traceService.findAllTracesById(List.of(traceId))).thenReturn(List.of(trace));
 
     var result =
-        handler.toAssociatedElements(List.of(association), DeclaredSkillProgress.class, false);
+        strategy.toAssociatedElements(List.of(association), DeclaredSkillProgress.class, false);
 
     assertThat(result.traceAssociations())
         .singleElement()
@@ -205,7 +205,7 @@ class TraceAssociationContextHandlerTest {
 
     assertThatThrownBy(
             () ->
-                handler.toAssociatedElements(
+                strategy.toAssociatedElements(
                     List.of(association), DeclaredSkillProgress.class, false))
         .isInstanceOf(TraceNotFoundException.class);
   }

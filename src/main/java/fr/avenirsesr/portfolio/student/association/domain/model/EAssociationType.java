@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.student.association.domain.model;
 import fr.avenirsesr.portfolio.common.error.domain.exception.WrongClassTypeArgumentException;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperience;
+import fr.avenirsesr.portfolio.student.program.domain.model.DeclaredProgram;
 import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import java.util.Arrays;
@@ -17,7 +18,8 @@ public enum EAssociationType {
   DECLARED_ACTIVITY_DECLARED_SKILL(DeclaredActivity.class, DeclaredSkillProgress.class),
   TRACE_DECLARED_SKILL(Trace.class, DeclaredSkillProgress.class),
   TRACE_DECLARED_EXPERIENCE(Trace.class, DeclaredExperience.class),
-  DECLARED_EXPERIENCE_DECLARED_SKILL(DeclaredExperience.class, DeclaredSkillProgress.class);
+  DECLARED_EXPERIENCE_DECLARED_SKILL(DeclaredExperience.class, DeclaredSkillProgress.class),
+  DECLARED_PROGRAM_DECLARED_SKILL(DeclaredProgram.class, DeclaredSkillProgress.class);
 
   private final Class<?> key1;
   private final Class<?> key2;
