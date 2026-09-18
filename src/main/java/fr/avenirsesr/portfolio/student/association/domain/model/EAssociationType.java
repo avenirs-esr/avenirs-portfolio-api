@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.student.association.domain.model;
 
+import fr.avenirsesr.portfolio.common.error.domain.exception.WrongClassTypeArgumentException;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
@@ -35,7 +36,7 @@ public enum EAssociationType {
         .findFirst()
         .orElseThrow(
             () ->
-                new IllegalArgumentException(
+                new WrongClassTypeArgumentException(
                     clazz.getSimpleName()
                         + " cannot be associated with "
                         + associatedClass.getSimpleName()));

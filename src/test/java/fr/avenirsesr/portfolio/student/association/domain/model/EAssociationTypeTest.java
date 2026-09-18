@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.student.association.domain.model;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import fr.avenirsesr.portfolio.common.error.domain.exception.WrongClassTypeArgumentException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
@@ -106,9 +107,9 @@ class EAssociationTypeTest {
 
     BddLogger.when("calling of");
 
-    BddLogger.then("it should throw IllegalArgumentException");
+    BddLogger.then("it should throw WrongClassTypeArgumentException");
     assertThrows(
-        IllegalArgumentException.class,
+        WrongClassTypeArgumentException.class,
         () -> EAssociationType.of(DeclaredExperience.class, DeclaredExperience.class));
   }
 }
