@@ -13,6 +13,7 @@ import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDraftCreationRequest;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDraftUpdateRequest;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDuplicationRequest;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import java.time.LocalDate;
@@ -2059,13 +2060,15 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       }
 
       @Test
-      void thenItShouldCreateANewDraftWithANewIdAndTheSameContent() throws Exception {
+      void thenItShouldCreateANewDraftWithANewIdAndTheProvidedTitle() throws Exception {
         BddLogger.and("given an existing published activity");
         UUID activityId = publishNewActivity("Activité à dupliquer");
 
-        BddLogger.then("it should create a draft with a new id holding the same content");
+        BddLogger.then(
+            "it should create a draft with a new id, the provided title, and the source's other"
+                + " content");
 
-        UUID duplicateId = duplicateActivityAsStaff(activityId);
+        UUID duplicateId = duplicateActivityAsStaff(activityId, "Copie de l'activité à dupliquer");
         assertNotEquals(activityId, duplicateId);
 
         webTestClient
@@ -2078,7 +2081,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             .isOk()
             .expectBody()
             .jsonPath("$.title")
-            .isEqualTo("Activité à dupliquer")
+            .isEqualTo("Copie de l'activité à dupliquer")
             .jsonPath("$.summary")
             .isEqualTo("Un résumé valide pour la publication")
             .jsonPath("$.description")
@@ -2092,7 +2095,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         BddLogger.and("given an existing published activity");
         UUID activityId = publishNewActivity("Activité dupliquée toujours publiée");
 
-        duplicateActivityAsStaff(activityId);
+        duplicateActivityAsStaff(activityId, "Copie de l'activité dupliquée toujours publiée");
 
         BddLogger.then("the source activity should still be PUBLISHED");
 
@@ -2136,11 +2139,17 @@ class ActivityControllerIT extends ContainerConfigurationTest {
 
         BddLogger.then("the draft should belong to the staff who asked for the duplication");
 
+        String requestBody =
+            objectMapper.writeValueAsString(
+                new ActivityDuplicationRequest("Copie par un autre personnel"));
+
         String body =
             webTestClient
                 .post()
                 .uri(DUPLICATE_PATH, activityId)
                 .headers(ActivityControllerIT.this::addStudentHeaders)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestBody)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
@@ -2183,8 +2192,8 @@ class ActivityControllerIT extends ContainerConfigurationTest {
 
         BddLogger.then("two successive duplications should each own a distinct banner");
 
-        UUID firstDuplicateId = duplicateActivityAsStaff(activityId);
-        UUID secondDuplicateId = duplicateActivityAsStaff(activityId);
+        UUID firstDuplicateId = duplicateActivityAsStaff(activityId, "Copie 1 avec bannière");
+        UUID secondDuplicateId = duplicateActivityAsStaff(activityId, "Copie 2 avec bannière");
 
         UUID firstBannerId = bannerIdOf("DRAFT", firstDuplicateId);
         UUID secondBannerId = bannerIdOf("DRAFT", secondDuplicateId);
@@ -2195,16 +2204,21 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       }
 
       @Test
-      void thenItShouldReturn404WhenActivityNotFound() {
+      void thenItShouldReturn404WhenActivityNotFound() throws Exception {
         BddLogger.and("given a non-existent activity id");
         UUID unknownId = UUID.randomUUID();
 
         BddLogger.then("it should return 404 with ACTIVITY_NOT_FOUND error code");
 
+        String requestBody =
+            objectMapper.writeValueAsString(new ActivityDuplicationRequest("Copie introuvable"));
+
         webTestClient
             .post()
             .uri(DUPLICATE_PATH, unknownId)
             .headers(ActivityControllerIT.this::addStaffHeaders)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(requestBody)
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus()
@@ -2221,10 +2235,15 @@ class ActivityControllerIT extends ContainerConfigurationTest {
 
         BddLogger.then("it should return 403 with ACCESS_DENIED error code");
 
+        String requestBody =
+            objectMapper.writeValueAsString(new ActivityDuplicationRequest("Copie refusée"));
+
         webTestClient
             .post()
             .uri(DUPLICATE_PATH, activityId)
             .headers(ActivityControllerIT.this::addSecondStudentHeaders)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(requestBody)
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus()
@@ -2235,13 +2254,19 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       }
 
       @Test
-      void thenItShouldReturn401WhenNotAuthenticated() {
+      void thenItShouldReturn401WhenNotAuthenticated() throws Exception {
         BddLogger.and("given a non-authenticated request");
         BddLogger.then("it should return 401");
+
+        String requestBody =
+            objectMapper.writeValueAsString(
+                new ActivityDuplicationRequest("Copie non authentifiée"));
 
         webTestClient
             .post()
             .uri(DUPLICATE_PATH, UUID.randomUUID())
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(requestBody)
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus()
@@ -2376,12 +2401,16 @@ class ActivityControllerIT extends ContainerConfigurationTest {
     return UUID.fromString(objectMapper.readTree(body).get("createdItemId").asText());
   }
 
-  private UUID duplicateActivityAsStaff(UUID activityId) throws Exception {
+  private UUID duplicateActivityAsStaff(UUID activityId, String title) throws Exception {
+    String requestBody = objectMapper.writeValueAsString(new ActivityDuplicationRequest(title));
+
     String body =
         webTestClient
             .post()
             .uri(DUPLICATE_PATH, activityId)
             .headers(this::addStaffHeaders)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(requestBody)
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus()

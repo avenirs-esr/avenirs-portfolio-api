@@ -14,6 +14,7 @@ import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.*;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.*;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDraftCreationRequest;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDraftUpdateRequest;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDuplicationRequest;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.response.ActivityDraftCreationResponse;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.response.ActivityDraftUpdateResponse;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityPresentationData;
@@ -255,13 +256,16 @@ public class ActivityController {
   @PreAuthorize("hasAuthority('activity:duplicate')")
   @PostMapping("/duplicate/{activityId}")
   public ResponseEntity<ActivityDraftCreationResponse> duplicateActivity(
-      Principal principal, @PathVariable UUID activityId) {
+      Principal principal,
+      @PathVariable UUID activityId,
+      @RequestBody ActivityDuplicationRequest body) {
     log.debug(
-        "Received request to duplicate activity [{}] by user [{}]",
+        "Received request to duplicate activity [{}] as [{}] by user [{}]",
         activityId,
+        body.title(),
         principal.getName());
 
-    var duplicate = activityService.duplicateActivity(activityId);
+    var duplicate = activityService.duplicateActivity(activityId, body.title());
     return ResponseEntity.ok(new ActivityDraftCreationResponse(duplicate.getId()));
   }
 

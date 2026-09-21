@@ -81,7 +81,7 @@ public interface ActivityService {
 
   ActivityDraft createDraftFromActivity(UUID activityId);
 
-  ActivityDraft duplicateActivity(UUID activityId);
+  ActivityDraft duplicateActivity(UUID activityId, String title);
 
   Boolean hasEnrolledStudents(ActivityDraft draft);
 

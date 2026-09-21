@@ -1,8 +1,29 @@
 package fr.avenirsesr.portfolio.activity.domain.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.TITLE_LENGTH;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
@@ -45,11 +66,18 @@ import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 class ActivityServiceImplTest {
 
@@ -2059,6 +2087,7 @@ class ActivityServiceImplTest {
       UUID activityId;
       Staff loggedInStaff;
       Staff originalAuthor;
+      String newTitle;
 
       @BeforeEach
       void setupWhen() {
@@ -2066,6 +2095,7 @@ class ActivityServiceImplTest {
         activityId = UUID.randomUUID();
         loggedInStaff = mock(Staff.class);
         originalAuthor = mock(Staff.class);
+        newTitle = "Copie de l'activité";
         when(loggedInUserService.getLoggedInStaff()).thenReturn(loggedInStaff);
       }
 
@@ -2087,7 +2117,7 @@ class ActivityServiceImplTest {
         void thenItShouldSaveANewDraftWithANewIdAndTheLoggedInStaffAsAuthor() {
           BddLogger.then("a brand new draft owned by the logged-in staff should be saved");
 
-          ActivityDraft result = activityService.duplicateActivity(activityId);
+          ActivityDraft result = activityService.duplicateActivity(activityId, newTitle);
 
           assertNotEquals(activityId, result.getId());
           assertEquals(loggedInStaff, result.getAuthor());
@@ -2095,12 +2125,21 @@ class ActivityServiceImplTest {
         }
 
         @Test
-        void thenItShouldCopyEveryActivityField() {
+        void thenItShouldUseTheProvidedTitleInsteadOfTheSourceOne() {
+          BddLogger.then("the draft should be titled with the caller-provided title");
+
+          ActivityDraft result = activityService.duplicateActivity(activityId, newTitle);
+
+          assertEquals(newTitle, result.getTitle());
+          assertNotEquals(activity.getTitle(), result.getTitle());
+        }
+
+        @Test
+        void thenItShouldCopyEveryFieldExceptTheTitle() {
           BddLogger.then("the draft should hold the same content as the source activity");
 
-          ActivityDraft result = activityService.duplicateActivity(activityId);
+          ActivityDraft result = activityService.duplicateActivity(activityId, newTitle);
 
-          assertEquals("Activité à dupliquer", result.getTitle());
           assertEquals(EActivityThematic.EXPERIENCES, result.getThematic().orElseThrow());
           assertEquals("Un résumé", result.getSummary().orElseThrow());
           assertEquals("<p>Une description</p>", result.getDescription().orElseThrow());
@@ -2118,7 +2157,7 @@ class ActivityServiceImplTest {
           BddLogger.then("the draft dates should be refreshed instead of copied");
 
           Instant beforeDuplication = Instant.now();
-          ActivityDraft result = activityService.duplicateActivity(activityId);
+          ActivityDraft result = activityService.duplicateActivity(activityId, newTitle);
 
           assertFalse(result.getCreatedAt().isBefore(beforeDuplication));
           assertFalse(result.getUpdatedAt().isBefore(beforeDuplication));
@@ -2128,7 +2167,7 @@ class ActivityServiceImplTest {
         void thenItShouldLeaveTheSourceActivityUntouched() {
           BddLogger.then("the source activity should stay published and never be saved");
 
-          activityService.duplicateActivity(activityId);
+          activityService.duplicateActivity(activityId, newTitle);
 
           assertEquals(EActivityStatus.PUBLISHED, activity.getStatus());
           verify(activityRepository, never()).save(any());
@@ -2139,7 +2178,7 @@ class ActivityServiceImplTest {
         void thenItShouldNotRequireTheLoggedInStaffToBeTheAuthor() {
           BddLogger.then("any staff should be allowed to duplicate the activity");
 
-          assertDoesNotThrow(() -> activityService.duplicateActivity(activityId));
+          assertDoesNotThrow(() -> activityService.duplicateActivity(activityId, newTitle));
         }
       }
 
@@ -2171,7 +2210,7 @@ class ActivityServiceImplTest {
         void thenItShouldCopyThemInsteadOfSharingTheSourceOnes() {
           BddLogger.then("the draft should reference copies instead of the source files");
 
-          ActivityDraft result = activityService.duplicateActivity(activityId);
+          ActivityDraft result = activityService.duplicateActivity(activityId, newTitle);
 
           assertEquals(copiedBanner, result.getBanner().orElseThrow());
           assertEquals(List.of(copiedAttachment), result.getFiles());
@@ -2194,10 +2233,44 @@ class ActivityServiceImplTest {
           BddLogger.then("the service should throw ActivityNotFoundException");
 
           assertThrows(
-              ActivityNotFoundException.class, () -> activityService.duplicateActivity(activityId));
+              ActivityNotFoundException.class,
+              () -> activityService.duplicateActivity(activityId, newTitle));
 
           verify(activityDraftRepository, never()).save(any());
           verifyNoInteractions(fileResourceService);
+        }
+      }
+
+      @Nested
+      class AndTheTitleIsInvalid {
+
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("the provided title is invalid");
+        }
+
+        @Test
+        void thenItShouldThrowFieldValidationExceptionWhenTitleIsBlank() {
+          BddLogger.then("the service should throw FieldValidationException");
+
+          assertThrows(
+              FieldValidationException.class,
+              () -> activityService.duplicateActivity(activityId, " "));
+
+          verifyNoInteractions(activityRepository, activityDraftRepository, fileResourceService);
+        }
+
+        @Test
+        void thenItShouldThrowFieldValidationExceptionWhenTitleExceedsMaxLength() {
+          BddLogger.then("the service should throw FieldValidationException");
+
+          String tooLong = "a".repeat(TITLE_LENGTH + 1);
+
+          assertThrows(
+              FieldValidationException.class,
+              () -> activityService.duplicateActivity(activityId, tooLong));
+
+          verifyNoInteractions(activityRepository, activityDraftRepository, fileResourceService);
         }
       }
 
@@ -2220,7 +2293,7 @@ class ActivityServiceImplTest {
         void thenItShouldSaveANewDraftWithANewIdAndTheLoggedInStaffAsAuthor() {
           BddLogger.then("a brand new draft owned by the logged-in staff should be saved");
 
-          ActivityDraft result = activityService.duplicateActivity(activityId);
+          ActivityDraft result = activityService.duplicateActivity(activityId, newTitle);
 
           assertNotEquals(activityId, result.getId());
           assertEquals(loggedInStaff, result.getAuthor());
@@ -2228,12 +2301,21 @@ class ActivityServiceImplTest {
         }
 
         @Test
-        void thenItShouldCopyEveryDraftField() {
+        void thenItShouldUseTheProvidedTitleInsteadOfTheSourceOne() {
+          BddLogger.then("the new draft should be titled with the caller-provided title");
+
+          ActivityDraft result = activityService.duplicateActivity(activityId, newTitle);
+
+          assertEquals(newTitle, result.getTitle());
+          assertNotEquals(sourceDraft.getTitle(), result.getTitle());
+        }
+
+        @Test
+        void thenItShouldCopyEveryFieldExceptTheTitle() {
           BddLogger.then("the new draft should hold the same content as the source draft");
 
-          ActivityDraft result = activityService.duplicateActivity(activityId);
+          ActivityDraft result = activityService.duplicateActivity(activityId, newTitle);
 
-          assertEquals("Brouillon à dupliquer", result.getTitle());
           assertEquals(EActivityThematic.EXPERIENCES, result.getThematic().orElseThrow());
           assertEquals("Un résumé", result.getSummary().orElseThrow());
           assertEquals("<p>Une description</p>", result.getDescription().orElseThrow());
@@ -2251,7 +2333,7 @@ class ActivityServiceImplTest {
           BddLogger.then("the draft dates should be refreshed instead of copied");
 
           Instant beforeDuplication = Instant.now();
-          ActivityDraft result = activityService.duplicateActivity(activityId);
+          ActivityDraft result = activityService.duplicateActivity(activityId, newTitle);
 
           assertFalse(result.getCreatedAt().isBefore(beforeDuplication));
           assertFalse(result.getUpdatedAt().isBefore(beforeDuplication));
@@ -2261,7 +2343,7 @@ class ActivityServiceImplTest {
         void thenItShouldLeaveTheSourceDraftUntouched() {
           BddLogger.then("the source draft should never be modified or saved again");
 
-          activityService.duplicateActivity(activityId);
+          activityService.duplicateActivity(activityId, newTitle);
 
           verify(activityDraftRepository, never()).save(sourceDraft);
           verify(activityDraftRepository, never()).removeFromDatabase(any());
@@ -2271,7 +2353,7 @@ class ActivityServiceImplTest {
         void thenItShouldNotRequireTheLoggedInStaffToBeTheAuthor() {
           BddLogger.then("any staff should be allowed to duplicate the draft");
 
-          assertDoesNotThrow(() -> activityService.duplicateActivity(activityId));
+          assertDoesNotThrow(() -> activityService.duplicateActivity(activityId, newTitle));
         }
 
         @Nested
@@ -2300,7 +2382,7 @@ class ActivityServiceImplTest {
           void thenItShouldCopyThemInsteadOfSharingTheSourceOnes() {
             BddLogger.then("the new draft should reference copies instead of the source files");
 
-            ActivityDraft result = activityService.duplicateActivity(activityId);
+            ActivityDraft result = activityService.duplicateActivity(activityId, newTitle);
 
             assertEquals(copiedBanner, result.getBanner().orElseThrow());
             assertEquals(List.of(copiedAttachment), result.getFiles());
