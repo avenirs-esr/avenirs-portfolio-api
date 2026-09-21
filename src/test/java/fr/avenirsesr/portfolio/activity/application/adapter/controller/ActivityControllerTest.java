@@ -34,6 +34,7 @@ import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.Activit
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityFeedbacksPreviewMapper;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityOverviewDtoMapper;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityStaffOverviewDtoMapper;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDuplicationRequest;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.response.ActivityDraftCreationResponse;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityStaffOverviewData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityWithStudentStatusData;
@@ -893,22 +894,39 @@ class ActivityControllerTest {
 
   @Test
   void shouldDuplicateActivityAndReturnTheNewDraftId() {
-    BddLogger.given("an existing activity");
+    BddLogger.given("an existing activity and a title for the duplicate");
     UUID activityId = UUID.randomUUID();
     UUID duplicateId = UUID.randomUUID();
+    String title = "Copie de l'activité";
     ActivityDraft duplicate = mock(ActivityDraft.class);
     when(duplicate.getId()).thenReturn(duplicateId);
-    when(activityService.duplicateActivity(activityId)).thenReturn(duplicate);
+    when(activityService.duplicateActivity(activityId, title)).thenReturn(duplicate);
 
-    BddLogger.when("duplicating that activity");
+    BddLogger.when("duplicating that activity with a new title");
     ResponseEntity<ActivityDraftCreationResponse> response =
-        controller.duplicateActivity(principal, activityId);
+        controller.duplicateActivity(principal, activityId, new ActivityDuplicationRequest(title));
 
     BddLogger.then("it should return the id of the newly created draft");
     assertEquals(200, response.getStatusCode().value());
     assertNotNull(response.getBody());
     assertEquals(duplicateId, response.getBody().draftId());
     assertNotEquals(activityId, response.getBody().draftId());
+  }
+
+  @Test
+  void shouldForwardTheProvidedTitleToTheService() {
+    BddLogger.given("an existing activity and a title for the duplicate");
+    UUID activityId = UUID.randomUUID();
+    ActivityDraft duplicate = mock(ActivityDraft.class);
+    when(activityService.duplicateActivity(eq(activityId), eq("Nouveau titre")))
+        .thenReturn(duplicate);
+
+    BddLogger.when("duplicating that activity");
+    controller.duplicateActivity(
+        principal, activityId, new ActivityDuplicationRequest("Nouveau titre"));
+
+    BddLogger.then("the title from the request body should be forwarded to the service");
+    verify(activityService).duplicateActivity(activityId, "Nouveau titre");
   }
 
   private HttpServletRequest createMockRequest() {

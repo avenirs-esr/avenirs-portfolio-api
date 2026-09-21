@@ -567,27 +567,29 @@ public class ActivityServiceImpl implements ActivityService {
   }
 
   @Override
-  public ActivityDraft duplicateActivity(UUID activityId) {
+  public ActivityDraft duplicateActivity(UUID activityId, String title) {
     var staff = loggedInUserService.getLoggedInStaff();
-    var now = Instant.now();
+    requireNotBlankAndMaxLength("title", title, TITLE_LENGTH);
 
+    var now = Instant.now();
     var publishedSource = activityRepository.findById(activityId);
+
     if (publishedSource.isPresent()) {
-      return saveDuplicateFrom(publishedSource.get(), staff, now);
+      return saveDuplicateFrom(publishedSource.get(), staff, title, now);
     }
 
     var draftSource =
         activityDraftRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);
-    return saveDuplicateFrom(draftSource, staff, now);
+    return saveDuplicateFrom(draftSource, staff, title, now);
   }
 
-  private ActivityDraft saveDuplicateFrom(Activity source, Staff staff, Instant now) {
+  private ActivityDraft saveDuplicateFrom(Activity source, Staff staff, String title, Instant now) {
     var duplicate =
         ActivityDraft.toDomain(
             UUID.randomUUID(),
             now,
             now,
-            source.getTitle(),
+            title,
             staff,
             source.getThematic(),
             source.getSummary(),
@@ -606,13 +608,14 @@ public class ActivityServiceImpl implements ActivityService {
     return activityDraftRepository.save(duplicate);
   }
 
-  private ActivityDraft saveDuplicateFrom(ActivityDraft source, Staff staff, Instant now) {
+  private ActivityDraft saveDuplicateFrom(
+      ActivityDraft source, Staff staff, String title, Instant now) {
     var duplicate =
         ActivityDraft.toDomain(
             UUID.randomUUID(),
             now,
             now,
-            source.getTitle(),
+            title,
             staff,
             source.getThematic().orElse(null),
             source.getSummary().orElse(null),
