@@ -15,8 +15,8 @@ import org.springframework.data.jpa.domain.Specification;
 
 <span class="nc" id="L16">public class TraceSpecification {</span>
   public static Specification&lt;TraceEntity&gt; unassociated() {
-<span class="nc" id="L18">    return (root, query, criteriaBuilder) -&gt;</span>
-<span class="nc" id="L19">        criteriaBuilder.not(associated().toPredicate(root, query, criteriaBuilder));</span>
+<span class="fc" id="L18">    return (root, query, criteriaBuilder) -&gt;</span>
+<span class="fc" id="L19">        criteriaBuilder.not(associated().toPredicate(root, query, criteriaBuilder));</span>
   }
 
   public static Specification&lt;TraceEntity&gt; associated() {

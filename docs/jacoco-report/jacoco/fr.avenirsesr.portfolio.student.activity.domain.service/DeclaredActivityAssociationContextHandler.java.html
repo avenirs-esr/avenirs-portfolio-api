@@ -12,6 +12,7 @@ import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivi
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociatedElementsData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.exception.MaximumAssociationReachedException;
+import fr.avenirsesr.portfolio.student.association.domain.filter.AssociationSearchFilter;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
@@ -30,111 +31,111 @@ public class DeclaredActivityAssociationContextHandler implements AssociationCon
 
   @Override
   public EAssociationContextType getContextType() {
-<span class="fc" id="L33">    return EAssociationContextType.DECLARED_ACTIVITY;</span>
+<span class="fc" id="L34">    return EAssociationContextType.DECLARED_ACTIVITY;</span>
   }
 
   @Override
   public void checkLoggedInStudentOwns(List&lt;UUID&gt; elementIds) {
-<span class="fc" id="L38">    fetchAndCheckOwnership(elementIds);</span>
-<span class="fc" id="L39">  }</span>
+<span class="fc" id="L39">    fetchAndCheckOwnership(elementIds);</span>
+<span class="fc" id="L40">  }</span>
 
   @Override
   public void checkLoggedInStudentCanAssociate(
       UUID elementId, EAssociationType associationType, int associationsToAdd) {
-<span class="fc" id="L44">    var declaredActivity = fetchAndCheckOwnership(List.of(elementId)).getFirst();</span>
+<span class="fc" id="L45">    var declaredActivity = fetchAndCheckOwnership(List.of(elementId)).getFirst();</span>
 
-<span class="fc bfc" id="L46" title="All 2 branches covered.">    if (declaredActivity.isUnsubscribed()) {</span>
-<span class="fc" id="L47">      throw new DeclaredActivityUnsubscribedException();</span>
+<span class="fc bfc" id="L47" title="All 2 branches covered.">    if (declaredActivity.isUnsubscribed()) {</span>
+<span class="fc" id="L48">      throw new DeclaredActivityUnsubscribedException();</span>
     }
 
-<span class="fc bfc" id="L50" title="All 2 branches covered.">    if (associationType == EAssociationType.DECLARED_ACTIVITY_TRACE) {</span>
-<span class="fc" id="L51">      checkMaximumAllowedTraceAssociations(declaredActivity, associationsToAdd);</span>
+<span class="fc bfc" id="L51" title="All 2 branches covered.">    if (associationType == EAssociationType.DECLARED_ACTIVITY_TRACE) {</span>
+<span class="fc" id="L52">      checkMaximumAllowedTraceAssociations(declaredActivity, associationsToAdd);</span>
     }
-<span class="fc" id="L53">  }</span>
+<span class="fc" id="L54">  }</span>
 
   @Override
   public void checkLoggedInStudentCanUnassociate(List&lt;UUID&gt; elementIds) {
-<span class="fc" id="L57">    if (fetchAndCheckOwnership(elementIds).stream()</span>
-<span class="fc bfc" id="L58" title="All 2 branches covered.">        .anyMatch(declaredActivity -&gt; declaredActivity.getFinishedAt().isPresent())) {</span>
-<span class="fc" id="L59">      throw new DeclaredActivityAlreadyFinishedException();</span>
+<span class="fc" id="L58">    if (fetchAndCheckOwnership(elementIds).stream()</span>
+<span class="fc bfc" id="L59" title="All 2 branches covered.">        .anyMatch(declaredActivity -&gt; declaredActivity.getFinishedAt().isPresent())) {</span>
+<span class="fc" id="L60">      throw new DeclaredActivityAlreadyFinishedException();</span>
     }
-<span class="fc" id="L61">  }</span>
+<span class="fc" id="L62">  }</span>
 
   @Override
   public PagedResult&lt;AssociationSearchResultData&gt; search(
-      String keyword, PageCriteria pageCriteria) {
-<span class="fc" id="L66">    var declaredActivities = declaredActivityService.searchDeclaredActivity(keyword, pageCriteria);</span>
+      String keyword, AssociationSearchFilter filter, PageCriteria pageCriteria) {
+<span class="fc" id="L67">    var declaredActivities = declaredActivityService.searchDeclaredActivity(keyword, pageCriteria);</span>
 
-<span class="fc" id="L68">    return new PagedResult&lt;&gt;(</span>
-<span class="fc" id="L69">        declaredActivities.content().stream()</span>
-<span class="fc" id="L70">            .map(</span>
+<span class="fc" id="L69">    return new PagedResult&lt;&gt;(</span>
+<span class="fc" id="L70">        declaredActivities.content().stream()</span>
+<span class="fc" id="L71">            .map(</span>
                 declaredActivity -&gt;
-<span class="fc" id="L72">                    new AssociationSearchResultData(</span>
-<span class="fc" id="L73">                        declaredActivity.getId(),</span>
-<span class="fc" id="L74">                        declaredActivity.getActivity().getTitle(),</span>
-<span class="fc" id="L75">                        declaredActivity.getActivity().getThematic().name(),</span>
-<span class="fc" id="L76">                        declaredActivity.getFinishedAt().isPresent()))</span>
-<span class="fc" id="L77">            .toList(),</span>
-<span class="fc" id="L78">        declaredActivities.pageInfo());</span>
+<span class="fc" id="L73">                    new AssociationSearchResultData(</span>
+<span class="fc" id="L74">                        declaredActivity.getId(),</span>
+<span class="fc" id="L75">                        declaredActivity.getActivity().getTitle(),</span>
+<span class="fc" id="L76">                        declaredActivity.getActivity().getThematic().name(),</span>
+<span class="fc" id="L77">                        declaredActivity.getFinishedAt().isPresent()))</span>
+<span class="fc" id="L78">            .toList(),</span>
+<span class="fc" id="L79">        declaredActivities.pageInfo());</span>
   }
 
   @Override
   public AssociatedElementsData toAssociatedElements(
       List&lt;Association&gt; associations, Class&lt;?&gt; subjectClass, boolean onlyNotCompleted) {
-<span class="fc" id="L84">    var ids =</span>
-<span class="fc" id="L85">        associations.stream().map(association -&gt; association.associatedIdOf(subjectClass)).toList();</span>
+<span class="fc" id="L85">    var ids =</span>
+<span class="fc" id="L86">        associations.stream().map(association -&gt; association.associatedIdOf(subjectClass)).toList();</span>
     var declaredActivities =
-<span class="fc bfc" id="L87" title="All 2 branches covered.">        onlyNotCompleted</span>
-<span class="fc" id="L88">            ? declaredActivityService.findAllNotCompletedActivitiesByIds(ids)</span>
-<span class="fc" id="L89">            : declaredActivityService.findAllDeclaredActivitiesByIds(ids);</span>
-<span class="fc" id="L90">    var statuses = declaredActivityService.getDeclaredActivityStatus(declaredActivities);</span>
+<span class="fc bfc" id="L88" title="All 2 branches covered.">        onlyNotCompleted</span>
+<span class="fc" id="L89">            ? declaredActivityService.findAllNotCompletedActivitiesByIds(ids)</span>
+<span class="fc" id="L90">            : declaredActivityService.findAllDeclaredActivitiesByIds(ids);</span>
+<span class="fc" id="L91">    var statuses = declaredActivityService.getDeclaredActivityStatus(declaredActivities);</span>
 
-<span class="fc" id="L92">    return AssociatedElementsData.ofDeclaredActivities(</span>
-<span class="fc" id="L93">        associations.stream()</span>
-<span class="fc" id="L94">            .map(</span>
+<span class="fc" id="L93">    return AssociatedElementsData.ofDeclaredActivities(</span>
+<span class="fc" id="L94">        associations.stream()</span>
+<span class="fc" id="L95">            .map(</span>
                 association -&gt; {
-<span class="fc" id="L96">                  var declaredActivity =</span>
-<span class="fc" id="L97">                      AssociationUtils.elementOf(</span>
+<span class="fc" id="L97">                  var declaredActivity =</span>
+<span class="fc" id="L98">                      AssociationUtils.elementOf(</span>
                           declaredActivities,
-<span class="fc" id="L99">                          association.associatedIdOf(subjectClass),</span>
+<span class="fc" id="L100">                          association.associatedIdOf(subjectClass),</span>
                           DeclaredActivityNotFoundException::new);
 
-<span class="fc" id="L102">                  return new DeclaredActivityAssociationData(</span>
-<span class="fc" id="L103">                      association.getId(), declaredActivity, statuses.get(declaredActivity));</span>
+<span class="fc" id="L103">                  return new DeclaredActivityAssociationData(</span>
+<span class="fc" id="L104">                      association.getId(), declaredActivity, statuses.get(declaredActivity));</span>
                 })
-<span class="fc" id="L105">            .toList());</span>
+<span class="fc" id="L106">            .toList());</span>
   }
 
   private void checkMaximumAllowedTraceAssociations(
       DeclaredActivity declaredActivity, int associationsToAdd) {
-<span class="fc" id="L110">    var allowedAssociations = declaredActivity.getActivity().getTraceAllowedAssociations();</span>
+<span class="fc" id="L111">    var allowedAssociations = declaredActivity.getActivity().getTraceAllowedAssociations();</span>
 
-<span class="fc bfc" id="L112" title="All 2 branches covered.">    if (allowedAssociations == -1) {</span>
-<span class="fc" id="L113">      return;</span>
+<span class="fc bfc" id="L113" title="All 2 branches covered.">    if (allowedAssociations == -1) {</span>
+<span class="fc" id="L114">      return;</span>
     }
 
-<span class="fc" id="L116">    var traceAssociations =</span>
-<span class="fc" id="L117">        associationService.getAllOf(</span>
-<span class="fc" id="L118">            declaredActivity.getId(),</span>
+<span class="fc" id="L117">    var traceAssociations =</span>
+<span class="fc" id="L118">        associationService.getAllOf(</span>
+<span class="fc" id="L119">            declaredActivity.getId(),</span>
             DeclaredActivity.class,
-<span class="fc" id="L120">            List.of(EAssociationType.DECLARED_ACTIVITY_TRACE));</span>
+<span class="fc" id="L121">            List.of(EAssociationType.DECLARED_ACTIVITY_TRACE));</span>
 
-<span class="pc bpc" id="L122" title="1 of 2 branches missed.">    if (traceAssociations.size() + associationsToAdd &gt; allowedAssociations) {</span>
-<span class="fc" id="L123">      throw new MaximumAssociationReachedException();</span>
+<span class="pc bpc" id="L123" title="1 of 2 branches missed.">    if (traceAssociations.size() + associationsToAdd &gt; allowedAssociations) {</span>
+<span class="fc" id="L124">      throw new MaximumAssociationReachedException();</span>
     }
-<span class="nc" id="L125">  }</span>
+<span class="nc" id="L126">  }</span>
 
   private List&lt;DeclaredActivity&gt; fetchAndCheckOwnership(List&lt;UUID&gt; elementIds) {
-<span class="fc" id="L128">    var declaredActivities = declaredActivityService.findAllDeclaredActivitiesByIds(elementIds);</span>
+<span class="fc" id="L129">    var declaredActivities = declaredActivityService.findAllDeclaredActivitiesByIds(elementIds);</span>
 
-<span class="fc" id="L130">    AssociationUtils.checkOwnership(</span>
+<span class="fc" id="L131">    AssociationUtils.checkOwnership(</span>
         elementIds,
         declaredActivities,
         DeclaredActivity::getStudent,
-<span class="fc" id="L134">        loggedInUserService.getLoggedInStudent(),</span>
+<span class="fc" id="L135">        loggedInUserService.getLoggedInStudent(),</span>
         DeclaredActivityNotFoundException::new);
 
-<span class="fc" id="L137">    return declaredActivities;</span>
+<span class="fc" id="L138">    return declaredActivities;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

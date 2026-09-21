@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.student.association.application.adapter.dto.Assoc
 import fr.avenirsesr.portfolio.student.association.application.adapter.dto.AssociationsDTO;
 import fr.avenirsesr.portfolio.student.association.application.adapter.mapper.AssociationSearchResultDTOMapper;
 import fr.avenirsesr.portfolio.student.association.application.adapter.mapper.AssociationsDTOMapper;
+import fr.avenirsesr.portfolio.student.association.application.adapter.request.AssociationSearchFilterRequest;
 import fr.avenirsesr.portfolio.student.association.application.adapter.request.AssociationsCreationRequest;
 import fr.avenirsesr.portfolio.student.association.application.adapter.request.AssociationsDeleteRequest;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
@@ -18,6 +19,7 @@ import java.security.Principal;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -29,7 +31,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-<span class="fc" id="L32">@Slf4j</span>
+<span class="fc" id="L34">@Slf4j</span>
 @AllArgsConstructor
 @RestController
 @RequestMapping(&quot;/me/associations&quot;)
@@ -47,17 +49,17 @@ public class AssociationController {
           EAssociationContextType contextType,
       @Valid @PathVariable UUID elementId,
       @RequestParam(required = false, defaultValue = &quot;false&quot;) boolean onlyNotCompleted) {
-<span class="fc" id="L50">    log.debug(</span>
+<span class="fc" id="L52">    log.debug(</span>
         &quot;Received request to get the associations of {} [{}] by student [{}]&quot;
             + &quot; (onlyNotCompleted={})&quot;,
         contextType,
         elementId,
-<span class="fc" id="L55">        principal.getName(),</span>
-<span class="fc" id="L56">        onlyNotCompleted);</span>
+<span class="fc" id="L57">        principal.getName(),</span>
+<span class="fc" id="L58">        onlyNotCompleted);</span>
 
-<span class="fc" id="L58">    return ResponseEntity.ok(</span>
-<span class="fc" id="L59">        associationsDTOMapper.toDTO(</span>
-<span class="fc" id="L60">            associationService.getAllAssociatedElementsOf(</span>
+<span class="fc" id="L60">    return ResponseEntity.ok(</span>
+<span class="fc" id="L61">        associationsDTOMapper.toDTO(</span>
+<span class="fc" id="L62">            associationService.getAllAssociatedElementsOf(</span>
                 elementId, contextType, onlyNotCompleted)));
   }
 
@@ -73,18 +75,18 @@ public class AssociationController {
           @PathVariable
           EAssociationContextType associatedContextType,
       @Valid @RequestBody AssociationsCreationRequest body) {
-<span class="fc" id="L76">    log.debug(</span>
+<span class="fc" id="L78">    log.debug(</span>
         &quot;Received request to associate {} [{}] with {} [{}] by student [{}]&quot;,
         contextType,
         elementId,
         associatedContextType,
-<span class="fc" id="L81">        body.idsToAssociate(),</span>
-<span class="fc" id="L82">        principal.getName());</span>
+<span class="fc" id="L83">        body.idsToAssociate(),</span>
+<span class="fc" id="L84">        principal.getName());</span>
 
-<span class="fc" id="L84">    return ResponseEntity.ok(</span>
-<span class="fc" id="L85">        associationsDTOMapper.toDTO(</span>
-<span class="fc" id="L86">            associationService.associate(</span>
-<span class="fc" id="L87">                elementId, contextType, associatedContextType, body.idsToAssociate())));</span>
+<span class="fc" id="L86">    return ResponseEntity.ok(</span>
+<span class="fc" id="L87">        associationsDTOMapper.toDTO(</span>
+<span class="fc" id="L88">            associationService.associate(</span>
+<span class="fc" id="L89">                elementId, contextType, associatedContextType, body.idsToAssociate())));</span>
   }
 
   @PreAuthorize(&quot;hasAuthority('association:manage')&quot;)
@@ -96,16 +98,16 @@ public class AssociationController {
           EAssociationContextType contextType,
       @Valid @PathVariable UUID elementId,
       @Valid @RequestBody AssociationsDeleteRequest body) {
-<span class="fc" id="L99">    log.debug(</span>
+<span class="fc" id="L101">    log.debug(</span>
         &quot;Received request to unassociate the associations [{}] of {} [{}] by student [{}]&quot;,
-<span class="fc" id="L101">        body.idsToDelete(),</span>
+<span class="fc" id="L103">        body.idsToDelete(),</span>
         contextType,
         elementId,
-<span class="fc" id="L104">        principal.getName());</span>
+<span class="fc" id="L106">        principal.getName());</span>
 
-<span class="fc" id="L106">    associationService.unassociate(elementId, contextType, body.idsToDelete());</span>
+<span class="fc" id="L108">    associationService.unassociate(elementId, contextType, body.idsToDelete());</span>
 
-<span class="fc" id="L108">    return ResponseEntity.noContent().build();</span>
+<span class="fc" id="L110">    return ResponseEntity.noContent().build();</span>
   }
 
   @PreAuthorize(&quot;hasAuthority('association:manage')&quot;)
@@ -120,27 +122,33 @@ public class AssociationController {
               @PathVariable
               EAssociationContextType associatedContextType,
           @RequestParam(required = false) String keyword,
+          @ParameterObject AssociationSearchFilterRequest filter,
           @RequestParam(required = false) Integer page,
           @RequestParam(required = false) Integer pageSize) {
-<span class="fc" id="L125">    var pageCriteria = new PageCriteria(page, pageSize);</span>
-<span class="fc" id="L126">    log.debug(</span>
+<span class="fc" id="L128">    var pageCriteria = new PageCriteria(page, pageSize);</span>
+<span class="fc" id="L129">    log.debug(</span>
         &quot;Received request to search {} for association with a new {} by student [{}]&quot;
-            + &quot; (keyword={}, page={}, pageSize={})&quot;,
+            + &quot; (keyword={}, filter={}, page={}, pageSize={})&quot;,
         associatedContextType,
         contextType,
-<span class="fc" id="L131">        principal.getName(),</span>
+<span class="fc" id="L134">        principal.getName(),</span>
         keyword,
-<span class="fc" id="L133">        pageCriteria.page(),</span>
-<span class="fc" id="L134">        pageCriteria.pageSize());</span>
+        filter,
+<span class="fc" id="L137">        pageCriteria.page(),</span>
+<span class="fc" id="L138">        pageCriteria.pageSize());</span>
 
-<span class="fc" id="L136">    var pagedResult =</span>
-<span class="fc" id="L137">        associationService.searchForAssociationWithNewElement(</span>
-            contextType, associatedContextType, keyword, pageCriteria);
+<span class="fc" id="L140">    var pagedResult =</span>
+<span class="fc" id="L141">        associationService.searchForAssociationWithNewElement(</span>
+            contextType,
+            associatedContextType,
+            keyword,
+<span class="fc" id="L145">            filter.toDomain(associatedContextType),</span>
+            pageCriteria);
 
-<span class="fc" id="L140">    return ResponseEntity.ok(</span>
+<span class="fc" id="L148">    return ResponseEntity.ok(</span>
         new PagedResponse&lt;&gt;(
-<span class="fc" id="L142">            pagedResult.content().stream().map(associationSearchResultDTOMapper::toDTO).toList(),</span>
-<span class="fc" id="L143">            PageInfoDTO.fromDomain(pagedResult.pageInfo())));</span>
+<span class="fc" id="L150">            pagedResult.content().stream().map(associationSearchResultDTOMapper::toDTO).toList(),</span>
+<span class="fc" id="L151">            PageInfoDTO.fromDomain(pagedResult.pageInfo())));</span>
   }
 
   @PreAuthorize(&quot;hasAuthority('association:manage')&quot;)
@@ -155,28 +163,35 @@ public class AssociationController {
           @PathVariable
           EAssociationContextType associatedContextType,
       @RequestParam(required = false) String keyword,
+      @ParameterObject AssociationSearchFilterRequest filter,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize) {
-<span class="fc" id="L160">    var pageCriteria = new PageCriteria(page, pageSize);</span>
-<span class="fc" id="L161">    log.debug(</span>
+<span class="fc" id="L169">    var pageCriteria = new PageCriteria(page, pageSize);</span>
+<span class="fc" id="L170">    log.debug(</span>
         &quot;Received request to search {} for association with {} [{}] by student [{}]&quot;
-            + &quot; (keyword={}, page={}, pageSize={})&quot;,
+            + &quot; (keyword={}, filter={}, page={}, pageSize={})&quot;,
         associatedContextType,
         contextType,
         elementId,
-<span class="fc" id="L167">        principal.getName(),</span>
+<span class="fc" id="L176">        principal.getName(),</span>
         keyword,
-<span class="fc" id="L169">        pageCriteria.page(),</span>
-<span class="fc" id="L170">        pageCriteria.pageSize());</span>
+        filter,
+<span class="fc" id="L179">        pageCriteria.page(),</span>
+<span class="fc" id="L180">        pageCriteria.pageSize());</span>
 
-<span class="fc" id="L172">    var pagedResult =</span>
-<span class="fc" id="L173">        associationService.searchForAssociation(</span>
-            elementId, contextType, associatedContextType, keyword, pageCriteria);
+<span class="fc" id="L182">    var pagedResult =</span>
+<span class="fc" id="L183">        associationService.searchForAssociation(</span>
+            elementId,
+            contextType,
+            associatedContextType,
+            keyword,
+<span class="fc" id="L188">            filter.toDomain(associatedContextType),</span>
+            pageCriteria);
 
-<span class="fc" id="L176">    return ResponseEntity.ok(</span>
+<span class="fc" id="L191">    return ResponseEntity.ok(</span>
         new PagedResponse&lt;&gt;(
-<span class="fc" id="L178">            pagedResult.content().stream().map(associationSearchResultDTOMapper::toDTO).toList(),</span>
-<span class="fc" id="L179">            PageInfoDTO.fromDomain(pagedResult.pageInfo())));</span>
+<span class="fc" id="L193">            pagedResult.content().stream().map(associationSearchResultDTOMapper::toDTO).toList(),</span>
+<span class="fc" id="L194">            PageInfoDTO.fromDomain(pagedResult.pageInfo())));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
