@@ -14,6 +14,8 @@ import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
+import fr.avenirsesr.portfolio.student.association.domain.filter.AssociationSearchFilter;
+import fr.avenirsesr.portfolio.student.association.domain.filter.TraceAssociationSearchFilter;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
@@ -91,14 +93,12 @@ class TraceAssociationContextHandlerTest {
     handler.checkLoggedInStudentCanAssociate(traceId, EAssociationType.TRACE_DECLARED_SKILL, 1);
   }
 
-  @Test
-  void search_should_return_the_traces_of_the_logged_in_student() {
+  private UUID givenTracesViewFilteredOn(Boolean isAssociated, PageCriteria pageCriteria) {
     UUID traceId = UUID.randomUUID();
-    var pageCriteria = new PageCriteria(0, 10);
 
     when(traceService.getTracesView(
             "kw",
-            new TraceFilter(null, null, null, null),
+            new TraceFilter(isAssociated, null, null, null),
             null,
             pageCriteria,
             new SortCriteria(ESortField.DATE, ESortOrder.DESC)))
@@ -108,7 +108,7 @@ class TraceAssociationContextHandlerTest {
                     new TraceViewData(
                         traceId,
                         "My trace",
-                        false,
+                        Boolean.TRUE.equals(isAssociated),
                         null,
                         null,
                         Optional.empty(),
@@ -118,10 +118,54 @@ class TraceAssociationContextHandlerTest {
                         null)),
                 new PageInfo(0, 10, 1)));
 
-    var result = handler.search("kw", pageCriteria);
+    return traceId;
+  }
+
+  @Test
+  void search_should_return_the_traces_of_the_logged_in_student() {
+    var pageCriteria = new PageCriteria(0, 10);
+    UUID traceId = givenTracesViewFilteredOn(null, pageCriteria);
+
+    var result = handler.search("kw", AssociationSearchFilter.NONE, pageCriteria);
 
     assertThat(result.content())
         .containsExactly(new AssociationSearchResultData(traceId, "My trace", null, false));
+  }
+
+  @Test
+  void search_should_return_only_the_associated_traces_when_filtering_on_associated_traces() {
+    var pageCriteria = new PageCriteria(0, 10);
+    UUID traceId = givenTracesViewFilteredOn(true, pageCriteria);
+
+    var result = handler.search("kw", new TraceAssociationSearchFilter(true), pageCriteria);
+
+    assertThat(result.content())
+        .extracting(AssociationSearchResultData::id)
+        .containsExactly(traceId);
+  }
+
+  @Test
+  void search_should_return_only_the_unassociated_traces_when_filtering_on_unassociated_traces() {
+    var pageCriteria = new PageCriteria(0, 10);
+    UUID traceId = givenTracesViewFilteredOn(false, pageCriteria);
+
+    var result = handler.search("kw", new TraceAssociationSearchFilter(false), pageCriteria);
+
+    assertThat(result.content())
+        .extracting(AssociationSearchResultData::id)
+        .containsExactly(traceId);
+  }
+
+  @Test
+  void search_should_not_filter_on_the_association_when_the_trace_filter_is_empty() {
+    var pageCriteria = new PageCriteria(0, 10);
+    UUID traceId = givenTracesViewFilteredOn(null, pageCriteria);
+
+    var result = handler.search("kw", new TraceAssociationSearchFilter(null), pageCriteria);
+
+    assertThat(result.content())
+        .extracting(AssociationSearchResultData::id)
+        .containsExactly(traceId);
   }
 
   @Test

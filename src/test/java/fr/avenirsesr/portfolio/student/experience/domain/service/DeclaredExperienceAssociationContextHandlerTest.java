@@ -11,6 +11,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
+import fr.avenirsesr.portfolio.student.association.domain.filter.AssociationSearchFilter;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
@@ -92,7 +93,7 @@ class DeclaredExperienceAssociationContextHandlerTest {
     when(declaredExperienceService.search("kw", pageCriteria))
         .thenReturn(new PagedResult<>(List.of(declaredExperience), new PageInfo(0, 10, 1)));
 
-    var result = handler.search("kw", pageCriteria);
+    var result = handler.search("kw", AssociationSearchFilter.NONE, pageCriteria);
 
     assertThat(result.content())
         .containsExactly(
@@ -116,7 +117,7 @@ class DeclaredExperienceAssociationContextHandlerTest {
     when(declaredExperienceService.search("kw", pageCriteria))
         .thenReturn(new PagedResult<>(List.of(declaredExperience), new PageInfo(0, 10, 1)));
 
-    var result = handler.search("kw", pageCriteria);
+    var result = handler.search("kw", AssociationSearchFilter.NONE, pageCriteria);
 
     assertThat(result.content())
         .containsExactly(

@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.student.association.application.adapter.dto.Assoc
 import fr.avenirsesr.portfolio.student.association.application.adapter.dto.AssociationsDTO;
 import fr.avenirsesr.portfolio.student.association.application.adapter.mapper.AssociationSearchResultDTOMapper;
 import fr.avenirsesr.portfolio.student.association.application.adapter.mapper.AssociationsDTOMapper;
+import fr.avenirsesr.portfolio.student.association.application.adapter.request.AssociationSearchFilterRequest;
 import fr.avenirsesr.portfolio.student.association.application.adapter.request.AssociationsCreationRequest;
 import fr.avenirsesr.portfolio.student.association.application.adapter.request.AssociationsDeleteRequest;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
@@ -18,6 +19,7 @@ import java.security.Principal;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -120,22 +122,28 @@ public class AssociationController {
               @PathVariable
               EAssociationContextType associatedContextType,
           @RequestParam(required = false) String keyword,
+          @ParameterObject AssociationSearchFilterRequest filter,
           @RequestParam(required = false) Integer page,
           @RequestParam(required = false) Integer pageSize) {
     var pageCriteria = new PageCriteria(page, pageSize);
     log.debug(
         "Received request to search {} for association with a new {} by student [{}]"
-            + " (keyword={}, page={}, pageSize={})",
+            + " (keyword={}, filter={}, page={}, pageSize={})",
         associatedContextType,
         contextType,
         principal.getName(),
         keyword,
+        filter,
         pageCriteria.page(),
         pageCriteria.pageSize());
 
     var pagedResult =
         associationService.searchForAssociationWithNewElement(
-            contextType, associatedContextType, keyword, pageCriteria);
+            contextType,
+            associatedContextType,
+            keyword,
+            filter.toDomain(associatedContextType),
+            pageCriteria);
 
     return ResponseEntity.ok(
         new PagedResponse<>(
@@ -155,23 +163,30 @@ public class AssociationController {
           @PathVariable
           EAssociationContextType associatedContextType,
       @RequestParam(required = false) String keyword,
+      @ParameterObject AssociationSearchFilterRequest filter,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize) {
     var pageCriteria = new PageCriteria(page, pageSize);
     log.debug(
         "Received request to search {} for association with {} [{}] by student [{}]"
-            + " (keyword={}, page={}, pageSize={})",
+            + " (keyword={}, filter={}, page={}, pageSize={})",
         associatedContextType,
         contextType,
         elementId,
         principal.getName(),
         keyword,
+        filter,
         pageCriteria.page(),
         pageCriteria.pageSize());
 
     var pagedResult =
         associationService.searchForAssociation(
-            elementId, contextType, associatedContextType, keyword, pageCriteria);
+            elementId,
+            contextType,
+            associatedContextType,
+            keyword,
+            filter.toDomain(associatedContextType),
+            pageCriteria);
 
     return ResponseEntity.ok(
         new PagedResponse<>(

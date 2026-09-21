@@ -8,6 +8,8 @@ import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociatedElementsData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
+import fr.avenirsesr.portfolio.student.association.domain.filter.AssociationSearchFilter;
+import fr.avenirsesr.portfolio.student.association.domain.filter.TraceAssociationSearchFilter;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
@@ -50,11 +52,16 @@ public class TraceAssociationContextHandler implements AssociationContextHandler
 
   @Override
   public PagedResult<AssociationSearchResultData> search(
-      String keyword, PageCriteria pageCriteria) {
+      String keyword, AssociationSearchFilter filter, PageCriteria pageCriteria) {
+    var isAssociated =
+        filter instanceof TraceAssociationSearchFilter(var traceIsAssociated)
+            ? traceIsAssociated
+            : null;
+
     var traces =
         traceService.getTracesView(
             keyword,
-            new TraceFilter(null, null, null, null),
+            new TraceFilter(isAssociated, null, null, null),
             null,
             pageCriteria,
             new SortCriteria(ESortField.DATE, ESortOrder.DESC));

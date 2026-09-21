@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.student.association.domain.data.AssociationData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.exception.AssociationAlreadyExistException;
 import fr.avenirsesr.portfolio.student.association.domain.exception.AssociationDoesNotExistException;
+import fr.avenirsesr.portfolio.student.association.domain.filter.AssociationSearchFilter;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
@@ -141,6 +142,7 @@ public class AssociationServiceImpl implements AssociationService {
       EAssociationContextType contextType,
       EAssociationContextType associatedContextType,
       String keyword,
+      AssociationSearchFilter filter,
       PageCriteria pageCriteria) {
     var associationType =
         EAssociationType.of(contextType.toClass(), associatedContextType.toClass());
@@ -153,7 +155,7 @@ public class AssociationServiceImpl implements AssociationService {
                 getAllOf(id, contextType.toClass(), List.of(associationType)),
                 contextType.toClass()));
 
-    var searchResults = handlerOf(associatedContextType).search(keyword, pageCriteria);
+    var searchResults = handlerOf(associatedContextType).search(keyword, filter, pageCriteria);
 
     return new PagedResult<>(
         searchResults.content().stream()
@@ -173,10 +175,11 @@ public class AssociationServiceImpl implements AssociationService {
       EAssociationContextType contextType,
       EAssociationContextType associatedContextType,
       String keyword,
+      AssociationSearchFilter filter,
       PageCriteria pageCriteria) {
     EAssociationType.of(contextType.toClass(), associatedContextType.toClass());
 
-    return handlerOf(associatedContextType).search(keyword, pageCriteria);
+    return handlerOf(associatedContextType).search(keyword, filter, pageCriteria);
   }
 
   @Override
