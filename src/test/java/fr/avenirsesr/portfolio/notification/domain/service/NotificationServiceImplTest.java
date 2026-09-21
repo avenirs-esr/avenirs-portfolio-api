@@ -317,4 +317,32 @@ class NotificationServiceImplTest {
       verify(notificationRepository, never()).save(any());
     }
   }
+
+  @Nested
+  class DeleteNotificationsOf {
+
+    @Test
+    void should_delete_the_notifications_of_the_given_type_and_elements() {
+      BddLogger.given("Two element ids");
+      List<UUID> elementIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+
+      BddLogger.when("deleteNotificationsOf is called");
+      service.deleteNotificationsOf(ENotificationType.ASK_FOR_FEEDBACK, elementIds);
+
+      BddLogger.then("the notifications of those elements are deleted");
+      verify(notificationRepository)
+          .deleteByTypeAndElementIds(ENotificationType.ASK_FOR_FEEDBACK, elementIds);
+    }
+
+    @Test
+    void should_not_call_the_repository_when_there_is_no_element() {
+      BddLogger.given("No element id");
+
+      BddLogger.when("deleteNotificationsOf is called");
+      service.deleteNotificationsOf(ENotificationType.ASK_FOR_FEEDBACK, List.of());
+
+      BddLogger.then("the repository is not called");
+      verifyNoInteractions(notificationRepository);
+    }
+  }
 }

@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.notification.domain.exception.NotificationNotFoundException;
 import fr.avenirsesr.portfolio.notification.domain.model.Notification;
+import fr.avenirsesr.portfolio.notification.domain.model.enums.ENotificationType;
 import fr.avenirsesr.portfolio.notification.domain.model.notification.BaseNotification;
 import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.notification.domain.port.output.repository.NotificationRepository;
@@ -85,6 +86,15 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     return notificationRepository.findByUserAndCategory(userId, userCategory, pageCriteria);
+  }
+
+  @Override
+  public void deleteNotificationsOf(ENotificationType type, List<UUID> elementIds) {
+    if (elementIds.isEmpty()) {
+      return;
+    }
+
+    notificationRepository.deleteByTypeAndElementIds(type, elementIds);
   }
 
   private void setStaffUnseenNotification(List<UUID> staffIds, boolean seen) {

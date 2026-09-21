@@ -266,6 +266,35 @@ class NotificationSpecificationIT extends ContainerConfigurationTest {
     assertThat(count).isZero();
   }
 
+  @Test
+  void deleteByTypeAndElementIds_should_delete_only_the_notifications_of_the_type_and_elements() {
+    BddLogger.given("Notifications of two elements, of another element and of another type");
+    UUID elementId = UUID.randomUUID();
+    UUID otherElementId = UUID.randomUUID();
+    NotificationEntity deleted =
+        persistNotificationOf(user, ENotificationType.ASK_FOR_FEEDBACK, elementId);
+    NotificationEntity otherDeleted =
+        persistNotificationOf(otherUser, ENotificationType.ASK_FOR_FEEDBACK, otherElementId);
+    NotificationEntity otherElement =
+        persistNotificationOf(user, ENotificationType.ASK_FOR_FEEDBACK, UUID.randomUUID());
+    NotificationEntity otherType =
+        persistNotificationOf(user, ENotificationType.ACTIVITY_MODIFIED, elementId);
+    entityManager.flush();
+    entityManager.clear();
+
+    BddLogger.when("deleting the ASK_FOR_FEEDBACK notifications of the two elements");
+    notificationDatabaseRepository.deleteByTypeAndElementIds(
+        ENotificationType.ASK_FOR_FEEDBACK, List.of(elementId, otherElementId));
+    entityManager.flush();
+    entityManager.clear();
+
+    BddLogger.then("Only the notifications of that type and those elements are deleted");
+    assertThat(notificationJpaRepository.existsById(deleted.getId())).isFalse();
+    assertThat(notificationJpaRepository.existsById(otherDeleted.getId())).isFalse();
+    assertThat(notificationJpaRepository.existsById(otherElement.getId())).isTrue();
+    assertThat(notificationJpaRepository.existsById(otherType.getId())).isTrue();
+  }
+
   private UserEntity persistUser(String email) {
     UserEntity u =
         UserEntity.of(
@@ -291,6 +320,23 @@ class NotificationSpecificationIT extends ContainerConfigurationTest {
             category,
             List.of("param"),
             seen);
+    entityManager.persist(entity);
+    return entity;
+  }
+
+  private NotificationEntity persistNotificationOf(
+      UserEntity owner, ENotificationType type, UUID elementId) {
+    NotificationEntity entity =
+        NotificationEntity.of(
+            UUID.randomUUID(),
+            Instant.now(),
+            Instant.now(),
+            type,
+            elementId,
+            owner,
+            null,
+            List.of("param"),
+            false);
     entityManager.persist(entity);
     return entity;
   }

@@ -10,6 +10,7 @@ import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.mapper.FileMapper;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.repository.FileJpaRepository;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.FeedbackRepository;
@@ -175,6 +176,11 @@ public class FeedbackDatabaseRepository
             .and(FeedbackSpecification.hasStatus(status))
             .and(FeedbackSpecification.isLatestOfItsDeclaredActivity());
     return (int) jpaRepository.count(spec);
+  }
+
+  @Override
+  public void deleteByDeclaredActivityId(DeclaredActivity declaredActivity) {
+    removeAllFromDatabase(FeedbackSpecification.ofDeclaredActivity(declaredActivity.getId()));
   }
 
   // ── private helpers ─────────────────────────────────────────────────
