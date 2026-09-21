@@ -17,6 +17,8 @@ import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationExce
 import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.notification.domain.model.enums.ENotificationType;
+import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityNotFoundException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityUnpublishedException;
@@ -33,6 +35,7 @@ import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivi
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.FeedbackService;
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.FeedbackRepository;
+import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.Duration;
@@ -53,11 +56,12 @@ class DeclaredActivityServiceImplTest {
 
   @Mock private DeclaredActivityRepository declaredActivityRepository;
   @Mock private ActivityService activityService;
+  @Mock private AssociationService associationService;
 
   @Mock private LoggedInUserService loggedInUserService;
   @Mock private FeedbackRepository feedbackRepository;
   @Mock private FeedbackService feedbackService;
-
+  @Mock private NotificationService notificationService;
   @InjectMocks private DeclaredActivityServiceImpl service;
 
   private DeclaredActivityService declaredActivityService;
@@ -65,6 +69,7 @@ class DeclaredActivityServiceImplTest {
   @Captor private ArgumentCaptor<DeclaredActivity> activityCaptor;
 
   private Student student;
+  private final UUID declaredActivityId = UUID.randomUUID();
 
   @BeforeEach
   void setUp() {
@@ -73,9 +78,11 @@ class DeclaredActivityServiceImplTest {
         new DeclaredActivityServiceImpl(
             declaredActivityRepository,
             activityService,
+            associationService,
             loggedInUserService,
             feedbackRepository,
-            feedbackService);
+            feedbackService,
+            notificationService);
   }
 
   @Test
@@ -1168,5 +1175,83 @@ class DeclaredActivityServiceImplTest {
 
     BddLogger.then("it should return an empty list");
     assertThat(result).isEmpty();
+  }
+
+  private DeclaredActivity stubDeclaredActivity(Instant unsubscribe) {
+    Activity activity = ActivityFixture.create().toModel();
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(
+            declaredActivityId,
+            student,
+            activity,
+            Instant.now(),
+            "my reflection",
+            null,
+            null,
+            null);
+
+    declaredActivity.unsubscribe(unsubscribe);
+
+    UUID declaredActivityId = declaredActivity.getId();
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any()))
+        .thenReturn(Optional.of(declaredActivity));
+    return declaredActivity;
+  }
+
+  @Test
+  void delete_should_throw_when_declaredActivity_not_found() {
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any()))
+        .thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> declaredActivityService.delete(declaredActivityId))
+        .isInstanceOf(DeclaredActivityNotFoundException.class);
+
+    verifyNoInteractions(associationService, feedbackService);
+    verify(declaredActivityRepository, never()).removeFromDatabase(any());
+  }
+
+  @Test
+  void delete_should_throw_when_declaredActivity_not_unsubscribed() {
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    stubDeclaredActivity(null);
+    assertThatThrownBy(() -> declaredActivityService.delete(declaredActivityId))
+        .isInstanceOf(DeclaredActivityNotUnsubscribedException.class);
+    verifyNoInteractions(associationService, feedbackService);
+    verify(declaredActivityRepository, never()).removeFromDatabase(any());
+  }
+
+  @Test
+  void
+      delete_should_delete_associations_notifications_feedbacks_then_declared_activity_when_unsubscribed() {
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    DeclaredActivity declaredActivity = stubDeclaredActivity(Instant.now());
+    UUID feedbackId = UUID.randomUUID();
+    Feedback feedback = mock(Feedback.class);
+    when(feedback.getId()).thenReturn(feedbackId);
+    when(feedbackRepository.findAllByDeclaredActivityId(declaredActivityId))
+        .thenReturn(List.of(feedback));
+    declaredActivityService.delete(declaredActivityId);
+    InOrder inOrder =
+        inOrder(
+            associationService, notificationService, feedbackService, declaredActivityRepository);
+    inOrder
+        .verify(associationService)
+        .deleteAllOf(List.of(declaredActivityId), DeclaredActivity.class);
+    inOrder
+        .verify(notificationService)
+        .deleteNotificationsOf(ENotificationType.ASK_FOR_FEEDBACK, List.of(feedbackId));
+    inOrder.verify(feedbackService).deleteByDeclaredActivityId(declaredActivity);
+    inOrder.verify(declaredActivityRepository).removeFromDatabase(declaredActivity);
+  }
+
+  @Test
+  void delete_should_reject_when_activity_is_not_owned_by_connected_student() {
+    Student connected = StudentFixture.create().toModel();
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(connected);
+    stubDeclaredActivity(Instant.now());
+    assertThatThrownBy(() -> declaredActivityService.delete(declaredActivityId))
+        .isInstanceOf(UserNotAuthorizedException.class);
+    verifyNoInteractions(associationService, feedbackService);
+    verify(declaredActivityRepository, never()).removeFromDatabase(any());
   }
 }

@@ -8,6 +8,8 @@ import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
+import fr.avenirsesr.portfolio.notification.domain.model.enums.ENotificationType;
+import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityUnpublishedException;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
@@ -17,11 +19,13 @@ import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityDeta
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackData;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.*;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
+import fr.avenirsesr.portfolio.student.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.FeedbackService;
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.FeedbackRepository;
+import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -37,9 +41,11 @@ import lombok.extern.slf4j.Slf4j;
 public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   private final DeclaredActivityRepository declaredActivityRepository;
   private final ActivityService activityService;
+  private final AssociationService associationService;
   private final LoggedInUserService loggedInUserService;
   private final FeedbackRepository feedbackRepository;
   private final FeedbackService feedbackService;
+  private final NotificationService notificationService;
 
   @Override
   public PagedResult<DeclaredActivity> getDeclaredActivities(PageCriteria pageCriteria) {
@@ -406,6 +412,32 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
         .findByActivity(student, activity)
         .filter(declaredActivity -> !declaredActivity.isUnsubscribed())
         .isPresent();
+  }
+
+  @Override
+  public void delete(UUID declaredActivityId) {
+    DeclaredActivity declaredActivity =
+        fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
+
+    if (!declaredActivity.isUnsubscribed()) {
+      throw new DeclaredActivityNotUnsubscribedException();
+    }
+
+    var feedbackIds =
+        feedbackRepository.findAllByDeclaredActivityId(declaredActivityId).stream()
+            .map(Feedback::getId)
+            .toList();
+
+    associationService.deleteAllOf(List.of(declaredActivityId), DeclaredActivity.class);
+    notificationService.deleteNotificationsOf(ENotificationType.ASK_FOR_FEEDBACK, feedbackIds);
+    feedbackService.deleteByDeclaredActivityId(declaredActivity);
+    declaredActivityRepository.removeFromDatabase(declaredActivity);
+
+    log.debug(
+        "Deleted the declared activity {} of student {} with its associations, notifications"
+            + " and feedbacks",
+        declaredActivityId,
+        declaredActivity.getStudent().getId());
   }
 
   private boolean isSubmittedOrFinished(
