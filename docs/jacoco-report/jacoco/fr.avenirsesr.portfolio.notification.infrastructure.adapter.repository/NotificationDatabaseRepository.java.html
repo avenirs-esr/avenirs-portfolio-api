@@ -10,49 +10,45 @@ import fr.avenirsesr.portfolio.notification.domain.port.output.repository.Notifi
 import fr.avenirsesr.portfolio.notification.infrastructure.adapter.mapper.NotificationMapper;
 import fr.avenirsesr.portfolio.notification.infrastructure.adapter.model.NotificationEntity;
 import fr.avenirsesr.portfolio.notification.infrastructure.adapter.specification.NotificationSpecification;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.DeleteSpecification;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public class NotificationDatabaseRepository
     extends GenericJpaRepositoryAdapter&lt;Notification, NotificationEntity&gt;
     implements NotificationRepository {
-  private final NotificationJpaRepository notificationJpaRepository;
 
   public NotificationDatabaseRepository(NotificationJpaRepository jpaRepository) {
-<span class="fc" id="L26">    super(jpaRepository, jpaRepository, NotificationEntity.class, NotificationMapper.INSTANCE);</span>
-<span class="fc" id="L27">    this.notificationJpaRepository = jpaRepository;</span>
-<span class="fc" id="L28">  }</span>
+<span class="fc" id="L25">    super(jpaRepository, jpaRepository, NotificationEntity.class, NotificationMapper.INSTANCE);</span>
+<span class="fc" id="L26">  }</span>
 
   @Override
   public PagedResult&lt;Notification&gt; findByUserAndCategory(
       UUID userId, EUserCategory userCategory, PageCriteria pageCriteria) {
-<span class="fc" id="L33">    var specification =</span>
-<span class="fc" id="L34">        NotificationSpecification.hasUser(userId)</span>
-<span class="fc" id="L35">            .and(NotificationSpecification.hasUserCategoryNullOrEquals(userCategory));</span>
-<span class="fc" id="L36">    return findAll(</span>
+<span class="fc" id="L31">    var specification =</span>
+<span class="fc" id="L32">        NotificationSpecification.hasUser(userId)</span>
+<span class="fc" id="L33">            .and(NotificationSpecification.hasUserCategoryNullOrEquals(userCategory));</span>
+<span class="fc" id="L34">    return findAll(</span>
         specification,
-<span class="fc" id="L38">        PageRequest.of(</span>
-<span class="fc" id="L39">            pageCriteria.page(), pageCriteria.pageSize(), Sort.by(&quot;createdAt&quot;).descending()));</span>
+<span class="fc" id="L36">        PageRequest.of(</span>
+<span class="fc" id="L37">            pageCriteria.page(), pageCriteria.pageSize(), Sort.by(&quot;createdAt&quot;).descending()));</span>
   }
 
   @Override
   public long countUnreadByUserAndCategory(UUID userId, EUserCategory userCategory) {
-<span class="fc" id="L44">    var specification =</span>
-<span class="fc" id="L45">        NotificationSpecification.hasUser(userId)</span>
-<span class="fc" id="L46">            .and(NotificationSpecification.hasUserCategoryNullOrEquals(userCategory))</span>
-<span class="fc" id="L47">            .and(NotificationSpecification.isNotSeen());</span>
-<span class="fc" id="L48">    return jpaSpecificationExecutor.count(specification);</span>
+<span class="fc" id="L42">    var specification =</span>
+<span class="fc" id="L43">        NotificationSpecification.hasUser(userId)</span>
+<span class="fc" id="L44">            .and(NotificationSpecification.hasUserCategoryNullOrEquals(userCategory))</span>
+<span class="fc" id="L45">            .and(NotificationSpecification.isNotSeen());</span>
+<span class="fc" id="L46">    return jpaSpecificationExecutor.count(specification);</span>
   }
 
   @Override
-  public void deleteByTypeAndElementId(ENotificationType type, UUID elementId) {
-<span class="fc" id="L53">    DeleteSpecification&lt;NotificationEntity&gt; specification =</span>
-<span class="fc" id="L54">        NotificationSpecification.ofTypeAndElement(type, elementId);</span>
-<span class="fc" id="L55">    removeAllFromDatabase((specification));</span>
-<span class="fc" id="L56">  }</span>
+  public void deleteByTypeAndElementIds(ENotificationType type, List&lt;UUID&gt; elementIds) {
+<span class="fc" id="L51">    removeAllFromDatabase(NotificationSpecification.ofTypeAndElements(type, elementIds));</span>
+<span class="fc" id="L52">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

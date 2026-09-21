@@ -111,7 +111,7 @@ public class DeclaredActivityController {
   @PreAuthorize(&quot;hasAuthority('declared-activity:delete:own')&quot;)
   @DeleteMapping(&quot;/{declaredActivityId}&quot;)
   public ResponseEntity&lt;Void&gt; deleteActivity(@PathVariable UUID declaredActivityId) {
-<span class="fc" id="L114">    declaredActivityService.deleteActivity(declaredActivityId);</span>
+<span class="fc" id="L114">    declaredActivityService.delete(declaredActivityId);</span>
 <span class="fc" id="L115">    return ResponseEntity.noContent().build();</span>
   }
 

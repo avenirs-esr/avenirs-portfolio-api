@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import org.springframework.data.jpa.domain.DeleteSpecification;
 import org.springframework.data.jpa.domain.Specification;
 
 public final class FeedbackSpecification {
@@ -14,40 +15,45 @@ public final class FeedbackSpecification {
   private FeedbackSpecification() {}
 
   public static Specification&lt;FeedbackEntity&gt; hasStaffAuthor(UUID staffId) {
-<span class="fc" id="L17">    return (root, query, cb) -&gt;</span>
-<span class="fc" id="L18">        cb.equal(root.join(&quot;declaredActivity&quot;).join(&quot;activity&quot;).get(&quot;author&quot;).get(&quot;id&quot;), staffId);</span>
+<span class="fc" id="L18">    return (root, query, cb) -&gt;</span>
+<span class="fc" id="L19">        cb.equal(root.join(&quot;declaredActivity&quot;).join(&quot;activity&quot;).get(&quot;author&quot;).get(&quot;id&quot;), staffId);</span>
   }
 
   public static Specification&lt;FeedbackEntity&gt; hasStatus(EFeedbackStatus... status) {
     List&lt;EFeedbackStatus&gt; statuses =
-<span class="pc bpc" id="L23" title="1 of 2 branches missed.">        status == null ? List.of() : Arrays.stream(status).filter(Objects::nonNull).toList();</span>
-<span class="fc" id="L24">    return (root, query, cb) -&gt; {</span>
-<span class="fc bfc" id="L25" title="All 2 branches covered.">      if (statuses.isEmpty()) return cb.conjunction();</span>
-<span class="fc" id="L26">      return root.get(&quot;status&quot;).in(statuses);</span>
+<span class="pc bpc" id="L24" title="1 of 2 branches missed.">        status == null ? List.of() : Arrays.stream(status).filter(Objects::nonNull).toList();</span>
+<span class="fc" id="L25">    return (root, query, cb) -&gt; {</span>
+<span class="fc bfc" id="L26" title="All 2 branches covered.">      if (statuses.isEmpty()) return cb.conjunction();</span>
+<span class="fc" id="L27">      return root.get(&quot;status&quot;).in(statuses);</span>
     };
   }
 
   public static Specification&lt;FeedbackEntity&gt; hasActivityId(UUID activityId) {
-<span class="fc" id="L31">    return (root, query, cb) -&gt; {</span>
-<span class="fc bfc" id="L32" title="All 2 branches covered.">      if (activityId == null) return cb.conjunction();</span>
-<span class="fc" id="L33">      return cb.equal(root.get(&quot;declaredActivity&quot;).get(&quot;activity&quot;).get(&quot;id&quot;), activityId);</span>
+<span class="fc" id="L32">    return (root, query, cb) -&gt; {</span>
+<span class="fc bfc" id="L33" title="All 2 branches covered.">      if (activityId == null) return cb.conjunction();</span>
+<span class="fc" id="L34">      return cb.equal(root.get(&quot;declaredActivity&quot;).get(&quot;activity&quot;).get(&quot;id&quot;), activityId);</span>
     };
   }
 
   public static Specification&lt;FeedbackEntity&gt; hasDeclaredActivityId(UUID declaredActivityId) {
-<span class="fc" id="L38">    return (root, query, cb) -&gt;</span>
-<span class="fc" id="L39">        cb.equal(root.get(&quot;declaredActivity&quot;).get(&quot;id&quot;), declaredActivityId);</span>
+<span class="fc" id="L39">    return (root, query, cb) -&gt;</span>
+<span class="fc" id="L40">        cb.equal(root.get(&quot;declaredActivity&quot;).get(&quot;id&quot;), declaredActivityId);</span>
+  }
+
+  public static DeleteSpecification&lt;FeedbackEntity&gt; ofDeclaredActivity(UUID declaredActivityId) {
+<span class="fc" id="L44">    return (root, delete, cb) -&gt;</span>
+<span class="fc" id="L45">        cb.equal(root.get(&quot;declaredActivity&quot;).get(&quot;id&quot;), declaredActivityId);</span>
   }
 
   public static Specification&lt;FeedbackEntity&gt; isLatestOfItsDeclaredActivity() {
-<span class="fc" id="L43">    return (root, query, cb) -&gt; {</span>
-<span class="fc" id="L44">      var subquery = query.subquery(Instant.class);</span>
-<span class="fc" id="L45">      var subRoot = subquery.from(FeedbackEntity.class);</span>
-<span class="fc" id="L46">      subquery.select(cb.greatest(subRoot.&lt;Instant&gt;get(&quot;createdAt&quot;)));</span>
-<span class="fc" id="L47">      subquery.where(</span>
-<span class="fc" id="L48">          cb.equal(</span>
-<span class="fc" id="L49">              subRoot.get(&quot;declaredActivity&quot;).get(&quot;id&quot;), root.get(&quot;declaredActivity&quot;).get(&quot;id&quot;)));</span>
-<span class="fc" id="L50">      return cb.equal(root.&lt;Instant&gt;get(&quot;createdAt&quot;), subquery);</span>
+<span class="fc" id="L49">    return (root, query, cb) -&gt; {</span>
+<span class="fc" id="L50">      var subquery = query.subquery(Instant.class);</span>
+<span class="fc" id="L51">      var subRoot = subquery.from(FeedbackEntity.class);</span>
+<span class="fc" id="L52">      subquery.select(cb.greatest(subRoot.&lt;Instant&gt;get(&quot;createdAt&quot;)));</span>
+<span class="fc" id="L53">      subquery.where(</span>
+<span class="fc" id="L54">          cb.equal(</span>
+<span class="fc" id="L55">              subRoot.get(&quot;declaredActivity&quot;).get(&quot;id&quot;), root.get(&quot;declaredActivity&quot;).get(&quot;id&quot;)));</span>
+<span class="fc" id="L56">      return cb.equal(root.&lt;Instant&gt;get(&quot;createdAt&quot;), subquery);</span>
     };
   }
 }

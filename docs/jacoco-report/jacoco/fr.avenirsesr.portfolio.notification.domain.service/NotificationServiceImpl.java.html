@@ -89,26 +89,30 @@ public class NotificationServiceImpl implements NotificationService {
   }
 
   @Override
-  public void deleteNotificationsOf(ENotificationType type, UUID elementID) {
-<span class="fc" id="L93">    notificationRepository.deleteByTypeAndElementId(type, elementID);</span>
-<span class="fc" id="L94">  }</span>
+  public void deleteNotificationsOf(ENotificationType type, List&lt;UUID&gt; elementIds) {
+<span class="fc bfc" id="L93" title="All 2 branches covered.">    if (elementIds.isEmpty()) {</span>
+<span class="fc" id="L94">      return;</span>
+    }
+
+<span class="fc" id="L97">    notificationRepository.deleteByTypeAndElementIds(type, elementIds);</span>
+<span class="fc" id="L98">  }</span>
 
   private void setStaffUnseenNotification(List&lt;UUID&gt; staffIds, boolean seen) {
-<span class="fc bfc" id="L97" title="All 2 branches covered.">    if (staffIds.isEmpty()) {</span>
-<span class="fc" id="L98">      return;</span>
+<span class="fc bfc" id="L101" title="All 2 branches covered.">    if (staffIds.isEmpty()) {</span>
+<span class="fc" id="L102">      return;</span>
     }
-<span class="fc" id="L100">    var staff = staffRepository.findAllById(List.copyOf(staffIds));</span>
-<span class="fc" id="L101">    staff.forEach(s -&gt; s.setHasUnseenNotification(seen));</span>
-<span class="fc" id="L102">    staffRepository.saveAll(staff);</span>
-<span class="fc" id="L103">  }</span>
+<span class="fc" id="L104">    var staff = staffRepository.findAllById(List.copyOf(staffIds));</span>
+<span class="fc" id="L105">    staff.forEach(s -&gt; s.setHasUnseenNotification(seen));</span>
+<span class="fc" id="L106">    staffRepository.saveAll(staff);</span>
+<span class="fc" id="L107">  }</span>
 
   private void setStudentUnseenNotification(List&lt;UUID&gt; studentIds, boolean seen) {
-<span class="fc bfc" id="L106" title="All 2 branches covered.">    if (studentIds.isEmpty()) {</span>
-<span class="fc" id="L107">      return;</span>
+<span class="fc bfc" id="L110" title="All 2 branches covered.">    if (studentIds.isEmpty()) {</span>
+<span class="fc" id="L111">      return;</span>
     }
-<span class="fc" id="L109">    var students = studentRepository.findAllById(List.copyOf(studentIds));</span>
-<span class="fc" id="L110">    students.forEach(s -&gt; s.setHasUnseenNotification(seen));</span>
-<span class="fc" id="L111">    studentRepository.saveAll(students);</span>
-<span class="fc" id="L112">  }</span>
+<span class="fc" id="L113">    var students = studentRepository.findAllById(List.copyOf(studentIds));</span>
+<span class="fc" id="L114">    students.forEach(s -&gt; s.setHasUnseenNotification(seen));</span>
+<span class="fc" id="L115">    studentRepository.saveAll(students);</span>
+<span class="fc" id="L116">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
