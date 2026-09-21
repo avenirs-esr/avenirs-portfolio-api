@@ -108,16 +108,23 @@ public class DeclaredActivityController {
 <span class="fc" id="L108">    return ResponseEntity.ok(&quot;Declared activities successfully unsubscribed&quot;);</span>
   }
 
+  @PreAuthorize(&quot;hasAuthority('declared-activity:delete:own')&quot;)
+  @DeleteMapping(&quot;/{declaredActivityId}&quot;)
+  public ResponseEntity&lt;Void&gt; deleteActivity(@PathVariable UUID declaredActivityId) {
+<span class="fc" id="L114">    declaredActivityService.deleteActivity(declaredActivityId);</span>
+<span class="fc" id="L115">    return ResponseEntity.noContent().build();</span>
+  }
+
   @PreAuthorize(&quot;hasAuthority('declared-activity:update:own')&quot;)
   @PutMapping(&quot;/finish/{declaredActivityId}&quot;)
   public ResponseEntity&lt;Void&gt; finish(
       Principal principal, @Valid @PathVariable UUID declaredActivityId) {
-<span class="nc" id="L115">    log.debug(</span>
+<span class="nc" id="L122">    log.debug(</span>
         &quot;Received request to finish declared activity [{}] for student [{}]&quot;,
         declaredActivityId,
-<span class="nc" id="L118">        principal.getName());</span>
-<span class="nc" id="L119">    declaredActivityService.finish(declaredActivityId);</span>
-<span class="nc" id="L120">    return ResponseEntity.noContent().build();</span>
+<span class="nc" id="L125">        principal.getName());</span>
+<span class="nc" id="L126">    declaredActivityService.finish(declaredActivityId);</span>
+<span class="nc" id="L127">    return ResponseEntity.noContent().build();</span>
   }
 
   @PreAuthorize(&quot;hasAuthority('declared-activity:update:own')&quot;)
@@ -126,8 +133,8 @@ public class DeclaredActivityController {
       @PathVariable(&quot;activityId&quot;) UUID activityId,
       @Valid @RequestBody UpdateReflectionRequest request) {
 
-<span class="nc" id="L129">    declaredActivityService.updateReflection(activityId, request.reflection());</span>
-<span class="nc" id="L130">    return ResponseEntity.ok(&quot;Declared activities successfully updated&quot;);</span>
+<span class="nc" id="L136">    declaredActivityService.updateReflection(activityId, request.reflection());</span>
+<span class="nc" id="L137">    return ResponseEntity.ok(&quot;Declared activities successfully updated&quot;);</span>
   }
 
   @PreAuthorize(&quot;hasAuthority('activity:read:contextual')&quot;)
@@ -136,20 +143,20 @@ public class DeclaredActivityController {
       HttpServletRequest request,
       Principal principal,
       @Valid @PathVariable UUID declaredActivityId) {
-<span class="fc" id="L139">    log.debug(</span>
+<span class="fc" id="L146">    log.debug(</span>
         &quot;Received request to get declared activity [{}] details for student [{}]&quot;,
         declaredActivityId,
-<span class="fc" id="L142">        principal.getName());</span>
-<span class="fc" id="L143">    String baseUrl = extractOrigin(request);</span>
-<span class="fc" id="L144">    var details = declaredActivityService.getDeclaredActivityDetails(declaredActivityId);</span>
-<span class="fc" id="L145">    var status = declaredActivityService.getDeclaredActivityStatus(details.declaredActivity());</span>
+<span class="fc" id="L149">        principal.getName());</span>
+<span class="fc" id="L150">    String baseUrl = extractOrigin(request);</span>
+<span class="fc" id="L151">    var details = declaredActivityService.getDeclaredActivityDetails(declaredActivityId);</span>
+<span class="fc" id="L152">    var status = declaredActivityService.getDeclaredActivityStatus(details.declaredActivity());</span>
 
-<span class="fc" id="L147">    return ResponseEntity.ok(</span>
-<span class="fc" id="L148">        declaredActivityDetailsDTOMapper.toDTO(</span>
+<span class="fc" id="L154">    return ResponseEntity.ok(</span>
+<span class="fc" id="L155">        declaredActivityDetailsDTOMapper.toDTO(</span>
             details,
             status,
-<span class="fc" id="L151">            fileDTOMapper.toFileDTOs(</span>
-<span class="fc" id="L152">                details.declaredActivity().getActivity().getFiles(), baseUrl)));</span>
+<span class="fc" id="L158">            fileDTOMapper.toFileDTOs(</span>
+<span class="fc" id="L159">                details.declaredActivity().getActivity().getFiles(), baseUrl)));</span>
   }
 
   @PreAuthorize(&quot;hasAuthority('declared-activity:update:own')&quot;)
@@ -157,12 +164,12 @@ public class DeclaredActivityController {
   public ResponseEntity&lt;String&gt; updateDeclaredActivity(
       @Valid @RequestBody DeclaredActivityUpdateRequest declaredActivityUpdateRequest,
       @PathVariable UUID declaredActivityId) {
-<span class="fc" id="L160">    var optionalPeriod = Optional.ofNullable(declaredActivityUpdateRequest.period());</span>
-<span class="fc" id="L161">    LocalDate startDate = optionalPeriod.map(DeclaredActivityPeriodDTO::startDate).orElse(null);</span>
-<span class="fc" id="L162">    LocalDate endDate = optionalPeriod.map(DeclaredActivityPeriodDTO::endDate).orElse(null);</span>
-<span class="pc" id="L163">    declaredActivityService.updateDeclaredActivity(</span>
-<span class="fc" id="L164">        declaredActivityId, startDate, endDate, declaredActivityUpdateRequest.valorized());</span>
-<span class="nc" id="L165">    return ResponseEntity.ok(&quot;Declared activity successfully updated&quot;);</span>
+<span class="fc" id="L167">    var optionalPeriod = Optional.ofNullable(declaredActivityUpdateRequest.period());</span>
+<span class="fc" id="L168">    LocalDate startDate = optionalPeriod.map(DeclaredActivityPeriodDTO::startDate).orElse(null);</span>
+<span class="fc" id="L169">    LocalDate endDate = optionalPeriod.map(DeclaredActivityPeriodDTO::endDate).orElse(null);</span>
+<span class="pc" id="L170">    declaredActivityService.updateDeclaredActivity(</span>
+<span class="fc" id="L171">        declaredActivityId, startDate, endDate, declaredActivityUpdateRequest.valorized());</span>
+<span class="nc" id="L172">    return ResponseEntity.ok(&quot;Declared activity successfully updated&quot;);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
