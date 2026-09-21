@@ -24,7 +24,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.reposi
 avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.application.adapter.controller,ActivityController,123,546,0,2,30,130,5,18,5,17
 avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.infrastructure.context,CustomDateTimeProvider,0,11,0,0,0,4,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.infrastructure.context,PrometheusLogFilter,5,11,3,3,1,3,2,3,0,2
-avenirs-portfolio-api,fr.avenirsesr.portfolio.user.application.adapter.controller,UserController,76,101,0,2,22,26,4,7,4,6
+avenirs-portfolio-api,fr.avenirsesr.portfolio.user.application.adapter.controller,UserController,89,101,0,2,25,26,5,7,5,6
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.skill.application.adapter.controller,DeclaredSkillProgressController,32,120,0,0,10,35,3,5,3,5
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.association.domain.data,AssociationData,0,12,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.association.domain.data,AssociationSearchResultData,0,15,0,0,0,1,0,1,0,1
@@ -59,10 +59,10 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.domain.data,TraceVie
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.domain.data,TraceDetailData,0,36,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.domain.data,TraceDeclaredActivityData,0,12,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.application.adapter.controller,SeedingAdminController,88,0,14,0,22,0,9,0,2,0
-avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.service,UserServiceImpl,72,321,13,20,15,86,13,25,4,15
-avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.service,StudentServiceImpl,123,107,3,3,29,30,11,8,9,7
+avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.service,UserServiceImpl,81,375,16,23,16,94,16,27,4,17
+avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.service,StudentServiceImpl,123,127,3,3,29,35,11,9,9,8
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.service,UserServiceImpl.NotificationState,0,9,0,0,0,1,0,1,0,1
-avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.service,StaffServiceImpl,109,108,4,2,25,29,10,7,7,7
+avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.service,StaffServiceImpl,109,128,4,2,25,34,10,8,7,8
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.domain.filter,ETraceFilterKey,0,27,0,0,0,5,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.domain.filter,TraceFilter,0,60,0,8,0,9,0,6,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.association.application.adapter.controller,AssociationController,0,260,0,0,0,41,0,6,0,6
