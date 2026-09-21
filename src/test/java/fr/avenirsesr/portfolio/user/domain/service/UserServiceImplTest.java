@@ -24,6 +24,7 @@ import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StaffFixture;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -136,8 +137,8 @@ class UserServiceImplTest {
           .createStudent(
               loggedUser.getId(),
               externalUser.email(),
-              externalUser.institutionId(),
-              externalUser.groupId(),
+              externalUser.institutionIds(),
+              externalUser.groupIds(),
               null);
     }
 
@@ -195,8 +196,8 @@ class UserServiceImplTest {
           .createStudent(
               savedUser.getId(),
               externalUser.email(),
-              externalUser.institutionId(),
-              externalUser.groupId(),
+              externalUser.institutionIds(),
+              externalUser.groupIds(),
               null);
       verifyNoInteractions(staffService);
 
@@ -230,8 +231,8 @@ class UserServiceImplTest {
           .createStaff(
               savedUser.getId(),
               externalUser.email(),
-              externalUser.institutionId(),
-              externalUser.groupId(),
+              externalUser.institutionIds(),
+              externalUser.groupIds(),
               null);
       verifyNoInteractions(studentService);
 
@@ -539,6 +540,46 @@ class UserServiceImplTest {
     }
   }
 
+  @Nested
+  class RefreshAffiliations {
+
+    @Test
+    void shouldUpdateAffiliationsOfAnExistingStudent() {
+      String eppn = "lucas.tessier@university.com";
+      ExternalUserDTO externalUser = externalUser(EUserCategory.STUDENT, EUserStatus.ACTIVE, eppn);
+
+      BddLogger.given("a student known to the back-office with several affiliations");
+      when(externalUserClient.getByEppn(eppn)).thenReturn(Optional.of(externalUser));
+      when(userPrincipalRepository.findByEppn(eppn)).thenReturn(Optional.of(loggedUser));
+      when(studentService.existsById(loggedUser.getId())).thenReturn(true);
+      when(staffService.existsById(loggedUser.getId())).thenReturn(false);
+
+      BddLogger.when("refreshing the affiliations for that eppn");
+      userService.refreshAffiliations(eppn);
+
+      BddLogger.then("it should update the student's affiliations and leave staff untouched");
+      verify(studentService)
+          .updateAffiliations(
+              loggedUser.getId(), externalUser.institutionIds(), externalUser.groupIds());
+      verify(staffService, never()).updateAffiliations(any(), any(), any());
+    }
+
+    @Test
+    void shouldThrowWhenTheExternalUserIsUnknown() {
+      String eppn = "unknown@university.com";
+
+      BddLogger.given("no external user known to the back-office for that eppn");
+      when(externalUserClient.getByEppn(eppn)).thenReturn(Optional.empty());
+
+      BddLogger.when("refreshing the affiliations for that eppn");
+      BddLogger.then("it should throw ExternalUserNotFoundException");
+      assertThrows(
+          ExternalUserNotFoundException.class, () -> userService.refreshAffiliations(eppn));
+
+      verifyNoInteractions(studentService, staffService);
+    }
+  }
+
   private ExternalUserDTO externalUser(EUserCategory category, EUserStatus status, String eppn) {
     return new ExternalUserDTO(
         eppn,
@@ -548,8 +589,8 @@ class UserServiceImplTest {
         Set.of(category),
         eppn,
         "PEGASE",
-        UUID.randomUUID(),
-        UUID.randomUUID(),
+        List.of(UUID.randomUUID()),
+        List.of(UUID.randomUUID()),
         status);
   }
 }

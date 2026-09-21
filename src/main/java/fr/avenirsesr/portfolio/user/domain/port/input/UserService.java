@@ -18,6 +18,8 @@ public interface UserService extends BaseUserService {
 
   void updateNotificationPreferences(boolean notificationEnabled);
 
+  void refreshAffiliations(String eppn);
+
   User createUser(UUID id, String firstname, String lastname, String email, String eppn);
 
   UserQuickLinksData getQuickLinks(EUserCategory userCategory);

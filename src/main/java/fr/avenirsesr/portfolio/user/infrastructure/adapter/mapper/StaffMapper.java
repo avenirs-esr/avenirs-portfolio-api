@@ -13,8 +13,8 @@ public class StaffMapper implements Mapper<StaffEntity, Staff> {
     return StaffEntity.of(
         UserMapper.INSTANCE.fromDomain(staff.getUser()),
         staff.getInstitutionEmail(),
-        staff.getInstitutionId(),
-        staff.getGroupId(),
+        staff.getInstitutionIds(),
+        staff.getGroupIds(),
         staff.getBio(),
         staff.isHasUnseenNotification(),
         staff.getCoverPicture().map(FileMapper.INSTANCE::fromDomain).orElse(null),
@@ -28,8 +28,8 @@ public class StaffMapper implements Mapper<StaffEntity, Staff> {
     return Staff.toDomain(
         UserMapper.INSTANCE.toDomain(staffEntity.getUser()),
         staffEntity.getInstitutionEmail(),
-        staffEntity.getInstitutionId(),
-        staffEntity.getGroupId(),
+        staffEntity.getInstitutionIds(),
+        staffEntity.getGroupIds(),
         staffEntity.getBio(),
         staffEntity.isHasUnseenNotification(),
         staffEntity.getCoverPicture() == null

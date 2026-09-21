@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.fake;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StaffEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.time.Instant;
+import java.util.List;
 
 public class FakeStaff {
 
@@ -17,8 +18,8 @@ public class FakeStaff {
         StaffEntity.of(
             user,
             user.getEmail(),
-            null,
-            null,
+            List.of(),
+            List.of(),
             "fake bio",
             false,
             null,

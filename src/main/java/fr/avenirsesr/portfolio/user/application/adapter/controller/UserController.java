@@ -126,6 +126,14 @@ public class UserController {
   }
 
   @PreAuthorize("hasAuthority('profile:update:own')")
+  @PostMapping("/affiliations/refresh")
+  public ResponseEntity<Void> refreshAffiliations(Principal principal) {
+    log.debug("Received request to refresh affiliations of user [{}]", principal.getName());
+    userService.refreshAffiliations(principal.getName());
+    return ResponseEntity.noContent().build();
+  }
+
+  @PreAuthorize("hasAuthority('profile:update:own')")
   @PatchMapping("/preferences/notification")
   public ResponseEntity<String> updateNotificationPreferences(
       Principal principal, @RequestBody NotificationPreferencesRequest request) {
