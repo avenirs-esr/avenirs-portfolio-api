@@ -60,7 +60,7 @@ class StudentFeedbackItemListDTOMapperTest {
         student.getUser().getFirstName(),
         student.getUser().getLastName(),
         student.getUser().getEmail(),
-        null);
+        List.of());
   }
 
   @Test

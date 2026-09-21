@@ -676,7 +676,7 @@ public class FeedbackControllerIT extends ContainerConfigurationTest {
     BddLogger.when("performing a GET on the exhaustive list endpoint for the seeded activity");
     BddLogger.then(
         "the item for that feedback has an id, a status and a student with id, firstName, lastName,"
-            + " email and program");
+            + " email and programs");
 
     String response =
         webTestClient
@@ -706,7 +706,7 @@ public class FeedbackControllerIT extends ContainerConfigurationTest {
     assertThat(student.path("firstName").asText()).isNotEmpty();
     assertThat(student.path("lastName").asText()).isNotEmpty();
     assertThat(student.path("email").asText()).isNotEmpty();
-    assertThat(student.has("program")).isTrue();
+    assertThat(student.has("programs")).isTrue();
   }
 
   @Test

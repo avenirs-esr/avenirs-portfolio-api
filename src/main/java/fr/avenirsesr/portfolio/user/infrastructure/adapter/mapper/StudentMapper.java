@@ -15,8 +15,8 @@ public class StudentMapper implements Mapper<StudentEntity, Student> {
     return StudentEntity.of(
         UserMapper.INSTANCE.fromDomain(student.getUser()),
         student.getInstitutionEmail(),
-        student.getInstitutionId(),
-        student.getGroupId(),
+        student.getInstitutionIds(),
+        student.getGroupIds(),
         student.getBio(),
         student.isHasUnseenNotification(),
         student.getSelfKnowledgeCategories(),
@@ -31,8 +31,8 @@ public class StudentMapper implements Mapper<StudentEntity, Student> {
     return Student.toDomain(
         UserMapper.INSTANCE.toDomain(studentEntity.getUser()),
         studentEntity.getInstitutionEmail(),
-        studentEntity.getInstitutionId(),
-        studentEntity.getGroupId(),
+        studentEntity.getInstitutionIds(),
+        studentEntity.getGroupIds(),
         studentEntity.getBio(),
         studentEntity.isHasUnseenNotification(),
         studentEntity.getSelfKnowledgeCategories() == null
@@ -54,8 +54,8 @@ public class StudentMapper implements Mapper<StudentEntity, Student> {
     return Student.toDomain(
         attributes.contains("user") ? UserMapper.INSTANCE.toDomain(studentEntity.getUser()) : null,
         studentEntity.getInstitutionEmail(),
-        studentEntity.getInstitutionId(),
-        studentEntity.getGroupId(),
+        studentEntity.getInstitutionIds(),
+        studentEntity.getGroupIds(),
         studentEntity.getBio(),
         studentEntity.isHasUnseenNotification(),
         studentEntity.getSelfKnowledgeCategories() == null

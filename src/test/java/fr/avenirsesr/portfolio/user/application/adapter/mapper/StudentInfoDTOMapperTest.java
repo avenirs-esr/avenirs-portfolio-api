@@ -11,6 +11,7 @@ import fr.avenirsesr.portfolio.user.application.adapter.dto.StudentInfoDTO;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.output.client.GroupClient;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -27,23 +28,27 @@ class StudentInfoDTOMapperTest {
   @InjectMocks private StudentInfoDTOMapper mapper;
 
   @Test
-  void should_map_identity_and_the_program_resolved_from_the_group() {
-    BddLogger.given("A student belonging to a student group");
-    UUID groupId = UUID.randomUUID();
-    Student student = StudentFixture.create().withGroupId(groupId).toModel();
-    GroupDTO program =
+  void should_map_identity_and_the_programs_resolved_from_the_groups() {
+    BddLogger.given("A student belonging to two student groups");
+    UUID groupId1 = UUID.randomUUID();
+    UUID groupId2 = UUID.randomUUID();
+    Student student = StudentFixture.create().withGroupIds(List.of(groupId1, groupId2)).toModel();
+    GroupDTO program1 =
         new GroupDTO(UUID.randomUUID(), "Licence Informatique", EGroupType.PROGRAM, null);
-    when(groupClient.getProgramOfGroup(groupId)).thenReturn(Optional.of(program));
+    GroupDTO program2 =
+        new GroupDTO(UUID.randomUUID(), "Licence Mathématiques", EGroupType.PROGRAM, null);
+    when(groupClient.getProgramOfGroup(groupId1)).thenReturn(Optional.of(program1));
+    when(groupClient.getProgramOfGroup(groupId2)).thenReturn(Optional.of(program2));
 
     BddLogger.when("mapping the student to a StudentInfoDTO");
     StudentInfoDTO dto = mapper.toDTO(student);
 
-    BddLogger.then("the identity and the program of that group are present");
+    BddLogger.then("the identity and the programs of those groups are present");
     assertThat(dto.id()).isEqualTo(student.getUser().getId());
     assertThat(dto.firstName()).isEqualTo(student.getUser().getFirstName());
     assertThat(dto.lastName()).isEqualTo(student.getUser().getLastName());
     assertThat(dto.email()).isEqualTo(student.getUser().getEmail());
-    assertThat(dto.program()).isEqualTo(program);
+    assertThat(dto.programs()).containsExactly(program1, program2);
   }
 
   @Test
@@ -54,13 +59,13 @@ class StudentInfoDTOMapperTest {
     BddLogger.when("mapping the student to a StudentInfoDTO");
     StudentInfoDTO dto = mapper.toDTO(student);
 
-    BddLogger.then("the program is null and no back-office call is made");
-    assertThat(dto.program()).isNull();
+    BddLogger.then("the programs are empty and no back-office call is made");
+    assertThat(dto.programs()).isEmpty();
     verifyNoInteractions(groupClient);
   }
 
   @Test
-  void should_map_a_null_program_when_the_back_office_does_not_know_the_group() {
+  void should_skip_a_group_that_the_back_office_does_not_know() {
     BddLogger.given("A student whose group is unknown to the back-office");
     UUID groupId = UUID.randomUUID();
     Student student = StudentFixture.create().withGroupId(groupId).toModel();
@@ -69,9 +74,9 @@ class StudentInfoDTOMapperTest {
     BddLogger.when("mapping the student to a StudentInfoDTO");
     StudentInfoDTO dto = mapper.toDTO(student);
 
-    BddLogger.then("the identity is still mapped and the program is null");
+    BddLogger.then("the identity is still mapped and the programs are empty");
     assertThat(dto.id()).isEqualTo(student.getUser().getId());
-    assertThat(dto.program()).isNull();
+    assertThat(dto.programs()).isEmpty();
   }
 
   @Test

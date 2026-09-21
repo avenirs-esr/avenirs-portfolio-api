@@ -1,0 +1,205 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+        http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!--
+        Staff/Student used to carry a single institution_id/group_id column. To let an activity's
+        visibility scope target several institutions/groups, they now carry lists, backed by join
+        tables. Existing single values are backfilled into the new tables before the old columns
+        are dropped, so no data is lost on upgrade. Rollback recreates the columns empty (as in
+        changelog_2026-07-10__decouple-file-from-business-entities.xml): a list can't be losslessly
+        collapsed back into a single column.
+    -->
+
+    <changeSet author="Nathan" id="add-student-institutions-table">
+        <createTable tableName="student_institutions">
+            <column name="student_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="institution_id" type="UUID"/>
+        </createTable>
+
+        <rollback>
+            <dropTable tableName="student_institutions"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="Nathan" id="add-student-institutions-fk">
+        <addForeignKeyConstraint
+                baseTableName="student_institutions"
+                baseColumnNames="student_id"
+                constraintName="FK_student_institutions_student"
+                referencedTableName="student"
+                referencedColumnNames="id"/>
+
+        <rollback>
+            <dropForeignKeyConstraint
+                    baseTableName="student_institutions"
+                    constraintName="FK_student_institutions_student"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="Nathan" id="add-student-groups-table">
+        <createTable tableName="student_groups">
+            <column name="student_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="group_id" type="UUID"/>
+        </createTable>
+
+        <rollback>
+            <dropTable tableName="student_groups"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="Nathan" id="add-student-groups-fk">
+        <addForeignKeyConstraint
+                baseTableName="student_groups"
+                baseColumnNames="student_id"
+                constraintName="FK_student_groups_student"
+                referencedTableName="student"
+                referencedColumnNames="id"/>
+
+        <rollback>
+            <dropForeignKeyConstraint
+                    baseTableName="student_groups"
+                    constraintName="FK_student_groups_student"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="Nathan" id="add-staff-institutions-table">
+        <createTable tableName="staff_institutions">
+            <column name="staff_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="institution_id" type="UUID"/>
+        </createTable>
+
+        <rollback>
+            <dropTable tableName="staff_institutions"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="Nathan" id="add-staff-institutions-fk">
+        <addForeignKeyConstraint
+                baseTableName="staff_institutions"
+                baseColumnNames="staff_id"
+                constraintName="FK_staff_institutions_staff"
+                referencedTableName="staff"
+                referencedColumnNames="id"/>
+
+        <rollback>
+            <dropForeignKeyConstraint
+                    baseTableName="staff_institutions"
+                    constraintName="FK_staff_institutions_staff"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="Nathan" id="add-staff-groups-table">
+        <createTable tableName="staff_groups">
+            <column name="staff_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="group_id" type="UUID"/>
+        </createTable>
+
+        <rollback>
+            <dropTable tableName="staff_groups"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="Nathan" id="add-staff-groups-fk">
+        <addForeignKeyConstraint
+                baseTableName="staff_groups"
+                baseColumnNames="staff_id"
+                constraintName="FK_staff_groups_staff"
+                referencedTableName="staff"
+                referencedColumnNames="id"/>
+
+        <rollback>
+            <dropForeignKeyConstraint
+                    baseTableName="staff_groups"
+                    constraintName="FK_staff_groups_staff"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="Nathan" id="backfill-student-institutions">
+        <sql>
+            INSERT INTO student_institutions (student_id, institution_id)
+            SELECT id, institution_id FROM student WHERE institution_id IS NOT NULL;
+        </sql>
+
+        <rollback>
+            <sql>DELETE FROM student_institutions;</sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="Nathan" id="backfill-student-groups">
+        <sql>
+            INSERT INTO student_groups (student_id, group_id)
+            SELECT id, group_id FROM student WHERE group_id IS NOT NULL;
+        </sql>
+
+        <rollback>
+            <sql>DELETE FROM student_groups;</sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="Nathan" id="backfill-staff-institutions">
+        <sql>
+            INSERT INTO staff_institutions (staff_id, institution_id)
+            SELECT id, institution_id FROM staff WHERE institution_id IS NOT NULL;
+        </sql>
+
+        <rollback>
+            <sql>DELETE FROM staff_institutions;</sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="Nathan" id="backfill-staff-groups">
+        <sql>
+            INSERT INTO staff_groups (staff_id, group_id)
+            SELECT id, group_id FROM staff WHERE group_id IS NOT NULL;
+        </sql>
+
+        <rollback>
+            <sql>DELETE FROM staff_groups;</sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="Nathan" id="drop-student-institution-and-group-columns">
+        <dropColumn tableName="student" columnName="institution_id"/>
+        <dropColumn tableName="student" columnName="group_id"/>
+
+        <rollback>
+            <addColumn tableName="student">
+                <column name="institution_id" type="UUID"/>
+            </addColumn>
+            <addColumn tableName="student">
+                <column name="group_id" type="UUID"/>
+            </addColumn>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="Nathan" id="drop-staff-institution-and-group-columns">
+        <dropColumn tableName="staff" columnName="institution_id"/>
+        <dropColumn tableName="staff" columnName="group_id"/>
+
+        <rollback>
+            <addColumn tableName="staff">
+                <column name="institution_id" type="UUID"/>
+            </addColumn>
+            <addColumn tableName="staff">
+                <column name="group_id" type="UUID"/>
+            </addColumn>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

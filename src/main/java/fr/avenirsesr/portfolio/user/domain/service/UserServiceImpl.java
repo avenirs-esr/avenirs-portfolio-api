@@ -19,6 +19,7 @@ import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
 import fr.avenirsesr.portfolio.user.domain.port.output.client.ExternalUserClient;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserPrincipalRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -203,6 +204,9 @@ public class UserServiceImpl implements UserService {
   }
 
   private void provisionCategoryRecord(UUID userId, ExternalUserDTO externalUser) {
+    List<UUID> institutionIds = affiliationIds(externalUser.institutionIds());
+    List<UUID> groupIds = affiliationIds(externalUser.groupIds());
+
     externalUser
         .categories()
         .forEach(
@@ -210,20 +214,32 @@ public class UserServiceImpl implements UserService {
               switch (category) {
                 case STUDENT ->
                     studentService.createStudent(
-                        userId,
-                        externalUser.email(),
-                        externalUser.institutionId(),
-                        externalUser.groupId(),
-                        null);
+                        userId, externalUser.email(), institutionIds, groupIds, null);
                 case STAFF ->
                     staffService.createStaff(
-                        userId,
-                        externalUser.email(),
-                        externalUser.institutionId(),
-                        externalUser.groupId(),
-                        null);
+                        userId, externalUser.email(), institutionIds, groupIds, null);
               }
             });
+  }
+
+  @Override
+  public void refreshAffiliations(String eppn) {
+    var externalUser =
+        externalUserClient.getByEppn(eppn).orElseThrow(ExternalUserNotFoundException::new);
+    var user = userPrincipalRepository.findByEppn(eppn).orElseThrow(UserNotFoundException::new);
+    List<UUID> institutionIds = affiliationIds(externalUser.institutionIds());
+    List<UUID> groupIds = affiliationIds(externalUser.groupIds());
+
+    if (studentService.existsById(user.getId())) {
+      studentService.updateAffiliations(user.getId(), institutionIds, groupIds);
+    }
+    if (staffService.existsById(user.getId())) {
+      staffService.updateAffiliations(user.getId(), institutionIds, groupIds);
+    }
+  }
+
+  private static List<UUID> affiliationIds(List<UUID> ids) {
+    return ids == null ? List.of() : ids;
   }
 
   /** Carries the user and its unseen-notification flag out of the category switch. */

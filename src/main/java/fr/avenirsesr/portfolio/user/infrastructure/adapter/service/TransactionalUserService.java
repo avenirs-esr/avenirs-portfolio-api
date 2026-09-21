@@ -44,6 +44,12 @@ public class TransactionalUserService implements UserService {
 
   @Override
   @Transactional
+  public void refreshAffiliations(String eppn) {
+    delegate.refreshAffiliations(eppn);
+  }
+
+  @Override
+  @Transactional
   public User createUser(UUID id, String firstname, String lastname, String email, String eppn) {
     return delegate.createUser(id, firstname, lastname, email, eppn);
   }

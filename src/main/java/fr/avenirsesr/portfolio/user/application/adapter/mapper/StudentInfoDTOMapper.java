@@ -1,9 +1,12 @@
 package fr.avenirsesr.portfolio.user.application.adapter.mapper;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
+import fr.avenirsesr.portfolio.common.group.application.adapter.dto.GroupDTO;
 import fr.avenirsesr.portfolio.user.application.adapter.dto.StudentInfoDTO;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.output.client.GroupClient;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -20,13 +23,16 @@ public class StudentInfoDTOMapper {
     }
 
     User user = student.getUser();
-    UUID groupId = student.getGroupId();
+    List<UUID> groupIds = student.getGroupIds();
+    List<GroupDTO> programs =
+        groupIds == null
+            ? List.of()
+            : groupIds.stream()
+                .map(groupClient::getProgramOfGroup)
+                .flatMap(Optional::stream)
+                .toList();
 
     return new StudentInfoDTO(
-        user.getId(),
-        user.getFirstName(),
-        user.getLastName(),
-        user.getEmail(),
-        groupId == null ? null : groupClient.getProgramOfGroup(groupId).orElse(null));
+        user.getId(), user.getFirstName(), user.getLastName(), user.getEmail(), programs);
   }
 }

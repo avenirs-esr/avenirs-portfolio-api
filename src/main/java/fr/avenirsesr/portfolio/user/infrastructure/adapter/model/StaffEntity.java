@@ -7,6 +7,8 @@ import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,11 +29,15 @@ public class StaffEntity extends AvenirsBaseEntity {
   @Column(nullable = false, name = "institution_email")
   private String institutionEmail;
 
+  @ElementCollection
+  @CollectionTable(name = "staff_institutions", joinColumns = @JoinColumn(name = "staff_id"))
   @Column(name = "institution_id")
-  private UUID institutionId;
+  private List<UUID> institutionIds = new ArrayList<>();
 
+  @ElementCollection
+  @CollectionTable(name = "staff_groups", joinColumns = @JoinColumn(name = "staff_id"))
   @Column(name = "group_id")
-  private UUID groupId;
+  private List<UUID> groupIds = new ArrayList<>();
 
   @Column(name = "has_unseen_notification", nullable = false)
   private boolean hasUnseenNotification;
@@ -48,8 +54,8 @@ public class StaffEntity extends AvenirsBaseEntity {
       UUID id,
       UserEntity user,
       String institutionEmail,
-      UUID institutionId,
-      UUID groupId,
+      List<UUID> institutionIds,
+      List<UUID> groupIds,
       String bio,
       boolean hasUnseenNotification,
       FileEntity coverPicture,
@@ -60,8 +66,8 @@ public class StaffEntity extends AvenirsBaseEntity {
     this.user = user;
     this.bio = bio;
     this.institutionEmail = institutionEmail;
-    this.institutionId = institutionId;
-    this.groupId = groupId;
+    this.institutionIds = institutionIds;
+    this.groupIds = groupIds;
     this.hasUnseenNotification = hasUnseenNotification;
     this.coverPicture = coverPicture;
     this.profilePicture = profilePicture;
@@ -72,8 +78,8 @@ public class StaffEntity extends AvenirsBaseEntity {
   public static StaffEntity of(
       UserEntity user,
       String institutionEmail,
-      UUID institutionId,
-      UUID groupId,
+      List<UUID> institutionIds,
+      List<UUID> groupIds,
       String bio,
       boolean hasUnseenNotification,
       FileEntity coverPicture,
@@ -84,8 +90,8 @@ public class StaffEntity extends AvenirsBaseEntity {
         user.getId(),
         user,
         institutionEmail,
-        institutionId,
-        groupId,
+        institutionIds,
+        groupIds,
         bio,
         hasUnseenNotification,
         coverPicture,

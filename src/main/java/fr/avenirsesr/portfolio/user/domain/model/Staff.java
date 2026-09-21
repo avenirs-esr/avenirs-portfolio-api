@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -18,8 +19,8 @@ public class Staff extends AvenirsBaseModel {
 
   private String bio;
   private String institutionEmail;
-  private UUID institutionId;
-  private UUID groupId;
+  private List<UUID> institutionIds;
+  private List<UUID> groupIds;
   private boolean hasUnseenNotification;
 
   @Getter(AccessLevel.NONE)
@@ -31,8 +32,8 @@ public class Staff extends AvenirsBaseModel {
   private Staff(
       User user,
       String institutionEmail,
-      UUID institutionId,
-      UUID groupId,
+      List<UUID> institutionIds,
+      List<UUID> groupIds,
       String bio,
       boolean hasUnseenNotification,
       File coverPicture,
@@ -43,20 +44,24 @@ public class Staff extends AvenirsBaseModel {
     this.user = user;
     this.bio = bio;
     this.institutionEmail = institutionEmail;
-    this.institutionId = institutionId;
-    this.groupId = groupId;
+    this.institutionIds = institutionIds;
+    this.groupIds = groupIds;
     this.hasUnseenNotification = hasUnseenNotification;
     this.coverPicture = coverPicture;
     this.profilePicture = profilePicture;
   }
 
   public static Staff create(
-      User user, String institutionEmail, UUID institutionId, UUID groupId, String bio) {
+      User user,
+      String institutionEmail,
+      List<UUID> institutionIds,
+      List<UUID> groupIds,
+      String bio) {
     return new Staff(
         user,
         institutionEmail,
-        institutionId,
-        groupId,
+        institutionIds,
+        groupIds,
         bio,
         false,
         null,
@@ -68,8 +73,8 @@ public class Staff extends AvenirsBaseModel {
   public static Staff toDomain(
       User user,
       String institutionEmail,
-      UUID institutionId,
-      UUID groupId,
+      List<UUID> institutionIds,
+      List<UUID> groupIds,
       String bio,
       boolean hasUnseenNotification,
       File coverPicture,
@@ -79,8 +84,8 @@ public class Staff extends AvenirsBaseModel {
     return new Staff(
         user,
         institutionEmail,
-        institutionId,
-        groupId,
+        institutionIds,
+        groupIds,
         bio,
         hasUnseenNotification,
         coverPicture,
