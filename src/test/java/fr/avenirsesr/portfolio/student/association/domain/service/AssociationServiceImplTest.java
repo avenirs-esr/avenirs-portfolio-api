@@ -18,6 +18,8 @@ import fr.avenirsesr.portfolio.student.association.domain.data.AssociationData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.exception.AssociationAlreadyExistException;
 import fr.avenirsesr.portfolio.student.association.domain.exception.AssociationDoesNotExistException;
+import fr.avenirsesr.portfolio.student.association.domain.filter.AssociationSearchFilter;
+import fr.avenirsesr.portfolio.student.association.domain.filter.TraceAssociationSearchFilter;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
@@ -467,7 +469,7 @@ class AssociationServiceImplTest {
                     associatedTraceId,
                     declaredSkillProgressId,
                     EAssociationType.TRACE_DECLARED_SKILL)));
-    when(traceHandler.search("kw", pageCriteria))
+    when(traceHandler.search("kw", AssociationSearchFilter.NONE, pageCriteria))
         .thenReturn(
             new PagedResult<>(
                 List.of(
@@ -481,6 +483,7 @@ class AssociationServiceImplTest {
             EAssociationContextType.DECLARED_SKILL,
             EAssociationContextType.TRACE,
             "kw",
+            AssociationSearchFilter.NONE,
             pageCriteria);
 
     verify(declaredSkillHandler).checkLoggedInStudentOwns(List.of(declaredSkillProgressId));
@@ -499,7 +502,7 @@ class AssociationServiceImplTest {
     when(associationRepository.findAllOf(
             traceId, Trace.class, List.of(EAssociationType.DECLARED_ACTIVITY_TRACE)))
         .thenReturn(List.of());
-    when(declaredActivityHandler.search("kw", pageCriteria))
+    when(declaredActivityHandler.search("kw", AssociationSearchFilter.NONE, pageCriteria))
         .thenReturn(
             new PagedResult<>(
                 List.of(
@@ -513,11 +516,45 @@ class AssociationServiceImplTest {
             EAssociationContextType.TRACE,
             EAssociationContextType.DECLARED_ACTIVITY,
             "kw",
+            AssociationSearchFilter.NONE,
             pageCriteria);
 
     assertThat(result.content())
         .containsExactly(
             new AssociationSearchResultData(declaredActivityId, "Activity", "EXPERIENCES", true));
+  }
+
+  @Test
+  void searchForAssociation_should_pass_the_filter_to_the_searched_context() {
+    UUID declaredSkillProgressId = UUID.randomUUID();
+    UUID associatedTraceId = UUID.randomUUID();
+    var filter = new TraceAssociationSearchFilter(true);
+    var pageCriteria = new PageCriteria(0, 10);
+
+    when(associationRepository.findAllOf(
+            declaredSkillProgressId,
+            DeclaredSkillProgress.class,
+            List.of(EAssociationType.TRACE_DECLARED_SKILL)))
+        .thenReturn(List.of());
+    when(traceHandler.search("kw", filter, pageCriteria))
+        .thenReturn(
+            new PagedResult<>(
+                List.of(
+                    new AssociationSearchResultData(associatedTraceId, "associated", null, false)),
+                new PageInfo(0, 10, 1)));
+
+    var result =
+        service.searchForAssociation(
+            declaredSkillProgressId,
+            EAssociationContextType.DECLARED_SKILL,
+            EAssociationContextType.TRACE,
+            "kw",
+            filter,
+            pageCriteria);
+
+    assertThat(result.content())
+        .containsExactly(
+            new AssociationSearchResultData(associatedTraceId, "associated", null, false));
   }
 
   @Test
@@ -531,6 +568,7 @@ class AssociationServiceImplTest {
                     EAssociationContextType.TRACE,
                     EAssociationContextType.TRACE,
                     "kw",
+                    AssociationSearchFilter.NONE,
                     new PageCriteria(0, 10)))
         .isInstanceOf(WrongClassTypeArgumentException.class);
 
@@ -542,7 +580,7 @@ class AssociationServiceImplTest {
     UUID declaredSkillProgressId = UUID.randomUUID();
     var pageCriteria = new PageCriteria(0, 10);
 
-    when(declaredSkillHandler.search("kw", pageCriteria))
+    when(declaredSkillHandler.search("kw", AssociationSearchFilter.NONE, pageCriteria))
         .thenReturn(
             new PagedResult<>(
                 List.of(
@@ -555,6 +593,7 @@ class AssociationServiceImplTest {
             EAssociationContextType.DECLARED_EXPERIENCE,
             EAssociationContextType.DECLARED_SKILL,
             "kw",
+            AssociationSearchFilter.NONE,
             pageCriteria);
 
     assertThat(result.content())
@@ -570,7 +609,7 @@ class AssociationServiceImplTest {
     UUID declaredActivityId = UUID.randomUUID();
     var pageCriteria = new PageCriteria(0, 10);
 
-    when(declaredActivityHandler.search(null, pageCriteria))
+    when(declaredActivityHandler.search(null, AssociationSearchFilter.NONE, pageCriteria))
         .thenReturn(
             new PagedResult<>(
                 List.of(
@@ -583,6 +622,7 @@ class AssociationServiceImplTest {
             EAssociationContextType.TRACE,
             EAssociationContextType.DECLARED_ACTIVITY,
             null,
+            AssociationSearchFilter.NONE,
             pageCriteria);
 
     assertThat(result.content())
@@ -592,14 +632,45 @@ class AssociationServiceImplTest {
   }
 
   @Test
+  void searchForAssociationWithNewElement_should_pass_the_filter_to_the_searched_context() {
+    UUID unassociatedTraceId = UUID.randomUUID();
+    var filter = new TraceAssociationSearchFilter(false);
+    var pageCriteria = new PageCriteria(0, 10);
+
+    when(traceHandler.search("kw", filter, pageCriteria))
+        .thenReturn(
+            new PagedResult<>(
+                List.of(
+                    new AssociationSearchResultData(
+                        unassociatedTraceId, "unassociated", null, false)),
+                new PageInfo(0, 10, 1)));
+
+    var result =
+        service.searchForAssociationWithNewElement(
+            EAssociationContextType.DECLARED_SKILL,
+            EAssociationContextType.TRACE,
+            "kw",
+            filter,
+            pageCriteria);
+
+    assertThat(result.content())
+        .containsExactly(
+            new AssociationSearchResultData(unassociatedTraceId, "unassociated", null, false));
+  }
+
+  @Test
   void searchForAssociationWithNewElement_should_not_check_the_ownership_of_the_new_element() {
     var pageCriteria = new PageCriteria(0, 10);
 
-    when(traceHandler.search("kw", pageCriteria))
+    when(traceHandler.search("kw", AssociationSearchFilter.NONE, pageCriteria))
         .thenReturn(new PagedResult<>(List.of(), new PageInfo(0, 10, 0)));
 
     service.searchForAssociationWithNewElement(
-        EAssociationContextType.DECLARED_SKILL, EAssociationContextType.TRACE, "kw", pageCriteria);
+        EAssociationContextType.DECLARED_SKILL,
+        EAssociationContextType.TRACE,
+        "kw",
+        AssociationSearchFilter.NONE,
+        pageCriteria);
 
     verify(declaredSkillHandler, never()).checkLoggedInStudentOwns(anyList());
   }
@@ -613,10 +684,11 @@ class AssociationServiceImplTest {
                     EAssociationContextType.DECLARED_ACTIVITY,
                     EAssociationContextType.DECLARED_EXPERIENCE,
                     "kw",
+                    AssociationSearchFilter.NONE,
                     new PageCriteria(0, 10)))
         .isInstanceOf(WrongClassTypeArgumentException.class);
 
-    verify(declaredExperienceHandler, never()).search(any(), any());
+    verify(declaredExperienceHandler, never()).search(any(), any(), any());
     verifyNoInteractions(associationRepository);
   }
 }

@@ -2003,6 +2003,107 @@ class AssociationControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
+  void shouldSearchOnlyTheAssociatedTracesWhenFilteringOnAssociatedTraces() throws Exception {
+    BddLogger.given("an associated and an unassociated trace of the student");
+
+    String keyword = "Trace filtered on the associated traces";
+    String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
+    String otherExperienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
+    UUID associatedTraceId = createTraceAs(keyword + " - linked", studentPayload, studentSignature);
+    UUID unassociatedTraceId = createTraceAs(keyword + " - free", studentPayload, studentSignature);
+    associateExperienceWithTraceAndGetAssociationId(otherExperienceId, associatedTraceId);
+
+    BddLogger.when("searching the traces to associate filtered on the associated traces");
+
+    JsonNode data =
+        searchTracesForAssociation(
+            SEARCH_PATH,
+            new Object[] {"DECLARED_EXPERIENCE", experienceId, "TRACE"},
+            keyword,
+            true);
+
+    BddLogger.then("it should return only the associated trace");
+    assertThat(findSearchResultById(data, associatedTraceId.toString())).isNotNull();
+    assertThat(findSearchResultById(data, unassociatedTraceId.toString())).isNull();
+  }
+
+  @Test
+  void shouldSearchOnlyTheUnassociatedTracesWhenFilteringOnUnassociatedTraces() throws Exception {
+    BddLogger.given("an associated and an unassociated trace of the student");
+
+    String keyword = "Trace filtered on the unassociated traces";
+    String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
+    String otherExperienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
+    UUID associatedTraceId = createTraceAs(keyword + " - linked", studentPayload, studentSignature);
+    UUID unassociatedTraceId = createTraceAs(keyword + " - free", studentPayload, studentSignature);
+    associateExperienceWithTraceAndGetAssociationId(otherExperienceId, associatedTraceId);
+
+    BddLogger.when("searching the traces to associate filtered on the unassociated traces");
+
+    JsonNode data =
+        searchTracesForAssociation(
+            SEARCH_PATH,
+            new Object[] {"DECLARED_EXPERIENCE", experienceId, "TRACE"},
+            keyword,
+            false);
+
+    BddLogger.then("it should return only the unassociated trace");
+    assertThat(findSearchResultById(data, unassociatedTraceId.toString())).isNotNull();
+    assertThat(findSearchResultById(data, associatedTraceId.toString())).isNull();
+  }
+
+  @Test
+  void shouldSearchOnlyTheUnassociatedTracesForANewElementWhenFilteringOnUnassociatedTraces()
+      throws Exception {
+    BddLogger.given("an associated and an unassociated trace of the student");
+
+    String keyword = "Trace filtered on the unassociated traces for a new element";
+    String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
+    UUID associatedTraceId = createTraceAs(keyword + " - linked", studentPayload, studentSignature);
+    UUID unassociatedTraceId = createTraceAs(keyword + " - free", studentPayload, studentSignature);
+    associateExperienceWithTraceAndGetAssociationId(experienceId, associatedTraceId);
+
+    BddLogger.when(
+        "searching the traces to associate with a declared experience that does not exist yet"
+            + " filtered on the unassociated traces");
+
+    JsonNode data =
+        searchTracesForAssociation(
+            NEW_ELEMENT_SEARCH_PATH, new Object[] {"DECLARED_EXPERIENCE", "TRACE"}, keyword, false);
+
+    BddLogger.then("it should return only the unassociated trace");
+    assertThat(findSearchResultById(data, unassociatedTraceId.toString())).isNotNull();
+    assertThat(findSearchResultById(data, associatedTraceId.toString())).isNull();
+  }
+
+  private JsonNode searchTracesForAssociation(
+      String path, Object[] uriVariables, String keyword, boolean isAssociated) throws Exception {
+    String body =
+        webTestClient
+            .get()
+            .uri(
+                uriBuilder ->
+                    uriBuilder
+                        .path(path)
+                        .queryParam("keyword", keyword)
+                        .queryParam("isAssociated", isAssociated)
+                        .queryParam("page", "0")
+                        .queryParam("pageSize", "100")
+                        .build(uriVariables))
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+            .accept(APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    return objectMapper.readTree(body).get("data");
+  }
+
+  @Test
   void shouldReturn404WhenSearchingTracesForNonExistentDeclaredExperience() {
     BddLogger.given("a non-existent declared experience");
 

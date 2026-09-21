@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociatedElementsData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
+import fr.avenirsesr.portfolio.student.association.domain.filter.AssociationSearchFilter;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
@@ -38,12 +39,14 @@ public interface AssociationService {
       EAssociationContextType contextType,
       EAssociationContextType associatedContextType,
       String keyword,
+      AssociationSearchFilter filter,
       PageCriteria pageCriteria);
 
   PagedResult<AssociationSearchResultData> searchForAssociationWithNewElement(
       EAssociationContextType contextType,
       EAssociationContextType associatedContextType,
       String keyword,
+      AssociationSearchFilter filter,
       PageCriteria pageCriteria);
 
   void deleteAllByIds(List<UUID> ids);

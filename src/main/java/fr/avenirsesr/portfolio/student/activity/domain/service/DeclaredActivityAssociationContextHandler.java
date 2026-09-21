@@ -12,6 +12,7 @@ import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivi
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociatedElementsData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.exception.MaximumAssociationReachedException;
+import fr.avenirsesr.portfolio.student.association.domain.filter.AssociationSearchFilter;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
@@ -62,7 +63,7 @@ public class DeclaredActivityAssociationContextHandler implements AssociationCon
 
   @Override
   public PagedResult<AssociationSearchResultData> search(
-      String keyword, PageCriteria pageCriteria) {
+      String keyword, AssociationSearchFilter filter, PageCriteria pageCriteria) {
     var declaredActivities = declaredActivityService.searchDeclaredActivity(keyword, pageCriteria);
 
     return new PagedResult<>(

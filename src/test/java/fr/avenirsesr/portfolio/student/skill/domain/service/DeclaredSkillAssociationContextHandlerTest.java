@@ -12,6 +12,7 @@ import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternal
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
+import fr.avenirsesr.portfolio.student.association.domain.filter.AssociationSearchFilter;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
@@ -96,7 +97,7 @@ class DeclaredSkillAssociationContextHandlerTest {
     when(declaredSkillProgressService.searchDeclaredSkill("kw", pageCriteria))
         .thenReturn(new PagedResult<>(List.of(declaredSkillProgress), new PageInfo(0, 10, 1)));
 
-    var result = handler.search("kw", pageCriteria);
+    var result = handler.search("kw", AssociationSearchFilter.NONE, pageCriteria);
 
     assertThat(result.content())
         .containsExactly(

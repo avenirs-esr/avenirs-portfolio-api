@@ -24,6 +24,7 @@ import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActi
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.exception.MaximumAssociationReachedException;
+import fr.avenirsesr.portfolio.student.association.domain.filter.AssociationSearchFilter;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
@@ -208,7 +209,7 @@ class DeclaredActivityAssociationContextHandlerTest {
     when(declaredActivityService.searchDeclaredActivity("kw", pageCriteria))
         .thenReturn(new PagedResult<>(List.of(declaredActivity), new PageInfo(0, 10, 1)));
 
-    var result = handler.search("kw", pageCriteria);
+    var result = handler.search("kw", AssociationSearchFilter.NONE, pageCriteria);
 
     assertThat(result.content())
         .containsExactly(
