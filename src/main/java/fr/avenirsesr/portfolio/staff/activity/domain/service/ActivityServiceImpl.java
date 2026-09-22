@@ -24,10 +24,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityDashboardData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityPresentationData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityStaffOverviewData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityWithStudentStatusData;
-import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityDatesException;
-import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityDraftNotFoundException;
-import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityNotFoundException;
-import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityUnpublishedException;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.*;
 import fr.avenirsesr.portfolio.staff.activity.domain.mapper.ActivityPresentationDataMapper;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityDraft;
@@ -535,6 +532,10 @@ public class ActivityServiceImpl implements ActivityService {
       throw new UserNotAuthorizedException();
     }
 
+    var activityDraft = activityDraftRepository.findById(activityId);
+    if (activityDraft.isPresent()) {
+      return activityDraft.get();
+    }
     var draft =
         ActivityDraft.toDomain(
             activityId,
