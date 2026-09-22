@@ -84,7 +84,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.student.activity.application.adapt
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.program.infrastructure.adapter.specification,DeclaredProgramSpecification,8,69,3,9,3,13,4,8,1,5
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.program.domain.data,DeclaredProgramAssociationData,0,9,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.association.infrastructure.adapter.repository,AssociationDatabaseRepository,55,187,7,17,11,43,8,11,1,6
-avenirs-portfolio-api,fr.avenirsesr.portfolio.student.experience.infrastructure.adapter.specification,DeclaredExperienceSpecification,21,93,5,7,4,21,5,10,1,8
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.experience.infrastructure.adapter.specification,DeclaredExperienceSpecification,6,108,3,9,2,23,4,11,1,8
 avenirs-portfolio-api,fr.avenirsesr.portfolio.file.infrastructure.adapter.repository,FileDatabaseRepository,0,7,0,0,0,2,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.activity.domain.data,DeclaredActivityDetailsData,0,9,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.activity.domain.data,FeedbackData,0,36,0,0,0,1,0,1,0,1
