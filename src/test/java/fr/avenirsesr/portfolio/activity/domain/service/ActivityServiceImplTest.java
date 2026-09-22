@@ -518,6 +518,116 @@ class ActivityServiceImplTest {
     }
 
     @Nested
+    class WhenUpdatingActivityDraftTargeting {
+
+      UUID draftId;
+      Staff loggedInStaff;
+      ActivityDraft draft;
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("updating the targeting of an activity draft");
+        draftId = UUID.randomUUID();
+        loggedInStaff = mock(Staff.class);
+        draft = mock(ActivityDraft.class);
+        when(loggedInUserService.getLoggedInStaff()).thenReturn(loggedInStaff);
+      }
+
+      @Nested
+      class AndTheDraftExists {
+
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("the draft exists");
+          when(activityDraftRepository.findById(draftId)).thenReturn(Optional.of(draft));
+        }
+
+        @Nested
+        class AndTheLoggedInStaffIsTheAuthor {
+
+          @BeforeEach
+          void setupAnd() {
+            BddLogger.and("the logged-in staff is the author");
+            when(draft.getAuthor()).thenReturn(loggedInStaff);
+            when(activityDraftRepository.save(draft)).thenReturn(draft);
+          }
+
+          @Test
+          void thenItShouldSetTheProvidedTargetingAndSave() {
+            BddLogger.then("the provided targeting should be set and saved");
+
+            List<UUID> institutionIds = List.of(UUID.randomUUID());
+            List<UUID> groupIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+
+            ActivityDraft result =
+                activityService.updateActivityDraftTargeting(draftId, institutionIds, groupIds);
+
+            verify(draft).setTargetInstitutionIds(institutionIds);
+            verify(draft).setTargetGroupIds(groupIds);
+            verify(activityDraftRepository).save(draft);
+            assertEquals(draft, result);
+          }
+
+          @Test
+          void thenItShouldClearTargetingWhenNullIsPassed() {
+            BddLogger.then("the targeting should be cleared when null lists are passed");
+
+            activityService.updateActivityDraftTargeting(draftId, null, null);
+
+            verify(draft).setTargetInstitutionIds(List.of());
+            verify(draft).setTargetGroupIds(List.of());
+          }
+        }
+
+        @Nested
+        class AndTheLoggedInStaffIsNotTheAuthor {
+
+          @BeforeEach
+          void setupAnd() {
+            BddLogger.and("the logged-in staff is not the author");
+            when(draft.getAuthor()).thenReturn(mock(Staff.class));
+          }
+
+          @Test
+          void thenItShouldThrowActivityDraftNotFoundException() {
+            BddLogger.then("the service should throw ActivityDraftNotFoundException");
+
+            assertThrows(
+                ActivityDraftNotFoundException.class,
+                () ->
+                    activityService.updateActivityDraftTargeting(
+                        draftId, List.of(UUID.randomUUID()), List.of()));
+
+            verify(activityDraftRepository, never()).save(any());
+          }
+        }
+      }
+
+      @Nested
+      class AndTheDraftDoesNotExist {
+
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("the draft does not exist");
+          when(activityDraftRepository.findById(draftId)).thenReturn(Optional.empty());
+        }
+
+        @Test
+        void thenItShouldThrowActivityDraftNotFoundException() {
+          BddLogger.then("the service should throw ActivityDraftNotFoundException");
+
+          assertThrows(
+              ActivityDraftNotFoundException.class,
+              () ->
+                  activityService.updateActivityDraftTargeting(
+                      draftId, List.of(UUID.randomUUID()), List.of()));
+
+          verify(activityDraftRepository, never()).save(any());
+        }
+      }
+    }
+
+    @Nested
     class WhenAddingADraftFile {
 
       UUID draftId;

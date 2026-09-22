@@ -13,6 +13,7 @@ import fr.avenirsesr.portfolio.shared.application.adapter.mapper.FileDTOMapper;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.*;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.*;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDraftCreationRequest;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDraftTargetingUpdateRequest;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDraftUpdateRequest;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDuplicationRequest;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.response.ActivityDraftCreationResponse;
@@ -347,6 +348,25 @@ public class ActivityController {
             body.enableReflection(),
             body.links(),
             body.enableCompletionPeriod());
+    return ResponseEntity.ok(new ActivityDraftUpdateResponse(draft.getId()));
+  }
+
+  @PreAuthorize("hasAuthority('activity:update')")
+  @PatchMapping("/draft/{activityDraftId}/targeting")
+  public ResponseEntity<ActivityDraftUpdateResponse> updateActivityDraftTargeting(
+      Principal principal,
+      @PathVariable UUID activityDraftId,
+      @RequestBody ActivityDraftTargetingUpdateRequest body) {
+    log.debug(
+        "Received request to update targeting of activity draft by user [{}] for draft {} body :"
+            + " {}",
+        principal.getName(),
+        activityDraftId,
+        body);
+
+    var draft =
+        activityService.updateActivityDraftTargeting(
+            activityDraftId, body.targetInstitutionIds(), body.targetGroupIds());
     return ResponseEntity.ok(new ActivityDraftUpdateResponse(draft.getId()));
   }
 

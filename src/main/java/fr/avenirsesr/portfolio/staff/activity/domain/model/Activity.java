@@ -43,6 +43,10 @@ public class Activity extends AvenirsBaseModel {
   private List<String> links;
   private List<File> files;
 
+  private List<UUID> targetInstitutionIds = new ArrayList<>();
+
+  private List<UUID> targetGroupIds = new ArrayList<>();
+
   private Activity(
       UUID id,
       Staff author,

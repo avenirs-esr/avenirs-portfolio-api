@@ -1,0 +1,116 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet author="nathp" id="add-activity-target-institutions-table">
+        <createTable tableName="activity_target_institutions">
+            <column name="activity_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="institution_id" type="UUID"/>
+        </createTable>
+
+        <rollback>
+            <dropTable tableName="activity_target_institutions"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="nathp" id="add-activity-target-institutions-fk">
+        <addForeignKeyConstraint
+                baseTableName="activity_target_institutions"
+                baseColumnNames="activity_id"
+                constraintName="FK_activity_target_institutions_activity"
+                referencedTableName="activity"
+                referencedColumnNames="id"/>
+
+        <rollback>
+            <dropForeignKeyConstraint
+                    baseTableName="activity_target_institutions"
+                    constraintName="FK_activity_target_institutions_activity"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="nathp" id="add-activity-target-groups-table">
+        <createTable tableName="activity_target_groups">
+            <column name="activity_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="group_id" type="UUID"/>
+        </createTable>
+
+        <rollback>
+            <dropTable tableName="activity_target_groups"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="nathp" id="add-activity-target-groups-fk">
+        <addForeignKeyConstraint
+                baseTableName="activity_target_groups"
+                baseColumnNames="activity_id"
+                constraintName="FK_activity_target_groups_activity"
+                referencedTableName="activity"
+                referencedColumnNames="id"/>
+
+        <rollback>
+            <dropForeignKeyConstraint
+                    baseTableName="activity_target_groups"
+                    constraintName="FK_activity_target_groups_activity"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="nathp" id="add-activity-draft-target-institutions-table">
+        <createTable tableName="activity_draft_target_institutions">
+            <column name="activity_draft_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="institution_id" type="UUID"/>
+        </createTable>
+
+        <rollback>
+            <dropTable tableName="activity_draft_target_institutions"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="nathp" id="add-activity-draft-target-institutions-fk">
+        <addForeignKeyConstraint
+                baseTableName="activity_draft_target_institutions"
+                baseColumnNames="activity_draft_id"
+                constraintName="FK_activity_draft_target_institutions_draft"
+                referencedTableName="activity_draft"
+                referencedColumnNames="id"/>
+
+        <rollback>
+            <dropForeignKeyConstraint
+                    baseTableName="activity_draft_target_institutions"
+                    constraintName="FK_activity_draft_target_institutions_draft"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="nathp" id="add-activity-draft-target-groups-table">
+        <createTable tableName="activity_draft_target_groups">
+            <column name="activity_draft_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="group_id" type="UUID"/>
+        </createTable>
+
+        <rollback>
+            <dropTable tableName="activity_draft_target_groups"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="nathp" id="add-activity-draft-target-groups-fk">
+        <addForeignKeyConstraint
+                baseTableName="activity_draft_target_groups"
+                baseColumnNames="activity_draft_id"
+                constraintName="FK_activity_draft_target_groups_draft"
+                referencedTableName="activity_draft"
+                referencedColumnNames="id"/>
+
+        <rollback>
+            <dropForeignKeyConstraint
+                    baseTableName="activity_draft_target_groups"
+                    constraintName="FK_activity_draft_target_groups_draft"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

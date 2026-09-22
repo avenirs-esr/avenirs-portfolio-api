@@ -13,75 +13,89 @@ public class ActivityMapper implements Mapper<ActivityEntity, Activity> {
 
   @Override
   public ActivityEntity fromDomain(Activity domain) {
-    return ActivityEntity.of(
-        domain.getId(),
-        StaffMapper.INSTANCE.fromDomain(domain.getAuthor()),
-        domain.getTitle(),
-        domain.getThematic(),
-        domain.getSummary(),
-        domain.getStatus(),
-        domain.getDescription(),
-        domain.getRecommendedCompletionContexts().orElse(null),
-        domain.getStartDate().orElse(null),
-        domain.getEndDate().orElse(null),
-        domain.getTraceAllowedAssociations(),
-        domain.getFeedbackAllowedIterations(),
-        domain.isEnableReflection(),
-        domain.getBanner().map(FileMapper.INSTANCE::fromDomain).orElse(null),
-        domain.getLinks(),
-        domain.getFiles().stream().map(FileMapper.INSTANCE::fromDomain).toList(),
-        domain.getCreatedAt(),
-        domain.getUpdatedAt());
+    var entity =
+        ActivityEntity.of(
+            domain.getId(),
+            StaffMapper.INSTANCE.fromDomain(domain.getAuthor()),
+            domain.getTitle(),
+            domain.getThematic(),
+            domain.getSummary(),
+            domain.getStatus(),
+            domain.getDescription(),
+            domain.getRecommendedCompletionContexts().orElse(null),
+            domain.getStartDate().orElse(null),
+            domain.getEndDate().orElse(null),
+            domain.getTraceAllowedAssociations(),
+            domain.getFeedbackAllowedIterations(),
+            domain.isEnableReflection(),
+            domain.getBanner().map(FileMapper.INSTANCE::fromDomain).orElse(null),
+            domain.getLinks(),
+            domain.getFiles().stream().map(FileMapper.INSTANCE::fromDomain).toList(),
+            domain.getCreatedAt(),
+            domain.getUpdatedAt());
+    entity.setTargetInstitutionIds(domain.getTargetInstitutionIds());
+    entity.setTargetGroupIds(domain.getTargetGroupIds());
+    return entity;
   }
 
   @Override
   public Activity toDomain(ActivityEntity entity) {
-    return Activity.toDomain(
-        entity.getId(),
-        StaffMapper.INSTANCE.toDomain(entity.getAuthor()),
-        entity.getTitle(),
-        entity.getThematic(),
-        entity.getSummary(),
-        entity.getStatus(),
-        entity.getDescription(),
-        entity.getRecommendedCompletionContexts(),
-        entity.getStartDate(),
-        entity.getEndDate(),
-        entity.isEnableReflection(),
-        entity.getTraceAllowedAssociations(),
-        entity.getFeedbackAllowedIterations(),
-        entity.getBanner() == null ? null : FileMapper.INSTANCE.toDomain(entity.getBanner()),
-        entity.getLinks(),
-        entity.getFiles().stream().map(FileMapper.INSTANCE::toDomain).toList(),
-        entity.getCreatedAt(),
-        entity.getUpdatedAt());
+    var domain =
+        Activity.toDomain(
+            entity.getId(),
+            StaffMapper.INSTANCE.toDomain(entity.getAuthor()),
+            entity.getTitle(),
+            entity.getThematic(),
+            entity.getSummary(),
+            entity.getStatus(),
+            entity.getDescription(),
+            entity.getRecommendedCompletionContexts(),
+            entity.getStartDate(),
+            entity.getEndDate(),
+            entity.isEnableReflection(),
+            entity.getTraceAllowedAssociations(),
+            entity.getFeedbackAllowedIterations(),
+            entity.getBanner() == null ? null : FileMapper.INSTANCE.toDomain(entity.getBanner()),
+            entity.getLinks(),
+            entity.getFiles().stream().map(FileMapper.INSTANCE::toDomain).toList(),
+            entity.getCreatedAt(),
+            entity.getUpdatedAt());
+    domain.setTargetInstitutionIds(entity.getTargetInstitutionIds());
+    domain.setTargetGroupIds(entity.getTargetGroupIds());
+    return domain;
   }
 
   @Override
   public Activity toDomain(ActivityEntity entity, EntityGrapher<?> graph) {
     var attributes = graph.attributes();
-    return Activity.toDomain(
-        entity.getId(),
-        attributes.contains("author") ? StaffMapper.INSTANCE.toDomain(entity.getAuthor()) : null,
-        entity.getTitle(),
-        entity.getThematic(),
-        entity.getSummary(),
-        entity.getStatus(),
-        entity.getDescription(),
-        entity.getRecommendedCompletionContexts(),
-        entity.getStartDate(),
-        entity.getEndDate(),
-        entity.isEnableReflection(),
-        entity.getTraceAllowedAssociations(),
-        entity.getFeedbackAllowedIterations(),
-        attributes.contains("banner") && entity.getBanner() != null
-            ? FileMapper.INSTANCE.toDomain(entity.getBanner(), graph)
-            : null,
-        entity.getLinks(),
-        attributes.contains("files")
-            ? entity.getFiles().stream().map(FileMapper.INSTANCE::toDomain).toList()
-            : List.of(),
-        entity.getCreatedAt(),
-        entity.getUpdatedAt());
+    var domain =
+        Activity.toDomain(
+            entity.getId(),
+            attributes.contains("author")
+                ? StaffMapper.INSTANCE.toDomain(entity.getAuthor())
+                : null,
+            entity.getTitle(),
+            entity.getThematic(),
+            entity.getSummary(),
+            entity.getStatus(),
+            entity.getDescription(),
+            entity.getRecommendedCompletionContexts(),
+            entity.getStartDate(),
+            entity.getEndDate(),
+            entity.isEnableReflection(),
+            entity.getTraceAllowedAssociations(),
+            entity.getFeedbackAllowedIterations(),
+            attributes.contains("banner") && entity.getBanner() != null
+                ? FileMapper.INSTANCE.toDomain(entity.getBanner(), graph)
+                : null,
+            entity.getLinks(),
+            attributes.contains("files")
+                ? entity.getFiles().stream().map(FileMapper.INSTANCE::toDomain).toList()
+                : List.of(),
+            entity.getCreatedAt(),
+            entity.getUpdatedAt());
+    domain.setTargetInstitutionIds(entity.getTargetInstitutionIds());
+    domain.setTargetGroupIds(entity.getTargetGroupIds());
+    return domain;
   }
 }

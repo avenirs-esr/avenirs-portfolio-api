@@ -27,6 +27,8 @@ public class ActivityDraft extends AvenirsBaseModel {
   private File banner;
   @Getter private List<String> links;
   @Getter private List<File> files;
+  @Getter private List<UUID> targetInstitutionIds = new ArrayList<>();
+  @Getter private List<UUID> targetGroupIds = new ArrayList<>();
   @Getter private int traceAllowedAssociations;
   @Getter private int feedbackAllowedIterations;
   @Getter private boolean enableReflection;

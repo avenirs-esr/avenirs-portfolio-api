@@ -12,6 +12,7 @@ import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDraftCreationRequest;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDraftTargetingUpdateRequest;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDraftUpdateRequest;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDuplicationRequest;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
@@ -43,6 +44,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       BASE_PATH + "/PUBLISHED/{activityId}/presentation";
   private static final String DRAFT_PATH = BASE_PATH + "/draft";
   private static final String DRAFT_UPDATE_PATH = BASE_PATH + "/{draftId}";
+  private static final String DRAFT_TARGETING_PATH = BASE_PATH + "/draft/{draftId}/targeting";
   private static final String WORKING_SPACE_PATH = BASE_PATH + "/staff/working-space";
   private static final String LIBRARY_PATH = BASE_PATH + "/staff/library";
   private static final String PUBLISH_PATH = BASE_PATH + "/publish/{draftId}";
@@ -929,6 +931,217 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         webTestClient
             .patch()
             .uri(DRAFT_UPDATE_PATH, draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(requestBody)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk();
+      }
+    }
+
+    @Nested
+    class WhenUpdatingActivityDraftTargeting {
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("performing a PATCH on " + DRAFT_TARGETING_PATH);
+      }
+
+      @Test
+      void thenItShouldUpdateTargetingAndReturnDraftId() throws Exception {
+        BddLogger.and("given an existing activity draft");
+        UUID draftId = createDraftAndGetId("Brouillon à cibler");
+
+        BddLogger.then("it should return 200 with the draft id");
+
+        String requestBody =
+            objectMapper.writeValueAsString(
+                new ActivityDraftTargetingUpdateRequest(
+                    List.of(UUID.randomUUID()), List.of(UUID.randomUUID())));
+
+        webTestClient
+            .patch()
+            .uri(DRAFT_TARGETING_PATH, draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(requestBody)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.draftId")
+            .isEqualTo(draftId.toString());
+      }
+
+      @Test
+      void thenItShouldPersistTheTargetedInstitutionsAndGroups() throws Exception {
+        BddLogger.and("given an existing activity draft");
+        UUID draftId = createDraftAndGetId("Brouillon ciblage persisté");
+        UUID institutionId = UUID.randomUUID();
+        UUID groupId = UUID.randomUUID();
+
+        updateDraftTargeting(draftId, List.of(institutionId), List.of(groupId));
+
+        BddLogger.then("the draft content should expose the targeted institutions and groups");
+
+        webTestClient
+            .get()
+            .uri(CONTENT_PATH, "DRAFT", draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.targetInstitutionIds[0]")
+            .isEqualTo(institutionId.toString())
+            .jsonPath("$.targetGroupIds[0]")
+            .isEqualTo(groupId.toString());
+      }
+
+      @Test
+      void thenItShouldClearTargetingWhenListsAreEmpty() throws Exception {
+        BddLogger.and("given a draft already targeting an institution and a group");
+        UUID draftId = createDraftAndGetId("Brouillon ciblage effacé");
+        updateDraftTargeting(draftId, List.of(UUID.randomUUID()), List.of(UUID.randomUUID()));
+
+        BddLogger.then("submitting empty lists should clear the targeting");
+
+        updateDraftTargeting(draftId, List.of(), List.of());
+
+        webTestClient
+            .get()
+            .uri(CONTENT_PATH, "DRAFT", draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.targetInstitutionIds")
+            .isEqualTo(List.of())
+            .jsonPath("$.targetGroupIds")
+            .isEqualTo(List.of());
+      }
+
+      @Test
+      void thenItShouldTreatMissingListsAsEmpty() throws Exception {
+        BddLogger.and("given a draft already targeting an institution and a group");
+        UUID draftId = createDraftAndGetId("Brouillon ciblage non renseigné");
+        updateDraftTargeting(draftId, List.of(UUID.randomUUID()), List.of(UUID.randomUUID()));
+
+        BddLogger.then("submitting a body without targeting fields should clear the targeting");
+
+        webTestClient
+            .patch()
+            .uri(DRAFT_TARGETING_PATH, draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue("{}")
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk();
+
+        webTestClient
+            .get()
+            .uri(CONTENT_PATH, "DRAFT", draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.targetInstitutionIds")
+            .isEqualTo(List.of())
+            .jsonPath("$.targetGroupIds")
+            .isEqualTo(List.of());
+      }
+
+      @Test
+      void thenItShouldReturn404WhenDraftNotFound() throws Exception {
+        BddLogger.and("given a non-existent draft id");
+        UUID unknownId = UUID.randomUUID();
+
+        BddLogger.then("it should return 404 with ACTIVITY_DRAFT_NOT_FOUND error code");
+
+        String requestBody =
+            objectMapper.writeValueAsString(
+                new ActivityDraftTargetingUpdateRequest(List.of(), List.of()));
+
+        webTestClient
+            .patch()
+            .uri(DRAFT_TARGETING_PATH, unknownId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(requestBody)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isNotFound()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("ACTIVITY_DRAFT_NOT_FOUND");
+      }
+
+      @Test
+      void thenItShouldReturn403WhenStudentTriesToUpdateTargeting() throws Exception {
+        BddLogger.and("given an existing activity draft and a student account");
+        UUID draftId = createDraftAndGetId("Brouillon ciblage accès refusé");
+
+        BddLogger.then("it should return 403 with ACCESS_DENIED error code");
+
+        String requestBody =
+            objectMapper.writeValueAsString(
+                new ActivityDraftTargetingUpdateRequest(List.of(), List.of()));
+
+        webTestClient
+            .patch()
+            .uri(DRAFT_TARGETING_PATH, draftId)
+            .headers(ActivityControllerIT.this::addSecondStudentHeaders)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(requestBody)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isForbidden()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("ACCESS_DENIED");
+      }
+
+      @Test
+      void thenItShouldReturn401WhenNotAuthenticated() throws Exception {
+        BddLogger.then("it should return 401");
+
+        String requestBody =
+            objectMapper.writeValueAsString(
+                new ActivityDraftTargetingUpdateRequest(List.of(), List.of()));
+
+        webTestClient
+            .patch()
+            .uri(DRAFT_TARGETING_PATH, UUID.randomUUID())
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(requestBody)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isUnauthorized();
+      }
+
+      private void updateDraftTargeting(
+          UUID draftId, List<UUID> targetInstitutionIds, List<UUID> targetGroupIds)
+          throws Exception {
+        String requestBody =
+            objectMapper.writeValueAsString(
+                new ActivityDraftTargetingUpdateRequest(targetInstitutionIds, targetGroupIds));
+
+        webTestClient
+            .patch()
+            .uri(DRAFT_TARGETING_PATH, draftId)
             .headers(ActivityControllerIT.this::addStaffHeaders)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(requestBody)
