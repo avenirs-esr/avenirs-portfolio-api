@@ -35,6 +35,8 @@ public class ActivityFixture {
   private final File banner = ActivityBannerFixture.create().toModel();
   private List<String> links = List.of("https://example.com/link1", "https://example.com/link2");
   private List<File> files = List.of();
+  private List<UUID> targetInstitutionIds = List.of();
+  private List<UUID> targetGroupIds = List.of();
   private Instant createdAt = Instant.now();
   private Instant updatedAt = Instant.now();
 
@@ -127,25 +129,39 @@ public class ActivityFixture {
     return this;
   }
 
+  public ActivityFixture withTargetInstitutionIds(List<UUID> targetInstitutionIds) {
+    this.targetInstitutionIds = targetInstitutionIds;
+    return this;
+  }
+
+  public ActivityFixture withTargetGroupIds(List<UUID> targetGroupIds) {
+    this.targetGroupIds = targetGroupIds;
+    return this;
+  }
+
   public Activity toModel() {
-    return Activity.toDomain(
-        id,
-        author,
-        title,
-        thematic,
-        summary,
-        status,
-        description,
-        recommendedCompletionContexts,
-        startDate,
-        endDate,
-        enableRefection,
-        traceAllowedAssociations,
-        feedbackAllowedIterations,
-        banner,
-        links,
-        files,
-        createdAt,
-        updatedAt);
+    var activity =
+        Activity.toDomain(
+            id,
+            author,
+            title,
+            thematic,
+            summary,
+            status,
+            description,
+            recommendedCompletionContexts,
+            startDate,
+            endDate,
+            enableRefection,
+            traceAllowedAssociations,
+            feedbackAllowedIterations,
+            banner,
+            links,
+            files,
+            createdAt,
+            updatedAt);
+    activity.setTargetInstitutionIds(targetInstitutionIds);
+    activity.setTargetGroupIds(targetGroupIds);
+    return activity;
   }
 }

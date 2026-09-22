@@ -34,5 +34,7 @@ public record ActivityContentDTO(
     Boolean hasEnrolledStudent,
     List<FileDTO> files,
     List<String> links,
+    List<UUID> targetInstitutionIds,
+    List<UUID> targetGroupIds,
     Instant createdAt,
     Instant updatedAt) {}

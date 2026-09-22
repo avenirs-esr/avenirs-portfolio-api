@@ -82,6 +82,18 @@ public class ActivityEntity extends PeriodEntity<LocalDate> {
   @OrderBy("createdAt")
   private List<FileEntity> files = new ArrayList<>();
 
+  @ElementCollection
+  @CollectionTable(
+      name = "activity_target_institutions",
+      joinColumns = @JoinColumn(name = "activity_id"))
+  @Column(name = "institution_id")
+  private List<UUID> targetInstitutionIds = new ArrayList<>();
+
+  @ElementCollection
+  @CollectionTable(name = "activity_target_groups", joinColumns = @JoinColumn(name = "activity_id"))
+  @Column(name = "group_id")
+  private List<UUID> targetGroupIds = new ArrayList<>();
+
   private ActivityEntity(
       UUID id,
       StaffEntity author,

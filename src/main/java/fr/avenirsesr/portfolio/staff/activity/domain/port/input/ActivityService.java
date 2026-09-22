@@ -79,6 +79,9 @@ public interface ActivityService {
       List<String> links,
       boolean enableCompletionPeriod);
 
+  ActivityDraft updateActivityDraftTargeting(
+      UUID activityDraftId, List<UUID> targetInstitutionIds, List<UUID> targetGroupIds);
+
   ActivityDraft createDraftFromActivity(UUID activityId);
 
   ActivityDraft duplicateActivity(UUID activityId, String title);

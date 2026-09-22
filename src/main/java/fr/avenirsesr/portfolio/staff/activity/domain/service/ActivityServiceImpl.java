@@ -178,6 +178,9 @@ public class ActivityServiceImpl implements ActivityService {
       var updatedFields = updateActivity(activity, draft, !enrolledDeclaredActivities.isEmpty());
       activity.setStatus(EActivityStatus.PUBLISHED);
       notifyActivityUpdated(updatedFields, enrolledDeclaredActivities);
+    } else {
+      activity.setTargetInstitutionIds(draft.getTargetInstitutionIds());
+      activity.setTargetGroupIds(draft.getTargetGroupIds());
     }
 
     var savedActivity = activityRepository.save(activity);
@@ -234,7 +237,17 @@ public class ActivityServiceImpl implements ActivityService {
                 new HashSet<>(draft.getLinks()),
                 links -> activity.setLinks(links.stream().toList())),
             new FieldSync<>(
-                FILES_AND_LINKS, activity.getFiles(), draft.getFiles(), activity::setFiles));
+                FILES_AND_LINKS, activity.getFiles(), draft.getFiles(), activity::setFiles),
+            new FieldSync<>(
+                TARGETING,
+                new HashSet<>(activity.getTargetInstitutionIds()),
+                new HashSet<>(draft.getTargetInstitutionIds()),
+                ids -> activity.setTargetInstitutionIds(ids.stream().toList())),
+            new FieldSync<>(
+                TARGETING,
+                new HashSet<>(activity.getTargetGroupIds()),
+                new HashSet<>(draft.getTargetGroupIds()),
+                ids -> activity.setTargetGroupIds(ids.stream().toList())));
 
     var updatedFields =
         syncs.stream().filter(FieldSync::applyIfChanged).map(FieldSync::field).distinct().toList();
@@ -523,6 +536,17 @@ public class ActivityServiceImpl implements ActivityService {
   }
 
   @Override
+  public ActivityDraft updateActivityDraftTargeting(
+      UUID activityDraftId, List<UUID> targetInstitutionIds, List<UUID> targetGroupIds) {
+    var draft = getOwnedDraft(activityDraftId);
+    draft.setTargetInstitutionIds(targetInstitutionIds == null ? List.of() : targetInstitutionIds);
+    draft.setTargetGroupIds(targetGroupIds == null ? List.of() : targetGroupIds);
+    var updatedDraft = activityDraftRepository.save(draft);
+    log.info("Updated targeting of activity draft with id: {}", activityDraftId);
+    return updatedDraft;
+  }
+
+  @Override
   public ActivityDraft createDraftFromActivity(UUID activityId) {
     var staff = loggedInUserService.getLoggedInStaff();
     var activity =
@@ -555,6 +579,8 @@ public class ActivityServiceImpl implements ActivityService {
             activity.getBanner().orElse(null),
             activity.getLinks(),
             activity.getFiles());
+    draft.setTargetInstitutionIds(activity.getTargetInstitutionIds());
+    draft.setTargetGroupIds(activity.getTargetGroupIds());
 
     var savedDraft = activityDraftRepository.save(draft);
 
@@ -606,6 +632,8 @@ public class ActivityServiceImpl implements ActivityService {
             source.getFiles().stream()
                 .map(file -> fileResourceService.copy(file.getId()))
                 .toList());
+    duplicate.setTargetInstitutionIds(source.getTargetInstitutionIds());
+    duplicate.setTargetGroupIds(source.getTargetGroupIds());
     return activityDraftRepository.save(duplicate);
   }
 
@@ -632,6 +660,8 @@ public class ActivityServiceImpl implements ActivityService {
             source.getFiles().stream()
                 .map(file -> fileResourceService.copy(file.getId()))
                 .toList());
+    duplicate.setTargetInstitutionIds(source.getTargetInstitutionIds());
+    duplicate.setTargetGroupIds(source.getTargetGroupIds());
     return activityDraftRepository.save(duplicate);
   }
 
