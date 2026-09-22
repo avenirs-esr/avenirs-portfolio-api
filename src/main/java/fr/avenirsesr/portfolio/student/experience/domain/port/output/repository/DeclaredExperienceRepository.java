@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.student.experience.domain.port.output.repository
 
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.port.output.repository.GenericRepositoryPort;
 import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.experience.domain.model.enums.EExperienceType;
@@ -13,7 +14,8 @@ public interface DeclaredExperienceRepository extends GenericRepositoryPort<Decl
       Student student,
       PageCriteria pageCriteria,
       Boolean isValorized,
-      List<EExperienceType> experienceTypes);
+      List<EExperienceType> experienceTypes,
+      SortCriteria sortCriteria);
 
   PagedResult<DeclaredExperience> findAllByStudent(
       Student student, PageCriteria pageCriteria, String keyword);

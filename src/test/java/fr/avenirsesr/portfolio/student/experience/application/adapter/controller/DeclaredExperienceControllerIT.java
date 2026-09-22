@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.common.configuration.domain.model.TraceConfiguration;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortField;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
@@ -111,6 +113,83 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
   private String extractIdFromResponse(String responseBody) throws Exception {
     JsonNode jsonNode = objectMapper.readTree(responseBody);
     return jsonNode.get("id").asText();
+  }
+
+  private String buildCreateExperienceJson(String title, String startDate, String endDate) {
+    return "{\n"
+        + "  \"title\": \""
+        + title
+        + "\",\n"
+        + "  \"experienceType\": \"PROFESSIONAL\",\n"
+        + "  \"organization\": \"ACME Inc\",\n"
+        + "  \"activitySector\": \"IT\",\n"
+        + "  \"location\": \"Paris\",\n"
+        + "  \"description\": \"Some description\",\n"
+        + "  \"sourceOfInformation\": \"SELF_DECLARED\",\n"
+        + "  \"summary\": \"Summary text\",\n"
+        + "  \"externalLink\": \"https://example.com\",\n"
+        + "  \"startDate\": \""
+        + startDate
+        + "\",\n"
+        + "  \"endDate\": \""
+        + endDate
+        + "\"\n"
+        + "}\n";
+  }
+
+  private String createDeclaredExperience(String title, String startDate, String endDate)
+      throws Exception {
+    String responseBody =
+        webTestClient
+            .post()
+            .uri(BASE_PATH + "/")
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Signature", studentSignature)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(buildCreateExperienceJson(title, startDate, endDate))
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+    return extractIdFromResponse(responseBody);
+  }
+
+  private String getDeclaredExperienceView(ESortField sortField, ESortOrder sortOrder) {
+    return webTestClient
+        .get()
+        .uri(
+            uriBuilder -> {
+              uriBuilder.path(BASE_PATH + "/view").queryParam("pageSize", 100);
+              if (sortField != null) {
+                uriBuilder.queryParam("sortField", sortField);
+              }
+              if (sortOrder != null) {
+                uriBuilder.queryParam("sortOrder", sortOrder);
+              }
+              return uriBuilder.build();
+            })
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(String.class)
+        .returnResult()
+        .getResponseBody();
+  }
+
+  private List<String> orderedKnownIds(String responseBody, List<String> knownIds)
+      throws Exception {
+    List<String> result = new ArrayList<>();
+    for (JsonNode node : objectMapper.readTree(responseBody).get("data")) {
+      String id = node.get("id").asText();
+      if (knownIds.contains(id)) {
+        result.add(id);
+      }
+    }
+    return result;
   }
 
   @Transactional
@@ -255,6 +334,89 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .isEqualTo(0)
         .jsonPath("$.page.pageSize")
         .isEqualTo(5);
+  }
+
+  @Transactional
+  @Test
+  void shouldSortDeclaredExperienceViewByNameAscending() throws Exception {
+    BddLogger.given("three declared experiences with distinct titles");
+    String bananeId = createDeclaredExperience("Banane", "2024-01-01", "2024-01-15");
+    String cerieId = createDeclaredExperience("Cerise", "2024-03-01", "2024-03-15");
+    String ananasId = createDeclaredExperience("Ananas", "2024-06-01", "2024-06-15");
+    List<String> knownIds = List.of(bananeId, cerieId, ananasId);
+
+    BddLogger.when("performing a GET on /view with sortField=NAME, sortOrder=ASC");
+    BddLogger.then("experiences should be ordered alphabetically from A to Z by title");
+
+    String response = getDeclaredExperienceView(ESortField.NAME, ESortOrder.ASC);
+    assertThat(orderedKnownIds(response, knownIds)).containsExactly(ananasId, bananeId, cerieId);
+  }
+
+  @Transactional
+  @Test
+  void shouldSortDeclaredExperienceViewByNameDescending() throws Exception {
+    BddLogger.given("three declared experiences with distinct titles");
+    String bananeId = createDeclaredExperience("Banane", "2024-01-01", "2024-01-15");
+    String cerieId = createDeclaredExperience("Cerise", "2024-03-01", "2024-03-15");
+    String ananasId = createDeclaredExperience("Ananas", "2024-06-01", "2024-06-15");
+    List<String> knownIds = List.of(bananeId, cerieId, ananasId);
+
+    BddLogger.when("performing a GET on /view with sortField=NAME, sortOrder=DESC");
+    BddLogger.then("experiences should be ordered alphabetically from Z to A by title");
+
+    String response = getDeclaredExperienceView(ESortField.NAME, ESortOrder.DESC);
+    assertThat(orderedKnownIds(response, knownIds)).containsExactly(cerieId, bananeId, ananasId);
+  }
+
+  @Transactional
+  @Test
+  void shouldSortDeclaredExperienceViewByMostRecentStartDateFirst() throws Exception {
+    BddLogger.given("three declared experiences with distinct start dates");
+    String oldestId = createDeclaredExperience("Old experience", "2024-01-01", "2024-01-15");
+    String middleId = createDeclaredExperience("Middle experience", "2024-03-01", "2024-03-15");
+    String mostRecentId = createDeclaredExperience("Recent experience", "2024-06-01", "2024-06-15");
+    List<String> knownIds = List.of(oldestId, middleId, mostRecentId);
+
+    BddLogger.when("performing a GET on /view with sortField=DATE, sortOrder=DESC");
+    BddLogger.then("experiences should be ordered from the most recent to the oldest start date");
+
+    String response = getDeclaredExperienceView(ESortField.DATE, ESortOrder.DESC);
+    assertThat(orderedKnownIds(response, knownIds))
+        .containsExactly(mostRecentId, middleId, oldestId);
+  }
+
+  @Transactional
+  @Test
+  void shouldSortDeclaredExperienceViewByOldestStartDateFirst() throws Exception {
+    BddLogger.given("three declared experiences with distinct start dates");
+    String oldestId = createDeclaredExperience("Old experience", "2024-01-01", "2024-01-15");
+    String middleId = createDeclaredExperience("Middle experience", "2024-03-01", "2024-03-15");
+    String mostRecentId = createDeclaredExperience("Recent experience", "2024-06-01", "2024-06-15");
+    List<String> knownIds = List.of(oldestId, middleId, mostRecentId);
+
+    BddLogger.when("performing a GET on /view with sortField=DATE, sortOrder=ASC");
+    BddLogger.then("experiences should be ordered from the oldest to the most recent start date");
+
+    String response = getDeclaredExperienceView(ESortField.DATE, ESortOrder.ASC);
+    assertThat(orderedKnownIds(response, knownIds))
+        .containsExactly(oldestId, middleId, mostRecentId);
+  }
+
+  @Transactional
+  @Test
+  void shouldSortDeclaredExperienceViewByMostRecentStartDateFirstByDefault() throws Exception {
+    BddLogger.given("three declared experiences with distinct start dates");
+    String oldestId = createDeclaredExperience("Old experience", "2024-01-01", "2024-01-15");
+    String middleId = createDeclaredExperience("Middle experience", "2024-03-01", "2024-03-15");
+    String mostRecentId = createDeclaredExperience("Recent experience", "2024-06-01", "2024-06-15");
+    List<String> knownIds = List.of(oldestId, middleId, mostRecentId);
+
+    BddLogger.when("performing a GET on /view without sortField/sortOrder params");
+    BddLogger.then("experiences should default to the most recent to the oldest start date order");
+
+    String response = getDeclaredExperienceView(null, null);
+    assertThat(orderedKnownIds(response, knownIds))
+        .containsExactly(mostRecentId, middleId, oldestId);
   }
 
   @Transactional

@@ -6,6 +6,7 @@ import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValida
 import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
@@ -320,12 +321,16 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
 
   @Override
   public PagedResult<DeclaredExperienceData> getView(
-      PageCriteria pageCriteria, Boolean isValorized, List<EExperienceType> experienceTypes) {
+      PageCriteria pageCriteria,
+      Boolean isValorized,
+      List<EExperienceType> experienceTypes,
+      SortCriteria sortCriteria) {
     Student student = loggedInUserService.getLoggedInStudent();
     log.info("Get experience view by {}", student);
 
     var pagedExperiences =
-        experienceRepository.findAllByStudent(student, pageCriteria, isValorized, experienceTypes);
+        experienceRepository.findAllByStudent(
+            student, pageCriteria, isValorized, experienceTypes, sortCriteria);
 
     var associationsCountByExperience = getAssociationCounts(pagedExperiences.content());
 

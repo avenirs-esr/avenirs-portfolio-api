@@ -4,6 +4,9 @@ import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortField;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.student.experience.application.adapter.dto.DeclaredExperienceRequest;
 import fr.avenirsesr.portfolio.student.experience.application.adapter.dto.DeclaredExperienceViewDTO;
 import fr.avenirsesr.portfolio.student.experience.application.adapter.mapper.DeclaredExperienceMapper;
@@ -73,10 +76,15 @@ public class DeclaredExperienceController {
       @Parameter(
               array = @ArraySchema(schema = @Schema(ref = "#/components/schemas/EExperienceType")))
           @RequestParam(required = false)
-          List<EExperienceType> experienceTypes) {
+          List<EExperienceType> experienceTypes,
+      @RequestParam(required = false) ESortField sortField,
+      @RequestParam(required = false) ESortOrder sortOrder) {
+    SortCriteria sortCriteria =
+        (sortField != null && sortOrder != null) ? new SortCriteria(sortField, sortOrder) : null;
+
     PagedResult<DeclaredExperienceData> pagedExperiences =
         declaredExperienceService.getView(
-            new PageCriteria(page, pageSize), isValorized, experienceTypes);
+            new PageCriteria(page, pageSize), isValorized, experienceTypes, sortCriteria);
 
     return ResponseEntity.ok(
         new PagedResponse<>(
