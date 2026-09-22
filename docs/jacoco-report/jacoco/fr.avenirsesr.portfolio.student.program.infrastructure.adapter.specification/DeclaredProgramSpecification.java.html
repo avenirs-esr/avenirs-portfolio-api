@@ -21,23 +21,12 @@ import org.springframework.data.jpa.domain.Specification;
     };
   }
 
-  public static Specification&lt;DeclaredProgramEntity&gt; search(String keyword) {
-<span class="fc" id="L25">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="pc bpc" id="L26" title="2 of 4 branches missed.">      if (keyword == null || keyword.trim().isEmpty()) {</span>
-<span class="nc" id="L27">        return criteriaBuilder.conjunction();</span>
-      }
-
-<span class="fc" id="L30">      return criteriaBuilder.like(</span>
-<span class="fc" id="L31">          criteriaBuilder.lower(root.get(&quot;title&quot;)), &quot;%&quot; + keyword.toLowerCase() + &quot;%&quot;);</span>
-    };
-  }
-
   public static Specification&lt;DeclaredProgramEntity&gt; isValorized(Boolean isValorized) {
-<span class="fc" id="L36">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="fc bfc" id="L37" title="All 2 branches covered.">      if (isValorized == null) {</span>
-<span class="fc" id="L38">        return criteriaBuilder.conjunction();</span>
+<span class="fc" id="L25">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="fc bfc" id="L26" title="All 2 branches covered.">      if (isValorized == null) {</span>
+<span class="fc" id="L27">        return criteriaBuilder.conjunction();</span>
       }
-<span class="fc" id="L40">      return criteriaBuilder.equal(root.get(&quot;valorized&quot;), isValorized);</span>
+<span class="fc" id="L29">      return criteriaBuilder.equal(root.get(&quot;valorized&quot;), isValorized);</span>
     };
   }
 }
