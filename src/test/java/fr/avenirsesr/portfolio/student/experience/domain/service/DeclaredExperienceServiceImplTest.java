@@ -7,6 +7,9 @@ import static org.mockito.Mockito.*;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortField;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
@@ -1047,17 +1050,17 @@ class DeclaredExperienceServiceImplTest {
         new PagedResult<>(List.of(experience), new PageInfo(1, 8, 1));
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedIn);
-    when(experienceRepository.findAllByStudent(loggedIn, criteria, (Boolean) null, null))
+    when(experienceRepository.findAllByStudent(loggedIn, criteria, (Boolean) null, null, null))
         .thenReturn(repositoryResult);
 
-    PagedResult<DeclaredExperienceData> result = service.getView(criteria, null, null);
+    PagedResult<DeclaredExperienceData> result = service.getView(criteria, null, null, null);
 
     assertSame(repositoryResult.pageInfo(), result.pageInfo());
     assertEquals(
         List.of(
             new DeclaredExperienceData(experience, new DeclaredExperienceAssociationCount(0, 0))),
         result.content());
-    verify(experienceRepository).findAllByStudent(loggedIn, criteria, (Boolean) null, null);
+    verify(experienceRepository).findAllByStudent(loggedIn, criteria, (Boolean) null, null, null);
   }
 
   @Test
@@ -1071,17 +1074,17 @@ class DeclaredExperienceServiceImplTest {
         new PagedResult<>(List.of(experience), new PageInfo(1, 8, 1));
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedIn);
-    when(experienceRepository.findAllByStudent(loggedIn, criteria, true, null))
+    when(experienceRepository.findAllByStudent(loggedIn, criteria, true, null, null))
         .thenReturn(repositoryResult);
 
-    PagedResult<DeclaredExperienceData> result = service.getView(criteria, true, null);
+    PagedResult<DeclaredExperienceData> result = service.getView(criteria, true, null, null);
 
     assertSame(repositoryResult.pageInfo(), result.pageInfo());
     assertEquals(
         List.of(
             new DeclaredExperienceData(experience, new DeclaredExperienceAssociationCount(0, 0))),
         result.content());
-    verify(experienceRepository).findAllByStudent(loggedIn, criteria, true, null);
+    verify(experienceRepository).findAllByStudent(loggedIn, criteria, true, null, null);
   }
 
   @Test
@@ -1099,12 +1102,13 @@ class DeclaredExperienceServiceImplTest {
             loggedIn,
             criteria,
             true,
-            List.of(EExperienceType.PROFESSIONAL, EExperienceType.PERSONAL)))
+            List.of(EExperienceType.PROFESSIONAL, EExperienceType.PERSONAL),
+            null))
         .thenReturn(repositoryResult);
 
     PagedResult<DeclaredExperienceData> result =
         service.getView(
-            criteria, true, List.of(EExperienceType.PROFESSIONAL, EExperienceType.PERSONAL));
+            criteria, true, List.of(EExperienceType.PROFESSIONAL, EExperienceType.PERSONAL), null);
 
     assertSame(repositoryResult.pageInfo(), result.pageInfo());
     assertEquals(
@@ -1116,6 +1120,33 @@ class DeclaredExperienceServiceImplTest {
             loggedIn,
             criteria,
             true,
-            List.of(EExperienceType.PROFESSIONAL, EExperienceType.PERSONAL));
+            List.of(EExperienceType.PROFESSIONAL, EExperienceType.PERSONAL),
+            null);
+  }
+
+  @Test
+  void getView_shouldDelegateSortCriteriaToRepository() {
+    Student loggedIn = student;
+    PageCriteria criteria = new PageCriteria(1, 8);
+    DeclaredExperience experience = mock(DeclaredExperience.class);
+    UUID experienceId = UUID.randomUUID();
+    when(experience.getId()).thenReturn(experienceId);
+    PagedResult<DeclaredExperience> repositoryResult =
+        new PagedResult<>(List.of(experience), new PageInfo(1, 8, 1));
+    SortCriteria sortCriteria = new SortCriteria(ESortField.NAME, ESortOrder.ASC);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedIn);
+    when(experienceRepository.findAllByStudent(loggedIn, criteria, null, null, sortCriteria))
+        .thenReturn(repositoryResult);
+
+    PagedResult<DeclaredExperienceData> result =
+        service.getView(criteria, null, null, sortCriteria);
+
+    assertSame(repositoryResult.pageInfo(), result.pageInfo());
+    assertEquals(
+        List.of(
+            new DeclaredExperienceData(experience, new DeclaredExperienceAssociationCount(0, 0))),
+        result.content());
+    verify(experienceRepository).findAllByStudent(loggedIn, criteria, null, null, sortCriteria);
   }
 }

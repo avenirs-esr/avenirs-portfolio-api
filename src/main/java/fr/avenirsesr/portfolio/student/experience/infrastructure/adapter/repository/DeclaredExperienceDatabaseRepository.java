@@ -2,11 +2,13 @@ package fr.avenirsesr.portfolio.student.experience.infrastructure.adapter.reposi
 
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.experience.domain.model.enums.EExperienceType;
 import fr.avenirsesr.portfolio.student.experience.domain.port.output.repository.DeclaredExperienceRepository;
 import fr.avenirsesr.portfolio.student.experience.infrastructure.adapter.mapper.DeclaredExperienceMapper;
 import fr.avenirsesr.portfolio.student.experience.infrastructure.adapter.model.DeclaredExperienceEntity;
+import fr.avenirsesr.portfolio.student.experience.infrastructure.adapter.resolver.DeclaredExperienceSortResolver;
 import fr.avenirsesr.portfolio.student.experience.infrastructure.adapter.specification.DeclaredExperienceSpecification;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.repository.GenericUserJpaRepositoryAdapter;
@@ -32,13 +34,16 @@ public class DeclaredExperienceDatabaseRepository
       Student student,
       PageCriteria pageCriteria,
       Boolean isValorized,
-      List<EExperienceType> experienceTypes) {
+      List<EExperienceType> experienceTypes,
+      SortCriteria sortCriteria) {
     return findAll(
         hasStudent(student)
-            .and(DeclaredExperienceSpecification.ordered())
             .and(DeclaredExperienceSpecification.isValorized(isValorized))
             .and(DeclaredExperienceSpecification.hasExperienceType(experienceTypes)),
-        PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()));
+        PageRequest.of(
+            pageCriteria.page(),
+            pageCriteria.pageSize(),
+            DeclaredExperienceSortResolver.toSort(sortCriteria)));
   }
 
   @Override

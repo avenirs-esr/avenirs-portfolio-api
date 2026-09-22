@@ -13,7 +13,9 @@ public class OpenApiLanguageEnumConfiguration {
       openApi
           .getComponents()
           .addSchemas("ELanguage", BaseSwaggerSchema.languageSchema)
-          .addSchemas("EErrorCode", BaseSwaggerSchema.errorCodeSchema);
+          .addSchemas("EErrorCode", BaseSwaggerSchema.errorCodeSchema)
+          .addSchemas("ESortOrder", BaseSwaggerSchema.sortOrderSchema)
+          .addSchemas("ESortField", BaseSwaggerSchema.sortFieldSchema);
     };
   }
 }
