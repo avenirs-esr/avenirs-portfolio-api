@@ -2,52 +2,63 @@
 
 import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityAssociationData;
 import fr.avenirsesr.portfolio.student.experience.domain.data.DeclaredExperienceAssociationData;
+import fr.avenirsesr.portfolio.student.program.domain.data.DeclaredProgramAssociationData;
 import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillAssociationData;
 import fr.avenirsesr.portfolio.student.trace.domain.data.TraceAssociationData;
 import java.util.List;
 import java.util.stream.Stream;
 
-<span class="fc" id="L10">public record AssociatedElementsData(</span>
+<span class="fc" id="L11">public record AssociatedElementsData(</span>
     List&lt;TraceAssociationData&gt; traceAssociations,
     List&lt;DeclaredActivityAssociationData&gt; declaredActivityAssociations,
     List&lt;DeclaredSkillAssociationData&gt; declaredSkillAssociations,
-    List&lt;DeclaredExperienceAssociationData&gt; declaredExperienceAssociations) {
+    List&lt;DeclaredExperienceAssociationData&gt; declaredExperienceAssociations,
+    List&lt;DeclaredProgramAssociationData&gt; declaredProgramAssociations) {
 
   public static AssociatedElementsData empty() {
-<span class="fc" id="L17">    return new AssociatedElementsData(List.of(), List.of(), List.of(), List.of());</span>
+<span class="fc" id="L19">    return new AssociatedElementsData(List.of(), List.of(), List.of(), List.of(), List.of());</span>
   }
 
   public static AssociatedElementsData ofTraces(List&lt;TraceAssociationData&gt; traceAssociations) {
-<span class="fc" id="L21">    return new AssociatedElementsData(traceAssociations, List.of(), List.of(), List.of());</span>
+<span class="fc" id="L23">    return new AssociatedElementsData(</span>
+<span class="fc" id="L24">        traceAssociations, List.of(), List.of(), List.of(), List.of());</span>
   }
 
   public static AssociatedElementsData ofDeclaredActivities(
       List&lt;DeclaredActivityAssociationData&gt; declaredActivityAssociations) {
-<span class="fc" id="L26">    return new AssociatedElementsData(</span>
-<span class="fc" id="L27">        List.of(), declaredActivityAssociations, List.of(), List.of());</span>
+<span class="fc" id="L29">    return new AssociatedElementsData(</span>
+<span class="fc" id="L30">        List.of(), declaredActivityAssociations, List.of(), List.of(), List.of());</span>
   }
 
   public static AssociatedElementsData ofDeclaredSkills(
       List&lt;DeclaredSkillAssociationData&gt; declaredSkillAssociations) {
-<span class="fc" id="L32">    return new AssociatedElementsData(List.of(), List.of(), declaredSkillAssociations, List.of());</span>
+<span class="fc" id="L35">    return new AssociatedElementsData(</span>
+<span class="fc" id="L36">        List.of(), List.of(), declaredSkillAssociations, List.of(), List.of());</span>
   }
 
   public static AssociatedElementsData ofDeclaredExperiences(
       List&lt;DeclaredExperienceAssociationData&gt; declaredExperienceAssociations) {
-<span class="fc" id="L37">    return new AssociatedElementsData(</span>
-<span class="fc" id="L38">        List.of(), List.of(), List.of(), declaredExperienceAssociations);</span>
+<span class="fc" id="L41">    return new AssociatedElementsData(</span>
+<span class="fc" id="L42">        List.of(), List.of(), List.of(), declaredExperienceAssociations, List.of());</span>
+  }
+
+  public static AssociatedElementsData ofDeclaredPrograms(
+      List&lt;DeclaredProgramAssociationData&gt; declaredProgramAssociations) {
+<span class="fc" id="L47">    return new AssociatedElementsData(</span>
+<span class="fc" id="L48">        List.of(), List.of(), List.of(), List.of(), declaredProgramAssociations);</span>
   }
 
   public AssociatedElementsData merge(AssociatedElementsData other) {
-<span class="fc" id="L42">    return new AssociatedElementsData(</span>
-<span class="fc" id="L43">        concat(traceAssociations, other.traceAssociations),</span>
-<span class="fc" id="L44">        concat(declaredActivityAssociations, other.declaredActivityAssociations),</span>
-<span class="fc" id="L45">        concat(declaredSkillAssociations, other.declaredSkillAssociations),</span>
-<span class="fc" id="L46">        concat(declaredExperienceAssociations, other.declaredExperienceAssociations));</span>
+<span class="fc" id="L52">    return new AssociatedElementsData(</span>
+<span class="fc" id="L53">        concat(traceAssociations, other.traceAssociations),</span>
+<span class="fc" id="L54">        concat(declaredActivityAssociations, other.declaredActivityAssociations),</span>
+<span class="fc" id="L55">        concat(declaredSkillAssociations, other.declaredSkillAssociations),</span>
+<span class="fc" id="L56">        concat(declaredExperienceAssociations, other.declaredExperienceAssociations),</span>
+<span class="fc" id="L57">        concat(declaredProgramAssociations, other.declaredProgramAssociations));</span>
   }
 
   private static &lt;T&gt; List&lt;T&gt; concat(List&lt;T&gt; elements, List&lt;T&gt; otherElements) {
-<span class="fc" id="L50">    return Stream.concat(elements.stream(), otherElements.stream()).toList();</span>
+<span class="fc" id="L61">    return Stream.concat(elements.stream(), otherElements.stream()).toList();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

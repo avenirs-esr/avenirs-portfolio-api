@@ -12,8 +12,8 @@ import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
-import fr.avenirsesr.portfolio.student.association.domain.port.output.handler.AssociationContextHandler;
 import fr.avenirsesr.portfolio.student.association.domain.port.output.repository.AssociationRepository;
+import fr.avenirsesr.portfolio.student.association.domain.port.output.strategy.AssociationStrategy;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +24,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AssociationServiceImpl implements AssociationService {
   private final AssociationRepository associationRepository;
-  private final List&lt;AssociationContextHandler&gt; contextHandlers;
+  private final List&lt;AssociationStrategy&gt; strategies;
 
   @Override
   public List&lt;Association&gt; createAll(List&lt;AssociationData&gt; associationsData) {
@@ -72,7 +72,7 @@ public class AssociationServiceImpl implements AssociationService {
   @Override
   public AssociatedElementsData getAllAssociatedElementsOf(
       UUID id, EAssociationContextType contextType, boolean onlyNotCompleted) {
-<span class="fc" id="L75">    handlerOf(contextType).checkLoggedInStudentOwns(List.of(id));</span>
+<span class="fc" id="L75">    strategyOf(contextType).checkLoggedInStudentOwns(List.of(id));</span>
 
 <span class="fc" id="L77">    var clazz = contextType.toClass();</span>
 
@@ -82,7 +82,7 @@ public class AssociationServiceImpl implements AssociationService {
 <span class="fc" id="L82">        .stream()</span>
 <span class="fc" id="L83">        .map(</span>
             entry -&gt;
-<span class="fc" id="L85">                handlerOf(EAssociationContextType.of(entry.getKey()))</span>
+<span class="fc" id="L85">                strategyOf(EAssociationContextType.of(entry.getKey()))</span>
 <span class="fc" id="L86">                    .toAssociatedElements(entry.getValue(), clazz, onlyNotCompleted))</span>
 <span class="fc" id="L87">        .reduce(AssociatedElementsData.empty(), AssociatedElementsData::merge);</span>
   }
@@ -97,9 +97,9 @@ public class AssociationServiceImpl implements AssociationService {
 <span class="fc" id="L97">        EAssociationType.of(contextType.toClass(), associatedContextType.toClass());</span>
 <span class="fc" id="L98">    var uniqueAssociatedIds = associatedIds.stream().distinct().toList();</span>
 
-<span class="fc" id="L100">    handlerOf(contextType)</span>
+<span class="fc" id="L100">    strategyOf(contextType)</span>
 <span class="fc" id="L101">        .checkLoggedInStudentCanAssociate(id, associationType, uniqueAssociatedIds.size());</span>
-<span class="fc" id="L102">    handlerOf(associatedContextType).checkLoggedInStudentOwns(uniqueAssociatedIds);</span>
+<span class="fc" id="L102">    strategyOf(associatedContextType).checkLoggedInStudentOwns(uniqueAssociatedIds);</span>
 
 <span class="fc" id="L104">    createAll(</span>
 <span class="fc" id="L105">        uniqueAssociatedIds.stream()</span>
@@ -113,7 +113,7 @@ public class AssociationServiceImpl implements AssociationService {
 
   @Override
   public void unassociate(UUID id, EAssociationContextType contextType, List&lt;UUID&gt; associationIds) {
-<span class="fc" id="L116">    handlerOf(contextType).checkLoggedInStudentCanUnassociate(List.of(id));</span>
+<span class="fc" id="L116">    strategyOf(contextType).checkLoggedInStudentCanUnassociate(List.of(id));</span>
 
 <span class="fc" id="L118">    var clazz = contextType.toClass();</span>
 <span class="fc" id="L119">    var associations =</span>
@@ -129,7 +129,7 @@ public class AssociationServiceImpl implements AssociationService {
 <span class="fc" id="L129">    associationsByAssociatedClass(associations, clazz)</span>
 <span class="fc" id="L130">        .forEach(</span>
             (associatedClass, associatedAssociations) -&gt;
-<span class="fc" id="L132">                handlerOf(EAssociationContextType.of(associatedClass))</span>
+<span class="fc" id="L132">                strategyOf(EAssociationContextType.of(associatedClass))</span>
 <span class="fc" id="L133">                    .checkLoggedInStudentCanUnassociate(</span>
 <span class="fc" id="L134">                        associatedIdsOf(associatedAssociations, clazz)));</span>
 
@@ -147,7 +147,7 @@ public class AssociationServiceImpl implements AssociationService {
 <span class="fc" id="L147">    var associationType =</span>
 <span class="fc" id="L148">        EAssociationType.of(contextType.toClass(), associatedContextType.toClass());</span>
 
-<span class="fc" id="L150">    handlerOf(contextType).checkLoggedInStudentOwns(List.of(id));</span>
+<span class="fc" id="L150">    strategyOf(contextType).checkLoggedInStudentOwns(List.of(id));</span>
 
 <span class="fc" id="L152">    var associatedIds =</span>
         new HashSet&lt;&gt;(
@@ -155,7 +155,7 @@ public class AssociationServiceImpl implements AssociationService {
 <span class="fc" id="L155">                getAllOf(id, contextType.toClass(), List.of(associationType)),</span>
 <span class="fc" id="L156">                contextType.toClass()));</span>
 
-<span class="fc" id="L158">    var searchResults = handlerOf(associatedContextType).search(keyword, filter, pageCriteria);</span>
+<span class="fc" id="L158">    var searchResults = strategyOf(associatedContextType).search(keyword, filter, pageCriteria);</span>
 
 <span class="fc" id="L160">    return new PagedResult&lt;&gt;(</span>
 <span class="fc" id="L161">        searchResults.content().stream()</span>
@@ -179,7 +179,7 @@ public class AssociationServiceImpl implements AssociationService {
       PageCriteria pageCriteria) {
 <span class="fc" id="L180">    EAssociationType.of(contextType.toClass(), associatedContextType.toClass());</span>
 
-<span class="fc" id="L182">    return handlerOf(associatedContextType).search(keyword, filter, pageCriteria);</span>
+<span class="fc" id="L182">    return strategyOf(associatedContextType).search(keyword, filter, pageCriteria);</span>
   }
 
   @Override
@@ -201,32 +201,31 @@ public class AssociationServiceImpl implements AssociationService {
 <span class="fc" id="L201">    deleteAllByIds(associations.stream().map(Association::getId).toList());</span>
 <span class="fc" id="L202">  }</span>
 
-  private AssociationContextHandler handlerOf(EAssociationContextType contextType) {
-<span class="fc" id="L205">    return contextHandlers.stream()</span>
-<span class="fc bfc" id="L206" title="All 2 branches covered.">        .filter(handler -&gt; handler.getContextType() == contextType)</span>
+  private AssociationStrategy strategyOf(EAssociationContextType contextType) {
+<span class="fc" id="L205">    return strategies.stream()</span>
+<span class="fc bfc" id="L206" title="All 2 branches covered.">        .filter(strategy -&gt; strategy.getContextType() == contextType)</span>
 <span class="fc" id="L207">        .findFirst()</span>
 <span class="fc" id="L208">        .orElseThrow(</span>
-            () -&gt;
-<span class="nc" id="L210">                new IllegalArgumentException(contextType + &quot; has no association context handler&quot;));</span>
+<span class="nc" id="L209">            () -&gt; new IllegalArgumentException(contextType + &quot; has no association strategy&quot;));</span>
   }
 
   private Map&lt;Class&lt;?&gt;, List&lt;Association&gt;&gt; associationsByAssociatedClass(
       List&lt;Association&gt; associations, Class&lt;?&gt; clazz) {
-<span class="fc" id="L215">    return associations.stream()</span>
-<span class="fc" id="L216">        .collect(</span>
-<span class="fc" id="L217">            Collectors.groupingBy(</span>
-<span class="fc" id="L218">                association -&gt; association.getAssociationType().associatedKeyOf(clazz)));</span>
+<span class="fc" id="L214">    return associations.stream()</span>
+<span class="fc" id="L215">        .collect(</span>
+<span class="fc" id="L216">            Collectors.groupingBy(</span>
+<span class="fc" id="L217">                association -&gt; association.getAssociationType().associatedKeyOf(clazz)));</span>
   }
 
   private List&lt;UUID&gt; associatedIdsOf(List&lt;Association&gt; associations, Class&lt;?&gt; clazz) {
-<span class="fc" id="L222">    return associations.stream().map(association -&gt; association.associatedIdOf(clazz)).toList();</span>
+<span class="fc" id="L221">    return associations.stream().map(association -&gt; association.associatedIdOf(clazz)).toList();</span>
   }
 
   private AssociationData associationDataOf(
       UUID id, Class&lt;?&gt; clazz, UUID associatedId, EAssociationType associationType) {
-<span class="fc bfc" id="L227" title="All 2 branches covered.">    return associationType.getKey1().equals(clazz)</span>
-<span class="fc" id="L228">        ? new AssociationData(id, associatedId, associationType)</span>
-<span class="fc" id="L229">        : new AssociationData(associatedId, id, associationType);</span>
+<span class="fc bfc" id="L226" title="All 2 branches covered.">    return associationType.getKey1().equals(clazz)</span>
+<span class="fc" id="L227">        ? new AssociationData(id, associatedId, associationType)</span>
+<span class="fc" id="L228">        : new AssociationData(associatedId, id, associationType);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
