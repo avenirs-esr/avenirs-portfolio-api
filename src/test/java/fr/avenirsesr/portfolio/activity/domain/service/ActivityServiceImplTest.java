@@ -1,6 +1,8 @@
 package fr.avenirsesr.portfolio.activity.domain.service;
 
 import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.TITLE_LENGTH;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -43,10 +45,7 @@ import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityDashboardData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityPresentationData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityStaffOverviewData;
-import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityDatesException;
-import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityDraftNotFoundException;
-import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityNotFoundException;
-import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityUnpublishedException;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.*;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityDraft;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
@@ -2316,6 +2315,7 @@ class ActivityServiceImplTest {
 
           ActivityDraft result = activityService.duplicateActivity(activityId, newTitle);
 
+          assertEquals("Copie de l'activité", result.getTitle());
           assertEquals(EActivityThematic.EXPERIENCES, result.getThematic().orElseThrow());
           assertEquals("Un résumé", result.getSummary().orElseThrow());
           assertEquals("<p>Une description</p>", result.getDescription().orElseThrow());
@@ -2465,5 +2465,73 @@ class ActivityServiceImplTest {
     when(draft.getFeedbackAllowedIterations()).thenReturn(-1);
     when(draft.getBanner()).thenReturn(Optional.empty());
     when(draft.getLinks()).thenReturn(links);
+  }
+
+  @Nested
+  class WhenCreatingAnDraftActivity {
+
+    UUID activityId;
+    Staff staff;
+    List<String> links;
+
+    @BeforeEach
+    void setupWhen() {
+      BddLogger.when("creating a draft activity");
+      activityId = UUID.randomUUID();
+      staff = mock(Staff.class);
+      links = List.of("https://example.com");
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+    }
+
+    private Activity givenAnActivity() {
+      return activityService.create(
+          activityId,
+          staff,
+          "Test Activity",
+          EActivityThematic.EXPERIENCES,
+          "This is a test activity",
+          "<h3>Objectives</h3><p>Test activity description</p>",
+          "2026",
+          LocalDate.parse("2026-06-01"),
+          LocalDate.parse("2030-06-30"),
+          true,
+          -1,
+          -1,
+          links);
+    }
+
+    @Test
+    void createsDraft_whenNoExistingDraft() {
+      Activity activity = givenAnActivity();
+      when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
+      when(activityDraftRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+      var result = activityService.createDraftFromActivity(activityId);
+      assertThat(result.getId()).isEqualTo(activityId);
+      verify(activityDraftRepository).save(any(ActivityDraft.class));
+    }
+
+    @Test
+    void throwsNotFound_whenActivityDoesNotExist() {
+      when(activityRepository.findById(activityId)).thenReturn(Optional.empty());
+
+      assertThatThrownBy(() -> activityService.createDraftFromActivity(activityId))
+          .isInstanceOf(ActivityNotFoundException.class);
+
+      verify(activityDraftRepository, never()).findById(any(UUID.class));
+      verify(activityDraftRepository, never()).save(any());
+    }
+
+    @Test
+    void throwsNotAuthorized_whenUserIsNotAuthor() {
+      var activity = mock(Activity.class);
+      var otherStaff = mock(Staff.class);
+      when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
+      when(activity.getAuthor()).thenReturn(otherStaff);
+
+      assertThatThrownBy(() -> activityService.createDraftFromActivity(activityId))
+          .isInstanceOf(UserNotAuthorizedException.class);
+      verify(activityDraftRepository, never()).findById(any(UUID.class));
+      verify(activityDraftRepository, never()).save(any());
+    }
   }
 }
