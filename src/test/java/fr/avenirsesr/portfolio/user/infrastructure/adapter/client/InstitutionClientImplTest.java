@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.common.institution.domain.model.enums.EInstitutio
 import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.AvenirsSecurityHeaders;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import okhttp3.mockwebserver.MockResponse;
@@ -98,5 +99,51 @@ class InstitutionClientImplTest {
 
     BddLogger.then("no institution is returned and no exception escapes the client");
     assertThat(result).isEmpty();
+  }
+
+  @Test
+  void shouldReturnTrueWhenBackOfficeGrantsAccess() throws InterruptedException {
+    BddLogger.given("a back-office granting access to the targeted institution");
+    mockWebServer.enqueue(
+        new MockResponse().setBody("true").addHeader("Content-Type", "application/json"));
+
+    BddLogger.when("checking access to an institution");
+    boolean result = client.hasAccess(List.of(PARENT_ID), List.of(INSTITUTION_ID));
+
+    BddLogger.then("access is granted and the affiliated/target ids are sent");
+    assertThat(result).isTrue();
+
+    RecordedRequest request = mockWebServer.takeRequest();
+    assertThat(request.getPath()).isEqualTo("/back-office/institutions/staff/access-check");
+    assertThat(request.getMethod()).isEqualTo("POST");
+    assertThat(request.getHeader(AvenirsSecurityHeaders.API_KEY)).isEqualTo("test-key");
+    assertThat(request.getBody().readUtf8())
+        .contains(PARENT_ID.toString())
+        .contains(INSTITUTION_ID.toString());
+  }
+
+  @Test
+  void shouldReturnFalseWhenBackOfficeDeniesAccess() {
+    BddLogger.given("a back-office denying access to the targeted institution");
+    mockWebServer.enqueue(
+        new MockResponse().setBody("false").addHeader("Content-Type", "application/json"));
+
+    BddLogger.when("checking access to an institution");
+    boolean result = client.hasAccess(List.of(PARENT_ID), List.of(INSTITUTION_ID));
+
+    BddLogger.then("access is denied");
+    assertThat(result).isFalse();
+  }
+
+  @Test
+  void shouldReturnFalseWhenCheckingAccessAndBackOfficeFails() {
+    BddLogger.given("a back-office answering 500 to the access check");
+    mockWebServer.enqueue(new MockResponse().setResponseCode(500));
+
+    BddLogger.when("checking access to an institution");
+    boolean result = client.hasAccess(List.of(PARENT_ID), List.of(INSTITUTION_ID));
+
+    BddLogger.then("access is denied by default and no exception escapes the client");
+    assertThat(result).isFalse();
   }
 }

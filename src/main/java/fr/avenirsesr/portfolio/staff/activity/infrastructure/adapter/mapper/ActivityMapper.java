@@ -31,10 +31,10 @@ public class ActivityMapper implements Mapper<ActivityEntity, Activity> {
             domain.getBanner().map(FileMapper.INSTANCE::fromDomain).orElse(null),
             domain.getLinks(),
             domain.getFiles().stream().map(FileMapper.INSTANCE::fromDomain).toList(),
+            domain.getTargetInstitutionIds(),
+            domain.getTargetGroupIds(),
             domain.getCreatedAt(),
             domain.getUpdatedAt());
-    entity.setTargetInstitutionIds(domain.getTargetInstitutionIds());
-    entity.setTargetGroupIds(domain.getTargetGroupIds());
     return entity;
   }
 
@@ -58,10 +58,10 @@ public class ActivityMapper implements Mapper<ActivityEntity, Activity> {
             entity.getBanner() == null ? null : FileMapper.INSTANCE.toDomain(entity.getBanner()),
             entity.getLinks(),
             entity.getFiles().stream().map(FileMapper.INSTANCE::toDomain).toList(),
+            entity.getTargetInstitutionIds(),
+            entity.getTargetGroupIds(),
             entity.getCreatedAt(),
             entity.getUpdatedAt());
-    domain.setTargetInstitutionIds(entity.getTargetInstitutionIds());
-    domain.setTargetGroupIds(entity.getTargetGroupIds());
     return domain;
   }
 
@@ -92,10 +92,10 @@ public class ActivityMapper implements Mapper<ActivityEntity, Activity> {
             attributes.contains("files")
                 ? entity.getFiles().stream().map(FileMapper.INSTANCE::toDomain).toList()
                 : List.of(),
+            entity.getTargetInstitutionIds(),
+            entity.getTargetGroupIds(),
             entity.getCreatedAt(),
             entity.getUpdatedAt());
-    domain.setTargetInstitutionIds(entity.getTargetInstitutionIds());
-    domain.setTargetGroupIds(entity.getTargetGroupIds());
     return domain;
   }
 }

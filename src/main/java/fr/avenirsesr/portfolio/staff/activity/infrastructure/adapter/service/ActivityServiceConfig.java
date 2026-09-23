@@ -10,6 +10,8 @@ import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.Acti
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.StaffActivityOverviewRepository;
 import fr.avenirsesr.portfolio.staff.activity.domain.service.ActivityServiceImpl;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
+import fr.avenirsesr.portfolio.user.domain.port.output.client.GroupClient;
+import fr.avenirsesr.portfolio.user.domain.port.output.client.InstitutionClient;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -27,6 +29,8 @@ public class ActivityServiceConfig {
   private final FileResourceService fileResourceService;
   private final StudentRepository studentRepository;
   private final ActivityViewRepository activityViewRepository;
+  private final InstitutionClient institutionClient;
+  private final GroupClient groupClient;
 
   @Bean
   public ActivityService activityService() {
@@ -39,6 +43,8 @@ public class ActivityServiceConfig {
         notificationService,
         fileResourceService,
         studentRepository,
-        activityViewRepository);
+        activityViewRepository,
+        institutionClient,
+        groupClient);
   }
 }

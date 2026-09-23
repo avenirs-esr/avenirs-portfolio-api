@@ -54,6 +54,8 @@ class ActivityMapperTest {
   private final Instant updatedAt = Instant.parse("2023-12-31T23:59:59Z");
   private final List<String> links =
       List.of("https://example.com/link1", "https://example.com/link2");
+  private final List<UUID> targetInstitutionIds = List.of(UUID.randomUUID());
+  private final List<UUID> targetGroupIds = List.of(UUID.randomUUID());
 
   @BeforeEach
   void setUp() {
@@ -75,6 +77,8 @@ class ActivityMapperTest {
             banner,
             links,
             List.of(),
+            targetInstitutionIds,
+            targetGroupIds,
             createdAt,
             updatedAt);
   }
@@ -98,6 +102,8 @@ class ActivityMapperTest {
     assertEquals(traceAllowedAssociations, entity.getTraceAllowedAssociations());
     assertEquals(feedbackAllowedIterations, entity.getFeedbackAllowedIterations());
     assertEquals(enableRefection, entity.isEnableReflection());
+    assertEquals(targetInstitutionIds, entity.getTargetInstitutionIds());
+    assertEquals(targetGroupIds, entity.getTargetGroupIds());
     assertEquals(createdAt, entity.getCreatedAt());
     assertEquals(updatedAt, entity.getUpdatedAt());
   }
@@ -117,6 +123,8 @@ class ActivityMapperTest {
     entity.setTraceAllowedAssociations(traceAllowedAssociations);
     entity.setFeedbackAllowedIterations(feedbackAllowedIterations);
     entity.setEnableReflection(enableRefection);
+    entity.setTargetInstitutionIds(targetInstitutionIds);
+    entity.setTargetGroupIds(targetGroupIds);
     entity.setCreatedAt(createdAt);
     entity.setUpdatedAt(updatedAt);
 
@@ -136,6 +144,8 @@ class ActivityMapperTest {
     assertEquals(traceAllowedAssociations, mappedActivity.getTraceAllowedAssociations());
     assertEquals(feedbackAllowedIterations, mappedActivity.getFeedbackAllowedIterations());
     assertEquals(enableRefection, mappedActivity.isEnableReflection());
+    assertEquals(targetInstitutionIds, mappedActivity.getTargetInstitutionIds());
+    assertEquals(targetGroupIds, mappedActivity.getTargetGroupIds());
     assertEquals(createdAt, mappedActivity.getCreatedAt());
     assertEquals(updatedAt, mappedActivity.getUpdatedAt());
   }

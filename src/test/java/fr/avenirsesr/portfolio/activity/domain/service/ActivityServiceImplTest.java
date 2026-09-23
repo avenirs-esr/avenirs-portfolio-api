@@ -62,6 +62,8 @@ import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStat
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
+import fr.avenirsesr.portfolio.user.domain.port.output.client.GroupClient;
+import fr.avenirsesr.portfolio.user.domain.port.output.client.InstitutionClient;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -88,6 +90,8 @@ class ActivityServiceImplTest {
   @Mock private NotificationService notificationService;
   @Mock private FileResourceService fileResourceService;
   @Mock private ActivityViewRepository activityViewRepository;
+  @Mock private InstitutionClient institutionClient;
+  @Mock private GroupClient groupClient;
 
   @InjectMocks private ActivityServiceImpl activityService;
 
@@ -250,6 +254,10 @@ class ActivityServiceImplTest {
             BddLogger.then("all provided fields should be updated and saved");
 
             List<String> links = List.of("https://example.com", "https://avenirs-esr.fr");
+            List<UUID> institutionIds = List.of(UUID.randomUUID());
+            List<UUID> groupIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+            when(institutionClient.hasAccess(any(), eq(institutionIds))).thenReturn(true);
+            when(groupClient.hasAccess(any(), eq(groupIds))).thenReturn(true);
             ActivityDraft result =
                 activityService.updateActivityDraft(
                     draftId,
@@ -264,7 +272,9 @@ class ActivityServiceImplTest {
                     3,
                     false,
                     links,
-                    true);
+                    true,
+                    institutionIds,
+                    groupIds);
 
             verify(draft).setTitle("Nouveau titre");
             verify(draft).setThematic(EActivityThematic.EXPERIENCES);
@@ -277,6 +287,8 @@ class ActivityServiceImplTest {
             verify(draft).setFeedbackAllowedIterations(3);
             verify(draft).setEnableReflection(false);
             verify(draft).setLinks(links);
+            verify(draft).setTargetInstitutionIds(institutionIds);
+            verify(draft).setTargetGroupIds(groupIds);
             verify(activityDraftRepository).save(draft);
             assertEquals(draft, result);
           }
@@ -286,7 +298,8 @@ class ActivityServiceImplTest {
             BddLogger.then("no field should be updated when null values are passed");
 
             activityService.updateActivityDraft(
-                draftId, null, null, null, null, null, null, null, null, null, null, null, false);
+                draftId, null, null, null, null, null, null, null, null, null, null, null, false,
+                null, null);
 
             verify(draft, never()).setTitle(any());
             verify(draft, never()).setThematic(any());
@@ -297,6 +310,8 @@ class ActivityServiceImplTest {
             verify(draft, never()).setFeedbackAllowedIterations(anyInt());
             verify(draft, never()).setEnableReflection(anyBoolean());
             verify(draft, never()).addLinks(anyList());
+            verify(draft, never()).setTargetInstitutionIds(any());
+            verify(draft, never()).setTargetGroupIds(any());
             verify(activityDraftRepository).save(draft);
           }
 
@@ -317,7 +332,9 @@ class ActivityServiceImplTest {
                 null,
                 null,
                 null,
-                false);
+                false,
+                null,
+                null);
 
             verify(draft).setTitle("Titre seul");
             verify(draft, never()).setThematic(any());
@@ -335,7 +352,8 @@ class ActivityServiceImplTest {
             BddLogger.then("startDate and endDate should be cleared");
 
             activityService.updateActivityDraft(
-                draftId, null, null, null, null, null, null, null, null, null, null, null, false);
+                draftId, null, null, null, null, null, null, null, null, null, null, null, false,
+                null, null);
 
             verify(draft).setStartDate(null);
             verify(draft).setEndDate(null);
@@ -358,7 +376,9 @@ class ActivityServiceImplTest {
                 null,
                 null,
                 null,
-                false);
+                false,
+                null,
+                null);
 
             verify(draft).setStartDate(null);
             verify(draft).setEndDate(null);
@@ -381,7 +401,9 @@ class ActivityServiceImplTest {
                 null,
                 null,
                 null,
-                true);
+                true,
+                null,
+                null);
 
             verify(draft).setStartDate(LocalDate.parse("2026-06-01"));
             verify(draft).setEndDate(LocalDate.parse("2030-06-30"));
@@ -407,7 +429,9 @@ class ActivityServiceImplTest {
                         null,
                         null,
                         null,
-                        true));
+                        true,
+                        null,
+                        null));
 
             verify(activityDraftRepository, never()).save(any());
           }
@@ -421,7 +445,7 @@ class ActivityServiceImplTest {
                 () ->
                     activityService.updateActivityDraft(
                         draftId, null, null, null, null, null, null, null, null, null, null, null,
-                        true));
+                        true, null, null));
 
             verify(activityDraftRepository, never()).save(any());
           }
@@ -446,7 +470,9 @@ class ActivityServiceImplTest {
                         null,
                         null,
                         null,
-                        true));
+                        true,
+                        null,
+                        null));
 
             verify(activityDraftRepository, never()).save(any());
           }
@@ -461,7 +487,7 @@ class ActivityServiceImplTest {
             ActivityDraft result =
                 activityService.updateActivityDraft(
                     draftId, "Titre", null, null, null, null, null, null, null, null, null, null,
-                    false);
+                    false, null, null);
 
             assertEquals(savedDraft, result);
           }
@@ -485,7 +511,7 @@ class ActivityServiceImplTest {
                 () ->
                     activityService.updateActivityDraft(
                         draftId, "Titre", null, null, null, null, null, null, null, null, null,
-                        null, false));
+                        null, false, null, null));
 
             verify(activityDraftRepository, never()).save(any());
           }
@@ -510,7 +536,7 @@ class ActivityServiceImplTest {
               () ->
                   activityService.updateActivityDraft(
                       draftId, "Titre", null, null, null, null, null, null, null, null, null, null,
-                      false));
+                      false, null, null));
 
           verify(activityDraftRepository, never()).save(any());
         }
@@ -531,98 +557,266 @@ class ActivityServiceImplTest {
         loggedInStaff = mock(Staff.class);
         draft = mock(ActivityDraft.class);
         when(loggedInUserService.getLoggedInStaff()).thenReturn(loggedInStaff);
+        when(activityDraftRepository.findById(draftId)).thenReturn(Optional.of(draft));
+        when(draft.getAuthor()).thenReturn(loggedInStaff);
+        when(activityDraftRepository.save(draft)).thenReturn(draft);
       }
 
       @Nested
-      class AndTheDraftExists {
+      class AndTheTargetedIdsAreOutsideTheStaffPerimeter {
 
         @BeforeEach
         void setupAnd() {
-          BddLogger.and("the draft exists");
-          when(activityDraftRepository.findById(draftId)).thenReturn(Optional.of(draft));
-        }
-
-        @Nested
-        class AndTheLoggedInStaffIsTheAuthor {
-
-          @BeforeEach
-          void setupAnd() {
-            BddLogger.and("the logged-in staff is the author");
-            when(draft.getAuthor()).thenReturn(loggedInStaff);
-            when(activityDraftRepository.save(draft)).thenReturn(draft);
-          }
-
-          @Test
-          void thenItShouldSetTheProvidedTargetingAndSave() {
-            BddLogger.then("the provided targeting should be set and saved");
-
-            List<UUID> institutionIds = List.of(UUID.randomUUID());
-            List<UUID> groupIds = List.of(UUID.randomUUID(), UUID.randomUUID());
-
-            ActivityDraft result =
-                activityService.updateActivityDraftTargeting(draftId, institutionIds, groupIds);
-
-            verify(draft).setTargetInstitutionIds(institutionIds);
-            verify(draft).setTargetGroupIds(groupIds);
-            verify(activityDraftRepository).save(draft);
-            assertEquals(draft, result);
-          }
-
-          @Test
-          void thenItShouldClearTargetingWhenNullIsPassed() {
-            BddLogger.then("the targeting should be cleared when null lists are passed");
-
-            activityService.updateActivityDraftTargeting(draftId, null, null);
-
-            verify(draft).setTargetInstitutionIds(List.of());
-            verify(draft).setTargetGroupIds(List.of());
-          }
-        }
-
-        @Nested
-        class AndTheLoggedInStaffIsNotTheAuthor {
-
-          @BeforeEach
-          void setupAnd() {
-            BddLogger.and("the logged-in staff is not the author");
-            when(draft.getAuthor()).thenReturn(mock(Staff.class));
-          }
-
-          @Test
-          void thenItShouldThrowActivityDraftNotFoundException() {
-            BddLogger.then("the service should throw ActivityDraftNotFoundException");
-
-            assertThrows(
-                ActivityDraftNotFoundException.class,
-                () ->
-                    activityService.updateActivityDraftTargeting(
-                        draftId, List.of(UUID.randomUUID()), List.of()));
-
-            verify(activityDraftRepository, never()).save(any());
-          }
-        }
-      }
-
-      @Nested
-      class AndTheDraftDoesNotExist {
-
-        @BeforeEach
-        void setupAnd() {
-          BddLogger.and("the draft does not exist");
-          when(activityDraftRepository.findById(draftId)).thenReturn(Optional.empty());
+          BddLogger.and("the staff has no access to the targeted institution or group");
+          when(institutionClient.hasAccess(any(), any())).thenReturn(false);
+          when(groupClient.hasAccess(any(), any())).thenReturn(false);
+          when(activityRepository.findById(draftId)).thenReturn(Optional.empty());
         }
 
         @Test
-        void thenItShouldThrowActivityDraftNotFoundException() {
-          BddLogger.then("the service should throw ActivityDraftNotFoundException");
+        void thenItShouldThrowWhenTargetingAnInaccessibleInstitution() {
+          BddLogger.then(
+              "targeting an institution outside the staff's perimeter should be rejected");
 
           assertThrows(
-              ActivityDraftNotFoundException.class,
+              ActivityTargetNotAccessibleException.class,
               () ->
-                  activityService.updateActivityDraftTargeting(
-                      draftId, List.of(UUID.randomUUID()), List.of()));
+                  activityService.updateActivityDraft(
+                      draftId,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      false,
+                      List.of(UUID.randomUUID()),
+                      List.of()));
 
           verify(activityDraftRepository, never()).save(any());
+        }
+
+        @Test
+        void thenItShouldThrowWhenTargetingAnInaccessibleGroup() {
+          BddLogger.then("targeting a group outside the staff's perimeter should be rejected");
+
+          assertThrows(
+              ActivityTargetNotAccessibleException.class,
+              () ->
+                  activityService.updateActivityDraft(
+                      draftId,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      false,
+                      List.of(),
+                      List.of(UUID.randomUUID())));
+
+          verify(activityDraftRepository, never()).save(any());
+        }
+      }
+
+      @Nested
+      class AndNoActivityIsYetPublishedForTheDraft {
+
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("no activity has been published from this draft yet");
+          when(activityRepository.findById(draftId)).thenReturn(Optional.empty());
+        }
+
+        @Test
+        void thenItShouldFreelySetTheProvidedTargeting() {
+          BddLogger.then("the provided targeting should be set without restriction");
+
+          List<UUID> institutionIds = List.of(UUID.randomUUID());
+          List<UUID> groupIds = List.of();
+          when(institutionClient.hasAccess(any(), eq(institutionIds))).thenReturn(true);
+
+          ActivityDraft result =
+              activityService.updateActivityDraft(
+                  draftId,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  false,
+                  institutionIds,
+                  groupIds);
+
+          verify(draft).setTargetInstitutionIds(institutionIds);
+          verify(draft).setTargetGroupIds(groupIds);
+          assertEquals(draft, result);
+        }
+      }
+
+      @Nested
+      class AndTheActivityIsUnpublished {
+
+        Activity activity;
+
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("the activity linked to the draft is unpublished");
+          activity = mock(Activity.class);
+          when(activity.getStatus()).thenReturn(EActivityStatus.UNPUBLISHED);
+          when(activity.getTargetInstitutionIds()).thenReturn(List.of(UUID.randomUUID()));
+          when(activityRepository.findById(draftId)).thenReturn(Optional.of(activity));
+        }
+
+        @Test
+        void thenItShouldAllowRemovingAlreadyTargetedIds() {
+          BddLogger.then("targets can be freely removed while the activity is unpublished");
+
+          ActivityDraft result =
+              activityService.updateActivityDraft(
+                  draftId, null, null, null, null, null, null, null, null, null, null, null, false,
+                  List.of(), List.of());
+
+          verify(draft).setTargetInstitutionIds(List.of());
+          assertEquals(draft, result);
+        }
+      }
+
+      @Nested
+      class AndTheActivityIsPublished {
+
+        Activity activity;
+        UUID alreadyTargetedInstitutionId;
+        UUID alreadyTargetedGroupId;
+        UUID newInstitutionId;
+
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("the activity linked to the draft is published");
+          alreadyTargetedInstitutionId = UUID.randomUUID();
+          alreadyTargetedGroupId = UUID.randomUUID();
+          newInstitutionId = UUID.randomUUID();
+          activity = mock(Activity.class);
+          when(activity.getStatus()).thenReturn(EActivityStatus.PUBLISHED);
+          when(activity.getTargetInstitutionIds())
+              .thenReturn(List.of(alreadyTargetedInstitutionId));
+          when(activity.getTargetGroupIds()).thenReturn(List.of(alreadyTargetedGroupId));
+          when(activityRepository.findById(draftId)).thenReturn(Optional.of(activity));
+          when(institutionClient.hasAccess(any(), any())).thenReturn(true);
+          when(groupClient.hasAccess(any(), any())).thenReturn(true);
+        }
+
+        @Test
+        void thenItShouldThrowWhenRemovingAnAlreadyTargetedInstitution() {
+          BddLogger.then("removing an already targeted institution should be rejected");
+
+          assertThrows(
+              ActivityTargetRemovalNotAllowedException.class,
+              () ->
+                  activityService.updateActivityDraft(
+                      draftId,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      false,
+                      List.of(),
+                      List.of(alreadyTargetedGroupId)));
+
+          verify(activityDraftRepository, never()).save(any());
+        }
+
+        @Test
+        void thenItShouldThrowWhenRemovingAnAlreadyTargetedGroup() {
+          BddLogger.then("removing an already targeted group should be rejected");
+
+          assertThrows(
+              ActivityTargetRemovalNotAllowedException.class,
+              () ->
+                  activityService.updateActivityDraft(
+                      draftId,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      false,
+                      List.of(alreadyTargetedInstitutionId),
+                      List.of()));
+
+          verify(activityDraftRepository, never()).save(any());
+        }
+
+        @Test
+        void thenItShouldAllowAddingNewTargetsAlongsideExistingOnes() {
+          BddLogger.then("adding new targets on top of existing ones should be allowed");
+
+          List<UUID> updatedInstitutionIds =
+              List.of(alreadyTargetedInstitutionId, newInstitutionId);
+
+          ActivityDraft result =
+              activityService.updateActivityDraft(
+                  draftId,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  false,
+                  updatedInstitutionIds,
+                  List.of(alreadyTargetedGroupId));
+
+          verify(draft).setTargetInstitutionIds(updatedInstitutionIds);
+          assertEquals(draft, result);
+        }
+
+        @Test
+        void thenItShouldNotValidateFieldsLeftUnchanged() {
+          BddLogger.then("leaving targeting fields null should not trigger the removal check");
+
+          ActivityDraft result =
+              activityService.updateActivityDraft(
+                  draftId, null, null, null, null, null, null, null, null, null, null, null, false,
+                  null, null);
+
+          verify(draft, never()).setTargetInstitutionIds(any());
+          verify(draft, never()).setTargetGroupIds(any());
+          assertEquals(draft, result);
         }
       }
     }
@@ -1458,6 +1652,8 @@ class ActivityServiceImplTest {
                 null,
                 List.of(),
                 List.of(),
+                List.of(),
+                List.of(),
                 Instant.now(),
                 Instant.now());
 
@@ -1513,6 +1709,8 @@ class ActivityServiceImplTest {
             -1,
             -1,
             null,
+            List.of(),
+            List.of(),
             List.of(),
             List.of());
       }
@@ -2197,6 +2395,8 @@ class ActivityServiceImplTest {
       Staff loggedInStaff;
       Staff originalAuthor;
       String newTitle;
+      UUID sourceInstitutionId;
+      UUID sourceGroupId;
 
       @BeforeEach
       void setupWhen() {
@@ -2205,6 +2405,8 @@ class ActivityServiceImplTest {
         loggedInStaff = mock(Staff.class);
         originalAuthor = mock(Staff.class);
         newTitle = "Copie de l'activité";
+        sourceInstitutionId = UUID.randomUUID();
+        sourceGroupId = UUID.randomUUID();
         when(loggedInUserService.getLoggedInStaff()).thenReturn(loggedInStaff);
       }
 
@@ -2259,6 +2461,8 @@ class ActivityServiceImplTest {
           assertEquals(2, result.getFeedbackAllowedIterations());
           assertTrue(result.isEnableReflection());
           assertEquals(List.of("https://example.com"), result.getLinks());
+          assertEquals(List.of(sourceInstitutionId), result.getTargetInstitutionIds());
+          assertEquals(List.of(sourceGroupId), result.getTargetGroupIds());
         }
 
         @Test
@@ -2436,6 +2640,8 @@ class ActivityServiceImplTest {
           assertEquals(2, result.getFeedbackAllowedIterations());
           assertTrue(result.isEnableReflection());
           assertEquals(List.of("https://example.com"), result.getLinks());
+          assertEquals(List.of(sourceInstitutionId), result.getTargetInstitutionIds());
+          assertEquals(List.of(sourceGroupId), result.getTargetGroupIds());
         }
 
         @Test
@@ -2520,7 +2726,9 @@ class ActivityServiceImplTest {
                   true,
                   banner,
                   List.of("https://example.com"),
-                  files);
+                  files,
+                  List.of(sourceInstitutionId),
+                  List.of(sourceGroupId));
           return d;
         }
       }
@@ -2543,6 +2751,8 @@ class ActivityServiceImplTest {
             banner,
             List.of("https://example.com"),
             files,
+            List.of(sourceInstitutionId),
+            List.of(sourceGroupId),
             Instant.parse("2020-01-01T00:00:00Z"),
             Instant.parse("2021-01-01T00:00:00Z"));
       }

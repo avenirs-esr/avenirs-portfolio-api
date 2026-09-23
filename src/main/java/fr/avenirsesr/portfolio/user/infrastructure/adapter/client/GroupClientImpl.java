@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.user.infrastructure.adapter.client;
 import fr.avenirsesr.portfolio.common.group.application.adapter.dto.GroupDTO;
 import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.AvenirsSecurityHeaders;
 import fr.avenirsesr.portfolio.user.domain.port.output.client.GroupClient;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
@@ -61,4 +62,30 @@ public class GroupClientImpl implements GroupClient {
       return Optional.empty();
     }
   }
+
+  @Override
+  public boolean hasAccess(List<UUID> affiliatedIds, List<UUID> targetIds) {
+    try {
+      log.debug(
+          "Checking access to groups {} for affiliations {} against back-office",
+          targetIds,
+          affiliatedIds);
+      return webClient
+          .post()
+          .uri(groupEndpoint + "/staff/access-check")
+          .header(AvenirsSecurityHeaders.API_KEY, apiKey)
+          .bodyValue(new GroupAccessCheckRequest(affiliatedIds, targetIds))
+          .retrieve()
+          .bodyToMono(Boolean.class)
+          .defaultIfEmpty(false)
+          .block();
+    } catch (Exception e) {
+      log.error("Failed to check group access at '{}'. Error: {}", groupEndpoint, e.getMessage());
+      log.debug("Full error details:", e);
+      return false;
+    }
+  }
+
+  private record GroupAccessCheckRequest(
+      List<UUID> affiliatedGroupIds, List<UUID> targetGroupIds) {}
 }

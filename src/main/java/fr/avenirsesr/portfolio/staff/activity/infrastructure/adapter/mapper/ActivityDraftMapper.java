@@ -29,10 +29,10 @@ public class ActivityDraftMapper implements Mapper<ActivityDraftEntity, Activity
             activityDraft.getBanner().map(FileMapper.INSTANCE::fromDomain).orElse(null),
             activityDraft.getLinks(),
             activityDraft.getFiles().stream().map(FileMapper.INSTANCE::fromDomain).toList(),
+            activityDraft.getTargetInstitutionIds(),
+            activityDraft.getTargetGroupIds(),
             activityDraft.getCreatedAt(),
             activityDraft.getUpdatedAt());
-    entity.setTargetInstitutionIds(activityDraft.getTargetInstitutionIds());
-    entity.setTargetGroupIds(activityDraft.getTargetGroupIds());
     return entity;
   }
 
@@ -56,9 +56,9 @@ public class ActivityDraftMapper implements Mapper<ActivityDraftEntity, Activity
             entity.isEnableReflection(),
             entity.getBanner() == null ? null : FileMapper.INSTANCE.toDomain(entity.getBanner()),
             entity.getLinks(),
-            entity.getFiles().stream().map(FileMapper.INSTANCE::toDomain).toList());
-    domain.setTargetInstitutionIds(entity.getTargetInstitutionIds());
-    domain.setTargetGroupIds(entity.getTargetGroupIds());
+            entity.getFiles().stream().map(FileMapper.INSTANCE::toDomain).toList(),
+            entity.getTargetInstitutionIds(),
+            entity.getTargetGroupIds());
     return domain;
   }
 
@@ -87,9 +87,9 @@ public class ActivityDraftMapper implements Mapper<ActivityDraftEntity, Activity
                 ? FileMapper.INSTANCE.toDomain(entity.getBanner(), graph)
                 : null,
             entity.getLinks(),
-            entity.getFiles().stream().map(FileMapper.INSTANCE::toDomain).toList());
-    domain.setTargetInstitutionIds(entity.getTargetInstitutionIds());
-    domain.setTargetGroupIds(entity.getTargetGroupIds());
+            entity.getFiles().stream().map(FileMapper.INSTANCE::toDomain).toList(),
+            entity.getTargetInstitutionIds(),
+            entity.getTargetGroupIds());
     return domain;
   }
 }

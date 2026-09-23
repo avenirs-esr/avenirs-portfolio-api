@@ -77,10 +77,9 @@ public interface ActivityService {
       Integer feedbackAllowedIterations,
       Boolean enableReflection,
       List<String> links,
-      boolean enableCompletionPeriod);
-
-  ActivityDraft updateActivityDraftTargeting(
-      UUID activityDraftId, List<UUID> targetInstitutionIds, List<UUID> targetGroupIds);
+      boolean enableCompletionPeriod,
+      List<UUID> targetInstitutionIds,
+      List<UUID> targetGroupIds);
 
   ActivityDraft createDraftFromActivity(UUID activityId);
 

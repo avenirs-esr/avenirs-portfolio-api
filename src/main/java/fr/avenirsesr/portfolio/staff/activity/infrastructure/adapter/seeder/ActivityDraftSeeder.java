@@ -141,7 +141,9 @@ public class ActivityDraftSeeder {
                     data.feedbackAllowedIterations().orElse(null),
                     data.enableReflection(),
                     data.links(),
-                    data.startDate().isPresent() && data.endDate().isPresent());
+                    data.startDate().isPresent() && data.endDate().isPresent(),
+                    null,
+                    null);
 
             entityManager.flush();
 

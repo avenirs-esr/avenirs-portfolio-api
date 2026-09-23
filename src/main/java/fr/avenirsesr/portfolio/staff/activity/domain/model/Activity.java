@@ -42,10 +42,8 @@ public class Activity extends AvenirsBaseModel {
 
   private List<String> links;
   private List<File> files;
-
-  private List<UUID> targetInstitutionIds = new ArrayList<>();
-
-  private List<UUID> targetGroupIds = new ArrayList<>();
+  private List<UUID> targetInstitutionIds;
+  private List<UUID> targetGroupIds;
 
   private Activity(
       UUID id,
@@ -64,6 +62,8 @@ public class Activity extends AvenirsBaseModel {
       File banner,
       List<String> links,
       List<File> files,
+      List<UUID> targetInstitutionIds,
+      List<UUID> targetGroupIds,
       Instant createdAt,
       Instant updatedAt) {
     super(id, createdAt, updatedAt);
@@ -82,6 +82,9 @@ public class Activity extends AvenirsBaseModel {
     this.banner = banner;
     this.links = new ArrayList<>(links == null ? List.of() : links);
     this.files = new ArrayList<>(files == null ? List.of() : files);
+    this.targetInstitutionIds =
+        new ArrayList<>(targetInstitutionIds == null ? List.of() : targetInstitutionIds);
+    this.targetGroupIds = new ArrayList<>(targetGroupIds == null ? List.of() : targetGroupIds);
   }
 
   public static Activity create(
@@ -99,7 +102,9 @@ public class Activity extends AvenirsBaseModel {
       int feedbackAllowedIterations,
       File banner,
       List<String> links,
-      List<File> files) {
+      List<File> files,
+      List<UUID> targetInstitutionIds,
+      List<UUID> targetGroupIds) {
     Instant now = Instant.now();
     return new Activity(
         id,
@@ -118,6 +123,8 @@ public class Activity extends AvenirsBaseModel {
         banner,
         links,
         files,
+        targetInstitutionIds,
+        targetGroupIds,
         now,
         now);
   }
@@ -139,6 +146,8 @@ public class Activity extends AvenirsBaseModel {
       File banner,
       List<String> links,
       List<File> files,
+      List<UUID> targetInstitutionIds,
+      List<UUID> targetGroupIds,
       Instant createdAt,
       Instant updatedAt) {
     return new Activity(
@@ -158,6 +167,8 @@ public class Activity extends AvenirsBaseModel {
         banner,
         links,
         files,
+        targetInstitutionIds,
+        targetGroupIds,
         createdAt,
         updatedAt);
   }

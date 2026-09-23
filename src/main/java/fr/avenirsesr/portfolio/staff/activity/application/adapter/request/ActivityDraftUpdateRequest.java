@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThemat
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Schema()
 public record ActivityDraftUpdateRequest(
@@ -18,4 +19,6 @@ public record ActivityDraftUpdateRequest(
     Integer feedbackAllowedIterations,
     Boolean enableReflection,
     List<String> links,
-    boolean enableCompletionPeriod) {}
+    boolean enableCompletionPeriod,
+    List<UUID> targetInstitutionIds,
+    List<UUID> targetGroupIds) {}

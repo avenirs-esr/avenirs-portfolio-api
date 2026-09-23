@@ -8,5 +8,4 @@ public enum EActivityUpdatableField {
   SUMMARY,
   DESCRIPTION,
   RECOMMENDED_COMPLETION_CONTEXTS,
-  TARGETING,
 }

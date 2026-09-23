@@ -140,28 +140,26 @@ public class ActivityFixture {
   }
 
   public Activity toModel() {
-    var activity =
-        Activity.toDomain(
-            id,
-            author,
-            title,
-            thematic,
-            summary,
-            status,
-            description,
-            recommendedCompletionContexts,
-            startDate,
-            endDate,
-            enableRefection,
-            traceAllowedAssociations,
-            feedbackAllowedIterations,
-            banner,
-            links,
-            files,
-            createdAt,
-            updatedAt);
-    activity.setTargetInstitutionIds(targetInstitutionIds);
-    activity.setTargetGroupIds(targetGroupIds);
-    return activity;
+    return Activity.toDomain(
+        id,
+        author,
+        title,
+        thematic,
+        summary,
+        status,
+        description,
+        recommendedCompletionContexts,
+        startDate,
+        endDate,
+        enableRefection,
+        traceAllowedAssociations,
+        feedbackAllowedIterations,
+        banner,
+        links,
+        files,
+        targetInstitutionIds,
+        targetGroupIds,
+        createdAt,
+        updatedAt);
   }
 }
