@@ -111,6 +111,8 @@ public class ActivityEntity extends PeriodEntity<LocalDate> {
       FileEntity banner,
       List<String> links,
       List<FileEntity> files,
+      List<UUID> targetInstitutionIds,
+      List<UUID> targetGroupIds,
       Instant createdAt,
       Instant updatedAt) {
     this.setId(id);
@@ -129,6 +131,8 @@ public class ActivityEntity extends PeriodEntity<LocalDate> {
     this.banner = banner;
     this.links = links;
     this.files = files;
+    this.targetInstitutionIds = targetInstitutionIds;
+    this.targetGroupIds = targetGroupIds;
     this.setCreatedAt(createdAt);
     this.setUpdatedAt(updatedAt);
   }
@@ -150,6 +154,8 @@ public class ActivityEntity extends PeriodEntity<LocalDate> {
       FileEntity banner,
       List<String> links,
       List<FileEntity> files,
+      List<UUID> targetInstitutionIds,
+      List<UUID> targetGroupIds,
       Instant createdAt,
       Instant updatedAt) {
 
@@ -170,6 +176,8 @@ public class ActivityEntity extends PeriodEntity<LocalDate> {
         banner,
         links,
         files,
+        targetInstitutionIds,
+        targetGroupIds,
         createdAt,
         updatedAt);
   }

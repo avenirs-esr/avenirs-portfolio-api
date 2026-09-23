@@ -40,6 +40,8 @@ import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
+import fr.avenirsesr.portfolio.user.domain.port.output.client.GroupClient;
+import fr.avenirsesr.portfolio.user.domain.port.output.client.InstitutionClient;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import java.time.Duration;
 import java.time.Instant;
@@ -73,6 +75,8 @@ public class ActivityServiceImpl implements ActivityService {
   private final FileResourceService fileResourceService;
   private final StudentRepository studentRepository;
   private final ActivityViewRepository activityViewRepository;
+  private final InstitutionClient institutionClient;
+  private final GroupClient groupClient;
 
   @Override
   public Activity create(
@@ -121,6 +125,8 @@ public class ActivityServiceImpl implements ActivityService {
             feedbackAllowedIterations,
             null,
             links,
+            List.of(),
+            List.of(),
             List.of());
     activityRepository.save(activity);
     return activity;
@@ -171,16 +177,15 @@ public class ActivityServiceImpl implements ActivityService {
                 draft.getFeedbackAllowedIterations(),
                 draft.getBanner().orElse(null),
                 draft.getLinks(),
-                draft.getFiles()));
+                draft.getFiles(),
+                draft.getTargetInstitutionIds(),
+                draft.getTargetGroupIds()));
 
     if (publishedActivity.isPresent()) {
       var enrolledDeclaredActivities = declaredActivityService.getEnrolledStudents(activity);
       var updatedFields = updateActivity(activity, draft, !enrolledDeclaredActivities.isEmpty());
       activity.setStatus(EActivityStatus.PUBLISHED);
       notifyActivityUpdated(updatedFields, enrolledDeclaredActivities);
-    } else {
-      activity.setTargetInstitutionIds(draft.getTargetInstitutionIds());
-      activity.setTargetGroupIds(draft.getTargetGroupIds());
     }
 
     var savedActivity = activityRepository.save(activity);
@@ -237,23 +242,15 @@ public class ActivityServiceImpl implements ActivityService {
                 new HashSet<>(draft.getLinks()),
                 links -> activity.setLinks(links.stream().toList())),
             new FieldSync<>(
-                FILES_AND_LINKS, activity.getFiles(), draft.getFiles(), activity::setFiles),
-            new FieldSync<>(
-                TARGETING,
-                new HashSet<>(activity.getTargetInstitutionIds()),
-                new HashSet<>(draft.getTargetInstitutionIds()),
-                ids -> activity.setTargetInstitutionIds(ids.stream().toList())),
-            new FieldSync<>(
-                TARGETING,
-                new HashSet<>(activity.getTargetGroupIds()),
-                new HashSet<>(draft.getTargetGroupIds()),
-                ids -> activity.setTargetGroupIds(ids.stream().toList())));
+                FILES_AND_LINKS, activity.getFiles(), draft.getFiles(), activity::setFiles));
 
     var updatedFields =
         syncs.stream().filter(FieldSync::applyIfChanged).map(FieldSync::field).distinct().toList();
 
     activity.setStartDate(draft.getStartDate().orElse(null));
     activity.setEndDate(draft.getEndDate().orElse(null));
+    activity.setTargetInstitutionIds(draft.getTargetInstitutionIds());
+    activity.setTargetGroupIds(draft.getTargetGroupIds());
 
     if (!hasEnrolledStudents) {
       activity.setTraceAllowedAssociations(draft.getTraceAllowedAssociations());
@@ -474,7 +471,9 @@ public class ActivityServiceImpl implements ActivityService {
       Integer feedbackAllowedIterations,
       Boolean enableReflection,
       List<String> links,
-      boolean enableCompletionPeriod) {
+      boolean enableCompletionPeriod,
+      List<UUID> targetInstitutionIds,
+      List<UUID> targetGroupIds) {
     var loggedInStaff = loggedInUserService.getLoggedInStaff();
     var draft =
         activityDraftRepository.findById(id).orElseThrow(ActivityDraftNotFoundException::new);
@@ -482,6 +481,9 @@ public class ActivityServiceImpl implements ActivityService {
     if (!draft.getAuthor().equals(loggedInStaff)) {
       throw new UserNotAuthorizedException();
     }
+
+    validateTargetPerimeter(loggedInStaff, targetInstitutionIds, targetGroupIds);
+    validateTargetingUpdate(id, targetInstitutionIds, targetGroupIds);
 
     validateOptionalTextMaxLength("summary", summary, SUMMARY_LENGTH);
     validateOptionalTextMaxLength("description", description, RICH_DESCRIPTION_LENGTH);
@@ -530,20 +532,44 @@ public class ActivityServiceImpl implements ActivityService {
       draft.setLinks(links);
     }
 
+    if (targetInstitutionIds != null) draft.setTargetInstitutionIds(targetInstitutionIds);
+    if (targetGroupIds != null) draft.setTargetGroupIds(targetGroupIds);
+
     var updatedDraft = activityDraftRepository.save(draft);
     log.info("Updated activity draft with id: {}", id);
     return updatedDraft;
   }
 
-  @Override
-  public ActivityDraft updateActivityDraftTargeting(
-      UUID activityDraftId, List<UUID> targetInstitutionIds, List<UUID> targetGroupIds) {
-    var draft = getOwnedDraft(activityDraftId);
-    draft.setTargetInstitutionIds(targetInstitutionIds == null ? List.of() : targetInstitutionIds);
-    draft.setTargetGroupIds(targetGroupIds == null ? List.of() : targetGroupIds);
-    var updatedDraft = activityDraftRepository.save(draft);
-    log.info("Updated targeting of activity draft with id: {}", activityDraftId);
-    return updatedDraft;
+  private void validateTargetPerimeter(
+      Staff staff, List<UUID> targetInstitutionIds, List<UUID> targetGroupIds) {
+    if (targetInstitutionIds != null
+        && !targetInstitutionIds.isEmpty()
+        && !institutionClient.hasAccess(staff.getInstitutionIds(), targetInstitutionIds)) {
+      throw new ActivityTargetNotAccessibleException();
+    }
+    if (targetGroupIds != null
+        && !targetGroupIds.isEmpty()
+        && !groupClient.hasAccess(staff.getGroupIds(), targetGroupIds)) {
+      throw new ActivityTargetNotAccessibleException();
+    }
+  }
+
+  private void validateTargetingUpdate(
+      UUID activityId, List<UUID> targetInstitutionIds, List<UUID> targetGroupIds) {
+    var publishedActivity =
+        activityRepository
+            .findById(activityId)
+            .filter(activity -> activity.getStatus() == EActivityStatus.PUBLISHED);
+    if (publishedActivity.isEmpty()) {
+      return;
+    }
+
+    var activity = publishedActivity.get();
+    if (targetInstitutionIds != null
+            && !targetInstitutionIds.containsAll(activity.getTargetInstitutionIds())
+        || targetGroupIds != null && !targetGroupIds.containsAll(activity.getTargetGroupIds())) {
+      throw new ActivityTargetRemovalNotAllowedException();
+    }
   }
 
   @Override
@@ -578,9 +604,9 @@ public class ActivityServiceImpl implements ActivityService {
             activity.isEnableReflection(),
             activity.getBanner().orElse(null),
             activity.getLinks(),
-            activity.getFiles());
-    draft.setTargetInstitutionIds(activity.getTargetInstitutionIds());
-    draft.setTargetGroupIds(activity.getTargetGroupIds());
+            activity.getFiles(),
+            activity.getTargetInstitutionIds(),
+            activity.getTargetGroupIds());
 
     var savedDraft = activityDraftRepository.save(draft);
 
@@ -629,11 +655,9 @@ public class ActivityServiceImpl implements ActivityService {
             source.isEnableReflection(),
             source.getBanner().map(banner -> fileResourceService.copy(banner.getId())).orElse(null),
             source.getLinks(),
-            source.getFiles().stream()
-                .map(file -> fileResourceService.copy(file.getId()))
-                .toList());
-    duplicate.setTargetInstitutionIds(source.getTargetInstitutionIds());
-    duplicate.setTargetGroupIds(source.getTargetGroupIds());
+            source.getFiles().stream().map(file -> fileResourceService.copy(file.getId())).toList(),
+            source.getTargetInstitutionIds(),
+            source.getTargetGroupIds());
     return activityDraftRepository.save(duplicate);
   }
 
@@ -657,11 +681,9 @@ public class ActivityServiceImpl implements ActivityService {
             source.isEnableReflection(),
             source.getBanner().map(banner -> fileResourceService.copy(banner.getId())).orElse(null),
             source.getLinks(),
-            source.getFiles().stream()
-                .map(file -> fileResourceService.copy(file.getId()))
-                .toList());
-    duplicate.setTargetInstitutionIds(source.getTargetInstitutionIds());
-    duplicate.setTargetGroupIds(source.getTargetGroupIds());
+            source.getFiles().stream().map(file -> fileResourceService.copy(file.getId())).toList(),
+            source.getTargetInstitutionIds(),
+            source.getTargetGroupIds());
     return activityDraftRepository.save(duplicate);
   }
 

@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.user.infrastructure.adapter.client;
 import fr.avenirsesr.portfolio.common.institution.application.adapter.dto.InstitutionDTO;
 import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.AvenirsSecurityHeaders;
 import fr.avenirsesr.portfolio.user.domain.port.output.client.InstitutionClient;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
@@ -54,4 +55,33 @@ public class InstitutionClientImpl implements InstitutionClient {
       return Optional.empty();
     }
   }
+
+  @Override
+  public boolean hasAccess(List<UUID> affiliatedIds, List<UUID> targetIds) {
+    try {
+      log.debug(
+          "Checking access to institutions {} for affiliations {} against back-office",
+          targetIds,
+          affiliatedIds);
+      return webClient
+          .post()
+          .uri(institutionEndpoint + "/staff/access-check")
+          .header(AvenirsSecurityHeaders.API_KEY, apiKey)
+          .bodyValue(new InstitutionAccessCheckRequest(affiliatedIds, targetIds))
+          .retrieve()
+          .bodyToMono(Boolean.class)
+          .defaultIfEmpty(false)
+          .block();
+    } catch (Exception e) {
+      log.error(
+          "Failed to check institution access at '{}'. Error: {}",
+          institutionEndpoint,
+          e.getMessage());
+      log.debug("Full error details:", e);
+      return false;
+    }
+  }
+
+  private record InstitutionAccessCheckRequest(
+      List<UUID> affiliatedInstitutionIds, List<UUID> targetInstitutionIds) {}
 }

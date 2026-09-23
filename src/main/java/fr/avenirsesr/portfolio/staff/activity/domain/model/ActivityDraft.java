@@ -27,8 +27,8 @@ public class ActivityDraft extends AvenirsBaseModel {
   private File banner;
   @Getter private List<String> links;
   @Getter private List<File> files;
-  @Getter private List<UUID> targetInstitutionIds = new ArrayList<>();
-  @Getter private List<UUID> targetGroupIds = new ArrayList<>();
+  @Getter private List<UUID> targetInstitutionIds;
+  @Getter private List<UUID> targetGroupIds;
   @Getter private int traceAllowedAssociations;
   @Getter private int feedbackAllowedIterations;
   @Getter private boolean enableReflection;
@@ -53,7 +53,9 @@ public class ActivityDraft extends AvenirsBaseModel {
       boolean enableReflection,
       File banner,
       List<String> links,
-      List<File> files) {
+      List<File> files,
+      List<UUID> targetInstitutionIds,
+      List<UUID> targetGroupIds) {
     super(id, createdAt, updatedAt);
     this.title = title;
     this.author = author;
@@ -69,6 +71,9 @@ public class ActivityDraft extends AvenirsBaseModel {
     this.banner = banner;
     this.links = new ArrayList<>(links == null ? List.of() : links);
     this.files = new ArrayList<>(files == null ? List.of() : files);
+    this.targetInstitutionIds =
+        new ArrayList<>(targetInstitutionIds == null ? List.of() : targetInstitutionIds);
+    this.targetGroupIds = new ArrayList<>(targetGroupIds == null ? List.of() : targetGroupIds);
   }
 
   public static ActivityDraft create(String title, Staff createdBy) {
@@ -88,6 +93,8 @@ public class ActivityDraft extends AvenirsBaseModel {
         DEFAULT_FEEDBACK_ALLOWED_ITERATIONS,
         true,
         null,
+        List.of(),
+        List.of(),
         List.of(),
         List.of());
   }
@@ -109,7 +116,9 @@ public class ActivityDraft extends AvenirsBaseModel {
       boolean enableReflection,
       File banner,
       List<String> links,
-      List<File> files) {
+      List<File> files,
+      List<UUID> targetInstitutionIds,
+      List<UUID> targetGroupIds) {
     return new ActivityDraft(
         id,
         createdAt,
@@ -127,7 +136,9 @@ public class ActivityDraft extends AvenirsBaseModel {
         enableReflection,
         banner,
         links,
-        files);
+        files,
+        targetInstitutionIds,
+        targetGroupIds);
   }
 
   public Optional<EActivityThematic> getThematic() {

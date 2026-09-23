@@ -12,11 +12,11 @@ import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDraftCreationRequest;
-import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDraftTargetingUpdateRequest;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDraftUpdateRequest;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDuplicationRequest;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
+import fr.avenirsesr.portfolio.user.domain.port.input.StaffService;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
@@ -32,6 +32,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
+import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
 
@@ -44,7 +45,6 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       BASE_PATH + "/PUBLISHED/{activityId}/presentation";
   private static final String DRAFT_PATH = BASE_PATH + "/draft";
   private static final String DRAFT_UPDATE_PATH = BASE_PATH + "/{draftId}";
-  private static final String DRAFT_TARGETING_PATH = BASE_PATH + "/draft/{draftId}/targeting";
   private static final String WORKING_SPACE_PATH = BASE_PATH + "/staff/working-space";
   private static final String LIBRARY_PATH = BASE_PATH + "/staff/library";
   private static final String PUBLISH_PATH = BASE_PATH + "/publish/{draftId}";
@@ -61,6 +61,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
 
   @Autowired private WebTestClient webTestClient;
   @Autowired private ObjectMapper objectMapper;
+  @Autowired private StaffService staffService;
 
   @Value("${user.student.payload}")
   private String studentPayload;
@@ -643,7 +644,9 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                     3,
                     false,
                     List.of("https://example.com", "https://avenirs-esr.fr"),
-                    true));
+                    true,
+                    null,
+                    null));
 
         webTestClient
             .patch()
@@ -681,7 +684,9 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                     null,
                     null,
                     null,
-                    false));
+                    false,
+                    null,
+                    null));
 
         webTestClient
             .patch()
@@ -709,7 +714,8 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         String requestBody =
             objectMapper.writeValueAsString(
                 new ActivityDraftUpdateRequest(
-                    null, null, null, null, null, null, null, null, null, null, null, false));
+                    null, null, null, null, null, null, null, null, null, null, null, false, null,
+                    null));
 
         webTestClient
             .patch()
@@ -759,7 +765,9 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                     null,
                     null,
                     null,
-                    false));
+                    false,
+                    null,
+                    null));
 
         webTestClient
             .patch()
@@ -808,7 +816,9 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                     null,
                     null,
                     null,
-                    true));
+                    true,
+                    null,
+                    null));
 
         webTestClient
             .patch()
@@ -835,7 +845,8 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         String requestBody =
             objectMapper.writeValueAsString(
                 new ActivityDraftUpdateRequest(
-                    "Titre", null, null, null, null, null, null, null, null, null, null, false));
+                    "Titre", null, null, null, null, null, null, null, null, null, null, false,
+                    null, null));
 
         webTestClient
             .patch()
@@ -873,7 +884,9 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                     null,
                     null,
                     null,
-                    false));
+                    false,
+                    null,
+                    null));
 
         webTestClient
             .patch()
@@ -897,7 +910,8 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         String requestBody =
             objectMapper.writeValueAsString(
                 new ActivityDraftUpdateRequest(
-                    "Titre", null, null, null, null, null, null, null, null, null, null, false));
+                    "Titre", null, null, null, null, null, null, null, null, null, null, false,
+                    null, null));
 
         webTestClient
             .patch()
@@ -926,7 +940,9 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                     null,
                     null,
                     null,
-                    true));
+                    true,
+                    null,
+                    null));
 
         webTestClient
             .patch()
@@ -944,9 +960,23 @@ class ActivityControllerIT extends ContainerConfigurationTest {
     @Nested
     class WhenUpdatingActivityDraftTargeting {
 
+      private static final UUID STAFF_ID = UUID.fromString("57ff122f-ff76-4d95-b6c1-61a4efeabd80");
+      private static final UUID ALLOWED_INSTITUTION_ID_1 = UUID.randomUUID();
+      private static final UUID ALLOWED_INSTITUTION_ID_2 = UUID.randomUUID();
+      private static final UUID ALLOWED_GROUP_ID_1 = UUID.randomUUID();
+      private static final UUID ALLOWED_GROUP_ID_2 = UUID.randomUUID();
+      private static final UUID OUTSIDE_PERIMETER_INSTITUTION_ID = UUID.randomUUID();
+      private static final UUID OUTSIDE_PERIMETER_GROUP_ID = UUID.randomUUID();
+
       @BeforeEach
       void setupWhen() {
-        BddLogger.when("performing a PATCH on " + DRAFT_TARGETING_PATH);
+        BddLogger.when("performing a PATCH on " + DRAFT_UPDATE_PATH + " with targeting fields");
+        staffService.updateAffiliations(
+            STAFF_ID,
+            List.of(ALLOWED_INSTITUTION_ID_1, ALLOWED_INSTITUTION_ID_2),
+            List.of(ALLOWED_GROUP_ID_1, ALLOWED_GROUP_ID_2));
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
       }
 
       @Test
@@ -956,17 +986,15 @@ class ActivityControllerIT extends ContainerConfigurationTest {
 
         BddLogger.then("it should return 200 with the draft id");
 
-        String requestBody =
-            objectMapper.writeValueAsString(
-                new ActivityDraftTargetingUpdateRequest(
-                    List.of(UUID.randomUUID()), List.of(UUID.randomUUID())));
-
         webTestClient
             .patch()
-            .uri(DRAFT_TARGETING_PATH, draftId)
+            .uri(DRAFT_UPDATE_PATH, draftId)
             .headers(ActivityControllerIT.this::addStaffHeaders)
             .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(requestBody)
+            .bodyValue(
+                objectMapper.writeValueAsString(
+                    targetingRequest(
+                        List.of(ALLOWED_INSTITUTION_ID_1), List.of(ALLOWED_GROUP_ID_1))))
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus()
@@ -980,10 +1008,9 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       void thenItShouldPersistTheTargetedInstitutionsAndGroups() throws Exception {
         BddLogger.and("given an existing activity draft");
         UUID draftId = createDraftAndGetId("Brouillon ciblage persisté");
-        UUID institutionId = UUID.randomUUID();
-        UUID groupId = UUID.randomUUID();
 
-        updateDraftTargeting(draftId, List.of(institutionId), List.of(groupId));
+        updateDraftTargeting(
+            draftId, List.of(ALLOWED_INSTITUTION_ID_1), List.of(ALLOWED_GROUP_ID_1));
 
         BddLogger.then("the draft content should expose the targeted institutions and groups");
 
@@ -997,18 +1024,19 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             .isOk()
             .expectBody()
             .jsonPath("$.targetInstitutionIds[0]")
-            .isEqualTo(institutionId.toString())
+            .isEqualTo(ALLOWED_INSTITUTION_ID_1.toString())
             .jsonPath("$.targetGroupIds[0]")
-            .isEqualTo(groupId.toString());
+            .isEqualTo(ALLOWED_GROUP_ID_1.toString());
       }
 
       @Test
-      void thenItShouldClearTargetingWhenListsAreEmpty() throws Exception {
+      void thenItShouldClearTargetingWhenListsAreExplicitlyEmpty() throws Exception {
         BddLogger.and("given a draft already targeting an institution and a group");
         UUID draftId = createDraftAndGetId("Brouillon ciblage effacé");
-        updateDraftTargeting(draftId, List.of(UUID.randomUUID()), List.of(UUID.randomUUID()));
+        updateDraftTargeting(
+            draftId, List.of(ALLOWED_INSTITUTION_ID_1), List.of(ALLOWED_GROUP_ID_1));
 
-        BddLogger.then("submitting empty lists should clear the targeting");
+        BddLogger.then("submitting explicit empty lists should clear the targeting");
 
         updateDraftTargeting(draftId, List.of(), List.of());
 
@@ -1028,19 +1056,20 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       }
 
       @Test
-      void thenItShouldTreatMissingListsAsEmpty() throws Exception {
+      void thenItShouldLeaveTargetingUnchangedWhenFieldsAreMissing() throws Exception {
         BddLogger.and("given a draft already targeting an institution and a group");
         UUID draftId = createDraftAndGetId("Brouillon ciblage non renseigné");
-        updateDraftTargeting(draftId, List.of(UUID.randomUUID()), List.of(UUID.randomUUID()));
+        updateDraftTargeting(
+            draftId, List.of(ALLOWED_INSTITUTION_ID_1), List.of(ALLOWED_GROUP_ID_1));
 
-        BddLogger.then("submitting a body without targeting fields should clear the targeting");
+        BddLogger.then("submitting a body without targeting fields should leave it unchanged");
 
         webTestClient
             .patch()
-            .uri(DRAFT_TARGETING_PATH, draftId)
+            .uri(DRAFT_UPDATE_PATH, draftId)
             .headers(ActivityControllerIT.this::addStaffHeaders)
             .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue("{}")
+            .bodyValue("{\"enableCompletionPeriod\":false}")
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus()
@@ -1055,10 +1084,10 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             .expectStatus()
             .isOk()
             .expectBody()
-            .jsonPath("$.targetInstitutionIds")
-            .isEqualTo(List.of())
-            .jsonPath("$.targetGroupIds")
-            .isEqualTo(List.of());
+            .jsonPath("$.targetInstitutionIds[0]")
+            .isEqualTo(ALLOWED_INSTITUTION_ID_1.toString())
+            .jsonPath("$.targetGroupIds[0]")
+            .isEqualTo(ALLOWED_GROUP_ID_1.toString());
       }
 
       @Test
@@ -1068,16 +1097,12 @@ class ActivityControllerIT extends ContainerConfigurationTest {
 
         BddLogger.then("it should return 404 with ACTIVITY_DRAFT_NOT_FOUND error code");
 
-        String requestBody =
-            objectMapper.writeValueAsString(
-                new ActivityDraftTargetingUpdateRequest(List.of(), List.of()));
-
         webTestClient
             .patch()
-            .uri(DRAFT_TARGETING_PATH, unknownId)
+            .uri(DRAFT_UPDATE_PATH, unknownId)
             .headers(ActivityControllerIT.this::addStaffHeaders)
             .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(requestBody)
+            .bodyValue(objectMapper.writeValueAsString(targetingRequest(List.of(), List.of())))
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus()
@@ -1094,16 +1119,12 @@ class ActivityControllerIT extends ContainerConfigurationTest {
 
         BddLogger.then("it should return 403 with ACCESS_DENIED error code");
 
-        String requestBody =
-            objectMapper.writeValueAsString(
-                new ActivityDraftTargetingUpdateRequest(List.of(), List.of()));
-
         webTestClient
             .patch()
-            .uri(DRAFT_TARGETING_PATH, draftId)
+            .uri(DRAFT_UPDATE_PATH, draftId)
             .headers(ActivityControllerIT.this::addSecondStudentHeaders)
             .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(requestBody)
+            .bodyValue(objectMapper.writeValueAsString(targetingRequest(List.of(), List.of())))
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus()
@@ -1117,34 +1138,220 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       void thenItShouldReturn401WhenNotAuthenticated() throws Exception {
         BddLogger.then("it should return 401");
 
-        String requestBody =
-            objectMapper.writeValueAsString(
-                new ActivityDraftTargetingUpdateRequest(List.of(), List.of()));
-
         webTestClient
             .patch()
-            .uri(DRAFT_TARGETING_PATH, UUID.randomUUID())
+            .uri(DRAFT_UPDATE_PATH, UUID.randomUUID())
             .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(requestBody)
+            .bodyValue(objectMapper.writeValueAsString(targetingRequest(List.of(), List.of())))
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus()
             .isUnauthorized();
       }
 
-      private void updateDraftTargeting(
-          UUID draftId, List<UUID> targetInstitutionIds, List<UUID> targetGroupIds)
-          throws Exception {
-        String requestBody =
-            objectMapper.writeValueAsString(
-                new ActivityDraftTargetingUpdateRequest(targetInstitutionIds, targetGroupIds));
+      @Test
+      void thenItShouldReturn403WhenTargetingAnInstitutionOutsideStaffPerimeter() throws Exception {
+        BddLogger.and("given an existing activity draft");
+        UUID draftId = createDraftAndGetId("Brouillon ciblage institution hors périmètre");
+
+        BddLogger.then("it should return 403 with ACTIVITY_TARGET_NOT_ACCESSIBLE error code");
 
         webTestClient
             .patch()
-            .uri(DRAFT_TARGETING_PATH, draftId)
+            .uri(DRAFT_UPDATE_PATH, draftId)
             .headers(ActivityControllerIT.this::addStaffHeaders)
             .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(requestBody)
+            .bodyValue(
+                objectMapper.writeValueAsString(
+                    targetingRequest(List.of(OUTSIDE_PERIMETER_INSTITUTION_ID), List.of())))
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isEqualTo(403)
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("ACTIVITY_TARGET_NOT_ACCESSIBLE");
+      }
+
+      @Test
+      void thenItShouldReturn403WhenTargetingAGroupOutsideStaffPerimeter() throws Exception {
+        BddLogger.and("given an existing activity draft");
+        UUID draftId = createDraftAndGetId("Brouillon ciblage groupe hors périmètre");
+
+        BddLogger.then("it should return 403 with ACTIVITY_TARGET_NOT_ACCESSIBLE error code");
+
+        webTestClient
+            .patch()
+            .uri(DRAFT_UPDATE_PATH, draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(
+                objectMapper.writeValueAsString(
+                    targetingRequest(List.of(), List.of(OUTSIDE_PERIMETER_GROUP_ID))))
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isEqualTo(403)
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("ACTIVITY_TARGET_NOT_ACCESSIBLE");
+      }
+
+      @Test
+      void thenItShouldAllowAddingNewTargetsToAPublishedActivity() throws Exception {
+        BddLogger.and(
+            "given a published activity with an enrolled student targeting an institution");
+        UUID activityId = createDraftAndGetId("Activité publiée à cibler davantage");
+        updateDraftTargeting(activityId, List.of(ALLOWED_INSTITUTION_ID_1), List.of());
+        fillDraftWithSummaryAndDescription(activityId);
+        publishDraft(activityId);
+        subscribeStudentToActivity(activityId);
+
+        webTestClient
+            .post()
+            .uri(CREATE_DRAFT_PATH, activityId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .exchange()
+            .expectStatus()
+            .isOk();
+
+        BddLogger.then("adding a new institution to the targeting should be allowed");
+
+        webTestClient
+            .patch()
+            .uri(DRAFT_UPDATE_PATH, activityId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(
+                objectMapper.writeValueAsString(
+                    targetingRequest(
+                        List.of(ALLOWED_INSTITUTION_ID_1, ALLOWED_INSTITUTION_ID_2), null)))
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk();
+
+        webTestClient
+            .get()
+            .uri(CONTENT_PATH, "DRAFT", activityId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.targetInstitutionIds.length()")
+            .isEqualTo(2);
+      }
+
+      @Test
+      void thenItShouldReturn409WhenRemovingATargetFromAPublishedActivity() throws Exception {
+        BddLogger.and(
+            "given a published activity with an enrolled student targeting an institution");
+        UUID activityId = createDraftAndGetId("Activité publiée ciblage protégé");
+        updateDraftTargeting(activityId, List.of(ALLOWED_INSTITUTION_ID_1), List.of());
+        fillDraftWithSummaryAndDescription(activityId);
+        publishDraft(activityId);
+        subscribeStudentToActivity(activityId);
+
+        webTestClient
+            .post()
+            .uri(CREATE_DRAFT_PATH, activityId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .exchange()
+            .expectStatus()
+            .isOk();
+
+        BddLogger.then("removing the already targeted institution should return 409");
+
+        webTestClient
+            .patch()
+            .uri(DRAFT_UPDATE_PATH, activityId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(objectMapper.writeValueAsString(targetingRequest(List.of(), null)))
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isEqualTo(409)
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("ACTIVITY_TARGET_REMOVAL_NOT_ALLOWED");
+      }
+
+      @Test
+      void thenItShouldAllowRemovingTargetsWhenActivityIsUnpublishedDuringEdit() throws Exception {
+        BddLogger.and(
+            "given an unpublished activity (no enrolled student) targeting an institution");
+        UUID activityId = createDraftAndGetId("Activité dépubliée ciblage libre");
+        updateDraftTargeting(activityId, List.of(ALLOWED_INSTITUTION_ID_1), List.of());
+        fillDraftWithSummaryAndDescription(activityId);
+        publishDraft(activityId);
+
+        webTestClient
+            .post()
+            .uri(CREATE_DRAFT_PATH, activityId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .exchange()
+            .expectStatus()
+            .isOk();
+
+        BddLogger.then("removing the targeted institution should be allowed");
+
+        webTestClient
+            .patch()
+            .uri(DRAFT_UPDATE_PATH, activityId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(objectMapper.writeValueAsString(targetingRequest(List.of(), null)))
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk();
+
+        webTestClient
+            .get()
+            .uri(CONTENT_PATH, "DRAFT", activityId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.targetInstitutionIds")
+            .isEqualTo(List.of());
+      }
+
+      private ActivityDraftUpdateRequest targetingRequest(
+          List<UUID> targetInstitutionIds, List<UUID> targetGroupIds) {
+        return new ActivityDraftUpdateRequest(
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            false,
+            targetInstitutionIds,
+            targetGroupIds);
+      }
+
+      private void updateDraftTargeting(
+          UUID draftId, List<UUID> targetInstitutionIds, List<UUID> targetGroupIds)
+          throws Exception {
+        webTestClient
+            .patch()
+            .uri(DRAFT_UPDATE_PATH, draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(
+                objectMapper.writeValueAsString(
+                    targetingRequest(targetInstitutionIds, targetGroupIds)))
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus()
@@ -2547,7 +2754,9 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                 null,
                 null,
                 null,
-                false));
+                false,
+                null,
+                null));
 
     webTestClient
         .patch()
@@ -2576,7 +2785,9 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                 null,
                 null,
                 null,
-                false));
+                false,
+                null,
+                null));
 
     webTestClient
         .patch()
