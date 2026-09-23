@@ -77,8 +77,12 @@ public class DeclaredExperienceController {
               array = @ArraySchema(schema = @Schema(ref = "#/components/schemas/EExperienceType")))
           @RequestParam(required = false)
           List<EExperienceType> experienceTypes,
-      @RequestParam(required = false) ESortField sortField,
-      @RequestParam(required = false) ESortOrder sortOrder) {
+      @Parameter(schema = @Schema(ref = "#/components/schemas/ESortField"))
+          @RequestParam(required = false)
+          ESortField sortField,
+      @Parameter(schema = @Schema(ref = "#/components/schemas/ESortOrder"))
+          @RequestParam(required = false)
+          ESortOrder sortOrder) {
     SortCriteria sortCriteria =
         (sortField != null && sortOrder != null) ? new SortCriteria(sortField, sortOrder) : null;
 
