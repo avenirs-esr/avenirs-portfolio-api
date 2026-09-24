@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.student.activity.application.adapter.dto;
 
-import fr.avenirsesr.portfolio.file.application.adapter.dto.FileDTO;
+import fr.avenirsesr.portfolio.common.file.application.adapter.dto.FileDTO;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.user.application.adapter.dto.UserInfoDTO;
 import io.swagger.v3.oas.annotations.media.Schema;

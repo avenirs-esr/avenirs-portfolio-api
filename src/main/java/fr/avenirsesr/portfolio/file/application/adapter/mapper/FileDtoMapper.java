@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.file.application.adapter.mapper;
 
-import fr.avenirsesr.portfolio.file.application.adapter.dto.FileDTO;
+import fr.avenirsesr.portfolio.common.file.application.adapter.dto.FileDTO;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
 import java.util.Optional;

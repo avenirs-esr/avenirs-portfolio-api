@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.file.infrastructure.adapter.openapi;
 
-import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
+import fr.avenirsesr.portfolio.common.file.domain.model.enums.EFileType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 import java.util.Arrays;

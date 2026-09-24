@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.data;
 
-import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
+import fr.avenirsesr.portfolio.common.file.domain.model.enums.EFileType;
 import java.util.UUID;
 
 public record ActivityFileCreationData(

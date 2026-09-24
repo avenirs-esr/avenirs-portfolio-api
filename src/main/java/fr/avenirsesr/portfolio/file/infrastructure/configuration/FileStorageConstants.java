@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.file.infrastructure.configuration;
 
-import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
+import fr.avenirsesr.portfolio.common.file.domain.model.enums.EFileType;
 import jakarta.annotation.PostConstruct;
 import java.util.UUID;
 import lombok.Getter;
