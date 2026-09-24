@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.student.trace.domain.filter;
 
-import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
+import fr.avenirsesr.portfolio.common.file.domain.model.enums.EFileType;
 import java.util.*;
 
 public record TraceFilter(

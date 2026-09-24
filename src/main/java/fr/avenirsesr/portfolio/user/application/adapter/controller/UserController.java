@@ -4,9 +4,9 @@ import static fr.avenirsesr.portfolio.shared.application.adapter.Utils.extractOr
 import static fr.avenirsesr.portfolio.shared.application.adapter.Utils.readBytes;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
+import fr.avenirsesr.portfolio.common.file.application.adapter.dto.FileDTO;
 import fr.avenirsesr.portfolio.common.security.accesscontrol.domain.model.enums.ERole;
 import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.HmacAuthenticationToken;
-import fr.avenirsesr.portfolio.file.application.adapter.dto.FileDTO;
 import fr.avenirsesr.portfolio.file.application.adapter.mapper.FileDtoMapper;
 import fr.avenirsesr.portfolio.user.application.adapter.dto.LoggedInUserDTO;
 import fr.avenirsesr.portfolio.user.application.adapter.dto.ProfileOverviewDTO;

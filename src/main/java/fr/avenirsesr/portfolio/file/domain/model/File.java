@@ -2,7 +2,7 @@ package fr.avenirsesr.portfolio.file.domain.model;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
-import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
+import fr.avenirsesr.portfolio.common.file.domain.model.enums.EFileType;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.Getter;

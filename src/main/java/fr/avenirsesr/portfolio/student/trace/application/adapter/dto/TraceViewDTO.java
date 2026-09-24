@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.student.trace.application.adapter.dto;
 
-import fr.avenirsesr.portfolio.file.application.adapter.dto.FileDTO;
+import fr.avenirsesr.portfolio.common.file.application.adapter.dto.FileDTO;
 import fr.avenirsesr.portfolio.student.trace.domain.model.enums.ETraceAuthorType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;

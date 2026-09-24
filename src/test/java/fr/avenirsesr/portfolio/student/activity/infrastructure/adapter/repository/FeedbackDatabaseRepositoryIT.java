@@ -2,8 +2,8 @@ package fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.reposito
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import fr.avenirsesr.portfolio.common.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
-import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;

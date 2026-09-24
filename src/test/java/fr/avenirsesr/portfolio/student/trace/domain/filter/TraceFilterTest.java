@@ -2,7 +2,7 @@ package fr.avenirsesr.portfolio.student.trace.domain.filter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
+import fr.avenirsesr.portfolio.common.file.domain.model.enums.EFileType;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;

@@ -7,7 +7,7 @@ import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedRes
 import fr.avenirsesr.portfolio.common.data.domain.model.DateFilter;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.file.application.adapter.dto.FileDTO;
+import fr.avenirsesr.portfolio.common.file.application.adapter.dto.FileDTO;
 import fr.avenirsesr.portfolio.file.application.adapter.mapper.FileDtoMapper;
 import fr.avenirsesr.portfolio.student.trace.application.adapter.dto.*;
 import fr.avenirsesr.portfolio.student.trace.application.adapter.mapper.*;

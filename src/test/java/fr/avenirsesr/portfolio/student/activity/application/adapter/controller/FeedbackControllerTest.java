@@ -10,12 +10,12 @@ import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedRes
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
+import fr.avenirsesr.portfolio.common.file.application.adapter.dto.FileDTO;
+import fr.avenirsesr.portfolio.common.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
-import fr.avenirsesr.portfolio.file.application.adapter.dto.FileDTO;
 import fr.avenirsesr.portfolio.file.application.adapter.mapper.FileDtoMapper;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.file.domain.model.FileDownload;
-import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityContentDTO;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.FeedbackDashboardDTO;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.FeedbackDetailsDTO;

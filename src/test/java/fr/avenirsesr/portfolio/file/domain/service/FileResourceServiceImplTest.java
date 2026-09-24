@@ -5,11 +5,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
+import fr.avenirsesr.portfolio.common.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.file.domain.model.FileResource;
-import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.FileRepository;
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
