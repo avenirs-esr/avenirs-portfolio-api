@@ -3,6 +3,7 @@
 import fr.avenirsesr.portfolio.common.institution.application.adapter.dto.InstitutionDTO;
 import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.AvenirsSecurityHeaders;
 import fr.avenirsesr.portfolio.user.domain.port.output.client.InstitutionClient;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-<span class="fc" id="L15">@Slf4j</span>
+<span class="fc" id="L16">@Slf4j</span>
 @Component
 public class InstitutionClientImpl implements InstitutionClient {
 
@@ -24,35 +25,64 @@ public class InstitutionClientImpl implements InstitutionClient {
   @Value(&quot;${avenirs.back-office.institution.endpoint}&quot;)
   private String institutionEndpoint;
 
-<span class="fc" id="L27">  public InstitutionClientImpl(WebClient webClient) {</span>
-<span class="fc" id="L28">    this.webClient = webClient;</span>
-<span class="fc" id="L29">  }</span>
+<span class="fc" id="L28">  public InstitutionClientImpl(WebClient webClient) {</span>
+<span class="fc" id="L29">    this.webClient = webClient;</span>
+<span class="fc" id="L30">  }</span>
 
   @Override
   @Cacheable(value = &quot;institutionById&quot;, key = &quot;#id&quot;, unless = &quot;#result == null&quot;)
   public Optional&lt;InstitutionDTO&gt; getById(UUID id) {
     try {
-<span class="fc" id="L35">      log.debug(&quot;Fetching institution {} from back-office&quot;, id);</span>
-<span class="fc" id="L36">      return Optional.ofNullable(</span>
+<span class="fc" id="L36">      log.debug(&quot;Fetching institution {} from back-office&quot;, id);</span>
+<span class="fc" id="L37">      return Optional.ofNullable(</span>
           webClient
-<span class="fc" id="L38">              .get()</span>
-<span class="fc" id="L39">              .uri(institutionEndpoint + &quot;/&quot; + id)</span>
-<span class="fc" id="L40">              .header(AvenirsSecurityHeaders.API_KEY, apiKey)</span>
-<span class="fc" id="L41">              .retrieve()</span>
-<span class="fc" id="L42">              .bodyToMono(InstitutionDTO.class)</span>
-<span class="fc" id="L43">              .block());</span>
-<span class="fc" id="L44">    } catch (WebClientResponseException.NotFound e) {</span>
-<span class="fc" id="L45">      log.debug(&quot;Back-office does not know the institution {}&quot;, id);</span>
-<span class="fc" id="L46">      return Optional.empty();</span>
-<span class="fc" id="L47">    } catch (Exception e) {</span>
-<span class="fc" id="L48">      log.error(</span>
+<span class="fc" id="L39">              .get()</span>
+<span class="fc" id="L40">              .uri(institutionEndpoint + &quot;/&quot; + id)</span>
+<span class="fc" id="L41">              .header(AvenirsSecurityHeaders.API_KEY, apiKey)</span>
+<span class="fc" id="L42">              .retrieve()</span>
+<span class="fc" id="L43">              .bodyToMono(InstitutionDTO.class)</span>
+<span class="fc" id="L44">              .block());</span>
+<span class="fc" id="L45">    } catch (WebClientResponseException.NotFound e) {</span>
+<span class="fc" id="L46">      log.debug(&quot;Back-office does not know the institution {}&quot;, id);</span>
+<span class="fc" id="L47">      return Optional.empty();</span>
+<span class="fc" id="L48">    } catch (Exception e) {</span>
+<span class="fc" id="L49">      log.error(</span>
           &quot;Failed to fetch institution {} from back-office at '{}'. Error: {}&quot;,
           id,
           institutionEndpoint,
-<span class="fc" id="L52">          e.getMessage());</span>
-<span class="fc" id="L53">      log.debug(&quot;Full error details:&quot;, e);</span>
-<span class="fc" id="L54">      return Optional.empty();</span>
+<span class="fc" id="L53">          e.getMessage());</span>
+<span class="fc" id="L54">      log.debug(&quot;Full error details:&quot;, e);</span>
+<span class="fc" id="L55">      return Optional.empty();</span>
     }
   }
+
+  @Override
+  public boolean hasAccess(List&lt;UUID&gt; affiliatedIds, List&lt;UUID&gt; targetIds) {
+    try {
+<span class="fc" id="L62">      log.debug(</span>
+          &quot;Checking access to institutions {} for affiliations {} against back-office&quot;,
+          targetIds,
+          affiliatedIds);
+<span class="fc" id="L66">      return webClient</span>
+<span class="fc" id="L67">          .post()</span>
+<span class="fc" id="L68">          .uri(institutionEndpoint + &quot;/access-check&quot;)</span>
+<span class="fc" id="L69">          .header(AvenirsSecurityHeaders.API_KEY, apiKey)</span>
+<span class="fc" id="L70">          .bodyValue(new InstitutionAccessCheckRequest(affiliatedIds, targetIds))</span>
+<span class="fc" id="L71">          .retrieve()</span>
+<span class="fc" id="L72">          .bodyToMono(Boolean.class)</span>
+<span class="fc" id="L73">          .defaultIfEmpty(false)</span>
+<span class="fc" id="L74">          .block();</span>
+<span class="fc" id="L75">    } catch (Exception e) {</span>
+<span class="fc" id="L76">      log.error(</span>
+          &quot;Failed to check institution access at '{}'. Error: {}&quot;,
+          institutionEndpoint,
+<span class="fc" id="L79">          e.getMessage());</span>
+<span class="fc" id="L80">      log.debug(&quot;Full error details:&quot;, e);</span>
+<span class="fc" id="L81">      return false;</span>
+    }
+  }
+
+<span class="fc" id="L85">  private record InstitutionAccessCheckRequest(</span>
+      List&lt;UUID&gt; affiliatedInstitutionIds, List&lt;UUID&gt; targetInstitutionIds) {}
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

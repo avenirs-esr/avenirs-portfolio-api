@@ -346,8 +346,10 @@ public class ActivityController {
 <span class="fc" id="L346">            body.feedbackAllowedIterations(),</span>
 <span class="fc" id="L347">            body.enableReflection(),</span>
 <span class="fc" id="L348">            body.links(),</span>
-<span class="fc" id="L349">            body.enableCompletionPeriod());</span>
-<span class="fc" id="L350">    return ResponseEntity.ok(new ActivityDraftUpdateResponse(draft.getId()));</span>
+<span class="fc" id="L349">            body.enableCompletionPeriod(),</span>
+<span class="fc" id="L350">            body.targetInstitutionIds(),</span>
+<span class="fc" id="L351">            body.targetGroupIds());</span>
+<span class="fc" id="L352">    return ResponseEntity.ok(new ActivityDraftUpdateResponse(draft.getId()));</span>
   }
 
   @PreAuthorize(&quot;hasAuthority('activity:update')&quot;)
@@ -359,31 +361,31 @@ public class ActivityController {
       Principal principal,
       @PathVariable UUID activityDraftId,
       @RequestParam(&quot;file&quot;) MultipartFile file) {
-<span class="fc" id="L362">    log.debug(</span>
+<span class="fc" id="L364">    log.debug(</span>
         &quot;Received request to upload banner for activity draft [{}] by user [{}]&quot;,
         activityDraftId,
-<span class="fc" id="L365">        principal.getName());</span>
-<span class="fc" id="L366">    var uploaded =</span>
-<span class="fc" id="L367">        activityService.uploadDraftBanner(</span>
+<span class="fc" id="L367">        principal.getName());</span>
+<span class="fc" id="L368">    var uploaded =</span>
+<span class="fc" id="L369">        activityService.uploadDraftBanner(</span>
             activityDraftId,
-<span class="fc" id="L369">            file.getOriginalFilename(),</span>
-<span class="fc" id="L370">            file.getContentType(),</span>
-<span class="fc" id="L371">            file.getSize(),</span>
-<span class="fc" id="L372">            readBytes(file));</span>
-<span class="fc" id="L373">    return ResponseEntity.status(HttpStatus.CREATED)</span>
-<span class="fc" id="L374">        .body(fileDTOMapper.toFileDTO(uploaded, extractOrigin(request)));</span>
+<span class="fc" id="L371">            file.getOriginalFilename(),</span>
+<span class="fc" id="L372">            file.getContentType(),</span>
+<span class="fc" id="L373">            file.getSize(),</span>
+<span class="fc" id="L374">            readBytes(file));</span>
+<span class="fc" id="L375">    return ResponseEntity.status(HttpStatus.CREATED)</span>
+<span class="fc" id="L376">        .body(fileDTOMapper.toFileDTO(uploaded, extractOrigin(request)));</span>
   }
 
   @PreAuthorize(&quot;hasAuthority('activity:update')&quot;)
   @DeleteMapping(&quot;/draft/{activityDraftId}/banner&quot;)
   public ResponseEntity&lt;Void&gt; deleteDraftBanner(
       Principal principal, @PathVariable UUID activityDraftId) {
-<span class="nc" id="L381">    log.debug(</span>
+<span class="nc" id="L383">    log.debug(</span>
         &quot;Received request to delete banner of activity draft [{}] by user [{}]&quot;,
         activityDraftId,
-<span class="nc" id="L384">        principal.getName());</span>
-<span class="nc" id="L385">    activityService.deleteDraftBanner(activityDraftId);</span>
-<span class="nc" id="L386">    return ResponseEntity.noContent().build();</span>
+<span class="nc" id="L386">        principal.getName());</span>
+<span class="nc" id="L387">    activityService.deleteDraftBanner(activityDraftId);</span>
+<span class="nc" id="L388">    return ResponseEntity.noContent().build();</span>
   }
 
   @PreAuthorize(&quot;hasAuthority('activity:update')&quot;)
@@ -395,32 +397,32 @@ public class ActivityController {
       Principal principal,
       @PathVariable UUID activityDraftId,
       @RequestParam(&quot;file&quot;) MultipartFile file) {
-<span class="nc" id="L398">    log.debug(</span>
+<span class="nc" id="L400">    log.debug(</span>
         &quot;Received request to add file to activity draft [{}] by user [{}]&quot;,
         activityDraftId,
-<span class="nc" id="L401">        principal.getName());</span>
-<span class="nc" id="L402">    var uploaded =</span>
-<span class="nc" id="L403">        activityService.addDraftFile(</span>
+<span class="nc" id="L403">        principal.getName());</span>
+<span class="nc" id="L404">    var uploaded =</span>
+<span class="nc" id="L405">        activityService.addDraftFile(</span>
             activityDraftId,
-<span class="nc" id="L405">            file.getOriginalFilename(),</span>
-<span class="nc" id="L406">            file.getContentType(),</span>
-<span class="nc" id="L407">            file.getSize(),</span>
-<span class="nc" id="L408">            readBytes(file));</span>
-<span class="nc" id="L409">    return ResponseEntity.status(HttpStatus.CREATED)</span>
-<span class="nc" id="L410">        .body(fileDTOMapper.toFileDTO(uploaded, extractOrigin(request)));</span>
+<span class="nc" id="L407">            file.getOriginalFilename(),</span>
+<span class="nc" id="L408">            file.getContentType(),</span>
+<span class="nc" id="L409">            file.getSize(),</span>
+<span class="nc" id="L410">            readBytes(file));</span>
+<span class="nc" id="L411">    return ResponseEntity.status(HttpStatus.CREATED)</span>
+<span class="nc" id="L412">        .body(fileDTOMapper.toFileDTO(uploaded, extractOrigin(request)));</span>
   }
 
   @PreAuthorize(&quot;hasAuthority('activity:update')&quot;)
   @DeleteMapping(&quot;/draft/{activityDraftId}/files/{fileId}&quot;)
   public ResponseEntity&lt;Void&gt; deleteDraftFile(
       Principal principal, @PathVariable UUID activityDraftId, @PathVariable UUID fileId) {
-<span class="nc" id="L417">    log.debug(</span>
+<span class="nc" id="L419">    log.debug(</span>
         &quot;Received request to delete file [{}] of activity draft [{}] by user [{}]&quot;,
         fileId,
         activityDraftId,
-<span class="nc" id="L421">        principal.getName());</span>
-<span class="nc" id="L422">    activityService.deleteDraftFile(activityDraftId, fileId);</span>
-<span class="nc" id="L423">    return ResponseEntity.noContent().build();</span>
+<span class="nc" id="L423">        principal.getName());</span>
+<span class="nc" id="L424">    activityService.deleteDraftFile(activityDraftId, fileId);</span>
+<span class="nc" id="L425">    return ResponseEntity.noContent().build();</span>
   }
 
   @GetMapping(
@@ -429,18 +431,18 @@ public class ActivityController {
   @PreAuthorize(&quot;hasAuthority('activity:document:download:contextual')&quot;)
   public ResponseEntity&lt;byte[]&gt; downloadActivityFile(
       Principal principal, @PathVariable UUID activityId, @PathVariable UUID fileId) {
-<span class="nc" id="L432">    log.debug(</span>
+<span class="nc" id="L434">    log.debug(</span>
         &quot;Received request to download file [{}] of activity [{}] by user [{}]&quot;,
         fileId,
         activityId,
-<span class="nc" id="L436">        principal.getName());</span>
-<span class="nc" id="L437">    var downloadedFile = activityService.downloadActivityFile(activityId, fileId);</span>
-<span class="nc" id="L438">    return ResponseEntity.ok()</span>
-<span class="nc" id="L439">        .contentType(MediaType.APPLICATION_OCTET_STREAM)</span>
-<span class="nc" id="L440">        .header(</span>
+<span class="nc" id="L438">        principal.getName());</span>
+<span class="nc" id="L439">    var downloadedFile = activityService.downloadActivityFile(activityId, fileId);</span>
+<span class="nc" id="L440">    return ResponseEntity.ok()</span>
+<span class="nc" id="L441">        .contentType(MediaType.APPLICATION_OCTET_STREAM)</span>
+<span class="nc" id="L442">        .header(</span>
             HttpHeaders.CONTENT_DISPOSITION,
-<span class="nc" id="L442">            &quot;attachment; filename=\&quot;&quot; + downloadedFile.fileName() + &quot;\&quot;&quot;)</span>
-<span class="nc" id="L443">        .body(downloadedFile.content());</span>
+<span class="nc" id="L444">            &quot;attachment; filename=\&quot;&quot; + downloadedFile.fileName() + &quot;\&quot;&quot;)</span>
+<span class="nc" id="L445">        .body(downloadedFile.content());</span>
   }
 
   @PreAuthorize(&quot;hasAuthority('feedback:request:read:assigned')&quot;)
@@ -453,24 +455,24 @@ public class ActivityController {
           List&lt;EFeedbackStatus&gt; statuses,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize) {
-<span class="fc" id="L456">    var pageCriteria = new PageCriteria(page, pageSize);</span>
-<span class="fc" id="L457">    log.debug(</span>
+<span class="fc" id="L458">    var pageCriteria = new PageCriteria(page, pageSize);</span>
+<span class="fc" id="L459">    log.debug(</span>
         &quot;Received request to get activities with feedbacks for user [{}] (statuses={}, page={},&quot;
             + &quot; pageSize={})&quot;,
-<span class="fc" id="L460">        principal.getName(),</span>
+<span class="fc" id="L462">        principal.getName(),</span>
         statuses,
-<span class="fc" id="L462">        pageCriteria.page(),</span>
-<span class="fc" id="L463">        pageCriteria.pageSize());</span>
+<span class="fc" id="L464">        pageCriteria.page(),</span>
+<span class="fc" id="L465">        pageCriteria.pageSize());</span>
 
-<span class="fc" id="L465">    PagedResult&lt;Activity&gt; pagedResult =</span>
-<span class="fc" id="L466">        activityService.getActivitiesWithFeedbacks(statuses, pageCriteria);</span>
+<span class="fc" id="L467">    PagedResult&lt;Activity&gt; pagedResult =</span>
+<span class="fc" id="L468">        activityService.getActivitiesWithFeedbacks(statuses, pageCriteria);</span>
 
-<span class="fc" id="L468">    var response =</span>
+<span class="fc" id="L470">    var response =</span>
         new PagedResponse&lt;&gt;(
-<span class="fc" id="L470">            pagedResult.content().stream().map(activityFeedbacksPreviewMapper::toDTO).toList(),</span>
-<span class="fc" id="L471">            PageInfoDTO.fromDomain(pagedResult.pageInfo()));</span>
+<span class="fc" id="L472">            pagedResult.content().stream().map(activityFeedbacksPreviewMapper::toDTO).toList(),</span>
+<span class="fc" id="L473">            PageInfoDTO.fromDomain(pagedResult.pageInfo()));</span>
 
-<span class="fc" id="L473">    return ResponseEntity.ok(response);</span>
+<span class="fc" id="L475">    return ResponseEntity.ok(response);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
