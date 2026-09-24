@@ -37,5 +37,5 @@ public interface SelfKnowledgeService {
 
   void addSelfKnowledgeCategories(List<ESelfKnowledgeCategory> categories);
 
-  void removeSelfKnowledgeCategory(ESelfKnowledgeCategory selfKnowledgeCategory);
+  void removeSelfKnowledgeCategories(List<ESelfKnowledgeCategory> selfKnowledgeCategories);
 }

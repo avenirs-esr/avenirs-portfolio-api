@@ -182,16 +182,12 @@ public class SelfKnowledgeController {
   }
 
   @PreAuthorize("hasAuthority('self-knowledge:delete:own')")
-  @DeleteMapping("/categories/{selfKnowledgeCategory}")
-  public ResponseEntity<String> removeSelfKnowledgeCategory(
-      @Parameter(
-              name = "selfKnowledgeCategory",
-              in = ParameterIn.PATH,
-              required = true,
-              schema = @Schema(ref = "#/components/schemas/ESelfKnowledgeCategory"))
-          @PathVariable
-          ESelfKnowledgeCategory selfKnowledgeCategory) {
-    selfKnowledgeService.removeSelfKnowledgeCategory(selfKnowledgeCategory);
+  @DeleteMapping("/categories")
+  public ResponseEntity<String> removeSelfKnowledgeCategories(
+      @RequestBody
+          @ArraySchema(schema = @Schema(ref = "#/components/schemas/ESelfKnowledgeCategory"))
+          List<ESelfKnowledgeCategory> selfKnowledgeCategories) {
+    selfKnowledgeService.removeSelfKnowledgeCategories(selfKnowledgeCategories);
     return ResponseEntity.ok("Categories successfully deleted");
   }
 }

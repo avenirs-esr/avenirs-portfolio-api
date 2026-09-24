@@ -17,5 +17,6 @@ public interface SelfKnowledgeElementRepository
       PageCriteria pageCriteria,
       Boolean isValorized);
 
-  void deleteAllByStudentAndCategory(Student student, ESelfKnowledgeCategory selfKnowledgeCategory);
+  void deleteAllByStudentAndCategories(
+      Student student, List<ESelfKnowledgeCategory> selfKnowledgeCategories);
 }

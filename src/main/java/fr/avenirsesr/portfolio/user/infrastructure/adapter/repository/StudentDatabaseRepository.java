@@ -36,11 +36,11 @@ public class StudentDatabaseRepository extends GenericJpaRepositoryAdapter<Stude
   }
 
   @Override
-  public void removeSelfKnowledgeCategory(
-      Student student, ESelfKnowledgeCategory selfKnowledgeCategory) {
+  public void removeSelfKnowledgeCategories(
+      Student student, List<ESelfKnowledgeCategory> selfKnowledgeCategories) {
     StudentEntity studentEntity =
         jpaRepository.findById(student.getId()).orElseThrow(UserNotFoundException::new);
-    boolean removed = studentEntity.getSelfKnowledgeCategories().remove(selfKnowledgeCategory);
+    boolean removed = studentEntity.getSelfKnowledgeCategories().removeAll(selfKnowledgeCategories);
     if (!removed) {
       throw new SelfKnowledgeCategoryNotLinkedToStudentException();
     }
