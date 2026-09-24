@@ -6,6 +6,18 @@ and [Conventional Commits](https://www.conventionalcommits.org/) standard.
 
 ---
 
+## [1.4.13] - 2026-09-24
+
+- **File upload exposed to the other services**
+    - New endpoint `POST /storage`, which takes a multipart `file` part and an optional `isRestricted` part and returns
+      the created `FileDTO`. It carries no authority of its own: its callers are guarded by the back office, which owns
+      the terms of use upload (#2683).
+    - The file feature is now reached through the `FileClient` contract held by `avenirs-portfolio-common`, whose
+      current implementation delegates in process to `FileResourceService`. This is the seam for the extraction of the
+      feature into its own service; `get` and `delete` are part of the contract but are not served yet.
+    - `FileDTO`, `EFileType`, `FileSize` and `FileTypeNotSupportedException` moved to `avenirs-portfolio-common`, where
+      the shared contract needs them. Only their package changed.
+
 ## [1.4.12] - 2026-09-18
 
 - **Search for association without a source element**
