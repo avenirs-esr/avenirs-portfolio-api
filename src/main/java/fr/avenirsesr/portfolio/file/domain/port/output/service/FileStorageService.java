@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.file.domain.port.output.service;
 
-import fr.avenirsesr.portfolio.file.domain.exception.FileStorageException;
+import fr.avenirsesr.portfolio.common.file.domain.exception.FileStorageException;
 import fr.avenirsesr.portfolio.file.domain.model.FileResource;
 
 /**

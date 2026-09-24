@@ -1,12 +1,9 @@
 package fr.avenirsesr.portfolio.file.application.adapter.controller;
 
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
-import fr.avenirsesr.portfolio.file.application.adapter.mapper.FileDtoMapper;
-import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.FileRepository;
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
 import fr.avenirsesr.portfolio.file.domain.service.FileResourceServiceImpl;
-import fr.avenirsesr.portfolio.file.infrastructure.adapter.client.LocalFileClient;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
@@ -14,7 +11,6 @@ import java.io.IOException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mapstruct.factory.Mappers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,13 +47,9 @@ class StorageControllerIT extends ContainerConfigurationTest {
   void init() {
     MockitoAnnotations.openMocks(this);
 
-    FileResourceService fileResourceService =
-        new FileResourceServiceImpl(fileStorageService, fileRepository, loggedInUserService);
-
     StorageController storageController =
         new StorageController(
-            fileResourceService,
-            new LocalFileClient(fileResourceService, Mappers.getMapper(FileDtoMapper.class)),
+            new FileResourceServiceImpl(fileStorageService, fileRepository, loggedInUserService),
             new DefaultResourceLoader());
 
     webTestClient =

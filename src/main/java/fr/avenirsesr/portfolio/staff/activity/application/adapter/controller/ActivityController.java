@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.staff.activity.application.adapter.controller;
 
+import static fr.avenirsesr.portfolio.common.file.application.adapter.MultipartFileReader.readBytes;
 import static fr.avenirsesr.portfolio.shared.application.adapter.Utils.extractOrigin;
-import static fr.avenirsesr.portfolio.shared.application.adapter.Utils.readBytes;
 
 import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
