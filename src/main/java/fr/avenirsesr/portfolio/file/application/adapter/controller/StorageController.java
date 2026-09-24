@@ -1,5 +1,10 @@
 package fr.avenirsesr.portfolio.file.application.adapter.controller;
 
+import static fr.avenirsesr.portfolio.shared.application.adapter.Utils.readBytes;
+
+import fr.avenirsesr.portfolio.common.file.application.adapter.client.FileClient;
+import fr.avenirsesr.portfolio.common.file.application.adapter.dto.FileDTO;
+import fr.avenirsesr.portfolio.common.file.application.adapter.request.FileUploadRequest;
 import fr.avenirsesr.portfolio.common.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileStorageException;
@@ -15,13 +20,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MimeType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @AllArgsConstructor
@@ -29,7 +38,22 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/storage")
 public class StorageController {
   private final FileResourceService fileResourceService;
+  private final FileClient fileClient;
   private final ResourceLoader resourceLoader;
+
+  @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<FileDTO> upload(
+      @RequestParam("file") MultipartFile file,
+      @RequestParam(value = "isRestricted", defaultValue = "false") boolean isRestricted) {
+    log.debug("Received request to upload file [{}]", file.getOriginalFilename());
+
+    FileDTO uploaded =
+        fileClient.upload(
+            new FileUploadRequest(
+                file.getOriginalFilename(), file.getContentType(), readBytes(file), isRestricted));
+
+    return ResponseEntity.status(HttpStatus.CREATED).body(uploaded);
+  }
 
   @GetMapping("/{fileId}")
   public ResponseEntity<ByteArrayResource> getResourceByFileId(@Valid @PathVariable UUID fileId) {
