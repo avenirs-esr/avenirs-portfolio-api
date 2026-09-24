@@ -9,11 +9,12 @@ import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-<span class="fc" id="L16">@Slf4j</span>
+<span class="fc" id="L17">@Slf4j</span>
 @Component
 public class InstitutionClientImpl implements InstitutionClient {
 
@@ -25,64 +26,92 @@ public class InstitutionClientImpl implements InstitutionClient {
   @Value(&quot;${avenirs.back-office.institution.endpoint}&quot;)
   private String institutionEndpoint;
 
-<span class="fc" id="L28">  public InstitutionClientImpl(WebClient webClient) {</span>
-<span class="fc" id="L29">    this.webClient = webClient;</span>
-<span class="fc" id="L30">  }</span>
+<span class="fc" id="L29">  public InstitutionClientImpl(WebClient webClient) {</span>
+<span class="fc" id="L30">    this.webClient = webClient;</span>
+<span class="fc" id="L31">  }</span>
 
   @Override
   @Cacheable(value = &quot;institutionById&quot;, key = &quot;#id&quot;, unless = &quot;#result == null&quot;)
   public Optional&lt;InstitutionDTO&gt; getById(UUID id) {
     try {
-<span class="fc" id="L36">      log.debug(&quot;Fetching institution {} from back-office&quot;, id);</span>
-<span class="fc" id="L37">      return Optional.ofNullable(</span>
+<span class="fc" id="L37">      log.debug(&quot;Fetching institution {} from back-office&quot;, id);</span>
+<span class="fc" id="L38">      return Optional.ofNullable(</span>
           webClient
-<span class="fc" id="L39">              .get()</span>
-<span class="fc" id="L40">              .uri(institutionEndpoint + &quot;/&quot; + id)</span>
-<span class="fc" id="L41">              .header(AvenirsSecurityHeaders.API_KEY, apiKey)</span>
-<span class="fc" id="L42">              .retrieve()</span>
-<span class="fc" id="L43">              .bodyToMono(InstitutionDTO.class)</span>
-<span class="fc" id="L44">              .block());</span>
-<span class="fc" id="L45">    } catch (WebClientResponseException.NotFound e) {</span>
-<span class="fc" id="L46">      log.debug(&quot;Back-office does not know the institution {}&quot;, id);</span>
-<span class="fc" id="L47">      return Optional.empty();</span>
-<span class="fc" id="L48">    } catch (Exception e) {</span>
-<span class="fc" id="L49">      log.error(</span>
+<span class="fc" id="L40">              .get()</span>
+<span class="fc" id="L41">              .uri(institutionEndpoint + &quot;/&quot; + id)</span>
+<span class="fc" id="L42">              .header(AvenirsSecurityHeaders.API_KEY, apiKey)</span>
+<span class="fc" id="L43">              .retrieve()</span>
+<span class="fc" id="L44">              .bodyToMono(InstitutionDTO.class)</span>
+<span class="fc" id="L45">              .block());</span>
+<span class="fc" id="L46">    } catch (WebClientResponseException.NotFound e) {</span>
+<span class="fc" id="L47">      log.debug(&quot;Back-office does not know the institution {}&quot;, id);</span>
+<span class="fc" id="L48">      return Optional.empty();</span>
+<span class="fc" id="L49">    } catch (Exception e) {</span>
+<span class="fc" id="L50">      log.error(</span>
           &quot;Failed to fetch institution {} from back-office at '{}'. Error: {}&quot;,
           id,
           institutionEndpoint,
-<span class="fc" id="L53">          e.getMessage());</span>
-<span class="fc" id="L54">      log.debug(&quot;Full error details:&quot;, e);</span>
-<span class="fc" id="L55">      return Optional.empty();</span>
+<span class="fc" id="L54">          e.getMessage());</span>
+<span class="fc" id="L55">      log.debug(&quot;Full error details:&quot;, e);</span>
+<span class="fc" id="L56">      return Optional.empty();</span>
     }
   }
 
   @Override
   public boolean hasAccess(List&lt;UUID&gt; affiliatedIds, List&lt;UUID&gt; targetIds) {
     try {
-<span class="fc" id="L62">      log.debug(</span>
+<span class="fc" id="L63">      log.debug(</span>
           &quot;Checking access to institutions {} for affiliations {} against back-office&quot;,
           targetIds,
           affiliatedIds);
-<span class="fc" id="L66">      return webClient</span>
-<span class="fc" id="L67">          .post()</span>
-<span class="fc" id="L68">          .uri(institutionEndpoint + &quot;/staff/access-check&quot;)</span>
-<span class="fc" id="L69">          .header(AvenirsSecurityHeaders.API_KEY, apiKey)</span>
-<span class="fc" id="L70">          .bodyValue(new InstitutionAccessCheckRequest(affiliatedIds, targetIds))</span>
-<span class="fc" id="L71">          .retrieve()</span>
-<span class="fc" id="L72">          .bodyToMono(Boolean.class)</span>
-<span class="fc" id="L73">          .defaultIfEmpty(false)</span>
-<span class="fc" id="L74">          .block();</span>
-<span class="fc" id="L75">    } catch (Exception e) {</span>
-<span class="fc" id="L76">      log.error(</span>
+<span class="fc" id="L67">      return webClient</span>
+<span class="fc" id="L68">          .post()</span>
+<span class="fc" id="L69">          .uri(institutionEndpoint + &quot;/staff/access-check&quot;)</span>
+<span class="fc" id="L70">          .header(AvenirsSecurityHeaders.API_KEY, apiKey)</span>
+<span class="fc" id="L71">          .bodyValue(new InstitutionAccessCheckRequest(affiliatedIds, targetIds))</span>
+<span class="fc" id="L72">          .retrieve()</span>
+<span class="fc" id="L73">          .bodyToMono(Boolean.class)</span>
+<span class="fc" id="L74">          .defaultIfEmpty(false)</span>
+<span class="fc" id="L75">          .block();</span>
+<span class="fc" id="L76">    } catch (Exception e) {</span>
+<span class="fc" id="L77">      log.error(</span>
           &quot;Failed to check institution access at '{}'. Error: {}&quot;,
           institutionEndpoint,
-<span class="fc" id="L79">          e.getMessage());</span>
-<span class="fc" id="L80">      log.debug(&quot;Full error details:&quot;, e);</span>
-<span class="fc" id="L81">      return false;</span>
+<span class="fc" id="L80">          e.getMessage());</span>
+<span class="fc" id="L81">      log.debug(&quot;Full error details:&quot;, e);</span>
+<span class="fc" id="L82">      return false;</span>
     }
   }
 
-<span class="fc" id="L85">  private record InstitutionAccessCheckRequest(</span>
+  @Override
+  public List&lt;UUID&gt; getStudentAccessibleIds(List&lt;UUID&gt; ids) {
+<span class="pc bpc" id="L88" title="1 of 4 branches missed.">    if (ids == null || ids.isEmpty()) {</span>
+<span class="fc" id="L89">      return List.of();</span>
+    }
+    try {
+<span class="fc" id="L92">      log.debug(&quot;Resolving accessible institution ids for affiliations {} from back-office&quot;, ids);</span>
+<span class="fc" id="L93">      return webClient</span>
+<span class="fc" id="L94">          .post()</span>
+<span class="fc" id="L95">          .uri(institutionEndpoint + &quot;/student/accessible-ids&quot;)</span>
+<span class="fc" id="L96">          .header(AvenirsSecurityHeaders.API_KEY, apiKey)</span>
+<span class="fc" id="L97">          .bodyValue(new InstitutionAccessibleIdsRequest(ids))</span>
+<span class="fc" id="L98">          .retrieve()</span>
+<span class="fc" id="L99">          .bodyToMono(new ParameterizedTypeReference&lt;List&lt;UUID&gt;&gt;() {})</span>
+<span class="fc" id="L100">          .defaultIfEmpty(ids)</span>
+<span class="fc" id="L101">          .block();</span>
+<span class="fc" id="L102">    } catch (Exception e) {</span>
+<span class="fc" id="L103">      log.error(</span>
+          &quot;Failed to resolve accessible institution ids at '{}'. Error: {}&quot;,
+          institutionEndpoint,
+<span class="fc" id="L106">          e.getMessage());</span>
+<span class="fc" id="L107">      log.debug(&quot;Full error details:&quot;, e);</span>
+<span class="fc" id="L108">      return ids;</span>
+    }
+  }
+
+<span class="fc" id="L112">  private record InstitutionAccessCheckRequest(</span>
       List&lt;UUID&gt; affiliatedInstitutionIds, List&lt;UUID&gt; targetInstitutionIds) {}
+
+<span class="fc" id="L115">  private record InstitutionAccessibleIdsRequest(List&lt;UUID&gt; affiliatedInstitutionIds) {}</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
