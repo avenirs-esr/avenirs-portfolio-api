@@ -170,13 +170,15 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
   }
 
   @Override
-  public void removeSelfKnowledgeCategory(ESelfKnowledgeCategory selfKnowledgeCategory) {
+  public void removeSelfKnowledgeCategories(List<ESelfKnowledgeCategory> selfKnowledgeCategories) {
     Student student = loggedInUserService.getLoggedInStudent();
-    if (selfKnowledgeCategory.isMandatory()) {
+    if (selfKnowledgeCategories.stream().anyMatch(ESelfKnowledgeCategory::isMandatory)) {
       throw new SelfKnowledgeCategoryIsMandatoryException();
     }
-    selfKnowledgeElementRepository.deleteAllByStudentAndCategory(student, selfKnowledgeCategory);
-    studentService.removeSelfKnowledgeCategory(student, selfKnowledgeCategory);
+
+    selfKnowledgeElementRepository.deleteAllByStudentAndCategories(
+        student, selfKnowledgeCategories);
+    studentService.removeSelfKnowledgeCategories(student, selfKnowledgeCategories);
   }
 
   private static void checkTitleField(String title) {

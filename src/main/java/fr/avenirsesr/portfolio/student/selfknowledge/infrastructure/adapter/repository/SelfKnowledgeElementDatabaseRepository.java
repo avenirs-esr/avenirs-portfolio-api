@@ -51,9 +51,9 @@ public class SelfKnowledgeElementDatabaseRepository
 
   @Override
   @Transactional
-  public void deleteAllByStudentAndCategory(
-      Student student, ESelfKnowledgeCategory selfKnowledgeCategory) {
-    jpaRepository.deleteByStudentAndSelfKnowledgeCategory(
-        StudentMapper.INSTANCE.fromDomain(student), selfKnowledgeCategory);
+  public void deleteAllByStudentAndCategories(
+      Student student, List<ESelfKnowledgeCategory> selfKnowledgeCategories) {
+    jpaRepository.deleteByStudentAndSelfKnowledgeCategoryIn(
+        StudentMapper.INSTANCE.fromDomain(student), selfKnowledgeCategories);
   }
 }

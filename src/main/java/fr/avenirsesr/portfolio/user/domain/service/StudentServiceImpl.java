@@ -102,9 +102,9 @@ public class StudentServiceImpl implements StudentService {
   }
 
   @Override
-  public void removeSelfKnowledgeCategory(
-      Student student, ESelfKnowledgeCategory selfKnowledgeCategory) {
-    studentRepository.removeSelfKnowledgeCategory(student, selfKnowledgeCategory);
+  public void removeSelfKnowledgeCategories(
+      Student student, List<ESelfKnowledgeCategory> selfKnowledgeCategories) {
+    studentRepository.removeSelfKnowledgeCategories(student, selfKnowledgeCategories);
   }
 
   @Override

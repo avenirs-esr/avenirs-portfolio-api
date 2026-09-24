@@ -844,7 +844,7 @@ class SelfKnowledgeServiceImplTest {
           void setupWhen() {
             BddLogger.when(
                 "removing a non mandatory self knowledge category for the current student");
-            selfKnowledgeService.removeSelfKnowledgeCategory(removableCategory);
+            selfKnowledgeService.removeSelfKnowledgeCategories(List.of(removableCategory));
           }
 
           @Test
@@ -854,8 +854,45 @@ class SelfKnowledgeServiceImplTest {
                     + " category link for the student");
 
             verify(selfKnowledgeElementRepository)
-                .deleteAllByStudentAndCategory(eq(student), eq(removableCategory));
-            verify(studentService).removeSelfKnowledgeCategory(eq(student), eq(removableCategory));
+                .deleteAllByStudentAndCategories(eq(student), eq(List.of(removableCategory)));
+            verify(studentService)
+                .removeSelfKnowledgeCategories(eq(student), eq(List.of(removableCategory)));
+          }
+        }
+      }
+
+      @Nested
+      class AndMultipleNonMandatorySelfKnowledgeCategories {
+
+        private List<ESelfKnowledgeCategory> removableCategories;
+
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("non mandatory self knowledge categories linked to this student");
+          removableCategories =
+              List.of(ESelfKnowledgeCategory.MOTIVATION, ESelfKnowledgeCategory.TESTIMONIALS);
+        }
+
+        @Nested
+        class WhenRemovingSelfKnowledgeCategories {
+
+          @BeforeEach
+          void setupWhen() {
+            BddLogger.when(
+                "removing non mandatory self knowledge categories for the current student");
+            selfKnowledgeService.removeSelfKnowledgeCategories(removableCategories);
+          }
+
+          @Test
+          void thenItShouldDeleteElementsAndRemoveCategoriesForStudent() {
+            BddLogger.then(
+                "it should delete all elements for this student and categories, then remove the"
+                    + " categories links for the student");
+
+            verify(selfKnowledgeElementRepository)
+                .deleteAllByStudentAndCategories(eq(student), eq(removableCategories));
+            verify(studentService)
+                .removeSelfKnowledgeCategories(eq(student), eq(removableCategories));
           }
         }
       }
@@ -871,11 +908,31 @@ class SelfKnowledgeServiceImplTest {
           assertThrows(
               SelfKnowledgeCategoryIsMandatoryException.class,
               () ->
-                  selfKnowledgeService.removeSelfKnowledgeCategory(
-                      ESelfKnowledgeCategory.STRENGTHS));
+                  selfKnowledgeService.removeSelfKnowledgeCategories(
+                      List.of(ESelfKnowledgeCategory.STRENGTHS)));
 
           verifyNoInteractions(selfKnowledgeElementRepository);
-          verify(studentService, never()).removeSelfKnowledgeCategory(any(), any());
+          verify(studentService, never()).removeSelfKnowledgeCategories(any(), any());
+        }
+      }
+
+      @Nested
+      class WhenRemovingSelfKnowledgeCategoriesIncludingMandatory {
+
+        @Test
+        void thenItShouldThrowSelfKnowledgeCategoryIsMandatoryException() {
+          BddLogger.when("removing self knowledge categories including a mandatory one");
+          BddLogger.then("it should throw SelfKnowledgeCategoryIsMandatoryException");
+
+          assertThrows(
+              SelfKnowledgeCategoryIsMandatoryException.class,
+              () ->
+                  selfKnowledgeService.removeSelfKnowledgeCategories(
+                      List.of(
+                          ESelfKnowledgeCategory.STRENGTHS, ESelfKnowledgeCategory.MOTIVATION)));
+
+          verifyNoInteractions(selfKnowledgeElementRepository);
+          verify(studentService, never()).removeSelfKnowledgeCategories(any(), any());
         }
       }
     }
@@ -950,8 +1007,8 @@ class SelfKnowledgeServiceImplTest {
           assertThrows(
               UserNotFoundException.class,
               () ->
-                  selfKnowledgeService.removeSelfKnowledgeCategory(
-                      ESelfKnowledgeCategory.STRENGTHS));
+                  selfKnowledgeService.removeSelfKnowledgeCategories(
+                      List.of(ESelfKnowledgeCategory.STRENGTHS)));
 
           verifyNoInteractions(studentService);
           verifyNoInteractions(selfKnowledgeElementRepository);
@@ -1101,8 +1158,8 @@ class SelfKnowledgeServiceImplTest {
           assertThrows(
               UserIsNotStudentException.class,
               () ->
-                  selfKnowledgeService.removeSelfKnowledgeCategory(
-                      ESelfKnowledgeCategory.STRENGTHS));
+                  selfKnowledgeService.removeSelfKnowledgeCategories(
+                      List.of(ESelfKnowledgeCategory.STRENGTHS)));
         }
       }
 

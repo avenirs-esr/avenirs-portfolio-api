@@ -28,7 +28,8 @@ public interface StudentService {
 
   void addSelfKnowledgeCategories(Student student, List<ESelfKnowledgeCategory> categories);
 
-  void removeSelfKnowledgeCategory(Student student, ESelfKnowledgeCategory selfKnowledgeCategory);
+  void removeSelfKnowledgeCategories(
+      Student student, List<ESelfKnowledgeCategory> selfKnowledgeCategories);
 
   File uploadProfilePicture(String fileName, String mimeType, long size, byte[] content);
 
