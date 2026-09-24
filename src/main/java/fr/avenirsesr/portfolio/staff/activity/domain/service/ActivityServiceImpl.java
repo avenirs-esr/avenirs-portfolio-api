@@ -408,8 +408,13 @@ public class ActivityServiceImpl implements ActivityService {
   @Override
   public PagedResult<ActivityWithStudentStatusData> activitiesView(
       EActivityThematic thematic, PageCriteria pageCriteria) {
-    var pagedActivities = activityRepository.findAll(thematic, pageCriteria);
     var student = loggedInUserService.getLoggedInStudent();
+    var pagedActivities =
+        activityRepository.findAll(
+            thematic,
+            pageCriteria,
+            institutionClient.getStudentAccessibleIds(student.getInstitutionIds()),
+            groupClient.getStudentAccessibleIds(student.getGroupIds()));
     var subscribedActivities = declaredActivityService.getAllDeclaredActivitiesOf(student);
     var statusByDeclaredActivity =
         declaredActivityService.getDeclaredActivityStatus(subscribedActivities);
@@ -441,7 +446,9 @@ public class ActivityServiceImpl implements ActivityService {
         activityRepository.findLatest(
             DURATION_FOR_LATEST,
             subscribedActivities.stream().map(DeclaredActivity::getActivity).toList(),
-            pageCriteria);
+            pageCriteria,
+            institutionClient.getStudentAccessibleIds(student.getInstitutionIds()),
+            groupClient.getStudentAccessibleIds(student.getGroupIds()));
     return new PagedResult<>(
         pagedActivities.content().stream()
             .map(activity -> new ActivityWithStudentStatusData(activity, true, null))

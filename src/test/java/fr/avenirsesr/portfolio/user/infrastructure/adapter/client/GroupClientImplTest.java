@@ -187,4 +187,47 @@ class GroupClientImplTest {
     BddLogger.then("access is denied by default and no exception escapes the client");
     assertThat(result).isFalse();
   }
+
+  @Test
+  void shouldReturnAccessibleIdsResolvedByTheBackOffice() throws InterruptedException {
+    BddLogger.given("a back-office resolving a group together with its ancestors");
+    mockWebServer.enqueue(
+        new MockResponse()
+            .setBody("[\"%s\",\"%s\"]".formatted(GROUP_ID, PARENT_ID))
+            .addHeader("Content-Type", "application/json"));
+
+    BddLogger.when("resolving the group with its ancestors");
+    List<UUID> result = client.getStudentAccessibleIds(List.of(GROUP_ID));
+
+    BddLogger.then("the accessible ids returned by the back-office are forwarded");
+    assertThat(result).containsExactly(GROUP_ID, PARENT_ID);
+
+    RecordedRequest request = mockWebServer.takeRequest();
+    assertThat(request.getPath()).isEqualTo("/back-office/groups/student/accessible-ids");
+    assertThat(request.getMethod()).isEqualTo("POST");
+    assertThat(request.getHeader(AvenirsSecurityHeaders.API_KEY)).isEqualTo("test-key");
+    assertThat(request.getBody().readUtf8()).contains(GROUP_ID.toString());
+  }
+
+  @Test
+  void shouldReturnTheOriginalIdsWhenBackOfficeFails() {
+    BddLogger.given("a back-office failing to resolve accessible group ids");
+    mockWebServer.enqueue(new MockResponse().setResponseCode(500));
+
+    BddLogger.when("resolving the group with its ancestors");
+    List<UUID> result = client.getStudentAccessibleIds(List.of(GROUP_ID));
+
+    BddLogger.then("the requested group is returned and no exception escapes the client");
+    assertThat(result).containsExactly(GROUP_ID);
+  }
+
+  @Test
+  void shouldReturnEmptyListWhenNoIdsAreProvided() {
+    BddLogger.when("resolving ancestors for an empty list of groups");
+    List<UUID> result = client.getStudentAccessibleIds(List.of());
+
+    BddLogger.then("an empty list is returned and the back-office is not called");
+    assertThat(result).isEmpty();
+    assertThat(mockWebServer.getRequestCount()).isZero();
+  }
 }

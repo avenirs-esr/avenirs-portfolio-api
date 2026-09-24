@@ -1813,7 +1813,8 @@ class ActivityServiceImplTest {
 
         Activity activity = mock(Activity.class);
         when(activity.getCreatedAt()).thenReturn(Instant.now().minus(Duration.ofDays(10)));
-        when(activityRepository.findAll(EActivityThematic.EXPERIENCES, pageCriteria))
+        when(activityRepository.findAll(
+                eq(EActivityThematic.EXPERIENCES), eq(pageCriteria), any(), any()))
             .thenReturn(new PagedResult<>(List.of(activity), pageInfo));
         when(declaredActivityService.getAllDeclaredActivitiesOf(student)).thenReturn(List.of());
 
@@ -1833,7 +1834,7 @@ class ActivityServiceImplTest {
         DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
 
         when(activity.getCreatedAt()).thenReturn(Instant.now().minus(Duration.ofDays(10)));
-        when(activityRepository.findAll(null, pageCriteria))
+        when(activityRepository.findAll(eq(null), eq(pageCriteria), any(), any()))
             .thenReturn(new PagedResult<>(List.of(activity), pageInfo));
         when(declaredActivity.getActivity()).thenReturn(activity);
         when(declaredActivityService.getAllDeclaredActivitiesOf(student))
@@ -1854,7 +1855,7 @@ class ActivityServiceImplTest {
 
         Activity activity = mock(Activity.class);
         when(activity.getCreatedAt()).thenReturn(Instant.now().minus(Duration.ofDays(10)));
-        when(activityRepository.findAll(null, pageCriteria))
+        when(activityRepository.findAll(eq(null), eq(pageCriteria), any(), any()))
             .thenReturn(new PagedResult<>(List.of(activity), pageInfo));
         when(declaredActivityService.getAllDeclaredActivitiesOf(student)).thenReturn(List.of());
 
@@ -1869,13 +1870,43 @@ class ActivityServiceImplTest {
 
         Activity activity = mock(Activity.class);
         when(activity.getCreatedAt()).thenReturn(Instant.now().minus(Duration.ofDays(120)));
-        when(activityRepository.findAll(null, pageCriteria))
+        when(activityRepository.findAll(eq(null), eq(pageCriteria), any(), any()))
             .thenReturn(new PagedResult<>(List.of(activity), pageInfo));
         when(declaredActivityService.getAllDeclaredActivitiesOf(student)).thenReturn(List.of());
 
         var result = activityService.activitiesView(null, pageCriteria);
 
         assertFalse(result.content().getFirst().isNew());
+      }
+
+      @Test
+      void thenItShouldQueryTheRepositoryWithStudentAffiliationsExpandedWithAncestors() {
+        BddLogger.then(
+            "the repository should be queried with the student institutions and groups expanded"
+                + " with their ancestors");
+
+        UUID institutionId = UUID.randomUUID();
+        UUID institutionAncestorId = UUID.randomUUID();
+        UUID groupId = UUID.randomUUID();
+        UUID groupAncestorId = UUID.randomUUID();
+        List<UUID> institutionIdsWithAncestors = List.of(institutionId, institutionAncestorId);
+        List<UUID> groupIdsWithAncestors = List.of(groupId, groupAncestorId);
+
+        when(student.getInstitutionIds()).thenReturn(List.of(institutionId));
+        when(student.getGroupIds()).thenReturn(List.of(groupId));
+        when(institutionClient.getStudentAccessibleIds(List.of(institutionId)))
+            .thenReturn(institutionIdsWithAncestors);
+        when(groupClient.getStudentAccessibleIds(List.of(groupId)))
+            .thenReturn(groupIdsWithAncestors);
+        when(activityRepository.findAll(
+                null, pageCriteria, institutionIdsWithAncestors, groupIdsWithAncestors))
+            .thenReturn(new PagedResult<>(List.of(), pageInfo));
+        when(declaredActivityService.getAllDeclaredActivitiesOf(student)).thenReturn(List.of());
+
+        activityService.activitiesView(null, pageCriteria);
+
+        verify(activityRepository)
+            .findAll(null, pageCriteria, institutionIdsWithAncestors, groupIdsWithAncestors);
       }
     }
 
@@ -1899,7 +1930,8 @@ class ActivityServiceImplTest {
       void thenItShouldReturnEmptyWhenNoActivitiesExist() {
         BddLogger.then("an empty paged result should be returned");
 
-        when(activityRepository.findLatest(eq(Duration.ofDays(90)), anyList(), eq(pageCriteria)))
+        when(activityRepository.findLatest(
+                eq(Duration.ofDays(90)), anyList(), eq(pageCriteria), any(), any()))
             .thenReturn(new PagedResult<>(List.of(), pageInfo));
         when(declaredActivityService.getAllDeclaredActivitiesOf(student)).thenReturn(List.of());
 
@@ -1915,7 +1947,8 @@ class ActivityServiceImplTest {
         BddLogger.then("a single latest activity should be returned");
 
         Activity activity = mock(Activity.class);
-        when(activityRepository.findLatest(eq(Duration.ofDays(90)), anyList(), eq(pageCriteria)))
+        when(activityRepository.findLatest(
+                eq(Duration.ofDays(90)), anyList(), eq(pageCriteria), any(), any()))
             .thenReturn(new PagedResult<>(List.of(activity), new PageInfo(0, 10, 1)));
         when(declaredActivityService.getAllDeclaredActivitiesOf(student)).thenReturn(List.of());
 
@@ -1934,7 +1967,8 @@ class ActivityServiceImplTest {
         Activity activity1 = mock(Activity.class);
         Activity activity2 = mock(Activity.class);
 
-        when(activityRepository.findLatest(eq(Duration.ofDays(90)), anyList(), eq(pageCriteria)))
+        when(activityRepository.findLatest(
+                eq(Duration.ofDays(90)), anyList(), eq(pageCriteria), any(), any()))
             .thenReturn(new PagedResult<>(List.of(activity1, activity2), new PageInfo(0, 10, 2)));
         when(declaredActivityService.getAllDeclaredActivitiesOf(student)).thenReturn(List.of());
 
@@ -1955,7 +1989,8 @@ class ActivityServiceImplTest {
         DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
 
         when(declaredActivity.getActivity()).thenReturn(activity2);
-        when(activityRepository.findLatest(eq(Duration.ofDays(90)), anyList(), eq(pageCriteria)))
+        when(activityRepository.findLatest(
+                eq(Duration.ofDays(90)), anyList(), eq(pageCriteria), any(), any()))
             .thenReturn(new PagedResult<>(List.of(activity1, activity2), new PageInfo(0, 10, 2)));
         when(declaredActivityService.getAllDeclaredActivitiesOf(student))
             .thenReturn(List.of(declaredActivity));
@@ -1965,6 +2000,45 @@ class ActivityServiceImplTest {
         assertEquals(2, result.content().size());
         assertTrue(result.content().stream().anyMatch(a -> a.activity() == activity1));
         assertTrue(result.content().stream().anyMatch(a -> a.activity() == activity2));
+      }
+
+      @Test
+      void thenItShouldQueryTheRepositoryWithStudentAffiliationsExpandedWithAncestors() {
+        BddLogger.then(
+            "the repository should be queried with the student institutions and groups expanded"
+                + " with their ancestors");
+
+        UUID institutionId = UUID.randomUUID();
+        UUID institutionAncestorId = UUID.randomUUID();
+        UUID groupId = UUID.randomUUID();
+        UUID groupAncestorId = UUID.randomUUID();
+        List<UUID> institutionIdsWithAncestors = List.of(institutionId, institutionAncestorId);
+        List<UUID> groupIdsWithAncestors = List.of(groupId, groupAncestorId);
+
+        when(student.getInstitutionIds()).thenReturn(List.of(institutionId));
+        when(student.getGroupIds()).thenReturn(List.of(groupId));
+        when(institutionClient.getStudentAccessibleIds(List.of(institutionId)))
+            .thenReturn(institutionIdsWithAncestors);
+        when(groupClient.getStudentAccessibleIds(List.of(groupId)))
+            .thenReturn(groupIdsWithAncestors);
+        when(activityRepository.findLatest(
+                eq(Duration.ofDays(90)),
+                anyList(),
+                eq(pageCriteria),
+                eq(institutionIdsWithAncestors),
+                eq(groupIdsWithAncestors)))
+            .thenReturn(new PagedResult<>(List.of(), pageInfo));
+        when(declaredActivityService.getAllDeclaredActivitiesOf(student)).thenReturn(List.of());
+
+        activityService.latestActivitiesView(pageCriteria);
+
+        verify(activityRepository)
+            .findLatest(
+                Duration.ofDays(90),
+                List.of(),
+                pageCriteria,
+                institutionIdsWithAncestors,
+                groupIdsWithAncestors);
       }
     }
 

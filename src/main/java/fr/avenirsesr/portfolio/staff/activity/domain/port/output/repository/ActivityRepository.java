@@ -12,13 +12,21 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ActivityRepository extends GenericRepositoryPort<Activity> {
-  PagedResult<Activity> findAll(EActivityThematic thematic, PageCriteria pageCriteria);
+  PagedResult<Activity> findAll(
+      EActivityThematic thematic,
+      PageCriteria pageCriteria,
+      List<UUID> studentInstitutionIds,
+      List<UUID> studentGroupIds);
 
   PagedResult<ActivityStaffOverviewData> findAllStaffOverview(
       EActivityThematic thematic, PageCriteria pageCriteria);
 
   PagedResult<Activity> findLatest(
-      Duration durationForLate, List<Activity> activityToExclude, PageCriteria pageCriteria);
+      Duration durationForLate,
+      List<Activity> activityToExclude,
+      PageCriteria pageCriteria,
+      List<UUID> studentInstitutionIds,
+      List<UUID> studentGroupIds);
 
   PagedResult<Activity> findWithFeedbacks(
       UUID authorId, PageCriteria pageCriteria, EFeedbackStatus... status);

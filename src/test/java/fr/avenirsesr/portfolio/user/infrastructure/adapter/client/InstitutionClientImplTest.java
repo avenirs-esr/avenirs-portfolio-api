@@ -146,4 +146,47 @@ class InstitutionClientImplTest {
     BddLogger.then("access is denied by default and no exception escapes the client");
     assertThat(result).isFalse();
   }
+
+  @Test
+  void shouldReturnAccessibleIdsResolvedByTheBackOffice() throws InterruptedException {
+    BddLogger.given("a back-office resolving an institution together with its ancestors");
+    mockWebServer.enqueue(
+        new MockResponse()
+            .setBody("[\"%s\",\"%s\"]".formatted(INSTITUTION_ID, PARENT_ID))
+            .addHeader("Content-Type", "application/json"));
+
+    BddLogger.when("resolving the institution with its ancestors");
+    List<UUID> result = client.getStudentAccessibleIds(List.of(INSTITUTION_ID));
+
+    BddLogger.then("the accessible ids returned by the back-office are forwarded");
+    assertThat(result).containsExactly(INSTITUTION_ID, PARENT_ID);
+
+    RecordedRequest request = mockWebServer.takeRequest();
+    assertThat(request.getPath()).isEqualTo("/back-office/institutions/student/accessible-ids");
+    assertThat(request.getMethod()).isEqualTo("POST");
+    assertThat(request.getHeader(AvenirsSecurityHeaders.API_KEY)).isEqualTo("test-key");
+    assertThat(request.getBody().readUtf8()).contains(INSTITUTION_ID.toString());
+  }
+
+  @Test
+  void shouldReturnTheOriginalIdsWhenBackOfficeFails() {
+    BddLogger.given("a back-office failing to resolve accessible institution ids");
+    mockWebServer.enqueue(new MockResponse().setResponseCode(500));
+
+    BddLogger.when("resolving the institution with its ancestors");
+    List<UUID> result = client.getStudentAccessibleIds(List.of(INSTITUTION_ID));
+
+    BddLogger.then("the requested institution is returned and no exception escapes the client");
+    assertThat(result).containsExactly(INSTITUTION_ID);
+  }
+
+  @Test
+  void shouldReturnEmptyListWhenNoIdsAreProvided() {
+    BddLogger.when("resolving ancestors for an empty list of institutions");
+    List<UUID> result = client.getStudentAccessibleIds(List.of());
+
+    BddLogger.then("an empty list is returned and the back-office is not called");
+    assertThat(result).isEmpty();
+    assertThat(mockWebServer.getRequestCount()).isZero();
+  }
 }
