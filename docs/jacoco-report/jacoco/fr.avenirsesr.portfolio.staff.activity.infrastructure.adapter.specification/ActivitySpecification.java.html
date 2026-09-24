@@ -43,50 +43,25 @@ import org.springframework.data.jpa.domain.Specification;
     };
   }
 
-  public static Specification&lt;ActivityEntity&gt; visibleByInstitutions(List&lt;UUID&gt; institutionIds) {
-<span class="fc" id="L47">    return visibleByTarget(&quot;targetInstitutionIds&quot;, institutionIds);</span>
-  }
-
-  public static Specification&lt;ActivityEntity&gt; visibleByGroups(List&lt;UUID&gt; groupIds) {
-<span class="fc" id="L51">    return visibleByTarget(&quot;targetGroupIds&quot;, groupIds);</span>
-  }
-
-  private static Specification&lt;ActivityEntity&gt; visibleByTarget(
-      String targetAttribute, List&lt;UUID&gt; studentIds) {
-<span class="fc" id="L56">    return (root, query, cb) -&gt; {</span>
-<span class="fc" id="L57">      Predicate noTarget = cb.isEmpty(root.get(targetAttribute));</span>
-<span class="pc bpc" id="L58" title="1 of 4 branches missed.">      if (studentIds == null || studentIds.isEmpty()) {</span>
-<span class="fc" id="L59">        return noTarget;</span>
-      }
-
-<span class="fc" id="L62">      Subquery&lt;UUID&gt; subquery = query.subquery(UUID.class);</span>
-<span class="fc" id="L63">      Root&lt;ActivityEntity&gt; subRoot = subquery.from(ActivityEntity.class);</span>
-<span class="fc" id="L64">      Join&lt;ActivityEntity, UUID&gt; targetJoin = subRoot.join(targetAttribute);</span>
-<span class="fc" id="L65">      subquery.select(targetJoin).where(cb.equal(subRoot, root), targetJoin.in(studentIds));</span>
-
-<span class="fc" id="L67">      return cb.or(noTarget, cb.exists(subquery));</span>
-    };
-  }
-
   public static Specification&lt;ActivityEntity&gt; hasFeedback(
       UUID authorId, EFeedbackStatus... statuses) {
-<span class="fc" id="L73">    return (root, query, cb) -&gt; {</span>
-<span class="fc" id="L74">      Subquery&lt;Integer&gt; subquery = query.subquery(Integer.class);</span>
-<span class="fc" id="L75">      Root&lt;FeedbackEntity&gt; feedback = subquery.from(FeedbackEntity.class);</span>
-<span class="fc" id="L76">      Join&lt;FeedbackEntity, DeclaredActivityEntity&gt; declaredActivity =</span>
-<span class="fc" id="L77">          feedback.join(&quot;declaredActivity&quot;);</span>
+<span class="fc" id="L48">    return (root, query, cb) -&gt; {</span>
+<span class="fc" id="L49">      Subquery&lt;Integer&gt; subquery = query.subquery(Integer.class);</span>
+<span class="fc" id="L50">      Root&lt;FeedbackEntity&gt; feedback = subquery.from(FeedbackEntity.class);</span>
+<span class="fc" id="L51">      Join&lt;FeedbackEntity, DeclaredActivityEntity&gt; declaredActivity =</span>
+<span class="fc" id="L52">          feedback.join(&quot;declaredActivity&quot;);</span>
 
-<span class="fc" id="L79">      List&lt;Predicate&gt; predicates = new ArrayList&lt;&gt;(2);</span>
-<span class="fc" id="L80">      predicates.add(cb.equal(declaredActivity.get(&quot;activity&quot;), root));</span>
-<span class="fc" id="L81">      predicates.add(cb.equal(root.get(&quot;author&quot;).get(&quot;id&quot;), authorId));</span>
+<span class="fc" id="L54">      List&lt;Predicate&gt; predicates = new ArrayList&lt;&gt;(2);</span>
+<span class="fc" id="L55">      predicates.add(cb.equal(declaredActivity.get(&quot;activity&quot;), root));</span>
+<span class="fc" id="L56">      predicates.add(cb.equal(root.get(&quot;author&quot;).get(&quot;id&quot;), authorId));</span>
 
-<span class="pc bpc" id="L83" title="1 of 4 branches missed.">      if (statuses != null &amp;&amp; statuses.length &gt; 0) {</span>
-<span class="fc" id="L84">        predicates.add(feedback.get(&quot;status&quot;).in((Object[]) statuses));</span>
+<span class="pc bpc" id="L58" title="1 of 4 branches missed.">      if (statuses != null &amp;&amp; statuses.length &gt; 0) {</span>
+<span class="fc" id="L59">        predicates.add(feedback.get(&quot;status&quot;).in((Object[]) statuses));</span>
       }
 
-<span class="fc" id="L87">      subquery.select(cb.literal(1)).where(predicates.toArray(Predicate[]::new));</span>
+<span class="fc" id="L62">      subquery.select(cb.literal(1)).where(predicates.toArray(Predicate[]::new));</span>
 
-<span class="fc" id="L89">      return cb.exists(subquery);</span>
+<span class="fc" id="L64">      return cb.exists(subquery);</span>
     };
   }
 }

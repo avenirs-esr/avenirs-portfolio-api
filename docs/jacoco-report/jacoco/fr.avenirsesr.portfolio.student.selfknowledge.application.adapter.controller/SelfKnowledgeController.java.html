@@ -181,18 +181,24 @@ public class SelfKnowledgeController {
 <span class="fc" id="L181">            .toList());</span>
   }
 
+  //   @PreAuthorize(&quot;hasAuthority('self-knowledge:delete:own')&quot;)
+  //   @DeleteMapping(&quot;/elements&quot;)
+  //   public ResponseEntity&lt;String&gt; deleteSelfKnowledgeElements(
+  //       @RequestBody List&lt;UUID&gt; selfKnowledgeElementIds) {
+  //     log.debug(&quot;Received request to delete self knowledge elements [{}]&quot;,
+  // selfKnowledgeElementIds);
+  //     selfKnowledgeService.deleteSelfKnowledgeElements(selfKnowledgeElementIds);
+  //     return ResponseEntity.ok(&quot;Self knowledge elements successfully deleted&quot;);
+  //   }
+
   @PreAuthorize(&quot;hasAuthority('self-knowledge:delete:own')&quot;)
-  @DeleteMapping(&quot;/categories/{selfKnowledgeCategory}&quot;)
-  public ResponseEntity&lt;String&gt; removeSelfKnowledgeCategory(
-      @Parameter(
-              name = &quot;selfKnowledgeCategory&quot;,
-              in = ParameterIn.PATH,
-              required = true,
-              schema = @Schema(ref = &quot;#/components/schemas/ESelfKnowledgeCategory&quot;))
-          @PathVariable
-          ESelfKnowledgeCategory selfKnowledgeCategory) {
-<span class="nc" id="L194">    selfKnowledgeService.removeSelfKnowledgeCategory(selfKnowledgeCategory);</span>
-<span class="nc" id="L195">    return ResponseEntity.ok(&quot;Categories successfully deleted&quot;);</span>
+  @DeleteMapping(&quot;/categories&quot;)
+  public ResponseEntity&lt;String&gt; removeSelfKnowledgeCategories(
+      @RequestBody
+          @ArraySchema(schema = @Schema(ref = &quot;#/components/schemas/ESelfKnowledgeCategory&quot;))
+          List&lt;ESelfKnowledgeCategory&gt; selfKnowledgeCategories) {
+<span class="nc" id="L200">    selfKnowledgeService.removeSelfKnowledgeCategories(selfKnowledgeCategories);</span>
+<span class="nc" id="L201">    return ResponseEntity.ok(&quot;Categories successfully deleted&quot;);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

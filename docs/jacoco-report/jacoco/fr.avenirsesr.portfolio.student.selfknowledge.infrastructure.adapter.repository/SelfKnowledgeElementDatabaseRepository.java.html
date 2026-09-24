@@ -51,10 +51,10 @@ public class SelfKnowledgeElementDatabaseRepository
 
   @Override
   @Transactional
-  public void deleteAllByStudentAndCategory(
-      Student student, ESelfKnowledgeCategory selfKnowledgeCategory) {
-<span class="nc" id="L56">    jpaRepository.deleteByStudentAndSelfKnowledgeCategory(</span>
-<span class="nc" id="L57">        StudentMapper.INSTANCE.fromDomain(student), selfKnowledgeCategory);</span>
+  public void deleteAllByStudentAndCategories(
+      Student student, List&lt;ESelfKnowledgeCategory&gt; selfKnowledgeCategories) {
+<span class="nc" id="L56">    jpaRepository.deleteByStudentAndSelfKnowledgeCategoryIn(</span>
+<span class="nc" id="L57">        StudentMapper.INSTANCE.fromDomain(student), selfKnowledgeCategories);</span>
 <span class="nc" id="L58">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
