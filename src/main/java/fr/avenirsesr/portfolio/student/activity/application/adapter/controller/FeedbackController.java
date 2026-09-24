@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.student.activity.application.adapter.controller;
 
-import static fr.avenirsesr.portfolio.shared.application.adapter.Utils.readBytes;
+import static fr.avenirsesr.portfolio.common.file.application.adapter.MultipartFileReader.readBytes;
 
 import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;

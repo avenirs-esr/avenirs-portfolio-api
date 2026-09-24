@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.user.application.adapter.controller;
 
+import static fr.avenirsesr.portfolio.common.file.application.adapter.MultipartFileReader.readBytes;
 import static fr.avenirsesr.portfolio.shared.application.adapter.Utils.extractOrigin;
-import static fr.avenirsesr.portfolio.shared.application.adapter.Utils.readBytes;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.file.application.adapter.dto.FileDTO;

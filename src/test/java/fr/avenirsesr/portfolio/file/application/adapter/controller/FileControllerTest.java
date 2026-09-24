@@ -10,7 +10,6 @@ import fr.avenirsesr.portfolio.common.file.application.adapter.dto.FileDTO;
 import fr.avenirsesr.portfolio.common.file.application.adapter.request.FileUploadRequest;
 import fr.avenirsesr.portfolio.common.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
-import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.UUID;
@@ -20,21 +19,18 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 
 @ExtendWith(MockitoExtension.class)
-class StorageControllerTest {
+class FileControllerTest {
 
   private static final byte[] CONTENT = "<html></html>".getBytes(StandardCharsets.UTF_8);
 
-  @Mock private FileResourceService fileResourceService;
   @Mock private FileClient fileClient;
-  @Mock private ResourceLoader resourceLoader;
 
-  @InjectMocks private StorageController storageController;
+  @InjectMocks private FileController fileController;
 
   private static FileDTO uploadedFile() {
     return new FileDTO(
@@ -53,8 +49,8 @@ class StorageControllerTest {
     FileDTO uploaded = uploadedFile();
     when(fileClient.upload(any())).thenReturn(uploaded);
 
-    BddLogger.when("posting it on the storage endpoint");
-    ResponseEntity<FileDTO> response = storageController.upload(file, false);
+    BddLogger.when("posting it on the files endpoint");
+    ResponseEntity<FileDTO> response = fileController.upload(file, false);
 
     BddLogger.then("the file client is handed the content and the created file is returned");
     ArgumentCaptor<FileUploadRequest> captor = ArgumentCaptor.forClass(FileUploadRequest.class);
@@ -75,8 +71,8 @@ class StorageControllerTest {
     MockMultipartFile file = new MockMultipartFile("file", "cgu.html", "text/html", CONTENT);
     when(fileClient.upload(any())).thenReturn(uploadedFile());
 
-    BddLogger.when("posting it on the storage endpoint");
-    storageController.upload(file, true);
+    BddLogger.when("posting it on the files endpoint");
+    fileController.upload(file, true);
 
     BddLogger.then("the restricted flag reaches the file client");
     ArgumentCaptor<FileUploadRequest> captor = ArgumentCaptor.forClass(FileUploadRequest.class);
