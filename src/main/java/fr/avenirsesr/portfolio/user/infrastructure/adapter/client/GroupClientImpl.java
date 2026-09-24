@@ -9,6 +9,7 @@ import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -86,6 +87,34 @@ public class GroupClientImpl implements GroupClient {
     }
   }
 
+  @Override
+  public List<UUID> getStudentAccessibleIds(List<UUID> ids) {
+    if (ids == null || ids.isEmpty()) {
+      return List.of();
+    }
+    try {
+      log.debug("Resolving accessible group ids for affiliations {} from back-office", ids);
+      return webClient
+          .post()
+          .uri(groupEndpoint + "/student/accessible-ids")
+          .header(AvenirsSecurityHeaders.API_KEY, apiKey)
+          .bodyValue(new GroupAccessibleIdsRequest(ids))
+          .retrieve()
+          .bodyToMono(new ParameterizedTypeReference<List<UUID>>() {})
+          .defaultIfEmpty(ids)
+          .block();
+    } catch (Exception e) {
+      log.error(
+          "Failed to resolve accessible group ids at '{}'. Error: {}",
+          groupEndpoint,
+          e.getMessage());
+      log.debug("Full error details:", e);
+      return ids;
+    }
+  }
+
   private record GroupAccessCheckRequest(
       List<UUID> affiliatedGroupIds, List<UUID> targetGroupIds) {}
+
+  private record GroupAccessibleIdsRequest(List<UUID> affiliatedGroupIds) {}
 }

@@ -43,6 +43,31 @@ public class ActivitySpecification {
     };
   }
 
+  public static Specification<ActivityEntity> visibleByInstitutions(List<UUID> institutionIds) {
+    return visibleByTarget("targetInstitutionIds", institutionIds);
+  }
+
+  public static Specification<ActivityEntity> visibleByGroups(List<UUID> groupIds) {
+    return visibleByTarget("targetGroupIds", groupIds);
+  }
+
+  private static Specification<ActivityEntity> visibleByTarget(
+      String targetAttribute, List<UUID> studentIds) {
+    return (root, query, cb) -> {
+      Predicate noTarget = cb.isEmpty(root.get(targetAttribute));
+      if (studentIds == null || studentIds.isEmpty()) {
+        return noTarget;
+      }
+
+      Subquery<UUID> subquery = query.subquery(UUID.class);
+      Root<ActivityEntity> subRoot = subquery.from(ActivityEntity.class);
+      Join<ActivityEntity, UUID> targetJoin = subRoot.join(targetAttribute);
+      subquery.select(targetJoin).where(cb.equal(subRoot, root), targetJoin.in(studentIds));
+
+      return cb.or(noTarget, cb.exists(subquery));
+    };
+  }
+
   public static Specification<ActivityEntity> hasFeedback(
       UUID authorId, EFeedbackStatus... statuses) {
     return (root, query, cb) -> {

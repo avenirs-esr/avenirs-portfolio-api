@@ -9,4 +9,6 @@ public interface InstitutionClient {
   Optional<InstitutionDTO> getById(UUID id);
 
   boolean hasAccess(List<UUID> affiliatedIds, List<UUID> targetIds);
+
+  List<UUID> getStudentAccessibleIds(List<UUID> ids);
 }

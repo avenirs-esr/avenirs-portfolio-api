@@ -17,6 +17,7 @@ import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.Activi
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.user.domain.port.input.StaffService;
+import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
@@ -62,6 +63,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
   @Autowired private WebTestClient webTestClient;
   @Autowired private ObjectMapper objectMapper;
   @Autowired private StaffService staffService;
+  @Autowired private StudentService studentService;
 
   @Value("${user.student.payload}")
   private String studentPayload;
@@ -338,6 +340,241 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             .isEqualTo(8)
             .jsonPath("$.page.totalElements")
             .exists();
+      }
+    }
+
+    @Nested
+    class WhenFilteringActivitiesViewByStudentAffiliations {
+
+      private static final UUID STUDENT_ID =
+          UUID.fromString("0a8700ab-90b6-4a38-8338-acbdd4fbcd3d");
+      private static final UUID STAFF_ID = UUID.fromString("57ff122f-ff76-4d95-b6c1-61a4efeabd80");
+      private static final UUID TARGET_INSTITUTION_ID = UUID.randomUUID();
+      private static final UUID TARGET_GROUP_ID = UUID.randomUUID();
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("performing a GET on " + BASE_PATH + " with targeted activities");
+        staffService.updateAffiliations(
+            STAFF_ID, List.of(TARGET_INSTITUTION_ID), List.of(TARGET_GROUP_ID));
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+      }
+
+      @Test
+      void thenItShouldHideActivityTargetingAnInstitutionTheStudentDoesNotBelongTo()
+          throws Exception {
+        BddLogger.and("given an activity targeting an institution and a student without it");
+        UUID activityId = createDraftAndGetId("Activité ciblée institution non affiliée");
+        updateDraftTargeting(activityId, List.of(TARGET_INSTITUTION_ID), List.of());
+        fillDraftWithSummaryAndDescription(activityId);
+        publishDraft(activityId);
+        setStudentAffiliations(List.of(), List.of());
+
+        BddLogger.then("the activity should not appear in the student activities view");
+
+        webTestClient
+            .get()
+            .uri(
+                uriBuilder ->
+                    uriBuilder
+                        .path(BASE_PATH)
+                        .queryParam("page", "0")
+                        .queryParam("pageSize", "100")
+                        .build())
+            .headers(ActivityControllerIT.this::addStudentHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.data[?(@.id == '" + activityId + "')]")
+            .doesNotExist();
+      }
+
+      @Test
+      void thenItShouldShowActivityTargetingAnInstitutionTheStudentBelongsTo() throws Exception {
+        BddLogger.and("given an activity targeting an institution and a student with it");
+        UUID activityId = createDraftAndGetId("Activité ciblée institution affiliée");
+        updateDraftTargeting(activityId, List.of(TARGET_INSTITUTION_ID), List.of());
+        fillDraftWithSummaryAndDescription(activityId);
+        publishDraft(activityId);
+        setStudentAffiliations(List.of(TARGET_INSTITUTION_ID), List.of());
+
+        BddLogger.then("the activity should appear in the student activities view");
+
+        webTestClient
+            .get()
+            .uri(
+                uriBuilder ->
+                    uriBuilder
+                        .path(BASE_PATH)
+                        .queryParam("page", "0")
+                        .queryParam("pageSize", "100")
+                        .build())
+            .headers(ActivityControllerIT.this::addStudentHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.data[?(@.id == '" + activityId + "')]")
+            .exists();
+      }
+
+      @Test
+      void thenItShouldHideActivityTargetingAGroupTheStudentDoesNotBelongTo() throws Exception {
+        BddLogger.and("given an activity targeting a group and a student without it");
+        UUID activityId = createDraftAndGetId("Activité ciblée groupe non affilié");
+        updateDraftTargeting(activityId, List.of(), List.of(TARGET_GROUP_ID));
+        fillDraftWithSummaryAndDescription(activityId);
+        publishDraft(activityId);
+        setStudentAffiliations(List.of(), List.of());
+
+        BddLogger.then("the activity should not appear in the student activities view");
+
+        webTestClient
+            .get()
+            .uri(
+                uriBuilder ->
+                    uriBuilder
+                        .path(BASE_PATH)
+                        .queryParam("page", "0")
+                        .queryParam("pageSize", "100")
+                        .build())
+            .headers(ActivityControllerIT.this::addStudentHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.data[?(@.id == '" + activityId + "')]")
+            .doesNotExist();
+      }
+
+      @Test
+      void thenItShouldShowActivityTargetingAGroupTheStudentBelongsTo() throws Exception {
+        BddLogger.and("given an activity targeting a group and a student with it");
+        UUID activityId = createDraftAndGetId("Activité ciblée groupe affilié");
+        updateDraftTargeting(activityId, List.of(), List.of(TARGET_GROUP_ID));
+        fillDraftWithSummaryAndDescription(activityId);
+        publishDraft(activityId);
+        setStudentAffiliations(List.of(), List.of(TARGET_GROUP_ID));
+
+        BddLogger.then("the activity should appear in the student activities view");
+
+        webTestClient
+            .get()
+            .uri(
+                uriBuilder ->
+                    uriBuilder
+                        .path(BASE_PATH)
+                        .queryParam("page", "0")
+                        .queryParam("pageSize", "100")
+                        .build())
+            .headers(ActivityControllerIT.this::addStudentHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.data[?(@.id == '" + activityId + "')]")
+            .exists();
+      }
+
+      @Test
+      void thenItShouldRequireBothInstitutionAndGroupTargetsToMatchWhenActivityTargetsBoth()
+          throws Exception {
+        BddLogger.and("given an activity targeting both an institution and a group");
+        UUID activityId = createDraftAndGetId("Activité ciblée institution et groupe");
+        updateDraftTargeting(activityId, List.of(TARGET_INSTITUTION_ID), List.of(TARGET_GROUP_ID));
+        fillDraftWithSummaryAndDescription(activityId);
+        publishDraft(activityId);
+
+        BddLogger.then("matching only the institution should not be enough");
+        setStudentAffiliations(List.of(TARGET_INSTITUTION_ID), List.of());
+
+        webTestClient
+            .get()
+            .uri(
+                uriBuilder ->
+                    uriBuilder
+                        .path(BASE_PATH)
+                        .queryParam("page", "0")
+                        .queryParam("pageSize", "100")
+                        .build())
+            .headers(ActivityControllerIT.this::addStudentHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.data[?(@.id == '" + activityId + "')]")
+            .doesNotExist();
+
+        BddLogger.then("matching both the institution and the group should be enough");
+        setStudentAffiliations(List.of(TARGET_INSTITUTION_ID), List.of(TARGET_GROUP_ID));
+
+        webTestClient
+            .get()
+            .uri(
+                uriBuilder ->
+                    uriBuilder
+                        .path(BASE_PATH)
+                        .queryParam("page", "0")
+                        .queryParam("pageSize", "100")
+                        .build())
+            .headers(ActivityControllerIT.this::addStudentHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.data[?(@.id == '" + activityId + "')]")
+            .exists();
+      }
+
+      private void setStudentAffiliations(List<UUID> institutionIds, List<UUID> groupIds) {
+        TestTransaction.start();
+        studentService.updateAffiliations(STUDENT_ID, institutionIds, groupIds);
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+      }
+
+      private ActivityDraftUpdateRequest targetingRequest(
+          List<UUID> targetInstitutionIds, List<UUID> targetGroupIds) {
+        return new ActivityDraftUpdateRequest(
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            false,
+            targetInstitutionIds,
+            targetGroupIds);
+      }
+
+      private void updateDraftTargeting(
+          UUID draftId, List<UUID> targetInstitutionIds, List<UUID> targetGroupIds)
+          throws Exception {
+        webTestClient
+            .patch()
+            .uri(DRAFT_UPDATE_PATH, draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(
+                objectMapper.writeValueAsString(
+                    targetingRequest(targetInstitutionIds, targetGroupIds)))
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk();
       }
     }
 

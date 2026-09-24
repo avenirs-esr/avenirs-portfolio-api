@@ -26,8 +26,15 @@ public class ActivityDatabaseRepository
   }
 
   @Override
-  public PagedResult<Activity> findAll(EActivityThematic thematic, PageCriteria pageCriteria) {
-    var specification = ActivitySpecification.isPublished();
+  public PagedResult<Activity> findAll(
+      EActivityThematic thematic,
+      PageCriteria pageCriteria,
+      List<UUID> studentInstitutionIds,
+      List<UUID> studentGroupIds) {
+    var specification =
+        ActivitySpecification.isPublished()
+            .and(ActivitySpecification.visibleByInstitutions(studentInstitutionIds))
+            .and(ActivitySpecification.visibleByGroups(studentGroupIds));
     if (thematic != null)
       specification = specification.and(ActivitySpecification.withThematic(thematic));
 
@@ -61,11 +68,17 @@ public class ActivityDatabaseRepository
 
   @Override
   public PagedResult<Activity> findLatest(
-      Duration durationForLate, List<Activity> activityToExclude, PageCriteria pageCriteria) {
+      Duration durationForLate,
+      List<Activity> activityToExclude,
+      PageCriteria pageCriteria,
+      List<UUID> studentInstitutionIds,
+      List<UUID> studentGroupIds) {
     var sort = Sort.by(Sort.Direction.DESC, "createdAt");
     var specification =
         ActivitySpecification.isPublished()
             .and(ActivitySpecification.latest(durationForLate))
+            .and(ActivitySpecification.visibleByInstitutions(studentInstitutionIds))
+            .and(ActivitySpecification.visibleByGroups(studentGroupIds))
             .and(
                 ActivitySpecification.exclude(
                     activityToExclude.stream().map(ActivityMapper.INSTANCE::fromDomain).toList()));

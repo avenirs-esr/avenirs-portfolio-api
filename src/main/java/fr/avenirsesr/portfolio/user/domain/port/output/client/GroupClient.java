@@ -11,4 +11,6 @@ public interface GroupClient {
   Optional<GroupDTO> getProgramOfGroup(UUID groupId);
 
   boolean hasAccess(List<UUID> affiliatedIds, List<UUID> targetIds);
+
+  List<UUID> getStudentAccessibleIds(List<UUID> ids);
 }
