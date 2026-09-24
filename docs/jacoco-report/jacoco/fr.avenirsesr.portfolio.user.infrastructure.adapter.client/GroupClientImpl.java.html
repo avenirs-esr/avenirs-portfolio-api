@@ -72,7 +72,7 @@ public class GroupClientImpl implements GroupClient {
           affiliatedIds);
 <span class="fc" id="L73">      return webClient</span>
 <span class="fc" id="L74">          .post()</span>
-<span class="fc" id="L75">          .uri(groupEndpoint + &quot;/access-check&quot;)</span>
+<span class="fc" id="L75">          .uri(groupEndpoint + &quot;/staff/access-check&quot;)</span>
 <span class="fc" id="L76">          .header(AvenirsSecurityHeaders.API_KEY, apiKey)</span>
 <span class="fc" id="L77">          .bodyValue(new GroupAccessCheckRequest(affiliatedIds, targetIds))</span>
 <span class="fc" id="L78">          .retrieve()</span>

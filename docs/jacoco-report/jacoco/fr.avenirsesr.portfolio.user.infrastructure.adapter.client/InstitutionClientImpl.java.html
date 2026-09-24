@@ -65,7 +65,7 @@ public class InstitutionClientImpl implements InstitutionClient {
           affiliatedIds);
 <span class="fc" id="L66">      return webClient</span>
 <span class="fc" id="L67">          .post()</span>
-<span class="fc" id="L68">          .uri(institutionEndpoint + &quot;/access-check&quot;)</span>
+<span class="fc" id="L68">          .uri(institutionEndpoint + &quot;/staff/access-check&quot;)</span>
 <span class="fc" id="L69">          .header(AvenirsSecurityHeaders.API_KEY, apiKey)</span>
 <span class="fc" id="L70">          .bodyValue(new InstitutionAccessCheckRequest(affiliatedIds, targetIds))</span>
 <span class="fc" id="L71">          .retrieve()</span>
