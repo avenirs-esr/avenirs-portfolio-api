@@ -1,45 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CguAcceptanceServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.cgu.domain.service</a> &gt; <span class="el_source">CguAcceptanceServiceImpl.java</span></div><h1>CguAcceptanceServiceImpl.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.cgu.domain.service;
 
+import fr.avenirsesr.portfolio.cgu.domain.data.CguAcceptanceData;
 import fr.avenirsesr.portfolio.cgu.domain.exception.CguNotFoundException;
-import fr.avenirsesr.portfolio.cgu.domain.model.CguAcceptance;
 import fr.avenirsesr.portfolio.cgu.domain.port.input.CguAcceptanceService;
 import fr.avenirsesr.portfolio.cgu.domain.port.output.client.CguClient;
-import fr.avenirsesr.portfolio.cgu.domain.port.output.repository.CguAcceptanceRepository;
 import fr.avenirsesr.portfolio.common.cgu.application.adapter.dto.CguDTO;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-<span class="fc" id="L15">@Slf4j</span>
+<span class="fc" id="L17">@Slf4j</span>
 @AllArgsConstructor
 public class CguAcceptanceServiceImpl implements CguAcceptanceService {
   private final CguClient cguClient;
-  private final CguAcceptanceRepository cguAcceptanceRepository;
+  private final UserRepository userRepository;
   private final LoggedInUserService loggedInUserService;
 
   @Override
-  public CguAcceptance acceptCurrent() {
-<span class="fc" id="L24">    User user = loggedInUserService.getLoggedInUser();</span>
-<span class="fc" id="L25">    CguDTO current = cguClient.getLatest().orElseThrow(CguNotFoundException::new);</span>
+  public CguAcceptanceData acceptCurrent() {
+<span class="fc" id="L26">    User user = loggedInUserService.getLoggedInUser();</span>
+<span class="fc" id="L27">    CguDTO current = cguClient.getLatest().orElseThrow(CguNotFoundException::new);</span>
 
-<span class="fc" id="L27">    return cguAcceptanceRepository</span>
-<span class="fc" id="L28">        .findByUserAndCgu(user.getId(), current.id())</span>
-<span class="fc" id="L29">        .orElseGet(() -&gt; saveAcceptance(user, current));</span>
+<span class="fc bfc" id="L29" title="All 2 branches covered.">    if (current.id().equals(user.getAcceptedCguId())) {</span>
+<span class="fc" id="L30">      return acceptanceOf(user);</span>
+    }
+
+<span class="fc" id="L33">    user.setAcceptedCguId(current.id());</span>
+<span class="fc" id="L34">    user.setAcceptedCguAt(Instant.now().truncatedTo(ChronoUnit.MICROS));</span>
+<span class="fc" id="L35">    userRepository.save(user);</span>
+<span class="fc" id="L36">    log.info(&quot;Terms of use version {} accepted by user [{}]&quot;, current.version(), user.getId());</span>
+
+<span class="fc" id="L38">    return acceptanceOf(user);</span>
   }
 
   @Override
-  public Optional&lt;CguAcceptance&gt; getLastAcceptance() {
-<span class="fc" id="L34">    return cguAcceptanceRepository.findLastByUser(loggedInUserService.getLoggedInUser().getId());</span>
+  public Optional&lt;CguAcceptanceData&gt; getLastAcceptance() {
+<span class="fc" id="L43">    User user = loggedInUserService.getLoggedInUser();</span>
+
+<span class="fc" id="L45">    return Optional.ofNullable(user.getAcceptedCguId())</span>
+<span class="fc" id="L46">        .map(cguId -&gt; new CguAcceptanceData(cguId, user.getAcceptedCguAt()));</span>
   }
 
-  private CguAcceptance saveAcceptance(User user, CguDTO current) {
-<span class="fc" id="L38">    CguAcceptance acceptance =</span>
-<span class="fc" id="L39">        cguAcceptanceRepository.save(CguAcceptance.create(user, current.id()));</span>
-<span class="fc" id="L40">    log.info(&quot;Terms of use version {} accepted by user [{}]&quot;, current.version(), user.getId());</span>
-
-<span class="fc" id="L42">    return acceptance;</span>
+  private static CguAcceptanceData acceptanceOf(User user) {
+<span class="fc" id="L50">    return new CguAcceptanceData(user.getAcceptedCguId(), user.getAcceptedCguAt());</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

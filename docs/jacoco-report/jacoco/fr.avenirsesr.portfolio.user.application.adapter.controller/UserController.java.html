@@ -4,7 +4,7 @@ import static fr.avenirsesr.portfolio.common.file.application.adapter.MultipartF
 import static fr.avenirsesr.portfolio.shared.application.adapter.Utils.extractOrigin;
 
 import fr.avenirsesr.portfolio.cgu.application.adapter.dto.AcceptedCguDTO;
-import fr.avenirsesr.portfolio.cgu.domain.model.CguAcceptance;
+import fr.avenirsesr.portfolio.cgu.domain.data.CguAcceptanceData;
 import fr.avenirsesr.portfolio.cgu.domain.port.input.CguAcceptanceService;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.file.application.adapter.dto.FileDTO;
@@ -79,8 +79,8 @@ public class UserController {
 <span class="fc" id="L79">    return cguAcceptanceService.getLastAcceptance().map(UserController::toDto).orElse(null);</span>
   }
 
-  private static AcceptedCguDTO toDto(CguAcceptance acceptance) {
-<span class="fc" id="L83">    return new AcceptedCguDTO(acceptance.getCguId(), acceptance.getAcceptedAt());</span>
+  private static AcceptedCguDTO toDto(CguAcceptanceData acceptance) {
+<span class="fc" id="L83">    return new AcceptedCguDTO(acceptance.cguId(), acceptance.acceptedAt());</span>
   }
 
   @PreAuthorize(&quot;hasAuthority('profile:read:own')&quot;)
