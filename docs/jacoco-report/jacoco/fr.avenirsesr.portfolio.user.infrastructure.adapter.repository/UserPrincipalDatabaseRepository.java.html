@@ -26,29 +26,34 @@ public class UserPrincipalDatabaseRepository implements UserPrincipalRepository 
   }
 
   @Override
+  public Optional&lt;String&gt; findEppnByUserId(UUID userId) {
+<span class="fc" id="L30">    return jpaRepository.findByUserId(userId).map(UserPrincipalEntity::getEppn);</span>
+  }
+
+  @Override
   public void saveOrUpdate(User user, String eppn) {
-<span class="fc" id="L30">    var existing = jpaRepository.findByUserId(user.getId());</span>
+<span class="fc" id="L35">    var existing = jpaRepository.findByUserId(user.getId());</span>
 
-<span class="fc" id="L32">    var now = Instant.now();</span>
+<span class="fc" id="L37">    var now = Instant.now();</span>
 
-<span class="fc bfc" id="L34" title="All 2 branches covered.">    if (existing.isPresent()) {</span>
-<span class="fc" id="L35">      var entity = existing.get();</span>
+<span class="fc bfc" id="L39" title="All 2 branches covered.">    if (existing.isPresent()) {</span>
+<span class="fc" id="L40">      var entity = existing.get();</span>
 
-<span class="fc" id="L37">      entity.setEppn(eppn);</span>
-<span class="fc" id="L38">      entity.setUpdatedAt(now);</span>
+<span class="fc" id="L42">      entity.setEppn(eppn);</span>
+<span class="fc" id="L43">      entity.setUpdatedAt(now);</span>
 
-<span class="fc" id="L40">      jpaRepository.save(entity);</span>
-<span class="fc" id="L41">      return;</span>
+<span class="fc" id="L45">      jpaRepository.save(entity);</span>
+<span class="fc" id="L46">      return;</span>
     }
 
-<span class="fc" id="L44">    jpaRepository.save(</span>
-<span class="fc" id="L45">        UserPrincipalEntity.of(</span>
-<span class="fc" id="L46">            UUID.randomUUID(), UserMapper.INSTANCE.fromDomain(user), eppn, now, now));</span>
-<span class="fc" id="L47">  }</span>
+<span class="fc" id="L49">    jpaRepository.save(</span>
+<span class="fc" id="L50">        UserPrincipalEntity.of(</span>
+<span class="fc" id="L51">            UUID.randomUUID(), UserMapper.INSTANCE.fromDomain(user), eppn, now, now));</span>
+<span class="fc" id="L52">  }</span>
 
   @Override
   public long countAll() {
-<span class="fc" id="L51">    return jpaRepository.count();</span>
+<span class="fc" id="L56">    return jpaRepository.count();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
