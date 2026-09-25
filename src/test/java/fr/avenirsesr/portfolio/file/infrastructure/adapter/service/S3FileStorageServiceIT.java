@@ -7,16 +7,13 @@ import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.file.domain.model.FileResource;
 import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.file.infrastructure.configuration.S3StorageProperties;
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.testcontainers.utility.DockerImageName;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
@@ -35,45 +32,32 @@ import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 class S3FileStorageServiceIT {
 
   private static final String BUCKET = "avenirs-portfolio-it";
-  private static final String REGION = "eu-west-3";
-  private static final String ACCESS_KEY = "avenirs-it-access-key";
-  private static final String SECRET_KEY = "avenirs-it-secret-key";
-  private static final int MINIO_PORT = 9000;
 
-  private GenericContainer<?> minio;
+  private LocalStackContainer localstack;
   private S3Client s3Client;
   private S3FileStorageService storageService;
 
   @BeforeAll
   void startBackend() {
-    minio =
-        new GenericContainer<>(
-                DockerImageName.parse("quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z"))
-            .withEnv("MINIO_ROOT_USER", ACCESS_KEY)
-            .withEnv("MINIO_ROOT_PASSWORD", SECRET_KEY)
-            .withCommand("server", "/data")
-            .withExposedPorts(MINIO_PORT)
-            .waitingFor(
-                Wait.forHttp("/minio/health/ready")
-                    .forPort(MINIO_PORT)
-                    .withStartupTimeout(Duration.ofMinutes(2)));
-    minio.start();
+    localstack =
+        new LocalStackContainer(DockerImageName.parse("localstack/localstack:3.8"))
+            .withServices(LocalStackContainer.Service.S3);
+    localstack.start();
 
     var properties = new S3StorageProperties();
     properties.setBucket(BUCKET);
-    properties.setRegion(REGION);
-    properties.setAccessKey(ACCESS_KEY);
-    properties.setSecretKey(SECRET_KEY);
+    properties.setRegion(localstack.getRegion());
+    properties.setAccessKey(localstack.getAccessKey());
+    properties.setSecretKey(localstack.getSecretKey());
 
     s3Client =
         S3Client.builder()
-            .endpointOverride(
-                URI.create(
-                    "http://%s:%d".formatted(minio.getHost(), minio.getMappedPort(MINIO_PORT))))
+            .endpointOverride(localstack.getEndpointOverride(LocalStackContainer.Service.S3))
             .region(Region.of(properties.getRegion()))
             .credentialsProvider(
                 StaticCredentialsProvider.create(
-                    AwsBasicCredentials.create(ACCESS_KEY, SECRET_KEY)))
+                    AwsBasicCredentials.create(
+                        properties.getAccessKey(), properties.getSecretKey())))
             .forcePathStyle(true)
             .build();
     s3Client.createBucket(CreateBucketRequest.builder().bucket(BUCKET).build());
@@ -86,8 +70,8 @@ class S3FileStorageServiceIT {
     if (s3Client != null) {
       s3Client.close();
     }
-    if (minio != null) {
-      minio.stop();
+    if (localstack != null) {
+      localstack.stop();
     }
   }
 
