@@ -17,14 +17,7 @@ public interface StudentService {
 
   void updateProfile(User user, String bio);
 
-  Student createStudent(
-      UUID userId,
-      String institutionEmail,
-      List<UUID> institutionIds,
-      List<UUID> groupIds,
-      String bio);
-
-  void updateAffiliations(UUID studentId, List<UUID> institutionIds, List<UUID> groupIds);
+  Student createStudent(UUID userId, String institutionEmail, String bio);
 
   void addSelfKnowledgeCategories(Student student, List<ESelfKnowledgeCategory> categories);
 

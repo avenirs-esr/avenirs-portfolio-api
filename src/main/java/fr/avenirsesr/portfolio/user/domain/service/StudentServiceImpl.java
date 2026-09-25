@@ -72,28 +72,15 @@ public class StudentServiceImpl implements StudentService {
   }
 
   @Override
-  public Student createStudent(
-      UUID userId,
-      String institutionEmail,
-      List<UUID> institutionIds,
-      List<UUID> groupIds,
-      String bio) {
+  public Student createStudent(UUID userId, String institutionEmail, String bio) {
     var user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
-    var student = Student.create(user, institutionEmail, institutionIds, groupIds, bio);
+    var student = Student.create(user, institutionEmail, bio);
     if (user.getEmail() == null) {
       user.setEmail(institutionEmail);
       userRepository.save(user);
     }
     studentRepository.save(student);
     return student;
-  }
-
-  @Override
-  public void updateAffiliations(UUID studentId, List<UUID> institutionIds, List<UUID> groupIds) {
-    var student = studentRepository.findById(studentId).orElseThrow(UserIsNotStudentException::new);
-    student.setInstitutionIds(institutionIds);
-    student.setGroupIds(groupIds);
-    studentRepository.save(student);
   }
 
   @Override

@@ -281,8 +281,6 @@ class TraceSpecificationIT extends ContainerConfigurationTest {
         StudentEntity.of(
             u,
             "student@univ.com",
-            null,
-            null,
             "student",
             false,
             new ArrayList<>(),

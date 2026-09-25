@@ -172,10 +172,7 @@ public class SeederOrchestrator {
 
   public int seedTable(String tableName, ESeedMode mode) {
     Map<String, Function<ESeedMode, Integer>> seeders =
-        Map.of(
-            userPrincipalSeeder.tableName(), userPrincipalSeeder::seedAlone,
-            studentSeeder.tableName(), studentSeeder::seedAlone,
-            staffSeeder.tableName(), staffSeeder::seedAlone);
+        Map.of(userPrincipalSeeder.tableName(), userPrincipalSeeder::seedAlone);
 
     var seeder = seeders.get(tableName);
 
