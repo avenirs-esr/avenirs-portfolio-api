@@ -1,0 +1,116 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet author="Nathan" id="drop-student-institutions-fk">
+        <dropForeignKeyConstraint
+                baseTableName="student_institutions"
+                constraintName="FK_student_institutions_student"/>
+
+        <rollback>
+            <addForeignKeyConstraint
+                    baseTableName="student_institutions"
+                    baseColumnNames="student_id"
+                    constraintName="FK_student_institutions_student"
+                    referencedTableName="student"
+                    referencedColumnNames="id"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="Nathan" id="drop-student-groups-fk">
+        <dropForeignKeyConstraint
+                baseTableName="student_groups"
+                constraintName="FK_student_groups_student"/>
+
+        <rollback>
+            <addForeignKeyConstraint
+                    baseTableName="student_groups"
+                    baseColumnNames="student_id"
+                    constraintName="FK_student_groups_student"
+                    referencedTableName="student"
+                    referencedColumnNames="id"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="Nathan" id="drop-staff-institutions-fk">
+        <dropForeignKeyConstraint
+                baseTableName="staff_institutions"
+                constraintName="FK_staff_institutions_staff"/>
+
+        <rollback>
+            <addForeignKeyConstraint
+                    baseTableName="staff_institutions"
+                    baseColumnNames="staff_id"
+                    constraintName="FK_staff_institutions_staff"
+                    referencedTableName="staff"
+                    referencedColumnNames="id"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="Nathan" id="drop-staff-groups-fk">
+        <dropForeignKeyConstraint
+                baseTableName="staff_groups"
+                constraintName="FK_staff_groups_staff"/>
+
+        <rollback>
+            <addForeignKeyConstraint
+                    baseTableName="staff_groups"
+                    baseColumnNames="staff_id"
+                    constraintName="FK_staff_groups_staff"
+                    referencedTableName="staff"
+                    referencedColumnNames="id"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="Nathan" id="drop-student-institutions-table">
+        <dropTable tableName="student_institutions"/>
+
+        <rollback>
+            <createTable tableName="student_institutions">
+                <column name="student_id" type="UUID">
+                    <constraints nullable="false"/>
+                </column>
+                <column name="institution_id" type="UUID"/>
+            </createTable>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="Nathan" id="drop-student-groups-table">
+        <dropTable tableName="student_groups"/>
+
+        <rollback>
+            <createTable tableName="student_groups">
+                <column name="student_id" type="UUID">
+                    <constraints nullable="false"/>
+                </column>
+                <column name="group_id" type="UUID"/>
+            </createTable>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="Nathan" id="drop-staff-institutions-table">
+        <dropTable tableName="staff_institutions"/>
+
+        <rollback>
+            <createTable tableName="staff_institutions">
+                <column name="staff_id" type="UUID">
+                    <constraints nullable="false"/>
+                </column>
+                <column name="institution_id" type="UUID"/>
+            </createTable>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="Nathan" id="drop-staff-groups-table">
+        <dropTable tableName="staff_groups"/>
+
+        <rollback>
+            <createTable tableName="staff_groups">
+                <column name="staff_id" type="UUID">
+                    <constraints nullable="false"/>
+                </column>
+                <column name="group_id" type="UUID"/>
+            </createTable>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

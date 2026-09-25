@@ -62,8 +62,9 @@ import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStat
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.domain.port.output.client.GroupClient;
-import fr.avenirsesr.portfolio.user.domain.port.output.client.InstitutionClient;
+import fr.avenirsesr.portfolio.user.domain.port.output.client.AccessClient;
+import fr.avenirsesr.portfolio.user.domain.port.output.client.StudentAccessScope;
+import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserPrincipalRepository;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -90,14 +91,18 @@ class ActivityServiceImplTest {
   @Mock private NotificationService notificationService;
   @Mock private FileResourceService fileResourceService;
   @Mock private ActivityViewRepository activityViewRepository;
-  @Mock private InstitutionClient institutionClient;
-  @Mock private GroupClient groupClient;
+  @Mock private AccessClient accessClient;
+  @Mock private UserPrincipalRepository userPrincipalRepository;
 
   @InjectMocks private ActivityServiceImpl activityService;
+
+  private static final String EPPN = "logged-in-user@university.com";
 
   @BeforeEach
   void setUp() {
     MockitoAnnotations.openMocks(this);
+    when(userPrincipalRepository.findEppnByUserId(any())).thenReturn(Optional.of(EPPN));
+    when(accessClient.getStudentScope(any())).thenReturn(StudentAccessScope.empty());
   }
 
   @Nested
@@ -256,8 +261,8 @@ class ActivityServiceImplTest {
             List<String> links = List.of("https://example.com", "https://avenirs-esr.fr");
             List<UUID> institutionIds = List.of(UUID.randomUUID());
             List<UUID> groupIds = List.of(UUID.randomUUID(), UUID.randomUUID());
-            when(institutionClient.hasAccess(any(), eq(institutionIds))).thenReturn(true);
-            when(groupClient.hasAccess(any(), eq(groupIds))).thenReturn(true);
+            when(accessClient.staffHasAccess(any(), eq(institutionIds), eq(groupIds)))
+                .thenReturn(true);
             ActivityDraft result =
                 activityService.updateActivityDraft(
                     draftId,
@@ -568,8 +573,7 @@ class ActivityServiceImplTest {
         @BeforeEach
         void setupAnd() {
           BddLogger.and("the staff has no access to the targeted institution or group");
-          when(institutionClient.hasAccess(any(), any())).thenReturn(false);
-          when(groupClient.hasAccess(any(), any())).thenReturn(false);
+          when(accessClient.staffHasAccess(any(), any(), any())).thenReturn(false);
           when(activityRepository.findById(draftId)).thenReturn(Optional.empty());
         }
 
@@ -644,7 +648,8 @@ class ActivityServiceImplTest {
 
           List<UUID> institutionIds = List.of(UUID.randomUUID());
           List<UUID> groupIds = List.of();
-          when(institutionClient.hasAccess(any(), eq(institutionIds))).thenReturn(true);
+          when(accessClient.staffHasAccess(any(), eq(institutionIds), eq(groupIds)))
+              .thenReturn(true);
 
           ActivityDraft result =
               activityService.updateActivityDraft(
@@ -718,8 +723,7 @@ class ActivityServiceImplTest {
               .thenReturn(List.of(alreadyTargetedInstitutionId));
           when(activity.getTargetGroupIds()).thenReturn(List.of(alreadyTargetedGroupId));
           when(activityRepository.findById(draftId)).thenReturn(Optional.of(activity));
-          when(institutionClient.hasAccess(any(), any())).thenReturn(true);
-          when(groupClient.hasAccess(any(), any())).thenReturn(true);
+          when(accessClient.staffHasAccess(any(), any(), any())).thenReturn(true);
         }
 
         @Test
@@ -1892,12 +1896,8 @@ class ActivityServiceImplTest {
         List<UUID> institutionIdsWithAncestors = List.of(institutionId, institutionAncestorId);
         List<UUID> groupIdsWithAncestors = List.of(groupId, groupAncestorId);
 
-        when(student.getInstitutionIds()).thenReturn(List.of(institutionId));
-        when(student.getGroupIds()).thenReturn(List.of(groupId));
-        when(institutionClient.getStudentAccessibleIds(List.of(institutionId)))
-            .thenReturn(institutionIdsWithAncestors);
-        when(groupClient.getStudentAccessibleIds(List.of(groupId)))
-            .thenReturn(groupIdsWithAncestors);
+        when(accessClient.getStudentScope(EPPN))
+            .thenReturn(new StudentAccessScope(institutionIdsWithAncestors, groupIdsWithAncestors));
         when(activityRepository.findAll(
                 null, pageCriteria, institutionIdsWithAncestors, groupIdsWithAncestors))
             .thenReturn(new PagedResult<>(List.of(), pageInfo));
@@ -2015,12 +2015,8 @@ class ActivityServiceImplTest {
         List<UUID> institutionIdsWithAncestors = List.of(institutionId, institutionAncestorId);
         List<UUID> groupIdsWithAncestors = List.of(groupId, groupAncestorId);
 
-        when(student.getInstitutionIds()).thenReturn(List.of(institutionId));
-        when(student.getGroupIds()).thenReturn(List.of(groupId));
-        when(institutionClient.getStudentAccessibleIds(List.of(institutionId)))
-            .thenReturn(institutionIdsWithAncestors);
-        when(groupClient.getStudentAccessibleIds(List.of(groupId)))
-            .thenReturn(groupIdsWithAncestors);
+        when(accessClient.getStudentScope(EPPN))
+            .thenReturn(new StudentAccessScope(institutionIdsWithAncestors, groupIdsWithAncestors));
         when(activityRepository.findLatest(
                 eq(Duration.ofDays(90)),
                 anyList(),

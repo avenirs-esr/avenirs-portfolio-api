@@ -7,7 +7,6 @@ import fr.avenirsesr.portfolio.common.group.domain.model.enums.EGroupType;
 import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.AvenirsSecurityHeaders;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import okhttp3.mockwebserver.MockResponse;
@@ -140,94 +139,5 @@ class GroupClientImplTest {
 
     BddLogger.then("no group is returned and no exception escapes the client");
     assertThat(result).isEmpty();
-  }
-
-  @Test
-  void shouldReturnTrueWhenBackOfficeGrantsAccess() throws InterruptedException {
-    BddLogger.given("a back-office granting access to the targeted group");
-    mockWebServer.enqueue(
-        new MockResponse().setBody("true").addHeader("Content-Type", "application/json"));
-
-    BddLogger.when("checking access to a group");
-    boolean result = client.hasAccess(List.of(PARENT_ID), List.of(GROUP_ID));
-
-    BddLogger.then("access is granted and the affiliated/target ids are sent");
-    assertThat(result).isTrue();
-
-    RecordedRequest request = mockWebServer.takeRequest();
-    assertThat(request.getPath()).isEqualTo("/back-office/groups/staff/access-check");
-    assertThat(request.getMethod()).isEqualTo("POST");
-    assertThat(request.getHeader(AvenirsSecurityHeaders.API_KEY)).isEqualTo("test-key");
-    assertThat(request.getBody().readUtf8())
-        .contains(PARENT_ID.toString())
-        .contains(GROUP_ID.toString());
-  }
-
-  @Test
-  void shouldReturnFalseWhenBackOfficeDeniesAccess() {
-    BddLogger.given("a back-office denying access to the targeted group");
-    mockWebServer.enqueue(
-        new MockResponse().setBody("false").addHeader("Content-Type", "application/json"));
-
-    BddLogger.when("checking access to a group");
-    boolean result = client.hasAccess(List.of(PARENT_ID), List.of(GROUP_ID));
-
-    BddLogger.then("access is denied");
-    assertThat(result).isFalse();
-  }
-
-  @Test
-  void shouldReturnFalseWhenCheckingAccessAndBackOfficeFails() {
-    BddLogger.given("a back-office answering 500 to the access check");
-    mockWebServer.enqueue(new MockResponse().setResponseCode(500));
-
-    BddLogger.when("checking access to a group");
-    boolean result = client.hasAccess(List.of(PARENT_ID), List.of(GROUP_ID));
-
-    BddLogger.then("access is denied by default and no exception escapes the client");
-    assertThat(result).isFalse();
-  }
-
-  @Test
-  void shouldReturnAccessibleIdsResolvedByTheBackOffice() throws InterruptedException {
-    BddLogger.given("a back-office resolving a group together with its ancestors");
-    mockWebServer.enqueue(
-        new MockResponse()
-            .setBody("[\"%s\",\"%s\"]".formatted(GROUP_ID, PARENT_ID))
-            .addHeader("Content-Type", "application/json"));
-
-    BddLogger.when("resolving the group with its ancestors");
-    List<UUID> result = client.getStudentAccessibleIds(List.of(GROUP_ID));
-
-    BddLogger.then("the accessible ids returned by the back-office are forwarded");
-    assertThat(result).containsExactly(GROUP_ID, PARENT_ID);
-
-    RecordedRequest request = mockWebServer.takeRequest();
-    assertThat(request.getPath()).isEqualTo("/back-office/groups/student/accessible-ids");
-    assertThat(request.getMethod()).isEqualTo("POST");
-    assertThat(request.getHeader(AvenirsSecurityHeaders.API_KEY)).isEqualTo("test-key");
-    assertThat(request.getBody().readUtf8()).contains(GROUP_ID.toString());
-  }
-
-  @Test
-  void shouldReturnTheOriginalIdsWhenBackOfficeFails() {
-    BddLogger.given("a back-office failing to resolve accessible group ids");
-    mockWebServer.enqueue(new MockResponse().setResponseCode(500));
-
-    BddLogger.when("resolving the group with its ancestors");
-    List<UUID> result = client.getStudentAccessibleIds(List.of(GROUP_ID));
-
-    BddLogger.then("the requested group is returned and no exception escapes the client");
-    assertThat(result).containsExactly(GROUP_ID);
-  }
-
-  @Test
-  void shouldReturnEmptyListWhenNoIdsAreProvided() {
-    BddLogger.when("resolving ancestors for an empty list of groups");
-    List<UUID> result = client.getStudentAccessibleIds(List.of());
-
-    BddLogger.then("an empty list is returned and the back-office is not called");
-    assertThat(result).isEmpty();
-    assertThat(mockWebServer.getRequestCount()).isZero();
   }
 }

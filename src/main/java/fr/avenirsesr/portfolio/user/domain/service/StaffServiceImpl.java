@@ -15,7 +15,6 @@ import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.domain.port.input.StaffService;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StaffRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
-import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -70,22 +69,9 @@ public class StaffServiceImpl implements StaffService {
   }
 
   @Override
-  public void updateAffiliations(UUID staffId, List<UUID> institutionIds, List<UUID> groupIds) {
-    var staff = staffRepository.findById(staffId).orElseThrow(UserIsNotStaffException::new);
-    staff.setInstitutionIds(institutionIds);
-    staff.setGroupIds(groupIds);
-    staffRepository.save(staff);
-  }
-
-  @Override
-  public Staff createStaff(
-      UUID userId,
-      String institutionEmail,
-      List<UUID> institutionIds,
-      List<UUID> groupIds,
-      String bio) {
+  public Staff createStaff(UUID userId, String institutionEmail, String bio) {
     var user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
-    var staff = Staff.create(user, institutionEmail, institutionIds, groupIds, bio);
+    var staff = Staff.create(user, institutionEmail, bio);
     staffRepository.save(staff);
     if (user.getEmail() == null) {
       user.setEmail(institutionEmail);

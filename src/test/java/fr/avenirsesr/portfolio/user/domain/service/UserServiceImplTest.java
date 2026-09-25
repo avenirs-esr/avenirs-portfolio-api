@@ -133,13 +133,7 @@ class UserServiceImplTest {
       assertEquals(loggedUser, result);
 
       BddLogger.then("it should create the missing student profile");
-      verify(studentService)
-          .createStudent(
-              loggedUser.getId(),
-              externalUser.email(),
-              externalUser.institutionIds(),
-              externalUser.groupIds(),
-              null);
+      verify(studentService).createStudent(loggedUser.getId(), externalUser.email(), null);
     }
 
     @Test
@@ -160,8 +154,8 @@ class UserServiceImplTest {
 
       BddLogger.then("it should return the matching user without reconciling");
       assertEquals(loggedUser, result);
-      verify(studentService, never()).createStudent(any(), any(), any(), any(), any());
-      verify(staffService, never()).createStaff(any(), any(), any(), any(), any());
+      verify(studentService, never()).createStudent(any(), any(), any());
+      verify(staffService, never()).createStaff(any(), any(), any());
     }
 
     @Test
@@ -192,13 +186,7 @@ class UserServiceImplTest {
       verify(userPrincipalRepository).saveOrUpdate(savedUser, eppn);
 
       BddLogger.then("it should create the student profile");
-      verify(studentService)
-          .createStudent(
-              savedUser.getId(),
-              externalUser.email(),
-              externalUser.institutionIds(),
-              externalUser.groupIds(),
-              null);
+      verify(studentService).createStudent(savedUser.getId(), externalUser.email(), null);
       verifyNoInteractions(staffService);
 
       BddLogger.then("it should activate the external user");
@@ -227,13 +215,7 @@ class UserServiceImplTest {
       assertEquals(savedUser, result);
 
       BddLogger.then("it should create the staff profile");
-      verify(staffService)
-          .createStaff(
-              savedUser.getId(),
-              externalUser.email(),
-              externalUser.institutionIds(),
-              externalUser.groupIds(),
-              null);
+      verify(staffService).createStaff(savedUser.getId(), externalUser.email(), null);
       verifyNoInteractions(studentService);
 
       BddLogger.then("it should activate the external user");
@@ -537,46 +519,6 @@ class UserServiceImplTest {
           "unreadNotifications should be zero and hasUnseenNotification should be false");
       assertThat(result.unreadNotifications()).isZero();
       assertThat(result.hasUnseenNotification()).isFalse();
-    }
-  }
-
-  @Nested
-  class RefreshAffiliations {
-
-    @Test
-    void shouldUpdateAffiliationsOfAnExistingStudent() {
-      String eppn = "lucas.tessier@university.com";
-      ExternalUserDTO externalUser = externalUser(EUserCategory.STUDENT, EUserStatus.ACTIVE, eppn);
-
-      BddLogger.given("a student known to the back-office with several affiliations");
-      when(externalUserClient.getByEppn(eppn)).thenReturn(Optional.of(externalUser));
-      when(userPrincipalRepository.findByEppn(eppn)).thenReturn(Optional.of(loggedUser));
-      when(studentService.existsById(loggedUser.getId())).thenReturn(true);
-      when(staffService.existsById(loggedUser.getId())).thenReturn(false);
-
-      BddLogger.when("refreshing the affiliations for that eppn");
-      userService.refreshAffiliations(eppn);
-
-      BddLogger.then("it should update the student's affiliations and leave staff untouched");
-      verify(studentService)
-          .updateAffiliations(
-              loggedUser.getId(), externalUser.institutionIds(), externalUser.groupIds());
-      verify(staffService, never()).updateAffiliations(any(), any(), any());
-    }
-
-    @Test
-    void shouldThrowWhenTheExternalUserIsUnknown() {
-      String eppn = "unknown@university.com";
-
-      BddLogger.given("no external user known to the back-office for that eppn");
-      when(externalUserClient.getByEppn(eppn)).thenReturn(Optional.empty());
-
-      BddLogger.when("refreshing the affiliations for that eppn");
-      BddLogger.then("it should throw ExternalUserNotFoundException");
-      assertThrows(
-          ExternalUserNotFoundException.class, () -> userService.refreshAffiliations(eppn));
-
-      verifyNoInteractions(studentService, staffService);
     }
   }
 

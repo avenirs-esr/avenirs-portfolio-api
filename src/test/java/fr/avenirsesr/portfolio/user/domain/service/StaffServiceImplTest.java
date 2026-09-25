@@ -9,17 +9,12 @@ import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StaffRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
-import fr.avenirsesr.portfolio.user.infrastructure.fixture.StaffFixture;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -56,8 +51,6 @@ class StaffServiceImplTest {
           Staff.toDomain(
               user,
               "marie@university.com",
-              null,
-              null,
               "My staff bio",
               false,
               null,
@@ -75,28 +68,6 @@ class StaffServiceImplTest {
       assertEquals("Dupont", result.lastName());
       assertEquals("marie@university.com", result.email());
       assertEquals("My staff bio", result.bio());
-    }
-  }
-
-  @Nested
-  class UpdateAffiliations {
-
-    @Test
-    void shouldReplaceInstitutionAndGroupIdsAndSaveTheStaff() {
-      BddLogger.given("an existing staff and new affiliation ids from the back-office");
-      Staff staff = StaffFixture.create().toModel();
-      UUID institutionId = UUID.randomUUID();
-      UUID groupId = UUID.randomUUID();
-      when(staffRepository.findById(staff.getId())).thenReturn(Optional.of(staff));
-
-      BddLogger.when("updating the staff's affiliations");
-      staffService.updateAffiliations(staff.getId(), List.of(institutionId), List.of(groupId));
-
-      BddLogger.then("the staff's institution and group ids are replaced and saved");
-      ArgumentCaptor<Staff> staffCaptor = ArgumentCaptor.forClass(Staff.class);
-      verify(staffRepository).save(staffCaptor.capture());
-      assertEquals(List.of(institutionId), staffCaptor.getValue().getInstitutionIds());
-      assertEquals(List.of(groupId), staffCaptor.getValue().getGroupIds());
     }
   }
 }

@@ -7,6 +7,7 @@ import static fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivit
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
+import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.file.domain.exception.FileTypeNotSupportedException;
 import fr.avenirsesr.portfolio.common.file.domain.model.enums.EFileType;
@@ -40,9 +41,11 @@ import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
-import fr.avenirsesr.portfolio.user.domain.port.output.client.GroupClient;
-import fr.avenirsesr.portfolio.user.domain.port.output.client.InstitutionClient;
+import fr.avenirsesr.portfolio.user.domain.model.Student;
+import fr.avenirsesr.portfolio.user.domain.port.output.client.AccessClient;
+import fr.avenirsesr.portfolio.user.domain.port.output.client.StudentAccessScope;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
+import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserPrincipalRepository;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -75,8 +78,8 @@ public class ActivityServiceImpl implements ActivityService {
   private final FileResourceService fileResourceService;
   private final StudentRepository studentRepository;
   private final ActivityViewRepository activityViewRepository;
-  private final InstitutionClient institutionClient;
-  private final GroupClient groupClient;
+  private final AccessClient accessClient;
+  private final UserPrincipalRepository userPrincipalRepository;
 
   @Override
   public Activity create(
@@ -409,12 +412,10 @@ public class ActivityServiceImpl implements ActivityService {
   public PagedResult<ActivityWithStudentStatusData> activitiesView(
       EActivityThematic thematic, PageCriteria pageCriteria) {
     var student = loggedInUserService.getLoggedInStudent();
+    var scope = studentScope(student);
     var pagedActivities =
         activityRepository.findAll(
-            thematic,
-            pageCriteria,
-            institutionClient.getStudentAccessibleIds(student.getInstitutionIds()),
-            groupClient.getStudentAccessibleIds(student.getGroupIds()));
+            thematic, pageCriteria, scope.institutionIds(), scope.groupIds());
     var subscribedActivities = declaredActivityService.getAllDeclaredActivitiesOf(student);
     var statusByDeclaredActivity =
         declaredActivityService.getDeclaredActivityStatus(subscribedActivities);
@@ -442,13 +443,14 @@ public class ActivityServiceImpl implements ActivityService {
       PageCriteria pageCriteria) {
     var student = loggedInUserService.getLoggedInStudent();
     var subscribedActivities = declaredActivityService.getAllDeclaredActivitiesOf(student);
+    var scope = studentScope(student);
     var pagedActivities =
         activityRepository.findLatest(
             DURATION_FOR_LATEST,
             subscribedActivities.stream().map(DeclaredActivity::getActivity).toList(),
             pageCriteria,
-            institutionClient.getStudentAccessibleIds(student.getInstitutionIds()),
-            groupClient.getStudentAccessibleIds(student.getGroupIds()));
+            scope.institutionIds(),
+            scope.groupIds());
     return new PagedResult<>(
         pagedActivities.content().stream()
             .map(activity -> new ActivityWithStudentStatusData(activity, true, null))
@@ -549,16 +551,22 @@ public class ActivityServiceImpl implements ActivityService {
 
   private void validateTargetPerimeter(
       Staff staff, List<UUID> targetInstitutionIds, List<UUID> targetGroupIds) {
-    if (targetInstitutionIds != null
-        && !targetInstitutionIds.isEmpty()
-        && !institutionClient.hasAccess(staff.getInstitutionIds(), targetInstitutionIds)) {
+    boolean hasInstitutionTargets = targetInstitutionIds != null && !targetInstitutionIds.isEmpty();
+    boolean hasGroupTargets = targetGroupIds != null && !targetGroupIds.isEmpty();
+
+    if ((hasInstitutionTargets || hasGroupTargets)
+        && !accessClient.staffHasAccess(
+            eppnOf(staff.getId()), targetInstitutionIds, targetGroupIds)) {
       throw new ActivityTargetNotAccessibleException();
     }
-    if (targetGroupIds != null
-        && !targetGroupIds.isEmpty()
-        && !groupClient.hasAccess(staff.getGroupIds(), targetGroupIds)) {
-      throw new ActivityTargetNotAccessibleException();
-    }
+  }
+
+  private StudentAccessScope studentScope(Student student) {
+    return accessClient.getStudentScope(eppnOf(student.getId()));
+  }
+
+  private String eppnOf(UUID userId) {
+    return userPrincipalRepository.findEppnByUserId(userId).orElseThrow(UserNotFoundException::new);
   }
 
   private void validateTargetingUpdate(
