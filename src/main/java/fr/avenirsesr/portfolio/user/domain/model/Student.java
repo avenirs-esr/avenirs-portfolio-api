@@ -8,7 +8,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,10 +20,6 @@ public class Student extends AvenirsBaseModel {
 
   @Setter(AccessLevel.NONE)
   private String institutionEmail;
-
-  private List<UUID> institutionIds;
-
-  private List<UUID> groupIds;
 
   private String bio;
 
@@ -41,8 +36,6 @@ public class Student extends AvenirsBaseModel {
   private Student(
       User user,
       String institutionEmail,
-      List<UUID> institutionIds,
-      List<UUID> groupIds,
       String bio,
       boolean hasUnseenNotification,
       List<ESelfKnowledgeCategory> selfKnowledgeCategories,
@@ -53,8 +46,6 @@ public class Student extends AvenirsBaseModel {
     super(user.getId(), createdAt, updatedAt);
     this.user = user;
     this.institutionEmail = institutionEmail;
-    this.institutionIds = institutionIds;
-    this.groupIds = groupIds;
     this.bio = bio;
     this.hasUnseenNotification = hasUnseenNotification;
     this.selfKnowledgeCategories = selfKnowledgeCategories;
@@ -62,17 +53,10 @@ public class Student extends AvenirsBaseModel {
     this.profilePicture = profilePicture;
   }
 
-  public static Student create(
-      User user,
-      String institutionEmail,
-      List<UUID> institutionIds,
-      List<UUID> groupIds,
-      String bio) {
+  public static Student create(User user, String institutionEmail, String bio) {
     return new Student(
         user,
         institutionEmail,
-        institutionIds,
-        groupIds,
         bio,
         false,
         new ArrayList<>(),
@@ -85,8 +69,6 @@ public class Student extends AvenirsBaseModel {
   public static Student toDomain(
       User user,
       String institutionEmail,
-      List<UUID> institutionIds,
-      List<UUID> groupIds,
       String bio,
       boolean hasUnseenNotification,
       List<ESelfKnowledgeCategory> selfKnowledgeCategories,
@@ -97,8 +79,6 @@ public class Student extends AvenirsBaseModel {
     return new Student(
         user,
         institutionEmail,
-        institutionIds,
-        groupIds,
         bio,
         hasUnseenNotification,
         selfKnowledgeCategories,

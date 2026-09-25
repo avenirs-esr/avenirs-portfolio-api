@@ -4,16 +4,12 @@ import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 public class StaffFixture {
   private UUID id;
   private String bio;
   private User user;
-  private List<UUID> institutionIds;
-  private List<UUID> groupIds;
   private File profilePicture;
   private File coverPicture;
   private boolean hasUnseenNotification;
@@ -25,8 +21,6 @@ public class StaffFixture {
     this.id = user.getId();
     this.bio = "this is my staff bio";
     this.hasUnseenNotification = false;
-    this.institutionIds = new ArrayList<>();
-    this.groupIds = new ArrayList<>();
     this.createdAt = Instant.now();
     this.updatedAt = Instant.now();
   }
@@ -66,32 +60,10 @@ public class StaffFixture {
     return this;
   }
 
-  public StaffFixture withInstitutionId(UUID institutionId) {
-    this.institutionIds = List.of(institutionId);
-    return this;
-  }
-
-  public StaffFixture withInstitutionIds(List<UUID> institutionIds) {
-    this.institutionIds = institutionIds;
-    return this;
-  }
-
-  public StaffFixture withGroupId(UUID groupId) {
-    this.groupIds = List.of(groupId);
-    return this;
-  }
-
-  public StaffFixture withGroupIds(List<UUID> groupIds) {
-    this.groupIds = groupIds;
-    return this;
-  }
-
   public Staff toModel() {
     return Staff.toDomain(
         user,
         user.getEmail(),
-        institutionIds,
-        groupIds,
         bio,
         hasUnseenNotification,
         coverPicture,

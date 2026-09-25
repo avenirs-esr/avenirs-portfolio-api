@@ -3,13 +3,11 @@ package fr.avenirsesr.portfolio.user.infrastructure.adapter.client;
 import fr.avenirsesr.portfolio.common.group.application.adapter.dto.GroupDTO;
 import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.AvenirsSecurityHeaders;
 import fr.avenirsesr.portfolio.user.domain.port.output.client.GroupClient;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -63,58 +61,4 @@ public class GroupClientImpl implements GroupClient {
       return Optional.empty();
     }
   }
-
-  @Override
-  public boolean hasAccess(List<UUID> affiliatedIds, List<UUID> targetIds) {
-    try {
-      log.debug(
-          "Checking access to groups {} for affiliations {} against back-office",
-          targetIds,
-          affiliatedIds);
-      return webClient
-          .post()
-          .uri(groupEndpoint + "/staff/access-check")
-          .header(AvenirsSecurityHeaders.API_KEY, apiKey)
-          .bodyValue(new GroupAccessCheckRequest(affiliatedIds, targetIds))
-          .retrieve()
-          .bodyToMono(Boolean.class)
-          .defaultIfEmpty(false)
-          .block();
-    } catch (Exception e) {
-      log.error("Failed to check group access at '{}'. Error: {}", groupEndpoint, e.getMessage());
-      log.debug("Full error details:", e);
-      return false;
-    }
-  }
-
-  @Override
-  public List<UUID> getStudentAccessibleIds(List<UUID> ids) {
-    if (ids == null || ids.isEmpty()) {
-      return List.of();
-    }
-    try {
-      log.debug("Resolving accessible group ids for affiliations {} from back-office", ids);
-      return webClient
-          .post()
-          .uri(groupEndpoint + "/student/accessible-ids")
-          .header(AvenirsSecurityHeaders.API_KEY, apiKey)
-          .bodyValue(new GroupAccessibleIdsRequest(ids))
-          .retrieve()
-          .bodyToMono(new ParameterizedTypeReference<List<UUID>>() {})
-          .defaultIfEmpty(ids)
-          .block();
-    } catch (Exception e) {
-      log.error(
-          "Failed to resolve accessible group ids at '{}'. Error: {}",
-          groupEndpoint,
-          e.getMessage());
-      log.debug("Full error details:", e);
-      return ids;
-    }
-  }
-
-  private record GroupAccessCheckRequest(
-      List<UUID> affiliatedGroupIds, List<UUID> targetGroupIds) {}
-
-  private record GroupAccessibleIdsRequest(List<UUID> affiliatedGroupIds) {}
 }
