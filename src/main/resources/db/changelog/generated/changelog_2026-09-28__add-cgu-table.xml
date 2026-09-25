@@ -1,0 +1,59 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+        http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet author="iamgreendev" id="create-cgu">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="cgu"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="cgu">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="cgu_pkey"/>
+            </column>
+            <column name="user_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="accepted_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint tableName="cgu"
+                             columnNames="user_id, version_id"
+                             constraintName="cgu_user_version_uk"/>
+
+        <createIndex tableName="cgu" indexName="idx_cgu_user_id">
+            <column name="user_id"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseTableName="cgu"
+                                 baseColumnNames="user_id"
+                                 constraintName="fk_cgu_user"
+                                 referencedTableName="user"
+                                 referencedColumnNames="id"/>
+
+        <rollback>
+            <dropTable tableName="cgu"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

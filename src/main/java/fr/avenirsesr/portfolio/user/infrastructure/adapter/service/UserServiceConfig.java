@@ -5,7 +5,9 @@ import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.user.domain.port.input.StaffService;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
+import fr.avenirsesr.portfolio.user.domain.port.output.client.CguClient;
 import fr.avenirsesr.portfolio.user.domain.port.output.client.ExternalUserClient;
+import fr.avenirsesr.portfolio.user.domain.port.output.repository.CguRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserPrincipalRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
 import fr.avenirsesr.portfolio.user.domain.service.UserServiceImpl;
@@ -18,10 +20,12 @@ import org.springframework.context.annotation.Configuration;
 public class UserServiceConfig {
 
   private final UserRepository userRepository;
+  private final CguRepository cguRepository;
   private final UserPrincipalRepository userPrincipalRepository;
   private final StaffService staffService;
   private final StudentService studentService;
   private final ExternalUserClient externalUserClient;
+  private final CguClient cguClient;
   private final LoggedInUserService loggedInUserService;
   private final NotificationRepository notificationRepository;
 
@@ -30,10 +34,12 @@ public class UserServiceConfig {
     return new TransactionalUserService(
         new UserServiceImpl(
             userRepository,
+            cguRepository,
             userPrincipalRepository,
             staffService,
             studentService,
             externalUserClient,
+            cguClient,
             loggedInUserService,
             notificationRepository));
   }

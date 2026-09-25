@@ -9,4 +9,5 @@ import java.util.Set;
 public record LoggedInUserDTO(
     String firstname,
     String lastname,
-    @ArraySchema(schema = @Schema(ref = "#/components/schemas/ERole")) Set<ERole> roles) {}
+    @ArraySchema(schema = @Schema(ref = "#/components/schemas/ERole")) Set<ERole> roles,
+    AcceptedCguDTO acceptedCgu) {}

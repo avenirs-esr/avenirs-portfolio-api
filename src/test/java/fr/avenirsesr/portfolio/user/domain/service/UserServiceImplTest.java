@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import fr.avenirsesr.portfolio.common.cgu.application.adapter.dto.CguDTO;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
@@ -15,15 +16,22 @@ import fr.avenirsesr.portfolio.common.user.domain.exceptions.ExternalUserNotFoun
 import fr.avenirsesr.portfolio.common.user.domain.model.enums.EUserStatus;
 import fr.avenirsesr.portfolio.notification.domain.port.output.repository.NotificationRepository;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.user.domain.data.CguAcceptanceData;
+import fr.avenirsesr.portfolio.user.domain.data.LoggedInUserData;
 import fr.avenirsesr.portfolio.user.domain.data.UserQuickLinksData;
+import fr.avenirsesr.portfolio.user.domain.exception.CguNotFoundException;
+import fr.avenirsesr.portfolio.user.domain.model.Cgu;
 import fr.avenirsesr.portfolio.user.domain.port.input.StaffService;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
+import fr.avenirsesr.portfolio.user.domain.port.output.client.CguClient;
 import fr.avenirsesr.portfolio.user.domain.port.output.client.ExternalUserClient;
+import fr.avenirsesr.portfolio.user.domain.port.output.repository.CguRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserPrincipalRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StaffFixture;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -37,10 +45,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class UserServiceImplTest {
 
   @Mock private UserRepository userRepository;
+  @Mock private CguRepository cguRepository;
   @Mock private UserPrincipalRepository userPrincipalRepository;
   @Mock private StaffService staffService;
   @Mock private StudentService studentService;
   @Mock private ExternalUserClient externalUserClient;
+  @Mock private CguClient cguClient;
   @Mock private LoggedInUserService loggedInUserService;
   @Mock private NotificationRepository notificationRepository;
 
@@ -54,10 +64,12 @@ class UserServiceImplTest {
     userService =
         new UserServiceImpl(
             userRepository,
+            cguRepository,
             userPrincipalRepository,
             staffService,
             studentService,
             externalUserClient,
+            cguClient,
             loggedInUserService,
             notificationRepository);
   }
@@ -592,5 +604,151 @@ class UserServiceImplTest {
         List.of(UUID.randomUUID()),
         List.of(UUID.randomUUID()),
         status);
+  }
+
+  @Nested
+  class AcceptCgu {
+
+    private CguDTO publishedCgu() {
+      return new CguDTO(
+          UUID.randomUUID(), 2, Instant.parse("2026-09-01T10:00:00Z"), "<html></html>");
+    }
+
+    private Cgu acceptanceOf(UUID versionId, Instant acceptedAt) {
+      return Cgu.toDomain(
+          UUID.randomUUID(), acceptedAt, acceptedAt, loggedUser, versionId, acceptedAt);
+    }
+
+    @Test
+    void shouldRecordTheAcceptanceOfTheCurrentTermsOfUse() {
+      BddLogger.given("a published terms of use version not accepted yet by the logged-in user");
+      CguDTO current = publishedCgu();
+      when(loggedInUserService.getLoggedInUser()).thenReturn(loggedUser);
+      when(cguClient.getLatest()).thenReturn(Optional.of(current));
+      when(cguRepository.findByUserAndVersion(loggedUser.getId(), current.id()))
+          .thenReturn(Optional.empty());
+      when(cguRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+      BddLogger.when("accepting the current version");
+      CguAcceptanceData result = userService.acceptCgu();
+
+      BddLogger.then("the acceptance is saved for that user and returned as the last version");
+      ArgumentCaptor<Cgu> captor = ArgumentCaptor.forClass(Cgu.class);
+      verify(cguRepository).save(captor.capture());
+      Cgu saved = captor.getValue();
+      assertThat(saved.getUser()).isEqualTo(loggedUser);
+      assertThat(saved.getVersionId()).isEqualTo(current.id());
+      assertThat(saved.getAcceptedAt()).isNotNull();
+      assertThat(result)
+          .isEqualTo(new CguAcceptanceData(current.id(), saved.getAcceptedAt(), true));
+    }
+
+    @Test
+    void shouldKeepTheFirstAcceptanceWhenTheVersionIsAlreadyAccepted() {
+      BddLogger.given("a terms of use version already accepted by the logged-in user");
+      CguDTO current = publishedCgu();
+      Instant firstAcceptance = Instant.parse("2026-09-02T08:00:00Z");
+      when(loggedInUserService.getLoggedInUser()).thenReturn(loggedUser);
+      when(cguClient.getLatest()).thenReturn(Optional.of(current));
+      when(cguRepository.findByUserAndVersion(loggedUser.getId(), current.id()))
+          .thenReturn(Optional.of(acceptanceOf(current.id(), firstAcceptance)));
+
+      BddLogger.when("accepting it again");
+      CguAcceptanceData result = userService.acceptCgu();
+
+      BddLogger.then("the first acceptance date is returned and no row is added");
+      assertThat(result).isEqualTo(new CguAcceptanceData(current.id(), firstAcceptance, true));
+      verify(cguRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldKeepTheHistoryWhenANewerVersionIsAccepted() {
+      BddLogger.given("a logged-in user who accepted an outdated version");
+      CguDTO current = publishedCgu();
+      when(loggedInUserService.getLoggedInUser()).thenReturn(loggedUser);
+      when(cguClient.getLatest()).thenReturn(Optional.of(current));
+      when(cguRepository.findByUserAndVersion(loggedUser.getId(), current.id()))
+          .thenReturn(Optional.empty());
+      when(cguRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+      BddLogger.when("accepting the newer version");
+      CguAcceptanceData result = userService.acceptCgu();
+
+      BddLogger.then("a row is added for it and no previous acceptance is removed");
+      assertThat(result.versionId()).isEqualTo(current.id());
+      verify(cguRepository).save(any());
+      verify(cguRepository, never()).removeFromDatabase(any());
+      verify(cguRepository, never()).removeAllFromDatabase(any());
+    }
+
+    @Test
+    void shouldFailWhenNoTermsOfUseIsPublished() {
+      BddLogger.given("no published terms of use version");
+      when(loggedInUserService.getLoggedInUser()).thenReturn(loggedUser);
+      when(cguClient.getLatest()).thenReturn(Optional.empty());
+
+      BddLogger.when("accepting the current version");
+      BddLogger.then("it should fail without touching the database");
+      assertThrows(CguNotFoundException.class, () -> userService.acceptCgu());
+
+      verifyNoInteractions(cguRepository);
+    }
+  }
+
+  @Nested
+  class GetMe {
+
+    private Cgu acceptanceOf(UUID versionId) {
+      Instant acceptedAt = Instant.parse("2026-09-03T09:00:00Z");
+      return Cgu.toDomain(
+          UUID.randomUUID(), acceptedAt, acceptedAt, loggedUser, versionId, acceptedAt);
+    }
+
+    @Test
+    void shouldFlagTheLastAcceptedCguAsTheLastVersion() {
+      BddLogger.given("a logged-in user who accepted the published version");
+      UUID published = UUID.randomUUID();
+      when(loggedInUserService.getLoggedInUser()).thenReturn(loggedUser);
+      when(cguRepository.findLastAcceptedByUser(loggedUser.getId()))
+          .thenReturn(Optional.of(acceptanceOf(published)));
+      when(cguClient.getLatestId()).thenReturn(Optional.of(published));
+
+      BddLogger.when("getting the logged-in user");
+      LoggedInUserData result = userService.getMe();
+
+      BddLogger.then("the acceptance is carried along the identity, flagged as the last version");
+      assertThat(result.firstname()).isEqualTo(loggedUser.getFirstName());
+      assertThat(result.acceptedCgu().versionId()).isEqualTo(published);
+      assertThat(result.acceptedCgu().isLastVersion()).isTrue();
+    }
+
+    @Test
+    void shouldFlagAnOutdatedAcceptance() {
+      BddLogger.given("a logged-in user whose last acceptance is not the published version");
+      when(loggedInUserService.getLoggedInUser()).thenReturn(loggedUser);
+      when(cguRepository.findLastAcceptedByUser(loggedUser.getId()))
+          .thenReturn(Optional.of(acceptanceOf(UUID.randomUUID())));
+      when(cguClient.getLatestId()).thenReturn(Optional.of(UUID.randomUUID()));
+
+      BddLogger.when("getting the logged-in user");
+      LoggedInUserData result = userService.getMe();
+
+      BddLogger.then("the acceptance is not flagged as the last version");
+      assertThat(result.acceptedCgu().isLastVersion()).isFalse();
+    }
+
+    @Test
+    void shouldExposeNoAcceptedCguWhenTheUserNeverAcceptedAnything() {
+      BddLogger.given("a logged-in user who never accepted a version");
+      when(loggedInUserService.getLoggedInUser()).thenReturn(loggedUser);
+      when(cguRepository.findLastAcceptedByUser(loggedUser.getId())).thenReturn(Optional.empty());
+
+      BddLogger.when("getting the logged-in user");
+      LoggedInUserData result = userService.getMe();
+
+      BddLogger.then("no accepted version is carried and the back-office is not called");
+      assertThat(result.acceptedCgu()).isNull();
+      verifyNoInteractions(cguClient);
+    }
   }
 }

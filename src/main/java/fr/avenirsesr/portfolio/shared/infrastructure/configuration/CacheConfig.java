@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.common.externalskill.application.adapter.dto.Exte
 import fr.avenirsesr.portfolio.common.group.application.adapter.dto.GroupDTO;
 import fr.avenirsesr.portfolio.common.institution.application.adapter.dto.InstitutionDTO;
 import java.time.Duration;
+import java.util.UUID;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -43,6 +44,9 @@ public class CacheConfig {
     Jackson2JsonRedisSerializer<GroupDTO> groupSerializer =
         new Jackson2JsonRedisSerializer<>(mapper, GroupDTO.class);
 
+    Jackson2JsonRedisSerializer<UUID> latestCguIdSerializer =
+        new Jackson2JsonRedisSerializer<>(mapper, UUID.class);
+
     RedisCacheConfiguration searchConfig =
         RedisCacheConfiguration.defaultCacheConfig()
             .serializeValuesWith(
@@ -72,6 +76,12 @@ public class CacheConfig {
             .serializeValuesWith(
                 RedisSerializationContext.SerializationPair.fromSerializer(groupSerializer));
 
+    RedisCacheConfiguration latestCguIdConfig =
+        RedisCacheConfiguration.defaultCacheConfig()
+            .entryTtl(Duration.ofMinutes(5))
+            .serializeValuesWith(
+                RedisSerializationContext.SerializationPair.fromSerializer(latestCguIdSerializer));
+
     return RedisCacheManager.builder(factory)
         .withCacheConfiguration("external-skill-search", searchConfig)
         .withCacheConfiguration("externalSkillDetails", detailsConfig)
@@ -79,6 +89,7 @@ public class CacheConfig {
         .withCacheConfiguration("institutionById", institutionConfig)
         .withCacheConfiguration("groupById", groupConfig)
         .withCacheConfiguration("programByGroupId", groupConfig)
+        .withCacheConfiguration("latestCguId", latestCguIdConfig)
         .build();
   }
 }
