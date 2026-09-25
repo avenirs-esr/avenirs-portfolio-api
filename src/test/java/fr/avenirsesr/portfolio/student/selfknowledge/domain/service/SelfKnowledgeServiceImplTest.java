@@ -70,6 +70,7 @@ class SelfKnowledgeServiceImplTest {
       @BeforeEach
       void setupAnd() {
         BddLogger.and("a logged in student");
+        BddLogger.and("a logged in student");
         when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
       }
 
