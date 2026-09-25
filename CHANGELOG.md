@@ -6,6 +6,30 @@ and [Conventional Commits](https://www.conventionalcommits.org/) standard.
 
 ---
 
+## [1.4.15] - 2026-09-28
+
+- **Terms of use acceptance**
+    - New endpoint `POST /me/cgu/accept`, without any parameter, which reads the highest published version from the
+      back office and records it as accepted by the logged-in user, dated from the moment of the call. It returns the
+      identifier of the accepted version, that date and `isLastVersion` (#2746). Accepting a version already accepted
+      returns the first acceptance untouched, so a double click does not move the date.
+    - It carries no authority of its own: any authenticated user has to be able to accept the terms of use, whatever
+      the permissions carried by their roles.
+    - `GET /me` gained `acceptedCgu`: the identifier of the last version the user accepted, its acceptance date and
+      `isLastVersion`, which saves the front from comparing it with the published version itself. It is `null` as long
+      as the user never accepted anything.
+- **Update process**
+    - New table `cgu`, one row per version accepted by a user, holding the user, the identifier of the version and the
+      acceptance date. The couple user and version carries a unique constraint, so accepting twice adds nothing, while
+      accepting a newer version adds a row and leaves the previous acceptances in place.
+    - New cache `latestCguId`, five minutes, holding the identifier of the published version. `GET /me` reads it to
+      answer `isLastVersion` and is called on every page of the front, so it must not reach the back office each time.
+      The acceptance itself does not read the cache. A version published in the meantime is therefore reflected in
+      `isLastVersion` within five minutes.
+    - New property `avenirs.back-office.cgu.latest.endpoint`, default
+      `${avenirs.back-office.base-url}/cgu/latest`. It must point at the back office of the environment, which serves
+      the published terms of use without authentication.
+
 ## [1.4.14] - 2026-09-28
 
 - **File content exposed to the other services**
