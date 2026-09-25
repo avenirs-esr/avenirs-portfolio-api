@@ -1,8 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BackOfficeCguClient.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.cgu.infrastructure.adapter.client</a> &gt; <span class="el_source">BackOfficeCguClient.java</span></div><h1>BackOfficeCguClient.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.cgu.infrastructure.adapter.client;
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CguClientImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.user.infrastructure.adapter.client</a> &gt; <span class="el_source">CguClientImpl.java</span></div><h1>CguClientImpl.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.user.infrastructure.adapter.client;
 
-import fr.avenirsesr.portfolio.cgu.domain.port.output.client.CguClient;
 import fr.avenirsesr.portfolio.common.cgu.application.adapter.dto.CguDTO;
 import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.AvenirsSecurityHeaders;
+import fr.avenirsesr.portfolio.user.domain.port.output.client.CguClient;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,7 +12,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 
 <span class="fc" id="L13">@Slf4j</span>
 @Component
-public class BackOfficeCguClient implements CguClient {
+public class CguClientImpl implements CguClient {
 
   private final WebClient webClient;
 
@@ -22,7 +22,7 @@ public class BackOfficeCguClient implements CguClient {
   @Value(&quot;${avenirs.back-office.cgu.latest.endpoint}&quot;)
   private String latestCguEndpoint;
 
-<span class="fc" id="L25">  public BackOfficeCguClient(WebClient webClient) {</span>
+<span class="fc" id="L25">  public CguClientImpl(WebClient webClient) {</span>
 <span class="fc" id="L26">    this.webClient = webClient;</span>
 <span class="fc" id="L27">  }</span>
 
