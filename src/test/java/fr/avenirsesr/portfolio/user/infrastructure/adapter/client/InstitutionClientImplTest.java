@@ -7,7 +7,6 @@ import fr.avenirsesr.portfolio.common.institution.domain.model.enums.EInstitutio
 import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.AvenirsSecurityHeaders;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import okhttp3.mockwebserver.MockResponse;
@@ -99,94 +98,5 @@ class InstitutionClientImplTest {
 
     BddLogger.then("no institution is returned and no exception escapes the client");
     assertThat(result).isEmpty();
-  }
-
-  @Test
-  void shouldReturnTrueWhenBackOfficeGrantsAccess() throws InterruptedException {
-    BddLogger.given("a back-office granting access to the targeted institution");
-    mockWebServer.enqueue(
-        new MockResponse().setBody("true").addHeader("Content-Type", "application/json"));
-
-    BddLogger.when("checking access to an institution");
-    boolean result = client.hasAccess(List.of(PARENT_ID), List.of(INSTITUTION_ID));
-
-    BddLogger.then("access is granted and the affiliated/target ids are sent");
-    assertThat(result).isTrue();
-
-    RecordedRequest request = mockWebServer.takeRequest();
-    assertThat(request.getPath()).isEqualTo("/back-office/institutions/staff/access-check");
-    assertThat(request.getMethod()).isEqualTo("POST");
-    assertThat(request.getHeader(AvenirsSecurityHeaders.API_KEY)).isEqualTo("test-key");
-    assertThat(request.getBody().readUtf8())
-        .contains(PARENT_ID.toString())
-        .contains(INSTITUTION_ID.toString());
-  }
-
-  @Test
-  void shouldReturnFalseWhenBackOfficeDeniesAccess() {
-    BddLogger.given("a back-office denying access to the targeted institution");
-    mockWebServer.enqueue(
-        new MockResponse().setBody("false").addHeader("Content-Type", "application/json"));
-
-    BddLogger.when("checking access to an institution");
-    boolean result = client.hasAccess(List.of(PARENT_ID), List.of(INSTITUTION_ID));
-
-    BddLogger.then("access is denied");
-    assertThat(result).isFalse();
-  }
-
-  @Test
-  void shouldReturnFalseWhenCheckingAccessAndBackOfficeFails() {
-    BddLogger.given("a back-office answering 500 to the access check");
-    mockWebServer.enqueue(new MockResponse().setResponseCode(500));
-
-    BddLogger.when("checking access to an institution");
-    boolean result = client.hasAccess(List.of(PARENT_ID), List.of(INSTITUTION_ID));
-
-    BddLogger.then("access is denied by default and no exception escapes the client");
-    assertThat(result).isFalse();
-  }
-
-  @Test
-  void shouldReturnAccessibleIdsResolvedByTheBackOffice() throws InterruptedException {
-    BddLogger.given("a back-office resolving an institution together with its ancestors");
-    mockWebServer.enqueue(
-        new MockResponse()
-            .setBody("[\"%s\",\"%s\"]".formatted(INSTITUTION_ID, PARENT_ID))
-            .addHeader("Content-Type", "application/json"));
-
-    BddLogger.when("resolving the institution with its ancestors");
-    List<UUID> result = client.getStudentAccessibleIds(List.of(INSTITUTION_ID));
-
-    BddLogger.then("the accessible ids returned by the back-office are forwarded");
-    assertThat(result).containsExactly(INSTITUTION_ID, PARENT_ID);
-
-    RecordedRequest request = mockWebServer.takeRequest();
-    assertThat(request.getPath()).isEqualTo("/back-office/institutions/student/accessible-ids");
-    assertThat(request.getMethod()).isEqualTo("POST");
-    assertThat(request.getHeader(AvenirsSecurityHeaders.API_KEY)).isEqualTo("test-key");
-    assertThat(request.getBody().readUtf8()).contains(INSTITUTION_ID.toString());
-  }
-
-  @Test
-  void shouldReturnTheOriginalIdsWhenBackOfficeFails() {
-    BddLogger.given("a back-office failing to resolve accessible institution ids");
-    mockWebServer.enqueue(new MockResponse().setResponseCode(500));
-
-    BddLogger.when("resolving the institution with its ancestors");
-    List<UUID> result = client.getStudentAccessibleIds(List.of(INSTITUTION_ID));
-
-    BddLogger.then("the requested institution is returned and no exception escapes the client");
-    assertThat(result).containsExactly(INSTITUTION_ID);
-  }
-
-  @Test
-  void shouldReturnEmptyListWhenNoIdsAreProvided() {
-    BddLogger.when("resolving ancestors for an empty list of institutions");
-    List<UUID> result = client.getStudentAccessibleIds(List.of());
-
-    BddLogger.then("an empty list is returned and the back-office is not called");
-    assertThat(result).isEmpty();
-    assertThat(mockWebServer.getRequestCount()).isZero();
   }
 }

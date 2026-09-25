@@ -27,16 +27,6 @@ public class StudentEntity extends AvenirsBaseEntity {
   @Column(nullable = false, name = "institution_email")
   private String institutionEmail;
 
-  @ElementCollection
-  @CollectionTable(name = "student_institutions", joinColumns = @JoinColumn(name = "student_id"))
-  @Column(name = "institution_id")
-  private List<UUID> institutionIds = new ArrayList<>();
-
-  @ElementCollection
-  @CollectionTable(name = "student_groups", joinColumns = @JoinColumn(name = "student_id"))
-  @Column(name = "group_id")
-  private List<UUID> groupIds = new ArrayList<>();
-
   @Column(length = BIO_LENGTH)
   private String bio;
 
@@ -62,8 +52,6 @@ public class StudentEntity extends AvenirsBaseEntity {
       UUID id,
       UserEntity user,
       String institutionEmail,
-      List<UUID> institutionIds,
-      List<UUID> groupIds,
       String bio,
       boolean hasUnseenNotification,
       List<ESelfKnowledgeCategory> selfKnowledgeCategories,
@@ -75,8 +63,6 @@ public class StudentEntity extends AvenirsBaseEntity {
     this.user = user;
     this.bio = bio;
     this.institutionEmail = institutionEmail;
-    this.institutionIds = institutionIds;
-    this.groupIds = groupIds;
     this.hasUnseenNotification = hasUnseenNotification;
     this.selfKnowledgeCategories = selfKnowledgeCategories;
     this.coverPicture = coverPicture;
@@ -88,8 +74,6 @@ public class StudentEntity extends AvenirsBaseEntity {
   public static StudentEntity of(
       UserEntity user,
       String institutionEmail,
-      List<UUID> institutionIds,
-      List<UUID> groupIds,
       String bio,
       boolean hasUnseenNotification,
       List<ESelfKnowledgeCategory> selfKnowledgeCategories,
@@ -101,8 +85,6 @@ public class StudentEntity extends AvenirsBaseEntity {
         user.getId(),
         user,
         institutionEmail,
-        institutionIds,
-        groupIds,
         bio,
         hasUnseenNotification,
         selfKnowledgeCategories,

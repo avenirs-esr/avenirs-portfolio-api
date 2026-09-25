@@ -13,8 +13,6 @@ public class StudentFixture {
   private UUID id;
   private String bio;
   private User user;
-  private List<UUID> institutionIds;
-  private List<UUID> groupIds;
   private File profilePicture;
   private File coverPicture;
   private boolean hasUnseenNotification;
@@ -27,8 +25,6 @@ public class StudentFixture {
     this.id = user.getId();
     this.bio = "this is my student bio";
     this.hasUnseenNotification = false;
-    this.institutionIds = new ArrayList<>();
-    this.groupIds = new ArrayList<>();
     this.selfKnowledgeCategories = new ArrayList<>();
     this.createdAt = Instant.now();
     this.updatedAt = Instant.now();
@@ -69,26 +65,6 @@ public class StudentFixture {
     return this;
   }
 
-  public StudentFixture withInstitutionId(UUID institutionId) {
-    this.institutionIds = List.of(institutionId);
-    return this;
-  }
-
-  public StudentFixture withInstitutionIds(List<UUID> institutionIds) {
-    this.institutionIds = institutionIds;
-    return this;
-  }
-
-  public StudentFixture withGroupId(UUID groupId) {
-    this.groupIds = List.of(groupId);
-    return this;
-  }
-
-  public StudentFixture withGroupIds(List<UUID> groupIds) {
-    this.groupIds = groupIds;
-    return this;
-  }
-
   public StudentFixture withSelfKnowledgeCategories(
       List<ESelfKnowledgeCategory> selfKnowledgeCategories) {
     this.selfKnowledgeCategories = selfKnowledgeCategories;
@@ -99,8 +75,6 @@ public class StudentFixture {
     return Student.toDomain(
         user,
         user.getEmail(),
-        institutionIds,
-        groupIds,
         bio,
         hasUnseenNotification,
         selfKnowledgeCategories,

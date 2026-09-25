@@ -16,8 +16,7 @@ import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.Activi
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDuplicationRequest;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
-import fr.avenirsesr.portfolio.user.domain.port.input.StaffService;
-import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.client.AccessClientStub;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
@@ -62,8 +61,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
 
   @Autowired private WebTestClient webTestClient;
   @Autowired private ObjectMapper objectMapper;
-  @Autowired private StaffService staffService;
-  @Autowired private StudentService studentService;
+  @Autowired private AccessClientStub accessClientStub;
 
   @Value("${user.student.payload}")
   private String studentPayload;
@@ -355,7 +353,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       @BeforeEach
       void setupWhen() {
         BddLogger.when("performing a GET on " + BASE_PATH + " with targeted activities");
-        staffService.updateAffiliations(
+        accessClientStub.setStaffAffiliations(
             STAFF_ID, List.of(TARGET_INSTITUTION_ID), List.of(TARGET_GROUP_ID));
         TestTransaction.flagForCommit();
         TestTransaction.end();
@@ -535,10 +533,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       }
 
       private void setStudentAffiliations(List<UUID> institutionIds, List<UUID> groupIds) {
-        TestTransaction.start();
-        studentService.updateAffiliations(STUDENT_ID, institutionIds, groupIds);
-        TestTransaction.flagForCommit();
-        TestTransaction.end();
+        accessClientStub.setStudentScope(STUDENT_ID, institutionIds, groupIds);
       }
 
       private ActivityDraftUpdateRequest targetingRequest(
@@ -1208,7 +1203,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       @BeforeEach
       void setupWhen() {
         BddLogger.when("performing a PATCH on " + DRAFT_UPDATE_PATH + " with targeting fields");
-        staffService.updateAffiliations(
+        accessClientStub.setStaffAffiliations(
             STAFF_ID,
             List.of(ALLOWED_INSTITUTION_ID_1, ALLOWED_INSTITUTION_ID_2),
             List.of(ALLOWED_GROUP_ID_1, ALLOWED_GROUP_ID_2));

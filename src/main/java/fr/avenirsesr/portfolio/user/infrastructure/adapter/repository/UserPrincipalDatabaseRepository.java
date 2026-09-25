@@ -26,6 +26,11 @@ public class UserPrincipalDatabaseRepository implements UserPrincipalRepository 
   }
 
   @Override
+  public Optional<String> findEppnByUserId(UUID userId) {
+    return jpaRepository.findByUserId(userId).map(UserPrincipalEntity::getEppn);
+  }
+
+  @Override
   public void saveOrUpdate(User user, String eppn) {
     var existing = jpaRepository.findByUserId(user.getId());
 
