@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.user.infrastructure.adapter.service;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.file.domain.model.File;
+import fr.avenirsesr.portfolio.user.domain.data.CguAcceptanceData;
 import fr.avenirsesr.portfolio.user.domain.data.LoggedInUserData;
 import fr.avenirsesr.portfolio.user.domain.data.UserQuickLinksData;
 import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
@@ -23,6 +24,12 @@ public class TransactionalUserService implements UserService {
   @Override
   public LoggedInUserData getMe() {
     return delegate.getMe();
+  }
+
+  @Override
+  @Transactional
+  public CguAcceptanceData acceptCgu() {
+    return delegate.acceptCgu();
   }
 
   @Override

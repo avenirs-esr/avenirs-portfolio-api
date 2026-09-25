@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.user.domain.service;
 
+import fr.avenirsesr.portfolio.common.cgu.application.adapter.dto.CguDTO;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
@@ -11,14 +12,18 @@ import fr.avenirsesr.portfolio.common.user.domain.model.enums.EUserStatus;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.notification.domain.port.output.repository.NotificationRepository;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.user.domain.data.CguAcceptanceData;
 import fr.avenirsesr.portfolio.user.domain.data.LoggedInUserData;
 import fr.avenirsesr.portfolio.user.domain.data.UserQuickLinksData;
+import fr.avenirsesr.portfolio.user.domain.exception.CguNotFoundException;
 import fr.avenirsesr.portfolio.user.domain.port.input.StaffService;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
+import fr.avenirsesr.portfolio.user.domain.port.output.client.CguClient;
 import fr.avenirsesr.portfolio.user.domain.port.output.client.ExternalUserClient;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserPrincipalRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -32,6 +37,7 @@ public class UserServiceImpl implements UserService {
   private final StaffService staffService;
   private final StudentService studentService;
   private final ExternalUserClient externalUserClient;
+  private final CguClient cguClient;
   private final LoggedInUserService loggedInUserService;
   private final NotificationRepository notificationRepository;
 
@@ -49,7 +55,28 @@ public class UserServiceImpl implements UserService {
   @Override
   public LoggedInUserData getMe() {
     var user = loggedInUserService.getLoggedInUser();
-    return new LoggedInUserData(user.getFirstName(), user.getLastName());
+    return new LoggedInUserData(user.getFirstName(), user.getLastName(), acceptedCgu(user));
+  }
+
+  @Override
+  public CguAcceptanceData acceptCgu() {
+    var user = loggedInUserService.getLoggedInUser();
+    CguDTO current = cguClient.getLatest().orElseThrow(CguNotFoundException::new);
+
+    if (!current.id().equals(user.getAcceptedCguId())) {
+      user.setAcceptedCguId(current.id());
+      user.setAcceptedCguAt(Instant.now());
+      userRepository.save(user);
+      log.info("Terms of use version {} accepted by user [{}]", current.version(), user.getId());
+    }
+
+    return acceptedCgu(user);
+  }
+
+  private static CguAcceptanceData acceptedCgu(User user) {
+    return user.getAcceptedCguId() == null
+        ? null
+        : new CguAcceptanceData(user.getAcceptedCguId(), user.getAcceptedCguAt());
   }
 
   @Override

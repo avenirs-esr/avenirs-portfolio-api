@@ -64,6 +64,7 @@ public class UserFixture {
   }
 
   public User toModel() {
-    return User.toDomain(id, firstName, lastName, email, notificationEnabled, createdAt, updatedAt);
+    return User.toDomain(
+        id, firstName, lastName, email, notificationEnabled, null, null, createdAt, updatedAt);
   }
 }

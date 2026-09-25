@@ -6,6 +6,27 @@ and [Conventional Commits](https://www.conventionalcommits.org/) standard.
 
 ---
 
+## [1.4.15] - 2026-09-25
+
+- **Terms of use acceptance**
+    - New endpoint `POST /me/cgu/accept`, without any parameter, which reads the highest published version from the
+      back office and records it as accepted by the logged-in user, dated from the moment of the call. It returns the
+      identifier of the accepted version and that date (#2746). Accepting a version already accepted returns the first
+      acceptance untouched, so a double click does not move the date.
+    - It carries no authority of its own: any authenticated user has to be able to accept the terms of use, whatever
+      the permissions carried by their roles.
+    - `GET /me` gained `acceptedCgu`, holding the identifier of the last version accepted by the user and its
+      acceptance date. It is `null` as long as the user never accepted anything.
+- **Update process**
+    - Two new nullable columns on `user`, `accepted_cgu_id` and `accepted_cgu_at`. Existing rows stay null, which reads
+      as an account that has not accepted anything yet. Only the last acceptance of a user is kept: accepting a newer
+      version overwrites the previous one, no history is stored.
+    - `User` of `avenirs-portfolio-common` carries the two values, and `User.toDomain` takes them right after
+      `notificationEnabled`. Only this service reads and writes them.
+    - New property `avenirs.back-office.cgu.latest.endpoint`, default
+      `${avenirs.back-office.base-url}/cgu/latest`. It must point at the back office of the environment, which serves
+      the published terms of use without authentication.
+
 ## [1.4.14] - 2026-09-25
 
 - **File content exposed to the other services**

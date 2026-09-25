@@ -3,14 +3,21 @@ package fr.avenirsesr.portfolio.user.application.adapter.controller;
 import static fr.avenirsesr.portfolio.common.testutils.infrastructure.adapter.util.TestResourceUtils.loadJson;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+import fr.avenirsesr.portfolio.common.cgu.application.adapter.dto.CguDTO;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.application.adapter.Utils;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
+import fr.avenirsesr.portfolio.user.application.adapter.dto.AcceptedCguDTO;
+import fr.avenirsesr.portfolio.user.application.adapter.dto.LoggedInUserDTO;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.client.CguClientStub;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -25,6 +32,8 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 public class UserControllerIT extends ContainerConfigurationTest {
 
   @Autowired private WebTestClient webTestClient;
+
+  @Autowired private CguClientStub cguClientStub;
 
   @Value("${user.student.payload}")
   private String studentPayload;
@@ -479,5 +488,125 @@ public class UserControllerIT extends ContainerConfigurationTest {
         .exchange()
         .expectStatus()
         .isForbidden();
+  }
+
+  @Nested
+  class AcceptCgu {
+
+    private static final String PATH = "/me/cgu/accept";
+
+    @AfterEach
+    void restoreThePublishedCgu() {
+      cguClientStub.reset();
+    }
+
+    private CguDTO publish(int version) {
+      CguDTO published =
+          new CguDTO(UUID.randomUUID(), version, Instant.parse("2026-09-01T10:00:00Z"), "<html/>");
+      cguClientStub.setLatest(published);
+      return published;
+    }
+
+    private AcceptedCguDTO recordedAcceptance() {
+      LoggedInUserDTO me =
+          webTestClient
+              .get()
+              .uri("/me")
+              .header("X-Signed-Context", studentPayload)
+              .header("X-Context-Signature", studentSignature)
+              .exchange()
+              .expectStatus()
+              .isOk()
+              .expectBody(LoggedInUserDTO.class)
+              .returnResult()
+              .getResponseBody();
+
+      return me == null ? null : me.acceptedCgu();
+    }
+
+    private AcceptedCguDTO acceptAsStudent() {
+      return webTestClient
+          .post()
+          .uri(PATH)
+          .header("X-Signed-Context", studentPayload)
+          .header("X-Context-Signature", studentSignature)
+          .exchange()
+          .expectStatus()
+          .isOk()
+          .expectBody(AcceptedCguDTO.class)
+          .returnResult()
+          .getResponseBody();
+    }
+
+    @Test
+    void shouldAcceptTheCurrentCguAndExposeItOnMe() {
+      BddLogger.given("the " + PATH + " endpoint and a published terms of use version");
+      CguDTO published = publish(11);
+
+      BddLogger.when("performing a POST as a student");
+      BddLogger.then("the published version is recorded as accepted");
+      AcceptedCguDTO accepted = acceptAsStudent();
+      assertThat(accepted).isNotNull();
+      assertThat(accepted.id()).isEqualTo(published.id());
+      assertThat(accepted.acceptedAt()).isNotNull();
+
+      BddLogger.and("/me carries it back");
+      webTestClient
+          .get()
+          .uri("/me")
+          .header("X-Signed-Context", studentPayload)
+          .header("X-Context-Signature", studentSignature)
+          .exchange()
+          .expectStatus()
+          .isOk()
+          .expectBody()
+          .jsonPath("$.acceptedCgu.id")
+          .isEqualTo(published.id().toString())
+          .jsonPath("$.acceptedCgu.acceptedAt")
+          .exists();
+    }
+
+    @Test
+    void shouldKeepTheFirstAcceptanceOfTheSameVersion() {
+      BddLogger.given("the " + PATH + " endpoint and a version already accepted by the student");
+      publish(12);
+      acceptAsStudent();
+      AcceptedCguDTO recorded = recordedAcceptance();
+
+      BddLogger.when("performing a POST again");
+      BddLogger.then("the recorded acceptance is returned unchanged");
+      assertThat(recorded).isNotNull();
+      assertThat(acceptAsStudent()).isEqualTo(recorded);
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenNoCguIsPublished() {
+      BddLogger.given("the " + PATH + " endpoint and no published terms of use version");
+      cguClientStub.setLatest(null);
+
+      BddLogger.when("performing a POST as a student");
+      BddLogger.then("it should return a 404");
+      webTestClient
+          .post()
+          .uri(PATH)
+          .header("X-Signed-Context", studentPayload)
+          .header("X-Context-Signature", studentSignature)
+          .exchange()
+          .expectStatus()
+          .isNotFound()
+          .expectBody()
+          .jsonPath("$.code")
+          .isEqualTo("CGU_NOT_FOUND");
+    }
+
+    @Test
+    void shouldRejectAnAcceptanceWithoutTheSignedContext() {
+      BddLogger.given("the " + PATH + " endpoint");
+      publish(13);
+
+      BddLogger.when("performing a POST without the signed context headers");
+      BddLogger.then("it should return a 401");
+      webTestClient.post().uri(PATH).exchange().expectStatus().isUnauthorized();
+    }
   }
 }
