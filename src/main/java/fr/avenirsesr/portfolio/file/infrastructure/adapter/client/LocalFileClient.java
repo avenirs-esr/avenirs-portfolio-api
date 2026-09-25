@@ -37,6 +37,12 @@ public class LocalFileClient implements FileClient {
   }
 
   @Override
+  public byte[] fetchContent(UUID fileId) {
+    log.debug("Fetching content of file {}", fileId);
+    return fileResourceService.fetchContent(fileId).content();
+  }
+
+  @Override
   public void delete(UUID fileId) {
     log.debug("Deleting file {}", fileId);
     fileResourceService.delete(fileId);

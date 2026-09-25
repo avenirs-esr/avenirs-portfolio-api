@@ -16,6 +16,8 @@ public class UserMapper implements Mapper<UserEntity, User> {
             user.getLastName(),
             user.getEmail(),
             user.isNotificationEnabled(),
+            user.getAcceptedCguId(),
+            user.getAcceptedCguAt(),
             user.getCreatedAt(),
             user.getUpdatedAt())
         : null;
@@ -30,6 +32,8 @@ public class UserMapper implements Mapper<UserEntity, User> {
             userEntity.getLastName(),
             userEntity.getEmail(),
             userEntity.isNotificationEnabled(),
+            userEntity.getAcceptedCguId(),
+            userEntity.getAcceptedCguAt(),
             userEntity.getCreatedAt(),
             userEntity.getUpdatedAt())
         : null;
