@@ -6,6 +6,14 @@ and [Conventional Commits](https://www.conventionalcommits.org/) standard.
 
 ---
 
+## [1.4.14] - 2026-09-25
+
+- **File content exposed to the other services**
+    - The `FileClient` contract of `avenirs-portfolio-common` gained `fetchContent`, which returns the raw bytes of a
+      file. The back office reads the published terms of use through it (#2691). In process it delegates to
+      `FileResourceService`; over http it is served by the already public `GET /storage/{fileId}`, so no new endpoint
+      and no new authority here.
+
 ## [1.4.13] - 2026-09-24
 
 - **File upload exposed to the other services**
