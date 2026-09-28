@@ -19,6 +19,6 @@ public record ActivityDraftUpdateRequest(
     Integer feedbackAllowedIterations,
     Boolean enableReflection,
     List<String> links,
-    boolean enableCompletionPeriod,
+    Boolean enableCompletionPeriod,
     List<UUID> targetInstitutionIds,
     List<UUID> targetGroupIds) {}

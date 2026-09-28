@@ -410,6 +410,32 @@ class ActivityServiceImplTest {
           }
 
           @Test
+          void thenItShouldLeaveDatesUnchangedWhenEnableCompletionPeriodIsNull() {
+            BddLogger.then(
+                "dates should be left unchanged when enableCompletionPeriod is not provided");
+
+            activityService.updateActivityDraft(
+                draftId,
+                "Nouveau titre",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
+
+            verify(draft, never()).setStartDate(any());
+            verify(draft, never()).setEndDate(any());
+          }
+
+          @Test
           void thenItShouldThrowActivityDatesExceptionWhenOnlyOneDateIsProvided() {
             BddLogger.then("providing only one of the two dates should be rejected");
 

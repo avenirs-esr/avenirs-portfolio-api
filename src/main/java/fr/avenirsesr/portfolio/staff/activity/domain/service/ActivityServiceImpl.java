@@ -478,7 +478,7 @@ public class ActivityServiceImpl implements ActivityService {
       Integer feedbackAllowedIterations,
       Boolean enableReflection,
       List<String> links,
-      boolean enableCompletionPeriod,
+      Boolean enableCompletionPeriod,
       List<UUID> targetInstitutionIds,
       List<UUID> targetGroupIds) {
     var loggedInStaff = loggedInUserService.getLoggedInStaff();
@@ -501,7 +501,8 @@ public class ActivityServiceImpl implements ActivityService {
     if (startDate != null) {
       validateDateOrder(startDate, endDate);
     }
-    if ((startDate == null) != (endDate == null) || (enableCompletionPeriod && startDate == null)) {
+    if ((startDate == null) != (endDate == null)
+        || (Boolean.TRUE.equals(enableCompletionPeriod) && startDate == null)) {
       throw new ActivityDatesException();
     }
 
@@ -514,10 +515,10 @@ public class ActivityServiceImpl implements ActivityService {
     if (description != null) draft.setDescription(description);
     if (recommendedCompletionContexts != null)
       draft.setRecommendedCompletionContexts(recommendedCompletionContexts);
-    if (enableCompletionPeriod) {
+    if (Boolean.TRUE.equals(enableCompletionPeriod)) {
       draft.setStartDate(startDate);
       draft.setEndDate(endDate);
-    } else {
+    } else if (Boolean.FALSE.equals(enableCompletionPeriod)) {
       draft.setStartDate(null);
       draft.setEndDate(null);
     }
