@@ -4,6 +4,7 @@ import static fr.avenirsesr.portfolio.common.validation.domain.constraints.Field
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.activity.infrastructure.fixture.ActivityFixture;
@@ -32,6 +33,7 @@ import fr.avenirsesr.portfolio.student.activity.domain.exception.FeedbackSeenExc
 import fr.avenirsesr.portfolio.student.activity.domain.exception.FeedbackSubmittedException;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.Feedback;
+import fr.avenirsesr.portfolio.student.activity.domain.model.FeedbackAssociations;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.DeclaredActivityRepository;
@@ -39,6 +41,8 @@ import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.Fe
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
+import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperience;
+import fr.avenirsesr.portfolio.student.experience.domain.port.input.DeclaredExperienceService;
 import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
@@ -74,6 +78,7 @@ class FeedbackServiceImplTest {
   @Mock private DeclaredActivityRepository declaredActivityRepository;
   @Mock private ActivityService activityService;
   @Mock private DeclaredActivityService declaredActivityService;
+  @Mock private DeclaredExperienceService declaredExperienceService;
   @Mock private AssociationService associationService;
   @Mock private TraceService traceService;
   @Mock private DeclaredSkillProgressService declaredSkillProgressService;
@@ -128,9 +133,8 @@ class FeedbackServiceImplTest {
       BddLogger.then("A feedback with empty associations and null reflexion is saved");
       verify(feedbackRepository).save(feedbackCaptor.capture());
       Feedback captured = feedbackCaptor.getValue();
-      assertThat(captured.getAssociatedTraces()).isEmpty();
-      assertThat(captured.getAssociatedDeclaredSkills()).isEmpty();
       assertThat(captured.getReflexion()).isEmpty();
+      assertThat(captured.getAssociations()).isEqualTo(FeedbackAssociations.empty());
     }
 
     @Test
@@ -158,11 +162,11 @@ class FeedbackServiceImplTest {
     @Test
     void should_save_feedback_with_reflexion_and_associations_from_declared_activity() {
       BddLogger.given(
-          "A logged-in student, his declared activity with a reflexion, 1 trace association and 1"
-              + " skill association");
+          "A logged-in student, his declared activity with a reflexion and associations");
       UUID declaredActivityId = UUID.randomUUID();
       UUID traceId = UUID.randomUUID();
       UUID skillId = UUID.randomUUID();
+      UUID experienceId = UUID.randomUUID();
       String reflexion = "Ma réflexion sur cette activité.";
 
       Activity activity = ActivityFixture.create().toModel();
@@ -172,8 +176,11 @@ class FeedbackServiceImplTest {
 
       var traceAssociation = mock(Association.class);
       var skillAssociation = mock(Association.class);
+      var experienceAssociation = mock(Association.class);
+
       Trace trace = mock(Trace.class);
       DeclaredSkillProgress skill = mock(DeclaredSkillProgress.class);
+      DeclaredExperience experience = mock(DeclaredExperience.class);
 
       when(declaredActivityService.fetchActivityAndCheckLoggedInStudentAuthorization(
               declaredActivityId))
@@ -185,13 +192,18 @@ class FeedbackServiceImplTest {
       when(skillAssociation.getAssociationType())
           .thenReturn(EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL);
       when(skillAssociation.getId2()).thenReturn(skillId);
+      when(experienceAssociation.getAssociationType())
+          .thenReturn(EAssociationType.DECLARED_ACTIVITY_DECLARED_EXPERIENCE);
+      when(experienceAssociation.getId2()).thenReturn(experienceId);
 
       when(associationService.getAllOf(
               any(UUID.class), any(Class.class), ArgumentMatchers.<List<EAssociationType>>any()))
-          .thenReturn(List.of(traceAssociation, skillAssociation));
+          .thenReturn(List.of(traceAssociation, skillAssociation, experienceAssociation));
       when(traceService.findAllTracesById(List.of(traceId))).thenReturn(List.of(trace));
       when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of(skillId)))
           .thenReturn(List.of(skill));
+      when(declaredExperienceService.findAllByIds(List.of(experienceId)))
+          .thenReturn(List.of(experience));
       when(feedbackRepository.findAllByDeclaredActivityId(declaredActivityId))
           .thenReturn(List.of());
       when(feedbackRepository.save(any(Feedback.class))).thenAnswer(i -> i.getArguments()[0]);
@@ -199,13 +211,12 @@ class FeedbackServiceImplTest {
       BddLogger.when("createFeedback is called");
       service.createFeedback(declaredActivityId);
 
-      BddLogger.then(
-          "A feedback is saved with the activity's reflexion, 1 trace and 1 declared skill");
+      BddLogger.then("A feedback is saved with the activity's reflexion and associations");
       verify(feedbackRepository).save(feedbackCaptor.capture());
       Feedback captured = feedbackCaptor.getValue();
       assertThat(captured.getReflexion().orElse(null)).isEqualTo(reflexion);
-      assertThat(captured.getAssociatedTraces()).containsExactly(trace);
-      assertThat(captured.getAssociatedDeclaredSkills()).containsExactly(skill);
+      assertThat(captured.getAssociations())
+          .isEqualTo(new FeedbackAssociations(List.of(trace), List.of(skill), List.of(experience)));
     }
 
     @Test
@@ -289,8 +300,7 @@ class FeedbackServiceImplTest {
               null,
               EFeedbackStatus.IN_PROCESS,
               1,
-              List.of(),
-              List.of(),
+              FeedbackAssociations.empty(),
               List.of());
 
       when(declaredActivityService.fetchActivityAndCheckLoggedInStudentAuthorization(
@@ -329,8 +339,7 @@ class FeedbackServiceImplTest {
               "Retour du formateur",
               EFeedbackStatus.SUBMITTED,
               1,
-              List.of(),
-              List.of(),
+              FeedbackAssociations.empty(),
               List.of());
 
       Feedback inProcessFeedback =
@@ -343,8 +352,7 @@ class FeedbackServiceImplTest {
               null,
               EFeedbackStatus.IN_PROCESS,
               2,
-              List.of(),
-              List.of(),
+              FeedbackAssociations.empty(),
               List.of());
 
       when(declaredActivityService.fetchActivityAndCheckLoggedInStudentAuthorization(
@@ -370,6 +378,7 @@ class FeedbackServiceImplTest {
       UUID declaredActivityId = UUID.randomUUID();
       UUID traceId = UUID.randomUUID();
       UUID skillId = UUID.randomUUID();
+      UUID experienceId = UUID.randomUUID();
       String updatedReflexion = "Nouvelle réflexion mise à jour.";
 
       Activity activity = ActivityFixture.create().toModel();
@@ -388,14 +397,16 @@ class FeedbackServiceImplTest {
               null,
               EFeedbackStatus.NEW,
               1,
-              List.of(),
-              List.of(),
+              FeedbackAssociations.empty(),
               List.of());
 
       var traceAssociation = mock(Association.class);
       var skillAssociation = mock(Association.class);
+      var experienceAssociation = mock(Association.class);
+
       Trace trace = mock(Trace.class);
       DeclaredSkillProgress skill = mock(DeclaredSkillProgress.class);
+      DeclaredExperience experience = mock(DeclaredExperience.class);
 
       when(declaredActivityService.fetchActivityAndCheckLoggedInStudentAuthorization(
               declaredActivityId))
@@ -409,27 +420,32 @@ class FeedbackServiceImplTest {
       when(skillAssociation.getAssociationType())
           .thenReturn(EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL);
       when(skillAssociation.getId2()).thenReturn(skillId);
+      when(experienceAssociation.getAssociationType())
+          .thenReturn(EAssociationType.DECLARED_ACTIVITY_DECLARED_EXPERIENCE);
+      when(experienceAssociation.getId2()).thenReturn(experienceId);
       when(associationService.getAllOf(
               any(UUID.class), any(Class.class), ArgumentMatchers.<List<EAssociationType>>any()))
-          .thenReturn(List.of(traceAssociation, skillAssociation));
+          .thenReturn(List.of(traceAssociation, skillAssociation, experienceAssociation));
       when(traceService.findAllTracesById(List.of(traceId))).thenReturn(List.of(trace));
       when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of(skillId)))
           .thenReturn(List.of(skill));
+      when(declaredExperienceService.findAllByIds(List.of(experienceId)))
+          .thenReturn(List.of(experience));
       when(feedbackRepository.save(any(Feedback.class))).thenAnswer(i -> i.getArguments()[0]);
 
       BddLogger.when("createFeedback is called");
       service.createFeedback(declaredActivityId);
 
       BddLogger.then(
-          "The existing feedback is updated and saved — same ID, updated reflexion, traces and"
-              + " skills, status stays NEW");
+          "The existing feedback is updated and saved — same ID, updated reflexion and"
+              + " associations, status stays NEW");
       verify(feedbackRepository).save(feedbackCaptor.capture());
       Feedback saved = feedbackCaptor.getValue();
       assertThat(saved.getId()).isEqualTo(existingFeedbackId);
       assertThat(saved.getReflexion()).contains(updatedReflexion);
-      assertThat(saved.getAssociatedTraces()).containsExactly(trace);
-      assertThat(saved.getAssociatedDeclaredSkills()).containsExactly(skill);
       assertThat(saved.getStatus()).isEqualTo(EFeedbackStatus.NEW);
+      assertThat(saved.getAssociations())
+          .isEqualTo(new FeedbackAssociations(List.of(trace), List.of(skill), List.of(experience)));
     }
 
     @Test
@@ -452,8 +468,7 @@ class FeedbackServiceImplTest {
               "Retour du formateur",
               EFeedbackStatus.SUBMITTED,
               1,
-              List.of(),
-              List.of(),
+              FeedbackAssociations.empty(),
               List.of());
 
       when(declaredActivityService.fetchActivityAndCheckLoggedInStudentAuthorization(
@@ -499,8 +514,7 @@ class FeedbackServiceImplTest {
               "Retour du formateur",
               EFeedbackStatus.SEEN,
               1,
-              List.of(),
-              List.of(),
+              FeedbackAssociations.empty(),
               List.of());
 
       when(declaredActivityService.fetchActivityAndCheckLoggedInStudentAuthorization(
@@ -547,8 +561,7 @@ class FeedbackServiceImplTest {
               "Retour 1",
               EFeedbackStatus.SUBMITTED,
               1,
-              List.of(),
-              List.of(),
+              FeedbackAssociations.empty(),
               List.of());
       Feedback feedback2 =
           Feedback.toDomain(
@@ -560,8 +573,7 @@ class FeedbackServiceImplTest {
               "Retour 2",
               EFeedbackStatus.SUBMITTED,
               1,
-              List.of(),
-              List.of(),
+              FeedbackAssociations.empty(),
               List.of());
 
       when(declaredActivityService.fetchActivityAndCheckLoggedInStudentAuthorization(
@@ -601,8 +613,7 @@ class FeedbackServiceImplTest {
               "Retour 1",
               EFeedbackStatus.SUBMITTED,
               1,
-              List.of(),
-              List.of(),
+              FeedbackAssociations.empty(),
               List.of());
       Feedback seenFeedback =
           Feedback.toDomain(
@@ -614,8 +625,7 @@ class FeedbackServiceImplTest {
               "Retour 2",
               EFeedbackStatus.SEEN,
               1,
-              List.of(),
-              List.of(),
+              FeedbackAssociations.empty(),
               List.of());
 
       when(declaredActivityService.fetchActivityAndCheckLoggedInStudentAuthorization(
@@ -655,8 +665,7 @@ class FeedbackServiceImplTest {
               feedbackText,
               EFeedbackStatus.SUBMITTED,
               1,
-              List.of(),
-              List.of(),
+              FeedbackAssociations.empty(),
               List.of());
 
       when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
@@ -690,8 +699,7 @@ class FeedbackServiceImplTest {
               "Retour non encore soumis",
               EFeedbackStatus.NEW,
               1,
-              List.of(),
-              List.of(),
+              FeedbackAssociations.empty(),
               List.of());
 
       when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
@@ -779,8 +787,7 @@ class FeedbackServiceImplTest {
               null,
               EFeedbackStatus.NEW,
               1,
-              List.of(),
-              List.of(),
+              FeedbackAssociations.empty(),
               List.of());
 
       when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
@@ -811,8 +818,7 @@ class FeedbackServiceImplTest {
               feedbackText,
               EFeedbackStatus.IN_PROCESS,
               1,
-              List.of(),
-              List.of(),
+              FeedbackAssociations.empty(),
               List.of());
 
       when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
@@ -844,8 +850,7 @@ class FeedbackServiceImplTest {
               null,
               EFeedbackStatus.NEW,
               1,
-              List.of(),
-              List.of(),
+              FeedbackAssociations.empty(),
               List.of());
 
       when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
@@ -876,8 +881,7 @@ class FeedbackServiceImplTest {
               null,
               EFeedbackStatus.IN_PROCESS,
               1,
-              List.of(),
-              List.of(),
+              FeedbackAssociations.empty(),
               List.of());
 
       when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
@@ -907,8 +911,7 @@ class FeedbackServiceImplTest {
               null,
               EFeedbackStatus.IN_PROCESS,
               1,
-              List.of(),
-              List.of(),
+              FeedbackAssociations.empty(),
               List.of());
 
       when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
@@ -955,8 +958,7 @@ class FeedbackServiceImplTest {
               "Retour du formateur",
               EFeedbackStatus.IN_PROCESS,
               1,
-              List.of(),
-              List.of(),
+              FeedbackAssociations.empty(),
               List.of());
 
       BddLogger.when("getStudentFeedbackDetails is called with the student's own user");
@@ -984,8 +986,7 @@ class FeedbackServiceImplTest {
               feedbackText,
               EFeedbackStatus.SUBMITTED,
               1,
-              List.of(),
-              List.of(),
+              FeedbackAssociations.empty(),
               List.of());
 
       BddLogger.when("getStudentFeedbackDetails is called with the student's own user");
@@ -1016,8 +1017,7 @@ class FeedbackServiceImplTest {
               feedbackText,
               EFeedbackStatus.SEEN,
               1,
-              List.of(),
-              List.of(),
+              FeedbackAssociations.empty(),
               List.of());
 
       BddLogger.when("getStudentFeedbackDetails is called again with the student's own user");
@@ -1044,8 +1044,7 @@ class FeedbackServiceImplTest {
               null,
               EFeedbackStatus.NEW,
               1,
-              List.of(),
-              List.of(),
+              FeedbackAssociations.empty(),
               List.of());
       User differentUser = UserFixture.create().toModel();
 
@@ -1078,8 +1077,7 @@ class FeedbackServiceImplTest {
               null,
               EFeedbackStatus.IN_PROCESS,
               1,
-              List.of(),
-              List.of(),
+              FeedbackAssociations.empty(),
               List.of());
       String feedbackText = "Excellent travail, bravo !";
       User authorUser = UserFixture.create().withId(activity.getAuthor().getId()).toModel();
@@ -1131,8 +1129,7 @@ class FeedbackServiceImplTest {
               null,
               EFeedbackStatus.IN_PROCESS,
               1,
-              List.of(),
-              List.of(),
+              FeedbackAssociations.empty(),
               List.of());
       User differentUser = UserFixture.create().toModel();
 
@@ -1166,8 +1163,7 @@ class FeedbackServiceImplTest {
               null,
               EFeedbackStatus.IN_PROCESS,
               1,
-              List.of(),
-              List.of(),
+              FeedbackAssociations.empty(),
               List.of());
       String tooLongFeedback = "a".repeat(RICH_DESCRIPTION_LENGTH + 1);
       User authorUser = UserFixture.create().withId(activity.getAuthor().getId()).toModel();
@@ -1202,8 +1198,7 @@ class FeedbackServiceImplTest {
               "Bon travail !",
               EFeedbackStatus.SEEN,
               1,
-              List.of(),
-              List.of(),
+              FeedbackAssociations.empty(),
               List.of());
       User authorUser = UserFixture.create().withId(activity.getAuthor().getId()).toModel();
 
@@ -1243,8 +1238,7 @@ class FeedbackServiceImplTest {
               "Bon travail !",
               EFeedbackStatus.IN_PROCESS,
               1,
-              List.of(),
-              List.of(),
+              FeedbackAssociations.empty(),
               List.of());
 
       when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
@@ -1295,8 +1289,7 @@ class FeedbackServiceImplTest {
               "Bon travail !",
               EFeedbackStatus.IN_PROCESS,
               1,
-              List.of(),
-              List.of(),
+              FeedbackAssociations.empty(),
               List.of());
 
       when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
@@ -1330,8 +1323,7 @@ class FeedbackServiceImplTest {
               "Bon travail !",
               EFeedbackStatus.IN_PROCESS,
               1,
-              List.of(),
-              List.of(),
+              FeedbackAssociations.empty(),
               List.of());
 
       when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
@@ -1365,8 +1357,7 @@ class FeedbackServiceImplTest {
               null,
               EFeedbackStatus.NEW,
               1,
-              List.of(),
-              List.of(),
+              FeedbackAssociations.empty(),
               List.of());
 
       when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
@@ -1401,8 +1392,7 @@ class FeedbackServiceImplTest {
               "Bon travail !",
               EFeedbackStatus.SUBMITTED,
               1,
-              List.of(),
-              List.of(),
+              FeedbackAssociations.empty(),
               List.of());
 
       when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
@@ -1437,8 +1427,7 @@ class FeedbackServiceImplTest {
               "Bon travail !",
               EFeedbackStatus.SEEN,
               1,
-              List.of(),
-              List.of(),
+              FeedbackAssociations.empty(),
               List.of());
 
       when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
@@ -1677,8 +1666,7 @@ class FeedbackServiceImplTest {
               "Retour du formateur",
               EFeedbackStatus.SUBMITTED,
               1,
-              List.of(),
-              List.of(),
+              FeedbackAssociations.empty(),
               List.of());
       Feedback seenFeedback =
           Feedback.toDomain(
@@ -1690,8 +1678,7 @@ class FeedbackServiceImplTest {
               "Retour déjà vu",
               EFeedbackStatus.SEEN,
               2,
-              List.of(),
-              List.of(),
+              FeedbackAssociations.empty(),
               List.of());
 
       when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
@@ -2378,6 +2365,15 @@ class FeedbackServiceImplTest {
 
   private Feedback feedbackOf(
       UUID feedbackId, Activity activity, EFeedbackStatus status, List<File> attachments) {
+    return feedbackOf(feedbackId, activity, status, FeedbackAssociations.empty(), attachments);
+  }
+
+  private Feedback feedbackOf(
+      UUID feedbackId,
+      Activity activity,
+      EFeedbackStatus status,
+      FeedbackAssociations associations,
+      List<File> attachments) {
     return Feedback.toDomain(
         feedbackId,
         Instant.now(),
@@ -2387,8 +2383,7 @@ class FeedbackServiceImplTest {
         "Mon retour",
         status,
         1,
-        List.of(),
-        List.of(),
+        associations,
         attachments);
   }
 

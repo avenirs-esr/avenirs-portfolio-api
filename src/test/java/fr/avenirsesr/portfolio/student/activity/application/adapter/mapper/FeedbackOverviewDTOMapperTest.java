@@ -11,6 +11,7 @@ import fr.avenirsesr.portfolio.file.infrastructure.fixture.FileFixture;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.FeedbackOverviewDTO;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.Feedback;
+import fr.avenirsesr.portfolio.student.activity.domain.model.FeedbackAssociations;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
@@ -56,8 +57,7 @@ class FeedbackOverviewDTOMapperTest {
             null,
             EFeedbackStatus.NEW,
             1,
-            List.of(),
-            List.of(),
+            FeedbackAssociations.empty(),
             List.of());
 
     BddLogger.when("mapping to FeedbackOverviewDTO");
@@ -102,8 +102,7 @@ class FeedbackOverviewDTOMapperTest {
             "Voici mon retour détaillé",
             EFeedbackStatus.SUBMITTED,
             1,
-            List.of(),
-            List.of(),
+            FeedbackAssociations.empty(),
             List.of());
 
     BddLogger.when("mapping to FeedbackOverviewDTO");
@@ -138,8 +137,7 @@ class FeedbackOverviewDTOMapperTest {
             null,
             EFeedbackStatus.NEW,
             1,
-            List.of(),
-            List.of(),
+            FeedbackAssociations.empty(),
             List.of());
 
     BddLogger.when("mapping to FeedbackOverviewDTO");
@@ -176,8 +174,7 @@ class FeedbackOverviewDTOMapperTest {
             "Voici mon retour détaillé",
             EFeedbackStatus.SUBMITTED,
             1,
-            List.of(),
-            List.of(),
+            FeedbackAssociations.empty(),
             List.of(attachment));
 
     BddLogger.when("mapping to FeedbackOverviewDTO");

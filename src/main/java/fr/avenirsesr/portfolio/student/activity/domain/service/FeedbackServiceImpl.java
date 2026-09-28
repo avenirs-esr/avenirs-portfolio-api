@@ -18,6 +18,7 @@ import fr.avenirsesr.portfolio.notification.domain.model.notification.AskForFeed
 import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
+import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackAssociationsData;
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackDashboardData;
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackData;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.DeclaredActivityNotFoundException;
@@ -29,6 +30,7 @@ import fr.avenirsesr.portfolio.student.activity.domain.exception.FeedbackSeenExc
 import fr.avenirsesr.portfolio.student.activity.domain.exception.FeedbackSubmittedException;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.Feedback;
+import fr.avenirsesr.portfolio.student.activity.domain.model.FeedbackAssociations;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.FeedbackService;
@@ -37,6 +39,8 @@ import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.Fe
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.association.domain.utils.AssociationUtils;
+import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperience;
+import fr.avenirsesr.portfolio.student.experience.domain.port.input.DeclaredExperienceService;
 import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillProgressDetails;
 import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
@@ -56,10 +60,51 @@ public class FeedbackServiceImpl implements FeedbackService {
   private final AssociationService associationService;
   private final TraceService traceService;
   private final DeclaredSkillProgressService declaredSkillProgressService;
+  private final DeclaredExperienceService declaredExperienceService;
   private final LoggedInUserService loggedInUserService;
   private final NotificationService notificationService;
   private final ActivityService activityService;
   private final FileResourceService fileResourceService;
+
+  private FeedbackAssociations getAssociations(UUID declaredActivityId) {
+    var allAssociations =
+        associationService.getAllOf(
+            declaredActivityId,
+            DeclaredActivity.class,
+            List.of(
+                EAssociationType.DECLARED_ACTIVITY_TRACE,
+                EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL,
+                EAssociationType.DECLARED_ACTIVITY_DECLARED_EXPERIENCE));
+
+    var traceIds =
+        AssociationUtils.getIdsOf(
+            allAssociations, EAssociationType.DECLARED_ACTIVITY_TRACE, Trace.class);
+    var declaredSkillsIds =
+        AssociationUtils.getIdsOf(
+            allAssociations,
+            EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL,
+            DeclaredSkillProgress.class);
+    var declaredExperiencesIds =
+        AssociationUtils.getIdsOf(
+            allAssociations,
+            EAssociationType.DECLARED_ACTIVITY_DECLARED_EXPERIENCE,
+            DeclaredExperience.class);
+
+    List<Trace> traces = traceService.findAllTracesById(traceIds);
+    List<DeclaredSkillProgress> declaredSkills =
+        declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(declaredSkillsIds);
+    List<DeclaredExperience> declaredExperiences =
+        declaredExperienceService.findAllByIds(declaredExperiencesIds);
+
+    return new FeedbackAssociations(traces, declaredSkills, declaredExperiences);
+  }
+
+  private FeedbackAssociationsData getFeedbackAssociationsData(FeedbackAssociations associations) {
+    return new FeedbackAssociationsData(
+        associations.traces(),
+        enrichDeclaredSkills(associations.declaredSkills()),
+        associations.declaredExperiences());
+  }
 
   @Override
   public Feedback createFeedback(UUID declaredActivityId) {
@@ -74,28 +119,6 @@ public class FeedbackServiceImpl implements FeedbackService {
     validateOptionalEnrichedTextMaxLength(
         "reflexion", declaredActivity.getReflection(), RICH_DESCRIPTION_LENGTH);
 
-    var allAssociations =
-        associationService.getAllOf(
-            declaredActivityId,
-            DeclaredActivity.class,
-            List.of(
-                EAssociationType.DECLARED_ACTIVITY_TRACE,
-                EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL));
-
-    var traceIds =
-        AssociationUtils.getIdsOf(
-            allAssociations, EAssociationType.DECLARED_ACTIVITY_TRACE, Trace.class);
-
-    var declaredSkillsIds =
-        AssociationUtils.getIdsOf(
-            allAssociations,
-            EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL,
-            DeclaredSkillProgress.class);
-
-    List<Trace> traces = traceService.findAllTracesById(traceIds);
-    List<DeclaredSkillProgress> declaredSkills =
-        declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(declaredSkillsIds);
-
     List<Feedback> existingFeedbacks =
         feedbackRepository.findAllByDeclaredActivityId(declaredActivityId);
 
@@ -104,9 +127,11 @@ public class FeedbackServiceImpl implements FeedbackService {
       switch (lastFeedback.getStatus()) {
         case IN_PROCESS -> throw new FeedbackInProcessException();
         case NEW -> {
+          FeedbackAssociations associations = getAssociations(declaredActivityId);
+
           lastFeedback.setReflexion(declaredActivity.getReflection());
-          lastFeedback.setAssociatedTraces(traces);
-          lastFeedback.setAssociatedDeclaredSkills(declaredSkills);
+          lastFeedback.setAssociations(associations);
+
           return feedbackRepository.save(lastFeedback);
         }
         case SUBMITTED, SEEN -> {
@@ -118,12 +143,14 @@ public class FeedbackServiceImpl implements FeedbackService {
       }
     }
 
+    FeedbackAssociations associations = getAssociations(declaredActivityId);
     int iteration = existingFeedbacks.size() + 1;
+
     Feedback feedback =
         Feedback.create(
-            declaredActivity, declaredActivity.getReflection(), traces, declaredSkills, iteration);
-    var savedFeedback = feedbackRepository.save(feedback);
+            declaredActivity, declaredActivity.getReflection(), associations, iteration);
 
+    var savedFeedback = feedbackRepository.save(feedback);
     var author = savedFeedback.getDeclaredActivity().getActivity().getAuthor().getUser();
     notificationService.notify(new AskForFeedbackNotification(author, savedFeedback));
 
@@ -161,8 +188,7 @@ public class FeedbackServiceImpl implements FeedbackService {
         feedback.getFeedback().orElse(null),
         feedback.getStatus(),
         feedback.getIteration(),
-        feedback.getAssociatedTraces(),
-        enrichDeclaredSkills(feedback.getAssociatedDeclaredSkills()),
+        getFeedbackAssociationsData(feedback.getAssociations()),
         feedback.getAttachments());
   }
 
@@ -189,8 +215,7 @@ public class FeedbackServiceImpl implements FeedbackService {
         feedbackText,
         feedback.getStatus(),
         feedback.getIteration(),
-        feedback.getAssociatedTraces(),
-        enrichDeclaredSkills(feedback.getAssociatedDeclaredSkills()),
+        getFeedbackAssociationsData(feedback.getAssociations()),
         attachments);
   }
 

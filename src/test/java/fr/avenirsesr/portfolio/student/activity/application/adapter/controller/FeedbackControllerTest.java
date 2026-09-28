@@ -17,6 +17,7 @@ import fr.avenirsesr.portfolio.file.application.adapter.mapper.FileDtoMapper;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.file.domain.model.FileDownload;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityContentDTO;
+import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.FeedbackAssociationsDTO;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.FeedbackDashboardDTO;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.FeedbackDetailsDTO;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.FeedbackOverviewDTO;
@@ -89,8 +90,7 @@ class FeedbackControllerTest {
               "Ma réflexion",
               null,
               EFeedbackStatus.NEW,
-              List.of(),
-              List.of(),
+              new FeedbackAssociationsDTO(List.of(), List.of(), List.of()),
               List.of(),
               Instant.now(),
               Instant.now());
@@ -161,8 +161,7 @@ class FeedbackControllerTest {
               null,
               null,
               EFeedbackStatus.NEW,
-              List.of(),
-              List.of(),
+              new FeedbackAssociationsDTO(List.of(), List.of(), List.of()),
               List.of(),
               Instant.now(),
               Instant.now());

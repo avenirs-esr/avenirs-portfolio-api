@@ -3,8 +3,6 @@ package fr.avenirsesr.portfolio.student.activity.domain.data;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
-import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillProgressDetails;
-import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -24,6 +22,5 @@ public record FeedbackData(
     String feedback,
     EFeedbackStatus status,
     int iteration,
-    List<Trace> associatedTraces,
-    List<DeclaredSkillProgressDetails> associatedDeclaredSkills,
+    FeedbackAssociationsData associations,
     List<File> attachments) {}

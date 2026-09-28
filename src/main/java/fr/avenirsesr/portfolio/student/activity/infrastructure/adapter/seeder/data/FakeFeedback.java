@@ -5,7 +5,6 @@ import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.model.Ass
 import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.model.DeclaredActivityEntity;
 import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.model.FeedbackEntity;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 import net.datafaker.Faker;
 
@@ -25,7 +24,7 @@ public class FakeFeedback {
             null,
             EFeedbackStatus.NEW,
             1,
-            new AssociationsJson(List.of(), List.of()),
+            AssociationsJson.empty(),
             new ArrayList<>());
     entity.setId(UUID.fromString(faker.internet().uuid()));
     return new FakeFeedback(entity);
