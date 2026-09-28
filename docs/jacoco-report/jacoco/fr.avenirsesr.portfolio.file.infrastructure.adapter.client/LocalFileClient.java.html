@@ -37,9 +37,15 @@ public class LocalFileClient implements FileClient {
   }
 
   @Override
+  public byte[] fetchContent(UUID fileId) {
+<span class="nc" id="L41">    log.debug(&quot;Fetching content of file {}&quot;, fileId);</span>
+<span class="nc" id="L42">    return fileResourceService.fetchContent(fileId).content();</span>
+  }
+
+  @Override
   public void delete(UUID fileId) {
-<span class="fc" id="L41">    log.debug(&quot;Deleting file {}&quot;, fileId);</span>
-<span class="fc" id="L42">    fileResourceService.delete(fileId);</span>
-<span class="fc" id="L43">  }</span>
+<span class="fc" id="L47">    log.debug(&quot;Deleting file {}&quot;, fileId);</span>
+<span class="fc" id="L48">    fileResourceService.delete(fileId);</span>
+<span class="fc" id="L49">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
