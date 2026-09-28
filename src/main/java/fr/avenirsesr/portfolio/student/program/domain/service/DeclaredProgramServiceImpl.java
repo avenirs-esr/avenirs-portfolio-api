@@ -207,8 +207,12 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
 
   @Override
   public PagedResult<DeclaredProgram> search(String keyword, PageCriteria pageCriteria) {
-    return declaredProgramRepository.findAllByStudent(
-        loggedInUserService.getLoggedInStudent(), pageCriteria, keyword);
+    return declaredProgramRepository.searchByStudent(
+        loggedInUserService.getLoggedInStudent(),
+        pageCriteria,
+        keyword,
+        new SortCriteria(ESortField.DATE, ESortOrder.DESC),
+        new SortCriteria(ESortField.NAME, ESortOrder.ASC));
   }
 
   private EProgramStatus getProgramStatus(LocalDate startDate, LocalDate endDate) {

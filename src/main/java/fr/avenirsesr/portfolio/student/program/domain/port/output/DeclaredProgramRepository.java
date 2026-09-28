@@ -14,6 +14,6 @@ public interface DeclaredProgramRepository extends GenericRepositoryPort<Declare
       Boolean isValorized,
       SortCriteria... sortCriterias);
 
-  PagedResult<DeclaredProgram> findAllByStudent(
-      Student student, PageCriteria pageCriteria, String keyword);
+  PagedResult<DeclaredProgram> searchByStudent(
+      Student student, PageCriteria pageCriteria, String keyword, SortCriteria... sortCriterias);
 }

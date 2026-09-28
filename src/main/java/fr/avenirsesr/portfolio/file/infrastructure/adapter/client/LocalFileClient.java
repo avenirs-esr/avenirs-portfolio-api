@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.common.file.application.adapter.client.FileClient
 import fr.avenirsesr.portfolio.common.file.application.adapter.dto.FileDTO;
 import fr.avenirsesr.portfolio.common.file.application.adapter.request.FileUploadRequest;
 import fr.avenirsesr.portfolio.file.application.adapter.mapper.FileDtoMapper;
+import fr.avenirsesr.portfolio.file.domain.model.FileResource;
 import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,13 @@ public class LocalFileClient implements FileClient {
   public FileDTO get(UUID fileId) {
     log.debug("Fetching file {}", fileId);
     return fileDtoMapper.fromDomain(fileResourceService.get(fileId));
+  }
+
+  @Override
+  public byte[] fetchContent(UUID fileId) {
+    log.debug("Fetching file content {}", fileId);
+    FileResource file = fileResourceService.fetchContent(fileId);
+    return file.content();
   }
 
   @Override
