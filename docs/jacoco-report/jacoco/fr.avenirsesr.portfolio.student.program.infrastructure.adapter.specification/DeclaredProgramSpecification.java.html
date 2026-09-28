@@ -17,7 +17,7 @@ import org.springframework.data.jpa.domain.Specification;
 
 <span class="fc bfc" id="L18" title="All 2 branches covered.">    return switch (sortCriteria.field()) {</span>
 <span class="fc" id="L19">      case NAME -&gt; Sort.by(direction, &quot;title&quot;);</span>
-<span class="fc" id="L20">      case DATE -&gt; Sort.by(direction, &quot;endDate&quot;);</span>
+<span class="fc" id="L20">      case DATE -&gt; Sort.by(direction, &quot;endDate&quot;, &quot;startDate&quot;);</span>
     };
   }
 

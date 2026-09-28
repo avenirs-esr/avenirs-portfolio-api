@@ -207,16 +207,20 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
 
   @Override
   public PagedResult&lt;DeclaredProgram&gt; search(String keyword, PageCriteria pageCriteria) {
-<span class="fc" id="L210">    return declaredProgramRepository.findAllByStudent(</span>
-<span class="fc" id="L211">        loggedInUserService.getLoggedInStudent(), pageCriteria, keyword);</span>
+<span class="fc" id="L210">    return declaredProgramRepository.searchByStudent(</span>
+<span class="fc" id="L211">        loggedInUserService.getLoggedInStudent(),</span>
+        pageCriteria,
+        keyword,
+        new SortCriteria(ESortField.DATE, ESortOrder.DESC),
+        new SortCriteria(ESortField.NAME, ESortOrder.ASC));
   }
 
   private EProgramStatus getProgramStatus(LocalDate startDate, LocalDate endDate) {
-<span class="fc" id="L215">    EPeriodStatus periodStatus = EPeriodStatus.of(startDate, endDate);</span>
-<span class="fc bfc" id="L216" title="All 3 branches covered.">    return switch (periodStatus) {</span>
-<span class="fc" id="L217">      case EPeriodStatus.BEFORE -&gt; EProgramStatus.NOT_STARTED;</span>
-<span class="fc" id="L218">      case EPeriodStatus.DURING -&gt; EProgramStatus.IN_PROGRESS;</span>
-<span class="fc" id="L219">      case EPeriodStatus.AFTER -&gt; EProgramStatus.COMPLETED;</span>
+<span class="fc" id="L219">    EPeriodStatus periodStatus = EPeriodStatus.of(startDate, endDate);</span>
+<span class="fc bfc" id="L220" title="All 3 branches covered.">    return switch (periodStatus) {</span>
+<span class="fc" id="L221">      case EPeriodStatus.BEFORE -&gt; EProgramStatus.NOT_STARTED;</span>
+<span class="fc" id="L222">      case EPeriodStatus.DURING -&gt; EProgramStatus.IN_PROGRESS;</span>
+<span class="fc" id="L223">      case EPeriodStatus.AFTER -&gt; EProgramStatus.COMPLETED;</span>
     };
   }
 }

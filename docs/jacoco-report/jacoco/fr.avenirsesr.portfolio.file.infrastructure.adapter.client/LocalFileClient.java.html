@@ -4,13 +4,14 @@ import fr.avenirsesr.portfolio.common.file.application.adapter.client.FileClient
 import fr.avenirsesr.portfolio.common.file.application.adapter.dto.FileDTO;
 import fr.avenirsesr.portfolio.common.file.application.adapter.request.FileUploadRequest;
 import fr.avenirsesr.portfolio.file.application.adapter.mapper.FileDtoMapper;
+import fr.avenirsesr.portfolio.file.domain.model.FileResource;
 import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-<span class="fc" id="L13">@Slf4j</span>
+<span class="fc" id="L14">@Slf4j</span>
 @Component
 @RequiredArgsConstructor
 public class LocalFileClient implements FileClient {
@@ -19,27 +20,34 @@ public class LocalFileClient implements FileClient {
 
   @Override
   public FileDTO upload(FileUploadRequest request) {
-<span class="fc" id="L22">    log.debug(&quot;Uploading file {} of type {}&quot;, request.fileName(), request.mimeType());</span>
-<span class="fc" id="L23">    var file =</span>
-<span class="fc" id="L24">        fileResourceService.upload(</span>
-<span class="fc" id="L25">            request.fileName(),</span>
-<span class="fc" id="L26">            request.mimeType(),</span>
-<span class="fc" id="L27">            request.content().length,</span>
-<span class="fc" id="L28">            request.content(),</span>
-<span class="fc" id="L29">            request.isRestricted());</span>
-<span class="fc" id="L30">    return fileDtoMapper.fromDomain(file);</span>
+<span class="fc" id="L23">    log.debug(&quot;Uploading file {} of type {}&quot;, request.fileName(), request.mimeType());</span>
+<span class="fc" id="L24">    var file =</span>
+<span class="fc" id="L25">        fileResourceService.upload(</span>
+<span class="fc" id="L26">            request.fileName(),</span>
+<span class="fc" id="L27">            request.mimeType(),</span>
+<span class="fc" id="L28">            request.content().length,</span>
+<span class="fc" id="L29">            request.content(),</span>
+<span class="fc" id="L30">            request.isRestricted());</span>
+<span class="fc" id="L31">    return fileDtoMapper.fromDomain(file);</span>
   }
 
   @Override
   public FileDTO get(UUID fileId) {
-<span class="fc" id="L35">    log.debug(&quot;Fetching file {}&quot;, fileId);</span>
-<span class="fc" id="L36">    return fileDtoMapper.fromDomain(fileResourceService.get(fileId));</span>
+<span class="fc" id="L36">    log.debug(&quot;Fetching file {}&quot;, fileId);</span>
+<span class="fc" id="L37">    return fileDtoMapper.fromDomain(fileResourceService.get(fileId));</span>
+  }
+
+  @Override
+  public byte[] fetchContent(UUID fileId) {
+<span class="nc" id="L42">    log.debug(&quot;Fetching file content {}&quot;, fileId);</span>
+<span class="nc" id="L43">    FileResource file = fileResourceService.fetchContent(fileId);</span>
+<span class="nc" id="L44">    return file.content();</span>
   }
 
   @Override
   public void delete(UUID fileId) {
-<span class="fc" id="L41">    log.debug(&quot;Deleting file {}&quot;, fileId);</span>
-<span class="fc" id="L42">    fileResourceService.delete(fileId);</span>
-<span class="fc" id="L43">  }</span>
+<span class="fc" id="L49">    log.debug(&quot;Deleting file {}&quot;, fileId);</span>
+<span class="fc" id="L50">    fileResourceService.delete(fileId);</span>
+<span class="fc" id="L51">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
