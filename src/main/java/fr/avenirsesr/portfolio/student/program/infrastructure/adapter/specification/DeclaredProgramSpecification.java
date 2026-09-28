@@ -17,7 +17,7 @@ public class DeclaredProgramSpecification {
 
     return switch (sortCriteria.field()) {
       case NAME -> Sort.by(direction, "title");
-      case DATE -> Sort.by(direction, "endDate");
+      case DATE -> Sort.by(direction, "endDate", "startDate");
     };
   }
 

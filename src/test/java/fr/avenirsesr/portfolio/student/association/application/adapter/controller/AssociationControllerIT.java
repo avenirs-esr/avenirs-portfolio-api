@@ -3154,12 +3154,9 @@ class AssociationControllerIT extends ContainerConfigurationTest {
   }
 
   private UUID createDeclaredProgramAs(
-      String title, String organization, String payload, String signature) throws Exception {
-    var body =
-        Map.of(
-            "title", title,
-            "organization", organization,
-            "startDate", "2024-01-01");
+      String title, String organization, String startDate, String payload, String signature)
+      throws Exception {
+    var body = Map.of("title", title, "organization", organization, "startDate", startDate);
 
     var response =
         webTestClient
@@ -3180,7 +3177,13 @@ class AssociationControllerIT extends ContainerConfigurationTest {
   }
 
   private UUID createDeclaredProgram(String title, String organization) throws Exception {
-    return createDeclaredProgramAs(title, organization, studentPayload, studentSignature);
+    return createDeclaredProgram(title, organization, "2024-01-01");
+  }
+
+  private UUID createDeclaredProgram(String title, String organization, String startDate)
+      throws Exception {
+    return createDeclaredProgramAs(
+        title, organization, startDate, studentPayload, studentSignature);
   }
 
   private JsonNode searchForAssociation(
@@ -3208,6 +3211,12 @@ class AssociationControllerIT extends ContainerConfigurationTest {
             .getResponseBody();
 
     return objectMapper.readTree(body).get("data");
+  }
+
+  private List<String> titlesOf(JsonNode searchResults) {
+    return StreamSupport.stream(searchResults.spliterator(), false)
+        .map(searchResult -> searchResult.get("title").asText())
+        .toList();
   }
 
   private JsonNode getAssociations(String contextType, UUID elementId) throws Exception {
@@ -3269,7 +3278,11 @@ class AssociationControllerIT extends ContainerConfigurationTest {
     BddLogger.given("a declared program owned by another student");
     UUID declaredProgramId =
         createDeclaredProgramAs(
-            "Licence de droit", "Université", otherStudentPayload, otherStudentSignature);
+            "Licence de droit",
+            "Université",
+            "2024-01-01",
+            otherStudentPayload,
+            otherStudentSignature);
 
     when("getting its associations");
 
@@ -3641,6 +3654,26 @@ class AssociationControllerIT extends ContainerConfigurationTest {
     assertThat(found.get("title").asText()).isEqualTo("Formation agroécologie");
     assertThat(found.get("category").asText()).isEqualTo("INRAE");
     assertThat(found.get("disabled").asBoolean()).isFalse();
+  }
+
+  @Test
+  void shouldReturnTheDeclaredProgramsToAssociateOrderedByMostRecentThenByName() throws Exception {
+    BddLogger.given(
+        "three declared programs: two recent ones starting on the same date and an older one");
+    String keyword = "Tri des formations associables";
+    UUID traceId = createTrace("Trace pour le tri des formations");
+    createDeclaredProgram(keyword + " - C récente", "Université", "2024-09-01");
+    createDeclaredProgram(keyword + " - A ancienne", "Université", "2020-09-01");
+    createDeclaredProgram(keyword + " - B récente", "Université", "2024-09-01");
+
+    when("searching the declared programs to associate with the trace");
+
+    var results = searchForAssociation("TRACE", traceId, "DECLARED_PROGRAM", keyword);
+
+    BddLogger.then("it should return the recent ones first, ordered by name, then the older one");
+    assertThat(titlesOf(results))
+        .containsExactly(
+            keyword + " - B récente", keyword + " - C récente", keyword + " - A ancienne");
   }
 
   @Test

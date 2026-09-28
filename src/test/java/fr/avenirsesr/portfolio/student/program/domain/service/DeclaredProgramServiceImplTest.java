@@ -1021,17 +1021,22 @@ class DeclaredProgramServiceImplTest {
     class WhenSearchIsCalled {
 
       @Test
-      void thenItShouldReturnTheMatchingDeclaredProgramsOfTheLoggedInStudent() {
+      void thenItShouldReturnTheMatchingDeclaredProgramsSortedByMostRecentThenByName() {
         BddLogger.when("search(String keyword, PageCriteria pageCriteria) is called");
-        BddLogger.then("it should return the matching declared programs of the logged in student");
+        BddLogger.then(
+            "it should return the matching declared programs of the logged in student, from the"
+                + " most recent to the oldest then by name");
 
         var loggedStudent = mock(Student.class);
         var pageCriteria = new PageCriteria(0, 10);
+        var sortByDate = new SortCriteria(ESortField.DATE, ESortOrder.DESC);
+        var sortByName = new SortCriteria(ESortField.NAME, ESortOrder.ASC);
         var expected =
             new PagedResult<>(List.of(mock(DeclaredProgram.class)), new PageInfo(0, 10, 1));
 
         when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedStudent);
-        when(declaredProgramRepository.findAllByStudent(loggedStudent, pageCriteria, "stage"))
+        when(declaredProgramRepository.searchByStudent(
+                loggedStudent, pageCriteria, "stage", sortByDate, sortByName))
             .thenReturn(expected);
 
         assertEquals(expected, declaredProgramService.search("stage", pageCriteria));
