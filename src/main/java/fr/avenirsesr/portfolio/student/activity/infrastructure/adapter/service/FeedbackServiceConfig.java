@@ -10,6 +10,7 @@ import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.De
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.FeedbackRepository;
 import fr.avenirsesr.portfolio.student.activity.domain.service.FeedbackServiceImpl;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
+import fr.avenirsesr.portfolio.student.experience.domain.port.input.DeclaredExperienceService;
 import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ public class FeedbackServiceConfig {
   private final DeclaredActivityRepository declaredActivityRepository;
   private final AssociationService associationService;
   private final DeclaredSkillProgressService declaredSkillProgressService;
+  private final DeclaredExperienceService declaredExperienceService;
   private final LoggedInUserService loggedInUserService;
   private final NotificationService notificationService;
   private final ActivityService activityService;
@@ -41,6 +43,7 @@ public class FeedbackServiceConfig {
         associationService,
         traceService,
         declaredSkillProgressService,
+        declaredExperienceService,
         loggedInUserService,
         notificationService,
         activityService,

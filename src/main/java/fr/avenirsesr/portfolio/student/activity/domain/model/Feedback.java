@@ -3,8 +3,6 @@ package fr.avenirsesr.portfolio.student.activity.domain.model;
 import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
-import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
-import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,8 +25,7 @@ public class Feedback extends AvenirsBaseModel {
 
   private EFeedbackStatus status;
   private int iteration;
-  private List<Trace> associatedTraces;
-  private List<DeclaredSkillProgress> associatedDeclaredSkills;
+  private FeedbackAssociations associations;
   private List<File> attachments;
 
   private Feedback(
@@ -40,16 +37,14 @@ public class Feedback extends AvenirsBaseModel {
       String feedback,
       EFeedbackStatus status,
       int iteration,
-      List<Trace> associatedTraces,
-      List<DeclaredSkillProgress> associatedDeclaredSkills,
+      FeedbackAssociations associations,
       List<File> attachments) {
     super(id, createdAt, updatedAt);
     this.reflexion = reflexion;
     this.feedback = feedback;
     this.status = status;
     this.iteration = iteration;
-    this.associatedTraces = associatedTraces;
-    this.associatedDeclaredSkills = associatedDeclaredSkills;
+    this.associations = associations == null ? FeedbackAssociations.empty() : associations;
     this.attachments = new ArrayList<>(attachments == null ? List.of() : attachments);
     this.declaredActivity = declaredActivity;
   }
@@ -57,8 +52,7 @@ public class Feedback extends AvenirsBaseModel {
   public static Feedback create(
       DeclaredActivity declaredActivity,
       String reflexion,
-      List<Trace> associatedTraces,
-      List<DeclaredSkillProgress> associatedDeclaredSkills,
+      FeedbackAssociations associations,
       int iteration) {
     return new Feedback(
         UUID.randomUUID(),
@@ -69,8 +63,7 @@ public class Feedback extends AvenirsBaseModel {
         null,
         EFeedbackStatus.NEW,
         iteration,
-        associatedTraces,
-        associatedDeclaredSkills,
+        associations,
         List.of());
   }
 
@@ -83,8 +76,7 @@ public class Feedback extends AvenirsBaseModel {
       String feedback,
       EFeedbackStatus status,
       int iteration,
-      List<Trace> associatedTraces,
-      List<DeclaredSkillProgress> associatedDeclaredSkills,
+      FeedbackAssociations associations,
       List<File> attachments) {
     return new Feedback(
         id,
@@ -95,8 +87,7 @@ public class Feedback extends AvenirsBaseModel {
         feedback,
         status,
         iteration,
-        associatedTraces,
-        associatedDeclaredSkills,
+        associations,
         attachments);
   }
 

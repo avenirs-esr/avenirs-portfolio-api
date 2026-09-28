@@ -11,6 +11,7 @@ import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.StudentFeedbackItemListDTO;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.Feedback;
+import fr.avenirsesr.portfolio.student.activity.domain.model.FeedbackAssociations;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.user.application.adapter.dto.StudentInfoDTO;
 import fr.avenirsesr.portfolio.user.application.adapter.mapper.StudentInfoDTOMapper;
@@ -49,8 +50,7 @@ class StudentFeedbackItemListDTOMapperTest {
         null,
         status,
         1,
-        List.of(),
-        List.of(),
+        FeedbackAssociations.empty(),
         List.of());
   }
 
