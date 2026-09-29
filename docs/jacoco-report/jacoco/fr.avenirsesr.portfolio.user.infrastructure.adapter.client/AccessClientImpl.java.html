@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AccessClientImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.user.infrastructure.adapter.client</a> &gt; <span class="el_source">AccessClientImpl.java</span></div><h1>AccessClientImpl.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.user.infrastructure.adapter.client;
+
+import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.AvenirsSecurityHeaders;
+import fr.avenirsesr.portfolio.user.domain.port.output.client.AccessClient;
+import fr.avenirsesr.portfolio.user.domain.port.output.client.StudentAccessScope;
+import java.util.List;
+import java.util.UUID;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
+
+<span class="fc" id="L13">@Slf4j</span>
+@Component
+public class AccessClientImpl implements AccessClient {
+
+  private final WebClient webClient;
+
+  @Value(&quot;${avenirs.back-office.api-key}&quot;)
+  private String apiKey;
+
+  @Value(&quot;${avenirs.back-office.access.endpoint}&quot;)
+  private String accessEndpoint;
+
+<span class="fc" id="L25">  public AccessClientImpl(WebClient webClient) {</span>
+<span class="fc" id="L26">    this.webClient = webClient;</span>
+<span class="fc" id="L27">  }</span>
+
+  @Override
+  public boolean staffHasAccess(
+      String eppn, List&lt;UUID&gt; targetInstitutionIds, List&lt;UUID&gt; targetGroupIds) {
+    try {
+<span class="fc" id="L33">      log.debug(</span>
+          &quot;Checking staff access for eppn {} to institutions {} / groups {} against back-office&quot;,
+          eppn,
+          targetInstitutionIds,
+          targetGroupIds);
+<span class="fc" id="L38">      return webClient</span>
+<span class="fc" id="L39">          .post()</span>
+<span class="fc" id="L40">          .uri(accessEndpoint + &quot;/staff/check&quot;)</span>
+<span class="fc" id="L41">          .header(AvenirsSecurityHeaders.API_KEY, apiKey)</span>
+<span class="fc" id="L42">          .bodyValue(new StaffAccessCheckRequest(eppn, targetInstitutionIds, targetGroupIds))</span>
+<span class="fc" id="L43">          .retrieve()</span>
+<span class="fc" id="L44">          .bodyToMono(Boolean.class)</span>
+<span class="fc" id="L45">          .defaultIfEmpty(false)</span>
+<span class="fc" id="L46">          .block();</span>
+<span class="fc" id="L47">    } catch (Exception e) {</span>
+<span class="fc" id="L48">      log.error(</span>
+          &quot;Failed to check staff access for eppn {} at '{}'. Error: {}&quot;,
+          eppn,
+          accessEndpoint,
+<span class="fc" id="L52">          e.getMessage());</span>
+<span class="fc" id="L53">      log.debug(&quot;Full error details:&quot;, e);</span>
+<span class="fc" id="L54">      return false;</span>
+    }
+  }
+
+  @Override
+  public StudentAccessScope getStudentScope(String eppn) {
+    try {
+<span class="fc" id="L61">      log.debug(&quot;Resolving student scope for eppn {} from back-office&quot;, eppn);</span>
+<span class="fc" id="L62">      StudentScopeResponse response =</span>
+          webClient
+<span class="fc" id="L64">              .get()</span>
+<span class="fc" id="L65">              .uri(accessEndpoint + &quot;/student/&quot; + eppn + &quot;/scope&quot;)</span>
+<span class="fc" id="L66">              .header(AvenirsSecurityHeaders.API_KEY, apiKey)</span>
+<span class="fc" id="L67">              .retrieve()</span>
+<span class="fc" id="L68">              .bodyToMono(StudentScopeResponse.class)</span>
+<span class="fc" id="L69">              .block();</span>
+<span class="pc bpc" id="L70" title="1 of 2 branches missed.">      return response == null</span>
+<span class="nc" id="L71">          ? StudentAccessScope.empty()</span>
+<span class="fc" id="L72">          : new StudentAccessScope(response.institutionIds(), response.groupIds());</span>
+<span class="fc" id="L73">    } catch (Exception e) {</span>
+<span class="fc" id="L74">      log.error(</span>
+          &quot;Failed to resolve student scope for eppn {} at '{}'. Error: {}&quot;,
+          eppn,
+          accessEndpoint,
+<span class="fc" id="L78">          e.getMessage());</span>
+<span class="fc" id="L79">      log.debug(&quot;Full error details:&quot;, e);</span>
+<span class="fc" id="L80">      return StudentAccessScope.empty();</span>
+    }
+  }
+
+<span class="fc" id="L84">  private record StaffAccessCheckRequest(</span>
+      String eppn, List&lt;UUID&gt; targetInstitutionIds, List&lt;UUID&gt; targetGroupIds) {}
+
+<span class="fc" id="L87">  private record StudentScopeResponse(List&lt;UUID&gt; institutionIds, List&lt;UUID&gt; groupIds) {}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
