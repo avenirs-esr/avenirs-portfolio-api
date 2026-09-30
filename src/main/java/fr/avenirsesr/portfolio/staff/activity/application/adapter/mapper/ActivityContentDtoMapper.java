@@ -11,15 +11,22 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring", uses = OptionalMapper.class)
 public interface ActivityContentDtoMapper {
-
+  @Mapping(target = "haveDraft", expression = "java(false)")
   @Mapping(target = "hasEnrolledStudent", expression = "java(null)")
   @Mapping(target = "files", source = "files")
   ActivityContentDTO toDTO(Activity activity, List<FileDTO> files);
 
+  @Mapping(target = "haveDraft", expression = "java(false)")
   @Mapping(target = "hasEnrolledStudent", expression = "java(null)")
   ActivityContentDTO toDTO(Activity activity);
 
+  @Mapping(target = "haveDraft", expression = "java(false)")
   @Mapping(target = "hasEnrolledStudent", source = "hasEnrolledStudent")
   @Mapping(target = "files", source = "files")
   ActivityContentDTO toDTO(ActivityDraft activity, Boolean hasEnrolledStudent, List<FileDTO> files);
+
+  @Mapping(target = "haveDraft", source = "haveDraft")
+  @Mapping(target = "hasEnrolledStudent", expression = "java(null)")
+  @Mapping(target = "files", source = "files")
+  ActivityContentDTO toDTO(Activity activity, Boolean haveDraft, List<FileDTO> files);
 }

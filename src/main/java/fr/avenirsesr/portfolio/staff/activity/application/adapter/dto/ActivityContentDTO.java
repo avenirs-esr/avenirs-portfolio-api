@@ -32,6 +32,7 @@ public record ActivityContentDTO(
     int traceAllowedAssociations,
     int feedbackAllowedIterations,
     Boolean hasEnrolledStudent,
+    Boolean haveDraft,
     List<FileDTO> files,
     List<String> links,
     List<UUID> targetInstitutionIds,

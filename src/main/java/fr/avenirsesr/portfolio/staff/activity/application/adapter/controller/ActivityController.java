@@ -115,7 +115,9 @@ public class ActivityController {
           case PUBLISHED, UNPUBLISHED -> {
             var activity = activityService.getActivityById(activityId);
             yield activityContentDtoMapper.toDTO(
-                activity, fileDTOMapper.toFileDTOs(activity.getFiles(), baseUrl));
+                activity,
+                activityService.hasDraftForActivity(activity.getId()),
+                fileDTOMapper.toFileDTOs(activity.getFiles(), baseUrl));
           }
           case DRAFT -> {
             var draft = activityService.getActivityDraftById(activityId);

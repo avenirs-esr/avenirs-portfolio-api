@@ -3282,4 +3282,32 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         .expectStatus()
         .isForbidden();
   }
+
+  @Test
+  void thenItShouldReturnTrueHasDraftForPublishedActivityWhenDraftExists() throws Exception {
+    BddLogger.and("given a published activity with a draft");
+    UUID activityId = publishNewActivity("Activité publiée avec un brouillon");
+    subscribeStudentToActivity(activityId);
+    webTestClient
+        .post()
+        .uri(CREATE_DRAFT_PATH, activityId)
+        .headers(ActivityControllerIT.this::addStaffHeaders)
+        .exchange()
+        .expectStatus()
+        .isOk();
+
+    BddLogger.then("the published activity content should have hasDraft equal to true");
+
+    webTestClient
+        .get()
+        .uri(CONTENT_PATH, "PUBLISHED", activityId)
+        .headers(ActivityControllerIT.this::addStaffHeaders)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.haveDraft")
+        .isEqualTo(true);
+  }
 }

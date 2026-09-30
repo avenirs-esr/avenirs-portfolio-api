@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityDraft;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityDraftRepository;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.mapper.ActivityDraftMapper;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityDraftEntity;
+import java.util.UUID;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -13,5 +14,10 @@ public class ActivityDraftDatabaseRepository
     implements ActivityDraftRepository {
   protected ActivityDraftDatabaseRepository(ActivityDraftJpaRepository jpaRepository) {
     super(jpaRepository, jpaRepository, ActivityDraftEntity.class, ActivityDraftMapper.INSTANCE);
+  }
+
+  @Override
+  public boolean existsById(UUID id) {
+    return jpaRepository.existsById(id);
   }
 }

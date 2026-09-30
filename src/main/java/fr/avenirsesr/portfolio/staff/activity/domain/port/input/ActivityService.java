@@ -87,6 +87,8 @@ public interface ActivityService {
 
   Boolean hasEnrolledStudents(ActivityDraft draft);
 
+  Boolean hasDraftForActivity(UUID activityId);
+
   File uploadDraftBanner(
       UUID activityDraftId, String fileName, String mimeType, long size, byte[] content);
 
