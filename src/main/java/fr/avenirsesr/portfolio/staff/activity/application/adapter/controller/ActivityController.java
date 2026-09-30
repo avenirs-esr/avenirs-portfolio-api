@@ -428,6 +428,26 @@ public class ActivityController {
   }
 
   @GetMapping(
+      value = "/draft/{activityDraftId}/files/{fileId}/download",
+      produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  @PreAuthorize("hasAuthority('activity:document:download:contextual')")
+  public ResponseEntity<byte[]> downloadDraftFile(
+      Principal principal, @PathVariable UUID activityDraftId, @PathVariable UUID fileId) {
+    log.debug(
+        "Received request to download file [{}] of activity draft [{}] by user [{}]",
+        fileId,
+        activityDraftId,
+        principal.getName());
+    var downloadedFile = activityService.downloadDraftFile(activityDraftId, fileId);
+    return ResponseEntity.ok()
+        .contentType(MediaType.APPLICATION_OCTET_STREAM)
+        .header(
+            HttpHeaders.CONTENT_DISPOSITION,
+            "attachment; filename=\"" + downloadedFile.fileName() + "\"")
+        .body(downloadedFile.content());
+  }
+
+  @GetMapping(
       value = "/{activityId}/files/{fileId}/download",
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   @PreAuthorize("hasAuthority('activity:document:download:contextual')")
