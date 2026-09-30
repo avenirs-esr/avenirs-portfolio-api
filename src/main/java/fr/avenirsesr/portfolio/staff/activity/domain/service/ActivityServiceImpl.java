@@ -713,6 +713,11 @@ public class ActivityServiceImpl implements ActivityService {
   }
 
   @Override
+  public Boolean hasDraftForActivity(UUID activityId) {
+    return activityDraftRepository.existsById(activityId);
+  }
+
+  @Override
   public File uploadDraftBanner(
       UUID activityDraftId, String fileName, String mimeType, long size, byte[] content) {
     var draft = getOwnedDraft(activityDraftId);
