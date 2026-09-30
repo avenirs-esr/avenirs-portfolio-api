@@ -36,7 +36,9 @@ import fr.avenirsesr.portfolio.common.file.domain.exception.FileTypeNotSupported
 import fr.avenirsesr.portfolio.common.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.file.domain.model.File;
+import fr.avenirsesr.portfolio.file.domain.model.FileDownload;
 import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.notification.domain.model.notification.ActivityUpdatedNotification;
 import fr.avenirsesr.portfolio.notification.domain.model.notification.parameters.ActivityModifiedParameters;
@@ -60,10 +62,12 @@ import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
+import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStaffException;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.output.client.AccessClient;
 import fr.avenirsesr.portfolio.user.domain.port.output.client.StudentAccessScope;
+import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserPrincipalRepository;
 import java.time.Duration;
 import java.time.Instant;
@@ -93,6 +97,7 @@ class ActivityServiceImplTest {
   @Mock private ActivityViewRepository activityViewRepository;
   @Mock private AccessClient accessClient;
   @Mock private UserPrincipalRepository userPrincipalRepository;
+  @Mock private StudentRepository studentRepository;
 
   @InjectMocks private ActivityServiceImpl activityService;
 
@@ -2948,6 +2953,130 @@ class ActivityServiceImplTest {
           .isInstanceOf(UserNotAuthorizedException.class);
       verify(activityDraftRepository, never()).findById(any(UUID.class));
       verify(activityDraftRepository, never()).save(any());
+    }
+
+    @Nested
+    class WhenDownloadingAnActivityFile {
+
+      UUID activityId;
+      UUID fileId;
+      User loggedInUser;
+      Activity activity;
+      FileDownload expected;
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("downloading an activity file");
+        activityId = UUID.randomUUID();
+        fileId = UUID.randomUUID();
+        loggedInUser = mock(User.class);
+        when(loggedInUser.getId()).thenReturn(UUID.randomUUID());
+        when(loggedInUserService.getLoggedInUser()).thenReturn(loggedInUser);
+        var file = mock(File.class);
+        when(file.getId()).thenReturn(fileId);
+        activity = mock(Activity.class);
+        when(activity.getFiles()).thenReturn(List.of(file));
+        when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
+        expected = new FileDownload("doc.pdf", new byte[] {1});
+        when(fileResourceService.download(fileId)).thenReturn(expected);
+      }
+
+      @Test
+      void thenAnyStaffShouldBeAbleToDownloadTheFile() {
+        BddLogger.then("a staff who is not the author can download the file");
+        when(loggedInUserService.getLoggedInStaff()).thenReturn(mock(Staff.class));
+
+        assertThat(activityService.downloadActivityFile(activityId, fileId)).isEqualTo(expected);
+      }
+
+      @Test
+      void thenAnEnrolledStudentShouldBeAbleToDownloadTheFile() {
+        BddLogger.then("an enrolled student can download the file");
+        var student = mock(Student.class);
+        when(loggedInUserService.getLoggedInStaff()).thenThrow(new UserIsNotStaffException());
+        when(studentRepository.findById(loggedInUser.getId())).thenReturn(Optional.of(student));
+        when(declaredActivityService.isEnrolled(activity, student)).thenReturn(true);
+
+        assertThat(activityService.downloadActivityFile(activityId, fileId)).isEqualTo(expected);
+      }
+
+      @Test
+      void thenANotEnrolledStudentShouldBeRejected() {
+        BddLogger.then("a not enrolled student is rejected");
+        var student = mock(Student.class);
+        when(loggedInUserService.getLoggedInStaff()).thenThrow(new UserIsNotStaffException());
+        when(studentRepository.findById(loggedInUser.getId())).thenReturn(Optional.of(student));
+        when(declaredActivityService.isEnrolled(activity, student)).thenReturn(false);
+
+        assertThatThrownBy(() -> activityService.downloadActivityFile(activityId, fileId))
+            .isInstanceOf(UserNotAuthorizedException.class);
+        verify(fileResourceService, never()).download(any());
+      }
+
+      @Test
+      void thenAFileOutsideTheActivityShouldBeNotFound() {
+        BddLogger.then("a file not attached to the activity is not found");
+        when(loggedInUserService.getLoggedInStaff()).thenReturn(mock(Staff.class));
+
+        assertThatThrownBy(
+                () -> activityService.downloadActivityFile(activityId, UUID.randomUUID()))
+            .isInstanceOf(FileNotFoundException.class);
+        verify(fileResourceService, never()).download(any());
+      }
+    }
+
+    @Nested
+    class WhenDownloadingADraftFile {
+
+      UUID draftId;
+      UUID fileId;
+      Staff staff;
+      ActivityDraft draft;
+      FileDownload expected;
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("downloading a draft file");
+        draftId = UUID.randomUUID();
+        fileId = UUID.randomUUID();
+        staff = mock(Staff.class);
+        when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+        var file = mock(File.class);
+        when(file.getId()).thenReturn(fileId);
+        draft = mock(ActivityDraft.class);
+        when(draft.getFiles()).thenReturn(List.of(file));
+        when(activityDraftRepository.findById(draftId)).thenReturn(Optional.of(draft));
+        expected = new FileDownload("doc.pdf", new byte[] {1});
+        when(fileResourceService.download(fileId)).thenReturn(expected);
+      }
+
+      @Test
+      void thenTheAuthorShouldBeAbleToDownloadTheFile() {
+        BddLogger.then("the author can download the draft file");
+        when(draft.getAuthor()).thenReturn(staff);
+
+        assertThat(activityService.downloadDraftFile(draftId, fileId)).isEqualTo(expected);
+      }
+
+      @Test
+      void thenANonAuthorShouldGetDraftNotFound() {
+        BddLogger.then("a non author gets ActivityDraftNotFoundException");
+        when(draft.getAuthor()).thenReturn(mock(Staff.class));
+
+        assertThatThrownBy(() -> activityService.downloadDraftFile(draftId, fileId))
+            .isInstanceOf(ActivityDraftNotFoundException.class);
+        verify(fileResourceService, never()).download(any());
+      }
+
+      @Test
+      void thenAFileOutsideTheDraftShouldBeNotFound() {
+        BddLogger.then("a file not attached to the draft is not found");
+        when(draft.getAuthor()).thenReturn(staff);
+
+        assertThatThrownBy(() -> activityService.downloadDraftFile(draftId, UUID.randomUUID()))
+            .isInstanceOf(FileNotFoundException.class);
+        verify(fileResourceService, never()).download(any());
+      }
     }
   }
 }

@@ -101,6 +101,8 @@ public interface ActivityService {
 
   FileDownload downloadActivityFile(UUID activityId, UUID fileId);
 
+  FileDownload downloadDraftFile(UUID activityDraftId, UUID fileId);
+
   PagedResult<Activity> getActivitiesWithFeedbacks(
       List<EFeedbackStatus> statuses, PageCriteria pageCriteria);
 }

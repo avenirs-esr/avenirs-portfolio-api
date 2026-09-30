@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.activity.application.adapter.controller;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -53,6 +54,10 @@ class ActivityControllerIT extends ContainerConfigurationTest {
   private static final String CREATE_DRAFT_PATH = BASE_PATH + "/create-draft/{activityId}";
   private static final String DUPLICATE_PATH = BASE_PATH + "/duplicate/{activityId}";
   private static final String DRAFT_BANNER_PATH = BASE_PATH + "/draft/{draftId}/banner";
+  private static final String DRAFT_FILES_PATH = BASE_PATH + "/draft/{draftId}/files";
+  private static final String DRAFT_FILE_DOWNLOAD_PATH =
+      BASE_PATH + "/draft/{draftId}/files/{fileId}/download";
+  private static final byte[] DRAFT_FILE_CONTENT = "Contenu de la pièce jointe".getBytes(UTF_8);
   private static final String STATUS_PRESENTATION_PATH =
       BASE_PATH + "/{activityStatus}/{activityId}/presentation";
   private static final String SUBSCRIBE_PATH = "/me/activity-progress/subscribe/{activityId}";
@@ -2571,6 +2576,94 @@ class ActivityControllerIT extends ContainerConfigurationTest {
     }
 
     @Nested
+    class WhenDownloadingADraftFile {
+
+      UUID draftId;
+      UUID fileId;
+
+      @BeforeEach
+      void setupWhen() throws Exception {
+        BddLogger.when("performing a GET on " + DRAFT_FILE_DOWNLOAD_PATH);
+        BddLogger.and("given a draft with an attachment uploaded by the staff author");
+        draftId = createDraftAndGetId("Brouillon avec pièce jointe");
+        fileId = uploadDraftFileAndGetId(draftId);
+      }
+
+      @Test
+      void thenTheAuthorShouldDownloadTheAttachment() {
+        BddLogger.then("it should return 200 with the file content as an attachment");
+
+        webTestClient
+            .get()
+            .uri(DRAFT_FILE_DOWNLOAD_PATH, draftId, fileId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectHeader()
+            .valueEquals(
+                HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"piece-jointe.pdf\"")
+            .expectBody(byte[].class)
+            .isEqualTo(DRAFT_FILE_CONTENT);
+      }
+
+      @Test
+      void thenItShouldReturn404WhenTheFileDoesNotBelongToTheDraft() {
+        BddLogger.then("it should return 404");
+
+        webTestClient
+            .get()
+            .uri(DRAFT_FILE_DOWNLOAD_PATH, draftId, UUID.randomUUID())
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .exchange()
+            .expectStatus()
+            .isNotFound();
+      }
+
+      @Test
+      void thenItShouldReturn404WhenTheDraftDoesNotExist() {
+        BddLogger.then("it should return 404");
+
+        webTestClient
+            .get()
+            .uri(DRAFT_FILE_DOWNLOAD_PATH, UUID.randomUUID(), fileId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .exchange()
+            .expectStatus()
+            .isNotFound();
+      }
+
+      @Test
+      void thenItShouldReturn403WhenTheUserLacksTheDownloadPermission() {
+        BddLogger.then("it should return 403");
+
+        webTestClient
+            .get()
+            .uri(DRAFT_FILE_DOWNLOAD_PATH, draftId, fileId)
+            .headers(ActivityControllerIT.this::addNoPermissionHeaders)
+            .exchange()
+            .expectStatus()
+            .isForbidden();
+      }
+
+      @Test
+      void thenItShouldReturn403WhenTheUserIsAStudent() {
+        BddLogger.then("it should return 403 because a student is not the staff author");
+
+        webTestClient
+            .get()
+            .uri(DRAFT_FILE_DOWNLOAD_PATH, draftId, fileId)
+            .headers(ActivityControllerIT.this::addSecondStudentHeaders)
+            .exchange()
+            .expectStatus()
+            .isForbidden()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("USER_IS_NOT_STAFF_EXCEPTION");
+      }
+    }
+
+    @Nested
     class WhenCreatingDraftFromActivity {
 
       @BeforeEach
@@ -3101,6 +3194,37 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         .exchange()
         .expectStatus()
         .isCreated();
+  }
+
+  private UUID uploadDraftFileAndGetId(UUID draftId) throws Exception {
+    var builder = new MultipartBodyBuilder();
+    builder
+        .part(
+            "file",
+            new ByteArrayResource(DRAFT_FILE_CONTENT) {
+              @Override
+              public String getFilename() {
+                return "piece-jointe.pdf";
+              }
+            })
+        .contentType(MediaType.APPLICATION_PDF);
+
+    String body =
+        webTestClient
+            .post()
+            .uri(DRAFT_FILES_PATH, draftId)
+            .headers(this::addStaffHeaders)
+            .contentType(MediaType.MULTIPART_FORM_DATA)
+            .body(BodyInserters.fromMultipartData(builder.build()))
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    return UUID.fromString(objectMapper.readTree(body).get("id").asText());
   }
 
   private UUID bannerIdOf(String activityStatus, UUID activityId) throws Exception {

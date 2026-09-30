@@ -40,6 +40,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.Staf
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
+import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStaffException;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.output.client.AccessClient;
@@ -754,9 +755,7 @@ public class ActivityServiceImpl implements ActivityService {
   @Override
   public void deleteDraftFile(UUID activityDraftId, UUID fileId) {
     var draft = getOwnedDraft(activityDraftId);
-    if (draft.getFiles().stream().noneMatch(file -> file.getId().equals(fileId))) {
-      throw new FileNotFoundException();
-    }
+    requireFileAttached(draft.getFiles(), fileId);
     fileResourceService.delete(fileId);
     draft.removeFile(fileId);
     activityDraftRepository.save(draft);
@@ -764,24 +763,44 @@ public class ActivityServiceImpl implements ActivityService {
 
   @Override
   public FileDownload downloadActivityFile(UUID activityId, UUID fileId) {
-    var loggedInUser = loggedInUserService.getLoggedInUser();
     var activity =
         activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);
-
-    boolean isAuthor = activity.getAuthor().getUser().equals(loggedInUser);
-    boolean isEnrolledStudent =
-        studentRepository
-            .findById(loggedInUser.getId())
-            .map(student -> declaredActivityService.isEnrolled(activity, student))
-            .orElse(false);
-
-    if (!isAuthor && !isEnrolledStudent) {
+    if (!canDownloadActivityFiles(activity)) {
       throw new UserNotAuthorizedException();
     }
-    if (activity.getFiles().stream().noneMatch(file -> file.getId().equals(fileId))) {
+    requireFileAttached(activity.getFiles(), fileId);
+    return fileResourceService.download(fileId);
+  }
+
+  @Override
+  public FileDownload downloadDraftFile(UUID activityDraftId, UUID fileId) {
+    var draft = getOwnedDraft(activityDraftId);
+    requireFileAttached(draft.getFiles(), fileId);
+    return fileResourceService.download(fileId);
+  }
+
+  private boolean canDownloadActivityFiles(Activity activity) {
+    if (isLoggedInUserStaff()) {
+      return true;
+    }
+    return studentRepository
+        .findById(loggedInUserService.getLoggedInUser().getId())
+        .map(student -> declaredActivityService.isEnrolled(activity, student))
+        .orElse(false);
+  }
+
+  private void requireFileAttached(List<File> files, UUID fileId) {
+    if (files.stream().noneMatch(file -> file.getId().equals(fileId))) {
       throw new FileNotFoundException();
     }
-    return fileResourceService.download(fileId);
+  }
+
+  private boolean isLoggedInUserStaff() {
+    try {
+      return loggedInUserService.getLoggedInStaff() != null;
+    } catch (UserIsNotStaffException e) {
+      return false;
+    }
   }
 
   private ActivityDraft getOwnedDraft(UUID activityDraftId) {
