@@ -3,8 +3,6 @@
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
-import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillProgressDetails;
-import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -15,7 +13,7 @@ import java.util.UUID;
  * than {@link EFeedbackStatus#SUBMITTED}), in order to hide the staff answer from the student until
  * the review is finalised.
  */
-<span class="fc" id="L18">public record FeedbackData(</span>
+<span class="fc" id="L16">public record FeedbackData(</span>
     UUID id,
     Instant createdAt,
     Instant updatedAt,
@@ -24,7 +22,6 @@ import java.util.UUID;
     String feedback,
     EFeedbackStatus status,
     int iteration,
-    List&lt;Trace&gt; associatedTraces,
-    List&lt;DeclaredSkillProgressDetails&gt; associatedDeclaredSkills,
+    FeedbackAssociationsData associations,
     List&lt;File&gt; attachments) {}
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

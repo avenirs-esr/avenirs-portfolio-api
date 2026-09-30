@@ -23,7 +23,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.reposi
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.repository,GenericUserJpaRepositoryAdapter,0,10,0,0,0,3,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.repository,StaffDatabaseRepository,0,10,0,0,0,3,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.repository,UserDatabaseRepository,0,11,0,0,0,3,0,2,0,2
-avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.application.adapter.controller,ActivityController,123,565,0,2,30,133,5,18,5,17
+avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.application.adapter.controller,ActivityController,123,570,0,2,30,134,5,18,5,17
 avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.infrastructure.context,CustomDateTimeProvider,0,11,0,0,0,4,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.infrastructure.context,PrometheusLogFilter,5,11,3,3,1,3,2,3,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.application.adapter.controller,UserController,76,129,0,4,22,34,4,10,4,8
@@ -42,10 +42,10 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.domain.data,Activit
 avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.domain.data,ActivityDashboardData,0,12,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.domain.data,ActivityWithStudentStatusData,0,12,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.domain.data,ActivityStaffOverviewData,0,21,0,0,0,1,0,1,0,1
-avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.domain.service,ActivityServiceImpl,138,1579,11,123,28,382,14,107,7,47
+avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.domain.service,ActivityServiceImpl,138,1585,11,123,28,383,14,108,7,48
 avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.domain.service,ActivityServiceImpl.FieldSync,0,30,0,2,0,5,0,3,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.activity.domain.service,DeclaredActivityAssociationStrategy,1,178,1,11,1,52,1,17,0,12
-avenirs-portfolio-api,fr.avenirsesr.portfolio.student.activity.domain.service,FeedbackServiceImpl,0,757,2,70,0,189,2,56,0,21
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.activity.domain.service,FeedbackServiceImpl,0,787,2,70,0,197,2,58,0,23
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.activity.domain.service,DeclaredActivityServiceImpl,31,724,7,69,7,191,9,66,2,35
 avenirs-portfolio-api,fr.avenirsesr.portfolio.file.domain.data,FileData,0,12,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.port.output.client,StudentAccessScope,0,15,0,0,0,2,0,2,0,2
@@ -94,8 +94,9 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.student.program.domain.data,Declar
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.association.infrastructure.adapter.repository,AssociationDatabaseRepository,55,187,7,17,11,43,8,11,1,6
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.experience.infrastructure.adapter.specification,DeclaredExperienceSpecification,6,108,3,9,2,23,4,11,1,8
 avenirs-portfolio-api,fr.avenirsesr.portfolio.file.infrastructure.adapter.repository,FileDatabaseRepository,0,7,0,0,0,2,0,1,0,1
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.activity.domain.data,FeedbackAssociationsData,0,19,0,0,0,2,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.activity.domain.data,DeclaredActivityDetailsData,0,9,0,0,0,1,0,1,0,1
-avenirs-portfolio-api,fr.avenirsesr.portfolio.student.activity.domain.data,FeedbackData,0,36,0,0,0,1,0,1,0,1
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.activity.domain.data,FeedbackData,0,33,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.activity.domain.data,FeedbackDashboardData,0,15,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.activity.domain.data,DeclaredActivityAssociationData,0,12,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.infrastructure.service,ClockServiceConfig,0,7,0,0,0,2,0,2,0,2
@@ -117,7 +118,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.student.skill.infrastructure.adapt
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.repository,DeclaredSkillProgressDatabaseRepository,0,77,0,0,0,22,0,6,0,6
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.selfknowledge.domain.data,SelfKnowledgeElementDetails,0,6,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.notification.infrastructure.adapter.repository,NotificationDatabaseRepository,0,51,0,0,0,15,0,4,0,4
-avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.repository,ActivityDraftDatabaseRepository,0,7,0,0,0,2,0,1,0,1
+avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.repository,ActivityDraftDatabaseRepository,0,12,0,0,0,3,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.repository,StaffActivityOverviewQueryRepository,73,227,11,13,10,44,11,13,0,8
 avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.repository,ActivityDatabaseRepository,43,124,0,4,10,30,1,7,1,5
 avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.repository,ActivityViewDatabaseRepository,0,31,0,2,0,9,0,4,0,3
