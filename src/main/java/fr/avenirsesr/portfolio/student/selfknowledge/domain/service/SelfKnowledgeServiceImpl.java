@@ -101,11 +101,7 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
 
     selfKnowledgeElement.setTitle(title);
     selfKnowledgeElement.setDescription(description);
-
-    if (rating != null) {
-      selfKnowledgeElement.setRating(rating);
-    }
-
+    selfKnowledgeElement.setRating(rating);
     selfKnowledgeElement.setValorized(valorized);
 
     return selfKnowledgeElementRepository.save(selfKnowledgeElement);
