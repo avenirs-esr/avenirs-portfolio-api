@@ -456,10 +456,10 @@ class SelfKnowledgeServiceImplTest {
         class WhenUpdatingSelfKnowledgeElementWithNullRating {
 
           @Test
-          void thenItShouldNotOverrideExistingRating() {
+          void thenItShouldClearTheExistingRating() {
             BddLogger.when("updating element with null rating");
 
-            Integer existingRating = selfKnowledgeElement.getRating();
+            selfKnowledgeElement.setRating(3);
             when(selfKnowledgeElementRepository.findById(selfKnowledgeElementId))
                 .thenReturn(Optional.of(selfKnowledgeElement));
             when(selfKnowledgeElementRepository.save(any(SelfKnowledgeElement.class)))
@@ -468,8 +468,8 @@ class SelfKnowledgeServiceImplTest {
             selfKnowledgeService.updateSelfKnowledgeElement(
                 selfKnowledgeElementId, "New title", "New desc", null, false);
 
-            BddLogger.then("it should keep previous rating");
-            assertThat(selfKnowledgeElement.getRating()).isEqualTo(existingRating);
+            BddLogger.then("it should clear the rating");
+            assertThat(selfKnowledgeElement.getRating()).isNull();
 
             verify(selfKnowledgeElementRepository).save(selfKnowledgeElement);
           }

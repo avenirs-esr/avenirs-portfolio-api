@@ -97,6 +97,16 @@ class SelfKnowledgeControllerIT extends ContainerConfigurationTest {
     return json.get("id").asText();
   }
 
+  private WebTestClient.ResponseSpec getElement(String elementId) {
+    return webTestClient
+        .get()
+        .uri(BASE_PATH + "/element/{elementId}", elementId)
+        .header("Accept-Language", ELanguage.FRENCH.getCode())
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .exchange();
+  }
+
   @Test
   void shouldReturnSelfKnowledgeCategoriesForStudent() {
     webTestClient
@@ -207,6 +217,34 @@ class SelfKnowledgeControllerIT extends ContainerConfigurationTest {
         .isEqualTo(elementId)
         .jsonPath("$.valorized")
         .isEqualTo(true);
+  }
+
+  @Test
+  void shouldClearRatingWhenUpdatingWithUndefinedRating() throws Exception {
+    String elementId = createElement(ESelfKnowledgeCategory.STRENGTHS.name(), "Rated", "Desc", 3);
+
+    getElement(elementId).expectStatus().isOk().expectBody().jsonPath("$.rating").isEqualTo(3);
+
+    webTestClient
+        .put()
+        .uri(BASE_PATH + "/element/{elementId}", elementId)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(
+            """
+            {
+              "title": "Rated",
+              "description": "Desc",
+              "valorized": false
+            }
+            """)
+        .header("Accept-Language", ELanguage.FRENCH.getCode())
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk();
+
+    getElement(elementId).expectStatus().isOk().expectBody().jsonPath("$.rating").doesNotExist();
   }
 
   @Test
