@@ -1,33 +1,34 @@
 package fr.avenirsesr.portfolio.student.experience.infrastructure.adapter.specification;
 
+import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.student.experience.domain.model.enums.EExperienceType;
 import fr.avenirsesr.portfolio.student.experience.infrastructure.adapter.model.DeclaredExperienceEntity;
-import jakarta.persistence.criteria.Expression;
-import jakarta.persistence.criteria.Order;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
 public class DeclaredExperienceSpecification {
-  public static Specification<DeclaredExperienceEntity> ordered() {
-    return (root, query, cb) -> {
-      if (query == null) {
-        return cb.conjunction();
-      }
+  public static Sort toSort(SortCriteria... sortCriterias) {
+    if (sortCriterias == null || sortCriterias.length == 0) {
+      return Sort.unsorted();
+    }
 
-      List<Order> orders = new ArrayList<>();
+    return Arrays.stream(sortCriterias)
+        .filter(Objects::nonNull)
+        .map(
+            sortCriteria -> {
+              Sort.Direction direction =
+                  sortCriteria.order() == ESortOrder.ASC ? Sort.Direction.ASC : Sort.Direction.DESC;
 
-      Expression<Integer> endDateOrder =
-          cb.<Integer>selectCase().when(cb.isNull(root.get("endDate")), 1).otherwise(0);
-
-      orders.add(cb.desc(endDateOrder));
-      orders.add(cb.desc(root.get("endDate")));
-      orders.add(cb.asc(cb.lower(root.get("title"))));
-
-      query.orderBy(orders);
-
-      return cb.conjunction();
-    };
+              return switch (sortCriteria.field()) {
+                case NAME -> Sort.by(direction, "title");
+                case DATE -> Sort.by(direction, "endDate", "startDate");
+              };
+            })
+        .reduce(Sort.unsorted(), Sort::and);
   }
 
   public static Specification<DeclaredExperienceEntity> search(String keyword) {

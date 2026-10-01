@@ -20,7 +20,6 @@ import fr.avenirsesr.portfolio.student.experience.domain.exception.DeclaredExper
 import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.experience.domain.model.enums.EExperienceType;
 import fr.avenirsesr.portfolio.student.experience.domain.port.output.repository.DeclaredExperienceRepository;
-import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStudentException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
@@ -60,13 +59,6 @@ class DeclaredExperienceServiceImplTest {
 
     start = LocalDate.of(2024, 1, 1);
     end = LocalDate.of(2024, 6, 1);
-  }
-
-  private DeclaredSkillProgress mockDeclaredSkillProgress(Student owner) {
-    DeclaredSkillProgress skill = mock(DeclaredSkillProgress.class);
-    lenient().when(skill.getId()).thenReturn(UUID.randomUUID());
-    lenient().when(skill.getStudent()).thenReturn(owner);
-    return skill;
   }
 
   @Test
@@ -1148,5 +1140,27 @@ class DeclaredExperienceServiceImplTest {
             new DeclaredExperienceData(experience, new DeclaredExperienceAssociationCount(0, 0))),
         result.content());
     verify(experienceRepository).findAllByStudent(loggedIn, criteria, null, null, sortCriteria);
+  }
+
+  @Test
+  void shouldSearchExperiencesSortedByMostRecentThenByName() {
+    Student loggedIn = student;
+    PageCriteria pageCriteria = new PageCriteria(0, 10);
+    SortCriteria sortByDate = new SortCriteria(ESortField.DATE, ESortOrder.DESC);
+    SortCriteria sortByName = new SortCriteria(ESortField.NAME, ESortOrder.ASC);
+
+    var expected =
+        new PagedResult<>(List.of(mock(DeclaredExperience.class)), new PageInfo(0, 10, 1));
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedIn);
+    when(experienceRepository.searchByStudent(
+            loggedIn, pageCriteria, "stage", sortByDate, sortByName))
+        .thenReturn(expected);
+
+    assertSame(expected, service.search("stage", pageCriteria));
+
+    verify(loggedInUserService).getLoggedInStudent();
+    verify(experienceRepository)
+        .searchByStudent(loggedIn, pageCriteria, "stage", sortByDate, sortByName);
   }
 }

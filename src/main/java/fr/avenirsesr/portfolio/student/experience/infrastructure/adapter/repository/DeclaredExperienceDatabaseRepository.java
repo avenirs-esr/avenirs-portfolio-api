@@ -8,7 +8,6 @@ import fr.avenirsesr.portfolio.student.experience.domain.model.enums.EExperience
 import fr.avenirsesr.portfolio.student.experience.domain.port.output.repository.DeclaredExperienceRepository;
 import fr.avenirsesr.portfolio.student.experience.infrastructure.adapter.mapper.DeclaredExperienceMapper;
 import fr.avenirsesr.portfolio.student.experience.infrastructure.adapter.model.DeclaredExperienceEntity;
-import fr.avenirsesr.portfolio.student.experience.infrastructure.adapter.resolver.DeclaredExperienceSortResolver;
 import fr.avenirsesr.portfolio.student.experience.infrastructure.adapter.specification.DeclaredExperienceSpecification;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.repository.GenericUserJpaRepositoryAdapter;
@@ -43,17 +42,17 @@ public class DeclaredExperienceDatabaseRepository
         PageRequest.of(
             pageCriteria.page(),
             pageCriteria.pageSize(),
-            DeclaredExperienceSortResolver.toSort(sortCriteria)));
+            DeclaredExperienceSpecification.toSort(sortCriteria)));
   }
 
   @Override
-  public PagedResult<DeclaredExperience> findAllByStudent(
-      Student student, PageCriteria pageCriteria, String keyword) {
-    var specification =
-        hasStudent(student)
-            .and(DeclaredExperienceSpecification.ordered())
-            .and(DeclaredExperienceSpecification.search(keyword));
-
-    return findAll(specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()));
+  public PagedResult<DeclaredExperience> searchByStudent(
+      Student student, PageCriteria pageCriteria, String keyword, SortCriteria... sortCriterias) {
+    return findAll(
+        hasStudent(student).and(DeclaredExperienceSpecification.search(keyword)),
+        PageRequest.of(
+            pageCriteria.page(),
+            pageCriteria.pageSize(),
+            DeclaredExperienceSpecification.toSort(sortCriterias)));
   }
 }
