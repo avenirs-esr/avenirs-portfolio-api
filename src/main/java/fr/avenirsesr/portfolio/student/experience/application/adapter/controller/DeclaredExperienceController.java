@@ -84,7 +84,9 @@ public class DeclaredExperienceController {
           @RequestParam(required = false)
           ESortOrder sortOrder) {
     SortCriteria sortCriteria =
-        (sortField != null && sortOrder != null) ? new SortCriteria(sortField, sortOrder) : null;
+        (sortField != null && sortOrder != null)
+            ? new SortCriteria(sortField, sortOrder)
+            : new SortCriteria(ESortField.DATE, ESortOrder.DESC);
 
     PagedResult<DeclaredExperienceData> pagedExperiences =
         declaredExperienceService.getView(

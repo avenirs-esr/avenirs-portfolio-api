@@ -17,6 +17,6 @@ public interface DeclaredExperienceRepository extends GenericRepositoryPort<Decl
       List<EExperienceType> experienceTypes,
       SortCriteria sortCriteria);
 
-  PagedResult<DeclaredExperience> findAllByStudent(
-      Student student, PageCriteria pageCriteria, String keyword);
+  PagedResult<DeclaredExperience> searchByStudent(
+      Student student, PageCriteria pageCriteria, String keyword, SortCriteria... sortCriterias);
 }

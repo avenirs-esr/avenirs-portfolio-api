@@ -7,6 +7,8 @@ import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortField;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
@@ -374,7 +376,11 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
 
   @Override
   public PagedResult<DeclaredExperience> search(String keyword, PageCriteria pageCriteria) {
-    Student student = loggedInUserService.getLoggedInStudent();
-    return experienceRepository.findAllByStudent(student, pageCriteria, keyword);
+    return experienceRepository.searchByStudent(
+        loggedInUserService.getLoggedInStudent(),
+        pageCriteria,
+        keyword,
+        new SortCriteria(ESortField.DATE, ESortOrder.DESC),
+        new SortCriteria(ESortField.NAME, ESortOrder.ASC));
   }
 }
