@@ -15,7 +15,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.file.infrastructure.service,FileRe
 avenirs-portfolio-api,fr.avenirsesr.portfolio.file.infrastructure.service,FileDataGeneratorConfig,0,7,0,0,0,2,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.file.infrastructure.service,UserPhotoSeederConfig,0,7,0,0,0,2,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.file.infrastructure.adapter.client,LocalFileClient,12,53,0,0,3,15,1,4,1,4
-avenirs-portfolio-api,fr.avenirsesr.portfolio.student.selfknowledge.domain.service,SelfKnowledgeServiceImpl,0,337,3,35,0,88,3,32,0,16
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.selfknowledge.domain.service,SelfKnowledgeServiceImpl,0,335,3,33,0,87,3,31,0,16
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.specification,StudentSpecification,0,12,0,0,0,2,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.repository,CguDatabaseRepository,0,33,0,0,0,9,0,3,0,3
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.repository,UserPrincipalDatabaseRepository,0,70,0,2,0,21,0,6,0,5
