@@ -185,7 +185,13 @@ public class ActivityServiceImpl implements ActivityService {
                 draft.getTargetInstitutionIds(),
                 draft.getTargetGroupIds()));
 
+    var removedFileIds = new ArrayList<UUID>();
     if (publishedActivity.isPresent()) {
+      var draftFileIds = draft.getFiles().stream().map(File::getId).collect(Collectors.toSet());
+      activity.getFiles().stream()
+          .map(File::getId)
+          .filter(id -> !draftFileIds.contains(id))
+          .forEach(removedFileIds::add);
       var enrolledDeclaredActivities = declaredActivityService.getEnrolledStudents(activity);
       var updatedFields = updateActivity(activity, draft, !enrolledDeclaredActivities.isEmpty());
       activity.setStatus(EActivityStatus.PUBLISHED);
@@ -195,6 +201,7 @@ public class ActivityServiceImpl implements ActivityService {
     var savedActivity = activityRepository.save(activity);
 
     activityDraftRepository.removeFromDatabase(draft);
+    removedFileIds.forEach(fileResourceService::delete);
     return savedActivity;
   }
 
@@ -756,9 +763,16 @@ public class ActivityServiceImpl implements ActivityService {
   public void deleteDraftFile(UUID activityDraftId, UUID fileId) {
     var draft = getOwnedDraft(activityDraftId);
     requireFileAttached(draft.getFiles(), fileId);
-    fileResourceService.delete(fileId);
     draft.removeFile(fileId);
     activityDraftRepository.save(draft);
+    var stillUsedByPublishedActivity =
+        activityRepository
+            .findById(activityDraftId)
+            .map(activity -> activity.getFiles().stream().anyMatch(f -> f.getId().equals(fileId)))
+            .orElse(false);
+    if (!stillUsedByPublishedActivity) {
+      fileResourceService.delete(fileId);
+    }
   }
 
   @Override
