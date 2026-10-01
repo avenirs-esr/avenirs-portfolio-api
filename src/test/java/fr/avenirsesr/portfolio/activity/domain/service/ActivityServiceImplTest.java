@@ -1633,6 +1633,105 @@ class ActivityServiceImplTest {
     }
 
     @Nested
+    class WhenDeletingAnActivityDefinitively {
+
+      UUID activityId;
+      Activity activity;
+      File banner;
+      File activityFile;
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("deleting an activity definitively");
+        activityId = UUID.randomUUID();
+        banner = mock(File.class);
+        activityFile = mock(File.class);
+        activity = mock(Activity.class);
+        when(banner.getId()).thenReturn(UUID.randomUUID());
+        when(activityFile.getId()).thenReturn(UUID.randomUUID());
+        when(activity.getBanner()).thenReturn(Optional.of(banner));
+        when(activity.getFiles()).thenReturn(List.of(activityFile));
+      }
+
+      @Nested
+      class AndTheActivityExists {
+
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("the activity exists");
+          when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
+        }
+
+        @Test
+        void thenItShouldCascadeOnEveryLinkedElement() {
+          BddLogger.and("the activity has no draft");
+          when(activityDraftRepository.findById(activityId)).thenReturn(Optional.empty());
+
+          BddLogger.then(
+              "the declared activities, the views, the activity and its files should be deleted");
+
+          activityService.deleteActivityDefinitively(activityId);
+
+          InOrder inOrder =
+              inOrder(
+                  declaredActivityService,
+                  activityViewRepository,
+                  activityRepository,
+                  fileResourceService);
+          inOrder.verify(declaredActivityService).deleteAllOfActivity(activity);
+          inOrder.verify(activityViewRepository).deleteAllByActivityId(activityId);
+          inOrder.verify(activityRepository).removeFromDatabase(activity);
+          inOrder.verify(fileResourceService).delete(banner.getId());
+
+          verify(fileResourceService).delete(activityFile.getId());
+          verify(activityDraftRepository, never()).removeFromDatabase(any());
+        }
+
+        @Test
+        void thenItShouldAlsoDeleteTheDraftAndEachSharedFileOnlyOnce() {
+          BddLogger.and("the activity has a draft sharing its banner and one of its files");
+          File draftFile = mock(File.class);
+          when(draftFile.getId()).thenReturn(UUID.randomUUID());
+          ActivityDraft draft = mock(ActivityDraft.class);
+          when(draft.getBanner()).thenReturn(Optional.of(banner));
+          when(draft.getFiles()).thenReturn(List.of(activityFile, draftFile));
+          when(activityDraftRepository.findById(activityId)).thenReturn(Optional.of(draft));
+
+          BddLogger.then("the draft should be deleted and each file deleted once");
+
+          activityService.deleteActivityDefinitively(activityId);
+
+          verify(activityDraftRepository).removeFromDatabase(draft);
+          verify(fileResourceService).delete(banner.getId());
+          verify(fileResourceService).delete(activityFile.getId());
+          verify(fileResourceService).delete(draftFile.getId());
+        }
+      }
+
+      @Nested
+      class AndTheActivityDoesNotExist {
+
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("the activity does not exist");
+          when(activityRepository.findById(activityId)).thenReturn(Optional.empty());
+        }
+
+        @Test
+        void thenItShouldThrowActivityNotFoundException() {
+          BddLogger.then("the service should throw ActivityNotFoundException");
+
+          assertThrows(
+              ActivityNotFoundException.class,
+              () -> activityService.deleteActivityDefinitively(activityId));
+
+          verify(declaredActivityService, never()).deleteAllOfActivity(any());
+          verify(activityRepository, never()).removeFromDatabase(any());
+        }
+      }
+    }
+
+    @Nested
     class WhenGettingActivityNavigation {
 
       Staff author;

@@ -142,4 +142,10 @@ public class TransactionalDeclaredActivityService implements DeclaredActivitySer
   public void delete(UUID declaredActivityId) {
     delegate.delete(declaredActivityId);
   }
+
+  @Transactional
+  @Override
+  public void deleteAllOfActivity(Activity activity) {
+    delegate.deleteAllOfActivity(activity);
+  }
 }

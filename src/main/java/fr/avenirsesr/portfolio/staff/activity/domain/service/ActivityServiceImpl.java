@@ -53,6 +53,7 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -314,6 +315,34 @@ public class ActivityServiceImpl implements ActivityService {
 
     activityDraftRepository.removeFromDatabase(draft);
     log.info("Deleted activity draft with id: {}", activityDraftId);
+  }
+
+  @Override
+  public void deleteActivityDefinitively(UUID activityId) {
+    var activity =
+        activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);
+    var draft = activityDraftRepository.findById(activityId);
+
+    var fileIds =
+        Stream.concat(
+                fileIdsOf(activity.getBanner().orElse(null), activity.getFiles()),
+                draft
+                    .map(it -> fileIdsOf(it.getBanner().orElse(null), it.getFiles()))
+                    .orElseGet(Stream::empty))
+            .distinct()
+            .toList();
+
+    declaredActivityService.deleteAllOfActivity(activity);
+    activityViewRepository.deleteAllByActivityId(activityId);
+    draft.ifPresent(activityDraftRepository::removeFromDatabase);
+    activityRepository.removeFromDatabase(activity);
+    fileIds.forEach(fileResourceService::delete);
+
+    log.info("Definitively deleted activity {} and every element linked to it", activityId);
+  }
+
+  private Stream<UUID> fileIdsOf(File banner, List<File> files) {
+    return Stream.concat(Stream.ofNullable(banner), files.stream()).map(File::getId);
   }
 
   @Override

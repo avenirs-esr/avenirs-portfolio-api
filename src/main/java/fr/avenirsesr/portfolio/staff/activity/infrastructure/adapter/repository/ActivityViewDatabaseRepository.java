@@ -33,4 +33,9 @@ public class ActivityViewDatabaseRepository implements ActivityViewRepository {
   public int countUniqueViews(UUID activityId) {
     return activityViewJpaRepository.countByActivityId(activityId);
   }
+
+  @Override
+  public void deleteAllByActivityId(UUID activityId) {
+    activityViewJpaRepository.deleteByActivityId(activityId);
+  }
 }

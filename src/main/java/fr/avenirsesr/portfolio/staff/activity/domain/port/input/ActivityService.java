@@ -41,6 +41,8 @@ public interface ActivityService {
 
   void deleteDraft(UUID activityDraftId);
 
+  void deleteActivityDefinitively(UUID activityId);
+
   Activity getActivityById(UUID id);
 
   ActivityDraft getActivityDraftById(UUID id);

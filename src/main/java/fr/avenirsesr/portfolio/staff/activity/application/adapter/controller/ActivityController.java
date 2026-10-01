@@ -322,6 +322,20 @@ public class ActivityController {
     return ResponseEntity.ok("Activity draft successfully deleted");
   }
 
+  @PreAuthorize("hasAuthority('activity:admin:management')")
+  @DeleteMapping("/{activityId}")
+  public ResponseEntity<Void> deleteActivityDefinitively(
+      Principal principal, @PathVariable UUID activityId) {
+    log.debug(
+        "Received request to definitively delete activity {} by user [{}]",
+        activityId,
+        principal.getName());
+
+    activityService.deleteActivityDefinitively(activityId);
+
+    return ResponseEntity.noContent().build();
+  }
+
   @PreAuthorize("hasAuthority('activity:update')")
   @PatchMapping("/{activityDraftId}")
   public ResponseEntity<ActivityDraftUpdateResponse> updateActivityDraft(

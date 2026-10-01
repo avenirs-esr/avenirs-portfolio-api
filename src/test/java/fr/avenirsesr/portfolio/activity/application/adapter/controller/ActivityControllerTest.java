@@ -962,4 +962,17 @@ class ActivityControllerTest {
 
     verify(activityContentDtoMapper).toDTO(activity, true, List.of());
   }
+
+  @Test
+  void shouldDelegateDefinitiveDeletionToTheService() {
+    BddLogger.given("an activity id");
+    UUID activityId = activity.getId();
+
+    BddLogger.when("deleting the activity definitively");
+    var response = controller.deleteActivityDefinitively(principal, activityId);
+
+    BddLogger.then("it should delegate to the service and return 204");
+    assertEquals(204, response.getStatusCode().value());
+    verify(activityService).deleteActivityDefinitively(activityId);
+  }
 }

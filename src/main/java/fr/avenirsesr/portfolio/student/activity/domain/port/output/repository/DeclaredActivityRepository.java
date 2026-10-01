@@ -34,4 +34,6 @@ public interface DeclaredActivityRepository extends GenericRepositoryPort<Declar
   int countUnsubscribedByActivitySince(Activity activity, Instant since);
 
   List<DeclaredActivity> findAllEnrolledByActivity(Activity activity, FetchGraph fetchGraph);
+
+  List<DeclaredActivity> findAllByActivity(Activity activity, FetchGraph fetchGraph);
 }
