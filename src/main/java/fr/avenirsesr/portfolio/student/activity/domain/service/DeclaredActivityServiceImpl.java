@@ -440,6 +440,32 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
         declaredActivity.getStudent().getId());
   }
 
+  @Override
+  public void deleteAllOfActivity(Activity activity) {
+    var graph =
+        FetchGraph.init().add("student").fetch("user").root().add("activity").fetch("author");
+    var declaredActivities = declaredActivityRepository.findAllByActivity(activity, graph);
+
+    if (declaredActivities.isEmpty()) {
+      return;
+    }
+
+    var declaredActivityIds = declaredActivities.stream().map(DeclaredActivity::getId).toList();
+    var feedbackIds = feedbackService.deleteAllOfDeclaredActivities(declaredActivityIds);
+
+    associationService.deleteAllOf(declaredActivityIds, DeclaredActivity.class);
+    notificationService.deleteNotificationsOf(ENotificationType.ASK_FOR_FEEDBACK, feedbackIds);
+    notificationService.deleteNotificationsOf(
+        ENotificationType.ACTIVITY_MODIFIED, declaredActivityIds);
+    declaredActivityRepository.removeAllFromDatabase(declaredActivities);
+
+    log.debug(
+        "Deleted the {} declared activities of activity {} with their associations, notifications"
+            + " and feedbacks",
+        declaredActivities.size(),
+        activity.getId());
+  }
+
   private boolean isSubmittedOrFinished(
       DeclaredActivity declaredActivity, boolean hasActiveFeedback) {
     EDeclaredActivityStatus status = getDeclaredActivityStatus(declaredActivity, hasActiveFeedback);

@@ -431,4 +431,33 @@ public class FeedbackServiceImpl implements FeedbackService {
   public void deleteByDeclaredActivityId(DeclaredActivity declaredActivity) {
     feedbackRepository.deleteByDeclaredActivityId(declaredActivity);
   }
+
+  @Override
+  public List<UUID> deleteAllOfDeclaredActivities(List<UUID> declaredActivityIds) {
+    if (declaredActivityIds.isEmpty()) {
+      return List.of();
+    }
+
+    List<Feedback> feedbacks =
+        declaredActivityIds.stream()
+            .flatMap(
+                declaredActivityId ->
+                    feedbackRepository.findAllByDeclaredActivityId(declaredActivityId).stream())
+            .toList();
+
+    if (feedbacks.isEmpty()) {
+      return List.of();
+    }
+
+    List<UUID> attachmentIds =
+        feedbacks.stream()
+            .flatMap(feedback -> feedback.getAttachments().stream())
+            .map(File::getId)
+            .toList();
+
+    feedbackRepository.removeAllFromDatabase(feedbacks);
+    attachmentIds.forEach(fileResourceService::delete);
+
+    return feedbacks.stream().map(Feedback::getId).toList();
+  }
 }

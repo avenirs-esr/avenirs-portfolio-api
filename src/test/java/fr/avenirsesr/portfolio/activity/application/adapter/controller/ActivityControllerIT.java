@@ -63,6 +63,8 @@ class ActivityControllerIT extends ContainerConfigurationTest {
   private static final String SUBSCRIBE_PATH = "/me/activity-progress/subscribe/{activityId}";
   private static final String UNSUBSCRIBE_PATH = "/me/activity-progress/unsubscribe";
   private static final String DASHBOARD_PATH = BASE_PATH + "/{activityId}/dashboard";
+  private static final String DEFINITIVE_DELETE_PATH = BASE_PATH + "/{activityId}";
+  private static final String DECLARED_ACTIVITY_PATH = "/me/activity-progress/{declaredActivityId}";
 
   @Autowired private WebTestClient webTestClient;
   @Autowired private ObjectMapper objectMapper;
@@ -85,6 +87,12 @@ class ActivityControllerIT extends ContainerConfigurationTest {
 
   @Value("${user.staff.signature}")
   private String staffSignature;
+
+  @Value("${user.super-admin.payload}")
+  private String superAdminPayload;
+
+  @Value("${user.super-admin.signature}")
+  private String superAdminSignature;
 
   @Value("${user.no-permission.payload}")
   private String noPermissionPayload;
@@ -3258,6 +3266,25 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         .isCreated();
   }
 
+  private UUID subscribeStudentToActivityAndGetDeclaredActivityId(UUID activityId)
+      throws Exception {
+    String body =
+        webTestClient
+            .post()
+            .uri(SUBSCRIBE_PATH, activityId)
+            .headers(this::addStudentHeaders)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue("{}")
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    return UUID.fromString(objectMapper.readTree(body).get("createdItemId").asText());
+  }
+
   private Set<UUID> staffAuthoredActivityIds() throws Exception {
     String body =
         webTestClient
@@ -3372,6 +3399,11 @@ class ActivityControllerIT extends ContainerConfigurationTest {
     headers.add(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature);
   }
 
+  private void addSuperAdminHeaders(HttpHeaders headers) {
+    headers.add(AvenirsSecurityHeaders.SIGNED_CONTEXT, superAdminPayload);
+    headers.add(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, superAdminSignature);
+  }
+
   private void addNoPermissionHeaders(HttpHeaders headers) {
     headers.add(AvenirsSecurityHeaders.SIGNED_CONTEXT, noPermissionPayload);
     headers.add(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, noPermissionSignature);
@@ -3433,5 +3465,106 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         .expectBody()
         .jsonPath("$.haveDraft")
         .isEqualTo(true);
+  }
+
+  @Test
+  void shouldDeleteActivityDefinitivelyWithItsDeclaredActivitiesAsSuperAdmin() throws Exception {
+    BddLogger.given("a published activity a student is enrolled in");
+    UUID activityId = publishNewActivity("Activité à supprimer définitivement");
+    UUID declaredActivityId = subscribeStudentToActivityAndGetDeclaredActivityId(activityId);
+
+    BddLogger.when("performing a DELETE on " + DEFINITIVE_DELETE_PATH + " as a super admin");
+    BddLogger.then("it should return 204 and remove the activity and its declared activities");
+
+    webTestClient
+        .delete()
+        .uri(DEFINITIVE_DELETE_PATH, activityId)
+        .headers(this::addSuperAdminHeaders)
+        .exchange()
+        .expectStatus()
+        .isNoContent();
+
+    webTestClient
+        .get()
+        .uri(PRESENTATION_PATH, activityId)
+        .headers(this::addStaffHeaders)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isNotFound();
+
+    webTestClient
+        .get()
+        .uri(DECLARED_ACTIVITY_PATH, declaredActivityId)
+        .headers(this::addStudentHeaders)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isNotFound();
+  }
+
+  @Test
+  void shouldDeleteActivityDefinitivelyWithItsDraftAsSuperAdmin() throws Exception {
+    BddLogger.given("a published activity having a draft");
+    UUID activityId = publishNewActivity("Activité avec brouillon à supprimer définitivement");
+    webTestClient
+        .post()
+        .uri(CREATE_DRAFT_PATH, activityId)
+        .headers(this::addStaffHeaders)
+        .exchange()
+        .expectStatus()
+        .isOk();
+
+    BddLogger.when("performing a DELETE on " + DEFINITIVE_DELETE_PATH + " as a super admin");
+    BddLogger.then("it should return 204 and remove the draft as well");
+
+    webTestClient
+        .delete()
+        .uri(DEFINITIVE_DELETE_PATH, activityId)
+        .headers(this::addSuperAdminHeaders)
+        .exchange()
+        .expectStatus()
+        .isNoContent();
+
+    webTestClient
+        .get()
+        .uri(CONTENT_PATH, "DRAFT", activityId)
+        .headers(this::addStaffHeaders)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isNotFound();
+  }
+
+  @Test
+  void shouldReturn404WhenDeletingAnUnknownActivityDefinitively() {
+    BddLogger.given("an unknown activity id");
+    BddLogger.when("performing a DELETE on " + DEFINITIVE_DELETE_PATH + " as a super admin");
+    BddLogger.then("it should return 404");
+
+    webTestClient
+        .delete()
+        .uri(DEFINITIVE_DELETE_PATH, UUID.randomUUID())
+        .headers(this::addSuperAdminHeaders)
+        .exchange()
+        .expectStatus()
+        .isNotFound();
+  }
+
+  @Test
+  void shouldReturn403WhenDeletingActivityDefinitivelyWithoutAdminPermission() throws Exception {
+    BddLogger.given("a staff without the activity:admin:management permission");
+    UUID activityId = publishNewActivity("Activité protégée de la suppression définitive");
+
+    BddLogger.when("performing a DELETE on " + DEFINITIVE_DELETE_PATH);
+    BddLogger.then("it should return 403");
+
+    webTestClient
+        .delete()
+        .uri(DEFINITIVE_DELETE_PATH, activityId)
+        .headers(this::addStaffHeaders)
+        .exchange()
+        .expectStatus()
+        .isForbidden();
   }
 }

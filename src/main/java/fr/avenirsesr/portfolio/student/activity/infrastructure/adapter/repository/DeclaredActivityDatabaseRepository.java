@@ -104,4 +104,9 @@ public class DeclaredActivityDatabaseRepository
             .and(DeclaredActivitySpecification.isNotUnsubscribed()),
         fetchGraph);
   }
+
+  @Override
+  public List<DeclaredActivity> findAllByActivity(Activity activity, FetchGraph fetchGraph) {
+    return findAll(DeclaredActivitySpecification.hasActivityId(activity.getId()), fetchGraph);
+  }
 }

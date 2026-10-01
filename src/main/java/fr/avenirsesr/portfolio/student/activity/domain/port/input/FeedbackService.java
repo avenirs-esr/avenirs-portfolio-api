@@ -48,4 +48,6 @@ public interface FeedbackService {
   void deletePendingFeedbacks(List<UUID> declaredActivityIds);
 
   void deleteByDeclaredActivityId(DeclaredActivity declaredActivity);
+
+  List<UUID> deleteAllOfDeclaredActivities(List<UUID> declaredActivityIds);
 }

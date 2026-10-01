@@ -8,4 +8,6 @@ public interface ActivityViewRepository {
   void recordView(UUID activityId, UUID studentId);
 
   int countUniqueViews(UUID activityId);
+
+  void deleteAllByActivityId(UUID activityId);
 }
