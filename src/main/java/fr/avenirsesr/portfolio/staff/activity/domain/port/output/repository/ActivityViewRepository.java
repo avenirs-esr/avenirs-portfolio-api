@@ -17,7 +17,6 @@ public interface ActivityViewRepository {
 
   int countViewersSince(UUID activityId, Collection<UUID> studentIds, Instant since);
 
-  /** Date of the last consultation of each given student having consulted the activity. */
   Map<UUID, Instant> findLastViewedAtByStudents(UUID activityId, Collection<UUID> studentIds);
 
   void deleteAllByActivityId(UUID activityId);

@@ -2446,33 +2446,26 @@ class ActivityServiceImplTest {
       }
 
       @Test
-      void thenItShouldReturnTheEnrolledStudentsWithoutRecentConsultation() {
+      void thenItShouldReturnTheInactiveStudentsWithTheirLastConsultation() {
         BddLogger.then(
-            "only the students having never or not recently consulted the activity should be"
-                + " returned");
+            "the students returned by the query should be exposed with their last consultation");
 
         UUID neverConsultedId = UUID.randomUUID();
         UUID lastConsultedLongAgoId = UUID.randomUUID();
-        UUID recentlyConsultedId = UUID.randomUUID();
         Instant enrolledAt = Instant.now().minus(Duration.ofDays(60));
         Instant oldConsultation = Instant.now().minus(Duration.ofDays(45));
 
-        List<DeclaredActivity> enrolledStudents =
+        List<DeclaredActivity> inactiveStudents =
             List.of(
                 enrolledStudent(neverConsultedId, enrolledAt),
-                enrolledStudent(lastConsultedLongAgoId, enrolledAt),
-                enrolledStudent(recentlyConsultedId, enrolledAt));
+                enrolledStudent(lastConsultedLongAgoId, enrolledAt));
 
         when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
         when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
-        when(declaredActivityService.getEnrolledStudents(activity)).thenReturn(enrolledStudents);
+        when(declaredActivityService.getEnrolledStudentsNotViewedSince(eq(activity), any()))
+            .thenReturn(inactiveStudents);
         when(activityViewRepository.findLastViewedAtByStudents(eq(activityId), anyCollection()))
-            .thenReturn(
-                Map.of(
-                    lastConsultedLongAgoId,
-                    oldConsultation,
-                    recentlyConsultedId,
-                    Instant.now().minus(Duration.ofDays(2))));
+            .thenReturn(Map.of(lastConsultedLongAgoId, oldConsultation));
 
         List<InactiveStudentData> result = activityService.getInactiveStudents(activityId);
 
@@ -2485,34 +2478,34 @@ class ActivityServiceImplTest {
       }
 
       @Test
-      void thenItShouldLookUpTheConsultationsOverTheLastThirtyDays() {
-        BddLogger.then("the inactivity should be evaluated over the last 30 days");
-
-        UUID studentId = UUID.randomUUID();
-        List<DeclaredActivity> enrolledStudents =
-            List.of(enrolledStudent(studentId, Instant.now()));
+      void thenItShouldQueryTheStudentsWithoutConsultationOverTheLastThirtyDays() {
+        BddLogger.then("the inactivity should be evaluated by the query over the last 30 days");
 
         when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
         when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
-        when(declaredActivityService.getEnrolledStudents(activity)).thenReturn(enrolledStudents);
+        when(declaredActivityService.getEnrolledStudentsNotViewedSince(eq(activity), any()))
+            .thenReturn(List.of());
 
         Instant beforeCall = Instant.now();
-        when(activityViewRepository.findLastViewedAtByStudents(activityId, List.of(studentId)))
-            .thenReturn(Map.of(studentId, beforeCall.minus(Duration.ofDays(31))));
+        activityService.getInactiveStudents(activityId);
 
-        List<InactiveStudentData> result = activityService.getInactiveStudents(activityId);
+        ArgumentCaptor<Instant> sinceCaptor = ArgumentCaptor.forClass(Instant.class);
+        verify(declaredActivityService)
+            .getEnrolledStudentsNotViewedSince(eq(activity), sinceCaptor.capture());
 
-        assertEquals(1, result.size());
-        assertEquals(studentId, result.get(0).student().getId());
+        Instant expectedSince = beforeCall.minus(Duration.ofDays(30));
+        assertFalse(sinceCaptor.getValue().isBefore(expectedSince));
+        assertTrue(sinceCaptor.getValue().isBefore(expectedSince.plusSeconds(60)));
       }
 
       @Test
-      void thenItShouldReturnNoStudentWhenNobodyIsEnrolled() {
+      void thenItShouldReturnNoStudentWhenNobodyIsInactive() {
         BddLogger.then("an empty list should be returned and no view should be looked up");
 
         when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
         when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
-        when(declaredActivityService.getEnrolledStudents(activity)).thenReturn(List.of());
+        when(declaredActivityService.getEnrolledStudentsNotViewedSince(eq(activity), any()))
+            .thenReturn(List.of());
 
         assertTrue(activityService.getInactiveStudents(activityId).isEmpty());
         verify(activityViewRepository, never()).findLastViewedAtByStudents(any(), any());
