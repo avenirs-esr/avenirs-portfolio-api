@@ -8,6 +8,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityDashboardData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityPresentationData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityStaffOverviewData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityWithStudentStatusData;
+import fr.avenirsesr.portfolio.staff.activity.domain.data.InactiveStudentData;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityDraft;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
@@ -50,6 +51,8 @@ public interface ActivityService {
   ActivityPresentationData getActivityPresentation(EActivityStatus activityStatus, UUID id);
 
   ActivityDashboardData getActivityDashboard(UUID activityId);
+
+  List<InactiveStudentData> getInactiveStudents(UUID activityId);
 
   Map<EActivityThematic, List<Activity>> getActivityNavigation();
 

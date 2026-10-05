@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.repository
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityViewEntity;
 import java.time.Instant;
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -28,6 +29,9 @@ public interface ActivityViewJpaRepository extends JpaRepository<ActivityViewEnt
 
   int countByActivityIdAndStudentIdInAndLastViewedAtGreaterThanEqual(
       UUID activityId, Collection<UUID> studentIds, Instant since);
+
+  List<ActivityViewEntity> findByActivityIdAndStudentIdIn(
+      UUID activityId, Collection<UUID> studentIds);
 
   @Transactional
   void deleteByActivityId(UUID activityId);

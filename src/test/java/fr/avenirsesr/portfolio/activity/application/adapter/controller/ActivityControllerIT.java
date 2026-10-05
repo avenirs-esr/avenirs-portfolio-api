@@ -63,6 +63,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
   private static final String SUBSCRIBE_PATH = "/me/activity-progress/subscribe/{activityId}";
   private static final String UNSUBSCRIBE_PATH = "/me/activity-progress/unsubscribe";
   private static final String DASHBOARD_PATH = BASE_PATH + "/{activityId}/dashboard";
+  private static final String INACTIVE_STUDENTS_PATH = DASHBOARD_PATH + "/inactive-students";
   private static final String DEFINITIVE_DELETE_PATH = BASE_PATH + "/{activityId}";
   private static final String DECLARED_ACTIVITY_PATH = "/me/activity-progress/{declaredActivityId}";
 
@@ -815,6 +816,88 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             .expectBody()
             .jsonPath("$.code")
             .isEqualTo("ACTIVITY_NOT_FOUND");
+      }
+    }
+
+    @Nested
+    class WhenGettingTheInactiveStudents {
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("performing a GET on " + INACTIVE_STUDENTS_PATH);
+      }
+
+      @Test
+      void thenItShouldReturnTheEnrolledStudentHavingNeverConsultedTheActivity() throws Exception {
+        BddLogger.and("given an activity published by the staff and subscribed without being read");
+        UUID activityId = publishNewActivityAsStaff("Activité non consultée pour les inactifs");
+        subscribeStudentToActivity(activityId);
+
+        BddLogger.then(
+            "it should return the enrolled student, its enrolment date and no consultation date");
+
+        JsonNode inactiveStudents = getInactiveStudentsAsStaff(activityId);
+
+        assertEquals(1, inactiveStudents.size());
+        JsonNode inactiveStudent = inactiveStudents.get(0);
+        assertTrue(inactiveStudent.get("student").hasNonNull("id"));
+        assertTrue(inactiveStudent.get("student").hasNonNull("email"));
+        assertTrue(inactiveStudent.hasNonNull("enrolledAt"));
+        assertTrue(inactiveStudent.get("lastViewedAt").isNull());
+
+        BddLogger.and("once the student consults the activity");
+        getPresentationAsStudent(activityId);
+
+        BddLogger.then("it should not return the student anymore");
+
+        assertTrue(getInactiveStudentsAsStaff(activityId).isEmpty());
+      }
+
+      @Test
+      void thenItShouldReturnNoStudentWhenNobodyIsEnrolled() throws Exception {
+        BddLogger.and("given an activity published by the staff nobody subscribed to");
+        UUID activityId = publishNewActivityAsStaff("Activité sans inscrit pour les inactifs");
+
+        BddLogger.then("it should return an empty list");
+
+        assertTrue(getInactiveStudentsAsStaff(activityId).isEmpty());
+      }
+
+      @Test
+      void thenItShouldReturn404WhenActivityNotFound() {
+        BddLogger.and("given a non-existent activity id");
+        UUID unknownId = UUID.randomUUID();
+
+        BddLogger.then("it should return 404 with ACTIVITY_NOT_FOUND error code");
+
+        webTestClient
+            .get()
+            .uri(INACTIVE_STUDENTS_PATH, unknownId)
+            .header("Accept-Language", ELanguage.FRENCH.getCode())
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isNotFound()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("ACTIVITY_NOT_FOUND");
+      }
+
+      @Test
+      void thenItShouldReturn403WhenTheUserHasNoPermission() {
+        BddLogger.and("given a user without the activity:read:contextual permission");
+
+        BddLogger.then("it should return 403");
+
+        webTestClient
+            .get()
+            .uri(INACTIVE_STUDENTS_PATH, UUID.randomUUID())
+            .headers(ActivityControllerIT.this::addNoPermissionHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isForbidden();
       }
     }
 
@@ -3392,6 +3475,23 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         .exchange()
         .expectStatus()
         .isOk();
+  }
+
+  private JsonNode getInactiveStudentsAsStaff(UUID activityId) throws Exception {
+    String body =
+        webTestClient
+            .get()
+            .uri(INACTIVE_STUDENTS_PATH, activityId)
+            .headers(this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    return objectMapper.readTree(body);
   }
 
   private void getPresentationAsStudent(UUID activityId) {
