@@ -61,7 +61,7 @@ public class TraceAssociationStrategy implements AssociationStrategy {
 <span class="fc" id="L61">    var traces =</span>
 <span class="fc" id="L62">        traceService.getTracesView(</span>
             keyword,
-            new TraceFilter(isAssociated, null, null, null, null),
+            new TraceFilter(isAssociated, null, null, null),
             null,
             pageCriteria,
             new SortCriteria(ESortField.DATE, ESortOrder.DESC));
