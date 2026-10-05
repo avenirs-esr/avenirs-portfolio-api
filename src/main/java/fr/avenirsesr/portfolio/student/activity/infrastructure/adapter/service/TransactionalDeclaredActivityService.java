@@ -133,6 +133,12 @@ public class TransactionalDeclaredActivityService implements DeclaredActivitySer
   }
 
   @Override
+  public List<DeclaredActivity> getEnrolledStudentsNotViewedSince(
+      Activity activity, Instant since) {
+    return delegate.getEnrolledStudentsNotViewedSince(activity, since);
+  }
+
+  @Override
   public List<UUID> getEnrolledStudentIds(Activity activity) {
     return delegate.getEnrolledStudentIds(activity);
   }

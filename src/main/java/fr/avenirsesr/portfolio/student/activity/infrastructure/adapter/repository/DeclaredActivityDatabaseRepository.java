@@ -107,6 +107,14 @@ public class DeclaredActivityDatabaseRepository
   }
 
   @Override
+  public List<DeclaredActivity> findAllEnrolledNotViewedSince(
+      Activity activity, Instant since, FetchGraph fetchGraph) {
+    return findAll(
+        isEnrolledIn(activity).and(DeclaredActivitySpecification.hasNotBeenViewedSince(since)),
+        fetchGraph);
+  }
+
+  @Override
   public List<UUID> findEnrolledStudentIdsByActivity(Activity activity) {
     var cb = em.getCriteriaBuilder();
     var query = cb.createQuery(UUID.class);

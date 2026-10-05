@@ -423,30 +423,27 @@ public class ActivityServiceImpl implements ActivityService {
     var activity =
         activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);
 
-    var enrolledDeclaredActivities = declaredActivityService.getEnrolledStudents(activity);
-    if (enrolledDeclaredActivities.isEmpty()) {
+    var since = Instant.now().minus(DURATION_FOR_STUDENT_INACTIVITY);
+    var inactiveDeclaredActivities =
+        declaredActivityService.getEnrolledStudentsNotViewedSince(activity, since);
+    if (inactiveDeclaredActivities.isEmpty()) {
       return List.of();
     }
 
     var lastViewedAtByStudent =
         activityViewRepository.findLastViewedAtByStudents(
             activityId,
-            enrolledDeclaredActivities.stream()
+            inactiveDeclaredActivities.stream()
                 .map(declaredActivity -> declaredActivity.getStudent().getId())
                 .toList());
-    var since = Instant.now().minus(DURATION_FOR_STUDENT_INACTIVITY);
 
-    return enrolledDeclaredActivities.stream()
+    return inactiveDeclaredActivities.stream()
         .map(
             declaredActivity ->
                 new InactiveStudentData(
                     declaredActivity.getStudent(),
                     declaredActivity.getCreatedAt(),
                     lastViewedAtByStudent.get(declaredActivity.getStudent().getId())))
-        .filter(
-            inactiveStudent ->
-                inactiveStudent.lastViewedAt() == null
-                    || inactiveStudent.lastViewedAt().isBefore(since))
         .toList();
   }
 

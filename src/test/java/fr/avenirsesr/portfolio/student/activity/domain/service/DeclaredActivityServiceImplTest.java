@@ -1034,6 +1034,25 @@ class DeclaredActivityServiceImplTest {
   }
 
   @Test
+  void getEnrolledStudentsNotViewedSince_should_delegate_the_filtering_to_the_repository() {
+    BddLogger.given("an activity with one student having not consulted it for a month");
+    Activity activity = ActivityFixture.create().toModel();
+    Student student = StudentFixture.create().toModel();
+    Instant since = Instant.now().minus(Duration.ofDays(30));
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(UUID.randomUUID(), student, activity, null, null, null, null, null);
+    when(declaredActivityRepository.findAllEnrolledNotViewedSince(
+            eq(activity), eq(since), any(FetchGraph.class)))
+        .thenReturn(List.of(declaredActivity));
+
+    BddLogger.when("getting the enrolled students without recent consultation");
+    List<DeclaredActivity> result = service.getEnrolledStudentsNotViewedSince(activity, since);
+
+    BddLogger.then("it should return the declared activities filtered by the repository");
+    assertThat(result).containsExactly(declaredActivity);
+  }
+
+  @Test
   void getEnrolledStudentIds_should_delegate_to_repository() {
     BddLogger.given("an activity with two enrolled students");
     Activity activity = ActivityFixture.create().toModel();
