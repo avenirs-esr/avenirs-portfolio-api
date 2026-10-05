@@ -1,14 +1,33 @@
 package fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.repository;
 
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityViewEntity;
+import java.time.Instant;
+import java.util.Collection;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface ActivityViewJpaRepository extends JpaRepository<ActivityViewEntity, UUID> {
-  boolean existsByActivityIdAndStudentId(UUID activityId, UUID studentId);
+  @Transactional
+  @Modifying
+  @Query(
+      """
+      update ActivityViewEntity v
+      set v.lastViewedAt = :viewedAt, v.updatedAt = :viewedAt
+      where v.activityId = :activityId and v.studentId = :studentId
+      """)
+  int updateLastViewedAt(
+      @Param("activityId") UUID activityId,
+      @Param("studentId") UUID studentId,
+      @Param("viewedAt") Instant viewedAt);
 
   int countByActivityId(UUID activityId);
+
+  int countByActivityIdAndStudentIdInAndLastViewedAtGreaterThanEqual(
+      UUID activityId, Collection<UUID> studentIds, Instant since);
 
   @Transactional
   void deleteByActivityId(UUID activityId);

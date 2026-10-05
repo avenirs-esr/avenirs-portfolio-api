@@ -407,6 +407,11 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   }
 
   @Override
+  public List<UUID> getEnrolledStudentIds(Activity activity) {
+    return declaredActivityRepository.findEnrolledStudentIdsByActivity(activity);
+  }
+
+  @Override
   public boolean isEnrolled(Activity activity, Student student) {
     return declaredActivityRepository
         .findByActivity(student, activity)

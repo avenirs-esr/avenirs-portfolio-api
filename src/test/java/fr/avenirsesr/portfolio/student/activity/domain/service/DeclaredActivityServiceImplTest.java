@@ -1034,6 +1034,21 @@ class DeclaredActivityServiceImplTest {
   }
 
   @Test
+  void getEnrolledStudentIds_should_delegate_to_repository() {
+    BddLogger.given("an activity with two enrolled students");
+    Activity activity = ActivityFixture.create().toModel();
+    List<UUID> studentIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+    when(declaredActivityRepository.findEnrolledStudentIdsByActivity(activity))
+        .thenReturn(studentIds);
+
+    BddLogger.when("getting the ids of the enrolled students");
+    List<UUID> result = service.getEnrolledStudentIds(activity);
+
+    BddLogger.then("it should return the ids of the repository");
+    assertThat(result).isEqualTo(studentIds);
+  }
+
+  @Test
   void finish_should_throw_DeclaredActivityUnsubscribedException_when_unsubscribed() {
     BddLogger.given("A logged-in student and an activity he unsubscribed from");
     UUID declaredActivityId = UUID.randomUUID();

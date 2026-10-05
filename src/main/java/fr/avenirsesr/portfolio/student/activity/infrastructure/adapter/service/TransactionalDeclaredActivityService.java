@@ -133,6 +133,11 @@ public class TransactionalDeclaredActivityService implements DeclaredActivitySer
   }
 
   @Override
+  public List<UUID> getEnrolledStudentIds(Activity activity) {
+    return delegate.getEnrolledStudentIds(activity);
+  }
+
+  @Override
   public boolean isEnrolled(Activity activity, Student student) {
     return delegate.isEnrolled(activity, student);
   }

@@ -678,6 +678,8 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             .jsonPath("$.enrolledStudents")
             .isEqualTo(0)
             .jsonPath("$.unsubscriptionsLast30Days")
+            .isEqualTo(0)
+            .jsonPath("$.inactiveStudentsLast30Days")
             .isEqualTo(0);
       }
 
@@ -724,6 +726,50 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       }
 
       @Test
+      void thenItShouldCountTheEnrolledStudentsWithoutConsultationOverTheLastThirtyDays()
+          throws Exception {
+        BddLogger.and("given an activity published by the staff and subscribed without being read");
+        UUID activityId =
+            publishNewActivityAsStaff("Activité non consultée pour le tableau de bord");
+        subscribeStudentToActivity(activityId);
+
+        BddLogger.then("it should count the enrolled student as inactive");
+
+        webTestClient
+            .get()
+            .uri(DASHBOARD_PATH, activityId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.enrolledStudents")
+            .isEqualTo(1)
+            .jsonPath("$.inactiveStudentsLast30Days")
+            .isEqualTo(1);
+
+        BddLogger.and("once the student consults the activity");
+        getPresentationAsStudent(activityId);
+
+        BddLogger.then("it should not count the student as inactive anymore");
+
+        webTestClient
+            .get()
+            .uri(DASHBOARD_PATH, activityId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.enrolledStudents")
+            .isEqualTo(1)
+            .jsonPath("$.inactiveStudentsLast30Days")
+            .isEqualTo(0);
+      }
+
+      @Test
       void thenItShouldReturnTheDashboardWhenTheStaffIsNotTheAuthor() throws Exception {
         BddLogger.and("given an activity of the library the staff did not author");
         UUID activityId = findActivityNotAuthoredByStaff();
@@ -745,6 +791,8 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             .jsonPath("$.enrolledStudents")
             .exists()
             .jsonPath("$.unsubscriptionsLast30Days")
+            .exists()
+            .jsonPath("$.inactiveStudentsLast30Days")
             .exists();
       }
 
