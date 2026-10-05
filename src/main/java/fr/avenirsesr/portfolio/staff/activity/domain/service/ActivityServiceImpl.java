@@ -25,6 +25,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityDashboardData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityPresentationData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityStaffOverviewData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityWithStudentStatusData;
+import fr.avenirsesr.portfolio.staff.activity.domain.data.InactiveStudentData;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.*;
 import fr.avenirsesr.portfolio.staff.activity.domain.mapper.ActivityPresentationDataMapper;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
@@ -414,6 +415,39 @@ public class ActivityServiceImpl implements ActivityService {
     var since = Instant.now().minus(DURATION_FOR_STUDENT_INACTIVITY);
     return enrolledStudentIds.size()
         - activityViewRepository.countViewersSince(activityId, enrolledStudentIds, since);
+  }
+
+  @Override
+  public List<InactiveStudentData> getInactiveStudents(UUID activityId) {
+    loggedInUserService.getLoggedInStaff();
+    var activity =
+        activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);
+
+    var enrolledDeclaredActivities = declaredActivityService.getEnrolledStudents(activity);
+    if (enrolledDeclaredActivities.isEmpty()) {
+      return List.of();
+    }
+
+    var lastViewedAtByStudent =
+        activityViewRepository.findLastViewedAtByStudents(
+            activityId,
+            enrolledDeclaredActivities.stream()
+                .map(declaredActivity -> declaredActivity.getStudent().getId())
+                .toList());
+    var since = Instant.now().minus(DURATION_FOR_STUDENT_INACTIVITY);
+
+    return enrolledDeclaredActivities.stream()
+        .map(
+            declaredActivity ->
+                new InactiveStudentData(
+                    declaredActivity.getStudent(),
+                    declaredActivity.getCreatedAt(),
+                    lastViewedAtByStudent.get(declaredActivity.getStudent().getId())))
+        .filter(
+            inactiveStudent ->
+                inactiveStudent.lastViewedAt() == null
+                    || inactiveStudent.lastViewedAt().isBefore(since))
+        .toList();
   }
 
   @Override

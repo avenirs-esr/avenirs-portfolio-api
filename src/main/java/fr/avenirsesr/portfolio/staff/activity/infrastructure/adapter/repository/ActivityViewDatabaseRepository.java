@@ -4,7 +4,9 @@ import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.Acti
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityViewEntity;
 import java.time.Instant;
 import java.util.Collection;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -45,6 +47,18 @@ public class ActivityViewDatabaseRepository implements ActivityViewRepository {
     }
     return activityViewJpaRepository.countByActivityIdAndStudentIdInAndLastViewedAtGreaterThanEqual(
         activityId, studentIds, since);
+  }
+
+  @Override
+  public Map<UUID, Instant> findLastViewedAtByStudents(
+      UUID activityId, Collection<UUID> studentIds) {
+    if (studentIds.isEmpty()) {
+      return Map.of();
+    }
+    return activityViewJpaRepository.findByActivityIdAndStudentIdIn(activityId, studentIds).stream()
+        .collect(
+            Collectors.toMap(
+                ActivityViewEntity::getStudentId, ActivityViewEntity::getLastViewedAt));
   }
 
   @Override

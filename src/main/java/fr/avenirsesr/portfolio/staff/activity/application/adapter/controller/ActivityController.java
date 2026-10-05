@@ -20,6 +20,7 @@ import fr.avenirsesr.portfolio.staff.activity.application.adapter.response.Activ
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityPresentationData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityStaffOverviewData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityWithStudentStatusData;
+import fr.avenirsesr.portfolio.staff.activity.domain.data.InactiveStudentData;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
@@ -55,6 +56,7 @@ public class ActivityController {
   private final ActivityOverviewDtoMapper activityOverviewDtoMapper;
   private final ActivityStaffOverviewDtoMapper activityStaffOverviewDtoMapper;
   private final ActivityFeedbacksPreviewMapper activityFeedbacksPreviewMapper;
+  private final InactiveStudentDtoMapper inactiveStudentDtoMapper;
   private final FileDTOMapper fileDTOMapper;
 
   @PreAuthorize("hasAuthority('activity:read:contextual')")
@@ -94,6 +96,20 @@ public class ActivityController {
             dashboard.enrolledStudents(),
             dashboard.unsubscriptionsLast30Days(),
             dashboard.inactiveStudentsLast30Days()));
+  }
+
+  @PreAuthorize("hasAuthority('activity:read:contextual')")
+  @GetMapping("/{activityId}/dashboard/inactive-students")
+  public ResponseEntity<List<InactiveStudentDTO>> getActivityInactiveStudents(
+      Principal principal, @PathVariable UUID activityId) {
+    log.debug(
+        "Received request to get the inactive students of activity [{}] by user [{}]",
+        activityId,
+        principal.getName());
+
+    List<InactiveStudentData> inactiveStudents = activityService.getInactiveStudents(activityId);
+    return ResponseEntity.ok(
+        inactiveStudents.stream().map(inactiveStudentDtoMapper::toDTO).toList());
   }
 
   @PreAuthorize("hasAuthority('activity:document:read:contextual')")

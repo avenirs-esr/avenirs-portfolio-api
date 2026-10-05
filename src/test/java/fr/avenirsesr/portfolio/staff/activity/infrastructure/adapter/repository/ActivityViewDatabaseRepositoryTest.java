@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.repository
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.entry;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -142,5 +143,34 @@ class ActivityViewDatabaseRepositoryTest {
     assertThat(count).isZero();
     verify(activityViewJpaRepository, never())
         .countByActivityIdAndStudentIdInAndLastViewedAtGreaterThanEqual(any(), any(), any());
+  }
+
+  @Test
+  void findLastViewedAtByStudents_should_return_the_last_consultation_date_of_each_viewer() {
+    BddLogger.given("One of the two students having consulted the activity");
+    var otherStudentId = UUID.randomUUID();
+    var lastViewedAt = Instant.now().minus(Duration.ofDays(40));
+    when(activityViewJpaRepository.findByActivityIdAndStudentIdIn(
+            activityId, List.of(studentId, otherStudentId)))
+        .thenReturn(List.of(ActivityViewEntity.of(activityId, studentId, lastViewedAt)));
+
+    BddLogger.when("The last consultation dates are looked up");
+    var lastViewedAtByStudent =
+        repository.findLastViewedAtByStudents(activityId, List.of(studentId, otherStudentId));
+
+    BddLogger.then("Only the student having consulted the activity is returned");
+    assertThat(lastViewedAtByStudent).containsExactly(entry(studentId, lastViewedAt));
+  }
+
+  @Test
+  void findLastViewedAtByStudents_should_not_query_the_jpa_repository_without_student() {
+    BddLogger.given("No student to look for");
+
+    BddLogger.when("The last consultation dates are looked up");
+    var lastViewedAtByStudent = repository.findLastViewedAtByStudents(activityId, List.of());
+
+    BddLogger.then("No view is requested and no date is returned");
+    assertThat(lastViewedAtByStudent).isEmpty();
+    verify(activityViewJpaRepository, never()).findByActivityIdAndStudentIdIn(any(), any());
   }
 }

@@ -48,6 +48,7 @@ import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityDashboardData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityPresentationData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityStaffOverviewData;
+import fr.avenirsesr.portfolio.staff.activity.domain.data.InactiveStudentData;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.*;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityDraft;
@@ -2417,6 +2418,126 @@ class ActivityServiceImplTest {
         assertThrows(
             ActivityNotFoundException.class,
             () -> activityService.getActivityDashboard(activityId));
+      }
+    }
+
+    @Nested
+    class WhenGettingTheInactiveStudents {
+
+      UUID activityId;
+      Staff staff;
+      Activity activity;
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("getting the inactive students of the activity");
+        activityId = UUID.randomUUID();
+        staff = mock(Staff.class);
+        activity = mock(Activity.class);
+      }
+
+      private DeclaredActivity enrolledStudent(UUID studentId, Instant enrolledAt) {
+        Student student = mock(Student.class);
+        when(student.getId()).thenReturn(studentId);
+        DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
+        when(declaredActivity.getStudent()).thenReturn(student);
+        when(declaredActivity.getCreatedAt()).thenReturn(enrolledAt);
+        return declaredActivity;
+      }
+
+      @Test
+      void thenItShouldReturnTheEnrolledStudentsWithoutRecentConsultation() {
+        BddLogger.then(
+            "only the students having never or not recently consulted the activity should be"
+                + " returned");
+
+        UUID neverConsultedId = UUID.randomUUID();
+        UUID lastConsultedLongAgoId = UUID.randomUUID();
+        UUID recentlyConsultedId = UUID.randomUUID();
+        Instant enrolledAt = Instant.now().minus(Duration.ofDays(60));
+        Instant oldConsultation = Instant.now().minus(Duration.ofDays(45));
+
+        List<DeclaredActivity> enrolledStudents =
+            List.of(
+                enrolledStudent(neverConsultedId, enrolledAt),
+                enrolledStudent(lastConsultedLongAgoId, enrolledAt),
+                enrolledStudent(recentlyConsultedId, enrolledAt));
+
+        when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+        when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
+        when(declaredActivityService.getEnrolledStudents(activity)).thenReturn(enrolledStudents);
+        when(activityViewRepository.findLastViewedAtByStudents(eq(activityId), anyCollection()))
+            .thenReturn(
+                Map.of(
+                    lastConsultedLongAgoId,
+                    oldConsultation,
+                    recentlyConsultedId,
+                    Instant.now().minus(Duration.ofDays(2))));
+
+        List<InactiveStudentData> result = activityService.getInactiveStudents(activityId);
+
+        assertEquals(2, result.size());
+        assertEquals(neverConsultedId, result.get(0).student().getId());
+        assertEquals(enrolledAt, result.get(0).enrolledAt());
+        assertNull(result.get(0).lastViewedAt());
+        assertEquals(lastConsultedLongAgoId, result.get(1).student().getId());
+        assertEquals(oldConsultation, result.get(1).lastViewedAt());
+      }
+
+      @Test
+      void thenItShouldLookUpTheConsultationsOverTheLastThirtyDays() {
+        BddLogger.then("the inactivity should be evaluated over the last 30 days");
+
+        UUID studentId = UUID.randomUUID();
+        List<DeclaredActivity> enrolledStudents =
+            List.of(enrolledStudent(studentId, Instant.now()));
+
+        when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+        when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
+        when(declaredActivityService.getEnrolledStudents(activity)).thenReturn(enrolledStudents);
+
+        Instant beforeCall = Instant.now();
+        when(activityViewRepository.findLastViewedAtByStudents(activityId, List.of(studentId)))
+            .thenReturn(Map.of(studentId, beforeCall.minus(Duration.ofDays(31))));
+
+        List<InactiveStudentData> result = activityService.getInactiveStudents(activityId);
+
+        assertEquals(1, result.size());
+        assertEquals(studentId, result.get(0).student().getId());
+      }
+
+      @Test
+      void thenItShouldReturnNoStudentWhenNobodyIsEnrolled() {
+        BddLogger.then("an empty list should be returned and no view should be looked up");
+
+        when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+        when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
+        when(declaredActivityService.getEnrolledStudents(activity)).thenReturn(List.of());
+
+        assertTrue(activityService.getInactiveStudents(activityId).isEmpty());
+        verify(activityViewRepository, never()).findLastViewedAtByStudents(any(), any());
+      }
+
+      @Test
+      void thenItShouldThrowActivityNotFoundExceptionWhenTheActivityDoesNotExist() {
+        BddLogger.then("the service should throw ActivityNotFoundException");
+
+        when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+        when(activityRepository.findById(activityId)).thenReturn(Optional.empty());
+
+        assertThrows(
+            ActivityNotFoundException.class, () -> activityService.getInactiveStudents(activityId));
+      }
+
+      @Test
+      void thenItShouldThrowWhenTheUserIsNotAStaff() {
+        BddLogger.then("the service should not expose the students to a non staff user");
+
+        when(loggedInUserService.getLoggedInStaff()).thenThrow(new UserIsNotStaffException());
+
+        assertThrows(
+            UserIsNotStaffException.class, () -> activityService.getInactiveStudents(activityId));
+        verifyNoInteractions(activityViewRepository);
       }
     }
 
