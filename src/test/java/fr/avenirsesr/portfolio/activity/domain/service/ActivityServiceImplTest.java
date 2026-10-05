@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
@@ -2311,7 +2312,7 @@ class ActivityServiceImplTest {
       }
 
       @Test
-      void thenItShouldReturnTheThreeKeyFigures() {
+      void thenItShouldReturnTheFourKeyFigures() {
         BddLogger.then("the key figures of the activity should be returned");
 
         when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
@@ -2319,12 +2320,58 @@ class ActivityServiceImplTest {
         when(activityViewRepository.countUniqueViews(activityId)).thenReturn(128);
         when(declaredActivityService.countEnrolledStudents(activity)).thenReturn(42);
         when(declaredActivityService.countUnsubscriptionsSince(eq(activity), any())).thenReturn(3);
+        when(declaredActivityService.getEnrolledStudentIds(activity))
+            .thenReturn(List.of(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID()));
+        when(activityViewRepository.countViewersSince(eq(activityId), anyCollection(), any()))
+            .thenReturn(1);
 
         ActivityDashboardData result = activityService.getActivityDashboard(activityId);
 
         assertEquals(128, result.uniqueStudentViews());
         assertEquals(42, result.enrolledStudents());
         assertEquals(3, result.unsubscriptionsLast30Days());
+        assertEquals(2, result.inactiveStudentsLast30Days());
+      }
+
+      @Test
+      void thenItShouldCountTheEnrolledStudentsWithoutRecentConsultation() {
+        BddLogger.then("the enrolled students having not consulted the activity should be counted");
+
+        List<UUID> enrolledStudentIds =
+            List.of(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID());
+        when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+        when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
+        when(declaredActivityService.getEnrolledStudentIds(activity))
+            .thenReturn(enrolledStudentIds);
+        when(activityViewRepository.countViewersSince(eq(activityId), anyCollection(), any()))
+            .thenReturn(3);
+
+        Instant beforeCall = Instant.now();
+        ActivityDashboardData result = activityService.getActivityDashboard(activityId);
+
+        assertEquals(1, result.inactiveStudentsLast30Days());
+
+        ArgumentCaptor<Instant> sinceCaptor = ArgumentCaptor.forClass(Instant.class);
+        verify(activityViewRepository)
+            .countViewersSince(eq(activityId), eq(enrolledStudentIds), sinceCaptor.capture());
+
+        Instant expectedSince = beforeCall.minus(Duration.ofDays(30));
+        assertFalse(sinceCaptor.getValue().isBefore(expectedSince));
+        assertTrue(sinceCaptor.getValue().isBefore(expectedSince.plusSeconds(60)));
+      }
+
+      @Test
+      void thenItShouldNotCountAnyInactiveStudentWhenNobodyIsEnrolled() {
+        BddLogger.then("no inactive student should be counted and no view should be looked up");
+
+        when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+        when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
+        when(declaredActivityService.getEnrolledStudentIds(activity)).thenReturn(List.of());
+
+        ActivityDashboardData result = activityService.getActivityDashboard(activityId);
+
+        assertEquals(0, result.inactiveStudentsLast30Days());
+        verify(activityViewRepository, never()).countViewersSince(any(), any(), any());
       }
 
       @Test

@@ -92,7 +92,8 @@ public class ActivityController {
         new ActivityDashboardDTO(
             dashboard.uniqueStudentViews(),
             dashboard.enrolledStudents(),
-            dashboard.unsubscriptionsLast30Days()));
+            dashboard.unsubscriptionsLast30Days(),
+            dashboard.inactiveStudentsLast30Days()));
   }
 
   @PreAuthorize("hasAuthority('activity:document:read:contextual')")

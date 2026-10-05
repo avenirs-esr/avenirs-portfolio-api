@@ -13,12 +13,15 @@ import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.model.Dec
 import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.specification.DeclaredActivitySpecification;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.repository.GenericUserJpaRepositoryAdapter;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -26,6 +29,7 @@ public class DeclaredActivityDatabaseRepository
     extends GenericUserJpaRepositoryAdapter<DeclaredActivity, DeclaredActivityEntity>
     implements DeclaredActivityRepository {
   private final DeclaredActivityJpaRepository jpaRepository;
+  @PersistenceContext private EntityManager em;
 
   public DeclaredActivityDatabaseRepository(DeclaredActivityJpaRepository jpaRepository) {
     super(
@@ -99,14 +103,29 @@ public class DeclaredActivityDatabaseRepository
   @Override
   public List<DeclaredActivity> findAllEnrolledByActivity(
       Activity activity, FetchGraph fetchGraph) {
-    return findAll(
-        DeclaredActivitySpecification.hasActivityId(activity.getId())
-            .and(DeclaredActivitySpecification.isNotUnsubscribed()),
-        fetchGraph);
+    return findAll(isEnrolledIn(activity), fetchGraph);
+  }
+
+  @Override
+  public List<UUID> findEnrolledStudentIdsByActivity(Activity activity) {
+    var cb = em.getCriteriaBuilder();
+    var query = cb.createQuery(UUID.class);
+    var root = query.from(DeclaredActivityEntity.class);
+
+    query
+        .select(root.get("student").get("id"))
+        .where(isEnrolledIn(activity).toPredicate(root, query, cb));
+
+    return em.createQuery(query).getResultList();
   }
 
   @Override
   public List<DeclaredActivity> findAllByActivity(Activity activity, FetchGraph fetchGraph) {
     return findAll(DeclaredActivitySpecification.hasActivityId(activity.getId()), fetchGraph);
+  }
+
+  private static Specification<DeclaredActivityEntity> isEnrolledIn(Activity activity) {
+    return DeclaredActivitySpecification.hasActivityId(activity.getId())
+        .and(DeclaredActivitySpecification.isNotUnsubscribed());
   }
 }

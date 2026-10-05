@@ -63,6 +63,7 @@ public class ActivityServiceImpl implements ActivityService {
 
   private static final Duration DURATION_FOR_LATEST = Duration.ofDays(90);
   private static final Duration DURATION_FOR_RECENT_UNSUBSCRIPTIONS = Duration.ofDays(30);
+  private static final Duration DURATION_FOR_STUDENT_INACTIVITY = Duration.ofDays(30);
   private static final Set<EFileType> ALLOWED_DRAFT_FILE_TYPES =
       EnumSet.of(
           EFileType.PDF,
@@ -401,7 +402,18 @@ public class ActivityServiceImpl implements ActivityService {
         activityViewRepository.countUniqueViews(activityId),
         declaredActivityService.countEnrolledStudents(activity),
         declaredActivityService.countUnsubscriptionsSince(
-            activity, Instant.now().minus(DURATION_FOR_RECENT_UNSUBSCRIPTIONS)));
+            activity, Instant.now().minus(DURATION_FOR_RECENT_UNSUBSCRIPTIONS)),
+        countInactiveStudents(activityId, activity));
+  }
+
+  private int countInactiveStudents(UUID activityId, Activity activity) {
+    var enrolledStudentIds = declaredActivityService.getEnrolledStudentIds(activity);
+    if (enrolledStudentIds.isEmpty()) {
+      return 0;
+    }
+    var since = Instant.now().minus(DURATION_FOR_STUDENT_INACTIVITY);
+    return enrolledStudentIds.size()
+        - activityViewRepository.countViewersSince(activityId, enrolledStudentIds, since);
   }
 
   @Override

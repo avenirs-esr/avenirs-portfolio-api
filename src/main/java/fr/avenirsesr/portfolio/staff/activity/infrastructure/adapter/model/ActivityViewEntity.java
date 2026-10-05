@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import java.time.Instant;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,11 +32,15 @@ public class ActivityViewEntity extends AvenirsBaseEntity {
   @Column(name = "student_id", nullable = false)
   private UUID studentId;
 
-  public static ActivityViewEntity of(UUID activityId, UUID studentId) {
+  @Column(name = "last_viewed_at", nullable = false)
+  private Instant lastViewedAt;
+
+  public static ActivityViewEntity of(UUID activityId, UUID studentId, Instant lastViewedAt) {
     var entity = new ActivityViewEntity();
     entity.setId(UUID.randomUUID());
     entity.activityId = activityId;
     entity.studentId = studentId;
+    entity.lastViewedAt = lastViewedAt;
     return entity;
   }
 
