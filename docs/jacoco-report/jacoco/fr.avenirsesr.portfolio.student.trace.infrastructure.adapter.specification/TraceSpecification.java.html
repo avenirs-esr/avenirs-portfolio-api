@@ -46,50 +46,59 @@ import org.springframework.data.jpa.domain.Specification;
 <span class="fc" id="L46">    return (root, query, cb) -&gt; cb.equal(root.get(&quot;valorized&quot;), value);</span>
   }
 
+  public static Specification&lt;TraceEntity&gt; isLink(boolean value) {
+<span class="fc" id="L50">    return (root, query, cb) -&gt; {</span>
+<span class="fc" id="L51">      Expression&lt;String&gt; link = root.get(&quot;link&quot;);</span>
+<span class="fc bfc" id="L52" title="All 2 branches covered.">      return value</span>
+<span class="fc" id="L53">          ? cb.and(cb.isNotNull(link), cb.notEqual(cb.trim(link), &quot;&quot;))</span>
+<span class="fc" id="L54">          : cb.or(cb.isNull(link), cb.equal(cb.trim(link), &quot;&quot;));</span>
+    };
+  }
+
   public static Specification&lt;TraceEntity&gt; search(String keyword, ELanguage language) {
-<span class="fc" id="L50">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="fc bfc" id="L51" title="All 6 branches covered.">      if (keyword == null || keyword.trim().isEmpty() || query == null) {</span>
-<span class="fc" id="L52">        return criteriaBuilder.conjunction();</span>
+<span class="fc" id="L59">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="fc bfc" id="L60" title="All 6 branches covered.">      if (keyword == null || keyword.trim().isEmpty() || query == null) {</span>
+<span class="fc" id="L61">        return criteriaBuilder.conjunction();</span>
       }
 
-<span class="fc" id="L55">      query.distinct(true);</span>
+<span class="fc" id="L64">      query.distinct(true);</span>
 
-<span class="fc" id="L57">      String pattern = &quot;%&quot; + keyword.toLowerCase() + &quot;%&quot;;</span>
+<span class="fc" id="L66">      String pattern = &quot;%&quot; + keyword.toLowerCase() + &quot;%&quot;;</span>
 
       // Trace
-<span class="fc" id="L60">      var titlePredicate = criteriaBuilder.like(criteriaBuilder.lower(root.get(&quot;title&quot;)), pattern);</span>
-<span class="fc" id="L61">      var aiUsePredicate =</span>
-<span class="fc" id="L62">          criteriaBuilder.like(criteriaBuilder.lower(root.get(&quot;aiUseJustification&quot;)), pattern);</span>
-<span class="fc" id="L63">      var personalNotePredicate =</span>
-<span class="fc" id="L64">          criteriaBuilder.like(criteriaBuilder.lower(root.get(&quot;personalNote&quot;)), pattern);</span>
+<span class="fc" id="L69">      var titlePredicate = criteriaBuilder.like(criteriaBuilder.lower(root.get(&quot;title&quot;)), pattern);</span>
+<span class="fc" id="L70">      var aiUsePredicate =</span>
+<span class="fc" id="L71">          criteriaBuilder.like(criteriaBuilder.lower(root.get(&quot;aiUseJustification&quot;)), pattern);</span>
+<span class="fc" id="L72">      var personalNotePredicate =</span>
+<span class="fc" id="L73">          criteriaBuilder.like(criteriaBuilder.lower(root.get(&quot;personalNote&quot;)), pattern);</span>
 
       // Attachment
-<span class="fc" id="L67">      var attachment = root.join(&quot;attachment&quot;, JoinType.LEFT);</span>
-<span class="fc" id="L68">      Predicate attachmentPredicate =</span>
-<span class="fc" id="L69">          criteriaBuilder.like(criteriaBuilder.lower(attachment.get(&quot;fileName&quot;)), pattern);</span>
+<span class="fc" id="L76">      var attachment = root.join(&quot;attachment&quot;, JoinType.LEFT);</span>
+<span class="fc" id="L77">      Predicate attachmentPredicate =</span>
+<span class="fc" id="L78">          criteriaBuilder.like(criteriaBuilder.lower(attachment.get(&quot;fileName&quot;)), pattern);</span>
 
-<span class="fc" id="L71">      return criteriaBuilder.or(</span>
+<span class="fc" id="L80">      return criteriaBuilder.or(</span>
           titlePredicate, aiUsePredicate, personalNotePredicate, attachmentPredicate);
     };
   }
 
   public static Sort toSort(SortCriteria sortCriteria, TraceFilter filter) {
-<span class="fc bfc" id="L77" title="All 2 branches covered.">    if (sortCriteria == null) {</span>
-<span class="fc bfc" id="L78" title="All 2 branches covered.">      if (filter != null) {</span>
-<span class="fc bfc" id="L79" title="All 4 branches covered.">        return filter.isAssociated() != null &amp;&amp; !filter.isAssociated()</span>
-<span class="fc" id="L80">            ? Sort.by(Sort.Direction.ASC, &quot;createdAt&quot;)</span>
-<span class="fc" id="L81">            : Sort.by(Sort.Direction.DESC, &quot;updatedAt&quot;)</span>
-<span class="fc" id="L82">                .and(Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;));</span>
+<span class="fc bfc" id="L86" title="All 2 branches covered.">    if (sortCriteria == null) {</span>
+<span class="fc bfc" id="L87" title="All 2 branches covered.">      if (filter != null) {</span>
+<span class="fc bfc" id="L88" title="All 4 branches covered.">        return filter.isAssociated() != null &amp;&amp; !filter.isAssociated()</span>
+<span class="fc" id="L89">            ? Sort.by(Sort.Direction.ASC, &quot;createdAt&quot;)</span>
+<span class="fc" id="L90">            : Sort.by(Sort.Direction.DESC, &quot;updatedAt&quot;)</span>
+<span class="fc" id="L91">                .and(Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;));</span>
       }
-<span class="fc" id="L84">      return Sort.unsorted();</span>
+<span class="fc" id="L93">      return Sort.unsorted();</span>
     }
 
     Sort.Direction direction =
-<span class="fc bfc" id="L88" title="All 2 branches covered.">        sortCriteria.order() == ESortOrder.ASC ? Sort.Direction.ASC : Sort.Direction.DESC;</span>
+<span class="fc bfc" id="L97" title="All 2 branches covered.">        sortCriteria.order() == ESortOrder.ASC ? Sort.Direction.ASC : Sort.Direction.DESC;</span>
 
-<span class="fc bfc" id="L90" title="All 2 branches covered.">    return switch (sortCriteria.field()) {</span>
-<span class="fc" id="L91">      case NAME -&gt; Sort.by(direction, &quot;title&quot;);</span>
-<span class="fc" id="L92">      case DATE -&gt; Sort.by(direction, &quot;updatedAt&quot;).and(Sort.by(direction, &quot;createdAt&quot;));</span>
+<span class="fc bfc" id="L99" title="All 2 branches covered.">    return switch (sortCriteria.field()) {</span>
+<span class="fc" id="L100">      case NAME -&gt; Sort.by(direction, &quot;title&quot;);</span>
+<span class="fc" id="L101">      case DATE -&gt; Sort.by(direction, &quot;updatedAt&quot;).and(Sort.by(direction, &quot;createdAt&quot;));</span>
     };
   }
 }

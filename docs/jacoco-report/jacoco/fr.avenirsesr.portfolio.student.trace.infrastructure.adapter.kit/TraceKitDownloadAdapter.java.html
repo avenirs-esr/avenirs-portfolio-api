@@ -32,7 +32,7 @@ public class TraceKitDownloadAdapter implements KitDownloadPort {
     // TODO: Remove the explicit `Student` relationship and switch to a role and/or permission check
     // (see #2473)
 <span class="fc" id="L34">    Student student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L35">    TraceFilter filter = new TraceFilter(null, null, null, true);</span>
+<span class="fc" id="L35">    TraceFilter filter = new TraceFilter(null, null, null, true, null);</span>
 <span class="fc" id="L36">    List&lt;Trace&gt; traces = traceRepository.findAll(student, filter);</span>
 <span class="fc" id="L37">    return traces.stream().flatMap(this::toEntry).toList();</span>
   }

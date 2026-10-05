@@ -407,75 +407,44 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   }
 
   @Override
-  public List&lt;UUID&gt; getEnrolledStudentIds(Activity activity) {
-<span class="fc" id="L411">    return declaredActivityRepository.findEnrolledStudentIdsByActivity(activity);</span>
-  }
-
-  @Override
   public boolean isEnrolled(Activity activity, Student student) {
-<span class="fc" id="L416">    return declaredActivityRepository</span>
-<span class="fc" id="L417">        .findByActivity(student, activity)</span>
-<span class="fc bfc" id="L418" title="All 2 branches covered.">        .filter(declaredActivity -&gt; !declaredActivity.isUnsubscribed())</span>
-<span class="fc" id="L419">        .isPresent();</span>
+<span class="fc" id="L411">    return declaredActivityRepository</span>
+<span class="fc" id="L412">        .findByActivity(student, activity)</span>
+<span class="fc bfc" id="L413" title="All 2 branches covered.">        .filter(declaredActivity -&gt; !declaredActivity.isUnsubscribed())</span>
+<span class="fc" id="L414">        .isPresent();</span>
   }
 
   @Override
   public void delete(UUID declaredActivityId) {
-<span class="fc" id="L424">    DeclaredActivity declaredActivity =</span>
-<span class="fc" id="L425">        fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);</span>
+<span class="fc" id="L419">    DeclaredActivity declaredActivity =</span>
+<span class="fc" id="L420">        fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);</span>
 
-<span class="fc bfc" id="L427" title="All 2 branches covered.">    if (!declaredActivity.isUnsubscribed()) {</span>
-<span class="fc" id="L428">      throw new DeclaredActivityNotUnsubscribedException();</span>
+<span class="fc bfc" id="L422" title="All 2 branches covered.">    if (!declaredActivity.isUnsubscribed()) {</span>
+<span class="fc" id="L423">      throw new DeclaredActivityNotUnsubscribedException();</span>
     }
 
-<span class="fc" id="L431">    var feedbackIds =</span>
-<span class="fc" id="L432">        feedbackRepository.findAllByDeclaredActivityId(declaredActivityId).stream()</span>
-<span class="fc" id="L433">            .map(Feedback::getId)</span>
-<span class="fc" id="L434">            .toList();</span>
+<span class="fc" id="L426">    var feedbackIds =</span>
+<span class="fc" id="L427">        feedbackRepository.findAllByDeclaredActivityId(declaredActivityId).stream()</span>
+<span class="fc" id="L428">            .map(Feedback::getId)</span>
+<span class="fc" id="L429">            .toList();</span>
 
-<span class="fc" id="L436">    associationService.deleteAllOf(List.of(declaredActivityId), DeclaredActivity.class);</span>
-<span class="fc" id="L437">    notificationService.deleteNotificationsOf(ENotificationType.ASK_FOR_FEEDBACK, feedbackIds);</span>
-<span class="fc" id="L438">    feedbackService.deleteByDeclaredActivityId(declaredActivity);</span>
-<span class="fc" id="L439">    declaredActivityRepository.removeFromDatabase(declaredActivity);</span>
+<span class="fc" id="L431">    associationService.deleteAllOf(List.of(declaredActivityId), DeclaredActivity.class);</span>
+<span class="fc" id="L432">    notificationService.deleteNotificationsOf(ENotificationType.ASK_FOR_FEEDBACK, feedbackIds);</span>
+<span class="fc" id="L433">    feedbackService.deleteByDeclaredActivityId(declaredActivity);</span>
+<span class="fc" id="L434">    declaredActivityRepository.removeFromDatabase(declaredActivity);</span>
 
-<span class="fc" id="L441">    log.debug(</span>
+<span class="fc" id="L436">    log.debug(</span>
         &quot;Deleted the declared activity {} of student {} with its associations, notifications&quot;
             + &quot; and feedbacks&quot;,
         declaredActivityId,
-<span class="fc" id="L445">        declaredActivity.getStudent().getId());</span>
-<span class="fc" id="L446">  }</span>
-
-  @Override
-  public void deleteAllOfActivity(Activity activity) {
-    var graph =
-<span class="fc" id="L451">        FetchGraph.init().add(&quot;student&quot;).fetch(&quot;user&quot;).root().add(&quot;activity&quot;).fetch(&quot;author&quot;);</span>
-<span class="fc" id="L452">    var declaredActivities = declaredActivityRepository.findAllByActivity(activity, graph);</span>
-
-<span class="fc bfc" id="L454" title="All 2 branches covered.">    if (declaredActivities.isEmpty()) {</span>
-<span class="fc" id="L455">      return;</span>
-    }
-
-<span class="fc" id="L458">    var declaredActivityIds = declaredActivities.stream().map(DeclaredActivity::getId).toList();</span>
-<span class="fc" id="L459">    var feedbackIds = feedbackService.deleteAllOfDeclaredActivities(declaredActivityIds);</span>
-
-<span class="fc" id="L461">    associationService.deleteAllOf(declaredActivityIds, DeclaredActivity.class);</span>
-<span class="fc" id="L462">    notificationService.deleteNotificationsOf(ENotificationType.ASK_FOR_FEEDBACK, feedbackIds);</span>
-<span class="fc" id="L463">    notificationService.deleteNotificationsOf(</span>
-        ENotificationType.ACTIVITY_MODIFIED, declaredActivityIds);
-<span class="fc" id="L465">    declaredActivityRepository.removeAllFromDatabase(declaredActivities);</span>
-
-<span class="fc" id="L467">    log.debug(</span>
-        &quot;Deleted the {} declared activities of activity {} with their associations, notifications&quot;
-            + &quot; and feedbacks&quot;,
-<span class="fc" id="L470">        declaredActivities.size(),</span>
-<span class="fc" id="L471">        activity.getId());</span>
-<span class="fc" id="L472">  }</span>
+<span class="fc" id="L440">        declaredActivity.getStudent().getId());</span>
+<span class="fc" id="L441">  }</span>
 
   private boolean isSubmittedOrFinished(
       DeclaredActivity declaredActivity, boolean hasActiveFeedback) {
-<span class="fc" id="L476">    EDeclaredActivityStatus status = getDeclaredActivityStatus(declaredActivity, hasActiveFeedback);</span>
+<span class="fc" id="L445">    EDeclaredActivityStatus status = getDeclaredActivityStatus(declaredActivity, hasActiveFeedback);</span>
 
-<span class="fc bfc" id="L478" title="All 4 branches covered.">    return status == EDeclaredActivityStatus.SUBMITTED</span>
+<span class="fc bfc" id="L447" title="All 4 branches covered.">    return status == EDeclaredActivityStatus.SUBMITTED</span>
         || status == EDeclaredActivityStatus.COMPLETED;
   }
 }
