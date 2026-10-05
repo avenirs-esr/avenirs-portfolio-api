@@ -98,7 +98,7 @@ class TraceAssociationStrategyTest {
 
     when(traceService.getTracesView(
             "kw",
-            new TraceFilter(isAssociated, null, null, null),
+            new TraceFilter(isAssociated, null, null, null, null),
             null,
             pageCriteria,
             new SortCriteria(ESortField.DATE, ESortOrder.DESC)))

@@ -60,9 +60,10 @@ class TraceSpecificationIT extends ContainerConfigurationTest {
 
     TraceFilterSpecificationBuilder builder = new TraceFilterSpecificationBuilder();
 
-    Specification<TraceEntity> specNull = builder.getSpecification(ETraceFilterKey.FILE_TYPE, null);
+    Specification<TraceEntity> specNull = builder.getSpecification(ETraceFilterKey.TYPE, null);
     Specification<TraceEntity> specEmpty =
-        builder.getSpecification(ETraceFilterKey.FILE_TYPE, List.of());
+        builder.getSpecification(
+            ETraceFilterKey.TYPE, new TraceFilter.TraceTypeFilter(List.of(), null));
 
     List<TraceEntity> resultNull =
         traceJpaRepository.findAll(ofTestStudent(student.getId()).and(specNull));
@@ -171,12 +172,9 @@ class TraceSpecificationIT extends ContainerConfigurationTest {
     CriteriaBuilder cb = mock(CriteriaBuilder.class);
     CriteriaQuery<?> query = null;
 
-    Specification<TraceEntity> fileTypeSpec =
-        builder.getSpecification(ETraceFilterKey.FILE_TYPE, List.of(EFileType.PDF));
     Specification<TraceEntity> skillSpec =
         builder.getSpecification(ETraceFilterKey.SKILL, List.of(UUID.randomUUID()));
 
-    assertThat(fileTypeSpec.toPredicate(root, query, cb)).isNull();
     assertThat(skillSpec.toPredicate(root, query, cb)).isNull();
   }
 
@@ -256,6 +254,140 @@ class TraceSpecificationIT extends ContainerConfigurationTest {
         .isEqualTo(
             Sort.by(Sort.Direction.DESC, "updatedAt")
                 .and(Sort.by(Sort.Direction.DESC, "createdAt")));
+  }
+
+  @Test
+  void shouldFilterTracesWithLink() {
+    TraceEntity withLink = persistTrace("with-link");
+    withLink.setLink("https://example.com");
+    TraceEntity blankLink = persistTrace("blank-link");
+    blankLink.setLink("   ");
+    TraceEntity withoutLink = persistTrace("without-link");
+
+    entityManager.flush();
+    entityManager.clear();
+
+    List<TraceEntity> hasLinkResult =
+        traceJpaRepository.findAll(
+            ofTestStudent(student.getId()).and(TraceSpecification.isLink(true)));
+    List<TraceEntity> noLinkResult =
+        traceJpaRepository.findAll(
+            ofTestStudent(student.getId()).and(TraceSpecification.isLink(false)));
+
+    assertThat(hasLinkResult).extracting(TraceEntity::getId).containsExactly(withLink.getId());
+    assertThat(noLinkResult)
+        .extracting(TraceEntity::getId)
+        .containsExactlyInAnyOrder(blankLink.getId(), withoutLink.getId());
+  }
+
+  @Test
+  void shouldFilterLinkTracesOnlyWhenIsLinkTrueWithoutFileTypes() {
+    TraceEntity pdf = persistTrace("pdf");
+    persistAttachment(pdf, "doc.pdf", EFileType.PDF, true);
+    TraceEntity link = persistTrace("link");
+    link.setLink("https://example.com");
+
+    entityManager.flush();
+    entityManager.clear();
+
+    var spec =
+        new TraceFilterSpecificationBuilder()
+            .build(new TraceFilter(null, null, null, null, true).toMap())
+            .orElseThrow();
+
+    List<TraceEntity> result = traceJpaRepository.findAll(ofTestStudent(student.getId()).and(spec));
+
+    assertThat(result).extracting(TraceEntity::getId).containsExactly(link.getId());
+  }
+
+  @Test
+  void shouldFilterByFileType() {
+    TraceEntity pdf = persistTrace("pdf");
+    persistAttachment(pdf, "doc.pdf", EFileType.PDF, true);
+    TraceEntity png = persistTrace("png");
+    persistAttachment(png, "img.png", EFileType.PNG, true);
+    TraceEntity noFile = persistTrace("no-file");
+
+    entityManager.flush();
+    entityManager.clear();
+
+    var spec =
+        new TraceFilterSpecificationBuilder()
+            .build(new TraceFilter(null, List.of(EFileType.PDF), null, null, null).toMap())
+            .orElseThrow();
+
+    List<TraceEntity> result = traceJpaRepository.findAll(ofTestStudent(student.getId()).and(spec));
+
+    assertThat(result).extracting(TraceEntity::getId).containsExactly(pdf.getId());
+    assertThat(result).extracting(TraceEntity::getId).doesNotContain(png.getId(), noFile.getId());
+  }
+
+  @Test
+  void shouldReturnFileTypeOrLinkTracesWhenFileTypesAndIsLinkTrue() {
+    TraceEntity pdf = persistTrace("pdf");
+    persistAttachment(pdf, "doc.pdf", EFileType.PDF, true);
+    TraceEntity png = persistTrace("png");
+    persistAttachment(png, "img.png", EFileType.PNG, true);
+    TraceEntity link = persistTrace("link");
+    link.setLink("https://example.com");
+    TraceEntity empty = persistTrace("empty");
+
+    entityManager.flush();
+    entityManager.clear();
+
+    var spec =
+        new TraceFilterSpecificationBuilder()
+            .build(new TraceFilter(null, List.of(EFileType.PDF), null, null, true).toMap())
+            .orElseThrow();
+
+    List<TraceEntity> result = traceJpaRepository.findAll(ofTestStudent(student.getId()).and(spec));
+
+    assertThat(result)
+        .extracting(TraceEntity::getId)
+        .containsExactlyInAnyOrder(pdf.getId(), link.getId());
+    assertThat(result).extracting(TraceEntity::getId).doesNotContain(png.getId(), empty.getId());
+  }
+
+  @Test
+  void shouldKeepOtherFiltersAndedWhenFileTypesAndIsLinkTrue() {
+    TraceEntity valorizedLink = persistTrace("valorized-link");
+    valorizedLink.setLink("https://example.com");
+    valorizedLink.setValorized(true);
+    TraceEntity notValorizedLink = persistTrace("not-valorized-link");
+    notValorizedLink.setLink("https://example.com");
+
+    entityManager.flush();
+    entityManager.clear();
+
+    var spec =
+        new TraceFilterSpecificationBuilder()
+            .build(new TraceFilter(null, List.of(EFileType.PDF), null, true, true).toMap())
+            .orElseThrow();
+
+    List<TraceEntity> result = traceJpaRepository.findAll(ofTestStudent(student.getId()).and(spec));
+
+    assertThat(result).extracting(TraceEntity::getId).containsExactly(valorizedLink.getId());
+  }
+
+  @Test
+  void shouldAndFileTypesWithIsLinkFalse() {
+    TraceEntity pdf = persistTrace("pdf");
+    persistAttachment(pdf, "doc.pdf", EFileType.PDF, true);
+    TraceEntity pdfWithLink = persistTrace("pdf-with-link");
+    persistAttachment(pdfWithLink, "doc2.pdf", EFileType.PDF, true);
+    pdfWithLink.setLink("https://example.com");
+
+    entityManager.flush();
+    entityManager.clear();
+
+    var spec =
+        new TraceFilterSpecificationBuilder()
+            .build(new TraceFilter(null, List.of(EFileType.PDF), null, null, false).toMap())
+            .orElseThrow();
+
+    List<TraceEntity> result = traceJpaRepository.findAll(ofTestStudent(student.getId()).and(spec));
+
+    assertThat(result).extracting(TraceEntity::getId).containsExactly(pdf.getId());
   }
 
   private Specification<TraceEntity> ofTestStudent(UUID studentId) {

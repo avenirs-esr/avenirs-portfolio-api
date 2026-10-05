@@ -46,6 +46,15 @@ public class TraceSpecification {
     return (root, query, cb) -> cb.equal(root.get("valorized"), value);
   }
 
+  public static Specification<TraceEntity> isLink(boolean value) {
+    return (root, query, cb) -> {
+      Expression<String> link = root.get("link");
+      return value
+          ? cb.and(cb.isNotNull(link), cb.notEqual(cb.trim(link), ""))
+          : cb.or(cb.isNull(link), cb.equal(cb.trim(link), ""));
+    };
+  }
+
   public static Specification<TraceEntity> search(String keyword, ELanguage language) {
     return (root, query, criteriaBuilder) -> {
       if (keyword == null || keyword.trim().isEmpty() || query == null) {
