@@ -2,13 +2,12 @@ package fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.specificati
 
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.specification.FilterSpecificationBuilder;
 import fr.avenirsesr.portfolio.common.file.domain.model.enums.EFileType;
-import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
 import fr.avenirsesr.portfolio.student.trace.domain.filter.ETraceFilterKey;
+import fr.avenirsesr.portfolio.student.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.model.TraceEntity;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.Subquery;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.domain.Specification;
@@ -19,7 +18,7 @@ public class TraceFilterSpecificationBuilder
   @Override
   public Specification<TraceEntity> getSpecification(ETraceFilterKey key, Object value) {
     return switch (key) {
-      case FILE_TYPE -> fileType((List<EFileType>) value);
+      case TYPE -> type((TraceFilter.TraceTypeFilter) value);
       case SKILL -> skill((List<UUID>) value);
       case IS_ASSOCIATED -> {
         if (value == null) yield null;
@@ -34,18 +33,27 @@ public class TraceFilterSpecificationBuilder
     };
   }
 
-  private Specification<TraceEntity> fileType(List<EFileType> fileTypes) {
+  private Specification<TraceEntity> type(TraceFilter.TraceTypeFilter filter) {
     return (root, query, cb) -> {
-      if (fileTypes == null || fileTypes.isEmpty() || query == null) return null;
+      if (filter == null || filter.isEmpty()) return null;
 
-      Subquery<FileEntity> attachSub = query.subquery(FileEntity.class);
-      Root<FileEntity> attachRoot = attachSub.from(FileEntity.class);
-      Predicate fileTypePredicate = attachRoot.get("fileType").in(fileTypes);
-      Predicate belongsToTrace = cb.equal(attachRoot.get("elementId"), root.get("id"));
-      attachSub.where(cb.and(belongsToTrace, fileTypePredicate));
+      Predicate linkPredicate =
+          filter.isLink() == null
+              ? null
+              : TraceSpecification.isLink(filter.isLink()).toPredicate(root, query, cb);
 
-      return cb.exists(attachSub);
+      if (filter.hasNoFileTypes()) return linkPredicate;
+
+      Predicate fileTypes = fileTypeIn(root, filter.fileTypes());
+
+      if (linkPredicate == null) return fileTypes;
+
+      return filter.isLink() ? cb.or(fileTypes, linkPredicate) : cb.and(fileTypes, linkPredicate);
     };
+  }
+
+  private Predicate fileTypeIn(Root<TraceEntity> root, List<EFileType> fileTypes) {
+    return root.join("attachment", JoinType.LEFT).get("fileType").in(fileTypes);
   }
 
   private Specification<TraceEntity> skill(List<UUID> values) {

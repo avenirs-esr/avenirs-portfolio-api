@@ -24,12 +24,12 @@ class TraceFilterTest {
   }
 
   @Test
-  void shouldNotPutFileTypesWhenNullOrEmpty() {
+  void shouldNotPutTypeWhenFileTypesNullOrEmptyAndIsLinkNull() {
     TraceFilter nullList = new TraceFilter(false, null, null, null);
     TraceFilter emptyList = new TraceFilter(false, List.of(), null, null);
 
-    assertThat(nullList.toMap()).doesNotContainKey(ETraceFilterKey.FILE_TYPE);
-    assertThat(emptyList.toMap()).doesNotContainKey(ETraceFilterKey.FILE_TYPE);
+    assertThat(nullList.toMap()).doesNotContainKey(ETraceFilterKey.TYPE);
+    assertThat(emptyList.toMap()).doesNotContainKey(ETraceFilterKey.TYPE);
   }
 
   @Test
@@ -39,8 +39,10 @@ class TraceFilterTest {
     Map<ETraceFilterKey, Object> map = filter.toMap();
 
     assertThat(map).containsEntry(ETraceFilterKey.IS_ASSOCIATED, false);
-    assertThat((List<EFileType>) map.get(ETraceFilterKey.FILE_TYPE))
-        .containsExactly(EFileType.PDF, EFileType.PNG);
+    assertThat(map)
+        .containsEntry(
+            ETraceFilterKey.TYPE,
+            new TraceFilter.TraceTypeFilter(List.of(EFileType.PDF, EFileType.PNG), null));
   }
 
   @Test
@@ -87,13 +89,32 @@ class TraceFilterTest {
   void shouldPutAllKeysWhenAllProvided() {
     UUID id = UUID.randomUUID();
 
-    TraceFilter filter = new TraceFilter(true, List.of(EFileType.PDF), List.of(id), true);
+    TraceFilter filter = new TraceFilter(true, List.of(EFileType.PDF), List.of(id), true, true);
 
     Map<ETraceFilterKey, Object> map = filter.toMap();
 
     assertThat(map).containsEntry(ETraceFilterKey.IS_ASSOCIATED, true);
     assertThat(map).containsEntry(ETraceFilterKey.IS_VALORIZED, true);
-    assertThat(map).containsKeys(ETraceFilterKey.FILE_TYPE, ETraceFilterKey.SKILL);
+    assertThat(map)
+        .containsEntry(
+            ETraceFilterKey.TYPE, new TraceFilter.TraceTypeFilter(List.of(EFileType.PDF), true));
+    assertThat(map).containsKey(ETraceFilterKey.SKILL);
     assertThat(map).hasSize(4);
+  }
+
+  @Test
+  void shouldPutTypeWithIsLinkTrueWhenNoFileTypes() {
+    TraceFilter filter = new TraceFilter(null, null, null, null, true);
+
+    assertThat(filter.toMap())
+        .containsEntry(ETraceFilterKey.TYPE, new TraceFilter.TraceTypeFilter(null, true));
+  }
+
+  @Test
+  void shouldPutTypeWithIsLinkFalseWhenNoFileTypes() {
+    TraceFilter filter = new TraceFilter(null, List.of(), null, null, false);
+
+    assertThat(filter.toMap())
+        .containsEntry(ETraceFilterKey.TYPE, new TraceFilter.TraceTypeFilter(List.of(), false));
   }
 }

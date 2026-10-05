@@ -2,7 +2,7 @@ package fr.avenirsesr.portfolio.student.trace.domain.filter;
 
 public enum ETraceFilterKey {
   IS_ASSOCIATED,
-  FILE_TYPE,
+  TYPE,
   SKILL,
-  IS_VALORIZED
+  IS_VALORIZED,
 }
