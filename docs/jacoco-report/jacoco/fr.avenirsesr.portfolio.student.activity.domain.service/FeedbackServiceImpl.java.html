@@ -431,5 +431,34 @@ public class FeedbackServiceImpl implements FeedbackService {
   public void deleteByDeclaredActivityId(DeclaredActivity declaredActivity) {
 <span class="fc" id="L432">    feedbackRepository.deleteByDeclaredActivityId(declaredActivity);</span>
 <span class="fc" id="L433">  }</span>
+
+  @Override
+  public List&lt;UUID&gt; deleteAllOfDeclaredActivities(List&lt;UUID&gt; declaredActivityIds) {
+<span class="pc bpc" id="L437" title="1 of 2 branches missed.">    if (declaredActivityIds.isEmpty()) {</span>
+<span class="nc" id="L438">      return List.of();</span>
+    }
+
+<span class="fc" id="L441">    List&lt;Feedback&gt; feedbacks =</span>
+<span class="fc" id="L442">        declaredActivityIds.stream()</span>
+<span class="fc" id="L443">            .flatMap(</span>
+                declaredActivityId -&gt;
+<span class="fc" id="L445">                    feedbackRepository.findAllByDeclaredActivityId(declaredActivityId).stream())</span>
+<span class="fc" id="L446">            .toList();</span>
+
+<span class="pc bpc" id="L448" title="1 of 2 branches missed.">    if (feedbacks.isEmpty()) {</span>
+<span class="fc" id="L449">      return List.of();</span>
+    }
+
+<span class="nc" id="L452">    List&lt;UUID&gt; attachmentIds =</span>
+<span class="nc" id="L453">        feedbacks.stream()</span>
+<span class="nc" id="L454">            .flatMap(feedback -&gt; feedback.getAttachments().stream())</span>
+<span class="nc" id="L455">            .map(File::getId)</span>
+<span class="nc" id="L456">            .toList();</span>
+
+<span class="nc" id="L458">    feedbackRepository.removeAllFromDatabase(feedbacks);</span>
+<span class="nc" id="L459">    attachmentIds.forEach(fileResourceService::delete);</span>
+
+<span class="nc" id="L461">    return feedbacks.stream().map(Feedback::getId).toList();</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
