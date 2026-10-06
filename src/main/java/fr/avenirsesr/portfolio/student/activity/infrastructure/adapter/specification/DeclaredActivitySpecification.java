@@ -63,4 +63,13 @@ public final class DeclaredActivitySpecification {
       return cb.not(cb.exists(recentViews));
     };
   }
+
+  public static Specification<DeclaredActivityEntity> isValorized(Boolean isValorized) {
+    return (root, query, criteriaBuilder) -> {
+      if (isValorized == null) {
+        return criteriaBuilder.conjunction();
+      }
+      return criteriaBuilder.equal(root.get("valorized"), isValorized);
+    };
+  }
 }

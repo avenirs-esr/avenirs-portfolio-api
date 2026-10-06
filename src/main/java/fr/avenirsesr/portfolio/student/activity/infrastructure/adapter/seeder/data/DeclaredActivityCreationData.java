@@ -12,4 +12,5 @@ public record DeclaredActivityCreationData(
     Optional<String> reflection,
     Optional<LocalDate> startDate,
     Optional<LocalDate> endDate,
-    Optional<Instant> finishedAt) {}
+    Optional<Instant> finishedAt,
+    Optional<Boolean> valorized) {}

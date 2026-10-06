@@ -24,7 +24,8 @@
     "reflection": "L'analyse de cette expérience significative m'a aidé à identifier les compétences que je mobilise naturellement, notamment l'organisation et la capacité d'adaptation. J'ai également pris conscience des difficultés rencontrées et de la manière dont je les ai surmontées. Ce travail m'a permis de mieux comprendre mes points forts et les axes d'amélioration à travailler pour gagner en efficacité dans mes futures expériences professionnelles.",
     "startDate": "2025-02-01",
     "endDate": "2025-02-15",
-    "finishedAt": null
+    "finishedAt": null,
+    "valorized": true
   },
   {
     "id": "9a1d7c55-2f6b-4e88-9c2a-1e7b3d4f6c44",
@@ -78,7 +79,8 @@
     "reflection": null,
     "startDate": null,
     "endDate": null,
-    "finishedAt": null
+    "finishedAt": null,
+    "valorized": true
   },
   {
     "id": "d4c9f5a5-6c2b-4a5e-9c4f-8e2a6b1d3f04",
