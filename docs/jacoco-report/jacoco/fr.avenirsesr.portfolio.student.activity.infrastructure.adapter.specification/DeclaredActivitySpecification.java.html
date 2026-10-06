@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DeclaredActivitySpecification.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.specification</a> &gt; <span class="el_source">DeclaredActivitySpecification.java</span></div><h1>DeclaredActivitySpecification.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.specification;
 
+import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityViewEntity;
 import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.model.DeclaredActivityEntity;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.specification.StudentSpecification;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.UUID;
 import lombok.NoArgsConstructor;
@@ -12,40 +14,63 @@ import org.springframework.data.jpa.domain.Specification;
 public final class DeclaredActivitySpecification {
   public static Specification&lt;DeclaredActivityEntity&gt; hasActivityIdIn(
       Collection&lt;UUID&gt; activityIds) {
-<span class="fc" id="L15">    return (root, query, cb) -&gt; root.get(&quot;activity&quot;).get(&quot;id&quot;).in(activityIds);</span>
+<span class="fc" id="L17">    return (root, query, cb) -&gt; root.get(&quot;activity&quot;).get(&quot;id&quot;).in(activityIds);</span>
   }
 
   public static Specification&lt;DeclaredActivityEntity&gt; hasActivityIdInAndStudent(
       Collection&lt;UUID&gt; activityIds, Student student) {
-<span class="fc" id="L20">    return Specification.where(StudentSpecification.&lt;DeclaredActivityEntity&gt;hasStudent(student))</span>
-<span class="fc" id="L21">        .and(hasActivityIdIn(activityIds));</span>
+<span class="fc" id="L22">    return Specification.where(StudentSpecification.&lt;DeclaredActivityEntity&gt;hasStudent(student))</span>
+<span class="fc" id="L23">        .and(hasActivityIdIn(activityIds));</span>
   }
 
   public static Specification&lt;DeclaredActivityEntity&gt; hasActivityId(UUID activityId) {
-<span class="fc" id="L25">    return (root, query, cb) -&gt; cb.equal(root.get(&quot;activity&quot;).get(&quot;id&quot;), activityId);</span>
+<span class="fc" id="L27">    return (root, query, cb) -&gt; cb.equal(root.get(&quot;activity&quot;).get(&quot;id&quot;), activityId);</span>
   }
 
   public static Specification&lt;DeclaredActivityEntity&gt; search(String keyword) {
-<span class="fc" id="L29">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="fc bfc" id="L30" title="All 4 branches covered.">      if (keyword == null || keyword.trim().isEmpty()) {</span>
-<span class="fc" id="L31">        return criteriaBuilder.conjunction();</span>
+<span class="fc" id="L31">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="fc bfc" id="L32" title="All 4 branches covered.">      if (keyword == null || keyword.trim().isEmpty()) {</span>
+<span class="fc" id="L33">        return criteriaBuilder.conjunction();</span>
       }
-<span class="fc" id="L33">      return criteriaBuilder.like(</span>
-<span class="fc" id="L34">          criteriaBuilder.lower(root.get(&quot;activity&quot;).get(&quot;title&quot;)),</span>
-<span class="fc" id="L35">          &quot;%&quot; + keyword.toLowerCase() + &quot;%&quot;);</span>
+<span class="fc" id="L35">      return criteriaBuilder.like(</span>
+<span class="fc" id="L36">          criteriaBuilder.lower(root.get(&quot;activity&quot;).get(&quot;title&quot;)),</span>
+<span class="fc" id="L37">          &quot;%&quot; + keyword.toLowerCase() + &quot;%&quot;);</span>
     };
   }
 
   public static Specification&lt;DeclaredActivityEntity&gt; isNotCompleted() {
-<span class="nc" id="L40">    return (root, query, cb) -&gt; cb.isNull(root.get(&quot;finishedAt&quot;));</span>
+<span class="nc" id="L42">    return (root, query, cb) -&gt; cb.isNull(root.get(&quot;finishedAt&quot;));</span>
   }
 
   public static Specification&lt;DeclaredActivityEntity&gt; isCompleted() {
-<span class="nc" id="L44">    return (root, query, cb) -&gt; cb.isNotNull(root.get(&quot;finishedAt&quot;));</span>
+<span class="nc" id="L46">    return (root, query, cb) -&gt; cb.isNotNull(root.get(&quot;finishedAt&quot;));</span>
   }
 
   public static Specification&lt;DeclaredActivityEntity&gt; isNotUnsubscribed() {
-<span class="fc" id="L48">    return (root, query, cb) -&gt; cb.isNull(root.get(&quot;unsubscribedAt&quot;));</span>
+<span class="fc" id="L50">    return (root, query, cb) -&gt; cb.isNull(root.get(&quot;unsubscribedAt&quot;));</span>
+  }
+
+  public static Specification&lt;DeclaredActivityEntity&gt; hasNotBeenViewedSince(Instant since) {
+<span class="fc" id="L54">    return (root, query, cb) -&gt; {</span>
+<span class="fc" id="L55">      var recentViews = query.subquery(UUID.class);</span>
+<span class="fc" id="L56">      var view = recentViews.from(ActivityViewEntity.class);</span>
+<span class="fc" id="L57">      recentViews</span>
+<span class="fc" id="L58">          .select(view.get(&quot;id&quot;))</span>
+<span class="fc" id="L59">          .where(</span>
+<span class="fc" id="L60">              cb.equal(view.get(&quot;activityId&quot;), root.get(&quot;activity&quot;).get(&quot;id&quot;)),</span>
+<span class="fc" id="L61">              cb.equal(view.get(&quot;studentId&quot;), root.get(&quot;student&quot;).get(&quot;id&quot;)),</span>
+<span class="fc" id="L62">              cb.greaterThanOrEqualTo(view.&lt;Instant&gt;get(&quot;lastViewedAt&quot;), since));</span>
+<span class="fc" id="L63">      return cb.not(cb.exists(recentViews));</span>
+    };
+  }
+
+  public static Specification&lt;DeclaredActivityEntity&gt; isValorized(Boolean isValorized) {
+<span class="fc" id="L68">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">      if (isValorized == null) {</span>
+<span class="fc" id="L70">        return criteriaBuilder.conjunction();</span>
+      }
+<span class="fc" id="L72">      return criteriaBuilder.equal(root.get(&quot;valorized&quot;), isValorized);</span>
+    };
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
