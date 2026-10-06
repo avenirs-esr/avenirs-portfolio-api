@@ -25,7 +25,7 @@ public interface DeclaredActivityRepository extends GenericRepositoryPort<Declar
       List<UUID> activityIds, FetchGraph fetchGraph);
 
   PagedResult<DeclaredActivity> findStudentActivitiesByProgressAndDate(
-      Student student, PageCriteria pageCriteria, FetchGraph fetchGraph);
+      Student student, PageCriteria pageCriteria, Boolean isValorized, FetchGraph fetchGraph);
 
   Optional<DeclaredActivity> findByActivity(Student student, Activity activity);
 

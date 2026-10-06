@@ -101,6 +101,28 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
 
   @Test
   @Transactional
+  void shouldGetValorizedDeclaredActivities() {
+    BddLogger.given("valorized declared activities exist");
+
+    BddLogger.when("getting valorized declared activities");
+
+    BddLogger.then("it should return a list of valorized declared activities");
+
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "?isValorized=true")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.data")
+        .isArray();
+  }
+
+  @Test
+  @Transactional
   void shouldGetDeclaredActivityDetails() throws Exception {
     String id = declaredActivityId;
 

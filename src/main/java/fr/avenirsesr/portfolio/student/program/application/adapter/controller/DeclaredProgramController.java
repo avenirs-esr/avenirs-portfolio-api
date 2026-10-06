@@ -38,7 +38,7 @@ public class DeclaredProgramController {
       @RequestParam(required = false) Boolean isValorized) {
     var pageCriteria = new PageCriteria(page, pageSize);
     log.debug(
-        "Received request to get declared programs (page= {}, fileSize= {}, isValorized={})",
+        "Received request to get declared programs (page= {}, pageSize= {}, isValorized={})",
         pageCriteria.page(),
         pageCriteria.pageSize(),
         isValorized);

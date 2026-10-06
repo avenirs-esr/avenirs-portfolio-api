@@ -84,8 +84,8 @@ public class DeclaredActivitySeeder {
                                           Optional.ofNullable(fakeDeclaredActivity.getReflection()),
                                           Optional.ofNullable(fakeDeclaredActivity.getStartDate()),
                                           Optional.ofNullable(fakeDeclaredActivity.getEndDate()),
-                                          Optional.ofNullable(
-                                              fakeDeclaredActivity.getFinishedAt())))
+                                          Optional.ofNullable(fakeDeclaredActivity.getFinishedAt()),
+                                          Optional.ofNullable(fakeDeclaredActivity.isValorized())))
                               .toList())
                   .flatMap(List::stream)
                   .toList();
@@ -114,6 +114,12 @@ public class DeclaredActivitySeeder {
           if (data.reflection().isPresent())
             declaredActivityService.updateReflection(
                 declaredActivity.getId(), data.reflection().get());
+
+          data.valorized()
+              .ifPresent(
+                  valorized ->
+                      declaredActivityService.updateDeclaredActivity(
+                          declaredActivity.getId(), null, null, valorized));
 
           if (data.finishedAt().isPresent()) {
             clockService.fixed(data.finishedAt().get());
@@ -157,6 +163,7 @@ public class DeclaredActivitySeeder {
         data.reflection(),
         Optional.of(adjustedStart),
         Optional.of(adjustedEnd),
-        data.finishedAt());
+        data.finishedAt(),
+        data.valorized());
   }
 }

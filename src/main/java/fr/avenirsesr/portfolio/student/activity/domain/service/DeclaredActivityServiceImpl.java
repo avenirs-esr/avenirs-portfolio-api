@@ -48,12 +48,13 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   private final NotificationService notificationService;
 
   @Override
-  public PagedResult<DeclaredActivity> getDeclaredActivities(PageCriteria pageCriteria) {
+  public PagedResult<DeclaredActivity> getDeclaredActivities(
+      PageCriteria pageCriteria, Boolean isValorized) {
     Student student = loggedInUserService.getLoggedInStudent();
     var graph = FetchGraph.init().add("activity").fetch("author");
 
     return declaredActivityRepository.findStudentActivitiesByProgressAndDate(
-        student, pageCriteria, graph);
+        student, pageCriteria, isValorized, graph);
   }
 
   @Override

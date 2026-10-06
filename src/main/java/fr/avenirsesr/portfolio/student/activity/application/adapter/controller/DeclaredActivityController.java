@@ -51,17 +51,20 @@ public class DeclaredActivityController {
   public ResponseEntity<PagedResponse<DeclaredActivityViewDTO>> getDeclaredActivitiesView(
       Principal principal,
       @RequestParam(required = false) Integer page,
-      @RequestParam(required = false) Integer pageSize) {
+      @RequestParam(required = false) Integer pageSize,
+      @RequestParam(required = false) Boolean isValorized) {
     var pageCriteria = new PageCriteria(page, pageSize);
 
     log.debug(
-        "Received request to get declared activities view of user [{}] (page= {}, fileSize= {})",
+        "Received request to get declared activities view of user [{}] (page= {}, fileSize= {},"
+            + " isValorized= {})",
         principal.getName(),
         pageCriteria.page(),
-        pageCriteria.pageSize());
+        pageCriteria.pageSize(),
+        isValorized);
 
     PagedResult<DeclaredActivity> pagedResult =
-        declaredActivityService.getDeclaredActivities(pageCriteria);
+        declaredActivityService.getDeclaredActivities(pageCriteria, isValorized);
 
     var statusByDeclaredActivity =
         declaredActivityService.getDeclaredActivityStatus(pagedResult.content());
