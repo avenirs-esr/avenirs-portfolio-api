@@ -97,6 +97,7 @@ public class TraceServiceImpl implements TraceService {
                       trace.getId(),
                       trace.getTitle(),
                       isAssociated,
+                      trace.isValorized(),
                       trace.getCreatedAt(),
                       trace.getUpdatedAt(),
                       isAssociated

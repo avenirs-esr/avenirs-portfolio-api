@@ -109,6 +109,7 @@ class TraceAssociationStrategyTest {
                         traceId,
                         "My trace",
                         Boolean.TRUE.equals(isAssociated),
+                        false,
                         null,
                         null,
                         Optional.empty(),
