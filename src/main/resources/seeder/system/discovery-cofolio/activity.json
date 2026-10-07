@@ -1,0 +1,23 @@
+[
+  {
+    "author": {
+      "eppn": "cofadmin",
+      "firstName": "CoFolio",
+      "lastName": "ADMIN",
+      "email": "cofadmin@university.com"
+    },
+    "title": "Découvrir mon CoFolio, ajouter et associer mes premiers éléments",
+    "thematic": "OTHER",
+    "summary": "Cette 1ère activité vous invite à prendre en main votre Cofolio et à en explorer les grands onglets : Mes activités, Mes compétences et Mon projet de vie. Vous allez également ajouter vos 1ers éléments, les associer entre eux afin d'étayer une expérience, et effectuer une prise de recul dans cette activité. Ceci vous permettra de vous familiariser avec la logique de base de travail dans CoFolio.",
+    "description": "<h3>Consigne</h3><p><strong>1️⃣ Explorez les onglets : Mes activités, Mes compétences, Mon projet de vie.</strong></p><p>🔍 Parcourez-les pour comprendre leur rôle et la manière dont ils s'articulent.</p><p>📋 Besoin d'aide ? Consultez le parcours découverte disponible en pièce jointe.</p><p><strong>2️⃣ Ajoutez vos premiers éléments</strong></p><p>💼 Une expérience (professionnelle ou personnelle) dans : Mon projet de vie ➔ Mon parcours ➔ Mes expériences.</p><p>💡 Une compétence dans l'onglet Mes compétences (exemple : « communiquer »).</p><p><strong>3️⃣ Faites vos premières associations</strong></p><p>🔗 Reliez la compétence que vous venez de créer à l'expérience correspondante pour l'illustrer.</p><p><strong>4️⃣ Complétez votre réflexion</strong></p><p>📝 Accédez à l'activité « Découvrir mon CoFolio », puis allez dans Ma réflexion ➔ Modifier (zone « Ma prise de recul »).</p><p>💬 Répondez aux deux questions suivantes :</p><ul><li>Qu'ai-je compris de CoFolio ?</li><li>À quoi pourrait-il m'être utile ?</li></ul><h3>💡 À savoir</h3><p>🧪 <strong>Version expérimentale :</strong> Vous êtes bêta-testeur d'un outil destiné à un déploiement national. Vos retours sont précieux ! Nous reviendrons vers vous pour recueillir vos suggestions et améliorer l'outil.</p><p>📚 <strong>Référentiels V1 :</strong> Les référentiels de compétences actuellement disponibles sont limités à France Travail (ROME 4.0) et Onisep. D'autres référentiels (dont celui de votre formation) seront intégrés dans les prochaines versions.</p>",
+    "recommendedCompletionContexts": "Lors de vos premières utilisations de cette plateforme de portfolio pédagogique CoFolio",
+    "enableReflection": true,
+    "traceAllowedAssociations": -1,
+    "feedbackAllowedIterations": 0,
+    "links": [],
+    "bannerFileName": "default-activity-banner.jpeg",
+    "bannerMimeType": "image/jpeg",
+    "attachmentFileName": "Aide.activite.decouverte.V1.pdf",
+    "attachmentMimeType": "application/pdf"
+  }
+]

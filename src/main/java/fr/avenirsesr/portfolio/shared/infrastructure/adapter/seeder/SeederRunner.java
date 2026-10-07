@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder;
 
 import fr.avenirsesr.portfolio.common.seeder.domain.model.enums.ESeedMode;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.configuration.SeedingState;
+import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.seeder.SystemActivitySeeder;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserPrincipalRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,11 @@ public class SeederRunner implements CommandLineRunner {
 
   @Override
   public void run(String... args) {
+    seedDevData();
+    seederOrchestrator.seedTable(SystemActivitySeeder.TABLE_NAME, ESeedMode.INSERT_ONLY);
+  }
+
+  private void seedDevData() {
     if (!seedEnabled) {
       log.info("Seeder disabled: skipped");
       seedingState.markCompleted();

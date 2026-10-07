@@ -8,6 +8,7 @@ import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.UserPhotoSeede
 import fr.avenirsesr.portfolio.notification.infrastructure.adapter.seeder.NotificationSeeder;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.seeder.ActivityDraftSeeder;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.seeder.ActivitySeeder;
+import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.seeder.SystemActivitySeeder;
 import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.seeder.DeclaredActivitySeeder;
 import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.seeder.FeedbackSeeder;
 import fr.avenirsesr.portfolio.student.association.infrastructure.adapter.seeder.AssociationSeeder;
@@ -67,6 +68,7 @@ public class SeederOrchestrator {
   private final TraceSeeder traceSeeder;
   private final ActivityDraftSeeder activityDraftSeeder;
   private final ActivitySeeder activitySeeder;
+  private final SystemActivitySeeder systemActivitySeeder;
   private final DeclaredActivitySeeder declaredActivitySeeder;
   private final ActivityFileSeeder activityFileSeeder;
   private final FeedbackSeeder feedbackSeeder;
@@ -172,7 +174,9 @@ public class SeederOrchestrator {
 
   public int seedTable(String tableName, ESeedMode mode) {
     Map<String, Function<ESeedMode, Integer>> seeders =
-        Map.of(userPrincipalSeeder.tableName(), userPrincipalSeeder::seedAlone);
+        Map.of(
+            userPrincipalSeeder.tableName(), userPrincipalSeeder::seedAlone,
+            systemActivitySeeder.tableName(), systemActivitySeeder::seedAlone);
 
     var seeder = seeders.get(tableName);
 
