@@ -3,7 +3,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.student.skill.infrastructure.adapt
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.specification,DeclaredSkillProgressSpecification,27,75,4,8,6,16,5,9,1,7
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.specification,TraceSpecification,3,280,0,22,1,45,1,22,1,11
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.specification,TraceFilterSpecificationBuilder,21,114,3,25,6,22,3,19,0,7
-avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.domain.service,TraceServiceImpl,50,735,6,24,10,194,7,41,2,31
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.domain.service,TraceServiceImpl,50,737,6,24,10,195,7,41,2,31
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.domain.service,TraceAssociationStrategy,0,123,0,2,0,34,0,11,0,10
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.experience.domain.service,DeclaredExperienceAssociationStrategy,0,102,0,2,0,36,0,11,0,10
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.experience.domain.service,DeclaredExperienceServiceImpl,0,467,0,10,0,103,0,21,0,16
@@ -63,7 +63,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.application.adapter,Utils,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.domain.data,TraceLockedDeclaredActivitiesData,0,12,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.domain.data,TracesSummaryData,0,15,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.domain.data,TraceAssociationData,0,9,0,0,0,1,0,1,0,1
-avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.domain.data,TraceViewData,0,33,0,0,0,1,0,1,0,1
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.domain.data,TraceViewData,0,36,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.domain.data,TraceDetailData,0,36,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.domain.data,TraceDeclaredActivityData,0,12,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.application.adapter.controller,SeedingAdminController,88,0,14,0,22,0,9,0,2,0
