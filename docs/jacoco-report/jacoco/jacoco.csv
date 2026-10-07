@@ -73,7 +73,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.domain.filter,TraceF
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.service,UserServiceImpl,72,405,13,20,15,97,13,30,4,20
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.service,StudentServiceImpl,123,105,3,3,29,30,11,8,9,7
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.service,UserServiceImpl.NotificationState,0,9,0,0,0,1,0,1,0,1
-avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.service,StaffServiceImpl,109,106,4,2,25,29,10,7,7,7
+avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.service,StaffServiceImpl,109,106,3,3,25,29,9,8,7,7
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.association.application.adapter.controller,AssociationController,0,260,0,0,0,41,0,6,0,6
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.association.infrastructure.adapter.specification,AssociationSpecification,15,135,3,7,3,24,6,13,3,11
 avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.specification,ActivitySpecification,33,157,6,6,8,26,9,13,5,11
