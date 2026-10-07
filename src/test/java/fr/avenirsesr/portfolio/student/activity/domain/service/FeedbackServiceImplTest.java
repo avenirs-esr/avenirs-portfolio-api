@@ -43,6 +43,8 @@ import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.experience.domain.port.input.DeclaredExperienceService;
+import fr.avenirsesr.portfolio.student.program.domain.model.DeclaredProgram;
+import fr.avenirsesr.portfolio.student.program.domain.port.input.DeclaredProgramService;
 import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
@@ -79,6 +81,7 @@ class FeedbackServiceImplTest {
   @Mock private ActivityService activityService;
   @Mock private DeclaredActivityService declaredActivityService;
   @Mock private DeclaredExperienceService declaredExperienceService;
+  @Mock private DeclaredProgramService declaredProgramService;
   @Mock private AssociationService associationService;
   @Mock private TraceService traceService;
   @Mock private DeclaredSkillProgressService declaredSkillProgressService;
@@ -167,6 +170,7 @@ class FeedbackServiceImplTest {
       UUID traceId = UUID.randomUUID();
       UUID skillId = UUID.randomUUID();
       UUID experienceId = UUID.randomUUID();
+      UUID programId = UUID.randomUUID();
       String reflexion = "Ma réflexion sur cette activité.";
 
       Activity activity = ActivityFixture.create().toModel();
@@ -177,11 +181,13 @@ class FeedbackServiceImplTest {
       var traceAssociation = mock(Association.class);
       var skillAssociation = mock(Association.class);
       var experienceAssociation = mock(Association.class);
+      var programAssociation = mock(Association.class);
 
       Trace trace = mock(Trace.class);
+
       DeclaredSkillProgress skill = mock(DeclaredSkillProgress.class);
       DeclaredExperience experience = mock(DeclaredExperience.class);
-
+      DeclaredProgram program = mock(DeclaredProgram.class);
       when(declaredActivityService.fetchActivityAndCheckLoggedInStudentAuthorization(
               declaredActivityId))
           .thenReturn(declaredActivity);
@@ -195,15 +201,20 @@ class FeedbackServiceImplTest {
       when(experienceAssociation.getAssociationType())
           .thenReturn(EAssociationType.DECLARED_ACTIVITY_DECLARED_EXPERIENCE);
       when(experienceAssociation.getId2()).thenReturn(experienceId);
-
+      when(programAssociation.getAssociationType())
+          .thenReturn(EAssociationType.DECLARED_PROGRAM_DECLARED_ACTIVITY);
+      when(programAssociation.getId1()).thenReturn(programId);
       when(associationService.getAllOf(
               any(UUID.class), any(Class.class), ArgumentMatchers.<List<EAssociationType>>any()))
-          .thenReturn(List.of(traceAssociation, skillAssociation, experienceAssociation));
+          .thenReturn(
+              List.of(
+                  traceAssociation, skillAssociation, experienceAssociation, programAssociation));
       when(traceService.findAllTracesById(List.of(traceId))).thenReturn(List.of(trace));
       when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of(skillId)))
           .thenReturn(List.of(skill));
       when(declaredExperienceService.findAllByIds(List.of(experienceId)))
           .thenReturn(List.of(experience));
+      when(declaredProgramService.findAllByIds(List.of(programId))).thenReturn(List.of(program));
       when(feedbackRepository.findAllByDeclaredActivityId(declaredActivityId))
           .thenReturn(List.of());
       when(feedbackRepository.save(any(Feedback.class))).thenAnswer(i -> i.getArguments()[0]);
@@ -216,7 +227,9 @@ class FeedbackServiceImplTest {
       Feedback captured = feedbackCaptor.getValue();
       assertThat(captured.getReflexion().orElse(null)).isEqualTo(reflexion);
       assertThat(captured.getAssociations())
-          .isEqualTo(new FeedbackAssociations(List.of(trace), List.of(skill), List.of(experience)));
+          .isEqualTo(
+              new FeedbackAssociations(
+                  List.of(trace), List.of(skill), List.of(experience), List.of(program)));
     }
 
     @Test
@@ -379,6 +392,7 @@ class FeedbackServiceImplTest {
       UUID traceId = UUID.randomUUID();
       UUID skillId = UUID.randomUUID();
       UUID experienceId = UUID.randomUUID();
+      UUID programId = UUID.randomUUID();
       String updatedReflexion = "Nouvelle réflexion mise à jour.";
 
       Activity activity = ActivityFixture.create().toModel();
@@ -403,11 +417,11 @@ class FeedbackServiceImplTest {
       var traceAssociation = mock(Association.class);
       var skillAssociation = mock(Association.class);
       var experienceAssociation = mock(Association.class);
-
+      var programAssociation = mock(Association.class);
       Trace trace = mock(Trace.class);
       DeclaredSkillProgress skill = mock(DeclaredSkillProgress.class);
       DeclaredExperience experience = mock(DeclaredExperience.class);
-
+      DeclaredProgram program = mock(DeclaredProgram.class);
       when(declaredActivityService.fetchActivityAndCheckLoggedInStudentAuthorization(
               declaredActivityId))
           .thenReturn(declaredActivity);
@@ -420,17 +434,23 @@ class FeedbackServiceImplTest {
       when(skillAssociation.getAssociationType())
           .thenReturn(EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL);
       when(skillAssociation.getId2()).thenReturn(skillId);
+      when(programAssociation.getAssociationType())
+          .thenReturn(EAssociationType.DECLARED_PROGRAM_DECLARED_ACTIVITY);
+      when(programAssociation.getId1()).thenReturn(programId);
       when(experienceAssociation.getAssociationType())
           .thenReturn(EAssociationType.DECLARED_ACTIVITY_DECLARED_EXPERIENCE);
       when(experienceAssociation.getId2()).thenReturn(experienceId);
       when(associationService.getAllOf(
               any(UUID.class), any(Class.class), ArgumentMatchers.<List<EAssociationType>>any()))
-          .thenReturn(List.of(traceAssociation, skillAssociation, experienceAssociation));
+          .thenReturn(
+              List.of(
+                  traceAssociation, skillAssociation, experienceAssociation, programAssociation));
       when(traceService.findAllTracesById(List.of(traceId))).thenReturn(List.of(trace));
       when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of(skillId)))
           .thenReturn(List.of(skill));
       when(declaredExperienceService.findAllByIds(List.of(experienceId)))
           .thenReturn(List.of(experience));
+      when(declaredProgramService.findAllByIds(List.of(programId))).thenReturn(List.of(program));
       when(feedbackRepository.save(any(Feedback.class))).thenAnswer(i -> i.getArguments()[0]);
 
       BddLogger.when("createFeedback is called");
@@ -445,7 +465,9 @@ class FeedbackServiceImplTest {
       assertThat(saved.getReflexion()).contains(updatedReflexion);
       assertThat(saved.getStatus()).isEqualTo(EFeedbackStatus.NEW);
       assertThat(saved.getAssociations())
-          .isEqualTo(new FeedbackAssociations(List.of(trace), List.of(skill), List.of(experience)));
+          .isEqualTo(
+              new FeedbackAssociations(
+                  List.of(trace), List.of(skill), List.of(experience), List.of(program)));
     }
 
     @Test

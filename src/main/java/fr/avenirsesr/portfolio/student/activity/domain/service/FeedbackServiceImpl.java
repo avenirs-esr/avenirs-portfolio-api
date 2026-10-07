@@ -41,6 +41,8 @@ import fr.avenirsesr.portfolio.student.association.domain.port.input.Association
 import fr.avenirsesr.portfolio.student.association.domain.utils.AssociationUtils;
 import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.experience.domain.port.input.DeclaredExperienceService;
+import fr.avenirsesr.portfolio.student.program.domain.model.DeclaredProgram;
+import fr.avenirsesr.portfolio.student.program.domain.port.input.DeclaredProgramService;
 import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillProgressDetails;
 import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
@@ -61,6 +63,7 @@ public class FeedbackServiceImpl implements FeedbackService {
   private final TraceService traceService;
   private final DeclaredSkillProgressService declaredSkillProgressService;
   private final DeclaredExperienceService declaredExperienceService;
+  private final DeclaredProgramService declaredProgramService;
   private final LoggedInUserService loggedInUserService;
   private final NotificationService notificationService;
   private final ActivityService activityService;
@@ -74,7 +77,8 @@ public class FeedbackServiceImpl implements FeedbackService {
             List.of(
                 EAssociationType.DECLARED_ACTIVITY_TRACE,
                 EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL,
-                EAssociationType.DECLARED_ACTIVITY_DECLARED_EXPERIENCE));
+                EAssociationType.DECLARED_ACTIVITY_DECLARED_EXPERIENCE,
+                EAssociationType.DECLARED_PROGRAM_DECLARED_ACTIVITY));
 
     var traceIds =
         AssociationUtils.getIdsOf(
@@ -89,14 +93,20 @@ public class FeedbackServiceImpl implements FeedbackService {
             allAssociations,
             EAssociationType.DECLARED_ACTIVITY_DECLARED_EXPERIENCE,
             DeclaredExperience.class);
+    var declaredProgrammesIds =
+        AssociationUtils.getIdsOf(
+            allAssociations,
+            EAssociationType.DECLARED_PROGRAM_DECLARED_ACTIVITY,
+            DeclaredProgram.class);
 
     List<Trace> traces = traceService.findAllTracesById(traceIds);
     List<DeclaredSkillProgress> declaredSkills =
         declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(declaredSkillsIds);
     List<DeclaredExperience> declaredExperiences =
         declaredExperienceService.findAllByIds(declaredExperiencesIds);
-
-    return new FeedbackAssociations(traces, declaredSkills, declaredExperiences);
+    List<DeclaredProgram> declaredPrograms =
+        declaredProgramService.findAllByIds(declaredProgrammesIds);
+    return new FeedbackAssociations(traces, declaredSkills, declaredExperiences, declaredPrograms);
   }
 
   private FeedbackAssociationsData getFeedbackAssociationsData(FeedbackAssociations associations) {

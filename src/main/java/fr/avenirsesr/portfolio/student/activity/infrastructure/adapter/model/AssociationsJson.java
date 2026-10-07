@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.model;
 
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.student.experience.domain.model.enums.EExperienceType;
+import fr.avenirsesr.portfolio.student.program.domain.model.enums.EProgramStatus;
 import fr.avenirsesr.portfolio.student.skill.domain.model.enums.EDeclaredSkillLevel;
 import fr.avenirsesr.portfolio.student.trace.domain.model.enums.ETraceAuthorType;
 import java.time.Instant;
@@ -12,15 +13,17 @@ import java.util.UUID;
 public record AssociationsJson(
     List<TraceSnapshot> traces,
     List<DeclaredSkillProgressSnapshot> declaredSkillProgresses,
-    List<DeclaredExperienceSnapshot> declaredExperiences) {
+    List<DeclaredExperienceSnapshot> declaredExperiences,
+    List<DeclaredprogramSnapshot> declaredPrograms) {
   public AssociationsJson {
     traces = traces == null ? List.of() : traces;
     declaredSkillProgresses = declaredSkillProgresses == null ? List.of() : declaredSkillProgresses;
     declaredExperiences = declaredExperiences == null ? List.of() : declaredExperiences;
+    declaredPrograms = declaredPrograms == null ? List.of() : declaredPrograms;
   }
 
   public static AssociationsJson empty() {
-    return new AssociationsJson(List.of(), List.of(), List.of());
+    return new AssociationsJson(List.of(), List.of(), List.of(), List.of());
   }
 
   public record TraceSnapshot(
@@ -58,6 +61,20 @@ public record AssociationsJson(
       String summary,
       String externalLink,
       String result,
+      LocalDate startDate,
+      LocalDate endDate,
+      Instant createdAt,
+      Instant updatedAt) {}
+
+  public record DeclaredprogramSnapshot(
+      UUID id,
+      UUID studentId,
+      EProgramStatus status,
+      String title,
+      String description,
+      String organization,
+      String result,
+      String sourceOfInformation,
       LocalDate startDate,
       LocalDate endDate,
       Instant createdAt,

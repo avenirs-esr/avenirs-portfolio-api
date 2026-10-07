@@ -105,4 +105,34 @@ public class DeclaredProgram extends AvenirsBaseModel {
         createdAt,
         updatedAt);
   }
+
+  public static DeclaredProgram toDomain(
+      UUID id,
+      Student student,
+      EProgramStatus status,
+      String title,
+      String description,
+      String organization,
+      String result,
+      String sourceOfInformation,
+      LocalDate startDate,
+      LocalDate endDate,
+      boolean valorized,
+      Instant createdAt,
+      Instant updatedAt) {
+    return new DeclaredProgram(
+        id,
+        student,
+        status,
+        title,
+        description,
+        organization,
+        result,
+        sourceOfInformation,
+        startDate,
+        endDate,
+        valorized,
+        createdAt,
+        updatedAt);
+  }
 }

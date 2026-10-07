@@ -9,6 +9,7 @@ import fr.avenirsesr.portfolio.student.activity.domain.model.FeedbackAssociation
 import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.model.AssociationsJson;
 import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.model.FeedbackEntity;
 import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperience;
+import fr.avenirsesr.portfolio.student.program.domain.model.DeclaredProgram;
 import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkill;
 import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
@@ -122,13 +123,50 @@ public class FeedbackMapper implements Mapper<FeedbackEntity, Feedback> {
         snapshot.updatedAt());
   }
 
+  private AssociationsJson.DeclaredprogramSnapshot declaredprogramSnapshot(
+      DeclaredProgram declaredProgram) {
+    return new AssociationsJson.DeclaredprogramSnapshot(
+        declaredProgram.getId(),
+        declaredProgram.getStudent().getId(),
+        declaredProgram.getStatus(),
+        declaredProgram.getTitle(),
+        declaredProgram.getDescription(),
+        declaredProgram.getOrganization(),
+        declaredProgram.getResult(),
+        declaredProgram.getSourceOfInformation(),
+        declaredProgram.getStartDate(),
+        declaredProgram.getEndDate(),
+        declaredProgram.getCreatedAt(),
+        declaredProgram.getUpdatedAt());
+  }
+
+  private DeclaredProgram snapshotToDeclaredProgram(
+      AssociationsJson.DeclaredprogramSnapshot snapshot, Map<UUID, Student> students) {
+
+    return DeclaredProgram.toDomain(
+        snapshot.id(),
+        students.get(snapshot.studentId()),
+        snapshot.status(),
+        snapshot.title(),
+        snapshot.description(),
+        snapshot.organization(),
+        snapshot.result(),
+        snapshot.sourceOfInformation(),
+        snapshot.startDate(),
+        snapshot.endDate(),
+        false,
+        snapshot.createdAt(),
+        snapshot.updatedAt());
+  }
+
   private AssociationsJson associationsToSnapshots(FeedbackAssociations associations) {
     return new AssociationsJson(
         associations.traces().stream().map(this::traceToSnapshot).toList(),
         associations.declaredSkills().stream().map(this::declaredSkillProgressToSnapshot).toList(),
         associations.declaredExperiences().stream()
             .map(this::declaredExperienceToSnapshot)
-            .toList());
+            .toList(),
+        associations.declaredPrograms().stream().map(this::declaredprogramSnapshot).toList());
   }
 
   private FeedbackAssociations snapshotsToAssociations(
@@ -145,6 +183,9 @@ public class FeedbackMapper implements Mapper<FeedbackEntity, Feedback> {
             .toList(),
         associationsJson.declaredExperiences().stream()
             .map(snapshot -> snapshotToDeclaredExperience(snapshot, students))
+            .toList(),
+        associationsJson.declaredPrograms().stream()
+            .map(snapshot -> snapshotToDeclaredProgram(snapshot, students))
             .toList());
   }
 

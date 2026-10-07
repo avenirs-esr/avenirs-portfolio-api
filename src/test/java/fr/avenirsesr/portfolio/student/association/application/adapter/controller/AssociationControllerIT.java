@@ -767,22 +767,27 @@ class AssociationControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldReturn400WhenSearchingForANewElementWithTwoContextsThatCannotBeAssociated() {
-    BddLogger.given("two context types that cannot be associated together");
+  void shouldReturnDeclaredProgramWhenSerchingForNewDeclaredActivity() {
+    BddLogger.given("declared programs of the student");
 
     when("searching the declared programs to associate with a new declared activity");
 
     webTestClient
         .get()
-        .uri(NEW_ELEMENT_SEARCH_PATH, "DECLARED_ACTIVITY", "DECLARED_PROGRAM")
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(NEW_ELEMENT_SEARCH_PATH)
+                    .queryParam("page", "0")
+                    .queryParam("pageSize", "100")
+                    .build("DECLARED_ACTIVITY", "DECLARED_PROGRAM"))
         .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
         .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
         .accept(APPLICATION_JSON)
         .exchange()
         .expectStatus()
-        .isBadRequest();
-
-    BddLogger.then("it should return 400");
+        .isOk();
+    BddLogger.then("it should return the declared programs");
   }
 
   @Test

@@ -84,7 +84,8 @@ public class AssociationSeeder {
                     mapToAssociationCreationData(
                         savedDeclaredSkillProgresses,
                         savedDeclaredExperiences,
-                        savedDeclaredPrograms))
+                        savedDeclaredPrograms,
+                        savedActivities))
                 .toList());
 
     log.info("✔ {} associations created", associations.size());
@@ -94,7 +95,8 @@ public class AssociationSeeder {
   private Function<AssociationCreationData, AssociationData> mapToAssociationCreationData(
       List<DeclaredSkillProgressEntity> savedDeclaredSkillProgresses,
       List<DeclaredExperienceEntity> savedDeclaredExperiences,
-      List<DeclaredProgram> savedDeclaredPrograms) {
+      List<DeclaredProgram> savedDeclaredPrograms,
+      List<DeclaredActivityEntity> savedDeclaredActivity) {
 
     return data -> {
       Function<String, UUID> mapperId1 =
@@ -109,7 +111,7 @@ public class AssociationSeeder {
                 DECLARED_EXPERIENCE_DECLARED_PROGRAM ->
                 UUID::fromString;
 
-            case DECLARED_PROGRAM_DECLARED_SKILL ->
+            case DECLARED_PROGRAM_DECLARED_SKILL, DECLARED_PROGRAM_DECLARED_ACTIVITY ->
                 declaredProgramIdResolver(savedDeclaredPrograms);
           };
 
@@ -143,6 +145,18 @@ public class AssociationSeeder {
 
             case TRACE_DECLARED_PROGRAM, DECLARED_EXPERIENCE_DECLARED_PROGRAM ->
                 declaredProgramIdResolver(savedDeclaredPrograms);
+
+            case DECLARED_PROGRAM_DECLARED_ACTIVITY ->
+                id ->
+                    resolveDynamicIdWithStudentParam(
+                        id,
+                        savedDeclaredActivity,
+                        declaredActivity ->
+                            declaredActivity.getStudent() != null
+                                ? declaredActivity.getStudent().getId()
+                                : null,
+                        DeclaredActivityEntity::getId,
+                        declaredActivityComparator());
           };
 
       return new AssociationData(
@@ -208,5 +222,17 @@ public class AssociationSeeder {
         .thenComparing(DeclaredExperienceEntity::getStartDate, Comparator.reverseOrder())
         .thenComparing(
             experience -> experience.getTitle() == null ? "" : experience.getTitle().toLowerCase());
+  }
+
+  private Comparator<DeclaredActivityEntity> declaredActivityComparator() {
+    return Comparator.comparing(
+            (DeclaredActivityEntity activity) -> activity.getEndDate() == null ? 1 : 0,
+            Comparator.reverseOrder())
+        .thenComparing(DeclaredActivityEntity::getStartedAt, Comparator.reverseOrder())
+        .thenComparing(
+            declaredActivity ->
+                declaredActivity.getActivity().getTitle() == null
+                    ? ""
+                    : declaredActivity.getActivity().getTitle().toLowerCase());
   }
 }
