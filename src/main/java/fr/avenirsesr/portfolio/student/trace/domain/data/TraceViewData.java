@@ -11,6 +11,7 @@ public record TraceViewData(
     UUID id,
     String title,
     boolean isAssociated,
+    boolean valorized,
     Instant createdAt,
     Instant updatedAt,
     Optional<LocalDate> willBeDeletedAt,
