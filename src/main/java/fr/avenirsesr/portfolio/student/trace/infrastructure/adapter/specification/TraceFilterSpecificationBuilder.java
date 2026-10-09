@@ -2,13 +2,9 @@ package fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.specificati
 
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.specification.FilterSpecificationBuilder;
 import fr.avenirsesr.portfolio.common.file.domain.model.enums.EFileType;
-import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
 import fr.avenirsesr.portfolio.student.trace.domain.filter.ETraceFilterKey;
 import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.model.TraceEntity;
 import jakarta.persistence.criteria.JoinType;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.Subquery;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.domain.Specification;
@@ -34,17 +30,20 @@ public class TraceFilterSpecificationBuilder
     };
   }
 
+  /**
+   * Keeps the traces whose attachment is of one of the given types.
+   *
+   * <p>The attachment is reached through the {@code trace.attachment} association rather than by
+   * querying the file table on an owner column: a file no longer knows which business element it
+   * belongs to, that link was inverted when the file table was decoupled from the business
+   * entities. The inner join also drops the traces that carry no attachment at all, which is the
+   * expected outcome of filtering on a file type.
+   */
   private Specification<TraceEntity> fileType(List<EFileType> fileTypes) {
     return (root, query, cb) -> {
       if (fileTypes == null || fileTypes.isEmpty() || query == null) return null;
 
-      Subquery<FileEntity> attachSub = query.subquery(FileEntity.class);
-      Root<FileEntity> attachRoot = attachSub.from(FileEntity.class);
-      Predicate fileTypePredicate = attachRoot.get("fileType").in(fileTypes);
-      Predicate belongsToTrace = cb.equal(attachRoot.get("elementId"), root.get("id"));
-      attachSub.where(cb.and(belongsToTrace, fileTypePredicate));
-
-      return cb.exists(attachSub);
+      return root.join("attachment", JoinType.INNER).get("fileType").in(fileTypes);
     };
   }
 

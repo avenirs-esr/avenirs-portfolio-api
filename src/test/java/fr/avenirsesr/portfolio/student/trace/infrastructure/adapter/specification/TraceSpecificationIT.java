@@ -74,6 +74,29 @@ class TraceSpecificationIT extends ContainerConfigurationTest {
   }
 
   @Test
+  void shouldKeepOnlyTheTracesWhoseAttachmentMatchesTheRequestedFileTypes() {
+    TraceEntity withPdf = persistTrace("with pdf");
+    persistAttachment(withPdf, "report.pdf", EFileType.PDF, true);
+    TraceEntity withPng = persistTrace("with png");
+    persistAttachment(withPng, "picture.png", EFileType.PNG, true);
+    TraceEntity withoutAttachment = persistTrace("without attachment");
+
+    entityManager.flush();
+    entityManager.clear();
+
+    TraceFilterSpecificationBuilder builder = new TraceFilterSpecificationBuilder();
+    Specification<TraceEntity> spec =
+        builder.getSpecification(ETraceFilterKey.FILE_TYPE, List.of(EFileType.PDF));
+
+    List<TraceEntity> result = traceJpaRepository.findAll(ofTestStudent(student.getId()).and(spec));
+
+    assertThat(result).extracting(TraceEntity::getId).containsExactly(withPdf.getId());
+    assertThat(result)
+        .extracting(TraceEntity::getId)
+        .doesNotContain(withPng.getId(), withoutAttachment.getId());
+  }
+
+  @Test
   void shouldSearchByTitle_aiUse_personalNote_andAttachmentName() {
     TraceEntity byTitle = persistTrace("Projet Java");
     TraceEntity byAiUse = persistTrace("x");
