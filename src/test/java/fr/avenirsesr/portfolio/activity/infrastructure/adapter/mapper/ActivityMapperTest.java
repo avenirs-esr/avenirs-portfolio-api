@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.activity.infrastructure.adapter.mapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import fr.avenirsesr.portfolio.common.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
@@ -79,6 +80,7 @@ class ActivityMapperTest {
             List.of(),
             targetInstitutionIds,
             targetGroupIds,
+            true,
             createdAt,
             updatedAt);
   }
@@ -104,6 +106,7 @@ class ActivityMapperTest {
     assertEquals(enableRefection, entity.isEnableReflection());
     assertEquals(targetInstitutionIds, entity.getTargetInstitutionIds());
     assertEquals(targetGroupIds, entity.getTargetGroupIds());
+    assertTrue(entity.isNational());
     assertEquals(createdAt, entity.getCreatedAt());
     assertEquals(updatedAt, entity.getUpdatedAt());
   }
@@ -125,6 +128,7 @@ class ActivityMapperTest {
     entity.setEnableReflection(enableRefection);
     entity.setTargetInstitutionIds(targetInstitutionIds);
     entity.setTargetGroupIds(targetGroupIds);
+    entity.setNational(true);
     entity.setCreatedAt(createdAt);
     entity.setUpdatedAt(updatedAt);
 

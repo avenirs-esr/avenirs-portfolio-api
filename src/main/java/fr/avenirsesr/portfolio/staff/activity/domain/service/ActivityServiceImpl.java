@@ -187,6 +187,7 @@ public class ActivityServiceImpl implements ActivityService {
                 draft.getFiles(),
                 draft.getTargetInstitutionIds(),
                 draft.getTargetGroupIds()));
+    activity.setNational(draft.isNational());
 
     var removedFileIds = new ArrayList<UUID>();
     if (publishedActivity.isPresent()) {
@@ -265,6 +266,7 @@ public class ActivityServiceImpl implements ActivityService {
     activity.setEndDate(draft.getEndDate().orElse(null));
     activity.setTargetInstitutionIds(draft.getTargetInstitutionIds());
     activity.setTargetGroupIds(draft.getTargetGroupIds());
+    activity.setNational(draft.isNational());
 
     if (!hasEnrolledStudents) {
       activity.setTraceAllowedAssociations(draft.getTraceAllowedAssociations());
@@ -562,7 +564,8 @@ public class ActivityServiceImpl implements ActivityService {
       List<String> links,
       Boolean enableCompletionPeriod,
       List<UUID> targetInstitutionIds,
-      List<UUID> targetGroupIds) {
+      List<UUID> targetGroupIds,
+      Boolean national) {
     var loggedInStaff = loggedInUserService.getLoggedInStaff();
     var draft =
         activityDraftRepository.findById(id).orElseThrow(ActivityDraftNotFoundException::new);
@@ -624,6 +627,7 @@ public class ActivityServiceImpl implements ActivityService {
 
     if (targetInstitutionIds != null) draft.setTargetInstitutionIds(targetInstitutionIds);
     if (targetGroupIds != null) draft.setTargetGroupIds(targetGroupIds);
+    if (national != null) draft.setNational(national);
 
     var updatedDraft = activityDraftRepository.save(draft);
     log.info("Updated activity draft with id: {}", id);
@@ -702,7 +706,8 @@ public class ActivityServiceImpl implements ActivityService {
             activity.getLinks(),
             activity.getFiles(),
             activity.getTargetInstitutionIds(),
-            activity.getTargetGroupIds());
+            activity.getTargetGroupIds(),
+            activity.isNational());
 
     var savedDraft = activityDraftRepository.save(draft);
 
@@ -753,7 +758,8 @@ public class ActivityServiceImpl implements ActivityService {
             source.getLinks(),
             source.getFiles().stream().map(file -> fileResourceService.copy(file.getId())).toList(),
             source.getTargetInstitutionIds(),
-            source.getTargetGroupIds());
+            source.getTargetGroupIds(),
+            source.isNational());
     return activityDraftRepository.save(duplicate);
   }
 
@@ -779,7 +785,8 @@ public class ActivityServiceImpl implements ActivityService {
             source.getLinks(),
             source.getFiles().stream().map(file -> fileResourceService.copy(file.getId())).toList(),
             source.getTargetInstitutionIds(),
-            source.getTargetGroupIds());
+            source.getTargetGroupIds(),
+            source.isNational());
     return activityDraftRepository.save(duplicate);
   }
 

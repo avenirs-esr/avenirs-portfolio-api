@@ -381,7 +381,8 @@ public class ActivityController {
             body.links(),
             body.enableCompletionPeriod(),
             body.targetInstitutionIds(),
-            body.targetGroupIds());
+            body.targetGroupIds(),
+            body.national());
     return ResponseEntity.ok(new ActivityDraftUpdateResponse(draft.getId()));
   }
 

@@ -41,6 +41,7 @@ public class FakeActivity {
             List.of(),
             List.of(),
             List.of(),
+            false,
             Instant.now(),
             Instant.now()));
   }

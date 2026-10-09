@@ -84,7 +84,8 @@ public interface ActivityService {
       List<String> links,
       Boolean enableCompletionPeriod,
       List<UUID> targetInstitutionIds,
-      List<UUID> targetGroupIds);
+      List<UUID> targetGroupIds,
+      Boolean national);
 
   ActivityDraft createDraftFromActivity(UUID activityId);
 

@@ -92,6 +92,9 @@ public class ActivityDraftEntity extends PeriodEntity<LocalDate> {
   @Column(name = "group_id")
   private List<UUID> targetGroupIds = new ArrayList<>();
 
+  @Column(name = "is_national", nullable = false)
+  private boolean national;
+
   public ActivityDraftEntity(
       UUID id,
       String title,
@@ -110,6 +113,7 @@ public class ActivityDraftEntity extends PeriodEntity<LocalDate> {
       List<FileEntity> files,
       List<UUID> targetInstitutionIds,
       List<UUID> targetGroupIds,
+      boolean national,
       Instant createdAt,
       Instant updatedAt) {
     this.setId(id);
@@ -129,6 +133,7 @@ public class ActivityDraftEntity extends PeriodEntity<LocalDate> {
     this.files = files;
     this.targetInstitutionIds = targetInstitutionIds;
     this.targetGroupIds = targetGroupIds;
+    this.national = national;
     this.setCreatedAt(createdAt);
     this.setUpdatedAt(updatedAt);
   }
@@ -151,6 +156,7 @@ public class ActivityDraftEntity extends PeriodEntity<LocalDate> {
       List<FileEntity> files,
       List<UUID> targetInstitutionIds,
       List<UUID> targetGroupIds,
+      boolean national,
       Instant createdAt,
       Instant updatedAt) {
     return new ActivityDraftEntity(
@@ -171,6 +177,7 @@ public class ActivityDraftEntity extends PeriodEntity<LocalDate> {
         files,
         targetInstitutionIds,
         targetGroupIds,
+        national,
         createdAt,
         updatedAt);
   }

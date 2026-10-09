@@ -31,6 +31,7 @@ public class ActivityDraftMapper implements Mapper<ActivityDraftEntity, Activity
             activityDraft.getFiles().stream().map(FileMapper.INSTANCE::fromDomain).toList(),
             activityDraft.getTargetInstitutionIds(),
             activityDraft.getTargetGroupIds(),
+            activityDraft.isNational(),
             activityDraft.getCreatedAt(),
             activityDraft.getUpdatedAt());
     return entity;
@@ -58,7 +59,8 @@ public class ActivityDraftMapper implements Mapper<ActivityDraftEntity, Activity
             entity.getLinks(),
             entity.getFiles().stream().map(FileMapper.INSTANCE::toDomain).toList(),
             entity.getTargetInstitutionIds(),
-            entity.getTargetGroupIds());
+            entity.getTargetGroupIds(),
+            entity.isNational());
     return domain;
   }
 
@@ -89,7 +91,8 @@ public class ActivityDraftMapper implements Mapper<ActivityDraftEntity, Activity
             entity.getLinks(),
             entity.getFiles().stream().map(FileMapper.INSTANCE::toDomain).toList(),
             entity.getTargetInstitutionIds(),
-            entity.getTargetGroupIds());
+            entity.getTargetGroupIds(),
+            entity.isNational());
     return domain;
   }
 }

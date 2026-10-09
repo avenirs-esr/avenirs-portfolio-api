@@ -33,6 +33,7 @@ public class ActivityMapper implements Mapper<ActivityEntity, Activity> {
             domain.getFiles().stream().map(FileMapper.INSTANCE::fromDomain).toList(),
             domain.getTargetInstitutionIds(),
             domain.getTargetGroupIds(),
+            domain.isNational(),
             domain.getCreatedAt(),
             domain.getUpdatedAt());
     return entity;
@@ -60,6 +61,7 @@ public class ActivityMapper implements Mapper<ActivityEntity, Activity> {
             entity.getFiles().stream().map(FileMapper.INSTANCE::toDomain).toList(),
             entity.getTargetInstitutionIds(),
             entity.getTargetGroupIds(),
+            entity.isNational(),
             entity.getCreatedAt(),
             entity.getUpdatedAt());
     return domain;
@@ -94,6 +96,7 @@ public class ActivityMapper implements Mapper<ActivityEntity, Activity> {
                 : List.of(),
             entity.getTargetInstitutionIds(),
             entity.getTargetGroupIds(),
+            entity.isNational(),
             entity.getCreatedAt(),
             entity.getUpdatedAt());
     return domain;

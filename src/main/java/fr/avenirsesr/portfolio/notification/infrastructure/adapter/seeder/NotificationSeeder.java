@@ -158,6 +158,7 @@ public class NotificationSeeder {
         links,
         draft.getStartDate().isPresent() && draft.getEndDate().isPresent(),
         null,
+        null,
         null);
 
     activityService.publish(draft.getId());

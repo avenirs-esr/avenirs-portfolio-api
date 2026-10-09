@@ -21,4 +21,5 @@ public record ActivityDraftUpdateRequest(
     List<String> links,
     Boolean enableCompletionPeriod,
     List<UUID> targetInstitutionIds,
-    List<UUID> targetGroupIds) {}
+    List<UUID> targetGroupIds,
+    Boolean national) {}
