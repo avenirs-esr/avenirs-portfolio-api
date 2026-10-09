@@ -16,6 +16,7 @@ import java.util.UUID;
       "enableReflection",
       "traceAllowedAssociations",
       "feedbackAllowedIterations",
+      "national",
       "createdAt",
       "updatedAt"
     })
@@ -38,5 +39,6 @@ public record ActivityContentDTO(
     List<String> links,
     List<UUID> targetInstitutionIds,
     List<UUID> targetGroupIds,
+    boolean national,
     Instant createdAt,
     Instant updatedAt) {}

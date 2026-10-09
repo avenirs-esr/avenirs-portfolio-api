@@ -37,6 +37,7 @@ public class ActivityFixture {
   private List<File> files = List.of();
   private List<UUID> targetInstitutionIds = List.of();
   private List<UUID> targetGroupIds = List.of();
+  private boolean national = false;
   private Instant createdAt = Instant.now();
   private Instant updatedAt = Instant.now();
 
@@ -139,6 +140,11 @@ public class ActivityFixture {
     return this;
   }
 
+  public ActivityFixture withNational(boolean national) {
+    this.national = national;
+    return this;
+  }
+
   public Activity toModel() {
     return Activity.toDomain(
         id,
@@ -159,6 +165,7 @@ public class ActivityFixture {
         files,
         targetInstitutionIds,
         targetGroupIds,
+        national,
         createdAt,
         updatedAt);
   }

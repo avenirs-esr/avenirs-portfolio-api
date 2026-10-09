@@ -44,6 +44,7 @@ public class Activity extends AvenirsBaseModel {
   private List<File> files;
   private List<UUID> targetInstitutionIds;
   private List<UUID> targetGroupIds;
+  private boolean national;
 
   private Activity(
       UUID id,
@@ -64,6 +65,7 @@ public class Activity extends AvenirsBaseModel {
       List<File> files,
       List<UUID> targetInstitutionIds,
       List<UUID> targetGroupIds,
+      boolean national,
       Instant createdAt,
       Instant updatedAt) {
     super(id, createdAt, updatedAt);
@@ -85,6 +87,7 @@ public class Activity extends AvenirsBaseModel {
     this.targetInstitutionIds =
         new ArrayList<>(targetInstitutionIds == null ? List.of() : targetInstitutionIds);
     this.targetGroupIds = new ArrayList<>(targetGroupIds == null ? List.of() : targetGroupIds);
+    this.national = national;
   }
 
   public static Activity create(
@@ -125,6 +128,7 @@ public class Activity extends AvenirsBaseModel {
         files,
         targetInstitutionIds,
         targetGroupIds,
+        false,
         now,
         now);
   }
@@ -148,6 +152,7 @@ public class Activity extends AvenirsBaseModel {
       List<File> files,
       List<UUID> targetInstitutionIds,
       List<UUID> targetGroupIds,
+      boolean national,
       Instant createdAt,
       Instant updatedAt) {
     return new Activity(
@@ -169,6 +174,7 @@ public class Activity extends AvenirsBaseModel {
         files,
         targetInstitutionIds,
         targetGroupIds,
+        national,
         createdAt,
         updatedAt);
   }

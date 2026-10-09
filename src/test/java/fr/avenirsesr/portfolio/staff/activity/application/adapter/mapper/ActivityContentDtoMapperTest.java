@@ -48,6 +48,31 @@ class ActivityContentDtoMapperTest {
   }
 
   @Test
+  void shouldMapNationalFromActivity() {
+    BddLogger.given("a national activity");
+    Activity activity = ActivityFixture.create().withNational(true).toModel();
+
+    BddLogger.when("mapping to ActivityContentDTO");
+    ActivityContentDTO dto = mapper.toDTO(activity);
+
+    BddLogger.then("national should be true");
+    assertTrue(dto.national());
+  }
+
+  @Test
+  void shouldMapNationalFromDraft() {
+    BddLogger.given("a national activity draft");
+    ActivityDraft draft = ActivityDraft.create("draft title", StaffFixture.create().toModel());
+    draft.setNational(true);
+
+    BddLogger.when("mapping to ActivityContentDTO");
+    ActivityContentDTO dto = mapper.toDTO(draft, null, List.of());
+
+    BddLogger.then("national should be true");
+    assertTrue(dto.national());
+  }
+
+  @Test
   void shouldMapEmptyOptionalFieldsToNull() {
     BddLogger.given("an activity with empty optional fields");
     Activity activity =

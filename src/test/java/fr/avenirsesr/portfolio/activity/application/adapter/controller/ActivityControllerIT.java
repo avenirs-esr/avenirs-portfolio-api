@@ -572,7 +572,8 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             null,
             false,
             targetInstitutionIds,
-            targetGroupIds);
+            targetGroupIds,
+            null);
       }
 
       private void updateDraftTargeting(
@@ -1028,6 +1029,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                     List.of("https://example.com", "https://avenirs-esr.fr"),
                     true,
                     null,
+                    null,
                     null));
 
         webTestClient
@@ -1068,6 +1070,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                     null,
                     false,
                     null,
+                    null,
                     null));
 
         webTestClient
@@ -1097,7 +1100,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             objectMapper.writeValueAsString(
                 new ActivityDraftUpdateRequest(
                     null, null, null, null, null, null, null, null, null, null, null, false, null,
-                    null));
+                    null, null));
 
         webTestClient
             .patch()
@@ -1148,6 +1151,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                     null,
                     null,
                     false,
+                    null,
                     null,
                     null));
 
@@ -1200,6 +1204,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                     null,
                     true,
                     null,
+                    null,
                     null));
 
         webTestClient
@@ -1228,7 +1233,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             objectMapper.writeValueAsString(
                 new ActivityDraftUpdateRequest(
                     "Titre", null, null, null, null, null, null, null, null, null, null, false,
-                    null, null));
+                    null, null, null));
 
         webTestClient
             .patch()
@@ -1268,6 +1273,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                     null,
                     false,
                     null,
+                    null,
                     null));
 
         webTestClient
@@ -1293,7 +1299,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             objectMapper.writeValueAsString(
                 new ActivityDraftUpdateRequest(
                     "Titre", null, null, null, null, null, null, null, null, null, null, false,
-                    null, null));
+                    null, null, null));
 
         webTestClient
             .patch()
@@ -1323,6 +1329,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                     null,
                     null,
                     true,
+                    null,
                     null,
                     null));
 
@@ -1720,7 +1727,8 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             null,
             false,
             targetInstitutionIds,
-            targetGroupIds);
+            targetGroupIds,
+            null);
       }
 
       private void updateDraftTargeting(
@@ -3226,6 +3234,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                 null,
                 false,
                 null,
+                null,
                 null));
 
     webTestClient
@@ -3256,6 +3265,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                 null,
                 null,
                 false,
+                null,
                 null,
                 null));
 

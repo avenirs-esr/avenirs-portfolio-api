@@ -29,6 +29,7 @@ public class ActivityDraft extends AvenirsBaseModel {
   @Getter private List<File> files;
   @Getter private List<UUID> targetInstitutionIds;
   @Getter private List<UUID> targetGroupIds;
+  @Getter private boolean national;
   @Getter private int traceAllowedAssociations;
   @Getter private int feedbackAllowedIterations;
   @Getter private boolean enableReflection;
@@ -55,7 +56,8 @@ public class ActivityDraft extends AvenirsBaseModel {
       List<String> links,
       List<File> files,
       List<UUID> targetInstitutionIds,
-      List<UUID> targetGroupIds) {
+      List<UUID> targetGroupIds,
+      boolean national) {
     super(id, createdAt, updatedAt);
     this.title = title;
     this.author = author;
@@ -74,6 +76,7 @@ public class ActivityDraft extends AvenirsBaseModel {
     this.targetInstitutionIds =
         new ArrayList<>(targetInstitutionIds == null ? List.of() : targetInstitutionIds);
     this.targetGroupIds = new ArrayList<>(targetGroupIds == null ? List.of() : targetGroupIds);
+    this.national = national;
   }
 
   public static ActivityDraft create(String title, Staff createdBy) {
@@ -96,7 +99,8 @@ public class ActivityDraft extends AvenirsBaseModel {
         List.of(),
         List.of(),
         List.of(),
-        List.of());
+        List.of(),
+        false);
   }
 
   public static ActivityDraft toDomain(
@@ -118,7 +122,8 @@ public class ActivityDraft extends AvenirsBaseModel {
       List<String> links,
       List<File> files,
       List<UUID> targetInstitutionIds,
-      List<UUID> targetGroupIds) {
+      List<UUID> targetGroupIds,
+      boolean national) {
     return new ActivityDraft(
         id,
         createdAt,
@@ -138,7 +143,8 @@ public class ActivityDraft extends AvenirsBaseModel {
         links,
         files,
         targetInstitutionIds,
-        targetGroupIds);
+        targetGroupIds,
+        national);
   }
 
   public Optional<EActivityThematic> getThematic() {

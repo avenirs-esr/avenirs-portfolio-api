@@ -286,7 +286,8 @@ class ActivityServiceImplTest {
                     links,
                     true,
                     institutionIds,
-                    groupIds);
+                    groupIds,
+                    null);
 
             verify(draft).setTitle("Nouveau titre");
             verify(draft).setThematic(EActivityThematic.EXPERIENCES);
@@ -311,7 +312,7 @@ class ActivityServiceImplTest {
 
             activityService.updateActivityDraft(
                 draftId, null, null, null, null, null, null, null, null, null, null, null, false,
-                null, null);
+                null, null, null);
 
             verify(draft, never()).setTitle(any());
             verify(draft, never()).setThematic(any());
@@ -324,6 +325,19 @@ class ActivityServiceImplTest {
             verify(draft, never()).addLinks(anyList());
             verify(draft, never()).setTargetInstitutionIds(any());
             verify(draft, never()).setTargetGroupIds(any());
+            verify(draft, never()).setNational(anyBoolean());
+            verify(activityDraftRepository).save(draft);
+          }
+
+          @Test
+          void thenItShouldUpdateNationalWhenProvided() {
+            BddLogger.then("national should be updated when provided");
+
+            activityService.updateActivityDraft(
+                draftId, null, null, null, null, null, null, null, null, null, null, null, null,
+                null, null, true);
+
+            verify(draft).setNational(true);
             verify(activityDraftRepository).save(draft);
           }
 
@@ -346,6 +360,7 @@ class ActivityServiceImplTest {
                 null,
                 false,
                 null,
+                null,
                 null);
 
             verify(draft).setTitle("Titre seul");
@@ -365,7 +380,7 @@ class ActivityServiceImplTest {
 
             activityService.updateActivityDraft(
                 draftId, null, null, null, null, null, null, null, null, null, null, null, false,
-                null, null);
+                null, null, null);
 
             verify(draft).setStartDate(null);
             verify(draft).setEndDate(null);
@@ -389,6 +404,7 @@ class ActivityServiceImplTest {
                 null,
                 null,
                 false,
+                null,
                 null,
                 null);
 
@@ -415,6 +431,7 @@ class ActivityServiceImplTest {
                 null,
                 true,
                 null,
+                null,
                 null);
 
             verify(draft).setStartDate(LocalDate.parse("2026-06-01"));
@@ -429,6 +446,7 @@ class ActivityServiceImplTest {
             activityService.updateActivityDraft(
                 draftId,
                 "Nouveau titre",
+                null,
                 null,
                 null,
                 null,
@@ -469,6 +487,7 @@ class ActivityServiceImplTest {
                         null,
                         true,
                         null,
+                        null,
                         null));
 
             verify(activityDraftRepository, never()).save(any());
@@ -483,7 +502,7 @@ class ActivityServiceImplTest {
                 () ->
                     activityService.updateActivityDraft(
                         draftId, null, null, null, null, null, null, null, null, null, null, null,
-                        true, null, null));
+                        true, null, null, null));
 
             verify(activityDraftRepository, never()).save(any());
           }
@@ -510,6 +529,7 @@ class ActivityServiceImplTest {
                         null,
                         true,
                         null,
+                        null,
                         null));
 
             verify(activityDraftRepository, never()).save(any());
@@ -525,7 +545,7 @@ class ActivityServiceImplTest {
             ActivityDraft result =
                 activityService.updateActivityDraft(
                     draftId, "Titre", null, null, null, null, null, null, null, null, null, null,
-                    false, null, null);
+                    false, null, null, null);
 
             assertEquals(savedDraft, result);
           }
@@ -549,7 +569,7 @@ class ActivityServiceImplTest {
                 () ->
                     activityService.updateActivityDraft(
                         draftId, "Titre", null, null, null, null, null, null, null, null, null,
-                        null, false, null, null));
+                        null, false, null, null, null));
 
             verify(activityDraftRepository, never()).save(any());
           }
@@ -574,7 +594,7 @@ class ActivityServiceImplTest {
               () ->
                   activityService.updateActivityDraft(
                       draftId, "Titre", null, null, null, null, null, null, null, null, null, null,
-                      false, null, null));
+                      false, null, null, null));
 
           verify(activityDraftRepository, never()).save(any());
         }
@@ -633,7 +653,8 @@ class ActivityServiceImplTest {
                       null,
                       false,
                       List.of(UUID.randomUUID()),
-                      List.of()));
+                      List.of(),
+                      null));
 
           verify(activityDraftRepository, never()).save(any());
         }
@@ -660,7 +681,8 @@ class ActivityServiceImplTest {
                       null,
                       false,
                       List.of(),
-                      List.of(UUID.randomUUID())));
+                      List.of(UUID.randomUUID()),
+                      null));
 
           verify(activityDraftRepository, never()).save(any());
         }
@@ -700,7 +722,8 @@ class ActivityServiceImplTest {
                   null,
                   false,
                   institutionIds,
-                  groupIds);
+                  groupIds,
+                  null);
 
           verify(draft).setTargetInstitutionIds(institutionIds);
           verify(draft).setTargetGroupIds(groupIds);
@@ -729,7 +752,7 @@ class ActivityServiceImplTest {
           ActivityDraft result =
               activityService.updateActivityDraft(
                   draftId, null, null, null, null, null, null, null, null, null, null, null, false,
-                  List.of(), List.of());
+                  List.of(), List.of(), null);
 
           verify(draft).setTargetInstitutionIds(List.of());
           assertEquals(draft, result);
@@ -781,7 +804,8 @@ class ActivityServiceImplTest {
                       null,
                       false,
                       List.of(),
-                      List.of(alreadyTargetedGroupId)));
+                      List.of(alreadyTargetedGroupId),
+                      null));
 
           verify(activityDraftRepository, never()).save(any());
         }
@@ -808,7 +832,8 @@ class ActivityServiceImplTest {
                       null,
                       false,
                       List.of(alreadyTargetedInstitutionId),
-                      List.of()));
+                      List.of(),
+                      null));
 
           verify(activityDraftRepository, never()).save(any());
         }
@@ -836,7 +861,8 @@ class ActivityServiceImplTest {
                   null,
                   false,
                   updatedInstitutionIds,
-                  List.of(alreadyTargetedGroupId));
+                  List.of(alreadyTargetedGroupId),
+                  null);
 
           verify(draft).setTargetInstitutionIds(updatedInstitutionIds);
           assertEquals(draft, result);
@@ -849,7 +875,7 @@ class ActivityServiceImplTest {
           ActivityDraft result =
               activityService.updateActivityDraft(
                   draftId, null, null, null, null, null, null, null, null, null, null, null, false,
-                  null, null);
+                  null, null, null);
 
           verify(draft, never()).setTargetInstitutionIds(any());
           verify(draft, never()).setTargetGroupIds(any());
@@ -1039,6 +1065,16 @@ class ActivityServiceImplTest {
 
               verify(activityRepository).save(any(Activity.class));
               verify(activityDraftRepository).removeFromDatabase(draft);
+            }
+
+            @Test
+            void thenItShouldPublishTheNationalFlagOfTheDraft() {
+              BddLogger.then("the published activity should keep the national flag");
+              when(draft.isNational()).thenReturn(true);
+
+              Activity result = activityService.publish(draftId);
+
+              assertTrue(result.isNational());
             }
 
             @Test
@@ -1790,6 +1826,7 @@ class ActivityServiceImplTest {
                 List.of(),
                 List.of(),
                 List.of(),
+                false,
                 Instant.now(),
                 Instant.now());
 
@@ -3089,7 +3126,8 @@ class ActivityServiceImplTest {
                   List.of("https://example.com"),
                   files,
                   List.of(sourceInstitutionId),
-                  List.of(sourceGroupId));
+                  List.of(sourceGroupId),
+                  false);
           return d;
         }
       }
@@ -3114,6 +3152,7 @@ class ActivityServiceImplTest {
             files,
             List.of(sourceInstitutionId),
             List.of(sourceGroupId),
+            false,
             Instant.parse("2020-01-01T00:00:00Z"),
             Instant.parse("2021-01-01T00:00:00Z"));
       }

@@ -39,6 +39,7 @@ public class FakeActivityDraft {
             List.of(),
             List.of(),
             List.of(),
+            false,
             Instant.now(),
             Instant.now()));
   }
