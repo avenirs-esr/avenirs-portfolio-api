@@ -3,7 +3,7 @@ package fr.avenirsesr.portfolio.student.selfknowledge.infrastructure.adapter.mod
 import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.*;
 
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
-import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
+import fr.avenirsesr.portfolio.common.file.infrastructure.adapter.model.FileEntity;
 import fr.avenirsesr.portfolio.student.selfknowledge.domain.model.enums.ESelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import jakarta.persistence.*;

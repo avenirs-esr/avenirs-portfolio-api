@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.student.trace.domain.data;
 
-import fr.avenirsesr.portfolio.file.domain.model.File;
+import fr.avenirsesr.portfolio.common.file.domain.model.File;
 import fr.avenirsesr.portfolio.student.trace.domain.model.enums.ETraceAuthorType;
 import java.time.Instant;
 import java.util.Optional;

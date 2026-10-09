@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.user.infrastructure.fixture;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
-import fr.avenirsesr.portfolio.file.domain.model.File;
+import fr.avenirsesr.portfolio.common.file.domain.model.File;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import java.time.Instant;
 import java.util.UUID;

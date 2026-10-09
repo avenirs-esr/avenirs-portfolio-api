@@ -4,15 +4,15 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import fr.avenirsesr.portfolio.common.data.domain.model.User;
+import fr.avenirsesr.portfolio.common.file.domain.exception.FileNotFoundException;
+import fr.avenirsesr.portfolio.common.file.domain.model.File;
+import fr.avenirsesr.portfolio.common.file.domain.model.FileResource;
 import fr.avenirsesr.portfolio.common.file.domain.model.enums.EFileType;
+import fr.avenirsesr.portfolio.common.file.domain.port.output.repository.FileRepository;
+import fr.avenirsesr.portfolio.common.file.domain.port.output.service.FileStorageService;
+import fr.avenirsesr.portfolio.common.file.domain.port.output.service.FileUploaderProvider;
+import fr.avenirsesr.portfolio.common.file.domain.service.FileResourceServiceImpl;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
-import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
-import fr.avenirsesr.portfolio.file.domain.model.File;
-import fr.avenirsesr.portfolio.file.domain.model.FileResource;
-import fr.avenirsesr.portfolio.file.domain.port.output.repository.FileRepository;
-import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
-import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
@@ -30,7 +30,7 @@ class FileResourceServiceImplTest {
 
   @Mock private FileStorageService fileStorageService;
   @Mock private FileRepository fileRepository;
-  @Mock private LoggedInUserService loggedInUserService;
+  @Mock private FileUploaderProvider fileUploaderProvider;
 
   private FileResourceServiceImpl fileResourceService;
 
@@ -38,7 +38,7 @@ class FileResourceServiceImplTest {
   void setUp() {
     MockitoAnnotations.openMocks(this);
     fileResourceService =
-        new FileResourceServiceImpl(fileStorageService, fileRepository, loggedInUserService);
+        new FileResourceServiceImpl(fileStorageService, fileRepository, fileUploaderProvider);
   }
 
   @Nested
@@ -69,15 +69,13 @@ class FileResourceServiceImplTest {
         @BeforeEach
         void setupAnd() {
           BddLogger.and("the source file exists");
-          User loggedInUser = mock(User.class);
           loggedInUserId = UUID.randomUUID();
-          when(loggedInUser.getId()).thenReturn(loggedInUserId);
           sourceContent = new byte[] {1, 2, 3};
 
           when(fileRepository.findById(sourceId))
               .thenReturn(Optional.of(aSourceFile(EFileType.PDF, "consigne.pdf", 3L, true)));
           when(fileStorageService.get(SOURCE_URI)).thenReturn(sourceContent);
-          when(loggedInUserService.getLoggedInUser()).thenReturn(loggedInUser);
+          when(fileUploaderProvider.currentUploaderId()).thenReturn(loggedInUserId);
           when(fileStorageService.upload(any())).thenReturn(COPY_URI);
           when(fileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         }

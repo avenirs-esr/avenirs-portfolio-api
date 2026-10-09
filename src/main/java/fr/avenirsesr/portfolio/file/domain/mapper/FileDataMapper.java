@@ -1,8 +1,8 @@
 package fr.avenirsesr.portfolio.file.domain.mapper;
 
+import fr.avenirsesr.portfolio.common.file.domain.model.File;
+import fr.avenirsesr.portfolio.common.file.infrastructure.configuration.FileStorageConstants;
 import fr.avenirsesr.portfolio.file.domain.data.FileData;
-import fr.avenirsesr.portfolio.file.domain.model.File;
-import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
 import java.util.Optional;
 
 public interface FileDataMapper {

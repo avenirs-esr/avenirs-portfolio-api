@@ -1,11 +1,11 @@
 package fr.avenirsesr.portfolio.file.application.adapter.controller;
 
+import fr.avenirsesr.portfolio.common.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.common.file.domain.exception.FileStorageException;
+import fr.avenirsesr.portfolio.common.file.domain.model.FileResource;
 import fr.avenirsesr.portfolio.common.file.domain.model.enums.EFileType;
-import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
-import fr.avenirsesr.portfolio.file.domain.model.FileResource;
-import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
-import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
+import fr.avenirsesr.portfolio.common.file.domain.port.input.FileResourceService;
+import fr.avenirsesr.portfolio.user.infrastructure.configuration.UserPhotoDefaults;
 import jakarta.validation.Valid;
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,14 +45,14 @@ public class StorageController {
   public ResponseEntity<ByteArrayResource> getDefaultCoverPicture() {
     log.debug("Received request to get default cover photo");
     return serveDefaultPicture(
-        FileStorageConstants.COVER_DEFAULT_PATH, FileStorageConstants.COVER_DEFAULT_FILE_TYPE);
+        UserPhotoDefaults.COVER_DEFAULT_PATH, UserPhotoDefaults.COVER_DEFAULT_FILE_TYPE);
   }
 
   @GetMapping("/default/profile-picture")
   public ResponseEntity<ByteArrayResource> getDefaultProfilePicture() {
     log.debug("Received request to get default profile photo");
     return serveDefaultPicture(
-        FileStorageConstants.PROFILE_DEFAULT_PATH, FileStorageConstants.PROFILE_DEFAULT_FILE_TYPE);
+        UserPhotoDefaults.PROFILE_DEFAULT_PATH, UserPhotoDefaults.PROFILE_DEFAULT_FILE_TYPE);
   }
 
   /**
