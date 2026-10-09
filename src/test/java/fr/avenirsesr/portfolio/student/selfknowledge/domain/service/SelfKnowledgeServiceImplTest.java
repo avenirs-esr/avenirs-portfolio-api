@@ -1362,7 +1362,7 @@ class SelfKnowledgeServiceImplTest {
           FILE_NAME,
           CONTENT.length,
           "uri/" + FILE_NAME,
-          UserFixture.create().toModel(),
+          UserFixture.create().toModel().getId(),
           true);
     }
   }

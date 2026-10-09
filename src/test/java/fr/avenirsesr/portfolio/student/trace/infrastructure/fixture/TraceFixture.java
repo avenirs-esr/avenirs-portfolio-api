@@ -44,7 +44,7 @@ public class TraceFixture {
             "my fake pdf",
             1000L,
             "fake-url",
-            student.getUser(),
+            student.getUser().getId(),
             true);
   }
 

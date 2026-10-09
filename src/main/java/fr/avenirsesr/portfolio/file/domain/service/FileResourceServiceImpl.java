@@ -24,7 +24,7 @@ public class FileResourceServiceImpl implements FileResourceService {
   @Override
   public File upload(
       String fileName, String mimeType, long size, byte[] content, boolean isRestricted) {
-    var loggedInUser = loggedInUserService.getLoggedInUser();
+    var loggedInUserId = loggedInUserService.getLoggedInUser().getId();
 
     var fileResource =
         new FileResource(
@@ -42,7 +42,7 @@ public class FileResourceServiceImpl implements FileResourceService {
             fileResource.fileName(),
             fileResource.size(),
             uri,
-            loggedInUser,
+            loggedInUserId,
             isRestricted);
     return fileRepository.save(file);
   }

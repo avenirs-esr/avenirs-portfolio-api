@@ -52,7 +52,7 @@ public class FakeTraceAttachment {
                     FileStorageConstants.STORAGE_PATH,
                     FileStorageConstants.PLACEHOLDER_FILE_UUID,
                     fileType.name().toLowerCase()),
-            trace.getStudent().getUser(),
+            trace.getStudent().getUser().getId(),
             trace.getCreatedAt(),
             false,
             trace.getCreatedAt(),
