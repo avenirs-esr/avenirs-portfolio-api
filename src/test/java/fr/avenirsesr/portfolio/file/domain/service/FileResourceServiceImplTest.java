@@ -63,13 +63,15 @@ class FileResourceServiceImplTest {
       @Nested
       class AndTheSourceFileExists {
 
-        User loggedInUser;
+        UUID loggedInUserId;
         byte[] sourceContent;
 
         @BeforeEach
         void setupAnd() {
           BddLogger.and("the source file exists");
-          loggedInUser = mock(User.class);
+          User loggedInUser = mock(User.class);
+          loggedInUserId = UUID.randomUUID();
+          when(loggedInUser.getId()).thenReturn(loggedInUserId);
           sourceContent = new byte[] {1, 2, 3};
 
           when(fileRepository.findById(sourceId))
@@ -114,7 +116,7 @@ class FileResourceServiceImplTest {
 
           File copy = fileResourceService.copy(sourceId);
 
-          assertEquals(loggedInUser, copy.getUploadedBy());
+          assertEquals(loggedInUserId, copy.getUploadedById());
         }
 
         @Test
@@ -156,7 +158,7 @@ class FileResourceServiceImplTest {
             fileName,
             size,
             SOURCE_URI,
-            mock(User.class),
+            UUID.randomUUID(),
             Instant.now(),
             isRestricted,
             Instant.now(),

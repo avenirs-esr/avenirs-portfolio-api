@@ -1,7 +1,6 @@
 package fr.avenirsesr.portfolio.file.domain.model;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
-import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.file.domain.model.enums.EFileType;
 import java.time.Instant;
 import java.util.UUID;
@@ -15,7 +14,7 @@ public class File extends AvenirsBaseModel {
   private final String fileName;
   private final long size;
   private final String uri;
-  private final User uploadedBy;
+  private final UUID uploadedById;
   private final Instant uploadedAt;
   private final boolean isRestricted;
 
@@ -25,7 +24,7 @@ public class File extends AvenirsBaseModel {
       EFileType fileType,
       long size,
       String uri,
-      User uploadedBy,
+      UUID uploadedById,
       Instant uploadedAt,
       boolean isRestricted,
       Instant createdAt,
@@ -35,7 +34,7 @@ public class File extends AvenirsBaseModel {
     this.fileType = fileType;
     this.size = size;
     this.uri = uri;
-    this.uploadedBy = uploadedBy;
+    this.uploadedById = uploadedById;
     this.uploadedAt = uploadedAt;
     this.isRestricted = isRestricted;
   }
@@ -46,7 +45,7 @@ public class File extends AvenirsBaseModel {
       String fileName,
       long size,
       String uri,
-      User uploadedBy,
+      UUID uploadedById,
       boolean isRestricted) {
     return new File(
         id,
@@ -54,7 +53,7 @@ public class File extends AvenirsBaseModel {
         fileType,
         size,
         uri,
-        uploadedBy,
+        uploadedById,
         Instant.now(),
         isRestricted,
         Instant.now(),
@@ -67,7 +66,7 @@ public class File extends AvenirsBaseModel {
       String fileName,
       long size,
       String uri,
-      User uploadedBy,
+      UUID uploadedById,
       Instant uploadedAt,
       boolean isRestricted,
       Instant createdAt,
@@ -78,7 +77,7 @@ public class File extends AvenirsBaseModel {
         fileType,
         size,
         uri,
-        uploadedBy,
+        uploadedById,
         uploadedAt,
         isRestricted,
         createdAt,
