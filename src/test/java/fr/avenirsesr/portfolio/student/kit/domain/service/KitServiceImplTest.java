@@ -3,9 +3,9 @@ package fr.avenirsesr.portfolio.student.kit.domain.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import fr.avenirsesr.portfolio.common.file.domain.model.File;
+import fr.avenirsesr.portfolio.common.file.domain.port.output.service.FileStorageService;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
-import fr.avenirsesr.portfolio.file.domain.model.File;
-import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
 import fr.avenirsesr.portfolio.student.kit.domain.exception.KitDownloadMediaFailed;
 import fr.avenirsesr.portfolio.student.kit.domain.model.KitMediaEntry;
 import fr.avenirsesr.portfolio.student.kit.domain.port.output.KitDownloadPort;

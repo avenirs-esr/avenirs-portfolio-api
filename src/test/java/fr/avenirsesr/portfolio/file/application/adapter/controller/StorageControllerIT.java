@@ -1,10 +1,10 @@
 package fr.avenirsesr.portfolio.file.application.adapter.controller;
 
+import fr.avenirsesr.portfolio.common.file.domain.port.output.repository.FileRepository;
+import fr.avenirsesr.portfolio.common.file.domain.port.output.service.FileStorageService;
+import fr.avenirsesr.portfolio.common.file.domain.port.output.service.FileUploaderProvider;
+import fr.avenirsesr.portfolio.common.file.domain.service.FileResourceServiceImpl;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
-import fr.avenirsesr.portfolio.file.domain.port.output.repository.FileRepository;
-import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
-import fr.avenirsesr.portfolio.file.domain.service.FileResourceServiceImpl;
-import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
 import java.io.IOException;
@@ -30,7 +30,7 @@ class StorageControllerIT extends ContainerConfigurationTest {
   @Mock private FileStorageService fileStorageService;
 
   @Autowired private FileRepository fileRepository;
-  @Autowired private LoggedInUserService loggedInUserService;
+  @Autowired private FileUploaderProvider fileUploaderProvider;
 
   @Value("${user.student.payload}")
   private String studentPayload;
@@ -49,7 +49,7 @@ class StorageControllerIT extends ContainerConfigurationTest {
 
     StorageController storageController =
         new StorageController(
-            new FileResourceServiceImpl(fileStorageService, fileRepository, loggedInUserService),
+            new FileResourceServiceImpl(fileStorageService, fileRepository, fileUploaderProvider),
             new DefaultResourceLoader());
 
     webTestClient =

@@ -3,11 +3,10 @@ package fr.avenirsesr.portfolio.user.domain.service;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.common.file.domain.exception.FileTypeNotSupportedException;
+import fr.avenirsesr.portfolio.common.file.domain.model.File;
 import fr.avenirsesr.portfolio.common.file.domain.model.enums.EFileType;
+import fr.avenirsesr.portfolio.common.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.file.domain.mapper.FileDataMapper;
-import fr.avenirsesr.portfolio.file.domain.model.File;
-import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
-import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.user.domain.data.UserProfileOverviewData;
 import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStaffException;
@@ -15,6 +14,7 @@ import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.domain.port.input.StaffService;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StaffRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
+import fr.avenirsesr.portfolio.user.infrastructure.configuration.UserPhotoDefaults;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,9 +54,9 @@ public class StaffServiceImpl implements StaffService {
         staff.getInstitutionEmail(),
         staff.getBio(),
         FileDataMapper.mapFileData(
-            staff.getCoverPicture(), FileStorageConstants.DEFAULT_COVER_FILE_URL),
+            staff.getCoverPicture(), UserPhotoDefaults.DEFAULT_COVER_FILE_URL),
         FileDataMapper.mapFileData(
-            staff.getProfilePicture(), FileStorageConstants.DEFAULT_PROFILE_FILE_URL));
+            staff.getProfilePicture(), UserPhotoDefaults.DEFAULT_PROFILE_FILE_URL));
   }
 
   @Override

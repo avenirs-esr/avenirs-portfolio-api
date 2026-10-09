@@ -2,7 +2,7 @@ package fr.avenirsesr.portfolio.user.domain.model;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
-import fr.avenirsesr.portfolio.file.domain.model.File;
+import fr.avenirsesr.portfolio.common.file.domain.model.File;
 import java.time.Instant;
 import java.util.Optional;
 import lombok.AccessLevel;

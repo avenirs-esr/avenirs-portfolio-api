@@ -3,11 +3,10 @@ package fr.avenirsesr.portfolio.user.domain.service;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.common.file.domain.exception.FileTypeNotSupportedException;
+import fr.avenirsesr.portfolio.common.file.domain.model.File;
 import fr.avenirsesr.portfolio.common.file.domain.model.enums.EFileType;
+import fr.avenirsesr.portfolio.common.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.file.domain.mapper.FileDataMapper;
-import fr.avenirsesr.portfolio.file.domain.model.File;
-import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
-import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.selfknowledge.domain.model.enums.ESelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.user.domain.data.UserProfileOverviewData;
@@ -16,6 +15,7 @@ import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
+import fr.avenirsesr.portfolio.user.infrastructure.configuration.UserPhotoDefaults;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -56,9 +56,9 @@ public class StudentServiceImpl implements StudentService {
         student.getUser().getEmail(),
         student.getBio(),
         FileDataMapper.mapFileData(
-            student.getCoverPicture(), FileStorageConstants.DEFAULT_COVER_FILE_URL),
+            student.getCoverPicture(), UserPhotoDefaults.DEFAULT_COVER_FILE_URL),
         FileDataMapper.mapFileData(
-            student.getProfilePicture(), FileStorageConstants.DEFAULT_PROFILE_FILE_URL));
+            student.getProfilePicture(), UserPhotoDefaults.DEFAULT_PROFILE_FILE_URL));
   }
 
   @Override

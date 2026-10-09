@@ -3,7 +3,7 @@ package fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.model;
 import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.RICH_TEXT_LENGTH;
 
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
-import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
+import fr.avenirsesr.portfolio.common.file.infrastructure.adapter.model.FileEntity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;

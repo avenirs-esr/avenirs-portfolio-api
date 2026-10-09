@@ -2,13 +2,13 @@ package fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import fr.avenirsesr.portfolio.common.file.domain.exception.FileStorageException;
+import fr.avenirsesr.portfolio.common.file.domain.model.File;
+import fr.avenirsesr.portfolio.common.file.domain.port.input.FileResourceService;
+import fr.avenirsesr.portfolio.common.file.infrastructure.adapter.mapper.FileMapper;
+import fr.avenirsesr.portfolio.common.file.infrastructure.adapter.model.FileEntity;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.ESeederSource;
 import fr.avenirsesr.portfolio.common.utils.FileReader;
 import fr.avenirsesr.portfolio.common.validation.infrastructure.adapter.utils.ValidationUtils;
-import fr.avenirsesr.portfolio.file.domain.model.File;
-import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
-import fr.avenirsesr.portfolio.file.infrastructure.adapter.mapper.FileMapper;
-import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.data.ActivityFileCreationData;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.fake.FakeActivityFile;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityDraftRepository;

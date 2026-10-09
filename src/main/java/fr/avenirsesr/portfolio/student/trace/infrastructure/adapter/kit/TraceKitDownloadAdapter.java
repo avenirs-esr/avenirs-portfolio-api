@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.kit;
 
-import fr.avenirsesr.portfolio.file.domain.model.File;
+import fr.avenirsesr.portfolio.common.file.domain.model.File;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.kit.domain.model.KitMediaEntry;
 import fr.avenirsesr.portfolio.student.kit.domain.port.output.KitDownloadPort;

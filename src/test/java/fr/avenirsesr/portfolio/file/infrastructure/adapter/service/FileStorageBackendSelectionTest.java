@@ -3,9 +3,11 @@ package fr.avenirsesr.portfolio.file.infrastructure.adapter.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
+import fr.avenirsesr.portfolio.common.file.domain.port.output.service.FileStorageService;
+import fr.avenirsesr.portfolio.common.file.infrastructure.adapter.service.FileStorageServiceImpl;
+import fr.avenirsesr.portfolio.common.file.infrastructure.adapter.service.S3FileStorageService;
+import fr.avenirsesr.portfolio.common.file.infrastructure.configuration.S3StorageProperties;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
-import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
-import fr.avenirsesr.portfolio.file.infrastructure.configuration.S3StorageProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import software.amazon.awssdk.services.s3.S3Client;

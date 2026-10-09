@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.student.activity.domain.data;
 
-import fr.avenirsesr.portfolio.file.domain.model.File;
+import fr.avenirsesr.portfolio.common.file.domain.model.File;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import java.time.Instant;

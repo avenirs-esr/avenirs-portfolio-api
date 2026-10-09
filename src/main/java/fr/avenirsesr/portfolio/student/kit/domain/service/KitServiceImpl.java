@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.student.kit.domain.service;
 
 import fr.avenirsesr.portfolio.common.error.domain.exception.BusinessException;
-import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
+import fr.avenirsesr.portfolio.common.file.domain.port.output.service.FileStorageService;
 import fr.avenirsesr.portfolio.student.kit.domain.exception.KitDownloadMediaFailed;
 import fr.avenirsesr.portfolio.student.kit.domain.model.KitMediaEntry;
 import fr.avenirsesr.portfolio.student.kit.domain.port.input.KitService;
