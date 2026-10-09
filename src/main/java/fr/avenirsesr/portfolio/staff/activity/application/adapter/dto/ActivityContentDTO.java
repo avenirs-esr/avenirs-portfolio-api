@@ -33,7 +33,7 @@ public record ActivityContentDTO(
     int feedbackAllowedIterations,
     Boolean hasEnrolledStudent,
     Boolean haveDraft,
-    AuthorDTO author,
+    boolean isAuthor,
     List<FileDTO> files,
     List<String> links,
     List<UUID> targetInstitutionIds,
