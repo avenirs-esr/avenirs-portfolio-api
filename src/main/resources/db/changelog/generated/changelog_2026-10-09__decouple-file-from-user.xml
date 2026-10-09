@@ -1,0 +1,54 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+        http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!--
+      The uploader is now held as a plain identifier instead of an association, so that the file
+      table carries no foreign key towards a business table. This is the last structural link
+      between the file storage and the rest of the schema: the file table can be served by a
+      process that does not host the user table.
+
+      The column itself keeps its name, type and NOT NULL constraint; only the referential
+      integrity enforced by the database goes away. Orphan detection therefore moves to the
+      application side.
+    -->
+    <changeSet author="iamgreendev" id="decouple-file-drop-uploaded-by-fk">
+        <dropForeignKeyConstraint
+                baseTableName="file"
+                constraintName="FKj9th1p06bn6hnlwbtafeowlch"/>
+
+        <rollback>
+            <addForeignKeyConstraint
+                    baseColumnNames="uploaded_by"
+                    baseTableName="file"
+                    constraintName="FKj9th1p06bn6hnlwbtafeowlch"
+                    deferrable="false"
+                    initiallyDeferred="false"
+                    referencedColumnNames="id"
+                    referencedTableName="user"
+                    validate="true"/>
+        </rollback>
+    </changeSet>
+
+    <!--
+      Reading the files of a given uploader is no longer backed by the foreign key index that
+      Postgres created for the constraint, so the index is declared explicitly.
+    -->
+    <changeSet author="iamgreendev" id="decouple-file-add-uploaded-by-index">
+        <createIndex tableName="file" indexName="idx_file_uploaded_by">
+            <column name="uploaded_by"/>
+        </createIndex>
+
+        <rollback>
+            <dropIndex tableName="file" indexName="idx_file_uploaded_by"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

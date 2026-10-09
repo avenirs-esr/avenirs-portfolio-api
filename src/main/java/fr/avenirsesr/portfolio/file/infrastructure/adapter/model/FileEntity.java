@@ -2,7 +2,6 @@ package fr.avenirsesr.portfolio.file.infrastructure.adapter.model;
 
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
 import fr.avenirsesr.portfolio.common.file.domain.model.enums.EFileType;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.UUID;
@@ -29,9 +28,8 @@ public class FileEntity extends AvenirsBaseEntity {
   @Column(nullable = false)
   private String uri;
 
-  @ManyToOne()
-  @JoinColumn(name = "uploaded_by", nullable = false)
-  private UserEntity uploadedBy;
+  @Column(nullable = false, name = "uploaded_by")
+  private UUID uploadedById;
 
   @Column(nullable = false, name = "uploaded_at")
   private Instant uploadedAt;
@@ -45,7 +43,7 @@ public class FileEntity extends AvenirsBaseEntity {
       String fileName,
       long size,
       String uri,
-      UserEntity uploadedBy,
+      UUID uploadedById,
       Instant uploadedAt,
       boolean isRestricted,
       Instant createdAt,
@@ -55,7 +53,7 @@ public class FileEntity extends AvenirsBaseEntity {
     this.fileName = fileName;
     this.size = size;
     this.uri = uri;
-    this.uploadedBy = uploadedBy;
+    this.uploadedById = uploadedById;
     this.uploadedAt = uploadedAt;
     this.isRestricted = isRestricted;
     this.setCreatedAt(createdAt);
@@ -68,7 +66,7 @@ public class FileEntity extends AvenirsBaseEntity {
       String fileName,
       long size,
       String uri,
-      UserEntity uploadedBy,
+      UUID uploadedById,
       Instant uploadedAt,
       boolean isRestricted,
       Instant createdAt,
@@ -79,7 +77,7 @@ public class FileEntity extends AvenirsBaseEntity {
         fileName,
         size,
         uri,
-        uploadedBy,
+        uploadedById,
         uploadedAt,
         isRestricted,
         createdAt,

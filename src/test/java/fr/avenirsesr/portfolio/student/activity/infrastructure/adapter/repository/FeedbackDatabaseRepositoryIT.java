@@ -10,7 +10,6 @@ import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.model.FeedbackEntity;
 import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.specification.FeedbackSpecification;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import java.time.Instant;
@@ -55,7 +54,7 @@ class FeedbackDatabaseRepositoryIT extends ContainerConfigurationTest {
             "attachment.pdf",
             1L,
             "attachments/attachment.pdf",
-            entityManager.find(UserEntity.class, STUDENT_USER_ID),
+            STUDENT_USER_ID,
             Instant.now(),
             false,
             Instant.now(),

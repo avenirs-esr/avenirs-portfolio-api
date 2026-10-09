@@ -48,7 +48,7 @@ class ActivityMapperTest {
           "activity banner",
           1000L,
           "exemple.com/image.png",
-          author.getUser(),
+          author.getUser().getId(),
           false);
   private final Instant createdAt = Instant.parse("2023-01-01T00:00:00Z");
   private final Instant updatedAt = Instant.parse("2023-12-31T23:59:59Z");

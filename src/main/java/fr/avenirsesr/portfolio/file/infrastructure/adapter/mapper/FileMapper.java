@@ -3,7 +3,6 @@ package fr.avenirsesr.portfolio.file.infrastructure.adapter.mapper;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.mapper.Mapper;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 
 public class FileMapper implements Mapper<FileEntity, File> {
   public static final FileMapper INSTANCE = new FileMapper();
@@ -16,7 +15,7 @@ public class FileMapper implements Mapper<FileEntity, File> {
         domain.getFileName(),
         domain.getSize(),
         domain.getUri(),
-        UserMapper.INSTANCE.fromDomain(domain.getUploadedBy()),
+        domain.getUploadedById(),
         domain.getUploadedAt(),
         domain.isRestricted(),
         domain.getCreatedAt(),
@@ -31,7 +30,7 @@ public class FileMapper implements Mapper<FileEntity, File> {
         entity.getFileName(),
         entity.getSize(),
         entity.getUri(),
-        UserMapper.INSTANCE.toDomain(entity.getUploadedBy()),
+        entity.getUploadedById(),
         entity.getUploadedAt(),
         entity.isRestricted(),
         entity.getCreatedAt(),

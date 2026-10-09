@@ -343,7 +343,7 @@ class TraceSpecificationIT extends ContainerConfigurationTest {
             name,
             1L,
             "uri",
-            user,
+            user.getId(),
             Instant.now(),
             true,
             Instant.now(),
