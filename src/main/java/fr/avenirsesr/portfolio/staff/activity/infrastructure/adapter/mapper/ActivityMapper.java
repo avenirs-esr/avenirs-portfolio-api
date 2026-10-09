@@ -2,7 +2,7 @@ package fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.mapper;
 
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.EntityGrapher;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.mapper.Mapper;
-import fr.avenirsesr.portfolio.file.infrastructure.adapter.mapper.FileMapper;
+import fr.avenirsesr.portfolio.common.file.infrastructure.adapter.mapper.FileMapper;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StaffMapper;

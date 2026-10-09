@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.student.kit.infrastructure.adapter.service;
 
-import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
+import fr.avenirsesr.portfolio.common.file.domain.port.output.service.FileStorageService;
 import fr.avenirsesr.portfolio.student.kit.domain.port.input.KitService;
 import fr.avenirsesr.portfolio.student.kit.domain.port.output.KitDownloadPort;
 import fr.avenirsesr.portfolio.student.kit.domain.service.KitServiceImpl;

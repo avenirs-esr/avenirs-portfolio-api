@@ -10,17 +10,16 @@ import static org.mockito.Mockito.when;
 
 import fr.avenirsesr.portfolio.common.file.application.adapter.dto.FileDTO;
 import fr.avenirsesr.portfolio.common.file.application.adapter.request.FileUploadRequest;
+import fr.avenirsesr.portfolio.common.file.domain.model.File;
+import fr.avenirsesr.portfolio.common.file.domain.port.input.FileResourceService;
+import fr.avenirsesr.portfolio.common.file.infrastructure.adapter.client.LocalFileClient;
+import fr.avenirsesr.portfolio.common.file.infrastructure.configuration.FileStorageConstants;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
-import fr.avenirsesr.portfolio.file.application.adapter.mapper.FileDtoMapper;
-import fr.avenirsesr.portfolio.file.domain.model.File;
-import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
-import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
 import fr.avenirsesr.portfolio.file.infrastructure.fixture.FileFixture;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mapstruct.factory.Mappers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -35,7 +34,7 @@ class LocalFileClientTest {
   void setUp() {
     MockitoAnnotations.openMocks(this);
     FileStorageConstants.PHOTO_ENDPOINT_PREFIX = "/storage";
-    fileClient = new LocalFileClient(fileResourceService, Mappers.getMapper(FileDtoMapper.class));
+    fileClient = new LocalFileClient(fileResourceService);
   }
 
   @Test

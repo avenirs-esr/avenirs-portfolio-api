@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.user.infrastructure.adapter.service;
 
-import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
+import fr.avenirsesr.portfolio.common.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.user.domain.port.input.StaffService;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StaffRepository;

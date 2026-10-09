@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.student.selfknowledge.infrastructure.adapter.config;
 
-import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
+import fr.avenirsesr.portfolio.common.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.selfknowledge.domain.port.input.SelfKnowledgeService;
 import fr.avenirsesr.portfolio.student.selfknowledge.domain.port.output.repository.SelfKnowledgeElementRepository;

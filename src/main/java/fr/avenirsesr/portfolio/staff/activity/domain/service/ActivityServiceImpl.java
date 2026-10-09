@@ -10,15 +10,14 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
+import fr.avenirsesr.portfolio.common.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.common.file.domain.exception.FileTypeNotSupportedException;
+import fr.avenirsesr.portfolio.common.file.domain.model.File;
+import fr.avenirsesr.portfolio.common.file.domain.model.FileDownload;
 import fr.avenirsesr.portfolio.common.file.domain.model.enums.EFileType;
+import fr.avenirsesr.portfolio.common.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
-import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.file.domain.mapper.FileDataMapper;
-import fr.avenirsesr.portfolio.file.domain.model.File;
-import fr.avenirsesr.portfolio.file.domain.model.FileDownload;
-import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
-import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
 import fr.avenirsesr.portfolio.notification.domain.model.notification.ActivityUpdatedNotification;
 import fr.avenirsesr.portfolio.notification.domain.model.notification.parameters.ActivityModifiedParameters;
 import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
@@ -58,6 +57,7 @@ import fr.avenirsesr.portfolio.user.domain.port.output.client.AccessClient;
 import fr.avenirsesr.portfolio.user.domain.port.output.client.StudentAccessScope;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserPrincipalRepository;
+import fr.avenirsesr.portfolio.user.infrastructure.configuration.UserPhotoDefaults;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -574,7 +574,7 @@ public class ActivityServiceImpl implements ActivityService {
             declaredActivityId.orElse(null),
             declaredActivityStatus.orElse(null),
             FileDataMapper.mapFileData(
-                activity.getBanner(), FileStorageConstants.DEFAULT_COVER_FILE_URL),
+                activity.getBanner(), UserPhotoDefaults.DEFAULT_COVER_FILE_URL),
             getSubActivityOverviews(activity.getId()));
       }
       case DRAFT -> {
@@ -582,8 +582,7 @@ public class ActivityServiceImpl implements ActivityService {
             activityDraftRepository.findById(id).orElseThrow(ActivityDraftNotFoundException::new);
         yield ActivityPresentationDataMapper.toData(
             draft,
-            FileDataMapper.mapFileData(
-                draft.getBanner(), FileStorageConstants.DEFAULT_COVER_FILE_URL),
+            FileDataMapper.mapFileData(draft.getBanner(), UserPhotoDefaults.DEFAULT_COVER_FILE_URL),
             getDraftSubActivityOverviews(draft.getId()));
       }
     };
