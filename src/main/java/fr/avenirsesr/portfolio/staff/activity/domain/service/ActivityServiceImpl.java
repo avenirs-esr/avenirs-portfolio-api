@@ -798,6 +798,15 @@ public class ActivityServiceImpl implements ActivityService {
   }
 
   @Override
+  public Boolean isAuthorOfActivity(Activity activity) {
+    if (activity == null || activity.getAuthor() == null) {
+      return false;
+    }
+    var staff = loggedInUserService.getLoggedInStaff();
+    return Objects.equals(activity.getAuthor().getId(), staff.getId());
+  }
+
+  @Override
   public File uploadDraftBanner(
       UUID activityDraftId, String fileName, String mimeType, long size, byte[] content) {
     var draft = getOwnedDraft(activityDraftId);

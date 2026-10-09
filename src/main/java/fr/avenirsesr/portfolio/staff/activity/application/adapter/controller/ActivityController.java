@@ -131,9 +131,11 @@ public class ActivityController {
         switch (activityStatus) {
           case PUBLISHED, UNPUBLISHED -> {
             var activity = activityService.getActivityById(activityId);
+            boolean isAuthor = activityService.isAuthorOfActivity(activity);
             yield activityContentDtoMapper.toDTO(
                 activity,
                 activityService.hasDraftForActivity(activity.getId()),
+                isAuthor,
                 fileDTOMapper.toFileDTOs(activity.getFiles(), baseUrl));
           }
           case DRAFT -> {

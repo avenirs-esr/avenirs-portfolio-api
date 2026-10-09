@@ -89,6 +89,12 @@ class ActivityControllerIT extends ContainerConfigurationTest {
   @Value("${user.staff.signature}")
   private String staffSignature;
 
+  @Value("${user.anotherStaff.payload}")
+  private String anotherStaffPayload;
+
+  @Value("${user.anotherStaff.signature}")
+  private String anotherStaffSignature;
+
   @Value("${user.super-admin.payload}")
   private String superAdminPayload;
 
@@ -3547,6 +3553,11 @@ class ActivityControllerIT extends ContainerConfigurationTest {
     headers.add(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature);
   }
 
+  private void addOtherStaffHeaders(HttpHeaders headers) {
+    headers.add(AvenirsSecurityHeaders.SIGNED_CONTEXT, anotherStaffPayload);
+    headers.add(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, anotherStaffSignature);
+  }
+
   private void addSuperAdminHeaders(HttpHeaders headers) {
     headers.add(AvenirsSecurityHeaders.SIGNED_CONTEXT, superAdminPayload);
     headers.add(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, superAdminSignature);
@@ -3612,7 +3623,29 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         .isOk()
         .expectBody()
         .jsonPath("$.haveDraft")
+        .isEqualTo(true)
+        .jsonPath("$.isAuthor")
         .isEqualTo(true);
+  }
+
+  @Test
+  void thenItShouldIsAuthorFalseWhenStaffIsNotAuthor() throws Exception {
+    BddLogger.and("given a published activity created by one staff");
+    UUID activityId = publishNewActivity("Activité publiée par un autre auteur");
+
+    BddLogger.then("another staff reading the content should get is author false");
+
+    webTestClient
+        .get()
+        .uri(CONTENT_PATH, "PUBLISHED", activityId)
+        .headers(ActivityControllerIT.this::addOtherStaffHeaders)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.isAuthor")
+        .isEqualTo(false);
   }
 
   @Test

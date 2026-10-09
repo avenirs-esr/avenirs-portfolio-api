@@ -753,7 +753,8 @@ class ActivityControllerTest {
   void shouldReturnContentForPublishedActivityWithoutComputingHasEnrolledStudent() {
     BddLogger.given("a published activity");
     UUID activityId = activity.getId();
-
+    userId = UUID.randomUUID();
+    user = UserFixture.create().withId(userId).toModel();
     ActivityContentDTO dto =
         new ActivityContentDTO(
             activityId,
@@ -769,6 +770,7 @@ class ActivityControllerTest {
             0,
             null,
             false,
+            true,
             List.of(),
             List.of(),
             List.of(),
@@ -778,8 +780,8 @@ class ActivityControllerTest {
 
     when(activityService.getActivityById(activityId)).thenReturn(activity);
     when(fileDTOMapper.toFileDTOs(activity.getFiles(), null)).thenReturn(List.of());
-    when(activityContentDtoMapper.toDTO(activity, false, List.of())).thenReturn(dto);
-
+    when(activityContentDtoMapper.toDTO(activity, false, true, List.of())).thenReturn(dto);
+    when(activityService.isAuthorOfActivity(activity)).thenReturn(true);
     BddLogger.when("getting the activity content for status PUBLISHED");
 
     var request = createMockRequest();
@@ -788,7 +790,7 @@ class ActivityControllerTest {
     BddLogger.then("it should return the DTO without calling hasEnrolledStudents");
     assertEquals(200, response.getStatusCode().value());
     assertEquals(dto, response.getBody());
-    verify(activityContentDtoMapper).toDTO(activity, false, List.of());
+    verify(activityContentDtoMapper).toDTO(activity, false, true, List.of());
     verify(activityService, never()).hasEnrolledStudents(any(ActivityDraft.class));
   }
 
@@ -796,7 +798,8 @@ class ActivityControllerTest {
   void shouldReturnContentForUnpublishedActivityWithoutComputingHasEnrolledStudent() {
     BddLogger.given("an unpublished activity");
     UUID activityId = activity.getId();
-
+    userId = UUID.randomUUID();
+    user = UserFixture.create().withId(userId).toModel();
     ActivityContentDTO dto =
         new ActivityContentDTO(
             activityId,
@@ -812,6 +815,7 @@ class ActivityControllerTest {
             0,
             null,
             false,
+            true,
             List.of(),
             List.of(),
             List.of(),
@@ -821,8 +825,8 @@ class ActivityControllerTest {
 
     when(activityService.getActivityById(activityId)).thenReturn(activity);
     when(fileDTOMapper.toFileDTOs(activity.getFiles(), null)).thenReturn(List.of());
-    when(activityContentDtoMapper.toDTO(activity, false, List.of())).thenReturn(dto);
-
+    when(activityContentDtoMapper.toDTO(activity, false, true, List.of())).thenReturn(dto);
+    when(activityService.isAuthorOfActivity(activity)).thenReturn(true);
     BddLogger.when("getting the activity content for status UNPUBLISHED");
 
     var request = createMockRequest();
@@ -831,7 +835,7 @@ class ActivityControllerTest {
     BddLogger.then("it should return the DTO without calling hasEnrolledStudents");
     assertEquals(200, response.getStatusCode().value());
     assertEquals(dto, response.getBody());
-    verify(activityContentDtoMapper).toDTO(activity, false, List.of());
+    verify(activityContentDtoMapper).toDTO(activity, false, true, List.of());
     verify(activityService, never()).hasEnrolledStudents(any(ActivityDraft.class));
   }
 
@@ -840,7 +844,8 @@ class ActivityControllerTest {
     BddLogger.given("an activity draft");
     UUID draftId = UUID.randomUUID();
     ActivityDraft draft = mock(ActivityDraft.class);
-
+    userId = UUID.randomUUID();
+    user = UserFixture.create().withId(userId).toModel();
     ActivityContentDTO dto =
         new ActivityContentDTO(
             draftId,
@@ -856,6 +861,7 @@ class ActivityControllerTest {
             0,
             true,
             false,
+            true,
             List.of(),
             List.of(),
             List.of(),
@@ -953,14 +959,14 @@ class ActivityControllerTest {
     when(activityService.getActivityById(activityId)).thenReturn(activity);
 
     when(activityService.hasDraftForActivity(activityId)).thenReturn(true);
-
+    when(activityService.isAuthorOfActivity(activity)).thenReturn(true);
     var request = createMockRequest();
 
     var response = controller.getActivityContent(request, EActivityStatus.PUBLISHED, activityId);
 
     assertEquals(200, response.getStatusCode().value());
 
-    verify(activityContentDtoMapper).toDTO(activity, true, List.of());
+    verify(activityContentDtoMapper).toDTO(activity, true, true, List.of());
   }
 
   @Test
