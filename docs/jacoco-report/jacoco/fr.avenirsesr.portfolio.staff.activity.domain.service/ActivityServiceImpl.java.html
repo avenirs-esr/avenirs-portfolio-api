@@ -799,10 +799,10 @@ public class ActivityServiceImpl implements ActivityService {
 
   @Override
   public Boolean isAuthorOfActivity(Activity activity) {
-<span class="fc" id="L802">    var staff = loggedInUserService.getLoggedInStaff();</span>
-<span class="pc bpc" id="L803" title="3 of 6 branches missed.">    if (activity == null || activity.getAuthor() == null || staff == null) {</span>
-<span class="nc" id="L804">      return false;</span>
+<span class="pc bpc" id="L802" title="2 of 4 branches missed.">    if (activity == null || activity.getAuthor() == null) {</span>
+<span class="nc" id="L803">      return false;</span>
     }
+<span class="fc" id="L805">    var staff = loggedInUserService.getLoggedInStaff();</span>
 <span class="fc" id="L806">    return Objects.equals(activity.getAuthor().getId(), staff.getId());</span>
   }
 
