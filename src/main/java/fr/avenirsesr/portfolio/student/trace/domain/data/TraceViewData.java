@@ -16,6 +16,7 @@ public record TraceViewData(
     Instant updatedAt,
     Optional<LocalDate> willBeDeletedAt,
     Optional<File> attachment,
+    Optional<String> link,
     ETraceAuthorType authorType,
     String personalNote,
     String aiUseJustification) {}

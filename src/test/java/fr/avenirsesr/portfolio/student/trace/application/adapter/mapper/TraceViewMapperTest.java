@@ -46,6 +46,7 @@ class TraceViewMapperTest {
             updatedAt,
             Optional.of(deletionDate),
             Optional.empty(),
+            Optional.empty(),
             ETraceAuthorType.PERSONAL,
             "My personal note",
             "My AI use justification");
@@ -81,6 +82,7 @@ class TraceViewMapperTest {
             Instant.now(),
             Optional.empty(),
             Optional.empty(),
+            Optional.empty(),
             ETraceAuthorType.COLLECTIVE,
             null,
             null);
@@ -111,6 +113,7 @@ class TraceViewMapperTest {
                 Instant.now(),
                 Optional.empty(),
                 Optional.empty(),
+                Optional.empty(),
                 ETraceAuthorType.PERSONAL,
                 null,
                 null),
@@ -121,6 +124,7 @@ class TraceViewMapperTest {
                 false,
                 Instant.now(),
                 Instant.now(),
+                Optional.empty(),
                 Optional.empty(),
                 Optional.empty(),
                 ETraceAuthorType.THIRD_PARTY,

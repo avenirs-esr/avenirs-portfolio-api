@@ -475,7 +475,8 @@ class AssociationServiceImplTest {
             new PagedResult<>(
                 List.of(
                     new AssociationSearchResultData(associatedTraceId, "associated", null, false),
-                    new AssociationSearchResultData(availableTraceId, "available", null, false)),
+                    new AssociationSearchResultData(
+                        availableTraceId, "available", null, false, "report.pdf")),
                 new PageInfo(0, 10, 2)));
 
     var result =
@@ -491,7 +492,8 @@ class AssociationServiceImplTest {
     assertThat(result.content())
         .containsExactly(
             new AssociationSearchResultData(associatedTraceId, "associated", null, true),
-            new AssociationSearchResultData(availableTraceId, "available", null, false));
+            new AssociationSearchResultData(
+                availableTraceId, "available", null, false, "report.pdf"));
   }
 
   @Test

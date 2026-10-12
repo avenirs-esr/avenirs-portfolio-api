@@ -5,4 +5,4 @@ import java.util.UUID;
 
 @Schema(requiredProperties = {"id", "title", "disabled"})
 public record AssociationSearchResultDTO(
-    UUID id, String title, String category, boolean disabled) {}
+    UUID id, String title, String category, boolean disabled, String description) {}

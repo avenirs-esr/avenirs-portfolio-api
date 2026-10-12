@@ -94,6 +94,11 @@ class TraceAssociationStrategyTest {
   }
 
   private UUID givenTracesViewFilteredOn(Boolean isAssociated, PageCriteria pageCriteria) {
+    return givenTracesViewFilteredOn(isAssociated, pageCriteria, Optional.empty());
+  }
+
+  private UUID givenTracesViewFilteredOn(
+      Boolean isAssociated, PageCriteria pageCriteria, Optional<String> link) {
     UUID traceId = UUID.randomUUID();
 
     when(traceService.getTracesView(
@@ -114,6 +119,7 @@ class TraceAssociationStrategyTest {
                         null,
                         Optional.empty(),
                         Optional.empty(),
+                        link,
                         null,
                         null,
                         null)),
@@ -131,6 +137,20 @@ class TraceAssociationStrategyTest {
 
     assertThat(result.content())
         .containsExactly(new AssociationSearchResultData(traceId, "My trace", null, false));
+  }
+
+  @Test
+  void search_should_expose_the_trace_link_as_description_when_there_is_no_attachment() {
+    var pageCriteria = new PageCriteria(0, 10);
+    UUID traceId =
+        givenTracesViewFilteredOn(null, pageCriteria, Optional.of("https://example.org/doc"));
+
+    var result = strategy.search("kw", AssociationSearchFilter.NONE, pageCriteria);
+
+    assertThat(result.content())
+        .containsExactly(
+            new AssociationSearchResultData(
+                traceId, "My trace", null, false, "https://example.org/doc"));
   }
 
   @Test
