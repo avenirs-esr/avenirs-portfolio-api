@@ -876,7 +876,7 @@ class ActivityControllerTest {
     when(activityService.hasEnrolledStudents(draft)).thenReturn(true);
     when(draft.getFiles()).thenReturn(List.of());
     when(fileDTOMapper.toFileDTOs(List.of(), null)).thenReturn(List.of());
-    when(activityContentDtoMapper.toDTO(draft, true, List.of())).thenReturn(dto);
+    when(activityContentDtoMapper.toDTO(draft, true, true, List.of())).thenReturn(dto);
 
     BddLogger.when("getting the activity content for status DRAFT");
 
@@ -888,7 +888,7 @@ class ActivityControllerTest {
     assertEquals(200, response.getStatusCode().value());
     assertEquals(dto, response.getBody());
     verify(activityService).hasEnrolledStudents(draft);
-    verify(activityContentDtoMapper).toDTO(draft, true, List.of());
+    verify(activityContentDtoMapper).toDTO(draft, true, true, List.of());
   }
 
   @Test
