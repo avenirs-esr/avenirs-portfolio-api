@@ -165,9 +165,10 @@ public class AssociationServiceImpl implements AssociationService {
 <span class="fc" id="L165">                        result.id(),</span>
 <span class="fc" id="L166">                        result.title(),</span>
 <span class="fc" id="L167">                        result.category(),</span>
-<span class="fc bfc" id="L168" title="All 4 branches covered.">                        result.disabled() || associatedIds.contains(result.id())))</span>
-<span class="fc" id="L169">            .toList(),</span>
-<span class="fc" id="L170">        searchResults.pageInfo());</span>
+<span class="fc bfc" id="L168" title="All 4 branches covered.">                        result.disabled() || associatedIds.contains(result.id()),</span>
+<span class="fc" id="L169">                        result.description()))</span>
+<span class="fc" id="L170">            .toList(),</span>
+<span class="fc" id="L171">        searchResults.pageInfo());</span>
   }
 
   @Override
@@ -177,55 +178,55 @@ public class AssociationServiceImpl implements AssociationService {
       String keyword,
       AssociationSearchFilter filter,
       PageCriteria pageCriteria) {
-<span class="fc" id="L180">    EAssociationType.of(contextType.toClass(), associatedContextType.toClass());</span>
+<span class="fc" id="L181">    EAssociationType.of(contextType.toClass(), associatedContextType.toClass());</span>
 
-<span class="fc" id="L182">    return strategyOf(associatedContextType).search(keyword, filter, pageCriteria);</span>
+<span class="fc" id="L183">    return strategyOf(associatedContextType).search(keyword, filter, pageCriteria);</span>
   }
 
   @Override
   public void deleteAllByIds(List&lt;UUID&gt; ids) {
-<span class="fc" id="L187">    var activities = associationRepository.findAllById(ids);</span>
+<span class="fc" id="L188">    var activities = associationRepository.findAllById(ids);</span>
 
-<span class="fc bfc" id="L189" title="All 2 branches covered.">    if (!new HashSet&lt;&gt;(activities.stream().map(Association::getId).toList()).containsAll(ids)) {</span>
-<span class="fc" id="L190">      throw new AssociationDoesNotExistException();</span>
+<span class="fc bfc" id="L190" title="All 2 branches covered.">    if (!new HashSet&lt;&gt;(activities.stream().map(Association::getId).toList()).containsAll(ids)) {</span>
+<span class="fc" id="L191">      throw new AssociationDoesNotExistException();</span>
     }
 
-<span class="fc" id="L193">    associationRepository.removeAllFromDatabase(activities);</span>
-<span class="fc" id="L194">  }</span>
+<span class="fc" id="L194">    associationRepository.removeAllFromDatabase(activities);</span>
+<span class="fc" id="L195">  }</span>
 
   @Override
   public void deleteAllOf(List&lt;UUID&gt; ids, Class&lt;?&gt; clazz) {
-<span class="fc" id="L198">    var associationTypes = EAssociationType.getAllBy(clazz);</span>
-<span class="fc" id="L199">    var associations =</span>
-<span class="fc" id="L200">        ids.stream().flatMap(id -&gt; getAllOf(id, clazz, associationTypes).stream()).toList();</span>
-<span class="fc" id="L201">    deleteAllByIds(associations.stream().map(Association::getId).toList());</span>
-<span class="fc" id="L202">  }</span>
+<span class="fc" id="L199">    var associationTypes = EAssociationType.getAllBy(clazz);</span>
+<span class="fc" id="L200">    var associations =</span>
+<span class="fc" id="L201">        ids.stream().flatMap(id -&gt; getAllOf(id, clazz, associationTypes).stream()).toList();</span>
+<span class="fc" id="L202">    deleteAllByIds(associations.stream().map(Association::getId).toList());</span>
+<span class="fc" id="L203">  }</span>
 
   private AssociationStrategy strategyOf(EAssociationContextType contextType) {
-<span class="fc" id="L205">    return strategies.stream()</span>
-<span class="fc bfc" id="L206" title="All 2 branches covered.">        .filter(strategy -&gt; strategy.getContextType() == contextType)</span>
-<span class="fc" id="L207">        .findFirst()</span>
-<span class="fc" id="L208">        .orElseThrow(</span>
-<span class="nc" id="L209">            () -&gt; new IllegalArgumentException(contextType + &quot; has no association strategy&quot;));</span>
+<span class="fc" id="L206">    return strategies.stream()</span>
+<span class="fc bfc" id="L207" title="All 2 branches covered.">        .filter(strategy -&gt; strategy.getContextType() == contextType)</span>
+<span class="fc" id="L208">        .findFirst()</span>
+<span class="fc" id="L209">        .orElseThrow(</span>
+<span class="nc" id="L210">            () -&gt; new IllegalArgumentException(contextType + &quot; has no association strategy&quot;));</span>
   }
 
   private Map&lt;Class&lt;?&gt;, List&lt;Association&gt;&gt; associationsByAssociatedClass(
       List&lt;Association&gt; associations, Class&lt;?&gt; clazz) {
-<span class="fc" id="L214">    return associations.stream()</span>
-<span class="fc" id="L215">        .collect(</span>
-<span class="fc" id="L216">            Collectors.groupingBy(</span>
-<span class="fc" id="L217">                association -&gt; association.getAssociationType().associatedKeyOf(clazz)));</span>
+<span class="fc" id="L215">    return associations.stream()</span>
+<span class="fc" id="L216">        .collect(</span>
+<span class="fc" id="L217">            Collectors.groupingBy(</span>
+<span class="fc" id="L218">                association -&gt; association.getAssociationType().associatedKeyOf(clazz)));</span>
   }
 
   private List&lt;UUID&gt; associatedIdsOf(List&lt;Association&gt; associations, Class&lt;?&gt; clazz) {
-<span class="fc" id="L221">    return associations.stream().map(association -&gt; association.associatedIdOf(clazz)).toList();</span>
+<span class="fc" id="L222">    return associations.stream().map(association -&gt; association.associatedIdOf(clazz)).toList();</span>
   }
 
   private AssociationData associationDataOf(
       UUID id, Class&lt;?&gt; clazz, UUID associatedId, EAssociationType associationType) {
-<span class="fc bfc" id="L226" title="All 2 branches covered.">    return associationType.getKey1().equals(clazz)</span>
-<span class="fc" id="L227">        ? new AssociationData(id, associatedId, associationType)</span>
-<span class="fc" id="L228">        : new AssociationData(associatedId, id, associationType);</span>
+<span class="fc bfc" id="L227" title="All 2 branches covered.">    return associationType.getKey1().equals(clazz)</span>
+<span class="fc" id="L228">        ? new AssociationData(id, associatedId, associationType)</span>
+<span class="fc" id="L229">        : new AssociationData(associatedId, id, associationType);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

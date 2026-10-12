@@ -7,7 +7,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.domain.service,Trace
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.domain.service,TraceAssociationStrategy,0,136,0,2,0,38,0,11,0,10
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.experience.domain.service,DeclaredExperienceAssociationStrategy,0,102,0,2,0,36,0,11,0,10
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.experience.domain.service,DeclaredExperienceServiceImpl,0,467,0,10,0,103,0,21,0,16
-avenirs-portfolio-api,fr.avenirsesr.portfolio.student.association.domain.service,AssociationServiceImpl,9,412,1,17,2,95,2,33,1,25
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.association.domain.service,AssociationServiceImpl,9,414,1,17,2,96,2,33,1,25
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.kit.domain.service,KitServiceImpl,52,196,10,10,11,37,8,11,0,9
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.experience.infrastructure.adapter.repository,DeclaredExperienceDatabaseRepository,0,51,0,0,0,16,0,3,0,3
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.application.adapter.controller,TraceController,51,209,0,0,13,58,2,9,2,9
