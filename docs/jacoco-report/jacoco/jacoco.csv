@@ -4,7 +4,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.student.skill.infrastructure.adapt
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.specification,TraceSpecification,3,280,0,22,1,45,1,22,1,11
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.specification,TraceFilterSpecificationBuilder,21,114,3,25,6,22,3,19,0,7
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.domain.service,TraceServiceImpl,50,739,6,24,10,196,7,41,2,31
-avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.domain.service,TraceAssociationStrategy,0,123,0,2,0,34,0,11,0,10
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.domain.service,TraceAssociationStrategy,0,136,0,2,0,38,0,11,0,10
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.experience.domain.service,DeclaredExperienceAssociationStrategy,0,102,0,2,0,36,0,11,0,10
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.experience.domain.service,DeclaredExperienceServiceImpl,0,467,0,10,0,103,0,21,0,16
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.association.domain.service,AssociationServiceImpl,9,412,1,17,2,95,2,33,1,25
@@ -29,7 +29,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.infrastructure.context,Prom
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.application.adapter.controller,UserController,76,129,0,4,22,34,4,10,4,8
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.skill.application.adapter.controller,DeclaredSkillProgressController,32,120,0,0,10,35,3,5,3,5
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.association.domain.data,AssociationData,0,12,0,0,0,1,0,1,0,1
-avenirs-portfolio-api,fr.avenirsesr.portfolio.student.association.domain.data,AssociationSearchResultData,0,15,0,0,0,1,0,1,0,1
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.association.domain.data,AssociationSearchResultData,0,26,0,0,0,3,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.association.domain.data,AssociatedElementsData,0,108,0,0,0,19,0,9,0,9
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.client,GroupClientImpl,0,91,0,0,0,22,0,5,0,5
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.client,InstitutionClientImpl,0,74,0,0,0,20,0,3,0,3

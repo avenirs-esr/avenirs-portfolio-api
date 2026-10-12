@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortField;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
+import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociatedElementsData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
@@ -31,81 +32,88 @@ public class TraceAssociationStrategy implements AssociationStrategy {
 
   @Override
   public EAssociationContextType getContextType() {
-<span class="fc" id="L34">    return EAssociationContextType.TRACE;</span>
+<span class="fc" id="L35">    return EAssociationContextType.TRACE;</span>
   }
 
   @Override
   public void checkLoggedInStudentOwns(List&lt;UUID&gt; elementIds) {
-<span class="fc" id="L39">    fetchAndCheckOwnership(elementIds);</span>
-<span class="fc" id="L40">  }</span>
+<span class="fc" id="L40">    fetchAndCheckOwnership(elementIds);</span>
+<span class="fc" id="L41">  }</span>
 
   @Override
   public void checkLoggedInStudentCanAssociate(
       UUID elementId, EAssociationType associationType, int associationsToAdd) {
-<span class="fc" id="L45">    checkLoggedInStudentOwns(List.of(elementId));</span>
-<span class="fc" id="L46">  }</span>
+<span class="fc" id="L46">    checkLoggedInStudentOwns(List.of(elementId));</span>
+<span class="fc" id="L47">  }</span>
 
   @Override
   public void checkLoggedInStudentCanUnassociate(List&lt;UUID&gt; elementIds) {
-<span class="fc" id="L50">    checkLoggedInStudentOwns(elementIds);</span>
-<span class="fc" id="L51">  }</span>
+<span class="fc" id="L51">    checkLoggedInStudentOwns(elementIds);</span>
+<span class="fc" id="L52">  }</span>
 
   @Override
   public PagedResult&lt;AssociationSearchResultData&gt; search(
       String keyword, AssociationSearchFilter filter, PageCriteria pageCriteria) {
     var isAssociated =
-<span class="fc bfc" id="L57" title="All 2 branches covered.">        filter instanceof TraceAssociationSearchFilter(var traceIsAssociated)</span>
-<span class="fc" id="L58">            ? traceIsAssociated</span>
-<span class="fc" id="L59">            : null;</span>
+<span class="fc bfc" id="L58" title="All 2 branches covered.">        filter instanceof TraceAssociationSearchFilter(var traceIsAssociated)</span>
+<span class="fc" id="L59">            ? traceIsAssociated</span>
+<span class="fc" id="L60">            : null;</span>
 
-<span class="fc" id="L61">    var traces =</span>
-<span class="fc" id="L62">        traceService.getTracesView(</span>
+<span class="fc" id="L62">    var traces =</span>
+<span class="fc" id="L63">        traceService.getTracesView(</span>
             keyword,
             new TraceFilter(isAssociated, null, null, null),
             null,
             pageCriteria,
             new SortCriteria(ESortField.DATE, ESortOrder.DESC));
 
-<span class="fc" id="L69">    return new PagedResult&lt;&gt;(</span>
-<span class="fc" id="L70">        traces.content().stream()</span>
-<span class="fc" id="L71">            .map(trace -&gt; new AssociationSearchResultData(trace.id(), trace.title(), null, false))</span>
-<span class="fc" id="L72">            .toList(),</span>
-<span class="fc" id="L73">        traces.pageInfo());</span>
+<span class="fc" id="L70">    return new PagedResult&lt;&gt;(</span>
+<span class="fc" id="L71">        traces.content().stream()</span>
+<span class="fc" id="L72">            .map(</span>
+                trace -&gt;
+<span class="fc" id="L74">                    new AssociationSearchResultData(</span>
+<span class="fc" id="L75">                        trace.id(),</span>
+<span class="fc" id="L76">                        trace.title(),</span>
+                        null,
+                        false,
+<span class="fc" id="L79">                        trace.attachment().map(File::getFileName).or(trace::link).orElse(null)))</span>
+<span class="fc" id="L80">            .toList(),</span>
+<span class="fc" id="L81">        traces.pageInfo());</span>
   }
 
   @Override
   public AssociatedElementsData toAssociatedElements(
       List&lt;Association&gt; associations, Class&lt;?&gt; subjectClass, boolean onlyNotCompleted) {
-<span class="fc" id="L79">    var traces =</span>
-<span class="fc" id="L80">        traceService.findAllTracesById(</span>
-<span class="fc" id="L81">            associations.stream()</span>
-<span class="fc" id="L82">                .map(association -&gt; association.associatedIdOf(subjectClass))</span>
-<span class="fc" id="L83">                .toList());</span>
+<span class="fc" id="L87">    var traces =</span>
+<span class="fc" id="L88">        traceService.findAllTracesById(</span>
+<span class="fc" id="L89">            associations.stream()</span>
+<span class="fc" id="L90">                .map(association -&gt; association.associatedIdOf(subjectClass))</span>
+<span class="fc" id="L91">                .toList());</span>
 
-<span class="fc" id="L85">    return AssociatedElementsData.ofTraces(</span>
-<span class="fc" id="L86">        associations.stream()</span>
-<span class="fc" id="L87">            .map(</span>
+<span class="fc" id="L93">    return AssociatedElementsData.ofTraces(</span>
+<span class="fc" id="L94">        associations.stream()</span>
+<span class="fc" id="L95">            .map(</span>
                 association -&gt;
-<span class="fc" id="L89">                    new TraceAssociationData(</span>
-<span class="fc" id="L90">                        association.getId(),</span>
-<span class="fc" id="L91">                        AssociationUtils.elementOf(</span>
+<span class="fc" id="L97">                    new TraceAssociationData(</span>
+<span class="fc" id="L98">                        association.getId(),</span>
+<span class="fc" id="L99">                        AssociationUtils.elementOf(</span>
                             traces,
-<span class="fc" id="L93">                            association.associatedIdOf(subjectClass),</span>
+<span class="fc" id="L101">                            association.associatedIdOf(subjectClass),</span>
                             TraceNotFoundException::new)))
-<span class="fc" id="L95">            .toList());</span>
+<span class="fc" id="L103">            .toList());</span>
   }
 
   private List&lt;Trace&gt; fetchAndCheckOwnership(List&lt;UUID&gt; elementIds) {
-<span class="fc" id="L99">    var traces = traceService.findAllTracesById(elementIds);</span>
+<span class="fc" id="L107">    var traces = traceService.findAllTracesById(elementIds);</span>
 
-<span class="fc" id="L101">    AssociationUtils.checkOwnership(</span>
+<span class="fc" id="L109">    AssociationUtils.checkOwnership(</span>
         elementIds,
         traces,
         Trace::getStudent,
-<span class="fc" id="L105">        loggedInUserService.getLoggedInStudent(),</span>
+<span class="fc" id="L113">        loggedInUserService.getLoggedInStudent(),</span>
         TraceNotFoundException::new);
 
-<span class="fc" id="L108">    return traces;</span>
+<span class="fc" id="L116">    return traces;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
