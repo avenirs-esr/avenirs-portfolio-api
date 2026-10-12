@@ -9,6 +9,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.common.file.domain.model.File;
+import fr.avenirsesr.portfolio.common.file.domain.model.FileContent;
 import fr.avenirsesr.portfolio.common.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
@@ -198,7 +199,11 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
 
   @Override
   public File uploadAttachment(
-      UUID selfKnowledgeElementId, String fileName, String mimeType, long size, byte[] content) {
+      UUID selfKnowledgeElementId,
+      String fileName,
+      String mimeType,
+      long size,
+      FileContent content) {
 
     SelfKnowledgeElement selfKnowledgeElement =
         getAuthorizedSelfKnowledgeElement(selfKnowledgeElementId);

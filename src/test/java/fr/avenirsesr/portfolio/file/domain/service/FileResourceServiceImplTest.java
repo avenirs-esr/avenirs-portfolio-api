@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.common.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.common.file.domain.model.File;
+import fr.avenirsesr.portfolio.common.file.domain.model.FileContent;
 import fr.avenirsesr.portfolio.common.file.domain.model.FileResource;
 import fr.avenirsesr.portfolio.common.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.common.file.domain.port.output.repository.FileRepository;
@@ -13,6 +14,7 @@ import fr.avenirsesr.portfolio.common.file.domain.port.output.service.FileStorag
 import fr.avenirsesr.portfolio.common.file.domain.port.output.service.FileUploaderProvider;
 import fr.avenirsesr.portfolio.common.file.domain.service.FileResourceServiceImpl;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import java.io.IOException;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
@@ -74,14 +76,14 @@ class FileResourceServiceImplTest {
 
           when(fileRepository.findById(sourceId))
               .thenReturn(Optional.of(aSourceFile(EFileType.PDF, "consigne.pdf", 3L, true)));
-          when(fileStorageService.get(SOURCE_URI)).thenReturn(sourceContent);
+          when(fileStorageService.get(SOURCE_URI)).thenReturn(FileContent.ofBytes(sourceContent));
           when(fileUploaderProvider.currentUploaderId()).thenReturn(loggedInUserId);
           when(fileStorageService.upload(any())).thenReturn(COPY_URI);
           when(fileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         }
 
         @Test
-        void thenItShouldStoreTheSourceContentUnderANewId() {
+        void thenItShouldStoreTheSourceContentUnderANewId() throws IOException {
           BddLogger.then("a new file holding the source content should be stored and saved");
 
           File copy = fileResourceService.copy(sourceId);
@@ -93,7 +95,7 @@ class FileResourceServiceImplTest {
           ArgumentCaptor<FileResource> captor = ArgumentCaptor.forClass(FileResource.class);
           verify(fileStorageService).upload(captor.capture());
           assertEquals(copy.getId(), captor.getValue().id());
-          assertArrayEquals(sourceContent, captor.getValue().content());
+          assertArrayEquals(sourceContent, captor.getValue().content().open().readAllBytes());
         }
 
         @Test

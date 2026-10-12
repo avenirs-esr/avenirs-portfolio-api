@@ -1,7 +1,5 @@
 package fr.avenirsesr.portfolio.student.trace.application.adapter.controller;
 
-import static fr.avenirsesr.portfolio.common.file.application.adapter.MultipartFileReader.readBytes;
-
 import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.DateFilter;
@@ -19,12 +17,15 @@ import fr.avenirsesr.portfolio.student.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
 import jakarta.validation.Valid;
+import java.io.IOException;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -185,7 +186,7 @@ public class TraceController {
             file.getOriginalFilename(),
             file.getContentType(),
             file.getSize(),
-            readBytes(file));
+            file::getInputStream);
     return ResponseEntity.status(HttpStatus.CREATED).body(fileDtoMapper.fromDomain(uploaded));
   }
 
@@ -193,8 +194,8 @@ public class TraceController {
   @GetMapping(
       value = "/{traceId}/attachment/download",
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  public ResponseEntity<byte[]> downloadAttachment(
-      Principal principal, @PathVariable UUID traceId) {
+  public ResponseEntity<Resource> downloadAttachment(
+      Principal principal, @PathVariable UUID traceId) throws IOException {
     log.debug(
         "Received request to download attachment of trace [{}] by user [{}]",
         traceId,
@@ -205,6 +206,7 @@ public class TraceController {
         .header(
             HttpHeaders.CONTENT_DISPOSITION,
             "attachment; filename=\"" + downloadedFile.fileName() + "\"")
-        .body(downloadedFile.content());
+        .contentLength(downloadedFile.size())
+        .body(new InputStreamResource(downloadedFile.content().open()));
   }
 }

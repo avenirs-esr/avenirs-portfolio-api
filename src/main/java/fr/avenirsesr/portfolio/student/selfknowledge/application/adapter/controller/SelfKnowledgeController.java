@@ -1,7 +1,5 @@
 package fr.avenirsesr.portfolio.student.selfknowledge.application.adapter.controller;
 
-import static fr.avenirsesr.portfolio.common.file.application.adapter.MultipartFileReader.readBytes;
-
 import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
@@ -210,7 +208,7 @@ public class SelfKnowledgeController {
             file.getOriginalFilename(),
             file.getContentType(),
             file.getSize(),
-            readBytes(file));
+            file::getInputStream);
     return ResponseEntity.status(HttpStatus.CREATED).body(fileDtoMapper.fromDomain(uploaded));
   }
 

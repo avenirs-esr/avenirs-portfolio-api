@@ -11,11 +11,13 @@ import static org.mockito.Mockito.when;
 import fr.avenirsesr.portfolio.common.file.application.adapter.dto.FileDTO;
 import fr.avenirsesr.portfolio.common.file.application.adapter.request.FileUploadRequest;
 import fr.avenirsesr.portfolio.common.file.domain.model.File;
+import fr.avenirsesr.portfolio.common.file.domain.model.FileContent;
 import fr.avenirsesr.portfolio.common.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.common.file.infrastructure.adapter.client.LocalFileClient;
 import fr.avenirsesr.portfolio.common.file.infrastructure.configuration.FileStorageConstants;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.file.infrastructure.fixture.FileFixture;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,10 +40,12 @@ class LocalFileClientTest {
   }
 
   @Test
-  void shouldUploadFileAndReturnItsPublicRepresentation() {
+  void shouldUploadFileAndReturnItsPublicRepresentation() throws IOException {
     BddLogger.given("an upload request holding the content of a file");
     byte[] content = "file content".getBytes(StandardCharsets.UTF_8);
-    var request = new FileUploadRequest("terms.pdf", "application/pdf", content, false);
+    var request =
+        new FileUploadRequest(
+            "terms.pdf", "application/pdf", FileContent.ofBytes(content), content.length, false);
     File uploaded = FileFixture.create().toModel();
     when(fileResourceService.upload(anyString(), anyString(), anyLong(), any(), anyBoolean()))
         .thenReturn(uploaded);
@@ -53,7 +57,7 @@ class LocalFileClientTest {
     var fileNameCaptor = ArgumentCaptor.forClass(String.class);
     var mimeTypeCaptor = ArgumentCaptor.forClass(String.class);
     var sizeCaptor = ArgumentCaptor.forClass(Long.class);
-    var contentCaptor = ArgumentCaptor.forClass(byte[].class);
+    var contentCaptor = ArgumentCaptor.forClass(FileContent.class);
     var restrictedCaptor = ArgumentCaptor.forClass(Boolean.class);
     verify(fileResourceService)
         .upload(
@@ -66,7 +70,7 @@ class LocalFileClientTest {
     assertThat(fileNameCaptor.getValue()).isEqualTo("terms.pdf");
     assertThat(mimeTypeCaptor.getValue()).isEqualTo("application/pdf");
     assertThat(sizeCaptor.getValue()).isEqualTo(content.length);
-    assertThat(contentCaptor.getValue()).isEqualTo(content);
+    assertThat(contentCaptor.getValue().open().readAllBytes()).isEqualTo(content);
     assertThat(restrictedCaptor.getValue()).isFalse();
 
     assertThat(result.id()).isEqualTo(uploaded.getId());

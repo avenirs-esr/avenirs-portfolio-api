@@ -12,6 +12,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.file.application.adapter.dto.FileDTO;
 import fr.avenirsesr.portfolio.common.file.domain.model.File;
+import fr.avenirsesr.portfolio.common.file.domain.model.FileContent;
 import fr.avenirsesr.portfolio.common.file.domain.model.FileDownload;
 import fr.avenirsesr.portfolio.common.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
@@ -33,6 +34,7 @@ import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackData;
 import fr.avenirsesr.portfolio.student.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.FeedbackService;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.time.Instant;
@@ -45,6 +47,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -657,7 +660,7 @@ class FeedbackControllerTest {
               eq("retour.pdf"),
               eq("application/pdf"),
               eq(file.getSize()),
-              any(byte[].class)))
+              any(FileContent.class)))
           .thenReturn(uploaded);
       when(fileDtoMapper.fromDomain(uploaded)).thenReturn(expectedDto);
 
@@ -685,11 +688,11 @@ class FeedbackControllerTest {
       BddLogger.then("The service is called once with the file name, mime type, size and content");
       verify(feedbackService, times(1))
           .uploadAttachment(
-              feedbackId,
-              "retour.pdf",
-              "application/pdf",
-              file.getSize(),
-              "content".getBytes(StandardCharsets.UTF_8));
+              eq(feedbackId),
+              eq("retour.pdf"),
+              eq("application/pdf"),
+              eq(file.getSize()),
+              any(FileContent.class));
       verifyNoMoreInteractions(feedbackService);
     }
   }
@@ -717,7 +720,7 @@ class FeedbackControllerTest {
     }
 
     @Test
-    void should_delegate_to_service_with_correct_feedback_and_attachment_ids() {
+    void should_delegate_to_service_with_correct_feedback_and_attachment_ids() throws IOException {
       BddLogger.given("A feedback ID and an attachment ID");
 
       UUID feedbackId = UUID.randomUUID();
@@ -736,7 +739,8 @@ class FeedbackControllerTest {
   class DownloadAttachment {
 
     @Test
-    void should_return_200_with_the_file_content_and_content_disposition_header() {
+    void should_return_200_with_the_file_content_and_content_disposition_header()
+        throws IOException {
       BddLogger.given("A feedback ID and one of its attachment IDs");
 
       UUID feedbackId = UUID.randomUUID();
@@ -744,15 +748,15 @@ class FeedbackControllerTest {
       byte[] content = "content".getBytes(StandardCharsets.UTF_8);
 
       when(feedbackService.downloadAttachment(feedbackId, attachmentId))
-          .thenReturn(new FileDownload("retour.pdf", content));
+          .thenReturn(new FileDownload("retour.pdf", content.length, FileContent.ofBytes(content)));
 
       BddLogger.when("downloadAttachment is called");
-      ResponseEntity<byte[]> response =
+      ResponseEntity<Resource> response =
           controller.downloadFeedbackAttachment(principal, feedbackId, attachmentId);
 
       BddLogger.then("200 OK is returned with the file content as an octet stream");
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-      assertThat(response.getBody()).isEqualTo(content);
+      assertThat(response.getBody().getContentAsByteArray()).isEqualTo(content);
       assertThat(response.getHeaders().getContentType())
           .isEqualTo(MediaType.APPLICATION_OCTET_STREAM);
       assertThat(response.getHeaders().getFirst(HttpHeaders.CONTENT_DISPOSITION))
@@ -762,14 +766,14 @@ class FeedbackControllerTest {
     }
 
     @Test
-    void should_delegate_to_service_with_correct_feedback_and_attachment_ids() {
+    void should_delegate_to_service_with_correct_feedback_and_attachment_ids() throws IOException {
       BddLogger.given("A feedback ID and an attachment ID");
 
       UUID feedbackId = UUID.randomUUID();
       UUID attachmentId = UUID.randomUUID();
 
       when(feedbackService.downloadAttachment(feedbackId, attachmentId))
-          .thenReturn(new FileDownload("retour.pdf", new byte[0]));
+          .thenReturn(new FileDownload("retour.pdf", 0L, FileContent.ofBytes(new byte[0])));
 
       BddLogger.when("downloadAttachment is called");
       controller.downloadFeedbackAttachment(principal, feedbackId, attachmentId);

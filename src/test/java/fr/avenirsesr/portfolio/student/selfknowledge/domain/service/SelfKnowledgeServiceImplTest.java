@@ -10,6 +10,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.common.file.domain.model.File;
+import fr.avenirsesr.portfolio.common.file.domain.model.FileContent;
 import fr.avenirsesr.portfolio.common.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.common.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
@@ -59,6 +60,7 @@ class SelfKnowledgeServiceImplTest {
   private static final String FILE_NAME = "test-document.pdf";
   private static final String MIME_TYPE = "application/pdf";
   private static final byte[] CONTENT = "content".getBytes(StandardCharsets.UTF_8);
+  private static final FileContent CONTENT_RESOURCE = FileContent.ofBytes(CONTENT);
 
   @BeforeEach
   void setUp() {
@@ -1278,7 +1280,8 @@ class SelfKnowledgeServiceImplTest {
 
         File uploadedFile = attachment();
 
-        when(fileResourceService.upload(FILE_NAME, MIME_TYPE, CONTENT.length, CONTENT, true))
+        when(fileResourceService.upload(
+                FILE_NAME, MIME_TYPE, CONTENT.length, CONTENT_RESOURCE, true))
             .thenReturn(uploadedFile);
 
         when(selfKnowledgeElementRepository.save(any(SelfKnowledgeElement.class)))
@@ -1288,7 +1291,7 @@ class SelfKnowledgeServiceImplTest {
 
         File result =
             selfKnowledgeService.uploadAttachment(
-                selfKnowledgeElementId, FILE_NAME, MIME_TYPE, CONTENT.length, CONTENT);
+                selfKnowledgeElementId, FILE_NAME, MIME_TYPE, CONTENT.length, CONTENT_RESOURCE);
 
         BddLogger.then("the attachment should be added and the element saved");
 
@@ -1296,7 +1299,8 @@ class SelfKnowledgeServiceImplTest {
 
         verify(loggedInUserService).getLoggedInStudent();
 
-        verify(fileResourceService).upload(FILE_NAME, MIME_TYPE, CONTENT.length, CONTENT, true);
+        verify(fileResourceService)
+            .upload(FILE_NAME, MIME_TYPE, CONTENT.length, CONTENT_RESOURCE, true);
 
         verify(selfKnowledgeElementRepository).save(selfKnowledgeElement);
       }
