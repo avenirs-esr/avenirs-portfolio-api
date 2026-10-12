@@ -66,7 +66,7 @@ class ActivityContentDtoMapperTest {
     draft.setNational(true);
 
     BddLogger.when("mapping to ActivityContentDTO");
-    ActivityContentDTO dto = mapper.toDTO(draft, null, List.of());
+    ActivityContentDTO dto = mapper.toDTO(draft, null, true, List.of());
 
     BddLogger.then("national should be true");
     assertTrue(dto.national());
@@ -96,7 +96,7 @@ class ActivityContentDtoMapperTest {
     ActivityDraft draft = ActivityDraft.create("draft title", StaffFixture.create().toModel());
 
     BddLogger.when("mapping to ActivityContentDTO with hasEnrolledStudent = true");
-    ActivityContentDTO dto = mapper.toDTO(draft, true, List.of());
+    ActivityContentDTO dto = mapper.toDTO(draft, true, true, List.of());
 
     BddLogger.then("hasEnrolledStudent should be true");
     assertEquals(Boolean.TRUE, dto.hasEnrolledStudent());
@@ -108,7 +108,7 @@ class ActivityContentDtoMapperTest {
     ActivityDraft draft = ActivityDraft.create("draft title", StaffFixture.create().toModel());
 
     BddLogger.when("mapping to ActivityContentDTO with hasEnrolledStudent = null");
-    ActivityContentDTO dto = mapper.toDTO(draft, null, List.of());
+    ActivityContentDTO dto = mapper.toDTO(draft, null, true, List.of());
 
     BddLogger.then("hasEnrolledStudent should be null");
     assertNull(dto.hasEnrolledStudent());
@@ -124,7 +124,7 @@ class ActivityContentDtoMapperTest {
             new FileDTO(UUID.randomUUID(), "file2.txt", "/files/file2.txt"));
 
     BddLogger.when("mapping to ActivityContentDTO with files");
-    ActivityContentDTO dto = mapper.toDTO(draft, null, files);
+    ActivityContentDTO dto = mapper.toDTO(draft, null, true, files);
 
     BddLogger.then("files should be correctly mapped");
     assertEquals(files, dto.files());
@@ -136,7 +136,7 @@ class ActivityContentDtoMapperTest {
     ActivityDraft draft = ActivityDraft.create("draft title", StaffFixture.create().toModel());
 
     BddLogger.when("mapping to ActivityContentDTO with no files");
-    ActivityContentDTO dto = mapper.toDTO(draft, null, List.of());
+    ActivityContentDTO dto = mapper.toDTO(draft, null, true, List.of());
 
     BddLogger.then("files should be an empty list");
     assertNotNull(dto);

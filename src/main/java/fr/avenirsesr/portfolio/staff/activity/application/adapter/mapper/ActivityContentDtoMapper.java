@@ -22,8 +22,10 @@ public interface ActivityContentDtoMapper {
 
   @Mapping(target = "haveDraft", expression = "java(false)")
   @Mapping(target = "hasEnrolledStudent", source = "hasEnrolledStudent")
+  @Mapping(target = "isAuthor", source = "isAuthor")
   @Mapping(target = "files", source = "files")
-  ActivityContentDTO toDTO(ActivityDraft activity, Boolean hasEnrolledStudent, List<FileDTO> files);
+  ActivityContentDTO toDTO(
+      ActivityDraft activity, Boolean hasEnrolledStudent, boolean isAuthor, List<FileDTO> files);
 
   @Mapping(target = "haveDraft", source = "haveDraft")
   @Mapping(target = "isAuthor", source = "isAuthor")

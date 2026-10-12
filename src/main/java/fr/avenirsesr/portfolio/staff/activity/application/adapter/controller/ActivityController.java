@@ -143,6 +143,7 @@ public class ActivityController {
             yield activityContentDtoMapper.toDTO(
                 draft,
                 activityService.hasEnrolledStudents(draft),
+                true,
                 fileDTOMapper.toFileDTOs(draft.getFiles(), baseUrl));
           }
         };
