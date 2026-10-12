@@ -17,6 +17,10 @@ public interface TraceViewMapper {
 
   List<TraceViewDTO> toDTOs(List<TraceViewData> traces);
 
+  default String unwrapString(Optional<String> value) {
+    return value.orElse(null);
+  }
+
   default LocalDate unwrap(Optional<LocalDate> value) {
     return value.orElse(null);
   }

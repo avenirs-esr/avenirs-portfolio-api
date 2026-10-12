@@ -21,7 +21,7 @@ class AssociationSearchResultDTOMapperTest {
     UUID id = UUID.randomUUID();
     AssociationSearchResultData data =
         new AssociationSearchResultData(
-            id, "Java Workshop", EActivityThematic.EXPERIENCES.name(), true);
+            id, "Java Workshop", EActivityThematic.EXPERIENCES.name(), true, "report.pdf");
 
     BddLogger.when("mapping to DTO");
     AssociationSearchResultDTO dto = mapper.toDTO(data);
@@ -32,6 +32,7 @@ class AssociationSearchResultDTOMapperTest {
     assertEquals("Java Workshop", dto.title());
     assertEquals(EActivityThematic.EXPERIENCES.name(), dto.category());
     assertTrue(dto.disabled());
+    assertEquals("report.pdf", dto.description());
   }
 
   @Test

@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.student.trace.application.adapter.mapper;
 
+import fr.avenirsesr.portfolio.file.application.adapter.mapper.FileDtoMapper;
 import fr.avenirsesr.portfolio.shared.application.adapter.mapper.OptionalMapper;
 import fr.avenirsesr.portfolio.student.trace.application.adapter.dto.TraceOverviewDTO;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
@@ -8,7 +9,7 @@ import org.mapstruct.Mapping;
 
 @Mapper(
     componentModel = "spring",
-    uses = {OptionalMapper.class})
+    uses = {OptionalMapper.class, FileDtoMapper.class})
 public interface TraceOverviewMapper {
 
   @Mapping(source = "aiUseJustification", target = "aiUseJustification")

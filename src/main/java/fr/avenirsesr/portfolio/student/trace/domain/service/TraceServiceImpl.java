@@ -104,6 +104,7 @@ public class TraceServiceImpl implements TraceService {
                           ? Optional.empty()
                           : Optional.of(computeDeletionDateForUnassociatedTrace(trace, config)),
                       trace.getAttachment(),
+                      trace.getLink(),
                       trace.getAuthorType(),
                       trace.getPersonalNote().orElse(null),
                       trace.getAiUseJustification().orElse(null));

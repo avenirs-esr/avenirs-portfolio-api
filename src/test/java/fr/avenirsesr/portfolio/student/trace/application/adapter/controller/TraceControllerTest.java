@@ -70,6 +70,8 @@ class TraceControllerTest {
                 ETraceAuthorType.PERSONAL,
                 "Some justification for ia use",
                 null,
+                null,
+                null,
                 null));
 
     BddLogger.when("getting the trace overview");

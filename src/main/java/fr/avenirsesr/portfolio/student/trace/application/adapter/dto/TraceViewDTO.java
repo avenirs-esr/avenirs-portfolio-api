@@ -26,6 +26,7 @@ public record TraceViewDTO(
     Instant updatedAt,
     LocalDate willBeDeletedAt,
     FileDTO attachment,
+    String link,
     @Schema(ref = "#/components/schemas/ETraceAuthorType") ETraceAuthorType authorType,
     String personalNote,
     String aiUseJustification) {}

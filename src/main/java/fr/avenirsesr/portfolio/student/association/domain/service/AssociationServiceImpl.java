@@ -165,7 +165,8 @@ public class AssociationServiceImpl implements AssociationService {
                         result.id(),
                         result.title(),
                         result.category(),
-                        result.disabled() || associatedIds.contains(result.id())))
+                        result.disabled() || associatedIds.contains(result.id()),
+                        result.description()))
             .toList(),
         searchResults.pageInfo());
   }

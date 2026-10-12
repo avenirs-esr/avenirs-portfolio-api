@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.student.trace.application.adapter.mapper;
 import static org.junit.jupiter.api.Assertions.*;
 
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.file.application.adapter.mapper.FileDtoMapper;
 import fr.avenirsesr.portfolio.shared.application.adapter.mapper.OptionalMapper;
 import fr.avenirsesr.portfolio.student.trace.application.adapter.dto.TraceOverviewDTO;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
@@ -18,6 +19,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class TraceOverviewMapperTest {
 
   @Spy private OptionalMapper optionalMapper = Mappers.getMapper(OptionalMapper.class);
+
+  @Spy private FileDtoMapper fileDtoMapper = Mappers.getMapper(FileDtoMapper.class);
 
   @InjectMocks private TraceOverviewMapperImpl mapper;
 
