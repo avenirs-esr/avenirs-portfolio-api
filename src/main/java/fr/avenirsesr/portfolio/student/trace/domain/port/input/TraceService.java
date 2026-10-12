@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.common.file.domain.model.File;
+import fr.avenirsesr.portfolio.common.file.domain.model.FileContent;
 import fr.avenirsesr.portfolio.common.file.domain.model.FileDownload;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.student.trace.domain.data.*;
@@ -65,7 +66,8 @@ public interface TraceService {
 
   List<TraceLockedDeclaredActivitiesData> getLockedDeclaredActivities(List<UUID> traceIds);
 
-  File uploadAttachment(UUID traceId, String fileName, String mimeType, long size, byte[] content);
+  File uploadAttachment(
+      UUID traceId, String fileName, String mimeType, long size, FileContent content);
 
   FileDownload downloadAttachment(UUID traceId);
 }

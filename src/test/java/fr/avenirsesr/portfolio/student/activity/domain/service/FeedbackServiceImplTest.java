@@ -13,6 +13,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
 import fr.avenirsesr.portfolio.common.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.common.file.domain.model.File;
+import fr.avenirsesr.portfolio.common.file.domain.model.FileContent;
 import fr.avenirsesr.portfolio.common.file.domain.model.FileDownload;
 import fr.avenirsesr.portfolio.common.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.common.file.domain.port.input.FileResourceService;
@@ -102,6 +103,7 @@ class FeedbackServiceImplTest {
   private static final String FILE_NAME = "retour.pdf";
   private static final String MIME_TYPE = "application/pdf";
   private static final byte[] CONTENT = "content".getBytes(StandardCharsets.UTF_8);
+  private static final FileContent CONTENT_RESOURCE = FileContent.ofBytes(CONTENT);
 
   private Student student;
 
@@ -1988,17 +1990,19 @@ class FeedbackServiceImplTest {
 
       when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
       when(loggedInUserService.getLoggedInStaff()).thenReturn(author);
-      when(fileResourceService.upload(FILE_NAME, MIME_TYPE, CONTENT.length, CONTENT, true))
+      when(fileResourceService.upload(FILE_NAME, MIME_TYPE, CONTENT.length, CONTENT_RESOURCE, true))
           .thenReturn(uploaded);
       when(feedbackRepository.save(any(Feedback.class))).thenAnswer(i -> i.getArguments()[0]);
 
       BddLogger.when("uploadAttachment is called");
       File result =
-          service.uploadAttachment(feedbackId, FILE_NAME, MIME_TYPE, CONTENT.length, CONTENT);
+          service.uploadAttachment(
+              feedbackId, FILE_NAME, MIME_TYPE, CONTENT.length, CONTENT_RESOURCE);
 
       BddLogger.then("The file is uploaded as restricted and saved as an attachment");
       assertThat(result).isEqualTo(uploaded);
-      verify(fileResourceService).upload(FILE_NAME, MIME_TYPE, CONTENT.length, CONTENT, true);
+      verify(fileResourceService)
+          .upload(FILE_NAME, MIME_TYPE, CONTENT.length, CONTENT_RESOURCE, true);
       verify(feedbackRepository).save(feedbackCaptor.capture());
       assertThat(feedbackCaptor.getValue().getAttachments()).containsExactly(uploaded);
     }
@@ -2016,12 +2020,12 @@ class FeedbackServiceImplTest {
 
       when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
       when(loggedInUserService.getLoggedInStaff()).thenReturn(author);
-      when(fileResourceService.upload(FILE_NAME, MIME_TYPE, CONTENT.length, CONTENT, true))
+      when(fileResourceService.upload(FILE_NAME, MIME_TYPE, CONTENT.length, CONTENT_RESOURCE, true))
           .thenReturn(uploaded);
       when(feedbackRepository.save(any(Feedback.class))).thenAnswer(i -> i.getArguments()[0]);
 
       BddLogger.when("uploadAttachment is called");
-      service.uploadAttachment(feedbackId, FILE_NAME, MIME_TYPE, CONTENT.length, CONTENT);
+      service.uploadAttachment(feedbackId, FILE_NAME, MIME_TYPE, CONTENT.length, CONTENT_RESOURCE);
 
       BddLogger.then("The feedback holds both the existing and the new attachment");
       verify(feedbackRepository).save(feedbackCaptor.capture());
@@ -2042,7 +2046,7 @@ class FeedbackServiceImplTest {
       assertThatThrownBy(
               () ->
                   service.uploadAttachment(
-                      feedbackId, FILE_NAME, MIME_TYPE, CONTENT.length, CONTENT))
+                      feedbackId, FILE_NAME, MIME_TYPE, CONTENT.length, CONTENT_RESOURCE))
           .isInstanceOf(FeedbackNotFoundException.class);
 
       verifyNoInteractions(fileResourceService);
@@ -2069,7 +2073,7 @@ class FeedbackServiceImplTest {
       assertThatThrownBy(
               () ->
                   service.uploadAttachment(
-                      feedbackId, FILE_NAME, MIME_TYPE, CONTENT.length, CONTENT))
+                      feedbackId, FILE_NAME, MIME_TYPE, CONTENT.length, CONTENT_RESOURCE))
           .isInstanceOf(UserNotAuthorizedException.class);
 
       verifyNoInteractions(fileResourceService);
@@ -2092,7 +2096,7 @@ class FeedbackServiceImplTest {
       assertThatThrownBy(
               () ->
                   service.uploadAttachment(
-                      feedbackId, FILE_NAME, MIME_TYPE, CONTENT.length, CONTENT))
+                      feedbackId, FILE_NAME, MIME_TYPE, CONTENT.length, CONTENT_RESOURCE))
           .isInstanceOf(UserIsNotStaffException.class);
 
       verifyNoInteractions(fileResourceService);
@@ -2116,7 +2120,7 @@ class FeedbackServiceImplTest {
       assertThatThrownBy(
               () ->
                   service.uploadAttachment(
-                      feedbackId, FILE_NAME, MIME_TYPE, CONTENT.length, CONTENT))
+                      feedbackId, FILE_NAME, MIME_TYPE, CONTENT.length, CONTENT_RESOURCE))
           .isInstanceOf(FeedbackSeenException.class);
 
       verifyNoInteractions(fileResourceService);
@@ -2257,7 +2261,7 @@ class FeedbackServiceImplTest {
       File existingAttachment = attachment();
       Feedback feedback =
           feedbackOf(feedbackId, activity, EFeedbackStatus.IN_PROCESS, List.of(existingAttachment));
-      FileDownload expected = new FileDownload(FILE_NAME, CONTENT);
+      FileDownload expected = new FileDownload(FILE_NAME, CONTENT.length, CONTENT_RESOURCE);
 
       when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
       when(loggedInUserService.getLoggedInUser()).thenReturn(authorUser);
@@ -2280,7 +2284,7 @@ class FeedbackServiceImplTest {
       File existingAttachment = attachment();
       Feedback feedback =
           feedbackOf(feedbackId, activity, EFeedbackStatus.SUBMITTED, List.of(existingAttachment));
-      FileDownload expected = new FileDownload(FILE_NAME, CONTENT);
+      FileDownload expected = new FileDownload(FILE_NAME, CONTENT.length, CONTENT_RESOURCE);
 
       when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
       when(loggedInUserService.getLoggedInUser()).thenReturn(student.getUser());
@@ -2301,7 +2305,7 @@ class FeedbackServiceImplTest {
       File existingAttachment = attachment();
       Feedback feedback =
           feedbackOf(feedbackId, activity, EFeedbackStatus.SEEN, List.of(existingAttachment));
-      FileDownload expected = new FileDownload(FILE_NAME, CONTENT);
+      FileDownload expected = new FileDownload(FILE_NAME, CONTENT.length, CONTENT_RESOURCE);
 
       when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
       when(loggedInUserService.getLoggedInUser()).thenReturn(student.getUser());
@@ -2323,7 +2327,7 @@ class FeedbackServiceImplTest {
       File existingAttachment = attachment();
       Feedback feedback =
           feedbackOf(feedbackId, activity, EFeedbackStatus.SEEN, List.of(existingAttachment));
-      FileDownload expected = new FileDownload(FILE_NAME, CONTENT);
+      FileDownload expected = new FileDownload(FILE_NAME, CONTENT.length, CONTENT_RESOURCE);
 
       when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
       when(loggedInUserService.getLoggedInUser()).thenReturn(authorUser);

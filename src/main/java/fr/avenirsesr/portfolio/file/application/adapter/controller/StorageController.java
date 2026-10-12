@@ -1,16 +1,13 @@
 package fr.avenirsesr.portfolio.file.application.adapter.controller;
 
+import fr.avenirsesr.portfolio.common.file.application.adapter.controller.AbstractStorageController;
 import fr.avenirsesr.portfolio.common.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.common.file.domain.exception.FileStorageException;
-import fr.avenirsesr.portfolio.common.file.domain.model.FileResource;
 import fr.avenirsesr.portfolio.common.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.common.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.user.infrastructure.configuration.UserPhotoDefaults;
-import jakarta.validation.Valid;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.UUID;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -19,26 +16,18 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MimeType;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
-@AllArgsConstructor
 @RestController
 @RequestMapping("/storage")
-public class StorageController {
-  private final FileResourceService fileResourceService;
+public class StorageController extends AbstractStorageController {
   private final ResourceLoader resourceLoader;
 
-  @GetMapping("/{fileId}")
-  public ResponseEntity<ByteArrayResource> getResourceByFileId(@Valid @PathVariable UUID fileId) {
-    log.debug("Received request to get user photo id [{}]", fileId);
-    FileResource file = fileResourceService.fetchContent(fileId);
-
-    return ResponseEntity.ok()
-        .contentType(MediaType.asMediaType(MimeType.valueOf(file.fileType().getMimeType())))
-        .body(new ByteArrayResource(file.content()));
+  public StorageController(FileResourceService fileResourceService, ResourceLoader resourceLoader) {
+    super(fileResourceService);
+    this.resourceLoader = resourceLoader;
   }
 
   @GetMapping("/default/cover-picture")

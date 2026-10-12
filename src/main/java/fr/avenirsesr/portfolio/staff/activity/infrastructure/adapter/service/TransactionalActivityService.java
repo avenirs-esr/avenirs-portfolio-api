@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.service;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.file.domain.model.File;
+import fr.avenirsesr.portfolio.common.file.domain.model.FileContent;
 import fr.avenirsesr.portfolio.common.file.domain.model.FileDownload;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityDashboardData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityPresentationData;
@@ -252,7 +253,7 @@ public class TransactionalActivityService implements ActivityService {
 
   @Override
   public File uploadDraftBanner(
-      UUID activityDraftId, String fileName, String mimeType, long size, byte[] content) {
+      UUID activityDraftId, String fileName, String mimeType, long size, FileContent content) {
     return delegate.uploadDraftBanner(activityDraftId, fileName, mimeType, size, content);
   }
 
@@ -263,7 +264,7 @@ public class TransactionalActivityService implements ActivityService {
 
   @Override
   public File addDraftFile(
-      UUID activityDraftId, String fileName, String mimeType, long size, byte[] content) {
+      UUID activityDraftId, String fileName, String mimeType, long size, FileContent content) {
     return delegate.addDraftFile(activityDraftId, fileName, mimeType, size, content);
   }
 

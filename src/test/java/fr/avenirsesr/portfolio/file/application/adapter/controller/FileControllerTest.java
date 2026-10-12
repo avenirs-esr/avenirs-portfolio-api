@@ -10,6 +10,7 @@ import fr.avenirsesr.portfolio.common.file.application.adapter.dto.FileDTO;
 import fr.avenirsesr.portfolio.common.file.application.adapter.request.FileUploadRequest;
 import fr.avenirsesr.portfolio.common.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.UUID;
@@ -43,7 +44,7 @@ class FileControllerTest {
   }
 
   @Test
-  void shouldUploadTheMultipartContentThroughTheFileClient() {
+  void shouldUploadTheMultipartContentThroughTheFileClient() throws IOException {
     BddLogger.given("a multipart html file");
     MockMultipartFile file = new MockMultipartFile("file", "cgu.html", "text/html", CONTENT);
     FileDTO uploaded = uploadedFile();
@@ -58,7 +59,7 @@ class FileControllerTest {
 
     assertThat(captor.getValue().fileName()).isEqualTo("cgu.html");
     assertThat(captor.getValue().mimeType()).isEqualTo("text/html");
-    assertThat(captor.getValue().content()).isEqualTo(CONTENT);
+    assertThat(captor.getValue().content().open().readAllBytes()).isEqualTo(CONTENT);
     assertThat(captor.getValue().isRestricted()).isFalse();
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);

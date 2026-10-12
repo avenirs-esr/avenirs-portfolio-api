@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.student.selfknowledge.domain.port.input;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.file.domain.model.File;
+import fr.avenirsesr.portfolio.common.file.domain.model.FileContent;
 import fr.avenirsesr.portfolio.student.selfknowledge.domain.data.SelfKnowledgeElementDetails;
 import fr.avenirsesr.portfolio.student.selfknowledge.domain.model.SelfKnowledgeElement;
 import fr.avenirsesr.portfolio.student.selfknowledge.domain.model.enums.ESelfKnowledgeCategory;
@@ -42,7 +43,11 @@ public interface SelfKnowledgeService {
   void removeSelfKnowledgeCategories(List<ESelfKnowledgeCategory> selfKnowledgeCategories);
 
   File uploadAttachment(
-      UUID selfKnowledgeElementId, String fileName, String mimeType, long size, byte[] content);
+      UUID selfKnowledgeElementId,
+      String fileName,
+      String mimeType,
+      long size,
+      FileContent content);
 
   void deleteAttachment(UUID selfKnowledgeElementId, UUID attachmentId);
 }

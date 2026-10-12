@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.file.domain.model.File;
+import fr.avenirsesr.portfolio.common.file.domain.model.FileContent;
 import fr.avenirsesr.portfolio.common.file.domain.model.FileDownload;
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackDashboardData;
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackData;
@@ -34,7 +35,7 @@ public interface FeedbackService {
   void submitFeedback(UUID feedbackId);
 
   File uploadAttachment(
-      UUID feedbackId, String fileName, String mimeType, long size, byte[] content);
+      UUID feedbackId, String fileName, String mimeType, long size, FileContent content);
 
   void deleteAttachment(UUID feedbackId, UUID attachmentId);
 

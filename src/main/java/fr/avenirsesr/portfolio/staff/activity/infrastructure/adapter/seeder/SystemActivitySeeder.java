@@ -139,9 +139,10 @@ public class SystemActivitySeeder {
   }
 
   private File upload(String fileName, String mimeType, boolean isRestricted) {
-    try (var in = new ClassPathResource(RESOURCE_DIR + fileName).getInputStream()) {
-      var content = in.readAllBytes();
-      return fileResourceService.upload(fileName, mimeType, content.length, content, isRestricted);
+    var resource = new ClassPathResource(RESOURCE_DIR + fileName);
+    try {
+      return fileResourceService.upload(
+          fileName, mimeType, resource.contentLength(), resource::getInputStream, isRestricted);
     } catch (IOException e) {
       throw new UncheckedIOException("Cannot read " + fileName, e);
     }

@@ -21,6 +21,7 @@ import fr.avenirsesr.portfolio.activity.infrastructure.fixture.ActivityFixture;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
 import fr.avenirsesr.portfolio.common.file.domain.model.File;
+import fr.avenirsesr.portfolio.common.file.domain.model.FileContent;
 import fr.avenirsesr.portfolio.common.file.domain.model.FileDownload;
 import fr.avenirsesr.portfolio.common.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
@@ -271,7 +272,11 @@ class ActivityServiceImplSubActivityTest {
           SubActivityOperationNotAllowedException.class,
           () ->
               activityService.uploadDraftBanner(
-                  firstSubActivityDraft.getId(), "banner.png", "image/png", 3, new byte[3]));
+                  firstSubActivityDraft.getId(),
+                  "banner.png",
+                  "image/png",
+                  3,
+                  FileContent.ofBytes(new byte[3])));
       assertThrows(
           SubActivityOperationNotAllowedException.class,
           () -> activityService.deleteDraftBanner(firstSubActivityDraft.getId()));

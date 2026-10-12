@@ -1,7 +1,5 @@
 package fr.avenirsesr.portfolio.student.activity.application.adapter.controller;
 
-import static fr.avenirsesr.portfolio.common.file.application.adapter.MultipartFileReader.readBytes;
-
 import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
@@ -24,11 +22,14 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
+import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -198,7 +199,7 @@ public class FeedbackController {
             file.getOriginalFilename(),
             file.getContentType(),
             file.getSize(),
-            readBytes(file));
+            file::getInputStream);
     return ResponseEntity.status(HttpStatus.CREATED).body(fileDtoMapper.fromDomain(uploaded));
   }
 
@@ -221,10 +222,11 @@ public class FeedbackController {
   @GetMapping(
       value = "/{feedbackId}/attachments/{attachmentId}/download",
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  public ResponseEntity<byte[]> downloadFeedbackAttachment(
+  public ResponseEntity<Resource> downloadFeedbackAttachment(
       Principal principal,
       @Valid @PathVariable UUID feedbackId,
-      @Valid @PathVariable UUID attachmentId) {
+      @Valid @PathVariable UUID attachmentId)
+      throws IOException {
     log.debug(
         "Received request to download attachment [{}] of feedback [{}] by user [{}]",
         attachmentId,
@@ -236,6 +238,7 @@ public class FeedbackController {
         .header(
             HttpHeaders.CONTENT_DISPOSITION,
             "attachment; filename=\"" + downloadedFile.fileName() + "\"")
-        .body(downloadedFile.content());
+        .contentLength(downloadedFile.size())
+        .body(new InputStreamResource(downloadedFile.content().open()));
   }
 }

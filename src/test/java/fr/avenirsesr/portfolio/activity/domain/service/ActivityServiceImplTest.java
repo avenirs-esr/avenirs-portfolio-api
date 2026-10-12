@@ -37,6 +37,7 @@ import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationExce
 import fr.avenirsesr.portfolio.common.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.common.file.domain.exception.FileTypeNotSupportedException;
 import fr.avenirsesr.portfolio.common.file.domain.model.File;
+import fr.avenirsesr.portfolio.common.file.domain.model.FileContent;
 import fr.avenirsesr.portfolio.common.file.domain.model.FileDownload;
 import fr.avenirsesr.portfolio.common.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.common.file.domain.port.input.FileResourceService;
@@ -1115,7 +1116,7 @@ class ActivityServiceImplTest {
       UUID draftId;
       Staff loggedInStaff;
       ActivityDraft draft;
-      byte[] content;
+      FileContent content;
 
       @BeforeEach
       void setupWhen() {
@@ -1123,7 +1124,7 @@ class ActivityServiceImplTest {
         draftId = UUID.randomUUID();
         loggedInStaff = mock(Staff.class);
         draft = mock(ActivityDraft.class);
-        content = new byte[] {1, 2, 3};
+        content = FileContent.ofBytes(new byte[] {1, 2, 3});
         when(loggedInUserService.getLoggedInStaff()).thenReturn(loggedInStaff);
       }
 
@@ -3708,7 +3709,7 @@ class ActivityServiceImplTest {
         activity = mock(Activity.class);
         when(activity.getFiles()).thenReturn(List.of(file));
         when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
-        expected = new FileDownload("doc.pdf", new byte[] {1});
+        expected = new FileDownload("doc.pdf", 1L, FileContent.ofBytes(new byte[] {1}));
         when(fileResourceService.download(fileId)).thenReturn(expected);
       }
 
@@ -3826,7 +3827,7 @@ class ActivityServiceImplTest {
         draft = mock(ActivityDraft.class);
         when(draft.getFiles()).thenReturn(List.of(file));
         when(activityDraftRepository.findById(draftId)).thenReturn(Optional.of(draft));
-        expected = new FileDownload("doc.pdf", new byte[] {1});
+        expected = new FileDownload("doc.pdf", 1L, FileContent.ofBytes(new byte[] {1}));
         when(fileResourceService.download(fileId)).thenReturn(expected);
       }
 
