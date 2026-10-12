@@ -11,6 +11,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.common.file.domain.model.File;
+import fr.avenirsesr.portfolio.common.file.domain.model.FileContent;
 import fr.avenirsesr.portfolio.common.file.domain.model.FileDownload;
 import fr.avenirsesr.portfolio.common.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
@@ -297,7 +298,7 @@ public class FeedbackServiceImpl implements FeedbackService {
 
   @Override
   public File uploadAttachment(
-      UUID feedbackId, String fileName, String mimeType, long size, byte[] content) {
+      UUID feedbackId, String fileName, String mimeType, long size, FileContent content) {
     Feedback feedback = fetchFeedbackAndCheckLoggedInStaffIsAuthor(feedbackId);
 
     if (feedback.getStatus() == EFeedbackStatus.SEEN) {

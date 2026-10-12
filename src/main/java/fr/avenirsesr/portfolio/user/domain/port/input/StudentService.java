@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.user.domain.port.input;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.file.domain.model.File;
+import fr.avenirsesr.portfolio.common.file.domain.model.FileContent;
 import fr.avenirsesr.portfolio.student.selfknowledge.domain.model.enums.ESelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.user.domain.data.UserProfileOverviewData;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
@@ -24,11 +25,11 @@ public interface StudentService {
   void removeSelfKnowledgeCategories(
       Student student, List<ESelfKnowledgeCategory> selfKnowledgeCategories);
 
-  File uploadProfilePicture(String fileName, String mimeType, long size, byte[] content);
+  File uploadProfilePicture(String fileName, String mimeType, long size, FileContent content);
 
   void deleteProfilePicture();
 
-  File uploadCoverPicture(String fileName, String mimeType, long size, byte[] content);
+  File uploadCoverPicture(String fileName, String mimeType, long size, FileContent content);
 
   void deleteCoverPicture();
 }

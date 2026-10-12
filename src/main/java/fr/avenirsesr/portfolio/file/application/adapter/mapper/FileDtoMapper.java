@@ -5,10 +5,6 @@ import fr.avenirsesr.portfolio.common.file.domain.model.File;
 import java.util.Optional;
 import org.mapstruct.Mapper;
 
-/**
- * Lets the MapStruct mappers of this service reuse the file representation built by the shared
- * registry, through their {@code uses} attribute.
- */
 @Mapper(componentModel = "spring")
 public interface FileDtoMapper {
   default FileDTO fromDomain(File file) {

@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.student.kit.domain.model.KitMediaEntry;
 import fr.avenirsesr.portfolio.student.kit.domain.port.input.KitService;
 import fr.avenirsesr.portfolio.student.kit.domain.port.output.KitDownloadPort;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -43,7 +44,9 @@ public class KitServiceImpl implements KitService {
         String entryPath = folder.isEmpty() ? uniqueFileName : folder + "/" + uniqueFileName;
 
         zos.putNextEntry(new ZipEntry(entryPath));
-        zos.write(fileStorageService.get(entry.file().getUri()));
+        try (InputStream content = fileStorageService.get(entry.file().getUri()).open()) {
+          content.transferTo(zos);
+        }
         zos.closeEntry();
       }
     } catch (IOException e) {

@@ -1,6 +1,5 @@
 package fr.avenirsesr.portfolio.user.application.adapter.controller;
 
-import static fr.avenirsesr.portfolio.common.file.application.adapter.MultipartFileReader.readBytes;
 import static fr.avenirsesr.portfolio.shared.application.adapter.Utils.extractOrigin;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
@@ -173,7 +172,7 @@ public class UserController {
             file.getOriginalFilename(),
             file.getContentType(),
             file.getSize(),
-            readBytes(file));
+            file::getInputStream);
     return ResponseEntity.status(HttpStatus.CREATED).body(fileDtoMapper.fromDomain(uploaded));
   }
 
@@ -214,7 +213,7 @@ public class UserController {
             file.getOriginalFilename(),
             file.getContentType(),
             file.getSize(),
-            readBytes(file));
+            file::getInputStream);
     return ResponseEntity.status(HttpStatus.CREATED).body(fileDtoMapper.fromDomain(uploaded));
   }
 

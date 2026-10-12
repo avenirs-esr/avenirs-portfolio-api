@@ -3,11 +3,13 @@ package fr.avenirsesr.portfolio.file.infrastructure.adapter.service;
 import static org.junit.jupiter.api.Assertions.*;
 
 import fr.avenirsesr.portfolio.common.file.domain.exception.FileNotFoundException;
+import fr.avenirsesr.portfolio.common.file.domain.model.FileContent;
 import fr.avenirsesr.portfolio.common.file.domain.model.FileResource;
 import fr.avenirsesr.portfolio.common.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.common.file.infrastructure.adapter.service.S3FileStorageService;
 import fr.avenirsesr.portfolio.common.file.infrastructure.configuration.S3StorageProperties;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterAll;
@@ -77,15 +79,17 @@ class S3FileStorageServiceIT {
   }
 
   @Test
-  void shouldRoundTripAFileThroughTheBucket() {
+  void shouldRoundTripAFileThroughTheBucket() throws IOException {
     BddLogger.given("a file resource");
     var id = UUID.randomUUID();
     byte[] content = "Contenu du fichier de test".getBytes(StandardCharsets.UTF_8);
-    var resource = new FileResource(id, "retour.pdf", EFileType.PDF, content.length, content);
+    var resource =
+        new FileResource(
+            id, "retour.pdf", EFileType.PDF, content.length, FileContent.ofBytes(content));
 
     BddLogger.when("uploading it and reading it back");
     String locator = storageService.upload(resource);
-    byte[] read = storageService.get(locator);
+    byte[] read = storageService.get(locator).open().readAllBytes();
 
     BddLogger.then("the stored bytes should be the ones that were uploaded");
     assertEquals(id + ".pdf", locator);
@@ -109,7 +113,8 @@ class S3FileStorageServiceIT {
     byte[] content = "a supprimer".getBytes(StandardCharsets.UTF_8);
     String locator =
         storageService.upload(
-            new FileResource(id, "trace.pdf", EFileType.PDF, content.length, content));
+            new FileResource(
+                id, "trace.pdf", EFileType.PDF, content.length, FileContent.ofBytes(content)));
 
     BddLogger.when("deleting it");
     storageService.delete(locator);

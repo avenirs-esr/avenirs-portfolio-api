@@ -6,11 +6,14 @@ import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.common.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.common.file.domain.exception.FileStorageException;
+import fr.avenirsesr.portfolio.common.file.domain.model.FileContent;
 import fr.avenirsesr.portfolio.common.file.domain.model.FileResource;
 import fr.avenirsesr.portfolio.common.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.common.file.infrastructure.adapter.service.S3FileStorageService;
 import fr.avenirsesr.portfolio.common.file.infrastructure.configuration.S3StorageProperties;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,8 +22,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import software.amazon.awssdk.core.ResponseBytes;
+import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.http.AbortableInputStream;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
@@ -48,7 +52,11 @@ class S3FileStorageServiceTest {
 
   private FileResource aFileResource(UUID id, EFileType fileType) {
     return new FileResource(
-        id, "consigne.pdf", fileType, 3L, "abc".getBytes(StandardCharsets.UTF_8));
+        id,
+        "consigne.pdf",
+        fileType,
+        3L,
+        FileContent.ofBytes("abc".getBytes(StandardCharsets.UTF_8)));
   }
 
   @Nested
@@ -121,18 +129,21 @@ class S3FileStorageServiceTest {
       }
 
       @Test
-      void thenItShouldReturnTheObjectContent() {
+      void thenItShouldReturnTheObjectContent() throws IOException {
         BddLogger.then("the object bytes should be returned");
         byte[] content = "hello".getBytes(StandardCharsets.UTF_8);
-        when(s3Client.getObjectAsBytes(any(GetObjectRequest.class)))
-            .thenReturn(ResponseBytes.fromByteArray(GetObjectResponse.builder().build(), content));
+        when(s3Client.getObject(any(GetObjectRequest.class)))
+            .thenReturn(
+                new ResponseInputStream<>(
+                    GetObjectResponse.builder().build(),
+                    AbortableInputStream.create(new ByteArrayInputStream(content))));
 
-        byte[] read = storageService.get("some-key.pdf");
+        byte[] read = storageService.get("some-key.pdf").open().readAllBytes();
 
         assertArrayEquals(content, read);
 
         ArgumentCaptor<GetObjectRequest> captor = ArgumentCaptor.forClass(GetObjectRequest.class);
-        verify(s3Client).getObjectAsBytes(captor.capture());
+        verify(s3Client).getObject(captor.capture());
         assertEquals(BUCKET, captor.getValue().bucket());
         assertEquals("some-key.pdf", captor.getValue().key());
       }
@@ -141,7 +152,7 @@ class S3FileStorageServiceTest {
       void thenItShouldTranslateAMissingKeyIntoFileNotFound() {
         BddLogger.and("the key does not exist");
         BddLogger.then("the service should throw FileNotFoundException");
-        when(s3Client.getObjectAsBytes(any(GetObjectRequest.class)))
+        when(s3Client.getObject(any(GetObjectRequest.class)))
             .thenThrow(NoSuchKeyException.builder().message("no such key").build());
 
         assertThrows(FileNotFoundException.class, () -> storageService.get("missing.pdf"));
@@ -151,7 +162,7 @@ class S3FileStorageServiceTest {
       void thenItShouldWrapOtherBackendErrorsIntoAFileStorageException() {
         BddLogger.and("the backend denies the request");
         BddLogger.then("the service should throw FileStorageException");
-        when(s3Client.getObjectAsBytes(any(GetObjectRequest.class)))
+        when(s3Client.getObject(any(GetObjectRequest.class)))
             .thenThrow(S3Exception.builder().message("access denied").build());
 
         assertThrows(FileStorageException.class, () -> storageService.get("forbidden.pdf"));

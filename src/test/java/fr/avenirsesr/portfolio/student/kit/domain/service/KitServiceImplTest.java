@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.common.file.domain.model.File;
+import fr.avenirsesr.portfolio.common.file.domain.model.FileContent;
 import fr.avenirsesr.portfolio.common.file.domain.port.output.service.FileStorageService;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.student.kit.domain.exception.KitDownloadMediaFailed;
@@ -62,8 +63,10 @@ class KitServiceImplTest {
             .thenReturn(List.of(new KitMediaEntry(fileA, List.of("traces", "Trace A"))));
         when(secondPort.getMedia())
             .thenReturn(List.of(new KitMediaEntry(fileB, List.of("traces", "Trace B"))));
-        when(fileStorageService.get("uri-a")).thenReturn("contenu A".getBytes());
-        when(fileStorageService.get("uri-b")).thenReturn("contenu B".getBytes());
+        when(fileStorageService.get("uri-a"))
+            .thenReturn(FileContent.ofBytes("contenu A".getBytes()));
+        when(fileStorageService.get("uri-b"))
+            .thenReturn(FileContent.ofBytes("contenu B".getBytes()));
 
         kitService = new KitServiceImpl(fileStorageService, List.of(firstPort, secondPort));
 
@@ -82,7 +85,7 @@ class KitServiceImplTest {
         File file = aFile("rapport.pdf", "uri-c");
         when(firstPort.getMedia())
             .thenReturn(List.of(new KitMediaEntry(file, List.of("traces", "Bilan pro/perso"))));
-        when(fileStorageService.get("uri-c")).thenReturn("contenu".getBytes());
+        when(fileStorageService.get("uri-c")).thenReturn(FileContent.ofBytes("contenu".getBytes()));
 
         kitService = new KitServiceImpl(fileStorageService, List.of(firstPort));
 
@@ -102,8 +105,10 @@ class KitServiceImplTest {
                 List.of(
                     new KitMediaEntry(file1, List.of("traces", "Voyage à Berlin")),
                     new KitMediaEntry(file2, List.of("traces", "Voyage à Berlin"))));
-        when(fileStorageService.get("uri-1")).thenReturn("contenu 1".getBytes());
-        when(fileStorageService.get("uri-2")).thenReturn("contenu 2".getBytes());
+        when(fileStorageService.get("uri-1"))
+            .thenReturn(FileContent.ofBytes("contenu 1".getBytes()));
+        when(fileStorageService.get("uri-2"))
+            .thenReturn(FileContent.ofBytes("contenu 2".getBytes()));
 
         kitService = new KitServiceImpl(fileStorageService, List.of(firstPort));
 
@@ -124,8 +129,8 @@ class KitServiceImplTest {
                 List.of(
                     new KitMediaEntry(file1, List.of("traces", "Alpha")),
                     new KitMediaEntry(file2, List.of("traces", "Beta"))));
-        when(fileStorageService.get("uri-a")).thenReturn("A".getBytes());
-        when(fileStorageService.get("uri-b")).thenReturn("B".getBytes());
+        when(fileStorageService.get("uri-a")).thenReturn(FileContent.ofBytes("A".getBytes()));
+        when(fileStorageService.get("uri-b")).thenReturn(FileContent.ofBytes("B".getBytes()));
 
         kitService = new KitServiceImpl(fileStorageService, List.of(firstPort));
 
@@ -157,7 +162,7 @@ class KitServiceImplTest {
         File file = aFile("a.txt", "uri-a");
         when(firstPort.getMedia())
             .thenReturn(List.of(new KitMediaEntry(file, List.of("traces", "Trace A"))));
-        when(fileStorageService.get("uri-a")).thenReturn("contenu".getBytes());
+        when(fileStorageService.get("uri-a")).thenReturn(FileContent.ofBytes("contenu".getBytes()));
 
         kitService = new KitServiceImpl(fileStorageService, List.of(firstPort));
 

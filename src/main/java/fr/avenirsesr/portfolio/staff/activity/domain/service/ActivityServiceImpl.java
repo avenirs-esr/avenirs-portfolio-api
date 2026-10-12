@@ -12,6 +12,7 @@ import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.common.file.domain.exception.FileTypeNotSupportedException;
 import fr.avenirsesr.portfolio.common.file.domain.model.File;
+import fr.avenirsesr.portfolio.common.file.domain.model.FileContent;
 import fr.avenirsesr.portfolio.common.file.domain.model.FileDownload;
 import fr.avenirsesr.portfolio.common.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.common.file.domain.port.input.FileResourceService;
@@ -799,7 +800,7 @@ public class ActivityServiceImpl implements ActivityService {
 
   @Override
   public File uploadDraftBanner(
-      UUID activityDraftId, String fileName, String mimeType, long size, byte[] content) {
+      UUID activityDraftId, String fileName, String mimeType, long size, FileContent content) {
     var draft = getOwnedDraft(activityDraftId);
     if (!EFileType.fromMimeType(mimeType).isImage()) {
       throw new FileTypeNotSupportedException();
@@ -820,7 +821,7 @@ public class ActivityServiceImpl implements ActivityService {
 
   @Override
   public File addDraftFile(
-      UUID activityDraftId, String fileName, String mimeType, long size, byte[] content) {
+      UUID activityDraftId, String fileName, String mimeType, long size, FileContent content) {
     var draft = getOwnedDraft(activityDraftId);
     if (!ALLOWED_DRAFT_FILE_TYPES.contains(EFileType.fromMimeType(mimeType))) {
       throw new FileTypeNotSupportedException();

@@ -9,16 +9,6 @@
         http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd
         http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <!--
-      The uploader is now held as a plain identifier instead of an association, so that the file
-      table carries no foreign key towards a business table. This is the last structural link
-      between the file storage and the rest of the schema: the file table can be served by a
-      process that does not host the user table.
-
-      The column itself keeps its name, type and NOT NULL constraint; only the referential
-      integrity enforced by the database goes away. Orphan detection therefore moves to the
-      application side.
-    -->
     <changeSet author="iamgreendev" id="decouple-file-drop-uploaded-by-fk">
         <dropForeignKeyConstraint
                 baseTableName="file"
@@ -37,10 +27,6 @@
         </rollback>
     </changeSet>
 
-    <!--
-      Reading the files of a given uploader is no longer backed by the foreign key index that
-      Postgres created for the constraint, so the index is declared explicitly.
-    -->
     <changeSet author="iamgreendev" id="decouple-file-add-uploaded-by-index">
         <createIndex tableName="file" indexName="idx_file_uploaded_by">
             <column name="uploaded_by"/>

@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.staff.activity.domain.port.input;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.file.domain.model.File;
+import fr.avenirsesr.portfolio.common.file.domain.model.FileContent;
 import fr.avenirsesr.portfolio.common.file.domain.model.FileDownload;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityDashboardData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityPresentationData;
@@ -95,12 +96,12 @@ public interface ActivityService {
   Boolean hasDraftForActivity(UUID activityId);
 
   File uploadDraftBanner(
-      UUID activityDraftId, String fileName, String mimeType, long size, byte[] content);
+      UUID activityDraftId, String fileName, String mimeType, long size, FileContent content);
 
   void deleteDraftBanner(UUID activityDraftId);
 
   File addDraftFile(
-      UUID activityDraftId, String fileName, String mimeType, long size, byte[] content);
+      UUID activityDraftId, String fileName, String mimeType, long size, FileContent content);
 
   void deleteDraftFile(UUID activityDraftId, UUID fileId);
 

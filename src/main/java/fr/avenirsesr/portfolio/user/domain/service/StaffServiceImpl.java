@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.common.file.domain.exception.FileTypeNotSupportedException;
 import fr.avenirsesr.portfolio.common.file.domain.model.File;
+import fr.avenirsesr.portfolio.common.file.domain.model.FileContent;
 import fr.avenirsesr.portfolio.common.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.common.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.file.domain.mapper.FileDataMapper;
@@ -81,7 +82,8 @@ public class StaffServiceImpl implements StaffService {
   }
 
   @Override
-  public File uploadProfilePicture(String fileName, String mimeType, long size, byte[] content) {
+  public File uploadProfilePicture(
+      String fileName, String mimeType, long size, FileContent content) {
     var staff = loggedInUserService.getLoggedInStaff();
     requireImage(mimeType);
     var file = fileResourceService.upload(fileName, mimeType, size, content, false);
@@ -99,7 +101,7 @@ public class StaffServiceImpl implements StaffService {
   }
 
   @Override
-  public File uploadCoverPicture(String fileName, String mimeType, long size, byte[] content) {
+  public File uploadCoverPicture(String fileName, String mimeType, long size, FileContent content) {
     var staff = loggedInUserService.getLoggedInStaff();
     requireImage(mimeType);
     var file = fileResourceService.upload(fileName, mimeType, size, content, false);

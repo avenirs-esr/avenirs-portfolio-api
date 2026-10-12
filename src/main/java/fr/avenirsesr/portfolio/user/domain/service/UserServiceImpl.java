@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.file.domain.model.File;
+import fr.avenirsesr.portfolio.common.file.domain.model.FileContent;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.user.application.adapter.dto.ExternalUserDTO;
 import fr.avenirsesr.portfolio.common.user.domain.exceptions.ExternalUserNotFoundException;
@@ -183,7 +184,11 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public File uploadProfilePicture(
-      EUserCategory userCategory, String fileName, String mimeType, long size, byte[] content) {
+      EUserCategory userCategory,
+      String fileName,
+      String mimeType,
+      long size,
+      FileContent content) {
     return switch (userCategory) {
       case STUDENT -> studentService.uploadProfilePicture(fileName, mimeType, size, content);
       case STAFF -> staffService.uploadProfilePicture(fileName, mimeType, size, content);
@@ -200,7 +205,11 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public File uploadCoverPicture(
-      EUserCategory userCategory, String fileName, String mimeType, long size, byte[] content) {
+      EUserCategory userCategory,
+      String fileName,
+      String mimeType,
+      long size,
+      FileContent content) {
     return switch (userCategory) {
       case STUDENT -> studentService.uploadCoverPicture(fileName, mimeType, size, content);
       case STAFF -> staffService.uploadCoverPicture(fileName, mimeType, size, content);

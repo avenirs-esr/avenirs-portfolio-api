@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.user.infrastructure.adapter.service;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.file.domain.model.File;
+import fr.avenirsesr.portfolio.common.file.domain.model.FileContent;
 import fr.avenirsesr.portfolio.user.domain.data.CguAcceptanceData;
 import fr.avenirsesr.portfolio.user.domain.data.LoggedInUserData;
 import fr.avenirsesr.portfolio.user.domain.data.UserQuickLinksData;
@@ -63,7 +64,11 @@ public class TransactionalUserService implements UserService {
   @Override
   @Transactional
   public File uploadProfilePicture(
-      EUserCategory userCategory, String fileName, String mimeType, long size, byte[] content) {
+      EUserCategory userCategory,
+      String fileName,
+      String mimeType,
+      long size,
+      FileContent content) {
     return delegate.uploadProfilePicture(userCategory, fileName, mimeType, size, content);
   }
 
@@ -76,7 +81,11 @@ public class TransactionalUserService implements UserService {
   @Override
   @Transactional
   public File uploadCoverPicture(
-      EUserCategory userCategory, String fileName, String mimeType, long size, byte[] content) {
+      EUserCategory userCategory,
+      String fileName,
+      String mimeType,
+      long size,
+      FileContent content) {
     return delegate.uploadCoverPicture(userCategory, fileName, mimeType, size, content);
   }
 

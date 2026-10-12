@@ -10,6 +10,7 @@ import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValida
 import fr.avenirsesr.portfolio.common.configuration.domain.model.TraceConfiguration;
 import fr.avenirsesr.portfolio.common.data.domain.model.*;
 import fr.avenirsesr.portfolio.common.file.domain.model.File;
+import fr.avenirsesr.portfolio.common.file.domain.model.FileContent;
 import fr.avenirsesr.portfolio.common.file.domain.model.FileDownload;
 import fr.avenirsesr.portfolio.common.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
@@ -431,7 +432,7 @@ public class TraceServiceImpl implements TraceService {
 
   @Override
   public File uploadAttachment(
-      UUID traceId, String fileName, String mimeType, long size, byte[] content) {
+      UUID traceId, String fileName, String mimeType, long size, FileContent content) {
     var loggedInStudent = loggedInUserService.getLoggedInStudent();
     var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
     checkIfStudentIsAuthorizedOnTrace(loggedInStudent, trace);

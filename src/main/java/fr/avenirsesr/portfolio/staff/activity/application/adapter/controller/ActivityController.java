@@ -1,6 +1,5 @@
 package fr.avenirsesr.portfolio.staff.activity.application.adapter.controller;
 
-import static fr.avenirsesr.portfolio.common.file.application.adapter.MultipartFileReader.readBytes;
 import static fr.avenirsesr.portfolio.shared.application.adapter.Utils.extractOrigin;
 
 import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
@@ -31,11 +30,14 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -404,7 +406,7 @@ public class ActivityController {
             file.getOriginalFilename(),
             file.getContentType(),
             file.getSize(),
-            readBytes(file));
+            file::getInputStream);
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(fileDTOMapper.toFileDTO(uploaded, extractOrigin(request)));
   }
@@ -440,7 +442,7 @@ public class ActivityController {
             file.getOriginalFilename(),
             file.getContentType(),
             file.getSize(),
-            readBytes(file));
+            file::getInputStream);
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(fileDTOMapper.toFileDTO(uploaded, extractOrigin(request)));
   }
@@ -462,8 +464,9 @@ public class ActivityController {
       value = "/draft/{activityDraftId}/files/{fileId}/download",
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   @PreAuthorize("hasAuthority('activity:document:download:contextual')")
-  public ResponseEntity<byte[]> downloadDraftFile(
-      Principal principal, @PathVariable UUID activityDraftId, @PathVariable UUID fileId) {
+  public ResponseEntity<Resource> downloadDraftFile(
+      Principal principal, @PathVariable UUID activityDraftId, @PathVariable UUID fileId)
+      throws IOException {
     log.debug(
         "Received request to download file [{}] of activity draft [{}] by user [{}]",
         fileId,
@@ -475,15 +478,17 @@ public class ActivityController {
         .header(
             HttpHeaders.CONTENT_DISPOSITION,
             "attachment; filename=\"" + downloadedFile.fileName() + "\"")
-        .body(downloadedFile.content());
+        .contentLength(downloadedFile.size())
+        .body(new InputStreamResource(downloadedFile.content().open()));
   }
 
   @GetMapping(
       value = "/{activityId}/files/{fileId}/download",
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   @PreAuthorize("hasAuthority('activity:document:download:contextual')")
-  public ResponseEntity<byte[]> downloadActivityFile(
-      Principal principal, @PathVariable UUID activityId, @PathVariable UUID fileId) {
+  public ResponseEntity<Resource> downloadActivityFile(
+      Principal principal, @PathVariable UUID activityId, @PathVariable UUID fileId)
+      throws IOException {
     log.debug(
         "Received request to download file [{}] of activity [{}] by user [{}]",
         fileId,
@@ -495,7 +500,8 @@ public class ActivityController {
         .header(
             HttpHeaders.CONTENT_DISPOSITION,
             "attachment; filename=\"" + downloadedFile.fileName() + "\"")
-        .body(downloadedFile.content());
+        .contentLength(downloadedFile.size())
+        .body(new InputStreamResource(downloadedFile.content().open()));
   }
 
   @PreAuthorize("hasAuthority('feedback:request:read:assigned')")

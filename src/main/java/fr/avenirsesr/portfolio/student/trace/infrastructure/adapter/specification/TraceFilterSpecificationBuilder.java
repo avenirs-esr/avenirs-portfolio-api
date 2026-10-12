@@ -30,15 +30,6 @@ public class TraceFilterSpecificationBuilder
     };
   }
 
-  /**
-   * Keeps the traces whose attachment is of one of the given types.
-   *
-   * <p>The attachment is reached through the {@code trace.attachment} association rather than by
-   * querying the file table on an owner column: a file no longer knows which business element it
-   * belongs to, that link was inverted when the file table was decoupled from the business
-   * entities. The inner join also drops the traces that carry no attachment at all, which is the
-   * expected outcome of filtering on a file type.
-   */
   private Specification<TraceEntity> fileType(List<EFileType> fileTypes) {
     return (root, query, cb) -> {
       if (fileTypes == null || fileTypes.isEmpty() || query == null) return null;

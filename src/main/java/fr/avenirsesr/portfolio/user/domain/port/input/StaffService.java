@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.user.domain.port.input;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.file.domain.model.File;
+import fr.avenirsesr.portfolio.common.file.domain.model.FileContent;
 import fr.avenirsesr.portfolio.user.domain.data.UserProfileOverviewData;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import java.util.UUID;
@@ -17,11 +18,11 @@ public interface StaffService {
 
   Staff createStaff(UUID userId, String institutionEmail, String bio);
 
-  File uploadProfilePicture(String fileName, String mimeType, long size, byte[] content);
+  File uploadProfilePicture(String fileName, String mimeType, long size, FileContent content);
 
   void deleteProfilePicture();
 
-  File uploadCoverPicture(String fileName, String mimeType, long size, byte[] content);
+  File uploadCoverPicture(String fileName, String mimeType, long size, FileContent content);
 
   void deleteCoverPicture();
 }

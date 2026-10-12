@@ -6,7 +6,6 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-/** Binds the shared file registry to the notion of a current user held by the portfolio api. */
 @Component
 @RequiredArgsConstructor
 public class LoggedInUserFileUploaderProvider implements FileUploaderProvider {
