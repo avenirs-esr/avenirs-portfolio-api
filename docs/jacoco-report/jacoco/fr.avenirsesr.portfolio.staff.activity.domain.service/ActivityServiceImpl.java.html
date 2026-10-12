@@ -805,116 +805,125 @@ public class ActivityServiceImpl implements ActivityService {
   }
 
   @Override
+  public Boolean isAuthorOfActivity(Activity activity) {
+<span class="pc bpc" id="L809" title="2 of 4 branches missed.">    if (activity == null || activity.getAuthor() == null) {</span>
+<span class="nc" id="L810">      return false;</span>
+    }
+<span class="fc" id="L812">    var staff = loggedInUserService.getLoggedInStaff();</span>
+<span class="fc" id="L813">    return Objects.equals(activity.getAuthor().getId(), staff.getId());</span>
+  }
+
+  @Override
   public File uploadDraftBanner(
       UUID activityDraftId, String fileName, String mimeType, long size, byte[] content) {
-<span class="fc" id="L810">    var draft = getOwnedDraft(activityDraftId);</span>
-<span class="pc bpc" id="L811" title="1 of 2 branches missed.">    if (!EFileType.fromMimeType(mimeType).isImage()) {</span>
-<span class="nc" id="L812">      throw new FileTypeNotSupportedException();</span>
+<span class="fc" id="L819">    var draft = getOwnedDraft(activityDraftId);</span>
+<span class="pc bpc" id="L820" title="1 of 2 branches missed.">    if (!EFileType.fromMimeType(mimeType).isImage()) {</span>
+<span class="nc" id="L821">      throw new FileTypeNotSupportedException();</span>
     }
-<span class="fc" id="L814">    var file = fileResourceService.upload(fileName, mimeType, size, content, false);</span>
-<span class="fc" id="L815">    draft.setBanner(file);</span>
-<span class="fc" id="L816">    activityDraftRepository.save(draft);</span>
-<span class="fc" id="L817">    return file;</span>
+<span class="fc" id="L823">    var file = fileResourceService.upload(fileName, mimeType, size, content, false);</span>
+<span class="fc" id="L824">    draft.setBanner(file);</span>
+<span class="fc" id="L825">    activityDraftRepository.save(draft);</span>
+<span class="fc" id="L826">    return file;</span>
   }
 
   @Override
   public void deleteDraftBanner(UUID activityDraftId) {
-<span class="nc" id="L822">    var draft = getOwnedDraft(activityDraftId);</span>
-<span class="nc" id="L823">    draft.getBanner().ifPresent(banner -&gt; fileResourceService.delete(banner.getId()));</span>
-<span class="nc" id="L824">    draft.setBanner(null);</span>
-<span class="nc" id="L825">    activityDraftRepository.save(draft);</span>
-<span class="nc" id="L826">  }</span>
+<span class="nc" id="L831">    var draft = getOwnedDraft(activityDraftId);</span>
+<span class="nc" id="L832">    draft.getBanner().ifPresent(banner -&gt; fileResourceService.delete(banner.getId()));</span>
+<span class="nc" id="L833">    draft.setBanner(null);</span>
+<span class="nc" id="L834">    activityDraftRepository.save(draft);</span>
+<span class="nc" id="L835">  }</span>
 
   @Override
   public File addDraftFile(
       UUID activityDraftId, String fileName, String mimeType, long size, byte[] content) {
-<span class="fc" id="L831">    var draft = getOwnedDraft(activityDraftId);</span>
-<span class="fc bfc" id="L832" title="All 2 branches covered.">    if (!ALLOWED_DRAFT_FILE_TYPES.contains(EFileType.fromMimeType(mimeType))) {</span>
-<span class="fc" id="L833">      throw new FileTypeNotSupportedException();</span>
+<span class="fc" id="L840">    var draft = getOwnedDraft(activityDraftId);</span>
+<span class="fc bfc" id="L841" title="All 2 branches covered.">    if (!ALLOWED_DRAFT_FILE_TYPES.contains(EFileType.fromMimeType(mimeType))) {</span>
+<span class="fc" id="L842">      throw new FileTypeNotSupportedException();</span>
     }
-<span class="fc" id="L835">    var file = fileResourceService.upload(fileName, mimeType, size, content, true);</span>
-<span class="fc" id="L836">    draft.addFile(file);</span>
-<span class="fc" id="L837">    activityDraftRepository.save(draft);</span>
-<span class="fc" id="L838">    return file;</span>
+<span class="fc" id="L844">    var file = fileResourceService.upload(fileName, mimeType, size, content, true);</span>
+<span class="fc" id="L845">    draft.addFile(file);</span>
+<span class="fc" id="L846">    activityDraftRepository.save(draft);</span>
+<span class="fc" id="L847">    return file;</span>
   }
 
   @Override
   public void deleteDraftFile(UUID activityDraftId, UUID fileId) {
-<span class="nc" id="L843">    var draft = getOwnedDraft(activityDraftId);</span>
-<span class="nc" id="L844">    requireFileAttached(draft.getFiles(), fileId);</span>
-<span class="nc" id="L845">    draft.removeFile(fileId);</span>
-<span class="nc" id="L846">    activityDraftRepository.save(draft);</span>
-<span class="nc" id="L847">    var stillUsedByPublishedActivity =</span>
+<span class="nc" id="L852">    var draft = getOwnedDraft(activityDraftId);</span>
+<span class="nc" id="L853">    requireFileAttached(draft.getFiles(), fileId);</span>
+<span class="nc" id="L854">    draft.removeFile(fileId);</span>
+<span class="nc" id="L855">    activityDraftRepository.save(draft);</span>
+<span class="nc" id="L856">    var stillUsedByPublishedActivity =</span>
         activityRepository
-<span class="nc" id="L849">            .findById(activityDraftId)</span>
-<span class="nc" id="L850">            .map(activity -&gt; activity.getFiles().stream().anyMatch(f -&gt; f.getId().equals(fileId)))</span>
-<span class="nc" id="L851">            .orElse(false);</span>
-<span class="nc bnc" id="L852" title="All 2 branches missed.">    if (!stillUsedByPublishedActivity) {</span>
-<span class="nc" id="L853">      fileResourceService.delete(fileId);</span>
+<span class="nc" id="L858">            .findById(activityDraftId)</span>
+<span class="nc" id="L859">            .map(activity -&gt; activity.getFiles().stream().anyMatch(f -&gt; f.getId().equals(fileId)))</span>
+<span class="nc" id="L860">            .orElse(false);</span>
+<span class="nc bnc" id="L861" title="All 2 branches missed.">    if (!stillUsedByPublishedActivity) {</span>
+<span class="nc" id="L862">      fileResourceService.delete(fileId);</span>
     }
-<span class="nc" id="L855">  }</span>
+<span class="nc" id="L864">  }</span>
 
   @Override
   public FileDownload downloadActivityFile(UUID activityId, UUID fileId) {
-<span class="fc" id="L859">    var activity =</span>
-<span class="fc" id="L860">        activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);</span>
-<span class="fc bfc" id="L861" title="All 2 branches covered.">    if (!canDownloadActivityFiles(activity)) {</span>
-<span class="fc" id="L862">      throw new UserNotAuthorizedException();</span>
+<span class="fc" id="L868">    var activity =</span>
+<span class="fc" id="L869">        activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);</span>
+<span class="fc bfc" id="L870" title="All 2 branches covered.">    if (!canDownloadActivityFiles(activity)) {</span>
+<span class="fc" id="L871">      throw new UserNotAuthorizedException();</span>
     }
-<span class="fc" id="L864">    requireFileAttached(activity.getFiles(), fileId);</span>
-<span class="fc" id="L865">    return fileResourceService.download(fileId);</span>
+<span class="fc" id="L873">    requireFileAttached(activity.getFiles(), fileId);</span>
+<span class="fc" id="L874">    return fileResourceService.download(fileId);</span>
   }
 
   @Override
   public FileDownload downloadDraftFile(UUID activityDraftId, UUID fileId) {
-<span class="fc" id="L870">    var draft = getOwnedDraft(activityDraftId);</span>
-<span class="fc" id="L871">    requireFileAttached(draft.getFiles(), fileId);</span>
-<span class="fc" id="L872">    return fileResourceService.download(fileId);</span>
+<span class="fc" id="L879">    var draft = getOwnedDraft(activityDraftId);</span>
+<span class="fc" id="L880">    requireFileAttached(draft.getFiles(), fileId);</span>
+<span class="fc" id="L881">    return fileResourceService.download(fileId);</span>
   }
 
   private boolean canDownloadActivityFiles(Activity activity) {
-<span class="fc bfc" id="L876" title="All 2 branches covered.">    if (isLoggedInUserStaff()) {</span>
-<span class="fc" id="L877">      return true;</span>
+<span class="fc bfc" id="L885" title="All 2 branches covered.">    if (isLoggedInUserStaff()) {</span>
+<span class="fc" id="L886">      return true;</span>
     }
-<span class="fc" id="L879">    return studentRepository</span>
-<span class="fc" id="L880">        .findById(loggedInUserService.getLoggedInUser().getId())</span>
-<span class="fc" id="L881">        .map(student -&gt; declaredActivityService.isEnrolled(activity, student))</span>
-<span class="fc" id="L882">        .orElse(false);</span>
+<span class="fc" id="L888">    return studentRepository</span>
+<span class="fc" id="L889">        .findById(loggedInUserService.getLoggedInUser().getId())</span>
+<span class="fc" id="L890">        .map(student -&gt; declaredActivityService.isEnrolled(activity, student))</span>
+<span class="fc" id="L891">        .orElse(false);</span>
   }
 
   private void requireFileAttached(List&lt;File&gt; files, UUID fileId) {
-<span class="fc bfc" id="L886" title="All 2 branches covered.">    if (files.stream().noneMatch(file -&gt; file.getId().equals(fileId))) {</span>
-<span class="fc" id="L887">      throw new FileNotFoundException();</span>
+<span class="fc bfc" id="L895" title="All 2 branches covered.">    if (files.stream().noneMatch(file -&gt; file.getId().equals(fileId))) {</span>
+<span class="fc" id="L896">      throw new FileNotFoundException();</span>
     }
-<span class="fc" id="L889">  }</span>
+<span class="fc" id="L898">  }</span>
 
   private boolean isLoggedInUserStaff() {
     try {
-<span class="pc bpc" id="L893" title="1 of 2 branches missed.">      return loggedInUserService.getLoggedInStaff() != null;</span>
-<span class="fc" id="L894">    } catch (UserIsNotStaffException e) {</span>
-<span class="fc" id="L895">      return false;</span>
+<span class="pc bpc" id="L902" title="1 of 2 branches missed.">      return loggedInUserService.getLoggedInStaff() != null;</span>
+<span class="fc" id="L903">    } catch (UserIsNotStaffException e) {</span>
+<span class="fc" id="L904">      return false;</span>
     }
   }
 
   private ActivityDraft getOwnedDraft(UUID activityDraftId) {
-<span class="fc" id="L900">    var staff = loggedInUserService.getLoggedInStaff();</span>
-<span class="fc" id="L901">    var draft =</span>
+<span class="fc" id="L909">    var staff = loggedInUserService.getLoggedInStaff();</span>
+<span class="fc" id="L910">    var draft =</span>
         activityDraftRepository
-<span class="fc" id="L903">            .findById(activityDraftId)</span>
-<span class="fc" id="L904">            .orElseThrow(ActivityDraftNotFoundException::new);</span>
-<span class="fc bfc" id="L905" title="All 2 branches covered.">    if (!draft.getAuthor().equals(staff)) {</span>
-<span class="fc" id="L906">      throw new ActivityDraftNotFoundException();</span>
+<span class="fc" id="L912">            .findById(activityDraftId)</span>
+<span class="fc" id="L913">            .orElseThrow(ActivityDraftNotFoundException::new);</span>
+<span class="fc bfc" id="L914" title="All 2 branches covered.">    if (!draft.getAuthor().equals(staff)) {</span>
+<span class="fc" id="L915">      throw new ActivityDraftNotFoundException();</span>
     }
-<span class="fc" id="L908">    return draft;</span>
+<span class="fc" id="L917">    return draft;</span>
   }
 
   @Override
   public PagedResult&lt;Activity&gt; getActivitiesWithFeedbacks(
       List&lt;EFeedbackStatus&gt; statuses, PageCriteria pageCriteria) {
-<span class="fc" id="L914">    Staff staff = loggedInUserService.getLoggedInStaff();</span>
+<span class="fc" id="L923">    Staff staff = loggedInUserService.getLoggedInStaff();</span>
     var statusArray =
-<span class="fc bfc" id="L916" title="All 2 branches covered.">        statuses == null ? new EFeedbackStatus[0] : statuses.toArray(EFeedbackStatus[]::new);</span>
-<span class="fc" id="L917">    return activityRepository.findWithFeedbacks(staff.getId(), pageCriteria, statusArray);</span>
+<span class="fc bfc" id="L925" title="All 2 branches covered.">        statuses == null ? new EFeedbackStatus[0] : statuses.toArray(EFeedbackStatus[]::new);</span>
+<span class="fc" id="L926">    return activityRepository.findWithFeedbacks(staff.getId(), pageCriteria, statusArray);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
