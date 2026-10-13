@@ -9,6 +9,7 @@ import fr.avenirsesr.portfolio.shared.application.adapter.mapper.OptionalMapper;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityContentDTO;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityDraft;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StaffFixture;
 import java.util.List;
 import java.util.UUID;
@@ -39,6 +40,7 @@ class ActivityContentDtoMapperTest {
     assertEquals(activity.getId(), dto.id());
     assertEquals(activity.getTitle(), dto.title());
     assertEquals(activity.getThematic(), dto.thematic());
+    assertEquals(activity.getStatus(), dto.activityStatus());
     assertEquals(activity.getSummary(), dto.summary());
     assertEquals(activity.getDescription(), dto.description());
     assertEquals(
@@ -112,6 +114,18 @@ class ActivityContentDtoMapperTest {
 
     BddLogger.then("hasEnrolledStudent should be null");
     assertNull(dto.hasEnrolledStudent());
+  }
+
+  @Test
+  void shouldMapDraftActivityStatusToDraft() {
+    BddLogger.given("an activity draft");
+    ActivityDraft draft = ActivityDraft.create("draft title", StaffFixture.create().toModel());
+
+    BddLogger.when("mapping to ActivityContentDTO");
+    ActivityContentDTO dto = mapper.toDTO(draft, null, true, List.of());
+
+    BddLogger.then("activityStatus should be DRAFT");
+    assertEquals(EActivityStatus.DRAFT, dto.activityStatus());
   }
 
   @Test

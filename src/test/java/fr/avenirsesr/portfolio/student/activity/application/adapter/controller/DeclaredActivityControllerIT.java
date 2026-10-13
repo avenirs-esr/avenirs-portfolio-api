@@ -338,4 +338,66 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .expectStatus()
         .isNotFound();
   }
+
+  @Test
+  void deleteContentAndActivityWithSubmittedFeedbackAfterUnsubscribe() throws Exception {
+    BddLogger.given("a declared activity with a submitted feedback the student unsubscribed from");
+    String id = subscribeAndGetId(lockedInteractionsActivityId);
+    String feedbackId = askForFeedbackAndGetId(id);
+    webTestClient
+        .put()
+        .uri(FEEDBACK_BASE_PATH + "/" + feedbackId)
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue("{\"feedback\": \"Great work\"}")
+        .exchange()
+        .expectStatus()
+        .isNoContent();
+    webTestClient
+        .post()
+        .uri(FEEDBACK_BASE_PATH + "/" + feedbackId + "/submit")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isNoContent();
+    unsubscribe(lockedInteractionsActivityId);
+
+    BddLogger.when("he deletes the declared activity");
+    webTestClient
+        .method(HttpMethod.DELETE)
+        .uri(BASE_PATH + "/" + id)
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isNoContent();
+
+    BddLogger.then("the declared activity and its feedbacks are deleted");
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/" + id)
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isNotFound();
+  }
+
+  private String askForFeedbackAndGetId(String declaredActivityId) throws Exception {
+    String body =
+        webTestClient
+            .post()
+            .uri(FEEDBACK_BASE_PATH + "/" + declaredActivityId + "/ask-for-feedback")
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Signature", studentSignature)
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+    return objectMapper.readTree(body).get("id").asText();
+  }
 }

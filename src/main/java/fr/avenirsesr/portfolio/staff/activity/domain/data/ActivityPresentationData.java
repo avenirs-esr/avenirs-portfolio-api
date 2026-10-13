@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.staff.activity.domain.data;
 
 import fr.avenirsesr.portfolio.file.domain.data.FileData;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import java.time.Instant;
@@ -11,6 +12,7 @@ public record ActivityPresentationData(
     UUID id,
     String title,
     EActivityThematic thematic,
+    EActivityStatus activityStatus,
     Optional<UUID> subscribedDeclaredActivity,
     Optional<EDeclaredActivityStatus> subscribedDeclaredActivityStatus,
     String summary,

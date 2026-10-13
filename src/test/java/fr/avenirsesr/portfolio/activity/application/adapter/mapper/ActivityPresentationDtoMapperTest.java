@@ -39,6 +39,7 @@ class ActivityPresentationDtoMapperTest {
             activity.getId(),
             activity.getTitle(),
             activity.getThematic(),
+            activity.getStatus(),
             Optional.empty(),
             Optional.empty(),
             activity.getSummary(),
@@ -56,6 +57,7 @@ class ActivityPresentationDtoMapperTest {
     assertEquals(id, dto.id());
     assertEquals("Activity Title", dto.title());
     assertEquals(EActivityThematic.EXPERIENCES, dto.thematic());
+    assertEquals(activity.getStatus(), dto.activityStatus());
     assertNull(dto.subscribedDeclaredActivity());
     assertNull(dto.subscribedDeclaredActivityStatus());
     assertNotNull(dto.banner());
@@ -86,6 +88,7 @@ class ActivityPresentationDtoMapperTest {
             activity.getId(),
             activity.getTitle(),
             activity.getThematic(),
+            activity.getStatus(),
             Optional.of(declaredActivityId),
             Optional.of(EDeclaredActivityStatus.UNSUBSCRIBED),
             activity.getSummary(),
