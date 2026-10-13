@@ -180,7 +180,9 @@ public class FeedbackDatabaseRepository
 
   @Override
   public void deleteByDeclaredActivityId(DeclaredActivity declaredActivity) {
-    removeAllFromDatabase(FeedbackSpecification.ofDeclaredActivity(declaredActivity.getId()));
+    var spec = FeedbackSpecification.hasDeclaredActivityId(declaredActivity.getId());
+    var feedbacks = jpaRepository.findAll(spec);
+    jpaRepository.deleteAll(feedbacks);
   }
 
   // ── private helpers ─────────────────────────────────────────────────

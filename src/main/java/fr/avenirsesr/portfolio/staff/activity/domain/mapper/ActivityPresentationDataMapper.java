@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.file.domain.data.FileData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityPresentationData;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityDraft;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import java.util.Optional;
 import java.util.UUID;
@@ -18,6 +19,7 @@ public interface ActivityPresentationDataMapper {
         activity.getId(),
         activity.getTitle(),
         activity.getThematic(),
+        activity.getStatus(),
         Optional.ofNullable(subscribedDeclaredActivity),
         Optional.ofNullable(subscribedDeclaredActivityStatus),
         activity.getSummary(),
@@ -33,6 +35,7 @@ public interface ActivityPresentationDataMapper {
         draft.getId(),
         draft.getTitle(),
         draft.getThematic().orElse(null),
+        EActivityStatus.DRAFT,
         Optional.empty(),
         Optional.empty(),
         draft.getSummary().orElse(null),

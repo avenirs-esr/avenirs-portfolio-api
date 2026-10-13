@@ -41,6 +41,11 @@ public class DeclaredActivityDatabaseRepository
   }
 
   @Override
+  public void removeFromDatabase(DeclaredActivity declaredActivity) {
+    jpaRepository.deleteById(declaredActivity.getId());
+  }
+
+  @Override
   public List<DeclaredActivity> findAllByStudent(Student student, FetchGraph fetchGraph) {
     return findAll(hasStudent(student), fetchGraph);
   }

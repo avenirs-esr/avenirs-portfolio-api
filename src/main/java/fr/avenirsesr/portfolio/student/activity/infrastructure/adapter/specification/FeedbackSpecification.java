@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import org.springframework.data.jpa.domain.DeleteSpecification;
 import org.springframework.data.jpa.domain.Specification;
 
 public final class FeedbackSpecification {
@@ -37,11 +36,6 @@ public final class FeedbackSpecification {
 
   public static Specification<FeedbackEntity> hasDeclaredActivityId(UUID declaredActivityId) {
     return (root, query, cb) ->
-        cb.equal(root.get("declaredActivity").get("id"), declaredActivityId);
-  }
-
-  public static DeleteSpecification<FeedbackEntity> ofDeclaredActivity(UUID declaredActivityId) {
-    return (root, delete, cb) ->
         cb.equal(root.get("declaredActivity").get("id"), declaredActivityId);
   }
 

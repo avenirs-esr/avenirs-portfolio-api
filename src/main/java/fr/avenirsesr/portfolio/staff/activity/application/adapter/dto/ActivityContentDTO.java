@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.staff.activity.application.adapter.dto;
 
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.FileDTO;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
@@ -12,6 +13,7 @@ import java.util.UUID;
     requiredProperties = {
       "id",
       "title",
+      "activityStatus",
       "summary",
       "enableReflection",
       "traceAllowedAssociations",
@@ -24,6 +26,7 @@ public record ActivityContentDTO(
     UUID id,
     String title,
     @Schema(ref = "#/components/schemas/EActivityThematic") EActivityThematic thematic,
+    @Schema(ref = "#/components/schemas/EActivityStatus") EActivityStatus activityStatus,
     String summary,
     String description,
     String recommendedCompletionContexts,
