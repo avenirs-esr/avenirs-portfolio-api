@@ -9,6 +9,7 @@ import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public interface AssociationStrategy {
@@ -20,6 +21,11 @@ public interface AssociationStrategy {
       UUID elementId, EAssociationType associationType, int associationsToAdd);
 
   void checkLoggedInStudentCanUnassociate(List<UUID> elementIds);
+
+  default Map<UUID, Integer> getAssociationLimits(
+      List<UUID> elementIds, EAssociationType associationType) {
+    return Map.of();
+  }
 
   PagedResult<AssociationSearchResultData> search(
       String keyword, AssociationSearchFilter filter, PageCriteria pageCriteria);

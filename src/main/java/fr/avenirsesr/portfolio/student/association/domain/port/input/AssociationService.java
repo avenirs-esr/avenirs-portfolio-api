@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociatedElementsData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationData;
+import fr.avenirsesr.portfolio.student.association.domain.data.AssociationLimitData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.filter.AssociationSearchFilter;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
@@ -26,6 +27,8 @@ public interface AssociationService {
   AssociatedElementsData getAllAssociatedElementsOf(
       UUID id, EAssociationContextType contextType, boolean onlyNotCompleted);
 
+  List<AssociationLimitData> getAssociationLimits(UUID id, EAssociationContextType contextType);
+
   AssociatedElementsData associate(
       UUID id,
       EAssociationContextType contextType,
@@ -36,13 +39,6 @@ public interface AssociationService {
 
   PagedResult<AssociationSearchResultData> searchForAssociation(
       UUID id,
-      EAssociationContextType contextType,
-      EAssociationContextType associatedContextType,
-      String keyword,
-      AssociationSearchFilter filter,
-      PageCriteria pageCriteria);
-
-  PagedResult<AssociationSearchResultData> searchForAssociationWithNewElement(
       EAssociationContextType contextType,
       EAssociationContextType associatedContextType,
       String keyword,
