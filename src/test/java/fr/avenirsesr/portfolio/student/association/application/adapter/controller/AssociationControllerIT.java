@@ -45,6 +45,7 @@ class AssociationControllerIT extends ContainerConfigurationTest {
       BASE_PATH + "/{contextType}/{elementId}/{associatedContextType}/search";
   private static final String NEW_ELEMENT_SEARCH_PATH =
       BASE_PATH + "/{contextType}/{associatedContextType}/search";
+  private static final String LIMITS_PATH = BASE_PATH + "/{contextType}/{elementId}/limits";
 
   private static final String TRACE_ASSOCIATIONS_PATH = BASE_PATH + "/TRACE";
   private static final String DECLARED_ACTIVITY_ASSOCIATIONS_PATH =
@@ -99,6 +100,10 @@ class AssociationControllerIT extends ContainerConfigurationTest {
 
   private final String notFoundDeclaredExperienceId = "00000000-0000-0000-0000-000000000000";
   private final String finishedDeclaredActivityId = "9a1d7c55-2f6b-4e88-9c2a-1e7b3d4f6c44";
+
+  private final String unlimitedDeclaredActivityId = "7f3a2b91-3d44-4c6a-8a9e-2b6d5f1c0a22";
+  private final String limitedDeclaredActivityId = "a1f6c2d2-6c2b-4a5e-9c4f-8e2a6b1d3f01";
+  private final int limitedDeclaredActivityMaxTraces = 8;
 
   @BeforeAll
   void setup(@Autowired SeederRunner seederRunner) {
@@ -409,6 +414,8 @@ class AssociationControllerIT extends ContainerConfigurationTest {
         .jsonPath("$.data[0].category")
         .exists()
         .jsonPath("$.data[0].disabled")
+        .exists()
+        .jsonPath("$.data[0].limitReached")
         .exists()
         .jsonPath("$.page.page")
         .isEqualTo(0)
@@ -762,6 +769,7 @@ class AssociationControllerIT extends ContainerConfigurationTest {
 
     assertThat(finishedDeclaredActivity).isNotNull();
     assertThat(finishedDeclaredActivity.get("disabled").asBoolean()).isTrue();
+    assertThat(finishedDeclaredActivity.get("limitReached").asBoolean()).isFalse();
 
     BddLogger.then("it should return the finished declared activity as disabled");
   }
@@ -4021,5 +4029,303 @@ class AssociationControllerIT extends ContainerConfigurationTest {
             .orElseThrow();
 
     assertThat(alreadyAssociated.get("disabled").asBoolean()).isTrue();
+  }
+
+  private JsonNode getAssociationLimits(String contextType, UUID elementId) throws Exception {
+    String body =
+        webTestClient
+            .get()
+            .uri(LIMITS_PATH, contextType, elementId)
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+            .accept(APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    return objectMapper.readTree(body);
+  }
+
+  private JsonNode getTraceLimitOf(UUID declaredActivityId) throws Exception {
+    for (JsonNode limit : getAssociationLimits("DECLARED_ACTIVITY", declaredActivityId)) {
+      if ("TRACE".equals(limit.get("associatedContextType").asText())) {
+        return limit;
+      }
+    }
+
+    throw new IllegalStateException(
+        "No limit of traces for the declared activity " + declaredActivityId);
+  }
+
+  private List<UUID> createTraces(String titlePrefix, int count) throws Exception {
+    var traceIds = new ArrayList<UUID>();
+
+    for (int i = 1; i <= count; i++) {
+      traceIds.add(createTrace(titlePrefix + " " + i));
+    }
+
+    return traceIds;
+  }
+
+  private List<UUID> associationIdsOfTraces(JsonNode associations, List<UUID> traceIds) {
+    var associationIds = new ArrayList<UUID>();
+
+    for (JsonNode association : associations.get("traceAssociations")) {
+      if (traceIds.contains(UUID.fromString(association.get("trace").get("id").asText()))) {
+        associationIds.add(UUID.fromString(association.get("associationId").asText()));
+      }
+    }
+
+    return associationIds;
+  }
+
+  private void unassociate(String contextType, UUID elementId, List<UUID> associationIds)
+      throws Exception {
+    webTestClient
+        .method(HttpMethod.DELETE)
+        .uri(ASSOCIATIONS_PATH, contextType, elementId)
+        .contentType(APPLICATION_JSON)
+        .bodyValue(objectMapper.writeValueAsString(new AssociationsDeleteRequest(associationIds)))
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .exchange()
+        .expectStatus()
+        .isNoContent();
+  }
+
+  private void expectAssociationRefused(
+      String contextType, UUID elementId, String associatedContextType, UUID idToAssociate)
+      throws Exception {
+    webTestClient
+        .post()
+        .uri(ASSOCIATE_PATH, contextType, elementId, associatedContextType)
+        .contentType(APPLICATION_JSON)
+        .bodyValue(
+            objectMapper.writeValueAsString(
+                new AssociationsCreationRequest(List.of(idToAssociate))))
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .exchange()
+        .expectStatus()
+        .is4xxClientError();
+  }
+
+  private JsonNode searchForAssociationWithNewElement(
+      String contextType, String associatedContextType, String keyword) throws Exception {
+    String body =
+        webTestClient
+            .get()
+            .uri(
+                uriBuilder ->
+                    uriBuilder
+                        .path(NEW_ELEMENT_SEARCH_PATH)
+                        .queryParam("keyword", keyword)
+                        .queryParam("page", "0")
+                        .queryParam("pageSize", "100")
+                        .build(contextType, associatedContextType))
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+            .accept(APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    return objectMapper.readTree(body).get("data");
+  }
+
+  private void assertSearchResultFlags(
+      JsonNode searchResults, String id, boolean disabled, boolean limitReached) {
+    JsonNode searchResult = findSearchResultById(searchResults, id);
+
+    assertThat(searchResult).as("search result %s", id).isNotNull();
+    assertThat(searchResult.get("disabled").asBoolean())
+        .as("disabled of %s", id)
+        .isEqualTo(disabled);
+    assertThat(searchResult.get("limitReached").asBoolean())
+        .as("limitReached of %s", id)
+        .isEqualTo(limitReached);
+  }
+
+  @Test
+  void shouldReturnNoLimitWhenGettingTheLimitsOfATrace() throws Exception {
+    BddLogger.given("an existing trace");
+    UUID traceId = getFirstTraceId();
+
+    when("getting the limits of its associations");
+
+    JsonNode limits = getAssociationLimits("TRACE", traceId);
+
+    BddLogger.then("it should not report any limit");
+    assertThat(limits.isArray()).isTrue();
+    assertThat(limits).isEmpty();
+  }
+
+  @Test
+  void shouldReturnTheTraceLimitOfADeclaredActivityFromItsActivity() throws Exception {
+    BddLogger.given("a declared activity whose activity allows 8 traces");
+
+    when("getting the limits of its associations");
+
+    JsonNode limits =
+        getAssociationLimits("DECLARED_ACTIVITY", UUID.fromString(limitedDeclaredActivityId));
+
+    BddLogger.then("it should only report the limit of the traces, with the places left");
+    assertThat(limits).hasSize(1);
+    assertThat(limits.get(0).get("associatedContextType").asText()).isEqualTo("TRACE");
+    assertThat(limits.get(0).get("max").asInt()).isEqualTo(limitedDeclaredActivityMaxTraces);
+    assertThat(limits.get(0).get("remaining").asInt())
+        .isBetween(0, limitedDeclaredActivityMaxTraces);
+  }
+
+  @Test
+  void shouldReturnNoLimitForADeclaredActivityWhoseActivityAllowsUnlimitedTraces()
+      throws Exception {
+    BddLogger.given("a declared activity whose activity has no limit of traces");
+
+    when("getting the limits of its associations");
+
+    JsonNode limits =
+        getAssociationLimits("DECLARED_ACTIVITY", UUID.fromString(unlimitedDeclaredActivityId));
+
+    BddLogger.then("it should not report any limit");
+    assertThat(limits).isEmpty();
+  }
+
+  @Test
+  void shouldRefuseTheAssociationsOnceTheTraceLimitOfADeclaredActivityIsReached() throws Exception {
+    BddLogger.given("a declared activity whose traces limit is reached");
+    UUID declaredActivityId = UUID.fromString(limitedDeclaredActivityId);
+    UUID otherTraceId = createTrace("Trace beyond the limit of the declared activity");
+    int placesLeft = getTraceLimitOf(declaredActivityId).get("remaining").asInt();
+    List<UUID> fillingTraceIds = createTraces("Trace filling the declared activity", placesLeft);
+    List<UUID> associationIds =
+        associationIdsOfTraces(
+            associate(declaredActivityId, "DECLARED_ACTIVITY", "TRACE", fillingTraceIds),
+            fillingTraceIds);
+
+    try {
+      when("getting the limits of the declared activity");
+
+      JsonNode limit = getTraceLimitOf(declaredActivityId);
+
+      BddLogger.then("it should still report the limit of the traces, with no place left");
+      assertThat(limit.get("max").asInt()).isEqualTo(limitedDeclaredActivityMaxTraces);
+      assertThat(limit.get("remaining").asInt()).isZero();
+
+      when("searching the declared activities to associate with another trace");
+
+      JsonNode results = searchForAssociation("TRACE", otherTraceId, "DECLARED_ACTIVITY", "");
+
+      BddLogger.then("only the full declared activity should be flagged as limit reached");
+      assertSearchResultFlags(results, limitedDeclaredActivityId, true, true);
+      assertSearchResultFlags(results, unlimitedDeclaredActivityId, false, false);
+      assertSearchResultFlags(results, finishedDeclaredActivityId, true, false);
+
+      when("searching the declared activities to associate with a trace that does not exist yet");
+
+      JsonNode newElementResults =
+          searchForAssociationWithNewElement("TRACE", "DECLARED_ACTIVITY", "");
+
+      BddLogger.then("the full declared activity should be flagged as well");
+      assertSearchResultFlags(newElementResults, limitedDeclaredActivityId, true, true);
+      assertSearchResultFlags(newElementResults, unlimitedDeclaredActivityId, false, false);
+
+      when("associating one more trace with it, then associating it with another trace");
+
+      expectAssociationRefused("DECLARED_ACTIVITY", declaredActivityId, "TRACE", otherTraceId);
+      expectAssociationRefused("TRACE", otherTraceId, "DECLARED_ACTIVITY", declaredActivityId);
+
+      BddLogger.then("both should be refused and nothing should have been created");
+      assertThat(getAssociations("TRACE", otherTraceId).get("declaredActivityAssociations"))
+          .isEmpty();
+    } finally {
+      unassociate("DECLARED_ACTIVITY", declaredActivityId, associationIds);
+    }
+
+    BddLogger.then("dissociating the traces should free their places");
+    assertThat(getTraceLimitOf(declaredActivityId).get("remaining").asInt()).isEqualTo(placesLeft);
+  }
+
+  @Test
+  void shouldReturn404WhenGettingTheLimitsOfAnUnknownDeclaredActivity() {
+    BddLogger.given("an unknown declared activity");
+
+    when("getting the limits of its associations");
+
+    webTestClient
+        .get()
+        .uri(LIMITS_PATH, "DECLARED_ACTIVITY", UUID.randomUUID())
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .accept(APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isNotFound();
+
+    BddLogger.then("it should return 404");
+  }
+
+  @Test
+  void shouldReturn403WhenGettingTheLimitsOfAnotherStudentDeclaredActivity() throws Exception {
+    BddLogger.given("a declared activity of the logged-in student");
+    UUID declaredActivityId = getFirstActiveDeclaredActivityId();
+
+    when("another student gets the limits of its associations");
+
+    webTestClient
+        .get()
+        .uri(LIMITS_PATH, "DECLARED_ACTIVITY", declaredActivityId)
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, otherStudentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, otherStudentSignature)
+        .accept(APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isForbidden();
+
+    BddLogger.then("it should return 403");
+  }
+
+  @Test
+  void shouldReturn403WhenGettingTheLimitsWithoutPermission() {
+    BddLogger.given("an authenticated user without the association permission");
+
+    when("getting the limits of an element");
+
+    webTestClient
+        .get()
+        .uri(LIMITS_PATH, "TRACE", UUID.randomUUID())
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, noPermissionPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, noPermissionSignature)
+        .accept(APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isForbidden();
+
+    BddLogger.then("it should return 403");
+  }
+
+  @Test
+  void shouldReturn400WhenGettingTheLimitsWithAnUnknownContextType() {
+    BddLogger.given("an unknown context type");
+
+    when("getting the limits of an element of this type");
+
+    webTestClient
+        .get()
+        .uri(LIMITS_PATH, "UNKNOWN", UUID.randomUUID())
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .accept(APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isBadRequest();
+
+    BddLogger.then("it should return 400");
   }
 }

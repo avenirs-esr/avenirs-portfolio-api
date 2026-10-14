@@ -11,22 +11,23 @@ import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociatedElementsData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
-import fr.avenirsesr.portfolio.student.association.domain.exception.MaximumAssociationReachedException;
 import fr.avenirsesr.portfolio.student.association.domain.filter.AssociationSearchFilter;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
-import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.association.domain.port.output.strategy.AssociationStrategy;
 import fr.avenirsesr.portfolio.student.association.domain.utils.AssociationUtils;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class DeclaredActivityAssociationStrategy implements AssociationStrategy {
+  private static final int TRACE_UNLIMITED_ITERATIONS = -1;
+
   private final DeclaredActivityService declaredActivityService;
-  private final AssociationService associationService;
   private final LoggedInUserService loggedInUserService;
 
   @Override
@@ -47,10 +48,6 @@ public class DeclaredActivityAssociationStrategy implements AssociationStrategy 
     if (declaredActivity.isUnsubscribed()) {
       throw new DeclaredActivityUnsubscribedException();
     }
-
-    if (associationType == EAssociationType.DECLARED_ACTIVITY_TRACE) {
-      checkMaximumAllowedTraceAssociations(declaredActivity, associationsToAdd);
-    }
   }
 
   @Override
@@ -59,6 +56,18 @@ public class DeclaredActivityAssociationStrategy implements AssociationStrategy 
         .anyMatch(declaredActivity -> declaredActivity.getFinishedAt().isPresent())) {
       throw new DeclaredActivityAlreadyFinishedException();
     }
+  }
+
+  @Override
+  public Map<UUID, Integer> getAssociationLimits(
+      List<UUID> elementIds, EAssociationType associationType) {
+    if (associationType != EAssociationType.DECLARED_ACTIVITY_TRACE) {
+      return Map.of();
+    }
+
+    return declaredActivityService.findAllDeclaredActivitiesByIds(elementIds).stream()
+        .filter(declaredActivity -> traceLimitOf(declaredActivity) != TRACE_UNLIMITED_ITERATIONS)
+        .collect(Collectors.toMap(DeclaredActivity::getId, this::traceLimitOf));
   }
 
   @Override
@@ -106,25 +115,6 @@ public class DeclaredActivityAssociationStrategy implements AssociationStrategy 
             .toList());
   }
 
-  private void checkMaximumAllowedTraceAssociations(
-      DeclaredActivity declaredActivity, int associationsToAdd) {
-    var allowedAssociations = declaredActivity.getActivity().getTraceAllowedAssociations();
-
-    if (allowedAssociations == -1) {
-      return;
-    }
-
-    var traceAssociations =
-        associationService.getAllOf(
-            declaredActivity.getId(),
-            DeclaredActivity.class,
-            List.of(EAssociationType.DECLARED_ACTIVITY_TRACE));
-
-    if (traceAssociations.size() + associationsToAdd > allowedAssociations) {
-      throw new MaximumAssociationReachedException();
-    }
-  }
-
   private List<DeclaredActivity> fetchAndCheckOwnership(List<UUID> elementIds) {
     var declaredActivities = declaredActivityService.findAllDeclaredActivitiesByIds(elementIds);
 
@@ -136,5 +126,9 @@ public class DeclaredActivityAssociationStrategy implements AssociationStrategy 
         DeclaredActivityNotFoundException::new);
 
     return declaredActivities;
+  }
+
+  private int traceLimitOf(DeclaredActivity declaredActivity) {
+    return declaredActivity.getActivity().getTraceAllowedAssociations();
   }
 }

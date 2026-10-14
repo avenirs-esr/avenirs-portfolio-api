@@ -23,12 +23,10 @@ import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
-import fr.avenirsesr.portfolio.student.association.domain.exception.MaximumAssociationReachedException;
 import fr.avenirsesr.portfolio.student.association.domain.filter.AssociationSearchFilter;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
-import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
@@ -47,7 +45,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class DeclaredActivityAssociationStrategyTest {
 
   @Mock private DeclaredActivityService declaredActivityService;
-  @Mock private AssociationService associationService;
   @Mock private LoggedInUserService loggedInUserService;
 
   @InjectMocks private DeclaredActivityAssociationStrategy strategy;
@@ -56,6 +53,16 @@ class DeclaredActivityAssociationStrategyTest {
     var declaredActivity = mock(DeclaredActivity.class);
     lenient().when(declaredActivity.getId()).thenReturn(id);
     lenient().when(declaredActivity.getStudent()).thenReturn(student);
+
+    return declaredActivity;
+  }
+
+  private DeclaredActivity declaredActivityWithTraceLimit(UUID id, int traceAllowedAssociations) {
+    var activity = mock(Activity.class);
+    when(activity.getTraceAllowedAssociations()).thenReturn(traceAllowedAssociations);
+
+    var declaredActivity = declaredActivityOf(id, null);
+    when(declaredActivity.getActivity()).thenReturn(activity);
 
     return declaredActivity;
   }
@@ -111,42 +118,12 @@ class DeclaredActivityAssociationStrategyTest {
   }
 
   @Test
-  void checkLoggedInStudentCanAssociate_should_throw_when_the_allowed_traces_are_reached() {
+  void
+      checkLoggedInStudentCanAssociate_should_not_throw_when_the_student_owns_a_subscribed_declared_activity() {
     var student = StudentFixture.create().toModel();
     UUID declaredActivityId = UUID.randomUUID();
 
-    var activity = mock(Activity.class);
-    when(activity.getTraceAllowedAssociations()).thenReturn(2);
-
     var declaredActivity = declaredActivityOf(declaredActivityId, student);
-    when(declaredActivity.getActivity()).thenReturn(activity);
-
-    when(declaredActivityService.findAllDeclaredActivitiesByIds(List.of(declaredActivityId)))
-        .thenReturn(List.of(declaredActivity));
-    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-    when(associationService.getAllOf(
-            declaredActivityId,
-            DeclaredActivity.class,
-            List.of(EAssociationType.DECLARED_ACTIVITY_TRACE)))
-        .thenReturn(List.of(mock(Association.class)));
-
-    assertThatThrownBy(
-            () ->
-                strategy.checkLoggedInStudentCanAssociate(
-                    declaredActivityId, EAssociationType.DECLARED_ACTIVITY_TRACE, 2))
-        .isInstanceOf(MaximumAssociationReachedException.class);
-  }
-
-  @Test
-  void checkLoggedInStudentCanAssociate_should_not_count_the_traces_when_they_are_unlimited() {
-    var student = StudentFixture.create().toModel();
-    UUID declaredActivityId = UUID.randomUUID();
-
-    var activity = mock(Activity.class);
-    when(activity.getTraceAllowedAssociations()).thenReturn(-1);
-
-    var declaredActivity = declaredActivityOf(declaredActivityId, student);
-    when(declaredActivity.getActivity()).thenReturn(activity);
 
     when(declaredActivityService.findAllDeclaredActivitiesByIds(List.of(declaredActivityId)))
         .thenReturn(List.of(declaredActivity));
@@ -154,25 +131,6 @@ class DeclaredActivityAssociationStrategyTest {
 
     strategy.checkLoggedInStudentCanAssociate(
         declaredActivityId, EAssociationType.DECLARED_ACTIVITY_TRACE, 10);
-
-    verify(associationService, never()).getAllOf(any(UUID.class), any(), any());
-  }
-
-  @Test
-  void checkLoggedInStudentCanAssociate_should_not_count_the_traces_for_another_association() {
-    var student = StudentFixture.create().toModel();
-    UUID declaredActivityId = UUID.randomUUID();
-
-    var declaredActivity = declaredActivityOf(declaredActivityId, student);
-
-    when(declaredActivityService.findAllDeclaredActivitiesByIds(List.of(declaredActivityId)))
-        .thenReturn(List.of(declaredActivity));
-    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-
-    strategy.checkLoggedInStudentCanAssociate(
-        declaredActivityId, EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL, 1);
-
-    verify(associationService, never()).getAllOf(any(UUID.class), any(), any());
   }
 
   @Test
@@ -190,6 +148,52 @@ class DeclaredActivityAssociationStrategyTest {
     assertThatThrownBy(
             () -> strategy.checkLoggedInStudentCanUnassociate(List.of(declaredActivityId)))
         .isInstanceOf(DeclaredActivityAlreadyFinishedException.class);
+  }
+
+  @Test
+  void getAssociationLimits_should_return_the_trace_limit_of_the_limited_declared_activities() {
+    UUID firstId = UUID.randomUUID();
+    UUID secondId = UUID.randomUUID();
+
+    var first = declaredActivityWithTraceLimit(firstId, 3);
+    var second = declaredActivityWithTraceLimit(secondId, 1);
+
+    when(declaredActivityService.findAllDeclaredActivitiesByIds(List.of(firstId, secondId)))
+        .thenReturn(List.of(first, second));
+
+    var limits =
+        strategy.getAssociationLimits(
+            List.of(firstId, secondId), EAssociationType.DECLARED_ACTIVITY_TRACE);
+
+    assertThat(limits).isEqualTo(Map.of(firstId, 3, secondId, 1));
+  }
+
+  @Test
+  void getAssociationLimits_should_not_return_the_declared_activities_with_unlimited_traces() {
+    UUID limitedId = UUID.randomUUID();
+    UUID unlimitedId = UUID.randomUUID();
+
+    var limited = declaredActivityWithTraceLimit(limitedId, 2);
+    var unlimited = declaredActivityWithTraceLimit(unlimitedId, -1);
+
+    when(declaredActivityService.findAllDeclaredActivitiesByIds(List.of(limitedId, unlimitedId)))
+        .thenReturn(List.of(limited, unlimited));
+
+    var limits =
+        strategy.getAssociationLimits(
+            List.of(limitedId, unlimitedId), EAssociationType.DECLARED_ACTIVITY_TRACE);
+
+    assertThat(limits).isEqualTo(Map.of(limitedId, 2));
+  }
+
+  @Test
+  void getAssociationLimits_should_return_nothing_for_another_association_type() {
+    var limits =
+        strategy.getAssociationLimits(
+            List.of(UUID.randomUUID()), EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL);
+
+    assertThat(limits).isEmpty();
+    verify(declaredActivityService, never()).findAllDeclaredActivitiesByIds(any());
   }
 
   @Test

@@ -32,6 +32,7 @@ class AssociationSearchResultDTOMapperTest {
     assertEquals("Java Workshop", dto.title());
     assertEquals(EActivityThematic.EXPERIENCES.name(), dto.category());
     assertTrue(dto.disabled());
+    assertFalse(dto.limitReached());
     assertEquals("report.pdf", dto.description());
   }
 

@@ -4,9 +4,11 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociatedElementsData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationData;
+import fr.avenirsesr.portfolio.student.association.domain.data.AssociationLimitData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.exception.AssociationAlreadyExistException;
 import fr.avenirsesr.portfolio.student.association.domain.exception.AssociationDoesNotExistException;
+import fr.avenirsesr.portfolio.student.association.domain.exception.MaximumAssociationReachedException;
 import fr.avenirsesr.portfolio.student.association.domain.filter.AssociationSearchFilter;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
@@ -17,6 +19,8 @@ import fr.avenirsesr.portfolio.student.association.domain.port.output.strategy.A
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -88,6 +92,17 @@ public class AssociationServiceImpl implements AssociationService {
   }
 
   @Override
+  public List<AssociationLimitData> getAssociationLimits(
+      UUID id, EAssociationContextType contextType) {
+    strategyOf(contextType).checkLoggedInStudentOwns(List.of(id));
+
+    return EAssociationType.getAllBy(contextType.toClass()).stream()
+        .map(associationType -> limitsOf(contextType, List.of(id), associationType).get(id))
+        .filter(Objects::nonNull)
+        .toList();
+  }
+
+  @Override
   public AssociatedElementsData associate(
       UUID id,
       EAssociationContextType contextType,
@@ -100,6 +115,9 @@ public class AssociationServiceImpl implements AssociationService {
     strategyOf(contextType)
         .checkLoggedInStudentCanAssociate(id, associationType, uniqueAssociatedIds.size());
     strategyOf(associatedContextType).checkLoggedInStudentOwns(uniqueAssociatedIds);
+
+    checkLimits(contextType, List.of(id), associationType, uniqueAssociatedIds.size());
+    checkLimits(associatedContextType, uniqueAssociatedIds, associationType, 1);
 
     createAll(
         uniqueAssociatedIds.stream()
@@ -146,41 +164,44 @@ public class AssociationServiceImpl implements AssociationService {
       PageCriteria pageCriteria) {
     var associationType =
         EAssociationType.of(contextType.toClass(), associatedContextType.toClass());
+    Set<UUID> associatedIds;
 
-    strategyOf(contextType).checkLoggedInStudentOwns(List.of(id));
-
-    var associatedIds =
-        new HashSet<>(
-            associatedIdsOf(
-                getAllOf(id, contextType.toClass(), List.of(associationType)),
-                contextType.toClass()));
+    if (id == null) {
+      associatedIds = Set.of();
+    } else {
+      strategyOf(contextType).checkLoggedInStudentOwns(List.of(id));
+      associatedIds =
+          new HashSet<>(
+              associatedIdsOf(
+                  getAllOf(id, contextType.toClass(), List.of(associationType)),
+                  contextType.toClass()));
+    }
 
     var searchResults = strategyOf(associatedContextType).search(keyword, filter, pageCriteria);
+    var associableIds =
+        searchResults.content().stream()
+            .filter(result -> !result.disabled() && !associatedIds.contains(result.id()))
+            .map(AssociationSearchResultData::id)
+            .toList();
+    var limits = limitsOf(associatedContextType, associableIds, associationType);
 
     return new PagedResult<>(
         searchResults.content().stream()
             .map(
-                result ->
-                    new AssociationSearchResultData(
-                        result.id(),
-                        result.title(),
-                        result.category(),
-                        result.disabled() || associatedIds.contains(result.id()),
-                        result.description()))
+                result -> {
+                  var limit = limits.get(result.id());
+                  var limitReached = limit != null && limit.remaining() == 0;
+
+                  return new AssociationSearchResultData(
+                      result.id(),
+                      result.title(),
+                      result.category(),
+                      result.disabled() || associatedIds.contains(result.id()) || limitReached,
+                      limitReached,
+                      result.description());
+                })
             .toList(),
         searchResults.pageInfo());
-  }
-
-  @Override
-  public PagedResult<AssociationSearchResultData> searchForAssociationWithNewElement(
-      EAssociationContextType contextType,
-      EAssociationContextType associatedContextType,
-      String keyword,
-      AssociationSearchFilter filter,
-      PageCriteria pageCriteria) {
-    EAssociationType.of(contextType.toClass(), associatedContextType.toClass());
-
-    return strategyOf(associatedContextType).search(keyword, filter, pageCriteria);
   }
 
   @Override
@@ -227,5 +248,43 @@ public class AssociationServiceImpl implements AssociationService {
     return associationType.getKey1().equals(clazz)
         ? new AssociationData(id, associatedId, associationType)
         : new AssociationData(associatedId, id, associationType);
+  }
+
+  private Map<UUID, AssociationLimitData> limitsOf(
+      EAssociationContextType contextType, List<UUID> ids, EAssociationType associationType) {
+    if (ids.isEmpty()) {
+      return Map.of();
+    }
+
+    var limits = strategyOf(contextType).getAssociationLimits(ids, associationType);
+
+    if (limits.isEmpty()) {
+      return Map.of();
+    }
+
+    var associatedContextType =
+        EAssociationContextType.of(associationType.associatedKeyOf(contextType.toClass()));
+    var counts = countAllOf(List.copyOf(limits.keySet()), contextType.toClass(), associationType);
+
+    return limits.entrySet().stream()
+        .collect(
+            Collectors.toMap(
+                Map.Entry::getKey,
+                limit ->
+                    new AssociationLimitData(
+                        associatedContextType,
+                        limit.getValue(),
+                        counts.getOrDefault(limit.getKey(), 0L))));
+  }
+
+  private void checkLimits(
+      EAssociationContextType contextType,
+      List<UUID> ids,
+      EAssociationType associationType,
+      int associationsToAdd) {
+    if (limitsOf(contextType, ids, associationType).values().stream()
+        .anyMatch(limit -> associationsToAdd > limit.remaining())) {
+      throw new MaximumAssociationReachedException();
+    }
   }
 }

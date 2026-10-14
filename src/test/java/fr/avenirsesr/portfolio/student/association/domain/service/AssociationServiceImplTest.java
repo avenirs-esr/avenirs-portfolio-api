@@ -1,9 +1,19 @@
 package fr.avenirsesr.portfolio.student.association.domain.service;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
@@ -15,9 +25,11 @@ import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociatedElementsData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationData;
+import fr.avenirsesr.portfolio.student.association.domain.data.AssociationLimitData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.exception.AssociationAlreadyExistException;
 import fr.avenirsesr.portfolio.student.association.domain.exception.AssociationDoesNotExistException;
+import fr.avenirsesr.portfolio.student.association.domain.exception.MaximumAssociationReachedException;
 import fr.avenirsesr.portfolio.student.association.domain.filter.AssociationSearchFilter;
 import fr.avenirsesr.portfolio.student.association.domain.filter.TraceAssociationSearchFilter;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
@@ -78,6 +90,18 @@ class AssociationServiceImplTest {
   private void givenAssociationsOf(UUID id, Class<?> clazz, List<Association> associations) {
     when(associationRepository.findAllOf(id, clazz, EAssociationType.getAllBy(clazz)))
         .thenReturn(associations);
+  }
+
+  private void givenLimitOf(
+      UUID declaredActivityId, EAssociationType associationType, int max, long associations) {
+    lenient()
+        .when(
+            declaredActivityStrategy.getAssociationLimits(
+                List.of(declaredActivityId), associationType))
+        .thenReturn(Map.of(declaredActivityId, max));
+    when(associationRepository.countAllOf(
+            List.of(declaredActivityId), DeclaredActivity.class, associationType))
+        .thenReturn(Map.of(declaredActivityId, associations));
   }
 
   @Test
@@ -275,6 +299,76 @@ class AssociationServiceImplTest {
   }
 
   @Test
+  void getAssociationLimits_should_return_the_limit_of_each_limited_association_type() {
+    UUID declaredActivityId = UUID.randomUUID();
+    givenLimitOf(declaredActivityId, EAssociationType.DECLARED_ACTIVITY_TRACE, 3, 1);
+    givenLimitOf(declaredActivityId, EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL, 5, 5);
+
+    var result =
+        service.getAssociationLimits(declaredActivityId, EAssociationContextType.DECLARED_ACTIVITY);
+
+    verify(declaredActivityStrategy).checkLoggedInStudentOwns(List.of(declaredActivityId));
+    assertThat(result)
+        .containsExactlyInAnyOrder(
+            new AssociationLimitData(EAssociationContextType.TRACE, 3, 1),
+            new AssociationLimitData(EAssociationContextType.DECLARED_SKILL, 5, 5));
+  }
+
+  @Test
+  void getAssociationLimits_should_only_report_and_count_the_limited_association_types() {
+    UUID declaredActivityId = UUID.randomUUID();
+    givenLimitOf(declaredActivityId, EAssociationType.DECLARED_ACTIVITY_TRACE, 3, 1);
+
+    var result =
+        service.getAssociationLimits(declaredActivityId, EAssociationContextType.DECLARED_ACTIVITY);
+
+    assertThat(result)
+        .containsExactly(new AssociationLimitData(EAssociationContextType.TRACE, 3, 1));
+    verify(associationRepository, times(1)).countAllOf(any(), any(), any());
+  }
+
+  @Test
+  void getAssociationLimits_should_report_the_association_types_that_are_not_allowed_at_all() {
+    UUID declaredActivityId = UUID.randomUUID();
+    givenLimitOf(declaredActivityId, EAssociationType.DECLARED_ACTIVITY_TRACE, 0, 0);
+
+    var result =
+        service.getAssociationLimits(declaredActivityId, EAssociationContextType.DECLARED_ACTIVITY);
+
+    assertThat(result)
+        .containsExactly(new AssociationLimitData(EAssociationContextType.TRACE, 0, 0));
+  }
+
+  @Test
+  void getAssociationLimits_should_return_nothing_when_nothing_is_limited() {
+    UUID traceId = UUID.randomUUID();
+
+    var result = service.getAssociationLimits(traceId, EAssociationContextType.TRACE);
+
+    verify(traceStrategy).checkLoggedInStudentOwns(List.of(traceId));
+    assertThat(result).isEmpty();
+    verify(associationRepository, never()).countAllOf(any(), any(), any());
+  }
+
+  @Test
+  void getAssociationLimits_should_not_read_the_limits_when_the_element_is_not_owned() {
+    UUID declaredActivityId = UUID.randomUUID();
+
+    doThrow(new UserNotAuthorizedException())
+        .when(declaredActivityStrategy)
+        .checkLoggedInStudentOwns(List.of(declaredActivityId));
+
+    assertThatThrownBy(
+            () ->
+                service.getAssociationLimits(
+                    declaredActivityId, EAssociationContextType.DECLARED_ACTIVITY))
+        .isInstanceOf(UserNotAuthorizedException.class);
+
+    verify(declaredActivityStrategy, never()).getAssociationLimits(anyList(), any());
+    verify(associationRepository, never()).countAllOf(any(), any(), any());
+  }
+
+  @Test
   void associate_should_check_both_sides_before_creating_the_associations() {
     UUID traceId = UUID.randomUUID();
     UUID declaredSkillProgressId = UUID.randomUUID();
@@ -381,6 +475,79 @@ class AssociationServiceImplTest {
         .isInstanceOf(WrongClassTypeArgumentException.class);
 
     verifyNoInteractions(associationRepository);
+  }
+
+  @Test
+  void associate_should_throw_when_the_associations_exceed_the_limit_of_the_element() {
+    UUID declaredActivityId = UUID.randomUUID();
+    givenLimitOf(declaredActivityId, EAssociationType.DECLARED_ACTIVITY_TRACE, 2, 1);
+
+    assertThatThrownBy(
+            () ->
+                service.associate(
+                    declaredActivityId,
+                    EAssociationContextType.DECLARED_ACTIVITY,
+                    EAssociationContextType.TRACE,
+                    List.of(UUID.randomUUID(), UUID.randomUUID())))
+        .isInstanceOf(MaximumAssociationReachedException.class);
+
+    verify(associationRepository, never()).saveAll(anyList());
+  }
+
+  @Test
+  void associate_should_accept_the_associations_up_to_the_limit_of_the_element() {
+    UUID declaredActivityId = UUID.randomUUID();
+    givenLimitOf(declaredActivityId, EAssociationType.DECLARED_ACTIVITY_TRACE, 2, 1);
+    when(associationRepository.findAllIn(anyList())).thenReturn(List.of());
+    when(associationRepository.saveAll(anyList())).thenAnswer(i -> i.getArguments()[0]);
+    givenAssociationsOf(declaredActivityId, DeclaredActivity.class, List.of());
+
+    service.associate(
+        declaredActivityId,
+        EAssociationContextType.DECLARED_ACTIVITY,
+        EAssociationContextType.TRACE,
+        List.of(UUID.randomUUID()));
+
+    verify(associationRepository).saveAll(anyList());
+  }
+
+  @Test
+  void associate_should_throw_when_an_associated_element_has_reached_its_limit() {
+    UUID traceId = UUID.randomUUID();
+    UUID fullDeclaredActivityId = UUID.randomUUID();
+    givenLimitOf(fullDeclaredActivityId, EAssociationType.DECLARED_ACTIVITY_TRACE, 1, 1);
+
+    assertThatThrownBy(
+            () ->
+                service.associate(
+                    traceId,
+                    EAssociationContextType.TRACE,
+                    EAssociationContextType.DECLARED_ACTIVITY,
+                    List.of(fullDeclaredActivityId)))
+        .isInstanceOf(MaximumAssociationReachedException.class);
+
+    verify(associationRepository, never()).saveAll(anyList());
+  }
+
+  @Test
+  void associate_should_check_the_ownership_of_the_associated_elements_before_their_limit() {
+    UUID traceId = UUID.randomUUID();
+    UUID declaredActivityId = UUID.randomUUID();
+
+    doThrow(new UserNotAuthorizedException())
+        .when(declaredActivityStrategy)
+        .checkLoggedInStudentOwns(List.of(declaredActivityId));
+
+    assertThatThrownBy(
+            () ->
+                service.associate(
+                    traceId,
+                    EAssociationContextType.TRACE,
+                    EAssociationContextType.DECLARED_ACTIVITY,
+                    List.of(declaredActivityId)))
+        .isInstanceOf(UserNotAuthorizedException.class);
+
+    verify(declaredActivityStrategy, never()).getAssociationLimits(anyList(), any());
   }
 
   @Test
@@ -579,7 +746,93 @@ class AssociationServiceImplTest {
   }
 
   @Test
-  void searchForAssociationWithNewElement_should_return_the_results_of_the_searched_context() {
+  void searchForAssociation_should_flag_the_elements_that_reached_their_limit() {
+    UUID traceId = UUID.randomUUID();
+    UUID fullId = UUID.randomUUID();
+    UUID availableId = UUID.randomUUID();
+    UUID unlimitedId = UUID.randomUUID();
+    var pageCriteria = new PageCriteria(0, 10);
+
+    when(associationRepository.findAllOf(
+            traceId, Trace.class, List.of(EAssociationType.DECLARED_ACTIVITY_TRACE)))
+        .thenReturn(List.of());
+    when(declaredActivityStrategy.search("kw", AssociationSearchFilter.NONE, pageCriteria))
+        .thenReturn(
+            new PagedResult<>(
+                List.of(
+                    new AssociationSearchResultData(fullId, "Full", "EXPERIENCES", false),
+                    new AssociationSearchResultData(availableId, "Available", "EXPERIENCES", false),
+                    new AssociationSearchResultData(
+                        unlimitedId, "Unlimited", "EXPERIENCES", false)),
+                new PageInfo(0, 10, 3)));
+    when(declaredActivityStrategy.getAssociationLimits(
+            List.of(fullId, availableId, unlimitedId), EAssociationType.DECLARED_ACTIVITY_TRACE))
+        .thenReturn(Map.of(fullId, 2, availableId, 3));
+
+    when(associationRepository.countAllOf(
+            anyList(), eq(DeclaredActivity.class), eq(EAssociationType.DECLARED_ACTIVITY_TRACE)))
+        .thenReturn(Map.of(fullId, 2L, availableId, 1L));
+
+    var result =
+        service.searchForAssociation(
+            traceId,
+            EAssociationContextType.TRACE,
+            EAssociationContextType.DECLARED_ACTIVITY,
+            "kw",
+            AssociationSearchFilter.NONE,
+            pageCriteria);
+
+    assertThat(result.content())
+        .containsExactly(
+            new AssociationSearchResultData(fullId, "Full", "EXPERIENCES", true, true, null),
+            new AssociationSearchResultData(availableId, "Available", "EXPERIENCES", false),
+            new AssociationSearchResultData(unlimitedId, "Unlimited", "EXPERIENCES", false));
+  }
+
+  @Test
+  void searchForAssociation_should_not_flag_the_limit_of_the_elements_already_unselectable() {
+    UUID traceId = UUID.randomUUID();
+    UUID alreadyAssociatedId = UUID.randomUUID();
+    UUID finishedId = UUID.randomUUID();
+    UUID freeId = UUID.randomUUID();
+    var pageCriteria = new PageCriteria(0, 10);
+
+    when(associationRepository.findAllOf(
+            traceId, Trace.class, List.of(EAssociationType.DECLARED_ACTIVITY_TRACE)))
+        .thenReturn(
+            List.of(
+                association(
+                    alreadyAssociatedId, traceId, EAssociationType.DECLARED_ACTIVITY_TRACE)));
+    when(declaredActivityStrategy.search("kw", AssociationSearchFilter.NONE, pageCriteria))
+        .thenReturn(
+            new PagedResult<>(
+                List.of(
+                    new AssociationSearchResultData(
+                        alreadyAssociatedId, "Associated", "EXPERIENCES", false),
+                    new AssociationSearchResultData(finishedId, "Finished", "EXPERIENCES", true),
+                    new AssociationSearchResultData(freeId, "Free", "EXPERIENCES", false)),
+                new PageInfo(0, 10, 3)));
+
+    givenLimitOf(freeId, EAssociationType.DECLARED_ACTIVITY_TRACE, 3, 0);
+
+    var result =
+        service.searchForAssociation(
+            traceId,
+            EAssociationContextType.TRACE,
+            EAssociationContextType.DECLARED_ACTIVITY,
+            "kw",
+            AssociationSearchFilter.NONE,
+            pageCriteria);
+
+    assertThat(result.content())
+        .containsExactly(
+            new AssociationSearchResultData(alreadyAssociatedId, "Associated", "EXPERIENCES", true),
+            new AssociationSearchResultData(finishedId, "Finished", "EXPERIENCES", true),
+            new AssociationSearchResultData(freeId, "Free", "EXPERIENCES", false));
+  }
+
+  @Test
+  void searchForAssociation_should_return_the_results_of_the_searched_context_for_a_new_element() {
     UUID declaredSkillProgressId = UUID.randomUUID();
     var pageCriteria = new PageCriteria(0, 10);
 
@@ -592,7 +845,8 @@ class AssociationServiceImplTest {
                 new PageInfo(0, 10, 1)));
 
     var result =
-        service.searchForAssociationWithNewElement(
+        service.searchForAssociation(
+            null,
             EAssociationContextType.DECLARED_EXPERIENCE,
             EAssociationContextType.DECLARED_SKILL,
             "kw",
@@ -608,7 +862,8 @@ class AssociationServiceImplTest {
   }
 
   @Test
-  void searchForAssociationWithNewElement_should_keep_the_elements_disabled_by_their_own_context() {
+  void
+      searchForAssociation_should_keep_the_elements_disabled_by_their_own_context_for_a_new_element() {
     UUID declaredActivityId = UUID.randomUUID();
     var pageCriteria = new PageCriteria(0, 10);
 
@@ -621,7 +876,8 @@ class AssociationServiceImplTest {
                 new PageInfo(0, 10, 1)));
 
     var result =
-        service.searchForAssociationWithNewElement(
+        service.searchForAssociation(
+            null,
             EAssociationContextType.TRACE,
             EAssociationContextType.DECLARED_ACTIVITY,
             null,
@@ -635,7 +891,7 @@ class AssociationServiceImplTest {
   }
 
   @Test
-  void searchForAssociationWithNewElement_should_pass_the_filter_to_the_searched_context() {
+  void searchForAssociation_should_pass_the_filter_to_the_searched_context_for_a_new_element() {
     UUID unassociatedTraceId = UUID.randomUUID();
     var filter = new TraceAssociationSearchFilter(false);
     var pageCriteria = new PageCriteria(0, 10);
@@ -649,7 +905,8 @@ class AssociationServiceImplTest {
                 new PageInfo(0, 10, 1)));
 
     var result =
-        service.searchForAssociationWithNewElement(
+        service.searchForAssociation(
+            null,
             EAssociationContextType.DECLARED_SKILL,
             EAssociationContextType.TRACE,
             "kw",
@@ -662,13 +919,14 @@ class AssociationServiceImplTest {
   }
 
   @Test
-  void searchForAssociationWithNewElement_should_not_check_the_ownership_of_the_new_element() {
+  void searchForAssociation_should_not_check_the_ownership_of_the_new_element_for_a_new_element() {
     var pageCriteria = new PageCriteria(0, 10);
 
     when(traceStrategy.search("kw", AssociationSearchFilter.NONE, pageCriteria))
         .thenReturn(new PagedResult<>(List.of(), new PageInfo(0, 10, 0)));
 
-    service.searchForAssociationWithNewElement(
+    service.searchForAssociation(
+        null,
         EAssociationContextType.DECLARED_SKILL,
         EAssociationContextType.TRACE,
         "kw",
@@ -680,10 +938,11 @@ class AssociationServiceImplTest {
 
   @Test
   void
-      searchForAssociationWithNewElement_should_throw_when_the_two_contexts_cannot_be_associated() {
+      searchForAssociation_should_throw_when_the_two_contexts_cannot_be_associated_for_a_new_element() {
     assertThatThrownBy(
             () ->
-                service.searchForAssociationWithNewElement(
+                service.searchForAssociation(
+                    null,
                     EAssociationContextType.DECLARED_EXPERIENCE,
                     EAssociationContextType.DECLARED_EXPERIENCE,
                     "kw",
@@ -693,5 +952,32 @@ class AssociationServiceImplTest {
 
     verify(declaredExperienceStrategy, never()).search(any(), any(), any());
     verifyNoInteractions(associationRepository);
+  }
+
+  @Test
+  void searchForAssociation_should_flag_the_elements_that_reached_their_limit_for_a_new_element() {
+    UUID fullId = UUID.randomUUID();
+    var pageCriteria = new PageCriteria(0, 10);
+
+    when(declaredActivityStrategy.search("kw", AssociationSearchFilter.NONE, pageCriteria))
+        .thenReturn(
+            new PagedResult<>(
+                List.of(new AssociationSearchResultData(fullId, "Full", "EXPERIENCES", false)),
+                new PageInfo(0, 10, 1)));
+    givenLimitOf(fullId, EAssociationType.DECLARED_ACTIVITY_TRACE, 1, 1);
+
+    var result =
+        service.searchForAssociation(
+            null,
+            EAssociationContextType.TRACE,
+            EAssociationContextType.DECLARED_ACTIVITY,
+            "kw",
+            AssociationSearchFilter.NONE,
+            pageCriteria);
+
+    assertThat(result.content())
+        .containsExactly(
+            new AssociationSearchResultData(fullId, "Full", "EXPERIENCES", true, true, null));
+    verify(associationRepository, never()).findAllOf(any(UUID.class), any(), any());
   }
 }

@@ -45,7 +45,6 @@ public class DeclaredActivityServiceConfig {
   @Bean
   public AssociationStrategy declaredActivityAssociationStrategy(
       DeclaredActivityService declaredActivityService) {
-    return new DeclaredActivityAssociationStrategy(
-        declaredActivityService, associationService, loggedInUserService);
+    return new DeclaredActivityAssociationStrategy(declaredActivityService, loggedInUserService);
   }
 }

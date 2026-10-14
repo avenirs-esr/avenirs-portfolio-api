@@ -3,8 +3,10 @@ package fr.avenirsesr.portfolio.student.association.application.adapter.controll
 import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.student.association.application.adapter.dto.AssociationLimitDTO;
 import fr.avenirsesr.portfolio.student.association.application.adapter.dto.AssociationSearchResultDTO;
 import fr.avenirsesr.portfolio.student.association.application.adapter.dto.AssociationsDTO;
+import fr.avenirsesr.portfolio.student.association.application.adapter.mapper.AssociationLimitDTOMapper;
 import fr.avenirsesr.portfolio.student.association.application.adapter.mapper.AssociationSearchResultDTOMapper;
 import fr.avenirsesr.portfolio.student.association.application.adapter.mapper.AssociationsDTOMapper;
 import fr.avenirsesr.portfolio.student.association.application.adapter.request.AssociationSearchFilterRequest;
@@ -16,6 +18,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import java.security.Principal;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AssociationController {
   private final AssociationService associationService;
   private final AssociationsDTOMapper associationsDTOMapper;
+  private final AssociationLimitDTOMapper associationLimitDTOMapper;
   private final AssociationSearchResultDTOMapper associationSearchResultDTOMapper;
 
   @PreAuthorize("hasAuthority('association:manage')")
@@ -61,6 +65,25 @@ public class AssociationController {
         associationsDTOMapper.toDTO(
             associationService.getAllAssociatedElementsOf(
                 elementId, contextType, onlyNotCompleted)));
+  }
+
+  @PreAuthorize("hasAuthority('association:manage')")
+  @GetMapping("/{contextType}/{elementId}/limits")
+  public ResponseEntity<List<AssociationLimitDTO>> getAssociationLimits(
+      Principal principal,
+      @Parameter(schema = @Schema(ref = "#/components/schemas/EAssociationContextType"))
+          @PathVariable
+          EAssociationContextType contextType,
+      @Valid @PathVariable UUID elementId) {
+    log.debug(
+        "Received request to get the association limits of {} [{}] by student [{}]",
+        contextType,
+        elementId,
+        principal.getName());
+
+    return ResponseEntity.ok(
+        associationLimitDTOMapper.toDTOs(
+            associationService.getAssociationLimits(elementId, contextType)));
   }
 
   @PreAuthorize("hasAuthority('association:manage')")
@@ -138,7 +161,8 @@ public class AssociationController {
         pageCriteria.pageSize());
 
     var pagedResult =
-        associationService.searchForAssociationWithNewElement(
+        associationService.searchForAssociation(
+            null,
             contextType,
             associatedContextType,
             keyword,
