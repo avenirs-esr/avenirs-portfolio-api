@@ -3,6 +3,8 @@ package fr.avenirsesr.portfolio.activity.application.adapter.controller;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -2475,6 +2477,126 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             assertEquals("PUBLISHED", item.get("activityStatus").asText());
           }
         }
+      }
+    }
+
+    @Nested
+    class WhenGettingStaffWorkingSpaceWithDelegatedRights {
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("performing a GET on " + WORKING_SPACE_PATH + " as a delegated staff");
+      }
+
+      private void shareWith(UUID activityId, EActivityRight... rights) throws Exception {
+        defineAuthorizationsAsStaff(
+            activityId,
+            List.of(
+                new StaffAuthorizationRequest(STAFF_ID, List.of(EActivityRight.values())),
+                new StaffAuthorizationRequest(ANOTHER_STAFF_ID, List.of(rights))));
+      }
+
+      private JsonNode findInOtherStaffWorkingSpace(UUID activityId, String status)
+          throws Exception {
+        String body =
+            webTestClient
+                .get()
+                .uri(
+                    uriBuilder ->
+                        uriBuilder
+                            .path(WORKING_SPACE_PATH)
+                            .queryParam("pageSize", 100)
+                            .queryParamIfPresent("status", java.util.Optional.ofNullable(status))
+                            .build())
+                .headers(ActivityControllerIT.this::addOtherStaffHeaders)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(String.class)
+                .returnResult()
+                .getResponseBody();
+        for (JsonNode item : objectMapper.readTree(body).get("data")) {
+          if (activityId.toString().equals(item.get("activityId").asText())) {
+            return item;
+          }
+        }
+        return null;
+      }
+
+      @Test
+      void thenAPublishedActivityShouldBeListedWithAnyRightAndItsResponsibles() throws Exception {
+        BddLogger.and("given a published activity shared with the feedback right only");
+        UUID activityId = publishNewActivity("Activité publiée visible par feedback");
+        shareWith(activityId, EActivityRight.FEEDBACK);
+
+        BddLogger.then("the other staff sees it with the author as its only responsible");
+        JsonNode item = findInOtherStaffWorkingSpace(activityId, "PUBLISHED");
+        assertNotNull(item);
+        assertEquals(1, item.get("responsibles").size());
+        assertEquals(STAFF_ID.toString(), item.get("responsibles").get(0).get("id").asText());
+        assertTrue(item.get("responsibles").get(0).hasNonNull("firstName"));
+        assertTrue(item.get("responsibles").get(0).hasNonNull("lastName"));
+      }
+
+      @Test
+      void thenADraftShouldBeHiddenWithoutAManagementRight() throws Exception {
+        BddLogger.and("given a draft shared with the feedback right only");
+        UUID draftId = createDraftAndGetId("Brouillon invisible par feedback");
+        shareWith(draftId, EActivityRight.FEEDBACK);
+
+        BddLogger.then("the other staff does not see it");
+        assertNull(findInOtherStaffWorkingSpace(draftId, "DRAFT"));
+      }
+
+      @Test
+      void thenADraftShouldBeListedWithTheEditRight() throws Exception {
+        BddLogger.and("given a draft shared with the edit right");
+        UUID draftId = createDraftAndGetId("Brouillon visible par édition");
+        shareWith(draftId, EActivityRight.EDIT);
+
+        BddLogger.then("the other staff sees it");
+        assertNotNull(findInOtherStaffWorkingSpace(draftId, "DRAFT"));
+      }
+
+      @Test
+      void thenAnUnpublishedActivityShouldBeHiddenWithoutAManagementRight() throws Exception {
+        BddLogger.and("given an unpublished activity shared with the feedback right only");
+        UUID activityId = publishNewActivity("Activité dépubliée invisible par feedback");
+        shareWith(activityId, EActivityRight.FEEDBACK);
+        webTestClient
+            .post()
+            .uri(UNPUBLISH_PATH, activityId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .exchange()
+            .expectStatus()
+            .isNoContent();
+
+        BddLogger.then("the other staff does not see it");
+        assertNull(findInOtherStaffWorkingSpace(activityId, "UNPUBLISHED"));
+      }
+
+      @Test
+      void thenAnActivityWithoutAnyRightShouldBeHidden() throws Exception {
+        BddLogger.and("given a published activity not shared at all");
+        UUID activityId = publishNewActivity("Activité publiée non partagée");
+
+        BddLogger.then("the other staff does not see it, even without status filter");
+        assertNull(findInOtherStaffWorkingSpace(activityId, null));
+      }
+
+      @Test
+      void thenEveryResponsibleShouldBeListed() throws Exception {
+        BddLogger.and("given a published activity with two responsibles");
+        UUID activityId = publishNewActivity("Activité à deux responsables");
+        shareWith(activityId, EActivityRight.values());
+
+        BddLogger.then("both responsibles are listed on the item");
+        JsonNode item = findInOtherStaffWorkingSpace(activityId, null);
+        assertNotNull(item);
+        Set<String> responsibleIds = new HashSet<>();
+        item.get("responsibles").forEach(r -> responsibleIds.add(r.get("id").asText()));
+        assertEquals(Set.of(STAFF_ID.toString(), ANOTHER_STAFF_ID.toString()), responsibleIds);
       }
     }
 

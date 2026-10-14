@@ -460,30 +460,34 @@ public class ActivityServiceImpl implements ActivityService {
   public PagedResult<ActivityStaffOverviewData> staffActivityWorkingSpace(
       PageCriteria pageCriteria, EActivityStatus activityStatus) {
     var staff = loggedInUserService.getLoggedInStaff();
-    var pagedActivities =
-        staffActivityOverviewRepository.findAllByAuthorAndStatus(
-            staff, activityStatus, pageCriteria);
-
-    return new PagedResult<>(
-        pagedActivities.content().stream()
-            .map(
-                a ->
-                    new ActivityStaffOverviewData(
-                        a.activityId(),
-                        a.title(),
-                        a.thematic(),
-                        a.author(),
-                        a.activityStatus(),
-                        a.updatedAt()))
-            .toList(),
-        pagedActivities.pageInfo());
+    return withResponsibles(
+        staffActivityOverviewRepository.findAllAccessibleByStaffAndStatus(
+            staff, activityStatus, pageCriteria));
   }
 
   @Override
   public PagedResult<ActivityStaffOverviewData> staffActivityLibrary(
       EActivityThematic thematic, PageCriteria pageCriteria) {
     loggedInUserService.getLoggedInStaff();
-    return activityRepository.findAllStaffOverview(thematic, pageCriteria);
+    return withResponsibles(activityRepository.findAllStaffOverview(thematic, pageCriteria));
+  }
+
+  private PagedResult<ActivityStaffOverviewData> withResponsibles(
+      PagedResult<ActivityStaffOverviewData> pagedActivities) {
+    var responsiblesByActivityId =
+        activityAuthorizationService.getResponsiblesByActivityIds(
+            pagedActivities.content().stream()
+                .map(ActivityStaffOverviewData::activityId)
+                .distinct()
+                .toList());
+    return new PagedResult<>(
+        pagedActivities.content().stream()
+            .map(
+                a ->
+                    a.withResponsibles(
+                        responsiblesByActivityId.getOrDefault(a.activityId(), List.of())))
+            .toList(),
+        pagedActivities.pageInfo());
   }
 
   @Override

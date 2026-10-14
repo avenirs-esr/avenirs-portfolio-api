@@ -7,6 +7,6 @@ import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 
 public interface StaffActivityOverviewRepository {
-  PagedResult<ActivityStaffOverviewData> findAllByAuthorAndStatus(
-      Staff author, EActivityStatus activityStatus, PageCriteria pageCriteria);
+  PagedResult<ActivityStaffOverviewData> findAllAccessibleByStaffAndStatus(
+      Staff staff, EActivityStatus activityStatus, PageCriteria pageCriteria);
 }
