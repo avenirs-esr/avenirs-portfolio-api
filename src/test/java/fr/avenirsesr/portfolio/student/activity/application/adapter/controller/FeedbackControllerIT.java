@@ -7,8 +7,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityAuthorizationsRequest;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDraftCreationRequest;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDraftUpdateRequest;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.StaffAuthorizationRequest;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -29,6 +36,10 @@ public class FeedbackControllerIT extends ContainerConfigurationTest {
   private static final String ACTIVITY_ID = "9a12e6b4-8c3f-4d22-bf55-6d4c1f2a7e33";
   private static final String ATTACHMENT_FILE_NAME = "retour.pdf";
   private static final String ATTACHMENT_CONTENT = "Contenu du retour du staff";
+  private static final String ACTIVITIES_PATH = "/me/activities";
+  private static final UUID STAFF_ID = UUID.fromString("57ff122f-ff76-4d95-b6c1-61a4efeabd80");
+  private static final UUID ANOTHER_STAFF_ID =
+      UUID.fromString("5fcd76c5-017c-4d61-99d2-62a6f199c94e");
 
   @Autowired private WebTestClient webTestClient;
   @Autowired private ObjectMapper objectMapper;
@@ -50,6 +61,12 @@ public class FeedbackControllerIT extends ContainerConfigurationTest {
 
   @Value("${user.staff.signature}")
   private String staffSignature;
+
+  @Value("${user.anotherStaff.payload}")
+  private String anotherStaffPayload;
+
+  @Value("${user.anotherStaff.signature}")
+  private String anotherStaffSignature;
 
   @Value("${user.no-permission.payload}")
   private String noPermissionPayload;
@@ -1426,5 +1443,229 @@ public class FeedbackControllerIT extends ContainerConfigurationTest {
         .exchange()
         .expectStatus()
         .isUnauthorized();
+  }
+
+  // ── delegated feedback right ────────────────────────────────────────
+
+  private UUID publishActivityAsStaff(String title) throws Exception {
+    String draftBody =
+        webTestClient
+            .post()
+            .uri(ACTIVITIES_PATH + "/draft")
+            .header("X-Signed-Context", staffPayload)
+            .header("X-Context-Signature", staffSignature)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(objectMapper.writeValueAsString(new ActivityDraftCreationRequest(title)))
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+    UUID draftId = UUID.fromString(objectMapper.readTree(draftBody).get("draftId").asText());
+
+    webTestClient
+        .patch()
+        .uri(ACTIVITIES_PATH + "/" + draftId)
+        .header("X-Signed-Context", staffPayload)
+        .header("X-Context-Signature", staffSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(
+            objectMapper.writeValueAsString(
+                new ActivityDraftUpdateRequest(
+                    null,
+                    EActivityThematic.EXPERIENCES,
+                    "Un résumé valide pour la publication",
+                    "Une consigne valide pour la publication",
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    false,
+                    null,
+                    null,
+                    null)))
+        .exchange()
+        .expectStatus()
+        .isOk();
+
+    webTestClient
+        .post()
+        .uri(ACTIVITIES_PATH + "/publish/" + draftId)
+        .header("X-Signed-Context", staffPayload)
+        .header("X-Context-Signature", staffSignature)
+        .exchange()
+        .expectStatus()
+        .isOk();
+    return draftId;
+  }
+
+  private String subscribeStudentTo(UUID activityId) throws Exception {
+    String response =
+        webTestClient
+            .post()
+            .uri(ACTIVITY_BASE_PATH + "/subscribe/" + activityId)
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Signature", studentSignature)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue("{}")
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+    return objectMapper.readTree(response).get("createdItemId").asText();
+  }
+
+  private void defineAuthorizationsAsStaff(
+      UUID activityId, List<StaffAuthorizationRequest> authorizations) throws Exception {
+    webTestClient
+        .put()
+        .uri(ACTIVITIES_PATH + "/" + activityId + "/authorizations")
+        .header("X-Signed-Context", staffPayload)
+        .header("X-Context-Signature", staffSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(
+            objectMapper.writeValueAsString(new ActivityAuthorizationsRequest(authorizations)))
+        .exchange()
+        .expectStatus()
+        .isOk();
+  }
+
+  @Test
+  void shouldLetAStaffHoldingTheFeedbackRightProcessTheFeedback() throws Exception {
+    BddLogger.given("an activity published by a staff, with a feedback asked by a student");
+    UUID activityId = publishActivityAsStaff("Activité avec feedback délégué");
+    String feedbackId = askForFeedbackAndGetId(subscribeStudentTo(activityId));
+
+    BddLogger.when("another staff without any right fetches the feedback details");
+    BddLogger.then("403 is returned");
+    webTestClient
+        .get()
+        .uri(feedbackPath("STAFF", feedbackId))
+        .header("X-Signed-Context", anotherStaffPayload)
+        .header("X-Context-Signature", anotherStaffSignature)
+        .exchange()
+        .expectStatus()
+        .isForbidden();
+
+    BddLogger.when("the author grants the feedback right to the other staff");
+    defineAuthorizationsAsStaff(
+        activityId,
+        List.of(
+            new StaffAuthorizationRequest(STAFF_ID, List.of(EActivityRight.values())),
+            new StaffAuthorizationRequest(ANOTHER_STAFF_ID, List.of(EActivityRight.FEEDBACK))));
+
+    BddLogger.then("the other staff can read, list, answer and submit the feedback");
+    webTestClient
+        .get()
+        .uri(feedbackPath("STAFF", feedbackId))
+        .header("X-Signed-Context", anotherStaffPayload)
+        .header("X-Context-Signature", anotherStaffSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.id")
+        .isEqualTo(feedbackId);
+
+    webTestClient
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(BASE_PATH)
+                    .queryParam("activityId", activityId)
+                    .queryParam("pageSize", 100)
+                    .build())
+        .header("X-Signed-Context", anotherStaffPayload)
+        .header("X-Context-Signature", anotherStaffSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.data[?(@.id == '" + feedbackId + "')]")
+        .exists();
+
+    webTestClient
+        .put()
+        .uri(BASE_PATH + "/" + feedbackId)
+        .header("X-Signed-Context", anotherStaffPayload)
+        .header("X-Context-Signature", anotherStaffSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue("{\"feedback\": \"Retour délégué.\"}")
+        .exchange()
+        .expectStatus()
+        .isNoContent();
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + feedbackId + "/submit")
+        .header("X-Signed-Context", anotherStaffPayload)
+        .header("X-Context-Signature", anotherStaffSignature)
+        .exchange()
+        .expectStatus()
+        .isNoContent();
+
+    BddLogger.when("the author revokes the other staff");
+    defineAuthorizationsAsStaff(
+        activityId,
+        List.of(new StaffAuthorizationRequest(STAFF_ID, List.of(EActivityRight.values()))));
+
+    BddLogger.then("the other staff can no longer read the feedback");
+    webTestClient
+        .get()
+        .uri(feedbackPath("STAFF", feedbackId))
+        .header("X-Signed-Context", anotherStaffPayload)
+        .header("X-Context-Signature", anotherStaffSignature)
+        .exchange()
+        .expectStatus()
+        .isForbidden();
+  }
+
+  @Test
+  void shouldScopeTheFeedbackDashboardToTheFeedbackRight() throws Exception {
+    BddLogger.given("an activity published by a staff, with a feedback asked by a student");
+    UUID activityId = publishActivityAsStaff("Activité avec dashboard délégué");
+    askForFeedbackAndGetId(subscribeStudentTo(activityId));
+
+    BddLogger.when("another staff without the feedback right fetches the activity dashboard");
+    BddLogger.then("403 is returned");
+    webTestClient
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(BASE_PATH + "/dashboard")
+                    .queryParam("activityId", activityId)
+                    .build())
+        .header("X-Signed-Context", anotherStaffPayload)
+        .header("X-Context-Signature", anotherStaffSignature)
+        .exchange()
+        .expectStatus()
+        .isForbidden();
+
+    BddLogger.when("the author fetches the same dashboard");
+    BddLogger.then("the new feedback is counted");
+    webTestClient
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(BASE_PATH + "/dashboard")
+                    .queryParam("activityId", activityId)
+                    .build())
+        .header("X-Signed-Context", staffPayload)
+        .header("X-Context-Signature", staffSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.newFeedbacks")
+        .isEqualTo(1);
   }
 }

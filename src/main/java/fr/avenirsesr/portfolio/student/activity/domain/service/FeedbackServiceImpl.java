@@ -17,6 +17,8 @@ import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.notification.domain.model.notification.AskForFeedbackNotification;
 import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
+import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityAuthorizationService;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackAssociationsData;
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackDashboardData;
@@ -68,6 +70,7 @@ public class FeedbackServiceImpl implements FeedbackService {
   private final NotificationService notificationService;
   private final ActivityService activityService;
   private final FileResourceService fileResourceService;
+  private final ActivityAuthorizationService activityAuthorizationService;
 
   private FeedbackAssociations getAssociations(UUID declaredActivityId) {
     var allAssociations =
@@ -161,8 +164,13 @@ public class FeedbackServiceImpl implements FeedbackService {
             declaredActivity, declaredActivity.getReflection(), associations, iteration);
 
     var savedFeedback = feedbackRepository.save(feedback);
-    var author = savedFeedback.getDeclaredActivity().getActivity().getAuthor().getUser();
-    notificationService.notify(new AskForFeedbackNotification(author, savedFeedback));
+    notificationService.notifyAll(
+        activityAuthorizationService
+            .getStaffsWithRight(
+                savedFeedback.getDeclaredActivity().getActivity().getId(), EActivityRight.FEEDBACK)
+            .stream()
+            .map(staff -> new AskForFeedbackNotification(staff.getUser(), savedFeedback))
+            .toList());
 
     return savedFeedback;
   }
@@ -180,9 +188,7 @@ public class FeedbackServiceImpl implements FeedbackService {
   }
 
   private FeedbackData getStaffFeedbackDetails(User loggedInUser, Feedback feedback) {
-    if (!loggedInUser.equals(feedback.getDeclaredActivity().getActivity().getAuthor().getUser())) {
-      throw new UserNotAuthorizedException();
-    }
+    requireFeedbackRight(feedback);
 
     if (feedback.getStatus() == EFeedbackStatus.NEW) {
       feedback.setStatus(EFeedbackStatus.IN_PROCESS);
@@ -238,15 +244,7 @@ public class FeedbackServiceImpl implements FeedbackService {
 
   @Override
   public void updateFeedback(UUID feedbackId, String feedback) {
-    Feedback feedbackToUpdate =
-        feedbackRepository.findById(feedbackId).orElseThrow(FeedbackNotFoundException::new);
-
-    User loggedInUser = loggedInUserService.getLoggedInUser();
-    Staff author = feedbackToUpdate.getDeclaredActivity().getActivity().getAuthor();
-
-    if (!loggedInUser.equals(author.getUser())) {
-      throw new UserNotAuthorizedException();
-    }
+    Feedback feedbackToUpdate = fetchFeedbackAndCheckFeedbackRight(feedbackId);
 
     if (feedbackToUpdate.getStatus() == EFeedbackStatus.SEEN) {
       throw new FeedbackSeenException();
@@ -283,16 +281,15 @@ public class FeedbackServiceImpl implements FeedbackService {
             .findById(declaredActivityId)
             .orElseThrow(DeclaredActivityNotFoundException::new);
 
-    if (!loggedInStaff.equals(declaredActivity.getActivity().getAuthor())) {
-      throw new UserNotAuthorizedException();
-    }
+    activityAuthorizationService.checkRight(
+        loggedInStaff, declaredActivity.getActivity().getId(), EActivityRight.FEEDBACK);
     return feedbackRepository.findAllByDeclaredActivityId(
         declaredActivityId, EFeedbackStatus.SUBMITTED, EFeedbackStatus.SEEN);
   }
 
   @Override
   public void submitFeedback(UUID feedbackId) {
-    Feedback feedback = fetchFeedbackAndCheckLoggedInStaffIsAuthor(feedbackId);
+    Feedback feedback = fetchFeedbackAndCheckFeedbackRight(feedbackId);
 
     if (feedback.getStatus() == EFeedbackStatus.SUBMITTED
         || feedback.getStatus() == EFeedbackStatus.SEEN) {
@@ -308,7 +305,7 @@ public class FeedbackServiceImpl implements FeedbackService {
   @Override
   public File uploadAttachment(
       UUID feedbackId, String fileName, String mimeType, long size, byte[] content) {
-    Feedback feedback = fetchFeedbackAndCheckLoggedInStaffIsAuthor(feedbackId);
+    Feedback feedback = fetchFeedbackAndCheckFeedbackRight(feedbackId);
 
     if (feedback.getStatus() == EFeedbackStatus.SEEN) {
       throw new FeedbackSeenException();
@@ -323,7 +320,7 @@ public class FeedbackServiceImpl implements FeedbackService {
 
   @Override
   public void deleteAttachment(UUID feedbackId, UUID attachmentId) {
-    Feedback feedback = fetchFeedbackAndCheckLoggedInStaffIsAuthor(feedbackId);
+    Feedback feedback = fetchFeedbackAndCheckFeedbackRight(feedbackId);
 
     if (feedback.getStatus() == EFeedbackStatus.SEEN) {
       throw new FeedbackSeenException();
@@ -341,14 +338,16 @@ public class FeedbackServiceImpl implements FeedbackService {
         feedbackRepository.findById(feedbackId).orElseThrow(FeedbackNotFoundException::new);
     User loggedInUser = loggedInUserService.getLoggedInUser();
 
-    boolean isAuthor =
-        loggedInUser.equals(feedback.getDeclaredActivity().getActivity().getAuthor().getUser());
+    boolean hasFeedbackRight =
+        activityAuthorizationService
+            .getLoggedInStaffRights(feedback.getDeclaredActivity().getActivity().getId())
+            .contains(EActivityRight.FEEDBACK);
     boolean isOwningStudent =
         loggedInUser.equals(feedback.getDeclaredActivity().getStudent().getUser())
             && (feedback.getStatus() == EFeedbackStatus.SUBMITTED
                 || feedback.getStatus() == EFeedbackStatus.SEEN);
 
-    if (!isAuthor && !isOwningStudent) {
+    if (!hasFeedbackRight && !isOwningStudent) {
       throw new UserNotAuthorizedException();
     }
 
@@ -357,18 +356,18 @@ public class FeedbackServiceImpl implements FeedbackService {
     return fileResourceService.download(attachmentId);
   }
 
-  private Feedback fetchFeedbackAndCheckLoggedInStaffIsAuthor(UUID feedbackId) {
+  private Feedback fetchFeedbackAndCheckFeedbackRight(UUID feedbackId) {
     Feedback feedback =
         feedbackRepository.findById(feedbackId).orElseThrow(FeedbackNotFoundException::new);
-
-    Staff loggedInStaff = loggedInUserService.getLoggedInStaff();
-    Staff author = feedback.getDeclaredActivity().getActivity().getAuthor();
-
-    if (!loggedInStaff.equals(author)) {
-      throw new UserNotAuthorizedException();
-    }
-
+    requireFeedbackRight(feedback);
     return feedback;
+  }
+
+  private void requireFeedbackRight(Feedback feedback) {
+    activityAuthorizationService.checkRight(
+        loggedInUserService.getLoggedInStaff(),
+        feedback.getDeclaredActivity().getActivity().getId(),
+        EActivityRight.FEEDBACK);
   }
 
   @Override
@@ -387,9 +386,7 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     var activity = activityId != null ? activityService.getActivityById(activityId) : null;
     if (activity != null) {
-      if (!staff.equals(activity.getAuthor())) {
-        throw new UserNotAuthorizedException();
-      }
+      activityAuthorizationService.checkRight(staff, activity.getId(), EActivityRight.FEEDBACK);
     }
 
     int newCount = feedbackRepository.countByStatus(staff, activity, EFeedbackStatus.NEW);
