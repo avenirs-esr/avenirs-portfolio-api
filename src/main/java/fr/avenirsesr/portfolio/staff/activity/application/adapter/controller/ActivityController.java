@@ -12,6 +12,7 @@ import fr.avenirsesr.portfolio.shared.application.adapter.dto.FileDTO;
 import fr.avenirsesr.portfolio.shared.application.adapter.mapper.FileDTOMapper;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.*;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.*;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityAuthorizationsRequest;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDraftCreationRequest;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDraftUpdateRequest;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDuplicationRequest;
@@ -24,6 +25,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.data.InactiveStudentData;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
+import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityAuthorizationService;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -50,6 +52,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/me/activities")
 public class ActivityController {
   private final ActivityService activityService;
+  private final ActivityAuthorizationService activityAuthorizationService;
   private final ActivityPresentationDtoMapper activityPresentationDtoMapper;
   private final ActivityContentDtoMapper activityContentDtoMapper;
   private final ActivityNavigationMapper activityNavigationMapper;
@@ -57,6 +60,7 @@ public class ActivityController {
   private final ActivityStaffOverviewDtoMapper activityStaffOverviewDtoMapper;
   private final ActivityFeedbacksPreviewMapper activityFeedbacksPreviewMapper;
   private final InactiveStudentDtoMapper inactiveStudentDtoMapper;
+  private final ActivityAuthorizationDtoMapper activityAuthorizationDtoMapper;
   private final FileDTOMapper fileDTOMapper;
 
   @PreAuthorize("hasAuthority('activity:read:contextual')")
@@ -500,6 +504,37 @@ public class ActivityController {
             HttpHeaders.CONTENT_DISPOSITION,
             "attachment; filename=\"" + downloadedFile.fileName() + "\"")
         .body(downloadedFile.content());
+  }
+
+  @PreAuthorize("hasAuthority('activity:read:contextual')")
+  @GetMapping("/{activityId}/authorizations")
+  public ResponseEntity<List<ActivityAuthorizationDTO>> getActivityAuthorizations(
+      Principal principal, @PathVariable UUID activityId) {
+    log.debug(
+        "Received request to get authorizations of activity [{}] by user [{}]",
+        activityId,
+        principal.getName());
+
+    var authorizations = activityAuthorizationService.getActivityAuthorizations(activityId);
+    return ResponseEntity.ok(activityAuthorizationDtoMapper.toDTOs(authorizations));
+  }
+
+  @PreAuthorize("hasAuthority('activity:update')")
+  @PutMapping("/{activityId}/authorizations")
+  public ResponseEntity<List<ActivityAuthorizationDTO>> defineActivityAuthorizations(
+      Principal principal,
+      @PathVariable UUID activityId,
+      @RequestBody ActivityAuthorizationsRequest body) {
+    log.debug(
+        "Received request to define authorizations of activity [{}] by user [{}] body : {}",
+        activityId,
+        principal.getName(),
+        body);
+
+    var authorizations =
+        activityAuthorizationService.defineActivityAuthorizations(
+            activityId, activityAuthorizationDtoMapper.toDefinitions(body));
+    return ResponseEntity.ok(activityAuthorizationDtoMapper.toDTOs(authorizations));
   }
 
   @PreAuthorize("hasAuthority('feedback:request:read:assigned')")

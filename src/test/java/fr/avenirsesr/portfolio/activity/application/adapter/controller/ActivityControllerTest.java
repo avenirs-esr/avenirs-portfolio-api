@@ -25,31 +25,41 @@ import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.application.adapter.mapper.FileDTOMapper;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.controller.ActivityController;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityAuthorizationDTO;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityContentDTO;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityFeedbacksPreviewDTO;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityOverviewDTO;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityStaffOverviewDTO;
-import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.AuthorDTO;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.StaffInfoDTO;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityAuthorizationDtoMapper;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityContentDtoMapper;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityFeedbacksPreviewMapper;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityOverviewDtoMapper;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityStaffOverviewDtoMapper;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityAuthorizationsRequest;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDuplicationRequest;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.StaffAuthorizationRequest;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.response.ActivityDraftCreationResponse;
+import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityAuthorizationDefinition;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityStaffOverviewData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityWithStudentStatusData;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAuthorization;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityDraft;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
+import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityAuthorizationService;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
+import fr.avenirsesr.portfolio.user.infrastructure.fixture.StaffFixture;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import jakarta.servlet.http.HttpServletRequest;
 import java.security.Principal;
 import java.time.Instant;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -64,6 +74,8 @@ import org.springframework.http.ResponseEntity;
 class ActivityControllerTest {
 
   @Mock private ActivityService activityService;
+  @Mock private ActivityAuthorizationService activityAuthorizationService;
+  @Mock private ActivityAuthorizationDtoMapper activityAuthorizationDtoMapper;
   @Mock private ActivityOverviewDtoMapper activityOverviewDtoMapper;
   @Mock private ActivityStaffOverviewDtoMapper activityStaffOverviewDtoMapper;
   @Mock private ActivityContentDtoMapper activityContentDtoMapper;
@@ -76,13 +88,13 @@ class ActivityControllerTest {
   private User user;
   private Activity activity;
   private Principal principal;
-  private static AuthorDTO AUTHOR;
+  private static StaffInfoDTO AUTHOR;
 
   @BeforeEach
   void setUp() {
     userId = UUID.randomUUID();
     user = UserFixture.create().withId(userId).toModel();
-    AUTHOR = new AuthorDTO(userId, "staff firstname", "staff lastname");
+    AUTHOR = new StaffInfoDTO(userId, "staff firstname", "staff lastname");
     activity = ActivityFixture.create().toModel();
     principal = () -> userId.toString();
   }
@@ -986,5 +998,63 @@ class ActivityControllerTest {
     BddLogger.then("it should delegate to the service and return 204");
     assertEquals(204, response.getStatusCode().value());
     verify(activityService).deleteActivityDefinitively(activityId);
+  }
+
+  @Test
+  void shouldReturnTheAuthorizationsOfTheActivity() {
+    BddLogger.given("an activity with authorizations");
+    UUID activityId = UUID.randomUUID();
+    var staff = StaffFixture.create().toModel();
+    var authorization =
+        ActivityAuthorization.create(activityId, staff, EnumSet.of(EActivityRight.RESPONSIBLE));
+    var dto =
+        new ActivityAuthorizationDTO(
+            new StaffInfoDTO(staff.getId(), "firstName", "lastName"),
+            List.of(EActivityRight.RESPONSIBLE));
+    when(activityAuthorizationService.getActivityAuthorizations(activityId))
+        .thenReturn(List.of(authorization));
+    when(activityAuthorizationDtoMapper.toDTOs(List.of(authorization))).thenReturn(List.of(dto));
+
+    BddLogger.when("getting the authorizations");
+    var response = controller.getActivityAuthorizations(principal, activityId);
+
+    BddLogger.then("it should return the mapped authorizations");
+    assertEquals(200, response.getStatusCode().value());
+    assertEquals(List.of(dto), response.getBody());
+  }
+
+  @Test
+  void shouldDefineTheAuthorizationsOfTheActivity() {
+    BddLogger.given("an authorizations request");
+    UUID activityId = UUID.randomUUID();
+    var staff = StaffFixture.create().toModel();
+    var request =
+        new ActivityAuthorizationsRequest(
+            List.of(
+                new StaffAuthorizationRequest(
+                    staff.getId(), List.of(EActivityRight.RESPONSIBLE, EActivityRight.EDIT))));
+    var definitions =
+        List.of(
+            new ActivityAuthorizationDefinition(
+                staff.getId(), EnumSet.of(EActivityRight.RESPONSIBLE, EActivityRight.EDIT)));
+    var authorization =
+        ActivityAuthorization.create(
+            activityId, staff, EnumSet.of(EActivityRight.RESPONSIBLE, EActivityRight.EDIT));
+    var dto =
+        new ActivityAuthorizationDTO(
+            new StaffInfoDTO(staff.getId(), "firstName", "lastName"),
+            List.of(EActivityRight.RESPONSIBLE, EActivityRight.EDIT));
+    when(activityAuthorizationDtoMapper.toDefinitions(request)).thenReturn(definitions);
+    when(activityAuthorizationService.defineActivityAuthorizations(activityId, definitions))
+        .thenReturn(List.of(authorization));
+    when(activityAuthorizationDtoMapper.toDTOs(List.of(authorization))).thenReturn(List.of(dto));
+
+    BddLogger.when("defining the authorizations");
+    var response = controller.defineActivityAuthorizations(principal, activityId, request);
+
+    BddLogger.then("it should delegate to the service and return the mapped authorizations");
+    assertEquals(200, response.getStatusCode().value());
+    assertEquals(List.of(dto), response.getBody());
+    verify(activityAuthorizationService).defineActivityAuthorizations(activityId, definitions);
   }
 }

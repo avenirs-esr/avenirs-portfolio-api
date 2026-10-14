@@ -12,9 +12,12 @@ import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.Aven
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityAuthorizationsRequest;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDraftCreationRequest;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDraftUpdateRequest;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDuplicationRequest;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.StaffAuthorizationRequest;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.client.AccessClientStub;
@@ -66,6 +69,10 @@ class ActivityControllerIT extends ContainerConfigurationTest {
   private static final String INACTIVE_STUDENTS_PATH = DASHBOARD_PATH + "/inactive-students";
   private static final String DEFINITIVE_DELETE_PATH = BASE_PATH + "/{activityId}";
   private static final String DECLARED_ACTIVITY_PATH = "/me/activity-progress/{declaredActivityId}";
+  private static final String AUTHORIZATIONS_PATH = BASE_PATH + "/{activityId}/authorizations";
+  private static final UUID STAFF_ID = UUID.fromString("57ff122f-ff76-4d95-b6c1-61a4efeabd80");
+  private static final UUID ANOTHER_STAFF_ID =
+      UUID.fromString("5fcd76c5-017c-4d61-99d2-62a6f199c94e");
 
   @Autowired private WebTestClient webTestClient;
   @Autowired private ObjectMapper objectMapper;
@@ -2729,6 +2736,223 @@ class ActivityControllerIT extends ContainerConfigurationTest {
     }
 
     @Nested
+    class WhenManagingActivityAuthorizations {
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("performing a GET or a PUT on " + AUTHORIZATIONS_PATH);
+      }
+
+      @Test
+      void thenTheAuthorOfADraftShouldHoldEveryRight() throws Exception {
+        BddLogger.and("given a draft created by the staff");
+        UUID draftId = createDraftAndGetId("Brouillon avec autorisations");
+
+        BddLogger.then("the staff should be the only authorized one with every right");
+        JsonNode authorizations = getAuthorizationsAsStaff(draftId);
+
+        assertEquals(1, authorizations.size());
+        assertEquals(STAFF_ID.toString(), authorizations.get(0).get("staff").get("id").asText());
+        assertTrue(authorizations.get(0).get("staff").hasNonNull("firstName"));
+        assertTrue(authorizations.get(0).get("staff").hasNonNull("lastName"));
+        assertEquals(EActivityRight.values().length, authorizations.get(0).get("rights").size());
+      }
+
+      @Test
+      void thenTheAuthorizationsShouldSurvivePublication() throws Exception {
+        BddLogger.and("given a published activity");
+        UUID activityId = publishNewActivity("Activité publiée avec autorisations");
+
+        BddLogger.then("the author should still hold every right on the activity");
+        JsonNode authorizations = getAuthorizationsAsStaff(activityId);
+
+        assertEquals(1, authorizations.size());
+        assertEquals(STAFF_ID.toString(), authorizations.get(0).get("staff").get("id").asText());
+        assertEquals(EActivityRight.values().length, authorizations.get(0).get("rights").size());
+      }
+
+      @Test
+      void thenAManagerShouldBeAbleToGrantRightsToAnotherStaff() throws Exception {
+        BddLogger.and("given a draft created by the staff");
+        UUID draftId = createDraftAndGetId("Brouillon partagé");
+
+        BddLogger.then("another staff can be granted the feedback right");
+        String body =
+            webTestClient
+                .put()
+                .uri(AUTHORIZATIONS_PATH, draftId)
+                .headers(ActivityControllerIT.this::addStaffHeaders)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(
+                    objectMapper.writeValueAsString(
+                        new ActivityAuthorizationsRequest(
+                            List.of(
+                                new StaffAuthorizationRequest(
+                                    STAFF_ID, List.of(EActivityRight.values())),
+                                new StaffAuthorizationRequest(
+                                    ANOTHER_STAFF_ID, List.of(EActivityRight.FEEDBACK))))))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(String.class)
+                .returnResult()
+                .getResponseBody();
+
+        JsonNode authorizations = objectMapper.readTree(body);
+        assertEquals(2, authorizations.size());
+        JsonNode other = findAuthorizationOf(authorizations, ANOTHER_STAFF_ID);
+        assertEquals(1, other.get("rights").size());
+        assertEquals("FEEDBACK", other.get("rights").get(0).asText());
+
+        BddLogger.and("the other staff can then read the authorizations");
+        webTestClient
+            .get()
+            .uri(AUTHORIZATIONS_PATH, draftId)
+            .headers(ActivityControllerIT.this::addOtherStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.length()")
+            .isEqualTo(2);
+      }
+
+      @Test
+      void thenRemovingAStaffFromTheDefinitionShouldRevokeItsRights() throws Exception {
+        BddLogger.and("given a draft shared with another staff");
+        UUID draftId = createDraftAndGetId("Brouillon partagé puis repris");
+        defineAuthorizationsAsStaff(
+            draftId,
+            List.of(
+                new StaffAuthorizationRequest(STAFF_ID, List.of(EActivityRight.values())),
+                new StaffAuthorizationRequest(ANOTHER_STAFF_ID, List.of(EActivityRight.EDIT))));
+
+        BddLogger.then("defining the authorizations without the other staff revokes it");
+        defineAuthorizationsAsStaff(
+            draftId,
+            List.of(new StaffAuthorizationRequest(STAFF_ID, List.of(EActivityRight.values()))));
+
+        assertEquals(1, getAuthorizationsAsStaff(draftId).size());
+        webTestClient
+            .get()
+            .uri(AUTHORIZATIONS_PATH, draftId)
+            .headers(ActivityControllerIT.this::addOtherStaffHeaders)
+            .exchange()
+            .expectStatus()
+            .isForbidden();
+      }
+
+      @Test
+      void thenItShouldReturn400WhenNoResponsibleHoldsEveryManagementRight() throws Exception {
+        BddLogger.and("given a draft created by the staff");
+        UUID draftId = createDraftAndGetId("Brouillon sans responsable");
+
+        BddLogger.then("a definition without a full responsible should be rejected");
+        webTestClient
+            .put()
+            .uri(AUTHORIZATIONS_PATH, draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(
+                objectMapper.writeValueAsString(
+                    new ActivityAuthorizationsRequest(
+                        List.of(
+                            new StaffAuthorizationRequest(
+                                STAFF_ID, List.of(EActivityRight.RESPONSIBLE))))))
+            .exchange()
+            .expectStatus()
+            .isBadRequest();
+
+        assertEquals(
+            EActivityRight.values().length,
+            getAuthorizationsAsStaff(draftId).get(0).get("rights").size());
+      }
+
+      @Test
+      void thenItShouldReturn403WhenTheStaffCannotManageTheAuthorizations() throws Exception {
+        BddLogger.and("given a draft shared with another staff without the management right");
+        UUID draftId = createDraftAndGetId("Brouillon géré par un seul staff");
+        defineAuthorizationsAsStaff(
+            draftId,
+            List.of(
+                new StaffAuthorizationRequest(STAFF_ID, List.of(EActivityRight.values())),
+                new StaffAuthorizationRequest(ANOTHER_STAFF_ID, List.of(EActivityRight.EDIT))));
+
+        BddLogger.then("the other staff should not be able to define the authorizations");
+        webTestClient
+            .put()
+            .uri(AUTHORIZATIONS_PATH, draftId)
+            .headers(ActivityControllerIT.this::addOtherStaffHeaders)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(
+                objectMapper.writeValueAsString(
+                    new ActivityAuthorizationsRequest(
+                        List.of(
+                            new StaffAuthorizationRequest(
+                                ANOTHER_STAFF_ID, List.of(EActivityRight.values()))))))
+            .exchange()
+            .expectStatus()
+            .isForbidden();
+      }
+
+      @Test
+      void thenItShouldReturn403WhenTheStaffHoldsNoRight() throws Exception {
+        BddLogger.and("given a draft created by the staff");
+        UUID draftId = createDraftAndGetId("Brouillon privé");
+
+        BddLogger.then("another staff without any right should get 403");
+        webTestClient
+            .get()
+            .uri(AUTHORIZATIONS_PATH, draftId)
+            .headers(ActivityControllerIT.this::addOtherStaffHeaders)
+            .exchange()
+            .expectStatus()
+            .isForbidden();
+      }
+
+      @Test
+      void thenItShouldReturn404WhenTheActivityDoesNotExist() {
+        BddLogger.and("given an unknown activity id");
+        BddLogger.then("it should return 404");
+        webTestClient
+            .get()
+            .uri(AUTHORIZATIONS_PATH, UUID.randomUUID())
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .exchange()
+            .expectStatus()
+            .isNotFound()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("ACTIVITY_NOT_FOUND");
+      }
+
+      @Test
+      void thenItShouldReturn401WhenNotAuthenticated() {
+        BddLogger.then("it should return 401");
+        webTestClient
+            .get()
+            .uri(AUTHORIZATIONS_PATH, UUID.randomUUID())
+            .exchange()
+            .expectStatus()
+            .isUnauthorized();
+      }
+
+      @Test
+      void thenItShouldReturn403WhenTheUserHasNoPermission() {
+        BddLogger.then("it should return 403");
+        webTestClient
+            .get()
+            .uri(AUTHORIZATIONS_PATH, UUID.randomUUID())
+            .headers(ActivityControllerIT.this::addNoPermissionHeaders)
+            .exchange()
+            .expectStatus()
+            .isForbidden();
+      }
+    }
+
+    @Nested
     class WhenDownloadingADraftFile {
 
       UUID draftId;
@@ -3546,6 +3770,46 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         .isOk();
 
     return draftId;
+  }
+
+  private JsonNode getAuthorizationsAsStaff(UUID activityId) throws Exception {
+    String body =
+        webTestClient
+            .get()
+            .uri(AUTHORIZATIONS_PATH, activityId)
+            .headers(this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+    return objectMapper.readTree(body);
+  }
+
+  private void defineAuthorizationsAsStaff(
+      UUID activityId, List<StaffAuthorizationRequest> authorizations) throws Exception {
+    webTestClient
+        .put()
+        .uri(AUTHORIZATIONS_PATH, activityId)
+        .headers(this::addStaffHeaders)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(
+            objectMapper.writeValueAsString(new ActivityAuthorizationsRequest(authorizations)))
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isOk();
+  }
+
+  private JsonNode findAuthorizationOf(JsonNode authorizations, UUID staffId) {
+    for (JsonNode authorization : authorizations) {
+      if (staffId.toString().equals(authorization.get("staff").get("id").asText())) {
+        return authorization;
+      }
+    }
+    throw new AssertionError("No authorization found for staff " + staffId);
   }
 
   private void addStudentHeaders(HttpHeaders headers) {

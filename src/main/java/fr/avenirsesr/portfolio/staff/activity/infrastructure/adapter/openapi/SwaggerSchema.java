@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.openapi;
 
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import io.swagger.v3.oas.models.media.Schema;
@@ -20,4 +21,10 @@ public final class SwaggerSchema {
           .name("EActivityStatus")
           ._enum(Arrays.stream(EActivityStatus.values()).map(Enum::name).toList())
           .description("Enum for activity status");
+
+  public static final Schema<String> activityRightSchema =
+      new StringSchema()
+          .name("EActivityRight")
+          ._enum(Arrays.stream(EActivityRight.values()).map(Enum::name).toList())
+          .description("Enum for activity right");
 }

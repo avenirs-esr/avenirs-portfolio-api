@@ -33,6 +33,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityDraft;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityUpdatableField;
+import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityAuthorizationService;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityDraftRepository;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityRepository;
@@ -84,6 +85,7 @@ public class ActivityServiceImpl implements ActivityService {
   private final ActivityViewRepository activityViewRepository;
   private final AccessClient accessClient;
   private final UserPrincipalRepository userPrincipalRepository;
+  private final ActivityAuthorizationService activityAuthorizationService;
 
   @Override
   public Activity create(
@@ -136,6 +138,7 @@ public class ActivityServiceImpl implements ActivityService {
             List.of(),
             List.of());
     activityRepository.save(activity);
+    activityAuthorizationService.grantAllRights(activity.getId(), author);
     return activity;
   }
 
@@ -318,6 +321,9 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     activityDraftRepository.removeFromDatabase(draft);
+    if (!activityRepository.existsById(activityDraftId)) {
+      activityAuthorizationService.deleteAllOfActivity(activityDraftId);
+    }
     log.info("Deleted activity draft with id: {}", activityDraftId);
   }
 
@@ -340,6 +346,7 @@ public class ActivityServiceImpl implements ActivityService {
     activityViewRepository.deleteAllByActivityId(activityId);
     draft.ifPresent(activityDraftRepository::removeFromDatabase);
     activityRepository.removeFromDatabase(activity);
+    activityAuthorizationService.deleteAllOfActivity(activityId);
     fileIds.forEach(fileResourceService::delete);
 
     log.info("Definitively deleted activity {} and every element linked to it", activityId);
@@ -545,7 +552,9 @@ public class ActivityServiceImpl implements ActivityService {
     var staff = loggedInUserService.getLoggedInStaff();
     requireNotBlankAndMaxLength("title", title, TITLE_LENGTH);
     var draft = ActivityDraft.create(title, staff);
-    return activityDraftRepository.save(draft);
+    var savedDraft = activityDraftRepository.save(draft);
+    activityAuthorizationService.grantAllRights(savedDraft.getId(), staff);
+    return savedDraft;
   }
 
   @Override
@@ -760,7 +769,9 @@ public class ActivityServiceImpl implements ActivityService {
             source.getTargetInstitutionIds(),
             source.getTargetGroupIds(),
             source.isNational());
-    return activityDraftRepository.save(duplicate);
+    var savedDuplicate = activityDraftRepository.save(duplicate);
+    activityAuthorizationService.grantAllRights(savedDuplicate.getId(), staff);
+    return savedDuplicate;
   }
 
   private ActivityDraft saveDuplicateFrom(
@@ -787,7 +798,9 @@ public class ActivityServiceImpl implements ActivityService {
             source.getTargetInstitutionIds(),
             source.getTargetGroupIds(),
             source.isNational());
-    return activityDraftRepository.save(duplicate);
+    var savedDuplicate = activityDraftRepository.save(duplicate);
+    activityAuthorizationService.grantAllRights(savedDuplicate.getId(), staff);
+    return savedDuplicate;
   }
 
   private boolean hasEnrolledStudents(Activity activity) {
