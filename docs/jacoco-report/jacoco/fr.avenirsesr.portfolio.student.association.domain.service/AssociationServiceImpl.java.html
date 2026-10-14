@@ -19,7 +19,7 @@ import fr.avenirsesr.portfolio.student.association.domain.port.output.strategy.A
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -92,14 +92,14 @@ public class AssociationServiceImpl implements AssociationService {
   }
 
   @Override
-  public Optional&lt;AssociationLimitData&gt; getAssociationLimit(
-      UUID id, EAssociationContextType contextType, EAssociationContextType associatedContextType) {
-<span class="fc" id="L97">    var associationType =</span>
-<span class="fc" id="L98">        EAssociationType.of(contextType.toClass(), associatedContextType.toClass());</span>
+  public List&lt;AssociationLimitData&gt; getAssociationLimits(
+      UUID id, EAssociationContextType contextType) {
+<span class="fc" id="L97">    strategyOf(contextType).checkLoggedInStudentOwns(List.of(id));</span>
 
-<span class="fc" id="L100">    strategyOf(contextType).checkLoggedInStudentOwns(List.of(id));</span>
-
-<span class="fc" id="L102">    return Optional.ofNullable(limitsOf(contextType, List.of(id), associationType).get(id));</span>
+<span class="fc" id="L99">    return EAssociationType.getAllBy(contextType.toClass()).stream()</span>
+<span class="fc" id="L100">        .map(associationType -&gt; limitsOf(contextType, List.of(id), associationType).get(id))</span>
+<span class="fc" id="L101">        .filter(Objects::nonNull)</span>
+<span class="fc" id="L102">        .toList();</span>
   }
 
   @Override
@@ -262,15 +262,19 @@ public class AssociationServiceImpl implements AssociationService {
 <span class="fc" id="L262">      return Map.of();</span>
     }
 
-<span class="fc" id="L265">    var counts = countAllOf(List.copyOf(limits.keySet()), contextType.toClass(), associationType);</span>
+<span class="fc" id="L265">    var associatedContextType =</span>
+<span class="fc" id="L266">        EAssociationContextType.of(associationType.associatedKeyOf(contextType.toClass()));</span>
+<span class="fc" id="L267">    var counts = countAllOf(List.copyOf(limits.keySet()), contextType.toClass(), associationType);</span>
 
-<span class="fc" id="L267">    return limits.entrySet().stream()</span>
-<span class="fc" id="L268">        .collect(</span>
-<span class="fc" id="L269">            Collectors.toMap(</span>
+<span class="fc" id="L269">    return limits.entrySet().stream()</span>
+<span class="fc" id="L270">        .collect(</span>
+<span class="fc" id="L271">            Collectors.toMap(</span>
                 Map.Entry::getKey,
                 limit -&gt;
-<span class="fc" id="L272">                    new AssociationLimitData(</span>
-<span class="fc" id="L273">                        limit.getValue(), counts.getOrDefault(limit.getKey(), 0L))));</span>
+<span class="fc" id="L274">                    new AssociationLimitData(</span>
+                        associatedContextType,
+<span class="fc" id="L276">                        limit.getValue(),</span>
+<span class="fc" id="L277">                        counts.getOrDefault(limit.getKey(), 0L))));</span>
   }
 
   private void checkLimits(
@@ -278,10 +282,10 @@ public class AssociationServiceImpl implements AssociationService {
       List&lt;UUID&gt; ids,
       EAssociationType associationType,
       int associationsToAdd) {
-<span class="fc" id="L281">    if (limitsOf(contextType, ids, associationType).values().stream()</span>
-<span class="fc bfc" id="L282" title="All 4 branches covered.">        .anyMatch(limit -&gt; associationsToAdd &gt; limit.remaining())) {</span>
-<span class="fc" id="L283">      throw new MaximumAssociationReachedException();</span>
+<span class="fc" id="L285">    if (limitsOf(contextType, ids, associationType).values().stream()</span>
+<span class="fc bfc" id="L286" title="All 4 branches covered.">        .anyMatch(limit -&gt; associationsToAdd &gt; limit.remaining())) {</span>
+<span class="fc" id="L287">      throw new MaximumAssociationReachedException();</span>
     }
-<span class="fc" id="L285">  }</span>
+<span class="fc" id="L289">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
