@@ -1,11 +1,14 @@
 package fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.specification;
 
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
+import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityAuthorizationEntity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.model.FeedbackEntity;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -13,9 +16,21 @@ public final class FeedbackSpecification {
 
   private FeedbackSpecification() {}
 
-  public static Specification<FeedbackEntity> hasStaffAuthor(UUID staffId) {
-    return (root, query, cb) ->
-        cb.equal(root.join("declaredActivity").join("activity").get("author").get("id"), staffId);
+  public static Specification<FeedbackEntity> isAssignedToStaff(UUID staffId) {
+    return (root, query, cb) -> {
+      var subquery = query.subquery(Integer.class);
+      var authorization = subquery.from(ActivityAuthorizationEntity.class);
+      subquery
+          .select(cb.literal(1))
+          .where(
+              cb.equal(
+                  authorization.get("activityId"),
+                  root.get("declaredActivity").get("activity").get("id")),
+              cb.equal(authorization.get("staff").get("id"), staffId),
+              cb.isMember(
+                  EActivityRight.FEEDBACK, authorization.<Set<EActivityRight>>get("rights")));
+      return cb.exists(subquery);
+    };
   }
 
   public static Specification<FeedbackEntity> hasStatus(EFeedbackStatus... status) {

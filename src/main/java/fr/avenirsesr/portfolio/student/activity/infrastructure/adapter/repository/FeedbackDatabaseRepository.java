@@ -107,7 +107,7 @@ public class FeedbackDatabaseRepository
   public PagedResult<Feedback> findByStaff(
       UUID staffId, UUID activityId, PageCriteria pageCriteria, EFeedbackStatus... status) {
     var specification =
-        FeedbackSpecification.hasStaffAuthor(staffId)
+        FeedbackSpecification.isAssignedToStaff(staffId)
             .and(FeedbackSpecification.hasStatus(status))
             .and(FeedbackSpecification.hasActivityId(activityId))
             .and(FeedbackSpecification.isLatestOfItsDeclaredActivity());
@@ -135,7 +135,7 @@ public class FeedbackDatabaseRepository
   public List<Feedback> findLatestFeedbacksByStaffAndActivityForEachStudent(
       UUID staffId, UUID activityId) {
     var specification =
-        FeedbackSpecification.hasStaffAuthor(staffId)
+        FeedbackSpecification.isAssignedToStaff(staffId)
             .and(FeedbackSpecification.hasActivityId(activityId));
 
     var sort = Sort.by("createdAt").descending();
@@ -171,7 +171,7 @@ public class FeedbackDatabaseRepository
   @Override
   public int countByStatus(Staff staff, Activity activity, EFeedbackStatus status) {
     var spec =
-        FeedbackSpecification.hasStaffAuthor(staff.getId())
+        FeedbackSpecification.isAssignedToStaff(staff.getId())
             .and(FeedbackSpecification.hasActivityId(activity != null ? activity.getId() : null))
             .and(FeedbackSpecification.hasStatus(status))
             .and(FeedbackSpecification.isLatestOfItsDeclaredActivity());

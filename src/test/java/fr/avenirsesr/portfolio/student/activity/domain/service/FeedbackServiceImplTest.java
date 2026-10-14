@@ -18,9 +18,12 @@ import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.file.domain.model.FileDownload;
 import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
+import fr.avenirsesr.portfolio.notification.domain.model.notification.AskForFeedbackNotification;
 import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
+import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityAuthorizationService;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackDashboardData;
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackData;
@@ -88,6 +91,7 @@ class FeedbackServiceImplTest {
   @Mock private LoggedInUserService loggedInUserService;
   @Mock private NotificationService notificationService;
   @Mock private FileResourceService fileResourceService;
+  @Mock private ActivityAuthorizationService activityAuthorizationService;
 
   @InjectMocks private FeedbackServiceImpl service;
 
@@ -138,6 +142,45 @@ class FeedbackServiceImplTest {
       Feedback captured = feedbackCaptor.getValue();
       assertThat(captured.getReflexion()).isEmpty();
       assertThat(captured.getAssociations()).isEqualTo(FeedbackAssociations.empty());
+    }
+
+    @Test
+    void should_notify_every_staff_holding_the_feedback_right() {
+      BddLogger.given(
+          "A declared activity whose activity has two staffs holding the feedback right");
+      UUID declaredActivityId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().toModel();
+      Staff reviewer = StaffFixture.create().toModel();
+      Staff otherReviewer = StaffFixture.create().toModel();
+      DeclaredActivity declaredActivity =
+          DeclaredActivity.create(
+              UUID.randomUUID(), student, activity, null, null, null, null, null);
+
+      when(declaredActivityService.fetchActivityAndCheckLoggedInStudentAuthorization(
+              declaredActivityId))
+          .thenReturn(declaredActivity);
+      when(associationService.getAllOf(
+              any(UUID.class), any(Class.class), ArgumentMatchers.<List<EAssociationType>>any()))
+          .thenReturn(List.of());
+      when(traceService.findAllTracesById(List.of())).thenReturn(List.of());
+      when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of()))
+          .thenReturn(List.of());
+      when(feedbackRepository.findAllByDeclaredActivityId(declaredActivityId))
+          .thenReturn(List.of());
+      when(feedbackRepository.save(any(Feedback.class))).thenAnswer(i -> i.getArguments()[0]);
+      when(activityAuthorizationService.getStaffsWithRight(
+              activity.getId(), EActivityRight.FEEDBACK))
+          .thenReturn(List.of(reviewer, otherReviewer));
+
+      BddLogger.when("createFeedback is called");
+      service.createFeedback(declaredActivityId);
+
+      BddLogger.then("An ask-for-feedback notification is sent to each of them");
+      ArgumentCaptor<List<AskForFeedbackNotification>> captor = ArgumentCaptor.captor();
+      verify(notificationService).notifyAll(captor.capture());
+      assertThat(captor.getValue()).hasSize(2);
+      assertThat(captor.getValue().stream().map(notification -> notification.build().getUser()))
+          .containsExactly(reviewer.getUser(), otherReviewer.getUser());
     }
 
     @Test
@@ -938,6 +981,9 @@ class FeedbackServiceImplTest {
 
       when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
       when(loggedInUserService.getLoggedInUser()).thenReturn(differentUser);
+      doThrow(new UserNotAuthorizedException())
+          .when(activityAuthorizationService)
+          .checkRight(any(), any(), eq(EActivityRight.FEEDBACK));
 
       BddLogger.when("getFeedbackDetails is called with STAFF category");
 
@@ -1082,7 +1128,7 @@ class FeedbackServiceImplTest {
   class UpdateFeedback {
 
     @Test
-    void should_save_feedback_with_updated_text_when_user_is_author() {
+    void should_save_feedback_with_updated_text_when_staff_holds_the_feedback_right() {
       BddLogger.given("A logged-in staff who is the author of the activity and a valid feedback");
       UUID feedbackId = UUID.randomUUID();
       Activity activity = ActivityFixture.create().toModel();
@@ -1102,10 +1148,10 @@ class FeedbackServiceImplTest {
               FeedbackAssociations.empty(),
               List.of());
       String feedbackText = "Excellent travail, bravo !";
-      User authorUser = UserFixture.create().withId(activity.getAuthor().getId()).toModel();
+      Staff staff = StaffFixture.create().withId(activity.getAuthor().getId()).toModel();
 
       when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
-      when(loggedInUserService.getLoggedInUser()).thenReturn(authorUser);
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
       when(feedbackRepository.save(any(Feedback.class))).thenAnswer(i -> i.getArguments()[0]);
 
       BddLogger.when("updateFeedback is called with the new feedback text");
@@ -1134,7 +1180,7 @@ class FeedbackServiceImplTest {
     }
 
     @Test
-    void should_throw_UserNotAuthorizedException_when_user_is_not_the_author() {
+    void should_throw_UserNotAuthorizedException_when_staff_lacks_the_feedback_right() {
       BddLogger.given("A logged-in user who is NOT the author of the activity");
       UUID feedbackId = UUID.randomUUID();
       Activity activity = ActivityFixture.create().toModel();
@@ -1153,10 +1199,13 @@ class FeedbackServiceImplTest {
               1,
               FeedbackAssociations.empty(),
               List.of());
-      User differentUser = UserFixture.create().toModel();
+      Staff differentStaff = StaffFixture.create().toModel();
 
       when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
-      when(loggedInUserService.getLoggedInUser()).thenReturn(differentUser);
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(differentStaff);
+      doThrow(new UserNotAuthorizedException())
+          .when(activityAuthorizationService)
+          .checkRight(any(), any(), eq(EActivityRight.FEEDBACK));
 
       BddLogger.when("updateFeedback is called");
 
@@ -1188,10 +1237,10 @@ class FeedbackServiceImplTest {
               FeedbackAssociations.empty(),
               List.of());
       String tooLongFeedback = "a".repeat(RICH_DESCRIPTION_LENGTH + 1);
-      User authorUser = UserFixture.create().withId(activity.getAuthor().getId()).toModel();
+      Staff staff = StaffFixture.create().withId(activity.getAuthor().getId()).toModel();
 
       when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
-      when(loggedInUserService.getLoggedInUser()).thenReturn(authorUser);
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
 
       BddLogger.when("updateFeedback is called with a text that is too long");
 
@@ -1222,10 +1271,10 @@ class FeedbackServiceImplTest {
               1,
               FeedbackAssociations.empty(),
               List.of());
-      User authorUser = UserFixture.create().withId(activity.getAuthor().getId()).toModel();
+      Staff staff = StaffFixture.create().withId(activity.getAuthor().getId()).toModel();
 
       when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
-      when(loggedInUserService.getLoggedInUser()).thenReturn(authorUser);
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
 
       BddLogger.when("updateFeedback is called on a SEEN feedback");
 
@@ -1350,6 +1399,9 @@ class FeedbackServiceImplTest {
 
       when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
       when(loggedInUserService.getLoggedInStaff()).thenReturn(differentStaff);
+      doThrow(new UserNotAuthorizedException())
+          .when(activityAuthorizationService)
+          .checkRight(any(), any(), eq(EActivityRight.FEEDBACK));
 
       BddLogger.when("submitFeedback is called");
 
@@ -1607,6 +1659,9 @@ class FeedbackServiceImplTest {
       Staff differentStaff = StaffFixture.create().toModel();
 
       when(loggedInUserService.getLoggedInStaff()).thenReturn(differentStaff);
+      doThrow(new UserNotAuthorizedException())
+          .when(activityAuthorizationService)
+          .checkRight(any(), any(), eq(EActivityRight.FEEDBACK));
       when(activityService.getActivityById(activityId)).thenReturn(activity);
 
       BddLogger.when("getFeedbackDashboard is called with the activityId");
@@ -1800,6 +1855,9 @@ class FeedbackServiceImplTest {
               UUID.randomUUID(), student, activity, null, null, null, null, null);
 
       when(loggedInUserService.getLoggedInStaff()).thenReturn(differentStaff);
+      doThrow(new UserNotAuthorizedException())
+          .when(activityAuthorizationService)
+          .checkRight(any(), any(), eq(EActivityRight.FEEDBACK));
       when(declaredActivityRepository.findById(declaredActivityId))
           .thenReturn(Optional.of(declaredActivity));
 
@@ -1980,6 +2038,9 @@ class FeedbackServiceImplTest {
 
       when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
       when(loggedInUserService.getLoggedInStaff()).thenReturn(otherStaff);
+      doThrow(new UserNotAuthorizedException())
+          .when(activityAuthorizationService)
+          .checkRight(any(), any(), eq(EActivityRight.FEEDBACK));
 
       BddLogger.when("uploadAttachment is called");
 
@@ -2108,6 +2169,9 @@ class FeedbackServiceImplTest {
 
       when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
       when(loggedInUserService.getLoggedInStaff()).thenReturn(otherStaff);
+      doThrow(new UserNotAuthorizedException())
+          .when(activityAuthorizationService)
+          .checkRight(any(), any(), eq(EActivityRight.FEEDBACK));
 
       BddLogger.when("deleteAttachment is called");
 
@@ -2176,6 +2240,8 @@ class FeedbackServiceImplTest {
 
       when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
       when(loggedInUserService.getLoggedInUser()).thenReturn(authorUser);
+      when(activityAuthorizationService.getLoggedInStaffRights(activity.getId()))
+          .thenReturn(Set.of(EActivityRight.FEEDBACK));
       when(fileResourceService.download(existingAttachment.getId())).thenReturn(expected);
 
       BddLogger.when("downloadAttachment is called");
@@ -2240,6 +2306,8 @@ class FeedbackServiceImplTest {
 
       when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
       when(loggedInUserService.getLoggedInUser()).thenReturn(authorUser);
+      when(activityAuthorizationService.getLoggedInStaffRights(activity.getId()))
+          .thenReturn(Set.of(EActivityRight.FEEDBACK));
       when(fileResourceService.download(existingAttachment.getId())).thenReturn(expected);
 
       BddLogger.when("downloadAttachment is called");
@@ -2303,6 +2371,8 @@ class FeedbackServiceImplTest {
 
       when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
       when(loggedInUserService.getLoggedInUser()).thenReturn(authorUser);
+      when(activityAuthorizationService.getLoggedInStaffRights(activity.getId()))
+          .thenReturn(Set.of(EActivityRight.FEEDBACK));
 
       BddLogger.when("downloadAttachment is called with an unknown attachment ID");
 
