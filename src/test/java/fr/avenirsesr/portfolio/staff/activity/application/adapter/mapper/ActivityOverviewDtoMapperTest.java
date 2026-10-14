@@ -7,7 +7,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.application.adapter.mapper.OptionalMapper;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityOverviewDTO;
-import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.AuthorDTO;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.StaffInfoDTO;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityWithStudentStatusData;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
@@ -25,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class ActivityOverviewDtoMapperTest {
 
   @Spy private OptionalMapper optionalMapper = Mappers.getMapper(OptionalMapper.class);
+  @Spy private StaffInfoDtoMapper staffInfoDtoMapper = Mappers.getMapper(StaffInfoDtoMapper.class);
   @InjectMocks private ActivityOverviewDtoMapperImpl mapper;
 
   @Test
@@ -48,7 +49,7 @@ class ActivityOverviewDtoMapperTest {
     BddLogger.then("it should map nested activity fields correctly");
     assertNotNull(dto);
     assertEquals(activity.getId(), dto.id());
-    assertEquals(new AuthorDTO(staff.getId(), "firstname", "Lastname"), dto.author());
+    assertEquals(new StaffInfoDTO(staff.getId(), "firstname", "Lastname"), dto.author());
     assertEquals(activity.getTitle(), dto.title());
     assertEquals(activity.getThematic(), dto.thematic());
     assertEquals(activity.getSummary(), dto.summary());

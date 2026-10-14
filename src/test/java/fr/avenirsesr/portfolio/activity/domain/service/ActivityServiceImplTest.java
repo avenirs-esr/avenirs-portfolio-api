@@ -55,6 +55,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityDraft;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityUpdatableField;
+import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityAuthorizationService;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityDraftRepository;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityRepository;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityViewRepository;
@@ -100,6 +101,7 @@ class ActivityServiceImplTest {
   @Mock private AccessClient accessClient;
   @Mock private UserPrincipalRepository userPrincipalRepository;
   @Mock private StudentRepository studentRepository;
+  @Mock private ActivityAuthorizationService activityAuthorizationService;
 
   @InjectMocks private ActivityServiceImpl activityService;
 
@@ -170,6 +172,29 @@ class ActivityServiceImplTest {
         verify(activityRepository).save(captor.capture());
         assertEquals(createdActivity, captor.getValue());
       }
+
+      @Test
+      void thenItShouldGrantEveryRightToTheAuthor() {
+        BddLogger.then("the author should be granted every right on the activity");
+
+        Activity createdActivity =
+            activityService.create(
+                id,
+                author,
+                "Test Activity",
+                EActivityThematic.EXPERIENCES,
+                "This is a test activity",
+                "<h3>Objectives</h3><p>Test activity description</p>",
+                "2026",
+                null,
+                null,
+                true,
+                -1,
+                -1,
+                links);
+
+        verify(activityAuthorizationService).grantAllRights(createdActivity.getId(), author);
+      }
     }
 
     @Nested
@@ -198,6 +223,15 @@ class ActivityServiceImplTest {
 
         verify(loggedInUserService).getLoggedInStaff();
         verify(activityDraftRepository).save(result);
+      }
+
+      @Test
+      void thenItShouldGrantEveryRightToTheLoggedInStaff() {
+        BddLogger.then("the logged-in staff should be granted every right on the draft");
+
+        ActivityDraft result = activityService.createActivityDraft("Mon brouillon d'activité");
+
+        verify(activityAuthorizationService).grantAllRights(result.getId(), staff);
       }
 
       @Test
@@ -1622,6 +1656,26 @@ class ActivityServiceImplTest {
 
             verify(activityDraftRepository).removeFromDatabase(draft);
           }
+
+          @Test
+          void thenItShouldDeleteTheAuthorizationsWhenNoActivitySharesItsId() {
+            BddLogger.then("the authorizations of a standalone draft should be deleted");
+            when(activityRepository.existsById(draftId)).thenReturn(false);
+
+            activityService.deleteDraft(draftId);
+
+            verify(activityAuthorizationService).deleteAllOfActivity(draftId);
+          }
+
+          @Test
+          void thenItShouldKeepTheAuthorizationsWhenAnActivitySharesItsId() {
+            BddLogger.then("the authorizations of the published activity should be kept");
+            when(activityRepository.existsById(draftId)).thenReturn(true);
+
+            activityService.deleteDraft(draftId);
+
+            verify(activityAuthorizationService, never()).deleteAllOfActivity(any());
+          }
         }
 
         @Nested
@@ -1723,6 +1777,7 @@ class ActivityServiceImplTest {
 
           verify(fileResourceService).delete(activityFile.getId());
           verify(activityDraftRepository, never()).removeFromDatabase(any());
+          verify(activityAuthorizationService).deleteAllOfActivity(activityId);
         }
 
         @Test
@@ -2831,6 +2886,7 @@ class ActivityServiceImplTest {
           assertNotEquals(activityId, result.getId());
           assertEquals(loggedInStaff, result.getAuthor());
           verify(activityDraftRepository).save(result);
+          verify(activityAuthorizationService).grantAllRights(result.getId(), loggedInStaff);
         }
 
         @Test
@@ -3009,6 +3065,7 @@ class ActivityServiceImplTest {
           assertNotEquals(activityId, result.getId());
           assertEquals(loggedInStaff, result.getAuthor());
           verify(activityDraftRepository).save(result);
+          verify(activityAuthorizationService).grantAllRights(result.getId(), loggedInStaff);
         }
 
         @Test

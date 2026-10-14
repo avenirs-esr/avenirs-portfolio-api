@@ -9,7 +9,7 @@ import java.util.UUID;
 @Schema(requiredProperties = {"id", "title", "author", "thematic", "summary", "isNew"})
 public record ActivityOverviewDTO(
     UUID id,
-    AuthorDTO author,
+    StaffInfoDTO author,
     String title,
     @Schema(ref = "#/components/schemas/EActivityThematic") EActivityThematic thematic,
     @Schema(ref = "#/components/schemas/EDeclaredActivityStatus") EDeclaredActivityStatus status,
