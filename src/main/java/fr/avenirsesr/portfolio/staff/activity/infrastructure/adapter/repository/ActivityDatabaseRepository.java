@@ -64,7 +64,7 @@ public class ActivityDatabaseRepository
                         a.getId(),
                         a.getTitle(),
                         a.getThematic(),
-                        a.getAuthor(),
+                        List.of(),
                         a.getStatus(),
                         a.getUpdatedAt()))
             .toList(),

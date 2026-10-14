@@ -2658,11 +2658,12 @@ class ActivityServiceImplTest {
                 UUID.randomUUID(),
                 "Mon activité",
                 EActivityThematic.EXPERIENCES,
-                staff,
+                List.of(),
                 EActivityStatus.PUBLISHED,
                 Instant.now());
 
-        when(staffActivityOverviewRepository.findAllByAuthorAndStatus(staff, null, pageCriteria))
+        when(staffActivityOverviewRepository.findAllAccessibleByStaffAndStatus(
+                staff, null, pageCriteria))
             .thenReturn(new PagedResult<>(List.of(overviewData), pageInfo));
 
         var result = activityService.staffActivityWorkingSpace(pageCriteria, null);
@@ -2677,7 +2678,8 @@ class ActivityServiceImplTest {
       void thenItShouldReturnEmptyWhenNoActivitiesExist() {
         BddLogger.then("an empty paged result should be returned");
 
-        when(staffActivityOverviewRepository.findAllByAuthorAndStatus(staff, null, pageCriteria))
+        when(staffActivityOverviewRepository.findAllAccessibleByStaffAndStatus(
+                staff, null, pageCriteria))
             .thenReturn(new PagedResult<>(List.of(), new PageInfo(0, 8, 0)));
 
         var result = activityService.staffActivityWorkingSpace(pageCriteria, null);
@@ -2695,7 +2697,7 @@ class ActivityServiceImplTest {
                 UUID.randomUUID(),
                 "Brouillon",
                 EActivityThematic.RESUMES,
-                staff,
+                List.of(),
                 EActivityStatus.DRAFT,
                 Instant.now());
         ActivityStaffOverviewData published =
@@ -2703,7 +2705,7 @@ class ActivityServiceImplTest {
                 UUID.randomUUID(),
                 "Publiée",
                 EActivityThematic.EXPERIENCES,
-                staff,
+                List.of(),
                 EActivityStatus.PUBLISHED,
                 Instant.now().minusSeconds(3600));
         ActivityStaffOverviewData unpublished =
@@ -2711,11 +2713,12 @@ class ActivityServiceImplTest {
                 UUID.randomUUID(),
                 "Dépubliée",
                 EActivityThematic.SELF_KNOWLEDGE,
-                staff,
+                List.of(),
                 EActivityStatus.UNPUBLISHED,
                 Instant.now().minusSeconds(7200));
 
-        when(staffActivityOverviewRepository.findAllByAuthorAndStatus(staff, null, pageCriteria))
+        when(staffActivityOverviewRepository.findAllAccessibleByStaffAndStatus(
+                staff, null, pageCriteria))
             .thenReturn(
                 new PagedResult<>(List.of(draft, published, unpublished), new PageInfo(0, 8, 3)));
 
@@ -2734,34 +2737,40 @@ class ActivityServiceImplTest {
         BddLogger.then("the logged-in staff should be used as repository filter");
 
         Staff otherStaff = mock(Staff.class);
-        when(staffActivityOverviewRepository.findAllByAuthorAndStatus(staff, null, pageCriteria))
+        when(staffActivityOverviewRepository.findAllAccessibleByStaffAndStatus(
+                staff, null, pageCriteria))
             .thenReturn(new PagedResult<>(List.of(), new PageInfo(0, 8, 0)));
 
         activityService.staffActivityWorkingSpace(pageCriteria, null);
 
-        verify(staffActivityOverviewRepository).findAllByAuthorAndStatus(staff, null, pageCriteria);
+        verify(staffActivityOverviewRepository)
+            .findAllAccessibleByStaffAndStatus(staff, null, pageCriteria);
         verify(staffActivityOverviewRepository, never())
-            .findAllByAuthorAndStatus(eq(otherStaff), eq(null), any());
+            .findAllAccessibleByStaffAndStatus(eq(otherStaff), eq(null), any());
       }
 
       @Test
-      void thenItShouldMapAllFieldsCorrectly() {
-        BddLogger.then("all fields should be mapped without transformation");
+      void thenItShouldMapAllFieldsAndAttachTheResponsibles() {
+        BddLogger.then("all fields should be mapped and the responsibles attached");
 
         UUID expectedId = UUID.randomUUID();
         Instant expectedUpdatedAt = Instant.parse("2024-01-15T10:00:00Z");
+        Staff responsible = mock(Staff.class);
 
         ActivityStaffOverviewData overviewData =
             new ActivityStaffOverviewData(
                 expectedId,
                 "Titre précis",
                 EActivityThematic.SELF_KNOWLEDGE,
-                staff,
+                List.of(),
                 EActivityStatus.DRAFT,
                 expectedUpdatedAt);
 
-        when(staffActivityOverviewRepository.findAllByAuthorAndStatus(staff, null, pageCriteria))
+        when(staffActivityOverviewRepository.findAllAccessibleByStaffAndStatus(
+                staff, null, pageCriteria))
             .thenReturn(new PagedResult<>(List.of(overviewData), pageInfo));
+        when(activityAuthorizationService.getResponsiblesByActivityIds(List.of(expectedId)))
+            .thenReturn(Map.of(expectedId, List.of(responsible)));
 
         var result = activityService.staffActivityWorkingSpace(pageCriteria, null);
         var data = result.content().getFirst();
@@ -2769,9 +2778,33 @@ class ActivityServiceImplTest {
         assertEquals(expectedId, data.activityId());
         assertEquals("Titre précis", data.title());
         assertEquals(EActivityThematic.SELF_KNOWLEDGE, data.thematic());
-        assertEquals(staff, data.author());
+        assertEquals(List.of(responsible), data.responsibles());
         assertEquals(EActivityStatus.DRAFT, data.activityStatus());
         assertEquals(expectedUpdatedAt, data.updatedAt());
+      }
+
+      @Test
+      void thenItShouldLeaveTheResponsiblesEmptyWhenNobodyIsResponsible() {
+        BddLogger.then("an activity without responsible should carry an empty list");
+
+        ActivityStaffOverviewData overviewData =
+            new ActivityStaffOverviewData(
+                UUID.randomUUID(),
+                "Sans responsable",
+                EActivityThematic.EXPERIENCES,
+                List.of(),
+                EActivityStatus.PUBLISHED,
+                Instant.now());
+
+        when(staffActivityOverviewRepository.findAllAccessibleByStaffAndStatus(
+                staff, null, pageCriteria))
+            .thenReturn(new PagedResult<>(List.of(overviewData), pageInfo));
+        when(activityAuthorizationService.getResponsiblesByActivityIds(anyCollection()))
+            .thenReturn(Map.of());
+
+        var result = activityService.staffActivityWorkingSpace(pageCriteria, null);
+
+        assertTrue(result.content().getFirst().responsibles().isEmpty());
       }
     }
 
@@ -2797,7 +2830,7 @@ class ActivityServiceImplTest {
                 UUID.randomUUID(),
                 "Mon activité",
                 EActivityThematic.EXPERIENCES,
-                staff,
+                List.of(),
                 EActivityStatus.PUBLISHED,
                 Instant.now());
 
@@ -2831,6 +2864,31 @@ class ActivityServiceImplTest {
 
         verify(loggedInUserService).getLoggedInStaff();
         verify(activityRepository).findAllStaffOverview(null, pageCriteria);
+      }
+
+      @Test
+      void thenItShouldAttachTheResponsiblesOfEachActivity() {
+        BddLogger.then("the responsibles of each listed activity should be attached");
+
+        UUID activityId = UUID.randomUUID();
+        Staff responsible = mock(Staff.class);
+        ActivityStaffOverviewData overviewData =
+            new ActivityStaffOverviewData(
+                activityId,
+                "Activité de la bibliothèque",
+                EActivityThematic.EXPERIENCES,
+                List.of(),
+                EActivityStatus.PUBLISHED,
+                Instant.now());
+
+        when(activityRepository.findAllStaffOverview(null, pageCriteria))
+            .thenReturn(new PagedResult<>(List.of(overviewData), new PageInfo(0, 8, 1)));
+        when(activityAuthorizationService.getResponsiblesByActivityIds(List.of(activityId)))
+            .thenReturn(Map.of(activityId, List.of(responsible)));
+
+        var result = activityService.staffActivityLibrary(null, pageCriteria);
+
+        assertEquals(List.of(responsible), result.content().getFirst().responsibles());
       }
 
       @Test

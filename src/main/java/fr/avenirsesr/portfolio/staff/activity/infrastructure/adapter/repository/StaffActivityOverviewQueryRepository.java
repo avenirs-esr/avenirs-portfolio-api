@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityStaffOverviewData;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.StaffActivityOverviewRepository;
@@ -24,154 +25,121 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class StaffActivityOverviewQueryRepository implements StaffActivityOverviewRepository {
+  private static final String ANY_RIGHT_OF_STAFF =
+      """
+      EXISTS (
+          SELECT 1
+          FROM activity_authorization aa
+          JOIN activity_authorization_rights ar ON ar.activity_authorization_id = aa.id
+          WHERE aa.activity_id = %s
+            AND aa.staff_id = :staffId
+      )
+      """;
+
+  private static final String MANAGEMENT_RIGHT_OF_STAFF =
+      """
+      EXISTS (
+          SELECT 1
+          FROM activity_authorization aa
+          JOIN activity_authorization_rights ar ON ar.activity_authorization_id = aa.id
+          WHERE aa.activity_id = %s
+            AND aa.staff_id = :staffId
+            AND ar.activity_right IN (:managementRights)
+      )
+      """;
+
+  private static final String PUBLISHED_SELECT =
+      """
+      SELECT
+          a.id         AS activity_id,
+          a.title      AS title,
+          a.thematic   AS thematic,
+          a.status     AS status,
+          a.updated_at AS updated_at
+      FROM activity a
+      WHERE a.status = 'PUBLISHED'
+        AND
+      """
+          + ANY_RIGHT_OF_STAFF.formatted("a.id");
+
+  private static final String UNPUBLISHED_SELECT =
+      """
+      SELECT
+          a.id         AS activity_id,
+          a.title      AS title,
+          a.thematic   AS thematic,
+          a.status     AS status,
+          a.updated_at AS updated_at
+      FROM activity a
+      WHERE a.status = 'UNPUBLISHED'
+        AND
+      """
+          + MANAGEMENT_RIGHT_OF_STAFF.formatted("a.id");
+
+  private static final String DRAFT_SELECT =
+      """
+      SELECT
+          d.id         AS activity_id,
+          d.title      AS title,
+          d.thematic   AS thematic,
+          'DRAFT'      AS status,
+          d.updated_at AS updated_at
+      FROM activity_draft d
+      WHERE
+      """
+          + MANAGEMENT_RIGHT_OF_STAFF.formatted("d.id");
+
   @PersistenceContext private EntityManager em;
 
   @Override
-  public PagedResult<ActivityStaffOverviewData> findAllByAuthorAndStatus(
-      Staff author, EActivityStatus activityStatus, PageCriteria pageCriteria) {
+  public PagedResult<ActivityStaffOverviewData> findAllAccessibleByStaffAndStatus(
+      Staff staff, EActivityStatus activityStatus, PageCriteria pageCriteria) {
 
-    String activitySelect =
-        """
-        SELECT
-            a.id         AS activity_id,
-            a.title      AS title,
-            a.thematic   AS thematic,
-            a.author_id  AS author_id,
-            a.status     AS status,
-            a.updated_at AS updated_at
-        FROM activity a
-        WHERE a.author_id = :authorId
-        """;
+    String unified =
+        switch (activityStatus) {
+          case PUBLISHED -> PUBLISHED_SELECT;
+          case UNPUBLISHED -> UNPUBLISHED_SELECT;
+          case DRAFT -> DRAFT_SELECT;
+          case null ->
+              String.join(" UNION ALL ", PUBLISHED_SELECT, UNPUBLISHED_SELECT, DRAFT_SELECT);
+        };
 
-    String activitySelectWithStatus = activitySelect + " AND a.status = :activityStatus";
-
-    String draftSelect =
-        """
-        SELECT
-            d.id         AS activity_id,
-            d.title      AS title,
-            d.thematic   AS thematic,
-            d.author_id  AS author_id,
-            'DRAFT'      AS status,
-            d.updated_at AS updated_at
-        FROM activity_draft d
-        WHERE d.author_id = :authorId
-        """;
-
-    String unionSql;
-    String countSql;
-
-    switch (activityStatus) {
-      case DRAFT -> {
-        unionSql =
-            """
-            SELECT *
-            FROM (
-            """
-                + draftSelect
-                + """
-                ) AS unified
-                ORDER BY updated_at DESC
-                """;
-
-        countSql =
-            """
-            SELECT COUNT(*)
-            FROM activity_draft d
-            WHERE d.author_id = :authorId
-            """;
-      }
-
-      case PUBLISHED, UNPUBLISHED -> {
-        unionSql =
-            """
-            SELECT *
-            FROM (
-            """
-                + activitySelectWithStatus
-                + """
-                ) AS unified
-                ORDER BY updated_at DESC
-                """;
-
-        countSql =
-            """
-            SELECT COUNT(*)
-            FROM activity a
-            WHERE a.author_id = :authorId
-              AND a.status = :activityStatus
-            """;
-      }
-
-      case null -> {
-        unionSql =
-            """
-            SELECT *
-            FROM (
-            """
-                + activitySelect
-                + """
-
-                UNION ALL
-
-                """
-                + draftSelect
-                + """
-                ) AS unified
-                ORDER BY updated_at DESC
-                """;
-
-        countSql =
-            """
-            SELECT COUNT(*)
-            FROM (
-                SELECT id
-                FROM activity
-                WHERE author_id = :authorId
-
-                UNION ALL
-
-                SELECT id
-                FROM activity_draft
-                WHERE author_id = :authorId
-            ) AS total
-            """;
-      }
-    }
+    String dataSql = "SELECT * FROM (" + unified + ") AS unified ORDER BY updated_at DESC";
+    String countSql = "SELECT COUNT(*) FROM (" + unified + ") AS total";
 
     Query dataQuery =
-        em.createNativeQuery(unionSql)
-            .setParameter("authorId", author.getId())
+        bindParameters(em.createNativeQuery(dataSql), staff, activityStatus)
             .setFirstResult(pageCriteria.page() * pageCriteria.pageSize())
             .setMaxResults(pageCriteria.pageSize());
-
-    Query countQuery = em.createNativeQuery(countSql).setParameter("authorId", author.getId());
-
-    if (activityStatus == EActivityStatus.PUBLISHED
-        || activityStatus == EActivityStatus.UNPUBLISHED) {
-      dataQuery.setParameter("activityStatus", activityStatus.name());
-      countQuery.setParameter("activityStatus", activityStatus.name());
-    }
+    Query countQuery = bindParameters(em.createNativeQuery(countSql), staff, activityStatus);
 
     List<Object[]> rows = dataQuery.getResultList();
     long total = ((Number) countQuery.getSingleResult()).longValue();
 
-    List<ActivityStaffOverviewData> content =
-        rows.stream().map(row -> mapRow(row, author)).toList();
+    List<ActivityStaffOverviewData> content = rows.stream().map(this::mapRow).toList();
 
     return new PagedResult<>(
         content, new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), total));
   }
 
-  private ActivityStaffOverviewData mapRow(Object[] row, Staff author) {
+  private Query bindParameters(Query query, Staff staff, EActivityStatus activityStatus) {
+    query.setParameter("staffId", staff.getId());
+    if (activityStatus != EActivityStatus.PUBLISHED) {
+      query.setParameter(
+          "managementRights", EActivityRight.MANAGEMENT_RIGHTS.stream().map(Enum::name).toList());
+    }
+    return query;
+  }
+
+  private ActivityStaffOverviewData mapRow(Object[] row) {
     String thematic = toNullableString(row[2]);
     return new ActivityStaffOverviewData(
         toUUID(row[0]),
         toString(row[1]),
         thematic == null ? null : EActivityThematic.valueOf(thematic),
-        author,
-        EActivityStatus.valueOf(toString(row[4])),
-        toInstant(row[5]));
+        List.of(),
+        EActivityStatus.valueOf(toString(row[3])),
+        toInstant(row[4]));
   }
 
   private String toString(Object value) {

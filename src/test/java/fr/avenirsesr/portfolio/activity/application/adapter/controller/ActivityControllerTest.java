@@ -425,7 +425,7 @@ class ActivityControllerTest {
             UUID.randomUUID(),
             "Mon activité",
             EActivityThematic.EXPERIENCES,
-            staff,
+            List.of(staff),
             EActivityStatus.PUBLISHED,
             Instant.now());
 
@@ -437,7 +437,7 @@ class ActivityControllerTest {
     var expectedDto =
         new ActivityStaffOverviewDTO(
             overviewData.activityId(),
-            AUTHOR,
+            List.of(AUTHOR),
             "title",
             EActivityThematic.EXPERIENCES,
             EActivityStatus.PUBLISHED,
@@ -495,7 +495,7 @@ class ActivityControllerTest {
             UUID.randomUUID(),
             "Brouillon",
             EActivityThematic.RESUMES,
-            staff,
+            List.of(staff),
             EActivityStatus.DRAFT,
             Instant.now());
     var published =
@@ -503,7 +503,7 @@ class ActivityControllerTest {
             UUID.randomUUID(),
             "Publiée",
             EActivityThematic.EXPERIENCES,
-            staff,
+            List.of(staff),
             EActivityStatus.PUBLISHED,
             Instant.now().minusSeconds(3600));
 
@@ -514,7 +514,7 @@ class ActivityControllerTest {
         .thenReturn(
             new ActivityStaffOverviewDTO(
                 draft.activityId(),
-                AUTHOR,
+                List.of(AUTHOR),
                 "title",
                 EActivityThematic.RESUMES,
                 EActivityStatus.DRAFT,
@@ -523,7 +523,7 @@ class ActivityControllerTest {
         .thenReturn(
             new ActivityStaffOverviewDTO(
                 published.activityId(),
-                AUTHOR,
+                List.of(AUTHOR),
                 "title",
                 EActivityThematic.EXPERIENCES,
                 EActivityStatus.PUBLISHED,
@@ -579,7 +579,7 @@ class ActivityControllerTest {
             UUID.randomUUID(),
             "Mon activité",
             EActivityThematic.EXPERIENCES,
-            staff,
+            List.of(staff),
             EActivityStatus.PUBLISHED,
             Instant.now());
 
@@ -591,7 +591,7 @@ class ActivityControllerTest {
     var expectedDto =
         new ActivityStaffOverviewDTO(
             overviewData.activityId(),
-            AUTHOR,
+            List.of(AUTHOR),
             "title",
             EActivityThematic.EXPERIENCES,
             EActivityStatus.PUBLISHED,
@@ -627,7 +627,7 @@ class ActivityControllerTest {
             UUID.randomUUID(),
             "Mon activité",
             EActivityThematic.EXPERIENCES,
-            staff,
+            List.of(staff),
             EActivityStatus.PUBLISHED,
             Instant.now());
 
@@ -641,7 +641,7 @@ class ActivityControllerTest {
         .thenReturn(
             new ActivityStaffOverviewDTO(
                 overviewData.activityId(),
-                AUTHOR,
+                List.of(AUTHOR),
                 "title",
                 EActivityThematic.EXPERIENCES,
                 EActivityStatus.PUBLISHED,
@@ -714,7 +714,7 @@ class ActivityControllerTest {
             UUID.randomUUID(),
             "A1",
             EActivityThematic.EXPERIENCES,
-            staff,
+            List.of(staff),
             EActivityStatus.PUBLISHED,
             Instant.now());
     var data2 =
@@ -722,7 +722,7 @@ class ActivityControllerTest {
             UUID.randomUUID(),
             "A2",
             EActivityThematic.RESUMES,
-            staff,
+            List.of(staff),
             EActivityStatus.DRAFT,
             Instant.now());
     var data3 =
@@ -730,7 +730,7 @@ class ActivityControllerTest {
             UUID.randomUUID(),
             "A3",
             EActivityThematic.SELF_KNOWLEDGE,
-            staff,
+            List.of(staff),
             EActivityStatus.DRAFT,
             Instant.now());
     var data4 =
@@ -738,7 +738,7 @@ class ActivityControllerTest {
             UUID.randomUUID(),
             "A4",
             EActivityThematic.OTHER,
-            staff,
+            List.of(staff),
             EActivityStatus.DRAFT,
             Instant.now());
 
@@ -748,7 +748,12 @@ class ActivityControllerTest {
     when(activityStaffOverviewDtoMapper.toDTO(any()))
         .thenReturn(
             new ActivityStaffOverviewDTO(
-                UUID.randomUUID(), AUTHOR, null, null, EActivityStatus.DRAFT, Instant.now()));
+                UUID.randomUUID(),
+                List.of(AUTHOR),
+                null,
+                null,
+                EActivityStatus.DRAFT,
+                Instant.now()));
 
     BddLogger.when("getting staff activity working space");
     var response = controller.getStaffActivityWorkingSpace(principal, 0, 8, null);
