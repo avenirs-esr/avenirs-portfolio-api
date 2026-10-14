@@ -26,6 +26,11 @@ public class ActivityDatabaseRepository
   }
 
   @Override
+  public boolean existsById(UUID id) {
+    return jpaRepository.existsById(id);
+  }
+
+  @Override
   public PagedResult<Activity> findAll(
       EActivityThematic thematic,
       PageCriteria pageCriteria,

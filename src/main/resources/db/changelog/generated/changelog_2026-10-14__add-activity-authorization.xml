@@ -1,0 +1,117 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+        http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet author="iamgreendev" id="create-activity-authorization">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="activity_authorization"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="activity_authorization">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="activity_authorization_pkey"/>
+            </column>
+            <column name="activity_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="staff_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint tableName="activity_authorization"
+                             columnNames="activity_id, staff_id"
+                             constraintName="uk_activity_authorization_activity_staff"/>
+
+        <createIndex tableName="activity_authorization" indexName="idx_activity_authorization_activity">
+            <column name="activity_id"/>
+        </createIndex>
+
+        <createIndex tableName="activity_authorization" indexName="idx_activity_authorization_staff">
+            <column name="staff_id"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseTableName="activity_authorization"
+                                 baseColumnNames="staff_id"
+                                 constraintName="fk_activity_authorization_staff"
+                                 referencedTableName="staff"
+                                 referencedColumnNames="id"/>
+
+        <createTable tableName="activity_authorization_rights">
+            <column name="activity_authorization_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="activity_right" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex tableName="activity_authorization_rights" indexName="idx_activity_authorization_rights_authorization">
+            <column name="activity_authorization_id"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseTableName="activity_authorization_rights"
+                                 baseColumnNames="activity_authorization_id"
+                                 constraintName="fk_activity_authorization_rights_authorization"
+                                 referencedTableName="activity_authorization"
+                                 referencedColumnNames="id"/>
+
+        <rollback>
+            <dropTable tableName="activity_authorization_rights"/>
+            <dropTable tableName="activity_authorization"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="iamgreendev" id="grant-all-rights-to-existing-activity-authors" dbms="postgresql">
+        <sql>
+            INSERT INTO activity_authorization (id, activity_id, staff_id, created_at, updated_at)
+            SELECT gen_random_uuid(), a.id, a.author_id, now(), now()
+            FROM activity a
+            WHERE NOT EXISTS (
+                SELECT 1 FROM activity_authorization aa
+                WHERE aa.activity_id = a.id AND aa.staff_id = a.author_id
+            );
+
+            INSERT INTO activity_authorization (id, activity_id, staff_id, created_at, updated_at)
+            SELECT gen_random_uuid(), d.id, d.author_id, now(), now()
+            FROM activity_draft d
+            WHERE NOT EXISTS (
+                SELECT 1 FROM activity_authorization aa
+                WHERE aa.activity_id = d.id AND aa.staff_id = d.author_id
+            );
+
+            INSERT INTO activity_authorization_rights (activity_authorization_id, activity_right)
+            SELECT aa.id, r.activity_right
+            FROM activity_authorization aa
+            CROSS JOIN (
+                VALUES ('RESPONSIBLE'), ('EDIT'), ('MANAGE_AUTHORIZATIONS'), ('FEEDBACK'), ('EVALUATION'), ('PUBLISH')
+            ) AS r(activity_right)
+            WHERE NOT EXISTS (
+                SELECT 1 FROM activity_authorization_rights ar
+                WHERE ar.activity_authorization_id = aa.id AND ar.activity_right = r.activity_right
+            );
+        </sql>
+        <rollback>
+            <sql>
+                DELETE FROM activity_authorization_rights;
+                DELETE FROM activity_authorization;
+            </sql>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
