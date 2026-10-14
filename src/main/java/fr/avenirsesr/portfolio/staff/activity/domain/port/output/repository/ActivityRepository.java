@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ActivityRepository extends GenericRepositoryPort<Activity> {
+  boolean existsById(UUID id);
+
   PagedResult<Activity> findAll(
       EActivityThematic thematic,
       PageCriteria pageCriteria,
