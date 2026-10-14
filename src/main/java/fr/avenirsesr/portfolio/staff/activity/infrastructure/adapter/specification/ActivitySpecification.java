@@ -1,7 +1,9 @@
 package fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.specification;
 
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
+import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityAuthorizationEntity;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityEntity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.model.DeclaredActivityEntity;
@@ -14,6 +16,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -69,7 +72,7 @@ public class ActivitySpecification {
   }
 
   public static Specification<ActivityEntity> hasFeedback(
-      UUID authorId, EFeedbackStatus... statuses) {
+      UUID staffId, EFeedbackStatus... statuses) {
     return (root, query, cb) -> {
       Subquery<Integer> subquery = query.subquery(Integer.class);
       Root<FeedbackEntity> feedback = subquery.from(FeedbackEntity.class);
@@ -78,7 +81,6 @@ public class ActivitySpecification {
 
       List<Predicate> predicates = new ArrayList<>(2);
       predicates.add(cb.equal(declaredActivity.get("activity"), root));
-      predicates.add(cb.equal(root.get("author").get("id"), authorId));
 
       if (statuses != null && statuses.length > 0) {
         predicates.add(feedback.get("status").in((Object[]) statuses));
@@ -86,6 +88,23 @@ public class ActivitySpecification {
 
       subquery.select(cb.literal(1)).where(predicates.toArray(Predicate[]::new));
 
+      return cb.and(
+          cb.exists(subquery),
+          staffHasRight(staffId, EActivityRight.FEEDBACK).toPredicate(root, query, cb));
+    };
+  }
+
+  public static Specification<ActivityEntity> staffHasRight(UUID staffId, EActivityRight right) {
+    return (root, query, cb) -> {
+      Subquery<Integer> subquery = query.subquery(Integer.class);
+      Root<ActivityAuthorizationEntity> authorization =
+          subquery.from(ActivityAuthorizationEntity.class);
+      subquery
+          .select(cb.literal(1))
+          .where(
+              cb.equal(authorization.get("activityId"), root.get("id")),
+              cb.equal(authorization.get("staff").get("id"), staffId),
+              cb.isMember(right, authorization.<Set<EActivityRight>>get("rights")));
       return cb.exists(subquery);
     };
   }

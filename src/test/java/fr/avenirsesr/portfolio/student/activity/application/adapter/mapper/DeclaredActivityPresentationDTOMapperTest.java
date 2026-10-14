@@ -180,7 +180,7 @@ class DeclaredActivityPresentationDTOMapperTest {
         activity.getFeedbackAllowedIterations(),
         true,
         false,
-        false,
+        List.of(),
         List.of(),
         List.of(),
         List.of(),

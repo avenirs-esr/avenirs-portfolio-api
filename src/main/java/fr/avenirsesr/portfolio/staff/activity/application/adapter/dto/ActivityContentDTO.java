@@ -1,8 +1,10 @@
 package fr.avenirsesr.portfolio.staff.activity.application.adapter.dto;
 
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.FileDTO;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -18,6 +20,7 @@ import java.util.UUID;
       "enableReflection",
       "traceAllowedAssociations",
       "feedbackAllowedIterations",
+      "rights",
       "national",
       "createdAt",
       "updatedAt"
@@ -37,7 +40,8 @@ public record ActivityContentDTO(
     int feedbackAllowedIterations,
     Boolean hasEnrolledStudent,
     Boolean haveDraft,
-    boolean isAuthor,
+    @ArraySchema(schema = @Schema(ref = "#/components/schemas/EActivityRight"))
+        List<EActivityRight> rights,
     List<FileDTO> files,
     List<String> links,
     List<UUID> targetInstitutionIds,

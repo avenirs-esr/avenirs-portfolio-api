@@ -30,6 +30,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.exception.*;
 import fr.avenirsesr.portfolio.staff.activity.domain.mapper.ActivityPresentationDataMapper;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityDraft;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityUpdatableField;
@@ -149,9 +150,7 @@ public class ActivityServiceImpl implements ActivityService {
         activityDraftRepository
             .findById(activityDraftId)
             .orElseThrow(ActivityDraftNotFoundException::new);
-    if (!draft.getAuthor().equals(staff)) {
-      throw new UserNotAuthorizedException();
-    }
+    activityAuthorizationService.checkRight(staff, activityDraftId, EActivityRight.PUBLISH);
 
     if (draft.getThematic().isEmpty()) {
       throw new FieldValidationException(
@@ -299,9 +298,7 @@ public class ActivityServiceImpl implements ActivityService {
     var staff = loggedInUserService.getLoggedInStaff();
     var activity =
         activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);
-    if (!activity.getAuthor().equals(staff)) {
-      throw new UserNotAuthorizedException();
-    }
+    activityAuthorizationService.checkRight(staff, activityId, EActivityRight.PUBLISH);
     if (activity.getStatus() == EActivityStatus.UNPUBLISHED) {
       throw new ActivityUnpublishedException();
     }
@@ -316,9 +313,7 @@ public class ActivityServiceImpl implements ActivityService {
         activityDraftRepository
             .findById(activityDraftId)
             .orElseThrow(ActivityDraftNotFoundException::new);
-    if (!draft.getAuthor().equals(staff)) {
-      throw new UserNotAuthorizedException();
-    }
+    activityAuthorizationService.checkRight(staff, activityDraftId, EActivityRight.EDIT);
 
     activityDraftRepository.removeFromDatabase(draft);
     if (!activityRepository.existsById(activityDraftId)) {
@@ -363,13 +358,7 @@ public class ActivityServiceImpl implements ActivityService {
 
   @Override
   public ActivityDraft getActivityDraftById(UUID id) {
-    var staff = loggedInUserService.getLoggedInStaff();
-    var draft =
-        activityDraftRepository.findById(id).orElseThrow(ActivityDraftNotFoundException::new);
-    if (!draft.getAuthor().equals(staff)) {
-      throw new UserNotAuthorizedException();
-    }
-    return draft;
+    return getDraftWithAnyRight(id, EActivityRight.MANAGEMENT_RIGHTS);
   }
 
   @Override
@@ -578,10 +567,7 @@ public class ActivityServiceImpl implements ActivityService {
     var loggedInStaff = loggedInUserService.getLoggedInStaff();
     var draft =
         activityDraftRepository.findById(id).orElseThrow(ActivityDraftNotFoundException::new);
-
-    if (!draft.getAuthor().equals(loggedInStaff)) {
-      throw new UserNotAuthorizedException();
-    }
+    activityAuthorizationService.checkRight(loggedInStaff, id, EActivityRight.EDIT);
 
     validateTargetPerimeter(loggedInStaff, targetInstitutionIds, targetGroupIds);
     validateTargetingUpdate(id, targetInstitutionIds, targetGroupIds);
@@ -686,10 +672,7 @@ public class ActivityServiceImpl implements ActivityService {
     var staff = loggedInUserService.getLoggedInStaff();
     var activity =
         activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);
-
-    if (!activity.getAuthor().equals(staff)) {
-      throw new UserNotAuthorizedException();
-    }
+    activityAuthorizationService.checkRight(staff, activityId, EActivityRight.EDIT);
 
     var activityDraft = activityDraftRepository.findById(activityId);
     if (activityDraft.isPresent()) {
@@ -818,18 +801,9 @@ public class ActivityServiceImpl implements ActivityService {
   }
 
   @Override
-  public Boolean isAuthorOfActivity(Activity activity) {
-    if (activity == null || activity.getAuthor() == null) {
-      return false;
-    }
-    var staff = loggedInUserService.getLoggedInStaff();
-    return Objects.equals(activity.getAuthor().getId(), staff.getId());
-  }
-
-  @Override
   public File uploadDraftBanner(
       UUID activityDraftId, String fileName, String mimeType, long size, byte[] content) {
-    var draft = getOwnedDraft(activityDraftId);
+    var draft = getDraftWithRight(activityDraftId, EActivityRight.EDIT);
     if (!EFileType.fromMimeType(mimeType).isImage()) {
       throw new FileTypeNotSupportedException();
     }
@@ -841,7 +815,7 @@ public class ActivityServiceImpl implements ActivityService {
 
   @Override
   public void deleteDraftBanner(UUID activityDraftId) {
-    var draft = getOwnedDraft(activityDraftId);
+    var draft = getDraftWithRight(activityDraftId, EActivityRight.EDIT);
     draft.getBanner().ifPresent(banner -> fileResourceService.delete(banner.getId()));
     draft.setBanner(null);
     activityDraftRepository.save(draft);
@@ -850,7 +824,7 @@ public class ActivityServiceImpl implements ActivityService {
   @Override
   public File addDraftFile(
       UUID activityDraftId, String fileName, String mimeType, long size, byte[] content) {
-    var draft = getOwnedDraft(activityDraftId);
+    var draft = getDraftWithRight(activityDraftId, EActivityRight.EDIT);
     if (!ALLOWED_DRAFT_FILE_TYPES.contains(EFileType.fromMimeType(mimeType))) {
       throw new FileTypeNotSupportedException();
     }
@@ -862,7 +836,7 @@ public class ActivityServiceImpl implements ActivityService {
 
   @Override
   public void deleteDraftFile(UUID activityDraftId, UUID fileId) {
-    var draft = getOwnedDraft(activityDraftId);
+    var draft = getDraftWithRight(activityDraftId, EActivityRight.EDIT);
     requireFileAttached(draft.getFiles(), fileId);
     draft.removeFile(fileId);
     activityDraftRepository.save(draft);
@@ -889,7 +863,7 @@ public class ActivityServiceImpl implements ActivityService {
 
   @Override
   public FileDownload downloadDraftFile(UUID activityDraftId, UUID fileId) {
-    var draft = getOwnedDraft(activityDraftId);
+    var draft = getDraftWithAnyRight(activityDraftId, EActivityRight.MANAGEMENT_RIGHTS);
     requireFileAttached(draft.getFiles(), fileId);
     return fileResourceService.download(fileId);
   }
@@ -918,15 +892,23 @@ public class ActivityServiceImpl implements ActivityService {
     }
   }
 
-  private ActivityDraft getOwnedDraft(UUID activityDraftId) {
+  private ActivityDraft getDraftWithRight(UUID activityDraftId, EActivityRight right) {
     var staff = loggedInUserService.getLoggedInStaff();
     var draft =
         activityDraftRepository
             .findById(activityDraftId)
             .orElseThrow(ActivityDraftNotFoundException::new);
-    if (!draft.getAuthor().equals(staff)) {
-      throw new ActivityDraftNotFoundException();
-    }
+    activityAuthorizationService.checkRight(staff, activityDraftId, right);
+    return draft;
+  }
+
+  private ActivityDraft getDraftWithAnyRight(UUID activityDraftId, Set<EActivityRight> rights) {
+    var staff = loggedInUserService.getLoggedInStaff();
+    var draft =
+        activityDraftRepository
+            .findById(activityDraftId)
+            .orElseThrow(ActivityDraftNotFoundException::new);
+    activityAuthorizationService.checkAnyRight(staff, activityDraftId, rights);
     return draft;
   }
 

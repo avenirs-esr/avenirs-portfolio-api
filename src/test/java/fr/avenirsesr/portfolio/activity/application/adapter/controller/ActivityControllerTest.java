@@ -61,6 +61,7 @@ import java.security.Principal;
 import java.time.Instant;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -783,7 +784,7 @@ class ActivityControllerTest {
             0,
             null,
             false,
-            true,
+            List.of(),
             List.of(),
             List.of(),
             List.of(),
@@ -794,8 +795,10 @@ class ActivityControllerTest {
 
     when(activityService.getActivityById(activityId)).thenReturn(activity);
     when(fileDTOMapper.toFileDTOs(activity.getFiles(), null)).thenReturn(List.of());
-    when(activityContentDtoMapper.toDTO(activity, false, true, List.of())).thenReturn(dto);
-    when(activityService.isAuthorOfActivity(activity)).thenReturn(true);
+    when(activityContentDtoMapper.toDTO(activity, false, Set.of(EActivityRight.EDIT), List.of()))
+        .thenReturn(dto);
+    when(activityAuthorizationService.getLoggedInStaffRights(activityId))
+        .thenReturn(Set.of(EActivityRight.EDIT));
     BddLogger.when("getting the activity content for status PUBLISHED");
 
     var request = createMockRequest();
@@ -804,7 +807,7 @@ class ActivityControllerTest {
     BddLogger.then("it should return the DTO without calling hasEnrolledStudents");
     assertEquals(200, response.getStatusCode().value());
     assertEquals(dto, response.getBody());
-    verify(activityContentDtoMapper).toDTO(activity, false, true, List.of());
+    verify(activityContentDtoMapper).toDTO(activity, false, Set.of(EActivityRight.EDIT), List.of());
     verify(activityService, never()).hasEnrolledStudents(any(ActivityDraft.class));
   }
 
@@ -830,7 +833,7 @@ class ActivityControllerTest {
             0,
             null,
             false,
-            true,
+            List.of(),
             List.of(),
             List.of(),
             List.of(),
@@ -841,8 +844,10 @@ class ActivityControllerTest {
 
     when(activityService.getActivityById(activityId)).thenReturn(activity);
     when(fileDTOMapper.toFileDTOs(activity.getFiles(), null)).thenReturn(List.of());
-    when(activityContentDtoMapper.toDTO(activity, false, true, List.of())).thenReturn(dto);
-    when(activityService.isAuthorOfActivity(activity)).thenReturn(true);
+    when(activityContentDtoMapper.toDTO(activity, false, Set.of(EActivityRight.EDIT), List.of()))
+        .thenReturn(dto);
+    when(activityAuthorizationService.getLoggedInStaffRights(activityId))
+        .thenReturn(Set.of(EActivityRight.EDIT));
     BddLogger.when("getting the activity content for status UNPUBLISHED");
 
     var request = createMockRequest();
@@ -851,7 +856,7 @@ class ActivityControllerTest {
     BddLogger.then("it should return the DTO without calling hasEnrolledStudents");
     assertEquals(200, response.getStatusCode().value());
     assertEquals(dto, response.getBody());
-    verify(activityContentDtoMapper).toDTO(activity, false, true, List.of());
+    verify(activityContentDtoMapper).toDTO(activity, false, Set.of(EActivityRight.EDIT), List.of());
     verify(activityService, never()).hasEnrolledStudents(any(ActivityDraft.class));
   }
 
@@ -878,7 +883,7 @@ class ActivityControllerTest {
             0,
             true,
             false,
-            true,
+            List.of(),
             List.of(),
             List.of(),
             List.of(),
@@ -891,7 +896,8 @@ class ActivityControllerTest {
     when(activityService.hasEnrolledStudents(draft)).thenReturn(true);
     when(draft.getFiles()).thenReturn(List.of());
     when(fileDTOMapper.toFileDTOs(List.of(), null)).thenReturn(List.of());
-    when(activityContentDtoMapper.toDTO(draft, true, true, List.of())).thenReturn(dto);
+    when(activityAuthorizationService.getLoggedInStaffRights(any())).thenReturn(Set.of());
+    when(activityContentDtoMapper.toDTO(draft, true, Set.of(), List.of())).thenReturn(dto);
 
     BddLogger.when("getting the activity content for status DRAFT");
 
@@ -903,7 +909,7 @@ class ActivityControllerTest {
     assertEquals(200, response.getStatusCode().value());
     assertEquals(dto, response.getBody());
     verify(activityService).hasEnrolledStudents(draft);
-    verify(activityContentDtoMapper).toDTO(draft, true, true, List.of());
+    verify(activityContentDtoMapper).toDTO(draft, true, Set.of(), List.of());
   }
 
   @Test
@@ -977,14 +983,15 @@ class ActivityControllerTest {
     when(activityService.getActivityById(activityId)).thenReturn(activity);
 
     when(activityService.hasDraftForActivity(activityId)).thenReturn(true);
-    when(activityService.isAuthorOfActivity(activity)).thenReturn(true);
+    when(activityAuthorizationService.getLoggedInStaffRights(activityId))
+        .thenReturn(Set.of(EActivityRight.EDIT));
     var request = createMockRequest();
 
     var response = controller.getActivityContent(request, EActivityStatus.PUBLISHED, activityId);
 
     assertEquals(200, response.getStatusCode().value());
 
-    verify(activityContentDtoMapper).toDTO(activity, true, true, List.of());
+    verify(activityContentDtoMapper).toDTO(activity, true, Set.of(EActivityRight.EDIT), List.of());
   }
 
   @Test

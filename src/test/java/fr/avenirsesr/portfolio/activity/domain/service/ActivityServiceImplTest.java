@@ -19,6 +19,7 @@ import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -52,6 +53,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.data.InactiveStudentData;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.*;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityDraft;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityUpdatableField;
@@ -286,12 +288,11 @@ class ActivityServiceImplTest {
         }
 
         @Nested
-        class AndTheLoggedInStaffIsTheAuthor {
+        class AndTheLoggedInStaffCanEditTheDraft {
 
           @BeforeEach
           void setupAnd() {
-            BddLogger.and("the logged-in staff is the author");
-            when(draft.getAuthor()).thenReturn(loggedInStaff);
+            BddLogger.and("the logged-in staff holds the edit right");
             when(activityDraftRepository.save(draft)).thenReturn(draft);
           }
 
@@ -586,12 +587,14 @@ class ActivityServiceImplTest {
         }
 
         @Nested
-        class AndTheLoggedInStaffIsNotTheAuthor {
+        class AndTheLoggedInStaffCannotEditTheDraft {
 
           @BeforeEach
           void setupAnd() {
-            BddLogger.and("the logged-in staff is not the author");
-            when(draft.getAuthor()).thenReturn(mock(Staff.class));
+            BddLogger.and("the logged-in staff does not hold the edit right");
+            doThrow(new UserNotAuthorizedException())
+                .when(activityAuthorizationService)
+                .checkRight(loggedInStaff, draftId, EActivityRight.EDIT);
           }
 
           @Test
@@ -650,7 +653,6 @@ class ActivityServiceImplTest {
         draft = mock(ActivityDraft.class);
         when(loggedInUserService.getLoggedInStaff()).thenReturn(loggedInStaff);
         when(activityDraftRepository.findById(draftId)).thenReturn(Optional.of(draft));
-        when(draft.getAuthor()).thenReturn(loggedInStaff);
         when(activityDraftRepository.save(draft)).thenReturn(draft);
       }
 
@@ -946,12 +948,11 @@ class ActivityServiceImplTest {
         }
 
         @Nested
-        class AndTheLoggedInStaffIsTheAuthor {
+        class AndTheLoggedInStaffCanEditTheDraft {
 
           @BeforeEach
           void setupAnd() {
-            BddLogger.and("the logged-in staff is the author");
-            when(draft.getAuthor()).thenReturn(loggedInStaff);
+            BddLogger.and("the logged-in staff holds the edit right");
           }
 
           @Test
@@ -986,20 +987,22 @@ class ActivityServiceImplTest {
         }
 
         @Nested
-        class AndTheLoggedInStaffIsNotTheAuthor {
+        class AndTheLoggedInStaffCannotEditTheDraft {
 
           @BeforeEach
           void setupAnd() {
-            BddLogger.and("the logged-in staff is not the author");
-            when(draft.getAuthor()).thenReturn(mock(Staff.class));
+            BddLogger.and("the logged-in staff does not hold the edit right");
+            doThrow(new UserNotAuthorizedException())
+                .when(activityAuthorizationService)
+                .checkRight(loggedInStaff, draftId, EActivityRight.EDIT);
           }
 
           @Test
-          void thenItShouldThrowActivityDraftNotFoundException() {
-            BddLogger.then("the service should throw ActivityDraftNotFoundException");
+          void thenItShouldThrowUserNotAuthorizedException() {
+            BddLogger.then("the service should throw UserNotAuthorizedException");
 
             assertThrows(
-                ActivityDraftNotFoundException.class,
+                UserNotAuthorizedException.class,
                 () ->
                     activityService.addDraftFile(
                         draftId, "report.pdf", "application/pdf", 3L, content));
@@ -1061,11 +1064,11 @@ class ActivityServiceImplTest {
         }
 
         @Nested
-        class AndTheLoggedInStaffIsTheAuthor {
+        class AndTheLoggedInStaffCanPublish {
 
           @BeforeEach
           void setupAnd() {
-            BddLogger.and("the logged-in staff is the author");
+            BddLogger.and("the logged-in staff holds the publish right");
           }
 
           @Nested
@@ -1223,12 +1226,14 @@ class ActivityServiceImplTest {
         }
 
         @Nested
-        class AndTheLoggedInStaffIsNotTheAuthor {
+        class AndTheLoggedInStaffCannotPublish {
 
           @BeforeEach
           void setupAnd() {
-            BddLogger.and("the logged-in staff is not the author");
-            when(draft.getAuthor()).thenReturn(mock(Staff.class));
+            BddLogger.and("the logged-in staff does not hold the publish right");
+            doThrow(new UserNotAuthorizedException())
+                .when(activityAuthorizationService)
+                .checkRight(loggedInStaff, draftId, EActivityRight.PUBLISH);
           }
 
           @Test
@@ -1511,12 +1516,11 @@ class ActivityServiceImplTest {
         }
 
         @Nested
-        class AndTheLoggedInStaffIsTheAuthor {
+        class AndTheLoggedInStaffCanPublish {
 
           @BeforeEach
           void setupAnd() {
-            BddLogger.and("the logged-in staff is the author");
-            when(activity.getAuthor()).thenReturn(loggedInStaff);
+            BddLogger.and("the logged-in staff holds the publish right");
             when(activityRepository.save(activity)).thenReturn(activity);
           }
 
@@ -1549,12 +1553,14 @@ class ActivityServiceImplTest {
         }
 
         @Nested
-        class AndTheLoggedInStaffIsNotTheAuthor {
+        class AndTheLoggedInStaffCannotPublish {
 
           @BeforeEach
           void setupAnd() {
-            BddLogger.and("the logged-in staff is not the author");
-            when(activity.getAuthor()).thenReturn(mock(Staff.class));
+            BddLogger.and("the logged-in staff does not hold the publish right");
+            doThrow(new UserNotAuthorizedException())
+                .when(activityAuthorizationService)
+                .checkRight(loggedInStaff, activityId, EActivityRight.PUBLISH);
           }
 
           @Test
@@ -1575,7 +1581,6 @@ class ActivityServiceImplTest {
           @BeforeEach
           void setupAnd() {
             BddLogger.and("the activity is already unpublished");
-            when(activity.getAuthor()).thenReturn(loggedInStaff);
             when(activity.getStatus()).thenReturn(EActivityStatus.UNPUBLISHED);
           }
 
@@ -1636,16 +1641,15 @@ class ActivityServiceImplTest {
         }
 
         @Nested
-        class AndTheLoggedInStaffIsTheAuthor {
+        class AndTheLoggedInStaffCanEditTheDraft {
 
           Staff staff;
 
           @BeforeEach
           void setupAnd() {
-            BddLogger.and("the logged-in staff is the author of the draft");
+            BddLogger.and("the logged-in staff holds the edit right on the draft");
             staff = mock(Staff.class);
             when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
-            when(draft.getAuthor()).thenReturn(staff);
           }
 
           @Test
@@ -1679,13 +1683,16 @@ class ActivityServiceImplTest {
         }
 
         @Nested
-        class AndTheLoggedInStaffIsNotTheAuthor {
+        class AndTheLoggedInStaffCannotEditTheDraft {
 
           @BeforeEach
           void setupAnd() {
-            BddLogger.and("the logged-in staff is not the author of the draft");
-            when(loggedInUserService.getLoggedInStaff()).thenReturn(mock(Staff.class));
-            when(draft.getAuthor()).thenReturn(mock(Staff.class));
+            BddLogger.and("the logged-in staff does not hold the edit right on the draft");
+            Staff staff = mock(Staff.class);
+            when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+            doThrow(new UserNotAuthorizedException())
+                .when(activityAuthorizationService)
+                .checkRight(staff, draftId, EActivityRight.EDIT);
           }
 
           @Test
@@ -3299,11 +3306,12 @@ class ActivityServiceImplTest {
     }
 
     @Test
-    void throwsNotAuthorized_whenUserIsNotAuthor() {
+    void throwsNotAuthorized_whenUserCannotEditTheActivity() {
       var activity = mock(Activity.class);
-      var otherStaff = mock(Staff.class);
       when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
-      when(activity.getAuthor()).thenReturn(otherStaff);
+      doThrow(new UserNotAuthorizedException())
+          .when(activityAuthorizationService)
+          .checkRight(any(), eq(activityId), eq(EActivityRight.EDIT));
 
       assertThatThrownBy(() -> activityService.createDraftFromActivity(activityId))
           .isInstanceOf(UserNotAuthorizedException.class);
@@ -3382,6 +3390,55 @@ class ActivityServiceImplTest {
     }
 
     @Nested
+    class WhenGettingAnActivityDraftById {
+
+      UUID draftId;
+      Staff staff;
+      ActivityDraft draft;
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("getting an activity draft by id");
+        draftId = UUID.randomUUID();
+        staff = mock(Staff.class);
+        draft = mock(ActivityDraft.class);
+        when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+      }
+
+      @Test
+      void thenAStaffHoldingAManagementRightShouldGetTheDraft() {
+        BddLogger.then("the draft is returned after checking a management right");
+        when(activityDraftRepository.findById(draftId)).thenReturn(Optional.of(draft));
+
+        assertThat(activityService.getActivityDraftById(draftId)).isEqualTo(draft);
+        verify(activityAuthorizationService)
+            .checkAnyRight(staff, draftId, EActivityRight.MANAGEMENT_RIGHTS);
+      }
+
+      @Test
+      void thenAStaffWithoutManagementRightShouldBeRejected() {
+        BddLogger.then("a UserNotAuthorizedException is thrown");
+        when(activityDraftRepository.findById(draftId)).thenReturn(Optional.of(draft));
+        doThrow(new UserNotAuthorizedException())
+            .when(activityAuthorizationService)
+            .checkAnyRight(staff, draftId, EActivityRight.MANAGEMENT_RIGHTS);
+
+        assertThatThrownBy(() -> activityService.getActivityDraftById(draftId))
+            .isInstanceOf(UserNotAuthorizedException.class);
+      }
+
+      @Test
+      void thenAnUnknownDraftShouldBeNotFound() {
+        BddLogger.then("an ActivityDraftNotFoundException is thrown");
+        when(activityDraftRepository.findById(draftId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> activityService.getActivityDraftById(draftId))
+            .isInstanceOf(ActivityDraftNotFoundException.class);
+        verify(activityAuthorizationService, never()).checkAnyRight(any(), any(), any());
+      }
+    }
+
+    @Nested
     class WhenDownloadingADraftFile {
 
       UUID draftId;
@@ -3407,27 +3464,29 @@ class ActivityServiceImplTest {
       }
 
       @Test
-      void thenTheAuthorShouldBeAbleToDownloadTheFile() {
-        BddLogger.then("the author can download the draft file");
-        when(draft.getAuthor()).thenReturn(staff);
+      void thenAStaffManagingTheDraftShouldBeAbleToDownloadTheFile() {
+        BddLogger.then("a staff holding a management right can download the draft file");
 
         assertThat(activityService.downloadDraftFile(draftId, fileId)).isEqualTo(expected);
+        verify(activityAuthorizationService)
+            .checkAnyRight(staff, draftId, EActivityRight.MANAGEMENT_RIGHTS);
       }
 
       @Test
-      void thenANonAuthorShouldGetDraftNotFound() {
-        BddLogger.then("a non author gets ActivityDraftNotFoundException");
-        when(draft.getAuthor()).thenReturn(mock(Staff.class));
+      void thenAStaffWithoutManagementRightShouldBeRejected() {
+        BddLogger.then("a staff without any management right gets UserNotAuthorizedException");
+        doThrow(new UserNotAuthorizedException())
+            .when(activityAuthorizationService)
+            .checkAnyRight(staff, draftId, EActivityRight.MANAGEMENT_RIGHTS);
 
         assertThatThrownBy(() -> activityService.downloadDraftFile(draftId, fileId))
-            .isInstanceOf(ActivityDraftNotFoundException.class);
+            .isInstanceOf(UserNotAuthorizedException.class);
         verify(fileResourceService, never()).download(any());
       }
 
       @Test
       void thenAFileOutsideTheDraftShouldBeNotFound() {
         BddLogger.then("a file not attached to the draft is not found");
-        when(draft.getAuthor()).thenReturn(staff);
 
         assertThatThrownBy(() -> activityService.downloadDraftFile(draftId, UUID.randomUUID()))
             .isInstanceOf(FileNotFoundException.class);

@@ -87,6 +87,15 @@ public class ActivityAuthorizationServiceImpl implements ActivityAuthorizationSe
   }
 
   @Override
+  public Set<EActivityRight> getLoggedInStaffRights(UUID activityId) {
+    try {
+      return getRights(loggedInUserService.getLoggedInStaff(), activityId);
+    } catch (UserIsNotStaffException e) {
+      return EnumSet.noneOf(EActivityRight.class);
+    }
+  }
+
+  @Override
   public List<ActivityAuthorization> getActivityAuthorizations(UUID activityId) {
     requireActivityOrDraft(activityId);
     checkAnyRight(loggedInUserService.getLoggedInStaff(), activityId);

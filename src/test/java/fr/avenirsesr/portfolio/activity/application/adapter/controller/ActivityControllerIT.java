@@ -2953,6 +2953,198 @@ class ActivityControllerIT extends ContainerConfigurationTest {
     }
 
     @Nested
+    class WhenActingWithDelegatedRights {
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("another staff acts on an activity through its delegated rights");
+      }
+
+      private void shareDraftWith(UUID draftId, EActivityRight... rights) throws Exception {
+        defineAuthorizationsAsStaff(
+            draftId,
+            List.of(
+                new StaffAuthorizationRequest(STAFF_ID, List.of(EActivityRight.values())),
+                new StaffAuthorizationRequest(ANOTHER_STAFF_ID, List.of(rights))));
+      }
+
+      private String updateTitleRequest(String title) throws Exception {
+        return objectMapper.writeValueAsString(
+            new ActivityDraftUpdateRequest(
+                title, null, null, null, null, null, null, null, null, null, null, false, null,
+                null, null));
+      }
+
+      @Test
+      void thenAStaffHoldingTheEditRightShouldUpdateAndReadTheDraft() throws Exception {
+        BddLogger.and("given a draft shared with the edit right");
+        UUID draftId = createDraftAndGetId("Brouillon délégué en édition");
+        shareDraftWith(draftId, EActivityRight.EDIT);
+
+        BddLogger.then("the other staff can update the draft and read its content");
+        webTestClient
+            .patch()
+            .uri(DRAFT_UPDATE_PATH, draftId)
+            .headers(ActivityControllerIT.this::addOtherStaffHeaders)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(updateTitleRequest("Titre modifié par délégation"))
+            .exchange()
+            .expectStatus()
+            .isOk();
+
+        webTestClient
+            .get()
+            .uri(CONTENT_PATH, "DRAFT", draftId)
+            .headers(ActivityControllerIT.this::addOtherStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.title")
+            .isEqualTo("Titre modifié par délégation")
+            .jsonPath("$.rights.length()")
+            .isEqualTo(1)
+            .jsonPath("$.rights[0]")
+            .isEqualTo("EDIT");
+      }
+
+      @Test
+      void thenAStaffHoldingOnlyTheFeedbackRightShouldNeitherUpdateNorReadTheDraft()
+          throws Exception {
+        BddLogger.and("given a draft shared with the feedback right only");
+        UUID draftId = createDraftAndGetId("Brouillon délégué en feedback");
+        shareDraftWith(draftId, EActivityRight.FEEDBACK);
+
+        BddLogger.then("the other staff gets 403 on update and on the draft content");
+        webTestClient
+            .patch()
+            .uri(DRAFT_UPDATE_PATH, draftId)
+            .headers(ActivityControllerIT.this::addOtherStaffHeaders)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(updateTitleRequest("Tentative interdite"))
+            .exchange()
+            .expectStatus()
+            .isForbidden();
+
+        webTestClient
+            .get()
+            .uri(CONTENT_PATH, "DRAFT", draftId)
+            .headers(ActivityControllerIT.this::addOtherStaffHeaders)
+            .exchange()
+            .expectStatus()
+            .isForbidden();
+      }
+
+      @Test
+      void thenTheAuthorShouldNoLongerHaveAnyAuthorityOnceRevoked() throws Exception {
+        BddLogger.and("given a draft whose author handed every right over to another staff");
+        UUID draftId = createDraftAndGetId("Brouillon cédé");
+        defineAuthorizationsAsStaff(
+            draftId,
+            List.of(
+                new StaffAuthorizationRequest(ANOTHER_STAFF_ID, List.of(EActivityRight.values()))));
+
+        BddLogger.then("the author can no longer update nor delete the draft");
+        webTestClient
+            .patch()
+            .uri(DRAFT_UPDATE_PATH, draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(updateTitleRequest("Tentative de l'auteur"))
+            .exchange()
+            .expectStatus()
+            .isForbidden();
+
+        webTestClient
+            .delete()
+            .uri(DRAFT_PATH + "/{draftId}", draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .exchange()
+            .expectStatus()
+            .isForbidden();
+      }
+
+      @Test
+      void thenAStaffHoldingThePublishRightShouldPublishAndUnpublish() throws Exception {
+        BddLogger.and("given a complete draft shared with the publish right");
+        UUID draftId = createDraftAndGetId("Brouillon délégué en publication");
+        fillDraftWithSummaryAndDescription(draftId);
+        shareDraftWith(draftId, EActivityRight.PUBLISH);
+
+        BddLogger.then("the other staff can publish then unpublish the activity");
+        webTestClient
+            .post()
+            .uri(PUBLISH_PATH, draftId)
+            .headers(ActivityControllerIT.this::addOtherStaffHeaders)
+            .exchange()
+            .expectStatus()
+            .isOk();
+
+        webTestClient
+            .post()
+            .uri(UNPUBLISH_PATH, draftId)
+            .headers(ActivityControllerIT.this::addOtherStaffHeaders)
+            .exchange()
+            .expectStatus()
+            .isNoContent();
+      }
+
+      @Test
+      void thenAStaffWithoutThePublishRightShouldNotPublish() throws Exception {
+        BddLogger.and("given a complete draft shared with the edit right only");
+        UUID draftId = createDraftAndGetId("Brouillon non publiable par délégation");
+        fillDraftWithSummaryAndDescription(draftId);
+        shareDraftWith(draftId, EActivityRight.EDIT);
+
+        BddLogger.then("the other staff gets 403 when publishing");
+        webTestClient
+            .post()
+            .uri(PUBLISH_PATH, draftId)
+            .headers(ActivityControllerIT.this::addOtherStaffHeaders)
+            .exchange()
+            .expectStatus()
+            .isForbidden();
+      }
+
+      @Test
+      void thenAStaffHoldingTheEditRightShouldCreateADraftFromThePublishedActivity()
+          throws Exception {
+        BddLogger.and("given a published activity shared with the edit right");
+        UUID activityId = publishNewActivity("Activité publiée déléguée en édition");
+        shareDraftWith(activityId, EActivityRight.EDIT);
+
+        BddLogger.then("the other staff can create the edition draft");
+        webTestClient
+            .post()
+            .uri(CREATE_DRAFT_PATH, activityId)
+            .headers(ActivityControllerIT.this::addOtherStaffHeaders)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.draftId")
+            .isEqualTo(activityId.toString());
+      }
+
+      @Test
+      void thenAStaffWithoutTheEditRightShouldNotCreateADraftFromThePublishedActivity()
+          throws Exception {
+        BddLogger.and("given a published activity not shared at all");
+        UUID activityId = publishNewActivity("Activité publiée non partagée");
+
+        BddLogger.then("the other staff gets 403 when creating the edition draft");
+        webTestClient
+            .post()
+            .uri(CREATE_DRAFT_PATH, activityId)
+            .headers(ActivityControllerIT.this::addOtherStaffHeaders)
+            .exchange()
+            .expectStatus()
+            .isForbidden();
+      }
+    }
+
+    @Nested
     class WhenDownloadingADraftFile {
 
       UUID draftId;
@@ -3898,16 +4090,16 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         .expectBody()
         .jsonPath("$.haveDraft")
         .isEqualTo(true)
-        .jsonPath("$.isAuthor")
-        .isEqualTo(true);
+        .jsonPath("$.rights.length()")
+        .isEqualTo(EActivityRight.values().length);
   }
 
   @Test
-  void thenItShouldIsAuthorFalseWhenStaffIsNotAuthor() throws Exception {
+  void thenItShouldReturnNoRightWhenStaffHoldsNoAuthorization() throws Exception {
     BddLogger.and("given a published activity created by one staff");
     UUID activityId = publishNewActivity("Activité publiée par un autre auteur");
 
-    BddLogger.then("another staff reading the content should get is author false");
+    BddLogger.then("another staff reading the content should get no right");
 
     webTestClient
         .get()
@@ -3918,8 +4110,8 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         .expectStatus()
         .isOk()
         .expectBody()
-        .jsonPath("$.isAuthor")
-        .isEqualTo(false);
+        .jsonPath("$.rights")
+        .isEmpty();
   }
 
   @Test
