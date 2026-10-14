@@ -6,6 +6,35 @@ and [Conventional Commits](https://www.conventionalcommits.org/) standard.
 
 ---
 
+## [1.4.16] - 2026-10-15
+
+- **Activity authorizations**
+    - New object `ActivityAuthorization` linking a staff, an activity or draft and a set of rights (`EActivityRight`:
+      `RESPONSIBLE`, `EDIT`, `MANAGE_AUTHORIZATIONS`, `FEEDBACK`, `EVALUATION`, `PUBLISH`). A draft and its published
+      activity share their id, so one authorization covers both (#2886).
+    - The author of a new draft, activity or duplicate is granted every right as a fallback. An activity must keep at
+      least one staff holding the responsible, edit, publish and manage authorizations rights together; a definition
+      without one is rejected with 400.
+    - New endpoints `GET /me/activities/{activityId}/authorizations`, open to any staff holding a right on the
+      activity (authority `activity:read:contextual`), and `PUT /me/activities/{activityId}/authorizations`, reserved
+      to the manage authorizations right (authority `activity:update`). Both return the staffs (`id`, `firstName`,
+      `lastName`) with their rights. The PUT replaces the whole definition: a staff left out loses its rights.
+    - The author no longer carries any authority. Publishing and unpublishing require the publish right; editing a
+      draft, its files and its banner, deleting it and creating the edition draft of a published activity require the
+      edit right; reading a draft or downloading its files requires one of the management rights; every staff
+      operation on feedbacks (details, answer, submit, attachments, history, dashboard and lists) requires the
+      feedback right, and the ask-for-feedback notification reaches every staff holding it.
+    - `ActivityContentDTO` lost `isAuthor` and gained `rights`, the rights of the logged-in staff on the activity
+      (empty for a student). `ActivityStaffOverviewDTO` lost `author` and gained `responsibles`, the staffs holding the
+      responsible right. `AuthorDTO` became `StaffInfoDTO` (`id`, `firstName`, `lastName`), still carried by
+      `ActivityOverviewDTO.author` on the student side.
+    - The staff working space lists the published activities the staff holds any right on, and the drafts and
+      unpublished activities it holds a management right on, whoever authored them.
+- **Update process**
+    - New tables `activity_authorization` (activity id, staff, unique per couple) and `activity_authorization_rights`.
+      The migration grants every right to the author of each existing activity and draft; it relies on
+      `gen_random_uuid()` and therefore needs PostgreSQL 13 or later.
+
 ## [1.4.15] - 2026-09-28
 
 - **Terms of use acceptance**
