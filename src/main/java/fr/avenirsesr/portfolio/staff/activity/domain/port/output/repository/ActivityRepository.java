@@ -31,5 +31,5 @@ public interface ActivityRepository extends GenericRepositoryPort<Activity> {
       List<UUID> studentGroupIds);
 
   PagedResult<Activity> findWithFeedbacks(
-      UUID authorId, PageCriteria pageCriteria, EFeedbackStatus... status);
+      UUID staffId, PageCriteria pageCriteria, EFeedbackStatus... status);
 }

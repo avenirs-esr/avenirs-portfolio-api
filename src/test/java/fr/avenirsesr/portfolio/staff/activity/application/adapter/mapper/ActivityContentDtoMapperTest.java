@@ -9,9 +9,12 @@ import fr.avenirsesr.portfolio.shared.application.adapter.mapper.OptionalMapper;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityContentDTO;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityDraft;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StaffFixture;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -68,7 +71,7 @@ class ActivityContentDtoMapperTest {
     draft.setNational(true);
 
     BddLogger.when("mapping to ActivityContentDTO");
-    ActivityContentDTO dto = mapper.toDTO(draft, null, true, List.of());
+    ActivityContentDTO dto = mapper.toDTO(draft, null, Set.of(), List.of());
 
     BddLogger.then("national should be true");
     assertTrue(dto.national());
@@ -98,7 +101,7 @@ class ActivityContentDtoMapperTest {
     ActivityDraft draft = ActivityDraft.create("draft title", StaffFixture.create().toModel());
 
     BddLogger.when("mapping to ActivityContentDTO with hasEnrolledStudent = true");
-    ActivityContentDTO dto = mapper.toDTO(draft, true, true, List.of());
+    ActivityContentDTO dto = mapper.toDTO(draft, true, Set.of(), List.of());
 
     BddLogger.then("hasEnrolledStudent should be true");
     assertEquals(Boolean.TRUE, dto.hasEnrolledStudent());
@@ -110,7 +113,7 @@ class ActivityContentDtoMapperTest {
     ActivityDraft draft = ActivityDraft.create("draft title", StaffFixture.create().toModel());
 
     BddLogger.when("mapping to ActivityContentDTO with hasEnrolledStudent = null");
-    ActivityContentDTO dto = mapper.toDTO(draft, null, true, List.of());
+    ActivityContentDTO dto = mapper.toDTO(draft, null, Set.of(), List.of());
 
     BddLogger.then("hasEnrolledStudent should be null");
     assertNull(dto.hasEnrolledStudent());
@@ -122,7 +125,7 @@ class ActivityContentDtoMapperTest {
     ActivityDraft draft = ActivityDraft.create("draft title", StaffFixture.create().toModel());
 
     BddLogger.when("mapping to ActivityContentDTO");
-    ActivityContentDTO dto = mapper.toDTO(draft, null, true, List.of());
+    ActivityContentDTO dto = mapper.toDTO(draft, null, Set.of(), List.of());
 
     BddLogger.then("activityStatus should be DRAFT");
     assertEquals(EActivityStatus.DRAFT, dto.activityStatus());
@@ -138,7 +141,7 @@ class ActivityContentDtoMapperTest {
             new FileDTO(UUID.randomUUID(), "file2.txt", "/files/file2.txt"));
 
     BddLogger.when("mapping to ActivityContentDTO with files");
-    ActivityContentDTO dto = mapper.toDTO(draft, null, true, files);
+    ActivityContentDTO dto = mapper.toDTO(draft, null, Set.of(), files);
 
     BddLogger.then("files should be correctly mapped");
     assertEquals(files, dto.files());
@@ -150,10 +153,38 @@ class ActivityContentDtoMapperTest {
     ActivityDraft draft = ActivityDraft.create("draft title", StaffFixture.create().toModel());
 
     BddLogger.when("mapping to ActivityContentDTO with no files");
-    ActivityContentDTO dto = mapper.toDTO(draft, null, true, List.of());
+    ActivityContentDTO dto = mapper.toDTO(draft, null, Set.of(), List.of());
 
     BddLogger.then("files should be an empty list");
     assertNotNull(dto);
     assertTrue(dto.files().isEmpty());
+  }
+
+  @Test
+  void shouldMapTheRightsOfTheLoggedInStaff() {
+    BddLogger.given("an activity, a draft and the rights of the logged-in staff");
+    Activity activity = ActivityFixture.create().toModel();
+    ActivityDraft draft = ActivityDraft.create("draft title", StaffFixture.create().toModel());
+    Set<EActivityRight> rights = EnumSet.of(EActivityRight.EDIT, EActivityRight.PUBLISH);
+
+    BddLogger.when("mapping to ActivityContentDTO with the rights");
+    ActivityContentDTO activityDto = mapper.toDTO(activity, true, rights, List.of());
+    ActivityContentDTO draftDto = mapper.toDTO(draft, null, rights, List.of());
+
+    BddLogger.then("the rights should be carried by both DTOs");
+    assertEquals(List.of(EActivityRight.EDIT, EActivityRight.PUBLISH), activityDto.rights());
+    assertEquals(Boolean.TRUE, activityDto.haveDraft());
+    assertEquals(List.of(EActivityRight.EDIT, EActivityRight.PUBLISH), draftDto.rights());
+  }
+
+  @Test
+  void shouldMapNoRightWhenMappingAnActivityWithoutContext() {
+    BddLogger.given("an activity");
+    Activity activity = ActivityFixture.create().toModel();
+
+    BddLogger.when("mapping to ActivityContentDTO without rights");
+    BddLogger.then("the rights should be empty");
+    assertTrue(mapper.toDTO(activity).rights().isEmpty());
+    assertTrue(mapper.toDTO(activity, List.of()).rights().isEmpty());
   }
 }

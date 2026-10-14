@@ -25,6 +25,8 @@ public interface ActivityAuthorizationService {
 
   Set<EActivityRight> getRights(Staff staff, UUID activityId);
 
+  Set<EActivityRight> getLoggedInStaffRights(UUID activityId);
+
   List<ActivityAuthorization> getActivityAuthorizations(UUID activityId);
 
   List<ActivityAuthorization> defineActivityAuthorizations(

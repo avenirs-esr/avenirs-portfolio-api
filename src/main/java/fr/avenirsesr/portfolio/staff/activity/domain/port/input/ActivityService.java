@@ -95,8 +95,6 @@ public interface ActivityService {
 
   Boolean hasDraftForActivity(UUID activityId);
 
-  Boolean isAuthorOfActivity(Activity activity);
-
   File uploadDraftBanner(
       UUID activityDraftId, String fileName, String mimeType, long size, byte[] content);
 

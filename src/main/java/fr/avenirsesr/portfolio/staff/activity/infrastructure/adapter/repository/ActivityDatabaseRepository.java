@@ -93,8 +93,8 @@ public class ActivityDatabaseRepository
 
   @Override
   public PagedResult<Activity> findWithFeedbacks(
-      UUID authorId, PageCriteria pageCriteria, EFeedbackStatus... status) {
-    var specification = ActivitySpecification.hasFeedback(authorId, status);
+      UUID staffId, PageCriteria pageCriteria, EFeedbackStatus... status) {
+    var specification = ActivitySpecification.hasFeedback(staffId, status);
     var sort = Sort.by(Sort.Direction.DESC, "createdAt");
     return findAll(
         specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort));

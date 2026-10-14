@@ -135,11 +135,10 @@ public class ActivityController {
         switch (activityStatus) {
           case PUBLISHED, UNPUBLISHED -> {
             var activity = activityService.getActivityById(activityId);
-            boolean isAuthor = activityService.isAuthorOfActivity(activity);
             yield activityContentDtoMapper.toDTO(
                 activity,
                 activityService.hasDraftForActivity(activity.getId()),
-                isAuthor,
+                activityAuthorizationService.getLoggedInStaffRights(activity.getId()),
                 fileDTOMapper.toFileDTOs(activity.getFiles(), baseUrl));
           }
           case DRAFT -> {
@@ -147,7 +146,7 @@ public class ActivityController {
             yield activityContentDtoMapper.toDTO(
                 draft,
                 activityService.hasEnrolledStudents(draft),
-                true,
+                activityAuthorizationService.getLoggedInStaffRights(draft.getId()),
                 fileDTOMapper.toFileDTOs(draft.getFiles(), baseUrl));
           }
         };
