@@ -3,10 +3,20 @@
 import java.util.UUID;
 
 <span class="fc" id="L5">public record AssociationSearchResultData(</span>
-    UUID id, String title, String category, boolean disabled, String description) {
+    UUID id,
+    String title,
+    String category,
+    boolean disabled,
+    boolean limitReached,
+    String description) {
 
   public AssociationSearchResultData(UUID id, String title, String category, boolean disabled) {
-<span class="fc" id="L9">    this(id, title, category, disabled, null);</span>
-<span class="fc" id="L10">  }</span>
+<span class="fc" id="L14">    this(id, title, category, disabled, false, null);</span>
+<span class="fc" id="L15">  }</span>
+
+  public AssociationSearchResultData(
+      UUID id, String title, String category, boolean disabled, String description) {
+<span class="fc" id="L19">    this(id, title, category, disabled, false, description);</span>
+<span class="fc" id="L20">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
