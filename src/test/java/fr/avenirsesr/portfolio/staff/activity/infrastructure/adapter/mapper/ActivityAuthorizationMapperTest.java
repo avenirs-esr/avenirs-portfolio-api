@@ -19,7 +19,7 @@ class ActivityAuthorizationMapperTest {
     var activityId = UUID.randomUUID();
     var authorization =
         ActivityAuthorization.create(
-            activityId, staff, EnumSet.of(EActivityRight.RESPONSIBLE, EActivityRight.FEEDBACK));
+            activityId, staff, EnumSet.of(EActivityRight.LEADER, EActivityRight.FEEDBACK));
 
     BddLogger.when("mapping it to an entity and back to the domain");
     var entity = ActivityAuthorizationMapper.INSTANCE.fromDomain(authorization);
@@ -30,12 +30,12 @@ class ActivityAuthorizationMapperTest {
     assertThat(entity.getActivityId()).isEqualTo(activityId);
     assertThat(entity.getStaff().getId()).isEqualTo(staff.getId());
     assertThat(entity.getRights())
-        .containsExactlyInAnyOrder(EActivityRight.RESPONSIBLE, EActivityRight.FEEDBACK);
+        .containsExactlyInAnyOrder(EActivityRight.LEADER, EActivityRight.FEEDBACK);
     assertThat(domain.getId()).isEqualTo(authorization.getId());
     assertThat(domain.getActivityId()).isEqualTo(activityId);
     assertThat(domain.getStaff()).isEqualTo(staff);
     assertThat(domain.getRights())
-        .containsExactlyInAnyOrder(EActivityRight.RESPONSIBLE, EActivityRight.FEEDBACK);
+        .containsExactlyInAnyOrder(EActivityRight.LEADER, EActivityRight.FEEDBACK);
     assertThat(domain.getCreatedAt()).isEqualTo(authorization.getCreatedAt());
   }
 
@@ -52,6 +52,6 @@ class ActivityAuthorizationMapperTest {
 
     BddLogger.then("the rights should be empty on both sides");
     assertThat(domain.getRights()).isEmpty();
-    assertThat(domain.isResponsible()).isFalse();
+    assertThat(domain.isLeader()).isFalse();
   }
 }

@@ -460,7 +460,7 @@ public class ActivityServiceImpl implements ActivityService {
   public PagedResult<ActivityStaffOverviewData> staffActivityWorkingSpace(
       PageCriteria pageCriteria, EActivityStatus activityStatus) {
     var staff = loggedInUserService.getLoggedInStaff();
-    return withResponsibles(
+    return withLeaders(
         staffActivityOverviewRepository.findAllAccessibleByStaffAndStatus(
             staff, activityStatus, pageCriteria));
   }
@@ -469,23 +469,22 @@ public class ActivityServiceImpl implements ActivityService {
   public PagedResult<ActivityStaffOverviewData> staffActivityLibrary(
       EActivityThematic thematic, PageCriteria pageCriteria) {
     loggedInUserService.getLoggedInStaff();
-    return withResponsibles(activityRepository.findAllStaffOverview(thematic, pageCriteria));
+    return withLeaders(activityRepository.findAllStaffOverview(thematic, pageCriteria));
   }
 
-  private PagedResult<ActivityStaffOverviewData> withResponsibles(
+  private PagedResult<ActivityStaffOverviewData> withLeaders(
       PagedResult<ActivityStaffOverviewData> pagedActivities) {
-    var activityResponsibles =
-        activityAuthorizationService.getResponsiblesByActivityIds(
+    var activityLeaders =
+        activityAuthorizationService.getLeadersByActivityIds(
             idsOf(pagedActivities.content(), false));
-    var draftResponsibles =
-        activityAuthorizationService.getResponsiblesByDraftIds(
-            idsOf(pagedActivities.content(), true));
+    var draftLeaders =
+        activityAuthorizationService.getLeadersByDraftIds(idsOf(pagedActivities.content(), true));
     return new PagedResult<>(
         pagedActivities.content().stream()
             .map(
                 a -> {
-                  var responsibles = isDraft(a) ? draftResponsibles : activityResponsibles;
-                  return a.withResponsibles(responsibles.getOrDefault(a.activityId(), List.of()));
+                  var leaders = isDraft(a) ? draftLeaders : activityLeaders;
+                  return a.withLeaders(leaders.getOrDefault(a.activityId(), List.of()));
                 })
             .toList(),
         pagedActivities.pageInfo());

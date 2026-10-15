@@ -2491,7 +2491,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
 
       private void shareWith(String activityStatus, UUID activityId, EActivityRight... rights)
           throws Exception {
-        defineAuthorizationsAsStaff(activityStatus, activityId, responsibleAndReviewer(rights));
+        defineAuthorizationsAsStaff(activityStatus, activityId, leaderAndReviewer(rights));
       }
 
       private JsonNode findInOtherStaffWorkingSpace(UUID activityId, String status)
@@ -2523,18 +2523,18 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       }
 
       @Test
-      void thenAPublishedActivityShouldBeListedWithAnyRightAndItsResponsibles() throws Exception {
+      void thenAPublishedActivityShouldBeListedWithAnyRightAndItsLeaders() throws Exception {
         BddLogger.and("given a published activity shared with the feedback right only");
         UUID activityId = publishNewActivity("Activité publiée visible par feedback");
         shareWith("PUBLISHED", activityId, EActivityRight.FEEDBACK);
 
-        BddLogger.then("the other staff sees it with the author as its only responsible");
+        BddLogger.then("the other staff sees it with the author as its only leader");
         JsonNode item = findInOtherStaffWorkingSpace(activityId, "PUBLISHED");
         assertNotNull(item);
-        assertEquals(1, item.get("responsibles").size());
-        assertEquals(STAFF_ID.toString(), item.get("responsibles").get(0).get("id").asText());
-        assertTrue(item.get("responsibles").get(0).hasNonNull("firstName"));
-        assertTrue(item.get("responsibles").get(0).hasNonNull("lastName"));
+        assertEquals(1, item.get("leaders").size());
+        assertEquals(STAFF_ID.toString(), item.get("leaders").get(0).get("id").asText());
+        assertTrue(item.get("leaders").get(0).hasNonNull("firstName"));
+        assertTrue(item.get("leaders").get(0).hasNonNull("lastName"));
       }
 
       @Test
@@ -2584,17 +2584,17 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       }
 
       @Test
-      void thenEveryResponsibleShouldBeListed() throws Exception {
-        BddLogger.and("given a published activity with two responsibles");
+      void thenEveryLeaderShouldBeListed() throws Exception {
+        BddLogger.and("given a published activity with two leaders");
         UUID activityId = publishNewActivity("Activité à deux responsables");
         shareWith("PUBLISHED", activityId, EActivityRight.values());
 
-        BddLogger.then("both responsibles are listed on the item");
+        BddLogger.then("both leaders are listed on the item");
         JsonNode item = findInOtherStaffWorkingSpace(activityId, null);
         assertNotNull(item);
-        Set<String> responsibleIds = new HashSet<>();
-        item.get("responsibles").forEach(r -> responsibleIds.add(r.get("id").asText()));
-        assertEquals(Set.of(STAFF_ID.toString(), ANOTHER_STAFF_ID.toString()), responsibleIds);
+        Set<String> leaderIds = new HashSet<>();
+        item.get("leaders").forEach(r -> leaderIds.add(r.get("id").asText()));
+        assertEquals(Set.of(STAFF_ID.toString(), ANOTHER_STAFF_ID.toString()), leaderIds);
       }
     }
 
@@ -2955,7 +2955,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       void thenRemovingAStaffFromTheDefinitionShouldRevokeItsRights() throws Exception {
         BddLogger.and("given a draft shared with another staff");
         UUID draftId = createDraftAndGetId("Brouillon partagé puis repris");
-        defineAuthorizationsAsStaff("DRAFT", draftId, responsibleAndReviewer(EActivityRight.EDIT));
+        defineAuthorizationsAsStaff("DRAFT", draftId, leaderAndReviewer(EActivityRight.EDIT));
 
         BddLogger.then("defining the authorizations without the other staff revokes it");
         defineAuthorizationsAsStaff(
@@ -2974,11 +2974,11 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       }
 
       @Test
-      void thenItShouldReturn400WhenNoResponsibleHoldsEveryManagementRight() throws Exception {
+      void thenItShouldReturn400WhenNoLeaderHoldsEveryManagementRight() throws Exception {
         BddLogger.and("given a draft created by the staff");
         UUID draftId = createDraftAndGetId("Brouillon sans responsable");
 
-        BddLogger.then("a definition without a full responsible should be rejected");
+        BddLogger.then("a definition without a full leader should be rejected");
         webTestClient
             .put()
             .uri(AUTHORIZATIONS_PATH, "DRAFT", draftId)
@@ -2989,7 +2989,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                     new ActivityAuthorizationsRequest(
                         List.of(
                             new StaffAuthorizationRequest(
-                                STAFF_ID, List.of(EActivityRight.RESPONSIBLE))))))
+                                STAFF_ID, List.of(EActivityRight.LEADER))))))
             .exchange()
             .expectStatus()
             .isBadRequest();
@@ -3003,7 +3003,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       void thenItShouldReturn403WhenTheStaffCannotManageTheAuthorizations() throws Exception {
         BddLogger.and("given a draft shared with another staff without the management right");
         UUID draftId = createDraftAndGetId("Brouillon géré par un seul staff");
-        defineAuthorizationsAsStaff("DRAFT", draftId, responsibleAndReviewer(EActivityRight.EDIT));
+        defineAuthorizationsAsStaff("DRAFT", draftId, leaderAndReviewer(EActivityRight.EDIT));
 
         BddLogger.then("the other staff should not be able to define the authorizations");
         webTestClient
@@ -3099,7 +3099,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
 
         BddLogger.and("granting a right on the draft leaves the published activity untouched");
         defineAuthorizationsAsStaff(
-            "DRAFT", activityId, responsibleAndReviewer(EActivityRight.FEEDBACK));
+            "DRAFT", activityId, leaderAndReviewer(EActivityRight.FEEDBACK));
 
         assertEquals(2, getAuthorizationsAsStaff("DRAFT", activityId).size());
         assertEquals(1, getAuthorizationsAsStaff("PUBLISHED", activityId).size());
@@ -3127,7 +3127,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         UUID activityId = publishNewActivity("Activité dont un droit est retiré en brouillon");
         subscribeStudentToActivity(activityId);
         defineAuthorizationsAsStaff(
-            "PUBLISHED", activityId, responsibleAndReviewer(EActivityRight.FEEDBACK));
+            "PUBLISHED", activityId, leaderAndReviewer(EActivityRight.FEEDBACK));
         createDraftFromActivityAsStaff(activityId);
 
         BddLogger.then("the draft inherits the two authorizations");
@@ -3155,7 +3155,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         subscribeStudentToActivity(activityId);
         createDraftFromActivityAsStaff(activityId);
         defineAuthorizationsAsStaff(
-            "DRAFT", activityId, responsibleAndReviewer(EActivityRight.FEEDBACK));
+            "DRAFT", activityId, leaderAndReviewer(EActivityRight.FEEDBACK));
 
         BddLogger.then("deleting the draft leaves the activity authorizations in place");
         webTestClient
@@ -3204,7 +3204,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       }
 
       private void shareDraftWith(UUID draftId, EActivityRight... rights) throws Exception {
-        defineAuthorizationsAsStaff("DRAFT", draftId, responsibleAndReviewer(rights));
+        defineAuthorizationsAsStaff("DRAFT", draftId, leaderAndReviewer(rights));
       }
 
       private String updateTitleRequest(String title) throws Exception {
@@ -3353,7 +3353,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         BddLogger.and("given a published activity shared with the edit right");
         UUID activityId = publishNewActivity("Activité publiée déléguée en édition");
         defineAuthorizationsAsStaff(
-            "PUBLISHED", activityId, responsibleAndReviewer(EActivityRight.EDIT));
+            "PUBLISHED", activityId, leaderAndReviewer(EActivityRight.EDIT));
 
         BddLogger.then("the other staff can create the edition draft");
         webTestClient
@@ -4248,7 +4248,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         .isOk();
   }
 
-  private List<StaffAuthorizationRequest> responsibleAndReviewer(EActivityRight... reviewerRights) {
+  private List<StaffAuthorizationRequest> leaderAndReviewer(EActivityRight... reviewerRights) {
     return List.of(
         new StaffAuthorizationRequest(STAFF_ID, List.of(EActivityRight.values())),
         new StaffAuthorizationRequest(ANOTHER_STAFF_ID, List.of(reviewerRights)));

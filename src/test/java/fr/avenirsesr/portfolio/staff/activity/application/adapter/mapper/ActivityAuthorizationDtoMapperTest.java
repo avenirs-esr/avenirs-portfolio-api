@@ -37,11 +37,11 @@ class ActivityAuthorizationDtoMapperTest {
   void shouldMapAuthorizationsToDTOs() {
     BddLogger.given("two authorizations on an activity");
     var activityId = UUID.randomUUID();
-    var responsible = aStaff("Camille", "Fournier");
+    var leader = aStaff("Camille", "Fournier");
     var reviewer = aStaff("Zoé", "Cousin");
     var authorizations =
         List.of(
-            ActivityAuthorization.create(activityId, responsible, EActivityRight.all()),
+            ActivityAuthorization.create(activityId, leader, EActivityRight.all()),
             ActivityAuthorization.create(
                 activityId, reviewer, EnumSet.of(EActivityRight.FEEDBACK)));
 
@@ -51,7 +51,7 @@ class ActivityAuthorizationDtoMapperTest {
     BddLogger.then("each DTO should carry the staff info and its rights in enum order");
     assertThat(dtos).hasSize(2);
     assertThat(dtos.getFirst().staff())
-        .isEqualTo(new StaffInfoDTO(responsible.getId(), "Camille", "Fournier"));
+        .isEqualTo(new StaffInfoDTO(leader.getId(), "Camille", "Fournier"));
     assertThat(dtos.getFirst().rights()).containsExactly(EActivityRight.values());
     assertThat(dtos.get(1).staff()).isEqualTo(new StaffInfoDTO(reviewer.getId(), "Zoé", "Cousin"));
     assertThat(dtos.get(1).rights()).containsExactly(EActivityRight.FEEDBACK);
@@ -60,13 +60,12 @@ class ActivityAuthorizationDtoMapperTest {
   @Test
   void shouldMapTheRequestToDefinitions() {
     BddLogger.given("an authorizations request with a null entry and duplicated rights");
-    var responsibleId = UUID.randomUUID();
+    var leaderId = UUID.randomUUID();
     var reviewerId = UUID.randomUUID();
     var request =
         new ActivityAuthorizationsRequest(
             Arrays.asList(
-                new StaffAuthorizationRequest(
-                    responsibleId, Arrays.asList(EActivityRight.RESPONSIBLE, null)),
+                new StaffAuthorizationRequest(leaderId, Arrays.asList(EActivityRight.LEADER, null)),
                 null,
                 new StaffAuthorizationRequest(
                     reviewerId, List.of(EActivityRight.FEEDBACK, EActivityRight.FEEDBACK)),
@@ -78,8 +77,7 @@ class ActivityAuthorizationDtoMapperTest {
     BddLogger.then("null entries are dropped and rights are deduplicated");
     assertThat(definitions)
         .containsExactly(
-            new ActivityAuthorizationDefinition(
-                responsibleId, EnumSet.of(EActivityRight.RESPONSIBLE)),
+            new ActivityAuthorizationDefinition(leaderId, EnumSet.of(EActivityRight.LEADER)),
             new ActivityAuthorizationDefinition(reviewerId, EnumSet.of(EActivityRight.FEEDBACK)),
             new ActivityAuthorizationDefinition(
                 definitions.get(2).staffId(), EnumSet.noneOf(EActivityRight.class)));

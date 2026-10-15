@@ -2751,12 +2751,12 @@ class ActivityServiceImplTest {
       }
 
       @Test
-      void thenItShouldMapAllFieldsAndAttachTheResponsibles() {
-        BddLogger.then("all fields should be mapped and the responsibles attached");
+      void thenItShouldMapAllFieldsAndAttachTheLeaders() {
+        BddLogger.then("all fields should be mapped and the leaders attached");
 
         UUID expectedId = UUID.randomUUID();
         Instant expectedUpdatedAt = Instant.parse("2024-01-15T10:00:00Z");
-        Staff responsible = mock(Staff.class);
+        Staff leader = mock(Staff.class);
 
         ActivityStaffOverviewData overviewData =
             new ActivityStaffOverviewData(
@@ -2770,8 +2770,8 @@ class ActivityServiceImplTest {
         when(staffActivityOverviewRepository.findAllAccessibleByStaffAndStatus(
                 staff, null, pageCriteria))
             .thenReturn(new PagedResult<>(List.of(overviewData), pageInfo));
-        when(activityAuthorizationService.getResponsiblesByDraftIds(List.of(expectedId)))
-            .thenReturn(Map.of(expectedId, List.of(responsible)));
+        when(activityAuthorizationService.getLeadersByDraftIds(List.of(expectedId)))
+            .thenReturn(Map.of(expectedId, List.of(leader)));
 
         var result = activityService.staffActivityWorkingSpace(pageCriteria, null);
         var data = result.content().getFirst();
@@ -2779,14 +2779,14 @@ class ActivityServiceImplTest {
         assertEquals(expectedId, data.activityId());
         assertEquals("Titre précis", data.title());
         assertEquals(EActivityThematic.SELF_KNOWLEDGE, data.thematic());
-        assertEquals(List.of(responsible), data.responsibles());
+        assertEquals(List.of(leader), data.leaders());
         assertEquals(EActivityStatus.DRAFT, data.activityStatus());
         assertEquals(expectedUpdatedAt, data.updatedAt());
       }
 
       @Test
-      void thenItShouldLeaveTheResponsiblesEmptyWhenNobodyIsResponsible() {
-        BddLogger.then("an activity without responsible should carry an empty list");
+      void thenItShouldLeaveTheLeadersEmptyWhenNobodyIsLeader() {
+        BddLogger.then("an activity without leader should carry an empty list");
 
         ActivityStaffOverviewData overviewData =
             new ActivityStaffOverviewData(
@@ -2800,14 +2800,14 @@ class ActivityServiceImplTest {
         when(staffActivityOverviewRepository.findAllAccessibleByStaffAndStatus(
                 staff, null, pageCriteria))
             .thenReturn(new PagedResult<>(List.of(overviewData), pageInfo));
-        when(activityAuthorizationService.getResponsiblesByActivityIds(anyCollection()))
+        when(activityAuthorizationService.getLeadersByActivityIds(anyCollection()))
             .thenReturn(Map.of());
-        when(activityAuthorizationService.getResponsiblesByDraftIds(anyCollection()))
+        when(activityAuthorizationService.getLeadersByDraftIds(anyCollection()))
             .thenReturn(Map.of());
 
         var result = activityService.staffActivityWorkingSpace(pageCriteria, null);
 
-        assertTrue(result.content().getFirst().responsibles().isEmpty());
+        assertTrue(result.content().getFirst().leaders().isEmpty());
       }
     }
 
@@ -2870,11 +2870,11 @@ class ActivityServiceImplTest {
       }
 
       @Test
-      void thenItShouldAttachTheResponsiblesOfEachActivity() {
-        BddLogger.then("the responsibles of each listed activity should be attached");
+      void thenItShouldAttachTheLeadersOfEachActivity() {
+        BddLogger.then("the leaders of each listed activity should be attached");
 
         UUID activityId = UUID.randomUUID();
-        Staff responsible = mock(Staff.class);
+        Staff leader = mock(Staff.class);
         ActivityStaffOverviewData overviewData =
             new ActivityStaffOverviewData(
                 activityId,
@@ -2886,12 +2886,12 @@ class ActivityServiceImplTest {
 
         when(activityRepository.findAllStaffOverview(null, pageCriteria))
             .thenReturn(new PagedResult<>(List.of(overviewData), new PageInfo(0, 8, 1)));
-        when(activityAuthorizationService.getResponsiblesByActivityIds(List.of(activityId)))
-            .thenReturn(Map.of(activityId, List.of(responsible)));
+        when(activityAuthorizationService.getLeadersByActivityIds(List.of(activityId)))
+            .thenReturn(Map.of(activityId, List.of(leader)));
 
         var result = activityService.staffActivityLibrary(null, pageCriteria);
 
-        assertEquals(List.of(responsible), result.content().getFirst().responsibles());
+        assertEquals(List.of(leader), result.content().getFirst().leaders());
       }
 
       @Test

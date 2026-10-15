@@ -1018,11 +1018,11 @@ class ActivityControllerTest {
     UUID activityId = UUID.randomUUID();
     var staff = StaffFixture.create().toModel();
     var authorization =
-        ActivityAuthorization.create(activityId, staff, EnumSet.of(EActivityRight.RESPONSIBLE));
+        ActivityAuthorization.create(activityId, staff, EnumSet.of(EActivityRight.LEADER));
     var dto =
         new ActivityAuthorizationDTO(
             new StaffInfoDTO(staff.getId(), "firstName", "lastName"),
-            List.of(EActivityRight.RESPONSIBLE));
+            List.of(EActivityRight.LEADER));
     when(activityAuthorizationService.getActivityAuthorizations(activityId))
         .thenReturn(List.of(authorization));
     when(activityAuthorizationDtoMapper.toDTOs(List.of(authorization))).thenReturn(List.of(dto));
@@ -1045,18 +1045,18 @@ class ActivityControllerTest {
         new ActivityAuthorizationsRequest(
             List.of(
                 new StaffAuthorizationRequest(
-                    staff.getId(), List.of(EActivityRight.RESPONSIBLE, EActivityRight.EDIT))));
+                    staff.getId(), List.of(EActivityRight.LEADER, EActivityRight.EDIT))));
     var definitions =
         List.of(
             new ActivityAuthorizationDefinition(
-                staff.getId(), EnumSet.of(EActivityRight.RESPONSIBLE, EActivityRight.EDIT)));
+                staff.getId(), EnumSet.of(EActivityRight.LEADER, EActivityRight.EDIT)));
     var authorization =
         ActivityAuthorization.create(
-            activityId, staff, EnumSet.of(EActivityRight.RESPONSIBLE, EActivityRight.EDIT));
+            activityId, staff, EnumSet.of(EActivityRight.LEADER, EActivityRight.EDIT));
     var dto =
         new ActivityAuthorizationDTO(
             new StaffInfoDTO(staff.getId(), "firstName", "lastName"),
-            List.of(EActivityRight.RESPONSIBLE, EActivityRight.EDIT));
+            List.of(EActivityRight.LEADER, EActivityRight.EDIT));
     when(activityAuthorizationDtoMapper.toDefinitions(request)).thenReturn(definitions);
     when(activityAuthorizationService.defineDraftAuthorizations(activityId, definitions))
         .thenReturn(List.of(authorization));

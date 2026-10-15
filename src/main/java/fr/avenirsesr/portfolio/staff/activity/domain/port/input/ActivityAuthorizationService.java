@@ -34,7 +34,7 @@ public interface ActivityAuthorizationService {
 
   List<Staff> getStaffsWithRight(UUID activityId, EActivityRight right);
 
-  Map<UUID, List<Staff>> getResponsiblesByActivityIds(Collection<UUID> activityIds);
+  Map<UUID, List<Staff>> getLeadersByActivityIds(Collection<UUID> activityIds);
 
   void deleteAllOfActivity(UUID activityId);
 
@@ -55,7 +55,7 @@ public interface ActivityAuthorizationService {
 
   void grantAllDraftRights(UUID activityDraftId, Staff staff);
 
-  Map<UUID, List<Staff>> getResponsiblesByDraftIds(Collection<UUID> activityDraftIds);
+  Map<UUID, List<Staff>> getLeadersByDraftIds(Collection<UUID> activityDraftIds);
 
   void deleteAllOfDraft(UUID activityDraftId);
 

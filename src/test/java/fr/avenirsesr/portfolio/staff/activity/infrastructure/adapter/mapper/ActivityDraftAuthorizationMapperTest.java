@@ -51,6 +51,6 @@ class ActivityDraftAuthorizationMapperTest {
 
     BddLogger.then("the rights should be empty on both sides");
     assertThat(domain.getRights()).isEmpty();
-    assertThat(domain.isResponsible()).isFalse();
+    assertThat(domain.isLeader()).isFalse();
   }
 }

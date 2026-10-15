@@ -4,8 +4,8 @@ import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorize
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityAuthorizationDefinition;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityDraftNotFoundException;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityLeaderRequiredException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityNotFoundException;
-import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityResponsibleRequiredException;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAuthorization;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityAuthorizationService;
@@ -112,8 +112,8 @@ public class ActivityAuthorizationServiceImpl implements ActivityAuthorizationSe
   }
 
   @Override
-  public Map<UUID, List<Staff>> getResponsiblesByActivityIds(Collection<UUID> activityIds) {
-    return responsiblesOf(activityAuthorizationRepository, activityIds);
+  public Map<UUID, List<Staff>> getLeadersByActivityIds(Collection<UUID> activityIds) {
+    return leadersOf(activityAuthorizationRepository, activityIds);
   }
 
   @Override
@@ -178,8 +178,8 @@ public class ActivityAuthorizationServiceImpl implements ActivityAuthorizationSe
   }
 
   @Override
-  public Map<UUID, List<Staff>> getResponsiblesByDraftIds(Collection<UUID> activityDraftIds) {
-    return responsiblesOf(activityDraftAuthorizationRepository, activityDraftIds);
+  public Map<UUID, List<Staff>> getLeadersByDraftIds(Collection<UUID> activityDraftIds) {
+    return leadersOf(activityDraftAuthorizationRepository, activityDraftIds);
   }
 
   @Override
@@ -266,7 +266,7 @@ public class ActivityAuthorizationServiceImpl implements ActivityAuthorizationSe
     var rightsByStaffId = mergeRightsByStaffId(definitions);
     if (rightsByStaffId.values().stream()
         .noneMatch(rights -> rights.containsAll(EActivityRight.MANAGEMENT_RIGHTS))) {
-      throw new ActivityResponsibleRequiredException();
+      throw new ActivityLeaderRequiredException();
     }
 
     var saved =
@@ -318,13 +318,13 @@ public class ActivityAuthorizationServiceImpl implements ActivityAuthorizationSe
     repository.save(authorization);
   }
 
-  private Map<UUID, List<Staff>> responsiblesOf(
+  private Map<UUID, List<Staff>> leadersOf(
       StaffAuthorizationRepository repository, Collection<UUID> activityIds) {
     if (activityIds.isEmpty()) {
       return Map.of();
     }
     return repository.findAllByActivityIds(activityIds).stream()
-        .filter(ActivityAuthorization::isResponsible)
+        .filter(ActivityAuthorization::isLeader)
         .collect(
             Collectors.groupingBy(
                 ActivityAuthorization::getActivityId,

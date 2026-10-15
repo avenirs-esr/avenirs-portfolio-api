@@ -11,12 +11,12 @@ public record ActivityStaffOverviewData(
     UUID activityId,
     String title,
     EActivityThematic thematic,
-    List<Staff> responsibles,
+    List<Staff> leaders,
     EActivityStatus activityStatus,
     Instant updatedAt) {
 
-  public ActivityStaffOverviewData withResponsibles(List<Staff> responsibles) {
+  public ActivityStaffOverviewData withLeaders(List<Staff> leaders) {
     return new ActivityStaffOverviewData(
-        activityId, title, thematic, responsibles, activityStatus, updatedAt);
+        activityId, title, thematic, leaders, activityStatus, updatedAt);
   }
 }
