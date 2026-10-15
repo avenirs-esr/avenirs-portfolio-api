@@ -10,11 +10,11 @@ and [Conventional Commits](https://www.conventionalcommits.org/) standard.
 
 - **Activity authorizations**
     - New object `ActivityAuthorization` linking a staff, an activity and a set of rights
-      (`EActivityRight`: `RESPONSIBLE`, `EDIT`, `MANAGE_AUTHORIZATIONS`, `FEEDBACK`, `EVALUATION`,
+      (`EActivityRight`: `LEADER`, `EDIT`, `MANAGE_AUTHORIZATIONS`, `FEEDBACK`, `EVALUATION`,
       `PUBLISH`) (#2886). A draft carries its own authorizations, in its own table, the way it
       already carries its own title or its own files.
     - The author of a new draft, activity or duplicate is granted every right as a fallback. An
-      activity, as well as a draft, must keep at least one staff holding the responsible, edit,
+      activity, as well as a draft, must keep at least one staff holding the leader, edit,
       publish and manage authorizations rights together; a definition without one is rejected with
       400.
     - New endpoints `GET /me/activities/{activityStatus}/{activityId}/authorizations`, open to any
@@ -38,7 +38,7 @@ and [Conventional Commits](https://www.conventionalcommits.org/) standard.
       activity, and the ask-for-feedback notification reaches every staff holding it.
     - `ActivityContentDTO` lost `isAuthor` and gained `rights`, the rights of the logged-in staff
       on the activity or on the draft being read (empty for a student). `ActivityStaffOverviewDTO`
-      lost `author` and gained `responsibles`, the staffs holding the responsible right.
+      lost `author` and gained `leaders`, the staffs holding the leader right.
       `AuthorDTO` became `StaffInfoDTO` (`id`, `firstName`, `lastName`), still carried by
       `ActivityOverviewDTO.author` on the student side.
     - The staff working space lists the published activities the staff holds any right on, and the

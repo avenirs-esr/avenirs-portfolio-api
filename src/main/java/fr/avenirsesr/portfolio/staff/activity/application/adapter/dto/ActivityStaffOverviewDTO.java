@@ -7,10 +7,10 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-@Schema(requiredProperties = {"activityId", "title", "responsibles", "activityStatus", "updatedAt"})
+@Schema(requiredProperties = {"activityId", "title", "leaders", "activityStatus", "updatedAt"})
 public record ActivityStaffOverviewDTO(
     UUID activityId,
-    List<StaffInfoDTO> responsibles,
+    List<StaffInfoDTO> leaders,
     String title,
     @Schema(ref = "#/components/schemas/EActivityThematic") EActivityThematic thematic,
     @Schema(ref = "#/components/schemas/EActivityStatus") EActivityStatus activityStatus,

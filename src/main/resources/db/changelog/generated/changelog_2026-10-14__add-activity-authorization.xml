@@ -99,7 +99,7 @@
             SELECT aa.id, r.activity_right
             FROM activity_authorization aa
             CROSS JOIN (
-                VALUES ('RESPONSIBLE'), ('EDIT'), ('MANAGE_AUTHORIZATIONS'), ('FEEDBACK'), ('EVALUATION'), ('PUBLISH')
+                VALUES ('LEADER'), ('EDIT'), ('MANAGE_AUTHORIZATIONS'), ('FEEDBACK'), ('EVALUATION'), ('PUBLISH')
             ) AS r(activity_right)
             WHERE NOT EXISTS (
                 SELECT 1 FROM activity_authorization_rights ar

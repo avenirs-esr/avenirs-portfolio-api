@@ -14,8 +14,8 @@ import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityAuthorizationDefinition;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityDraftNotFoundException;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityLeaderRequiredException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityNotFoundException;
-import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityResponsibleRequiredException;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAuthorization;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityAuthorizationRepository;
@@ -277,7 +277,7 @@ class ActivityAuthorizationServiceImplTest {
       BddLogger.then("the authorizations should be returned");
       var other = StaffFixture.create().toModel();
       var mine = authorizationOf(staff, EActivityRight.FEEDBACK);
-      var theirs = authorizationOf(other, EActivityRight.RESPONSIBLE);
+      var theirs = authorizationOf(other, EActivityRight.LEADER);
       when(activityRepository.existsById(activityId)).thenReturn(true);
       givenActivityAuthorization(mine);
       when(activityAuthorizationRepository.findAllByActivityId(activityId))
@@ -331,21 +331,21 @@ class ActivityAuthorizationServiceImplTest {
   @Nested
   class WhenDefiningTheAuthorizations {
 
-    Staff responsible;
+    Staff leader;
     Staff reviewer;
 
     @BeforeEach
     void setupWhen() {
       BddLogger.given("an activity authorization service");
       BddLogger.when("defining the authorizations of an activity or of its draft");
-      responsible = StaffFixture.create().toModel();
+      leader = StaffFixture.create().toModel();
       reviewer = StaffFixture.create().toModel();
       lenient().when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
       lenient().when(activityRepository.existsById(activityId)).thenReturn(true);
       lenient().when(activityDraftRepository.existsById(activityId)).thenReturn(true);
     }
 
-    private ActivityAuthorizationDefinition responsibleDefinition(Staff holder) {
+    private ActivityAuthorizationDefinition leaderDefinition(Staff holder) {
       return new ActivityAuthorizationDefinition(holder.getId(), EActivityRight.all());
     }
 
@@ -358,7 +358,7 @@ class ActivityAuthorizationServiceImplTest {
       var removed = authorizationOf(removedStaff, EActivityRight.EVALUATION);
       when(activityAuthorizationRepository.findAllByActivityId(activityId))
           .thenReturn(List.of(existingReviewer, removed));
-      when(staffRepository.findAllById(anyList())).thenReturn(List.of(responsible, reviewer));
+      when(staffRepository.findAllById(anyList())).thenReturn(List.of(leader, reviewer));
       when(activityAuthorizationRepository.saveAll(anyList()))
           .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -366,7 +366,7 @@ class ActivityAuthorizationServiceImplTest {
           service.defineActivityAuthorizations(
               activityId,
               List.of(
-                  responsibleDefinition(responsible),
+                  leaderDefinition(leader),
                   new ActivityAuthorizationDefinition(
                       reviewer.getId(),
                       EnumSet.of(EActivityRight.FEEDBACK, EActivityRight.EVALUATION))));
@@ -376,7 +376,7 @@ class ActivityAuthorizationServiceImplTest {
       verify(activityAuthorizationRepository).saveAll(captor.capture());
       var saved = captor.getValue();
       assertThat(saved).hasSize(2);
-      assertThat(saved.getFirst().getStaff()).isEqualTo(responsible);
+      assertThat(saved.getFirst().getStaff()).isEqualTo(leader);
       assertThat(saved.getFirst().getRights())
           .containsExactlyInAnyOrderElementsOf(EActivityRight.all());
       assertThat(saved.get(1)).isSameAs(existingReviewer);
@@ -392,16 +392,14 @@ class ActivityAuthorizationServiceImplTest {
       givenDraftAuthorization(authorizationOf(staff, EActivityRight.MANAGE_AUTHORIZATIONS));
       when(activityDraftAuthorizationRepository.findAllByActivityId(activityId))
           .thenReturn(List.of());
-      when(staffRepository.findAllById(anyList())).thenReturn(List.of(responsible));
+      when(staffRepository.findAllById(anyList())).thenReturn(List.of(leader));
       when(activityDraftAuthorizationRepository.saveAll(anyList()))
           .thenAnswer(invocation -> invocation.getArgument(0));
 
-      var result =
-          service.defineDraftAuthorizations(
-              activityId, List.of(responsibleDefinition(responsible)));
+      var result = service.defineDraftAuthorizations(activityId, List.of(leaderDefinition(leader)));
 
       assertThat(result).hasSize(1);
-      assertThat(result.getFirst().getStaff()).isEqualTo(responsible);
+      assertThat(result.getFirst().getStaff()).isEqualTo(leader);
       verify(activityAuthorizationRepository, never()).findAllByActivityId(any());
       verify(activityAuthorizationRepository, never()).saveAll(anyList());
     }
@@ -411,7 +409,7 @@ class ActivityAuthorizationServiceImplTest {
       BddLogger.then("the rights of a staff listed twice should be merged");
       givenActivityAuthorization(authorizationOf(staff, EActivityRight.MANAGE_AUTHORIZATIONS));
       when(activityAuthorizationRepository.findAllByActivityId(activityId)).thenReturn(List.of());
-      when(staffRepository.findAllById(anyList())).thenReturn(List.of(responsible));
+      when(staffRepository.findAllById(anyList())).thenReturn(List.of(leader));
       when(activityAuthorizationRepository.saveAll(anyList()))
           .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -420,14 +418,14 @@ class ActivityAuthorizationServiceImplTest {
               activityId,
               List.of(
                   new ActivityAuthorizationDefinition(
-                      responsible.getId(), EActivityRight.MANAGEMENT_RIGHTS),
+                      leader.getId(), EActivityRight.MANAGEMENT_RIGHTS),
                   new ActivityAuthorizationDefinition(
-                      responsible.getId(), EnumSet.of(EActivityRight.FEEDBACK))));
+                      leader.getId(), EnumSet.of(EActivityRight.FEEDBACK))));
 
       assertThat(result).hasSize(1);
       assertThat(result.getFirst().getRights())
           .containsExactlyInAnyOrder(
-              EActivityRight.RESPONSIBLE,
+              EActivityRight.LEADER,
               EActivityRight.EDIT,
               EActivityRight.MANAGE_AUTHORIZATIONS,
               EActivityRight.PUBLISH,
@@ -439,8 +437,7 @@ class ActivityAuthorizationServiceImplTest {
       BddLogger.then("an entry without rights should not create an authorization");
       givenActivityAuthorization(authorizationOf(staff, EActivityRight.MANAGE_AUTHORIZATIONS));
       when(activityAuthorizationRepository.findAllByActivityId(activityId)).thenReturn(List.of());
-      when(staffRepository.findAllById(List.of(responsible.getId())))
-          .thenReturn(List.of(responsible));
+      when(staffRepository.findAllById(List.of(leader.getId()))).thenReturn(List.of(leader));
       when(activityAuthorizationRepository.saveAll(anyList()))
           .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -448,17 +445,17 @@ class ActivityAuthorizationServiceImplTest {
           service.defineActivityAuthorizations(
               activityId,
               Arrays.asList(
-                  responsibleDefinition(responsible),
+                  leaderDefinition(leader),
                   new ActivityAuthorizationDefinition(reviewer.getId(), Set.of()),
                   new ActivityAuthorizationDefinition(null, EActivityRight.all())));
 
       assertThat(result).hasSize(1);
-      assertThat(result.getFirst().getStaff()).isEqualTo(responsible);
+      assertThat(result.getFirst().getStaff()).isEqualTo(leader);
     }
 
     @Test
-    void thenItShouldThrowWhenNoResponsibleHoldsEveryManagementRight() {
-      BddLogger.then("an ActivityResponsibleRequiredException should be thrown");
+    void thenItShouldThrowWhenNoLeaderHoldsEveryManagementRight() {
+      BddLogger.then("an ActivityLeaderRequiredException should be thrown");
       givenActivityAuthorization(authorizationOf(staff, EActivityRight.MANAGE_AUTHORIZATIONS));
 
       assertThatThrownBy(
@@ -467,21 +464,21 @@ class ActivityAuthorizationServiceImplTest {
                       activityId,
                       List.of(
                           new ActivityAuthorizationDefinition(
-                              responsible.getId(),
+                              leader.getId(),
                               EnumSet.of(
-                                  EActivityRight.RESPONSIBLE,
+                                  EActivityRight.LEADER,
                                   EActivityRight.EDIT,
                                   EActivityRight.PUBLISH)),
                           new ActivityAuthorizationDefinition(
                               reviewer.getId(), EnumSet.of(EActivityRight.MANAGE_AUTHORIZATIONS)))))
-          .isInstanceOf(ActivityResponsibleRequiredException.class);
+          .isInstanceOf(ActivityLeaderRequiredException.class);
       verify(activityAuthorizationRepository, never()).saveAll(anyList());
       verify(activityAuthorizationRepository, never()).removeAllFromDatabase(anyList());
     }
 
     @Test
-    void thenTheDraftShouldAlsoRequireAResponsible() {
-      BddLogger.then("an ActivityResponsibleRequiredException should be thrown");
+    void thenTheDraftShouldAlsoRequireALeader() {
+      BddLogger.then("an ActivityLeaderRequiredException should be thrown");
       givenDraftAuthorization(authorizationOf(staff, EActivityRight.MANAGE_AUTHORIZATIONS));
 
       assertThatThrownBy(
@@ -490,34 +487,34 @@ class ActivityAuthorizationServiceImplTest {
                       activityId,
                       List.of(
                           new ActivityAuthorizationDefinition(
-                              responsible.getId(), EnumSet.of(EActivityRight.FEEDBACK)))))
-          .isInstanceOf(ActivityResponsibleRequiredException.class);
+                              leader.getId(), EnumSet.of(EActivityRight.FEEDBACK)))))
+          .isInstanceOf(ActivityLeaderRequiredException.class);
       verify(activityDraftAuthorizationRepository, never()).saveAll(anyList());
     }
 
     @Test
     void thenItShouldThrowWhenTheDefinitionsAreEmpty() {
-      BddLogger.then("an ActivityResponsibleRequiredException should be thrown");
+      BddLogger.then("an ActivityLeaderRequiredException should be thrown");
       givenActivityAuthorization(authorizationOf(staff, EActivityRight.MANAGE_AUTHORIZATIONS));
 
       assertThatThrownBy(() -> service.defineActivityAuthorizations(activityId, List.of()))
-          .isInstanceOf(ActivityResponsibleRequiredException.class);
+          .isInstanceOf(ActivityLeaderRequiredException.class);
       assertThatThrownBy(() -> service.defineActivityAuthorizations(activityId, null))
-          .isInstanceOf(ActivityResponsibleRequiredException.class);
+          .isInstanceOf(ActivityLeaderRequiredException.class);
     }
 
     @Test
     void thenItShouldThrowWhenAStaffDoesNotExist() {
       BddLogger.then("a UserIsNotStaffException should be thrown");
       givenActivityAuthorization(authorizationOf(staff, EActivityRight.MANAGE_AUTHORIZATIONS));
-      when(staffRepository.findAllById(anyList())).thenReturn(List.of(responsible));
+      when(staffRepository.findAllById(anyList())).thenReturn(List.of(leader));
 
       assertThatThrownBy(
               () ->
                   service.defineActivityAuthorizations(
                       activityId,
                       List.of(
-                          responsibleDefinition(responsible),
+                          leaderDefinition(leader),
                           new ActivityAuthorizationDefinition(
                               reviewer.getId(), EnumSet.of(EActivityRight.FEEDBACK)))))
           .isInstanceOf(UserIsNotStaffException.class);
@@ -532,7 +529,7 @@ class ActivityAuthorizationServiceImplTest {
       assertThatThrownBy(
               () ->
                   service.defineActivityAuthorizations(
-                      activityId, List.of(responsibleDefinition(responsible))))
+                      activityId, List.of(leaderDefinition(leader))))
           .isInstanceOf(UserNotAuthorizedException.class);
     }
 
@@ -543,8 +540,7 @@ class ActivityAuthorizationServiceImplTest {
 
       assertThatThrownBy(
               () ->
-                  service.defineDraftAuthorizations(
-                      activityId, List.of(responsibleDefinition(responsible))))
+                  service.defineDraftAuthorizations(activityId, List.of(leaderDefinition(leader))))
           .isInstanceOf(UserNotAuthorizedException.class);
     }
 
@@ -555,8 +551,7 @@ class ActivityAuthorizationServiceImplTest {
 
       assertThatThrownBy(
               () ->
-                  service.defineDraftAuthorizations(
-                      activityId, List.of(responsibleDefinition(responsible))))
+                  service.defineDraftAuthorizations(activityId, List.of(leaderDefinition(leader))))
           .isInstanceOf(ActivityDraftNotFoundException.class);
     }
   }
@@ -753,43 +748,43 @@ class ActivityAuthorizationServiceImplTest {
       when(activityAuthorizationRepository.findAllByActivityId(activityId))
           .thenReturn(
               List.of(
-                  authorizationOf(staff, EActivityRight.RESPONSIBLE, EActivityRight.FEEDBACK),
+                  authorizationOf(staff, EActivityRight.LEADER, EActivityRight.FEEDBACK),
                   authorizationOf(reviewer, EActivityRight.FEEDBACK)));
 
       assertThat(service.getStaffsWithRight(activityId, EActivityRight.FEEDBACK))
           .containsExactly(staff, reviewer);
-      assertThat(service.getStaffsWithRight(activityId, EActivityRight.RESPONSIBLE))
+      assertThat(service.getStaffsWithRight(activityId, EActivityRight.LEADER))
           .containsExactly(staff);
     }
 
     @Test
-    void thenItShouldGroupTheResponsiblesByActivity() {
-      BddLogger.then("the responsibles should be grouped by activity id");
+    void thenItShouldGroupTheLeadersByActivity() {
+      BddLogger.then("the leaders should be grouped by activity id");
       var otherActivityId = UUID.randomUUID();
       var reviewer = StaffFixture.create().toModel();
       var ids = List.of(activityId, otherActivityId);
       when(activityAuthorizationRepository.findAllByActivityIds(ids))
           .thenReturn(
               List.of(
-                  authorizationOf(staff, EActivityRight.RESPONSIBLE),
+                  authorizationOf(staff, EActivityRight.LEADER),
                   authorizationOf(reviewer, EActivityRight.FEEDBACK),
                   ActivityAuthorization.create(
-                      otherActivityId, reviewer, EnumSet.of(EActivityRight.RESPONSIBLE))));
+                      otherActivityId, reviewer, EnumSet.of(EActivityRight.LEADER))));
 
-      var result = service.getResponsiblesByActivityIds(ids);
+      var result = service.getLeadersByActivityIds(ids);
 
       assertThat(result.get(activityId)).containsExactly(staff);
       assertThat(result.get(otherActivityId)).containsExactly(reviewer);
     }
 
     @Test
-    void thenItShouldGroupTheDraftResponsiblesFromTheDraftTable() {
-      BddLogger.then("the draft responsibles should come from the draft table");
+    void thenItShouldGroupTheDraftLeadersFromTheDraftTable() {
+      BddLogger.then("the draft leaders should come from the draft table");
       var ids = List.of(activityId);
       when(activityDraftAuthorizationRepository.findAllByActivityIds(ids))
-          .thenReturn(List.of(authorizationOf(staff, EActivityRight.RESPONSIBLE)));
+          .thenReturn(List.of(authorizationOf(staff, EActivityRight.LEADER)));
 
-      assertThat(service.getResponsiblesByDraftIds(ids).get(activityId)).containsExactly(staff);
+      assertThat(service.getLeadersByDraftIds(ids).get(activityId)).containsExactly(staff);
       verify(activityAuthorizationRepository, never()).findAllByActivityIds(any());
     }
 
@@ -797,8 +792,8 @@ class ActivityAuthorizationServiceImplTest {
     void thenItShouldNotQueryTheRepositoryWithoutActivityIds() {
       BddLogger.then("an empty map should be returned");
 
-      assertThat(service.getResponsiblesByActivityIds(List.of())).isEmpty();
-      assertThat(service.getResponsiblesByDraftIds(List.of())).isEmpty();
+      assertThat(service.getLeadersByActivityIds(List.of())).isEmpty();
+      assertThat(service.getLeadersByDraftIds(List.of())).isEmpty();
       verify(activityAuthorizationRepository, never()).findAllByActivityIds(any());
       verify(activityDraftAuthorizationRepository, never()).findAllByActivityIds(any());
     }

@@ -69,7 +69,7 @@ public class ActivityAuthorization extends AvenirsBaseModel {
     return rights.containsAll(candidates);
   }
 
-  public boolean isResponsible() {
-    return has(EActivityRight.RESPONSIBLE);
+  public boolean isLeader() {
+    return has(EActivityRight.LEADER);
   }
 }
