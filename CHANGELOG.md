@@ -9,31 +9,47 @@ and [Conventional Commits](https://www.conventionalcommits.org/) standard.
 ## [1.4.16] - 2026-10-15
 
 - **Activity authorizations**
-    - New object `ActivityAuthorization` linking a staff, an activity or draft and a set of rights (`EActivityRight`:
-      `RESPONSIBLE`, `EDIT`, `MANAGE_AUTHORIZATIONS`, `FEEDBACK`, `EVALUATION`, `PUBLISH`). A draft and its published
-      activity share their id, so one authorization covers both (#2886).
-    - The author of a new draft, activity or duplicate is granted every right as a fallback. An activity must keep at
-      least one staff holding the responsible, edit, publish and manage authorizations rights together; a definition
-      without one is rejected with 400.
-    - New endpoints `GET /me/activities/{activityId}/authorizations`, open to any staff holding a right on the
-      activity (authority `activity:read:contextual`), and `PUT /me/activities/{activityId}/authorizations`, reserved
-      to the manage authorizations right (authority `activity:update`). Both return the staffs (`id`, `firstName`,
-      `lastName`) with their rights. The PUT replaces the whole definition: a staff left out loses its rights.
-    - The author no longer carries any authority. Publishing and unpublishing require the publish right; editing a
-      draft, its files and its banner, deleting it and creating the edition draft of a published activity require the
-      edit right; reading a draft or downloading its files requires one of the management rights; every staff
-      operation on feedbacks (details, answer, submit, attachments, history, dashboard and lists) requires the
-      feedback right, and the ask-for-feedback notification reaches every staff holding it.
-    - `ActivityContentDTO` lost `isAuthor` and gained `rights`, the rights of the logged-in staff on the activity
-      (empty for a student). `ActivityStaffOverviewDTO` lost `author` and gained `responsibles`, the staffs holding the
-      responsible right. `AuthorDTO` became `StaffInfoDTO` (`id`, `firstName`, `lastName`), still carried by
+    - New object `ActivityAuthorization` linking a staff, an activity and a set of rights
+      (`EActivityRight`: `RESPONSIBLE`, `EDIT`, `MANAGE_AUTHORIZATIONS`, `FEEDBACK`, `EVALUATION`,
+      `PUBLISH`) (#2886). A draft carries its own authorizations, in its own table, the way it
+      already carries its own title or its own files.
+    - The author of a new draft, activity or duplicate is granted every right as a fallback. An
+      activity, as well as a draft, must keep at least one staff holding the responsible, edit,
+      publish and manage authorizations rights together; a definition without one is rejected with
+      400.
+    - New endpoints `GET /me/activities/{activityStatus}/{activityId}/authorizations`, open to any
+      staff holding a right on the activity or on the draft (authority `activity:read:contextual`),
+      and `PUT /me/activities/{activityStatus}/{activityId}/authorizations`, reserved to the manage
+      authorizations right (authority `activity:update`). `DRAFT` addresses the authorizations of
+      the draft, `PUBLISHED` and `UNPUBLISHED` those of the activity. Both return the staffs (`id`,
+      `firstName`, `lastName`) with their rights. The `PUT` replaces the whole definition: a staff
+      left out loses its rights.
+    - Editing the rights of a draft leaves the published activity untouched until the draft is
+      published, exactly like its content. Creating the edition draft of an activity copies the
+      authorizations of the activity, publishing the draft hands them back to the activity, and
+      deleting the draft leaves the activity ones in place. The authorizations of a live activity
+      stay directly editable through the `PUBLISHED` path, so a reviewer can be added without
+      waiting for a publication.
+    - The author no longer carries any authority. Publishing and unpublishing require the publish
+      right; editing a draft, its files and its banner, deleting it and creating the edition draft
+      of a published activity require the edit right; reading a draft or downloading its files
+      requires one of the management rights; every staff operation on feedbacks (details, answer,
+      submit, attachments, history, dashboard and lists) requires the feedback right on the
+      activity, and the ask-for-feedback notification reaches every staff holding it.
+    - `ActivityContentDTO` lost `isAuthor` and gained `rights`, the rights of the logged-in staff
+      on the activity or on the draft being read (empty for a student). `ActivityStaffOverviewDTO`
+      lost `author` and gained `responsibles`, the staffs holding the responsible right.
+      `AuthorDTO` became `StaffInfoDTO` (`id`, `firstName`, `lastName`), still carried by
       `ActivityOverviewDTO.author` on the student side.
-    - The staff working space lists the published activities the staff holds any right on, and the drafts and
-      unpublished activities it holds a management right on, whoever authored them.
+    - The staff working space lists the published activities the staff holds any right on, and the
+      drafts and unpublished activities it holds a management right on, whoever authored them.
 - **Update process**
-    - New tables `activity_authorization` (activity id, staff, unique per couple) and `activity_authorization_rights`.
-      The migration grants every right to the author of each existing activity and draft; it relies on
-      `gen_random_uuid()` and therefore needs PostgreSQL 13 or later.
+    - New tables `activity_authorization` and `activity_authorization_rights`, holding the rights
+      on published activities, plus `activity_draft_authorization` and
+      `activity_draft_authorization_rights` for the drafts. Each couple activity and staff is
+      unique in its table.
+    - The migration grants every right to the author of each existing activity and draft. It
+      relies on `gen_random_uuid()` and therefore needs PostgreSQL 13 or later.
 
 ## [1.4.15] - 2026-09-28
 

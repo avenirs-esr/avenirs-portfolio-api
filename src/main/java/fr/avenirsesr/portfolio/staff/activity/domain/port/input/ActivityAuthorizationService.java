@@ -21,8 +21,6 @@ public interface ActivityAuthorizationService {
 
   void checkAnyRight(Staff staff, UUID activityId, Set<EActivityRight> rights);
 
-  void checkAnyRight(Staff staff, UUID activityId);
-
   Set<EActivityRight> getRights(Staff staff, UUID activityId);
 
   Set<EActivityRight> getLoggedInStaffRights(UUID activityId);
@@ -39,4 +37,29 @@ public interface ActivityAuthorizationService {
   Map<UUID, List<Staff>> getResponsiblesByActivityIds(Collection<UUID> activityIds);
 
   void deleteAllOfActivity(UUID activityId);
+
+  boolean hasDraftRight(Staff staff, UUID activityDraftId, EActivityRight right);
+
+  boolean hasAnyDraftRight(Staff staff, UUID activityDraftId, Set<EActivityRight> rights);
+
+  void checkDraftRight(Staff staff, UUID activityDraftId, EActivityRight right);
+
+  void checkAnyDraftRight(Staff staff, UUID activityDraftId, Set<EActivityRight> rights);
+
+  Set<EActivityRight> getLoggedInStaffDraftRights(UUID activityDraftId);
+
+  List<ActivityAuthorization> getDraftAuthorizations(UUID activityDraftId);
+
+  List<ActivityAuthorization> defineDraftAuthorizations(
+      UUID activityDraftId, List<ActivityAuthorizationDefinition> definitions);
+
+  void grantAllDraftRights(UUID activityDraftId, Staff staff);
+
+  Map<UUID, List<Staff>> getResponsiblesByDraftIds(Collection<UUID> activityDraftIds);
+
+  void deleteAllOfDraft(UUID activityDraftId);
+
+  void copyActivityAuthorizationsToDraft(UUID activityId);
+
+  void applyDraftAuthorizationsToActivity(UUID activityId);
 }

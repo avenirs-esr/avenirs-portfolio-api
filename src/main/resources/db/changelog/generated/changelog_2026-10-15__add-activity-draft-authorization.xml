@@ -1,0 +1,129 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+        http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet author="iamgreendev" id="create-activity-draft-authorization">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="activity_draft_authorization"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="activity_draft_authorization">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true"
+                             primaryKeyName="activity_draft_authorization_pkey"/>
+            </column>
+            <column name="activity_draft_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="staff_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint tableName="activity_draft_authorization"
+                             columnNames="activity_draft_id, staff_id"
+                             constraintName="uk_activity_draft_authorization_draft_staff"/>
+
+        <createIndex tableName="activity_draft_authorization"
+                     indexName="idx_activity_draft_authorization_draft">
+            <column name="activity_draft_id"/>
+        </createIndex>
+
+        <createIndex tableName="activity_draft_authorization"
+                     indexName="idx_activity_draft_authorization_staff">
+            <column name="staff_id"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseTableName="activity_draft_authorization"
+                                 baseColumnNames="staff_id"
+                                 constraintName="fk_activity_draft_authorization_staff"
+                                 referencedTableName="staff"
+                                 referencedColumnNames="id"/>
+
+        <createTable tableName="activity_draft_authorization_rights">
+            <column name="activity_draft_authorization_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="activity_right" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex tableName="activity_draft_authorization_rights"
+                     indexName="idx_activity_draft_authorization_rights_authorization">
+            <column name="activity_draft_authorization_id"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseTableName="activity_draft_authorization_rights"
+                                 baseColumnNames="activity_draft_authorization_id"
+                                 constraintName="fk_activity_draft_authorization_rights_authorization"
+                                 referencedTableName="activity_draft_authorization"
+                                 referencedColumnNames="id"/>
+
+        <rollback>
+            <dropTable tableName="activity_draft_authorization_rights"/>
+            <dropTable tableName="activity_draft_authorization"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="iamgreendev" id="move-draft-authorizations-to-their-own-table" dbms="postgresql">
+        <sql>
+            INSERT INTO activity_draft_authorization (id, activity_draft_id, staff_id, created_at, updated_at)
+            SELECT gen_random_uuid(), aa.activity_id, aa.staff_id, aa.created_at, aa.updated_at
+            FROM activity_authorization aa
+            WHERE EXISTS (SELECT 1 FROM activity_draft d WHERE d.id = aa.activity_id)
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM activity_draft_authorization da
+                  WHERE da.activity_draft_id = aa.activity_id
+                    AND da.staff_id = aa.staff_id
+              );
+
+            INSERT INTO activity_draft_authorization_rights (activity_draft_authorization_id, activity_right)
+            SELECT da.id, ar.activity_right
+            FROM activity_draft_authorization da
+            JOIN activity_authorization aa
+              ON aa.activity_id = da.activity_draft_id
+             AND aa.staff_id = da.staff_id
+            JOIN activity_authorization_rights ar ON ar.activity_authorization_id = aa.id
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM activity_draft_authorization_rights dr
+                WHERE dr.activity_draft_authorization_id = da.id
+                  AND dr.activity_right = ar.activity_right
+            );
+
+            DELETE FROM activity_authorization_rights
+            WHERE activity_authorization_id IN (
+                SELECT aa.id
+                FROM activity_authorization aa
+                WHERE NOT EXISTS (SELECT 1 FROM activity a WHERE a.id = aa.activity_id)
+            );
+
+            DELETE FROM activity_authorization aa
+            WHERE NOT EXISTS (SELECT 1 FROM activity a WHERE a.id = aa.activity_id);
+        </sql>
+        <rollback>
+            <sql>
+                DELETE FROM activity_draft_authorization_rights;
+                DELETE FROM activity_draft_authorization;
+            </sql>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

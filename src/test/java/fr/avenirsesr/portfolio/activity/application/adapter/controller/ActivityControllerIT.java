@@ -71,7 +71,8 @@ class ActivityControllerIT extends ContainerConfigurationTest {
   private static final String INACTIVE_STUDENTS_PATH = DASHBOARD_PATH + "/inactive-students";
   private static final String DEFINITIVE_DELETE_PATH = BASE_PATH + "/{activityId}";
   private static final String DECLARED_ACTIVITY_PATH = "/me/activity-progress/{declaredActivityId}";
-  private static final String AUTHORIZATIONS_PATH = BASE_PATH + "/{activityId}/authorizations";
+  private static final String AUTHORIZATIONS_PATH =
+      BASE_PATH + "/{activityStatus}/{activityId}/authorizations";
   private static final UUID STAFF_ID = UUID.fromString("57ff122f-ff76-4d95-b6c1-61a4efeabd80");
   private static final UUID ANOTHER_STAFF_ID =
       UUID.fromString("5fcd76c5-017c-4d61-99d2-62a6f199c94e");
@@ -2488,12 +2489,9 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         BddLogger.when("performing a GET on " + WORKING_SPACE_PATH + " as a delegated staff");
       }
 
-      private void shareWith(UUID activityId, EActivityRight... rights) throws Exception {
-        defineAuthorizationsAsStaff(
-            activityId,
-            List.of(
-                new StaffAuthorizationRequest(STAFF_ID, List.of(EActivityRight.values())),
-                new StaffAuthorizationRequest(ANOTHER_STAFF_ID, List.of(rights))));
+      private void shareWith(String activityStatus, UUID activityId, EActivityRight... rights)
+          throws Exception {
+        defineAuthorizationsAsStaff(activityStatus, activityId, responsibleAndReviewer(rights));
       }
 
       private JsonNode findInOtherStaffWorkingSpace(UUID activityId, String status)
@@ -2528,7 +2526,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       void thenAPublishedActivityShouldBeListedWithAnyRightAndItsResponsibles() throws Exception {
         BddLogger.and("given a published activity shared with the feedback right only");
         UUID activityId = publishNewActivity("Activité publiée visible par feedback");
-        shareWith(activityId, EActivityRight.FEEDBACK);
+        shareWith("PUBLISHED", activityId, EActivityRight.FEEDBACK);
 
         BddLogger.then("the other staff sees it with the author as its only responsible");
         JsonNode item = findInOtherStaffWorkingSpace(activityId, "PUBLISHED");
@@ -2543,7 +2541,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       void thenADraftShouldBeHiddenWithoutAManagementRight() throws Exception {
         BddLogger.and("given a draft shared with the feedback right only");
         UUID draftId = createDraftAndGetId("Brouillon invisible par feedback");
-        shareWith(draftId, EActivityRight.FEEDBACK);
+        shareWith("DRAFT", draftId, EActivityRight.FEEDBACK);
 
         BddLogger.then("the other staff does not see it");
         assertNull(findInOtherStaffWorkingSpace(draftId, "DRAFT"));
@@ -2553,7 +2551,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       void thenADraftShouldBeListedWithTheEditRight() throws Exception {
         BddLogger.and("given a draft shared with the edit right");
         UUID draftId = createDraftAndGetId("Brouillon visible par édition");
-        shareWith(draftId, EActivityRight.EDIT);
+        shareWith("DRAFT", draftId, EActivityRight.EDIT);
 
         BddLogger.then("the other staff sees it");
         assertNotNull(findInOtherStaffWorkingSpace(draftId, "DRAFT"));
@@ -2563,7 +2561,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       void thenAnUnpublishedActivityShouldBeHiddenWithoutAManagementRight() throws Exception {
         BddLogger.and("given an unpublished activity shared with the feedback right only");
         UUID activityId = publishNewActivity("Activité dépubliée invisible par feedback");
-        shareWith(activityId, EActivityRight.FEEDBACK);
+        shareWith("PUBLISHED", activityId, EActivityRight.FEEDBACK);
         webTestClient
             .post()
             .uri(UNPUBLISH_PATH, activityId)
@@ -2589,7 +2587,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       void thenEveryResponsibleShouldBeListed() throws Exception {
         BddLogger.and("given a published activity with two responsibles");
         UUID activityId = publishNewActivity("Activité à deux responsables");
-        shareWith(activityId, EActivityRight.values());
+        shareWith("PUBLISHED", activityId, EActivityRight.values());
 
         BddLogger.then("both responsibles are listed on the item");
         JsonNode item = findInOtherStaffWorkingSpace(activityId, null);
@@ -2871,7 +2869,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         UUID draftId = createDraftAndGetId("Brouillon avec autorisations");
 
         BddLogger.then("the staff should be the only authorized one with every right");
-        JsonNode authorizations = getAuthorizationsAsStaff(draftId);
+        JsonNode authorizations = getAuthorizationsAsStaff("DRAFT", draftId);
 
         assertEquals(1, authorizations.size());
         assertEquals(STAFF_ID.toString(), authorizations.get(0).get("staff").get("id").asText());
@@ -2886,11 +2884,23 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         UUID activityId = publishNewActivity("Activité publiée avec autorisations");
 
         BddLogger.then("the author should still hold every right on the activity");
-        JsonNode authorizations = getAuthorizationsAsStaff(activityId);
+        JsonNode authorizations = getAuthorizationsAsStaff("PUBLISHED", activityId);
 
         assertEquals(1, authorizations.size());
         assertEquals(STAFF_ID.toString(), authorizations.get(0).get("staff").get("id").asText());
         assertEquals(EActivityRight.values().length, authorizations.get(0).get("rights").size());
+
+        BddLogger.and("the draft authorizations should be gone with the draft itself");
+        webTestClient
+            .get()
+            .uri(AUTHORIZATIONS_PATH, "DRAFT", activityId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .exchange()
+            .expectStatus()
+            .isNotFound()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("ACTIVITY_DRAFT_NOT_FOUND");
       }
 
       @Test
@@ -2902,7 +2912,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         String body =
             webTestClient
                 .put()
-                .uri(AUTHORIZATIONS_PATH, draftId)
+                .uri(AUTHORIZATIONS_PATH, "DRAFT", draftId)
                 .headers(ActivityControllerIT.this::addStaffHeaders)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(
@@ -2930,7 +2940,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         BddLogger.and("the other staff can then read the authorizations");
         webTestClient
             .get()
-            .uri(AUTHORIZATIONS_PATH, draftId)
+            .uri(AUTHORIZATIONS_PATH, "DRAFT", draftId)
             .headers(ActivityControllerIT.this::addOtherStaffHeaders)
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
@@ -2945,21 +2955,18 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       void thenRemovingAStaffFromTheDefinitionShouldRevokeItsRights() throws Exception {
         BddLogger.and("given a draft shared with another staff");
         UUID draftId = createDraftAndGetId("Brouillon partagé puis repris");
-        defineAuthorizationsAsStaff(
-            draftId,
-            List.of(
-                new StaffAuthorizationRequest(STAFF_ID, List.of(EActivityRight.values())),
-                new StaffAuthorizationRequest(ANOTHER_STAFF_ID, List.of(EActivityRight.EDIT))));
+        defineAuthorizationsAsStaff("DRAFT", draftId, responsibleAndReviewer(EActivityRight.EDIT));
 
         BddLogger.then("defining the authorizations without the other staff revokes it");
         defineAuthorizationsAsStaff(
+            "DRAFT",
             draftId,
             List.of(new StaffAuthorizationRequest(STAFF_ID, List.of(EActivityRight.values()))));
 
-        assertEquals(1, getAuthorizationsAsStaff(draftId).size());
+        assertEquals(1, getAuthorizationsAsStaff("DRAFT", draftId).size());
         webTestClient
             .get()
-            .uri(AUTHORIZATIONS_PATH, draftId)
+            .uri(AUTHORIZATIONS_PATH, "DRAFT", draftId)
             .headers(ActivityControllerIT.this::addOtherStaffHeaders)
             .exchange()
             .expectStatus()
@@ -2974,7 +2981,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         BddLogger.then("a definition without a full responsible should be rejected");
         webTestClient
             .put()
-            .uri(AUTHORIZATIONS_PATH, draftId)
+            .uri(AUTHORIZATIONS_PATH, "DRAFT", draftId)
             .headers(ActivityControllerIT.this::addStaffHeaders)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(
@@ -2989,23 +2996,19 @@ class ActivityControllerIT extends ContainerConfigurationTest {
 
         assertEquals(
             EActivityRight.values().length,
-            getAuthorizationsAsStaff(draftId).get(0).get("rights").size());
+            getAuthorizationsAsStaff("DRAFT", draftId).get(0).get("rights").size());
       }
 
       @Test
       void thenItShouldReturn403WhenTheStaffCannotManageTheAuthorizations() throws Exception {
         BddLogger.and("given a draft shared with another staff without the management right");
         UUID draftId = createDraftAndGetId("Brouillon géré par un seul staff");
-        defineAuthorizationsAsStaff(
-            draftId,
-            List.of(
-                new StaffAuthorizationRequest(STAFF_ID, List.of(EActivityRight.values())),
-                new StaffAuthorizationRequest(ANOTHER_STAFF_ID, List.of(EActivityRight.EDIT))));
+        defineAuthorizationsAsStaff("DRAFT", draftId, responsibleAndReviewer(EActivityRight.EDIT));
 
         BddLogger.then("the other staff should not be able to define the authorizations");
         webTestClient
             .put()
-            .uri(AUTHORIZATIONS_PATH, draftId)
+            .uri(AUTHORIZATIONS_PATH, "DRAFT", draftId)
             .headers(ActivityControllerIT.this::addOtherStaffHeaders)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(
@@ -3027,7 +3030,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         BddLogger.then("another staff without any right should get 403");
         webTestClient
             .get()
-            .uri(AUTHORIZATIONS_PATH, draftId)
+            .uri(AUTHORIZATIONS_PATH, "DRAFT", draftId)
             .headers(ActivityControllerIT.this::addOtherStaffHeaders)
             .exchange()
             .expectStatus()
@@ -3037,10 +3040,21 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       @Test
       void thenItShouldReturn404WhenTheActivityDoesNotExist() {
         BddLogger.and("given an unknown activity id");
-        BddLogger.then("it should return 404");
+        BddLogger.then("it should return 404 with the error code of the requested status");
         webTestClient
             .get()
-            .uri(AUTHORIZATIONS_PATH, UUID.randomUUID())
+            .uri(AUTHORIZATIONS_PATH, "DRAFT", UUID.randomUUID())
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .exchange()
+            .expectStatus()
+            .isNotFound()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("ACTIVITY_DRAFT_NOT_FOUND");
+
+        webTestClient
+            .get()
+            .uri(AUTHORIZATIONS_PATH, "PUBLISHED", UUID.randomUUID())
             .headers(ActivityControllerIT.this::addStaffHeaders)
             .exchange()
             .expectStatus()
@@ -3055,7 +3069,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         BddLogger.then("it should return 401");
         webTestClient
             .get()
-            .uri(AUTHORIZATIONS_PATH, UUID.randomUUID())
+            .uri(AUTHORIZATIONS_PATH, "DRAFT", UUID.randomUUID())
             .exchange()
             .expectStatus()
             .isUnauthorized();
@@ -3066,11 +3080,118 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         BddLogger.then("it should return 403");
         webTestClient
             .get()
-            .uri(AUTHORIZATIONS_PATH, UUID.randomUUID())
+            .uri(AUTHORIZATIONS_PATH, "DRAFT", UUID.randomUUID())
             .headers(ActivityControllerIT.this::addNoPermissionHeaders)
             .exchange()
             .expectStatus()
             .isForbidden();
+      }
+
+      @Test
+      void thenTheDraftAuthorizationsShouldReachTheActivityOnlyOncePublished() throws Exception {
+        BddLogger.and("given a published activity with an enrolled student and its edition draft");
+        UUID activityId = publishNewActivity("Activité éditée avec des droits en brouillon");
+        subscribeStudentToActivity(activityId);
+        createDraftFromActivityAsStaff(activityId);
+
+        BddLogger.then("the draft starts from the authorizations of the activity");
+        assertEquals(1, getAuthorizationsAsStaff("DRAFT", activityId).size());
+
+        BddLogger.and("granting a right on the draft leaves the published activity untouched");
+        defineAuthorizationsAsStaff(
+            "DRAFT", activityId, responsibleAndReviewer(EActivityRight.FEEDBACK));
+
+        assertEquals(2, getAuthorizationsAsStaff("DRAFT", activityId).size());
+        assertEquals(1, getAuthorizationsAsStaff("PUBLISHED", activityId).size());
+        webTestClient
+            .get()
+            .uri(AUTHORIZATIONS_PATH, "PUBLISHED", activityId)
+            .headers(ActivityControllerIT.this::addOtherStaffHeaders)
+            .exchange()
+            .expectStatus()
+            .isForbidden();
+
+        BddLogger.and("publishing the draft applies them to the activity");
+        publishDraft(activityId);
+
+        JsonNode published = getAuthorizationsAsStaff("PUBLISHED", activityId);
+        assertEquals(2, published.size());
+        JsonNode reviewer = findAuthorizationOf(published, ANOTHER_STAFF_ID);
+        assertEquals(1, reviewer.get("rights").size());
+        assertEquals("FEEDBACK", reviewer.get("rights").get(0).asText());
+      }
+
+      @Test
+      void thenRevokingARightOnTheDraftShouldReachTheActivityOncePublished() throws Exception {
+        BddLogger.and("given a published activity shared with another staff");
+        UUID activityId = publishNewActivity("Activité dont un droit est retiré en brouillon");
+        subscribeStudentToActivity(activityId);
+        defineAuthorizationsAsStaff(
+            "PUBLISHED", activityId, responsibleAndReviewer(EActivityRight.FEEDBACK));
+        createDraftFromActivityAsStaff(activityId);
+
+        BddLogger.then("the draft inherits the two authorizations");
+        assertEquals(2, getAuthorizationsAsStaff("DRAFT", activityId).size());
+
+        BddLogger.and("revoking the other staff on the draft keeps it on the activity");
+        defineAuthorizationsAsStaff(
+            "DRAFT",
+            activityId,
+            List.of(new StaffAuthorizationRequest(STAFF_ID, List.of(EActivityRight.values()))));
+
+        assertEquals(1, getAuthorizationsAsStaff("DRAFT", activityId).size());
+        assertEquals(2, getAuthorizationsAsStaff("PUBLISHED", activityId).size());
+
+        BddLogger.and("publishing the draft revokes it on the activity too");
+        publishDraft(activityId);
+
+        assertEquals(1, getAuthorizationsAsStaff("PUBLISHED", activityId).size());
+      }
+
+      @Test
+      void thenDeletingTheDraftShouldKeepTheActivityAuthorizations() throws Exception {
+        BddLogger.and("given a published activity whose edition draft was shared");
+        UUID activityId = publishNewActivity("Activité dont le brouillon est abandonné");
+        subscribeStudentToActivity(activityId);
+        createDraftFromActivityAsStaff(activityId);
+        defineAuthorizationsAsStaff(
+            "DRAFT", activityId, responsibleAndReviewer(EActivityRight.FEEDBACK));
+
+        BddLogger.then("deleting the draft leaves the activity authorizations in place");
+        webTestClient
+            .delete()
+            .uri(DRAFT_PATH + "/{draftId}", activityId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .exchange()
+            .expectStatus()
+            .isOk();
+
+        assertEquals(1, getAuthorizationsAsStaff("PUBLISHED", activityId).size());
+        webTestClient
+            .get()
+            .uri(AUTHORIZATIONS_PATH, "DRAFT", activityId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .exchange()
+            .expectStatus()
+            .isNotFound();
+      }
+
+      @Test
+      void thenADraftShouldNotBeReachableThroughTheActivityScope() throws Exception {
+        BddLogger.and("given a draft that was never published");
+        UUID draftId = createDraftAndGetId("Brouillon jamais publié");
+
+        BddLogger.then("its authorizations are not reachable on the activity scope");
+        webTestClient
+            .get()
+            .uri(AUTHORIZATIONS_PATH, "PUBLISHED", draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .exchange()
+            .expectStatus()
+            .isNotFound()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("ACTIVITY_NOT_FOUND");
       }
     }
 
@@ -3083,11 +3204,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       }
 
       private void shareDraftWith(UUID draftId, EActivityRight... rights) throws Exception {
-        defineAuthorizationsAsStaff(
-            draftId,
-            List.of(
-                new StaffAuthorizationRequest(STAFF_ID, List.of(EActivityRight.values())),
-                new StaffAuthorizationRequest(ANOTHER_STAFF_ID, List.of(rights))));
+        defineAuthorizationsAsStaff("DRAFT", draftId, responsibleAndReviewer(rights));
       }
 
       private String updateTitleRequest(String title) throws Exception {
@@ -3163,6 +3280,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         BddLogger.and("given a draft whose author handed every right over to another staff");
         UUID draftId = createDraftAndGetId("Brouillon cédé");
         defineAuthorizationsAsStaff(
+            "DRAFT",
             draftId,
             List.of(
                 new StaffAuthorizationRequest(ANOTHER_STAFF_ID, List.of(EActivityRight.values()))));
@@ -3234,7 +3352,8 @@ class ActivityControllerIT extends ContainerConfigurationTest {
           throws Exception {
         BddLogger.and("given a published activity shared with the edit right");
         UUID activityId = publishNewActivity("Activité publiée déléguée en édition");
-        shareDraftWith(activityId, EActivityRight.EDIT);
+        defineAuthorizationsAsStaff(
+            "PUBLISHED", activityId, responsibleAndReviewer(EActivityRight.EDIT));
 
         BddLogger.then("the other staff can create the edition draft");
         webTestClient
@@ -4086,11 +4205,12 @@ class ActivityControllerIT extends ContainerConfigurationTest {
     return draftId;
   }
 
-  private JsonNode getAuthorizationsAsStaff(UUID activityId) throws Exception {
+  private JsonNode getAuthorizationsAsStaff(String activityStatus, UUID activityId)
+      throws Exception {
     String body =
         webTestClient
             .get()
-            .uri(AUTHORIZATIONS_PATH, activityId)
+            .uri(AUTHORIZATIONS_PATH, activityStatus, activityId)
             .headers(this::addStaffHeaders)
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
@@ -4103,10 +4223,11 @@ class ActivityControllerIT extends ContainerConfigurationTest {
   }
 
   private void defineAuthorizationsAsStaff(
-      UUID activityId, List<StaffAuthorizationRequest> authorizations) throws Exception {
+      String activityStatus, UUID activityId, List<StaffAuthorizationRequest> authorizations)
+      throws Exception {
     webTestClient
         .put()
-        .uri(AUTHORIZATIONS_PATH, activityId)
+        .uri(AUTHORIZATIONS_PATH, activityStatus, activityId)
         .headers(this::addStaffHeaders)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(
@@ -4115,6 +4236,22 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         .exchange()
         .expectStatus()
         .isOk();
+  }
+
+  private void createDraftFromActivityAsStaff(UUID activityId) {
+    webTestClient
+        .post()
+        .uri(CREATE_DRAFT_PATH, activityId)
+        .headers(this::addStaffHeaders)
+        .exchange()
+        .expectStatus()
+        .isOk();
+  }
+
+  private List<StaffAuthorizationRequest> responsibleAndReviewer(EActivityRight... reviewerRights) {
+    return List.of(
+        new StaffAuthorizationRequest(STAFF_ID, List.of(EActivityRight.values())),
+        new StaffAuthorizationRequest(ANOTHER_STAFF_ID, List.of(reviewerRights)));
   }
 
   private JsonNode findAuthorizationOf(JsonNode authorizations, UUID staffId) {

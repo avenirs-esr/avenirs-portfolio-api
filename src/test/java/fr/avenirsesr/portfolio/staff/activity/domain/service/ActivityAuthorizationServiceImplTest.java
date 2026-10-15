@@ -13,17 +13,20 @@ import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorize
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityAuthorizationDefinition;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityDraftNotFoundException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityNotFoundException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityResponsibleRequiredException;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAuthorization;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityAuthorizationRepository;
+import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityDraftAuthorizationRepository;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityDraftRepository;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityRepository;
 import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStaffException;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StaffRepository;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StaffFixture;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
@@ -42,6 +45,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class ActivityAuthorizationServiceImplTest {
 
   @Mock private ActivityAuthorizationRepository activityAuthorizationRepository;
+  @Mock private ActivityDraftAuthorizationRepository activityDraftAuthorizationRepository;
   @Mock private ActivityRepository activityRepository;
   @Mock private ActivityDraftRepository activityDraftRepository;
   @Mock private StaffRepository staffRepository;
@@ -62,30 +66,42 @@ class ActivityAuthorizationServiceImplTest {
     return ActivityAuthorization.create(activityId, holder, Set.of(rights));
   }
 
-  private void givenAuthorization(ActivityAuthorization authorization) {
+  private void givenActivityAuthorization(ActivityAuthorization authorization) {
     when(activityAuthorizationRepository.findByActivityIdAndStaffId(
             activityId, authorization.getStaff().getId()))
         .thenReturn(Optional.of(authorization));
   }
 
-  private void givenNoAuthorization(Staff holder) {
+  private void givenDraftAuthorization(ActivityAuthorization authorization) {
+    when(activityDraftAuthorizationRepository.findByActivityIdAndStaffId(
+            activityId, authorization.getStaff().getId()))
+        .thenReturn(Optional.of(authorization));
+  }
+
+  private void givenNoActivityAuthorization(Staff holder) {
     when(activityAuthorizationRepository.findByActivityIdAndStaffId(activityId, holder.getId()))
         .thenReturn(Optional.empty());
   }
 
+  private void givenNoDraftAuthorization(Staff holder) {
+    when(activityDraftAuthorizationRepository.findByActivityIdAndStaffId(
+            activityId, holder.getId()))
+        .thenReturn(Optional.empty());
+  }
+
   @Nested
-  class WhenCheckingARight {
+  class WhenCheckingARightOnAnActivity {
 
     @BeforeEach
     void setupWhen() {
       BddLogger.given("an activity authorization service");
-      BddLogger.when("checking whether a staff holds a right on an activity");
+      BddLogger.when("checking whether a staff holds a right on a published activity");
     }
 
     @Test
     void thenItShouldBeGrantedWhenTheAuthorizationHoldsTheRight() {
       BddLogger.then("the right should be granted");
-      givenAuthorization(authorizationOf(staff, EActivityRight.EDIT, EActivityRight.PUBLISH));
+      givenActivityAuthorization(authorizationOf(staff, EActivityRight.EDIT));
 
       assertThat(service.hasRight(staff, activityId, EActivityRight.EDIT)).isTrue();
       assertThat(service.hasRight(staff, activityId, EActivityRight.FEEDBACK)).isFalse();
@@ -94,7 +110,7 @@ class ActivityAuthorizationServiceImplTest {
     @Test
     void thenItShouldBeDeniedWhenTheStaffHasNoAuthorization() {
       BddLogger.then("the right should be denied");
-      givenNoAuthorization(staff);
+      givenNoActivityAuthorization(staff);
 
       assertThat(service.hasRight(staff, activityId, EActivityRight.EDIT)).isFalse();
       assertThat(service.hasAnyRight(staff, activityId)).isFalse();
@@ -111,9 +127,19 @@ class ActivityAuthorizationServiceImplTest {
     }
 
     @Test
+    void thenItShouldNotReadTheDraftAuthorizations() {
+      BddLogger.then("a right held on the draft should not apply to the activity");
+      givenNoActivityAuthorization(staff);
+
+      assertThat(service.hasRight(staff, activityId, EActivityRight.EDIT)).isFalse();
+      verify(activityDraftAuthorizationRepository, never())
+          .findByActivityIdAndStaffId(any(), any());
+    }
+
+    @Test
     void thenAnyOfTheRightsShouldBeEnough() {
       BddLogger.then("holding one of the candidate rights should be enough");
-      givenAuthorization(authorizationOf(staff, EActivityRight.FEEDBACK));
+      givenActivityAuthorization(authorizationOf(staff, EActivityRight.FEEDBACK));
 
       assertThat(service.hasAnyRight(staff, activityId)).isTrue();
       assertThat(
@@ -127,7 +153,7 @@ class ActivityAuthorizationServiceImplTest {
     @Test
     void thenCheckRightShouldThrowWhenTheRightIsMissing() {
       BddLogger.then("a UserNotAuthorizedException should be thrown");
-      givenAuthorization(authorizationOf(staff, EActivityRight.FEEDBACK));
+      givenActivityAuthorization(authorizationOf(staff, EActivityRight.FEEDBACK));
 
       assertThatThrownBy(() -> service.checkRight(staff, activityId, EActivityRight.EDIT))
           .isInstanceOf(UserNotAuthorizedException.class);
@@ -139,50 +165,121 @@ class ActivityAuthorizationServiceImplTest {
     @Test
     void thenCheckRightShouldPassWhenTheRightIsHeld() {
       BddLogger.then("no exception should be thrown");
-      givenAuthorization(authorizationOf(staff, EActivityRight.FEEDBACK));
+      givenActivityAuthorization(authorizationOf(staff, EActivityRight.FEEDBACK));
 
       service.checkRight(staff, activityId, EActivityRight.FEEDBACK);
-      service.checkAnyRight(staff, activityId);
       service.checkAnyRight(staff, activityId, EnumSet.of(EActivityRight.FEEDBACK));
-    }
-
-    @Test
-    void thenCheckAnyRightShouldThrowWhenTheStaffHasNoAuthorization() {
-      BddLogger.then("a UserNotAuthorizedException should be thrown");
-      givenNoAuthorization(staff);
-
-      assertThatThrownBy(() -> service.checkAnyRight(staff, activityId))
-          .isInstanceOf(UserNotAuthorizedException.class);
     }
 
     @Test
     void thenGetRightsShouldReturnTheHeldRights() {
       BddLogger.then("the held rights should be returned");
-      givenAuthorization(authorizationOf(staff, EActivityRight.EDIT, EActivityRight.PUBLISH));
+      givenActivityAuthorization(
+          authorizationOf(staff, EActivityRight.EDIT, EActivityRight.PUBLISH));
 
       assertThat(service.getRights(staff, activityId))
           .containsExactlyInAnyOrder(EActivityRight.EDIT, EActivityRight.PUBLISH);
     }
+
+    @Test
+    void thenTheLoggedInStaffRightsShouldBeEmptyWhenTheUserIsNotAStaff() {
+      BddLogger.then("no right should be returned to a user who is not a staff");
+      when(loggedInUserService.getLoggedInStaff()).thenThrow(new UserIsNotStaffException());
+
+      assertThat(service.getLoggedInStaffRights(activityId)).isEmpty();
+      assertThat(service.getLoggedInStaffDraftRights(activityId)).isEmpty();
+    }
+
+    @Test
+    void thenTheLoggedInStaffRightsShouldComeFromTheActivity() {
+      BddLogger.then("the rights of the logged-in staff should be read on the activity");
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+      givenActivityAuthorization(authorizationOf(staff, EActivityRight.EDIT));
+
+      assertThat(service.getLoggedInStaffRights(activityId)).containsExactly(EActivityRight.EDIT);
+    }
   }
 
   @Nested
-  class WhenGettingTheActivityAuthorizations {
+  class WhenCheckingARightOnADraft {
 
     @BeforeEach
     void setupWhen() {
       BddLogger.given("an activity authorization service");
-      BddLogger.when("getting the authorizations of an activity");
+      BddLogger.when("checking whether a staff holds a right on a draft");
+    }
+
+    @Test
+    void thenItShouldReadTheDraftAuthorizationsOnly() {
+      BddLogger.then("the draft authorizations should answer, not the activity ones");
+      givenDraftAuthorization(authorizationOf(staff, EActivityRight.EDIT));
+
+      assertThat(service.hasDraftRight(staff, activityId, EActivityRight.EDIT)).isTrue();
+      assertThat(service.hasDraftRight(staff, activityId, EActivityRight.PUBLISH)).isFalse();
+      verify(activityAuthorizationRepository, never()).findByActivityIdAndStaffId(any(), any());
+    }
+
+    @Test
+    void thenAnyOfTheRightsShouldBeEnough() {
+      BddLogger.then("holding one of the candidate rights should be enough");
+      givenDraftAuthorization(authorizationOf(staff, EActivityRight.EDIT));
+
+      assertThat(service.hasAnyDraftRight(staff, activityId, EActivityRight.MANAGEMENT_RIGHTS))
+          .isTrue();
+      assertThat(service.hasAnyDraftRight(staff, activityId, EnumSet.of(EActivityRight.FEEDBACK)))
+          .isFalse();
+    }
+
+    @Test
+    void thenCheckDraftRightShouldThrowWhenTheRightIsMissing() {
+      BddLogger.then("a UserNotAuthorizedException should be thrown");
+      givenNoDraftAuthorization(staff);
+
+      assertThatThrownBy(() -> service.checkDraftRight(staff, activityId, EActivityRight.EDIT))
+          .isInstanceOf(UserNotAuthorizedException.class);
+      assertThatThrownBy(
+              () -> service.checkAnyDraftRight(staff, activityId, EActivityRight.MANAGEMENT_RIGHTS))
+          .isInstanceOf(UserNotAuthorizedException.class);
+    }
+
+    @Test
+    void thenCheckDraftRightShouldPassWhenTheRightIsHeld() {
+      BddLogger.then("no exception should be thrown");
+      givenDraftAuthorization(authorizationOf(staff, EActivityRight.EDIT));
+
+      service.checkDraftRight(staff, activityId, EActivityRight.EDIT);
+      service.checkAnyDraftRight(staff, activityId, EActivityRight.MANAGEMENT_RIGHTS);
+    }
+
+    @Test
+    void thenTheLoggedInStaffDraftRightsShouldComeFromTheDraft() {
+      BddLogger.then("the rights of the logged-in staff should be read on the draft");
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+      givenDraftAuthorization(authorizationOf(staff, EActivityRight.FEEDBACK));
+
+      assertThat(service.getLoggedInStaffDraftRights(activityId))
+          .containsExactly(EActivityRight.FEEDBACK);
+    }
+  }
+
+  @Nested
+  class WhenGettingTheAuthorizations {
+
+    @BeforeEach
+    void setupWhen() {
+      BddLogger.given("an activity authorization service");
+      BddLogger.when("getting the authorizations of an activity or of its draft");
       lenient().when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
     }
 
     @Test
-    void thenItShouldReturnThemWhenTheStaffHoldsAnyRight() {
+    void thenTheActivityAuthorizationsShouldBeReturnedToAStaffHoldingAnyRight() {
       BddLogger.then("the authorizations should be returned");
       var other = StaffFixture.create().toModel();
       var mine = authorizationOf(staff, EActivityRight.FEEDBACK);
       var theirs = authorizationOf(other, EActivityRight.RESPONSIBLE);
       when(activityRepository.existsById(activityId)).thenReturn(true);
-      givenAuthorization(mine);
+      givenActivityAuthorization(mine);
       when(activityAuthorizationRepository.findAllByActivityId(activityId))
           .thenReturn(List.of(mine, theirs));
 
@@ -190,31 +287,41 @@ class ActivityAuthorizationServiceImplTest {
     }
 
     @Test
-    void thenItShouldAcceptADraftId() {
-      BddLogger.then("a draft id should be resolved as well");
-      when(activityRepository.existsById(activityId)).thenReturn(false);
+    void thenTheDraftAuthorizationsShouldBeReturnedToAStaffHoldingAnyRight() {
+      BddLogger.then("the draft authorizations should be returned");
+      var mine = authorizationOf(staff, EActivityRight.EDIT);
       when(activityDraftRepository.existsById(activityId)).thenReturn(true);
-      givenAuthorization(authorizationOf(staff, EActivityRight.EDIT));
-      when(activityAuthorizationRepository.findAllByActivityId(activityId)).thenReturn(List.of());
+      givenDraftAuthorization(mine);
+      when(activityDraftAuthorizationRepository.findAllByActivityId(activityId))
+          .thenReturn(List.of(mine));
 
-      assertThat(service.getActivityAuthorizations(activityId)).isEmpty();
+      assertThat(service.getDraftAuthorizations(activityId)).containsExactly(mine);
+      verify(activityRepository, never()).existsById(any());
     }
 
     @Test
-    void thenItShouldThrowWhenNeitherAnActivityNorADraftExists() {
+    void thenItShouldThrowWhenTheActivityDoesNotExist() {
       BddLogger.then("an ActivityNotFoundException should be thrown");
       when(activityRepository.existsById(activityId)).thenReturn(false);
-      when(activityDraftRepository.existsById(activityId)).thenReturn(false);
 
       assertThatThrownBy(() -> service.getActivityAuthorizations(activityId))
           .isInstanceOf(ActivityNotFoundException.class);
     }
 
     @Test
+    void thenItShouldThrowWhenTheDraftDoesNotExist() {
+      BddLogger.then("an ActivityDraftNotFoundException should be thrown");
+      when(activityDraftRepository.existsById(activityId)).thenReturn(false);
+
+      assertThatThrownBy(() -> service.getDraftAuthorizations(activityId))
+          .isInstanceOf(ActivityDraftNotFoundException.class);
+    }
+
+    @Test
     void thenItShouldThrowWhenTheStaffHoldsNoRight() {
       BddLogger.then("a UserNotAuthorizedException should be thrown");
       when(activityRepository.existsById(activityId)).thenReturn(true);
-      givenNoAuthorization(staff);
+      givenNoActivityAuthorization(staff);
 
       assertThatThrownBy(() -> service.getActivityAuthorizations(activityId))
           .isInstanceOf(UserNotAuthorizedException.class);
@@ -222,7 +329,7 @@ class ActivityAuthorizationServiceImplTest {
   }
 
   @Nested
-  class WhenDefiningTheActivityAuthorizations {
+  class WhenDefiningTheAuthorizations {
 
     Staff responsible;
     Staff reviewer;
@@ -230,15 +337,12 @@ class ActivityAuthorizationServiceImplTest {
     @BeforeEach
     void setupWhen() {
       BddLogger.given("an activity authorization service");
-      BddLogger.when("defining the authorizations of an activity");
+      BddLogger.when("defining the authorizations of an activity or of its draft");
       responsible = StaffFixture.create().toModel();
       reviewer = StaffFixture.create().toModel();
       lenient().when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
       lenient().when(activityRepository.existsById(activityId)).thenReturn(true);
-    }
-
-    private void givenManager() {
-      givenAuthorization(authorizationOf(staff, EActivityRight.MANAGE_AUTHORIZATIONS));
+      lenient().when(activityDraftRepository.existsById(activityId)).thenReturn(true);
     }
 
     private ActivityAuthorizationDefinition responsibleDefinition(Staff holder) {
@@ -246,9 +350,9 @@ class ActivityAuthorizationServiceImplTest {
     }
 
     @Test
-    void thenItShouldCreateUpdateAndRemoveAuthorizations() {
+    void thenItShouldCreateUpdateAndRemoveActivityAuthorizations() {
       BddLogger.then("new entries are created, kept ones updated and missing ones removed");
-      givenManager();
+      givenActivityAuthorization(authorizationOf(staff, EActivityRight.MANAGE_AUTHORIZATIONS));
       var removedStaff = StaffFixture.create().toModel();
       var existingReviewer = authorizationOf(reviewer, EActivityRight.FEEDBACK);
       var removed = authorizationOf(removedStaff, EActivityRight.EVALUATION);
@@ -279,12 +383,33 @@ class ActivityAuthorizationServiceImplTest {
       assertThat(existingReviewer.getRights())
           .containsExactlyInAnyOrder(EActivityRight.FEEDBACK, EActivityRight.EVALUATION);
       assertThat(result).isEqualTo(saved);
+      verify(activityDraftAuthorizationRepository, never()).saveAll(anyList());
+    }
+
+    @Test
+    void thenTheDraftAuthorizationsShouldBeWrittenInTheirOwnTable() {
+      BddLogger.then("defining the draft authorizations should not touch the activity ones");
+      givenDraftAuthorization(authorizationOf(staff, EActivityRight.MANAGE_AUTHORIZATIONS));
+      when(activityDraftAuthorizationRepository.findAllByActivityId(activityId))
+          .thenReturn(List.of());
+      when(staffRepository.findAllById(anyList())).thenReturn(List.of(responsible));
+      when(activityDraftAuthorizationRepository.saveAll(anyList()))
+          .thenAnswer(invocation -> invocation.getArgument(0));
+
+      var result =
+          service.defineDraftAuthorizations(
+              activityId, List.of(responsibleDefinition(responsible)));
+
+      assertThat(result).hasSize(1);
+      assertThat(result.getFirst().getStaff()).isEqualTo(responsible);
+      verify(activityAuthorizationRepository, never()).findAllByActivityId(any());
+      verify(activityAuthorizationRepository, never()).saveAll(anyList());
     }
 
     @Test
     void thenItShouldMergeDuplicatedStaffEntries() {
       BddLogger.then("the rights of a staff listed twice should be merged");
-      givenManager();
+      givenActivityAuthorization(authorizationOf(staff, EActivityRight.MANAGE_AUTHORIZATIONS));
       when(activityAuthorizationRepository.findAllByActivityId(activityId)).thenReturn(List.of());
       when(staffRepository.findAllById(anyList())).thenReturn(List.of(responsible));
       when(activityAuthorizationRepository.saveAll(anyList()))
@@ -312,7 +437,7 @@ class ActivityAuthorizationServiceImplTest {
     @Test
     void thenItShouldIgnoreEntriesWithoutRights() {
       BddLogger.then("an entry without rights should not create an authorization");
-      givenManager();
+      givenActivityAuthorization(authorizationOf(staff, EActivityRight.MANAGE_AUTHORIZATIONS));
       when(activityAuthorizationRepository.findAllByActivityId(activityId)).thenReturn(List.of());
       when(staffRepository.findAllById(List.of(responsible.getId())))
           .thenReturn(List.of(responsible));
@@ -322,7 +447,7 @@ class ActivityAuthorizationServiceImplTest {
       var result =
           service.defineActivityAuthorizations(
               activityId,
-              List.of(
+              Arrays.asList(
                   responsibleDefinition(responsible),
                   new ActivityAuthorizationDefinition(reviewer.getId(), Set.of()),
                   new ActivityAuthorizationDefinition(null, EActivityRight.all())));
@@ -334,7 +459,7 @@ class ActivityAuthorizationServiceImplTest {
     @Test
     void thenItShouldThrowWhenNoResponsibleHoldsEveryManagementRight() {
       BddLogger.then("an ActivityResponsibleRequiredException should be thrown");
-      givenManager();
+      givenActivityAuthorization(authorizationOf(staff, EActivityRight.MANAGE_AUTHORIZATIONS));
 
       assertThatThrownBy(
               () ->
@@ -355,9 +480,25 @@ class ActivityAuthorizationServiceImplTest {
     }
 
     @Test
+    void thenTheDraftShouldAlsoRequireAResponsible() {
+      BddLogger.then("an ActivityResponsibleRequiredException should be thrown");
+      givenDraftAuthorization(authorizationOf(staff, EActivityRight.MANAGE_AUTHORIZATIONS));
+
+      assertThatThrownBy(
+              () ->
+                  service.defineDraftAuthorizations(
+                      activityId,
+                      List.of(
+                          new ActivityAuthorizationDefinition(
+                              responsible.getId(), EnumSet.of(EActivityRight.FEEDBACK)))))
+          .isInstanceOf(ActivityResponsibleRequiredException.class);
+      verify(activityDraftAuthorizationRepository, never()).saveAll(anyList());
+    }
+
+    @Test
     void thenItShouldThrowWhenTheDefinitionsAreEmpty() {
       BddLogger.then("an ActivityResponsibleRequiredException should be thrown");
-      givenManager();
+      givenActivityAuthorization(authorizationOf(staff, EActivityRight.MANAGE_AUTHORIZATIONS));
 
       assertThatThrownBy(() -> service.defineActivityAuthorizations(activityId, List.of()))
           .isInstanceOf(ActivityResponsibleRequiredException.class);
@@ -368,7 +509,7 @@ class ActivityAuthorizationServiceImplTest {
     @Test
     void thenItShouldThrowWhenAStaffDoesNotExist() {
       BddLogger.then("a UserIsNotStaffException should be thrown");
-      givenManager();
+      givenActivityAuthorization(authorizationOf(staff, EActivityRight.MANAGE_AUTHORIZATIONS));
       when(staffRepository.findAllById(anyList())).thenReturn(List.of(responsible));
 
       assertThatThrownBy(
@@ -386,7 +527,7 @@ class ActivityAuthorizationServiceImplTest {
     @Test
     void thenItShouldThrowWhenTheStaffCannotManageTheAuthorizations() {
       BddLogger.then("a UserNotAuthorizedException should be thrown");
-      givenAuthorization(authorizationOf(staff, EActivityRight.EDIT));
+      givenActivityAuthorization(authorizationOf(staff, EActivityRight.EDIT));
 
       assertThatThrownBy(
               () ->
@@ -396,16 +537,27 @@ class ActivityAuthorizationServiceImplTest {
     }
 
     @Test
-    void thenItShouldThrowWhenTheActivityDoesNotExist() {
-      BddLogger.then("an ActivityNotFoundException should be thrown");
-      when(activityRepository.existsById(activityId)).thenReturn(false);
+    void thenItShouldThrowWhenTheStaffCannotManageTheDraftAuthorizations() {
+      BddLogger.then("a UserNotAuthorizedException should be thrown");
+      givenDraftAuthorization(authorizationOf(staff, EActivityRight.EDIT));
+
+      assertThatThrownBy(
+              () ->
+                  service.defineDraftAuthorizations(
+                      activityId, List.of(responsibleDefinition(responsible))))
+          .isInstanceOf(UserNotAuthorizedException.class);
+    }
+
+    @Test
+    void thenItShouldThrowWhenTheDraftDoesNotExist() {
+      BddLogger.then("an ActivityDraftNotFoundException should be thrown");
       when(activityDraftRepository.existsById(activityId)).thenReturn(false);
 
       assertThatThrownBy(
               () ->
-                  service.defineActivityAuthorizations(
+                  service.defineDraftAuthorizations(
                       activityId, List.of(responsibleDefinition(responsible))))
-          .isInstanceOf(ActivityNotFoundException.class);
+          .isInstanceOf(ActivityDraftNotFoundException.class);
     }
   }
 
@@ -419,9 +571,9 @@ class ActivityAuthorizationServiceImplTest {
     }
 
     @Test
-    void thenItShouldCreateAnAuthorizationHoldingEveryRight() {
-      BddLogger.then("a new authorization with every right should be saved");
-      givenNoAuthorization(staff);
+    void thenItShouldCreateAnActivityAuthorizationHoldingEveryRight() {
+      BddLogger.then("a new activity authorization with every right should be saved");
+      givenNoActivityAuthorization(staff);
 
       service.grantAllRights(activityId, staff);
 
@@ -432,18 +584,156 @@ class ActivityAuthorizationServiceImplTest {
       assertThat(captor.getValue().getStaff()).isEqualTo(staff);
       assertThat(captor.getValue().getRights())
           .containsExactlyInAnyOrderElementsOf(EActivityRight.all());
+      verify(activityDraftAuthorizationRepository, never()).save(any());
+    }
+
+    @Test
+    void thenItShouldCreateADraftAuthorizationHoldingEveryRight() {
+      BddLogger.then("a new draft authorization with every right should be saved");
+      givenNoDraftAuthorization(staff);
+
+      service.grantAllDraftRights(activityId, staff);
+
+      ArgumentCaptor<ActivityAuthorization> captor =
+          ArgumentCaptor.forClass(ActivityAuthorization.class);
+      verify(activityDraftAuthorizationRepository).save(captor.capture());
+      assertThat(captor.getValue().getRights())
+          .containsExactlyInAnyOrderElementsOf(EActivityRight.all());
+      verify(activityAuthorizationRepository, never()).save(any());
     }
 
     @Test
     void thenItShouldCompleteAnExistingAuthorization() {
       BddLogger.then("the existing authorization should be completed with every right");
       var existing = authorizationOf(staff, EActivityRight.FEEDBACK);
-      givenAuthorization(existing);
+      givenActivityAuthorization(existing);
 
       service.grantAllRights(activityId, staff);
 
       verify(activityAuthorizationRepository).save(existing);
       assertThat(existing.getRights()).containsExactlyInAnyOrderElementsOf(EActivityRight.all());
+    }
+  }
+
+  @Nested
+  class WhenCopyingTheActivityAuthorizationsToTheDraft {
+
+    Staff reviewer;
+
+    @BeforeEach
+    void setupWhen() {
+      BddLogger.given("an activity authorization service");
+      BddLogger.when("creating the edition draft of an activity");
+      reviewer = StaffFixture.create().toModel();
+    }
+
+    @Test
+    void thenTheDraftShouldStartFromTheActivityAuthorizations() {
+      BddLogger.then("each activity authorization should be copied to the draft table");
+      when(activityAuthorizationRepository.findAllByActivityId(activityId))
+          .thenReturn(
+              List.of(
+                  authorizationOf(staff, EActivityRight.values()),
+                  authorizationOf(reviewer, EActivityRight.FEEDBACK)));
+      when(activityDraftAuthorizationRepository.findAllByActivityId(activityId))
+          .thenReturn(List.of());
+      when(activityDraftAuthorizationRepository.saveAll(anyList()))
+          .thenAnswer(invocation -> invocation.getArgument(0));
+
+      service.copyActivityAuthorizationsToDraft(activityId);
+
+      ArgumentCaptor<List<ActivityAuthorization>> captor = ArgumentCaptor.captor();
+      verify(activityDraftAuthorizationRepository).saveAll(captor.capture());
+      assertThat(captor.getValue()).hasSize(2);
+      assertThat(captor.getValue().getFirst().getRights())
+          .containsExactlyInAnyOrderElementsOf(EActivityRight.all());
+      assertThat(captor.getValue().get(1).getStaff()).isEqualTo(reviewer);
+      assertThat(captor.getValue().get(1).getRights()).containsExactly(EActivityRight.FEEDBACK);
+      verify(activityAuthorizationRepository, never()).saveAll(anyList());
+    }
+
+    @Test
+    void thenAnExistingDraftAuthorizationShouldBeAligned() {
+      BddLogger.then("the draft rows should be aligned with the activity ones");
+      var staleDraft = authorizationOf(staff, EActivityRight.FEEDBACK);
+      var removedDraft = authorizationOf(reviewer, EActivityRight.EDIT);
+      when(activityAuthorizationRepository.findAllByActivityId(activityId))
+          .thenReturn(List.of(authorizationOf(staff, EActivityRight.PUBLISH)));
+      when(activityDraftAuthorizationRepository.findAllByActivityId(activityId))
+          .thenReturn(List.of(staleDraft, removedDraft));
+      when(activityDraftAuthorizationRepository.saveAll(anyList()))
+          .thenAnswer(invocation -> invocation.getArgument(0));
+
+      service.copyActivityAuthorizationsToDraft(activityId);
+
+      verify(activityDraftAuthorizationRepository).removeAllFromDatabase(List.of(removedDraft));
+      assertThat(staleDraft.getRights()).containsExactly(EActivityRight.PUBLISH);
+    }
+
+    @Test
+    void thenItShouldDoNothingWhenTheActivityHasNoAuthorization() {
+      BddLogger.then("nothing should be written in the draft table");
+      when(activityAuthorizationRepository.findAllByActivityId(activityId)).thenReturn(List.of());
+
+      service.copyActivityAuthorizationsToDraft(activityId);
+
+      verify(activityDraftAuthorizationRepository, never()).saveAll(anyList());
+      verify(activityDraftAuthorizationRepository, never()).removeAllFromDatabase(anyList());
+    }
+  }
+
+  @Nested
+  class WhenApplyingTheDraftAuthorizationsToTheActivity {
+
+    Staff reviewer;
+
+    @BeforeEach
+    void setupWhen() {
+      BddLogger.given("an activity authorization service");
+      BddLogger.when("publishing the draft of an activity");
+      reviewer = StaffFixture.create().toModel();
+    }
+
+    @Test
+    void thenTheActivityShouldTakeTheDraftAuthorizationsAndTheDraftTableShouldBeEmptied() {
+      BddLogger.then("the activity rows are aligned with the draft ones, then the draft is wiped");
+      var existingActivity = authorizationOf(staff, EActivityRight.FEEDBACK);
+      var removedActivity = authorizationOf(reviewer, EActivityRight.EDIT);
+      var newcomer = StaffFixture.create().toModel();
+      when(activityDraftAuthorizationRepository.findAllByActivityId(activityId))
+          .thenReturn(
+              List.of(
+                  authorizationOf(staff, EActivityRight.values()),
+                  authorizationOf(newcomer, EActivityRight.EVALUATION)));
+      when(activityAuthorizationRepository.findAllByActivityId(activityId))
+          .thenReturn(List.of(existingActivity, removedActivity));
+      when(activityAuthorizationRepository.saveAll(anyList()))
+          .thenAnswer(invocation -> invocation.getArgument(0));
+
+      service.applyDraftAuthorizationsToActivity(activityId);
+
+      verify(activityAuthorizationRepository).removeAllFromDatabase(List.of(removedActivity));
+      ArgumentCaptor<List<ActivityAuthorization>> captor = ArgumentCaptor.captor();
+      verify(activityAuthorizationRepository).saveAll(captor.capture());
+      assertThat(captor.getValue()).hasSize(2);
+      assertThat(captor.getValue().getFirst()).isSameAs(existingActivity);
+      assertThat(existingActivity.getRights())
+          .containsExactlyInAnyOrderElementsOf(EActivityRight.all());
+      assertThat(captor.getValue().get(1).getStaff()).isEqualTo(newcomer);
+      verify(activityDraftAuthorizationRepository).deleteAllByActivityId(activityId);
+    }
+
+    @Test
+    void thenItShouldKeepTheActivityAuthorizationsWhenTheDraftHasNone() {
+      BddLogger.then("the activity authorizations should be left untouched");
+      when(activityDraftAuthorizationRepository.findAllByActivityId(activityId))
+          .thenReturn(List.of());
+
+      service.applyDraftAuthorizationsToActivity(activityId);
+
+      verify(activityAuthorizationRepository, never()).saveAll(anyList());
+      verify(activityAuthorizationRepository, never()).removeAllFromDatabase(anyList());
+      verify(activityDraftAuthorizationRepository).deleteAllByActivityId(activityId);
     }
   }
 
@@ -457,7 +747,7 @@ class ActivityAuthorizationServiceImplTest {
     }
 
     @Test
-    void thenItShouldReturnTheStaffsHoldingTheRight() {
+    void thenItShouldReturnTheStaffsHoldingTheRightOnTheActivity() {
       BddLogger.then("only the staffs holding the right should be returned");
       var reviewer = StaffFixture.create().toModel();
       when(activityAuthorizationRepository.findAllByActivityId(activityId))
@@ -493,22 +783,38 @@ class ActivityAuthorizationServiceImplTest {
     }
 
     @Test
+    void thenItShouldGroupTheDraftResponsiblesFromTheDraftTable() {
+      BddLogger.then("the draft responsibles should come from the draft table");
+      var ids = List.of(activityId);
+      when(activityDraftAuthorizationRepository.findAllByActivityIds(ids))
+          .thenReturn(List.of(authorizationOf(staff, EActivityRight.RESPONSIBLE)));
+
+      assertThat(service.getResponsiblesByDraftIds(ids).get(activityId)).containsExactly(staff);
+      verify(activityAuthorizationRepository, never()).findAllByActivityIds(any());
+    }
+
+    @Test
     void thenItShouldNotQueryTheRepositoryWithoutActivityIds() {
       BddLogger.then("an empty map should be returned");
 
       assertThat(service.getResponsiblesByActivityIds(List.of())).isEmpty();
+      assertThat(service.getResponsiblesByDraftIds(List.of())).isEmpty();
       verify(activityAuthorizationRepository, never()).findAllByActivityIds(any());
+      verify(activityDraftAuthorizationRepository, never()).findAllByActivityIds(any());
     }
   }
 
   @Test
-  void shouldDeleteEveryAuthorizationOfTheActivity() {
+  void shouldDeleteTheAuthorizationsOfTheActivityAndOfItsDraftSeparately() {
     BddLogger.given("an activity authorization service");
-    BddLogger.when("deleting the authorizations of an activity");
-    BddLogger.then("the repository should delete them all");
+    BddLogger.when("deleting the authorizations");
+    BddLogger.then("each table should be deleted on its own");
 
     service.deleteAllOfActivity(activityId);
-
     verify(activityAuthorizationRepository).deleteAllByActivityId(activityId);
+    verify(activityDraftAuthorizationRepository, never()).deleteAllByActivityId(any());
+
+    service.deleteAllOfDraft(activityId);
+    verify(activityDraftAuthorizationRepository).deleteAllByActivityId(activityId);
   }
 }

@@ -233,7 +233,7 @@ class ActivityServiceImplTest {
 
         ActivityDraft result = activityService.createActivityDraft("Mon brouillon d'activité");
 
-        verify(activityAuthorizationService).grantAllRights(result.getId(), staff);
+        verify(activityAuthorizationService).grantAllDraftRights(result.getId(), staff);
       }
 
       @Test
@@ -594,7 +594,7 @@ class ActivityServiceImplTest {
             BddLogger.and("the logged-in staff does not hold the edit right");
             doThrow(new UserNotAuthorizedException())
                 .when(activityAuthorizationService)
-                .checkRight(loggedInStaff, draftId, EActivityRight.EDIT);
+                .checkDraftRight(loggedInStaff, draftId, EActivityRight.EDIT);
           }
 
           @Test
@@ -994,7 +994,7 @@ class ActivityServiceImplTest {
             BddLogger.and("the logged-in staff does not hold the edit right");
             doThrow(new UserNotAuthorizedException())
                 .when(activityAuthorizationService)
-                .checkRight(loggedInStaff, draftId, EActivityRight.EDIT);
+                .checkDraftRight(loggedInStaff, draftId, EActivityRight.EDIT);
           }
 
           @Test
@@ -1112,6 +1112,16 @@ class ActivityServiceImplTest {
               Activity result = activityService.publish(draftId);
 
               assertTrue(result.isNational());
+            }
+
+            @Test
+            void thenItShouldApplyTheDraftAuthorizationsToTheActivity() {
+              BddLogger.then("the draft authorizations should become the activity ones");
+
+              Activity result = activityService.publish(draftId);
+
+              verify(activityAuthorizationService)
+                  .applyDraftAuthorizationsToActivity(result.getId());
             }
 
             @Test
@@ -1233,7 +1243,7 @@ class ActivityServiceImplTest {
             BddLogger.and("the logged-in staff does not hold the publish right");
             doThrow(new UserNotAuthorizedException())
                 .when(activityAuthorizationService)
-                .checkRight(loggedInStaff, draftId, EActivityRight.PUBLISH);
+                .checkDraftRight(loggedInStaff, draftId, EActivityRight.PUBLISH);
           }
 
           @Test
@@ -1662,22 +1672,12 @@ class ActivityServiceImplTest {
           }
 
           @Test
-          void thenItShouldDeleteTheAuthorizationsWhenNoActivitySharesItsId() {
-            BddLogger.then("the authorizations of a standalone draft should be deleted");
-            when(activityRepository.existsById(draftId)).thenReturn(false);
+          void thenItShouldDeleteOnlyTheDraftAuthorizations() {
+            BddLogger.then("the draft authorizations should go, the activity ones should stay");
 
             activityService.deleteDraft(draftId);
 
-            verify(activityAuthorizationService).deleteAllOfActivity(draftId);
-          }
-
-          @Test
-          void thenItShouldKeepTheAuthorizationsWhenAnActivitySharesItsId() {
-            BddLogger.then("the authorizations of the published activity should be kept");
-            when(activityRepository.existsById(draftId)).thenReturn(true);
-
-            activityService.deleteDraft(draftId);
-
+            verify(activityAuthorizationService).deleteAllOfDraft(draftId);
             verify(activityAuthorizationService, never()).deleteAllOfActivity(any());
           }
         }
@@ -1692,7 +1692,7 @@ class ActivityServiceImplTest {
             when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
             doThrow(new UserNotAuthorizedException())
                 .when(activityAuthorizationService)
-                .checkRight(staff, draftId, EActivityRight.EDIT);
+                .checkDraftRight(staff, draftId, EActivityRight.EDIT);
           }
 
           @Test
@@ -1785,6 +1785,7 @@ class ActivityServiceImplTest {
           verify(fileResourceService).delete(activityFile.getId());
           verify(activityDraftRepository, never()).removeFromDatabase(any());
           verify(activityAuthorizationService).deleteAllOfActivity(activityId);
+          verify(activityAuthorizationService).deleteAllOfDraft(activityId);
         }
 
         @Test
@@ -2769,7 +2770,7 @@ class ActivityServiceImplTest {
         when(staffActivityOverviewRepository.findAllAccessibleByStaffAndStatus(
                 staff, null, pageCriteria))
             .thenReturn(new PagedResult<>(List.of(overviewData), pageInfo));
-        when(activityAuthorizationService.getResponsiblesByActivityIds(List.of(expectedId)))
+        when(activityAuthorizationService.getResponsiblesByDraftIds(List.of(expectedId)))
             .thenReturn(Map.of(expectedId, List.of(responsible)));
 
         var result = activityService.staffActivityWorkingSpace(pageCriteria, null);
@@ -2800,6 +2801,8 @@ class ActivityServiceImplTest {
                 staff, null, pageCriteria))
             .thenReturn(new PagedResult<>(List.of(overviewData), pageInfo));
         when(activityAuthorizationService.getResponsiblesByActivityIds(anyCollection()))
+            .thenReturn(Map.of());
+        when(activityAuthorizationService.getResponsiblesByDraftIds(anyCollection()))
             .thenReturn(Map.of());
 
         var result = activityService.staffActivityWorkingSpace(pageCriteria, null);
@@ -2951,7 +2954,7 @@ class ActivityServiceImplTest {
           assertNotEquals(activityId, result.getId());
           assertEquals(loggedInStaff, result.getAuthor());
           verify(activityDraftRepository).save(result);
-          verify(activityAuthorizationService).grantAllRights(result.getId(), loggedInStaff);
+          verify(activityAuthorizationService).grantAllDraftRights(result.getId(), loggedInStaff);
         }
 
         @Test
@@ -3130,7 +3133,7 @@ class ActivityServiceImplTest {
           assertNotEquals(activityId, result.getId());
           assertEquals(loggedInStaff, result.getAuthor());
           verify(activityDraftRepository).save(result);
-          verify(activityAuthorizationService).grantAllRights(result.getId(), loggedInStaff);
+          verify(activityAuthorizationService).grantAllDraftRights(result.getId(), loggedInStaff);
         }
 
         @Test
@@ -3350,6 +3353,20 @@ class ActivityServiceImplTest {
       var result = activityService.createDraftFromActivity(activityId);
       assertThat(result.getId()).isEqualTo(activityId);
       verify(activityDraftRepository).save(any(ActivityDraft.class));
+      verify(activityAuthorizationService).copyActivityAuthorizationsToDraft(activityId);
+    }
+
+    @Test
+    void doesNotCopyTheAuthorizationsAgain_whenTheDraftAlreadyExists() {
+      Activity activity = givenAnActivity();
+      ActivityDraft existingDraft = mock(ActivityDraft.class);
+      when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
+      when(activityDraftRepository.findById(activityId)).thenReturn(Optional.of(existingDraft));
+
+      assertThat(activityService.createDraftFromActivity(activityId)).isEqualTo(existingDraft);
+
+      verify(activityDraftRepository, never()).save(any());
+      verify(activityAuthorizationService, never()).copyActivityAuthorizationsToDraft(any());
     }
 
     @Test
@@ -3470,7 +3487,7 @@ class ActivityServiceImplTest {
 
         assertThat(activityService.getActivityDraftById(draftId)).isEqualTo(draft);
         verify(activityAuthorizationService)
-            .checkAnyRight(staff, draftId, EActivityRight.MANAGEMENT_RIGHTS);
+            .checkAnyDraftRight(staff, draftId, EActivityRight.MANAGEMENT_RIGHTS);
       }
 
       @Test
@@ -3479,7 +3496,7 @@ class ActivityServiceImplTest {
         when(activityDraftRepository.findById(draftId)).thenReturn(Optional.of(draft));
         doThrow(new UserNotAuthorizedException())
             .when(activityAuthorizationService)
-            .checkAnyRight(staff, draftId, EActivityRight.MANAGEMENT_RIGHTS);
+            .checkAnyDraftRight(staff, draftId, EActivityRight.MANAGEMENT_RIGHTS);
 
         assertThatThrownBy(() -> activityService.getActivityDraftById(draftId))
             .isInstanceOf(UserNotAuthorizedException.class);
@@ -3492,7 +3509,7 @@ class ActivityServiceImplTest {
 
         assertThatThrownBy(() -> activityService.getActivityDraftById(draftId))
             .isInstanceOf(ActivityDraftNotFoundException.class);
-        verify(activityAuthorizationService, never()).checkAnyRight(any(), any(), any());
+        verify(activityAuthorizationService, never()).checkAnyDraftRight(any(), any(), any());
       }
     }
 
@@ -3527,7 +3544,7 @@ class ActivityServiceImplTest {
 
         assertThat(activityService.downloadDraftFile(draftId, fileId)).isEqualTo(expected);
         verify(activityAuthorizationService)
-            .checkAnyRight(staff, draftId, EActivityRight.MANAGEMENT_RIGHTS);
+            .checkAnyDraftRight(staff, draftId, EActivityRight.MANAGEMENT_RIGHTS);
       }
 
       @Test
@@ -3535,7 +3552,7 @@ class ActivityServiceImplTest {
         BddLogger.then("a staff without any management right gets UserNotAuthorizedException");
         doThrow(new UserNotAuthorizedException())
             .when(activityAuthorizationService)
-            .checkAnyRight(staff, draftId, EActivityRight.MANAGEMENT_RIGHTS);
+            .checkAnyDraftRight(staff, draftId, EActivityRight.MANAGEMENT_RIGHTS);
 
         assertThatThrownBy(() -> activityService.downloadDraftFile(draftId, fileId))
             .isInstanceOf(UserNotAuthorizedException.class);

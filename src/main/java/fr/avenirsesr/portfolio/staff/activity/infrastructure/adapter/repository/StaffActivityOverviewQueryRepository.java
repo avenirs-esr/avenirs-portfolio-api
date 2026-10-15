@@ -25,26 +25,39 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class StaffActivityOverviewQueryRepository implements StaffActivityOverviewRepository {
-  private static final String ANY_RIGHT_OF_STAFF =
+  private static final String ANY_RIGHT_ON_ACTIVITY =
       """
       EXISTS (
           SELECT 1
           FROM activity_authorization aa
           JOIN activity_authorization_rights ar ON ar.activity_authorization_id = aa.id
-          WHERE aa.activity_id = %s
+          WHERE aa.activity_id = a.id
             AND aa.staff_id = :staffId
       )
       """;
 
-  private static final String MANAGEMENT_RIGHT_OF_STAFF =
+  private static final String MANAGEMENT_RIGHT_ON_ACTIVITY =
       """
       EXISTS (
           SELECT 1
           FROM activity_authorization aa
           JOIN activity_authorization_rights ar ON ar.activity_authorization_id = aa.id
-          WHERE aa.activity_id = %s
+          WHERE aa.activity_id = a.id
             AND aa.staff_id = :staffId
             AND ar.activity_right IN (:managementRights)
+      )
+      """;
+
+  private static final String MANAGEMENT_RIGHT_ON_DRAFT =
+      """
+      EXISTS (
+          SELECT 1
+          FROM activity_draft_authorization da
+          JOIN activity_draft_authorization_rights dr
+            ON dr.activity_draft_authorization_id = da.id
+          WHERE da.activity_draft_id = d.id
+            AND da.staff_id = :staffId
+            AND dr.activity_right IN (:managementRights)
       )
       """;
 
@@ -60,7 +73,7 @@ public class StaffActivityOverviewQueryRepository implements StaffActivityOvervi
       WHERE a.status = 'PUBLISHED'
         AND
       """
-          + ANY_RIGHT_OF_STAFF.formatted("a.id");
+          + ANY_RIGHT_ON_ACTIVITY;
 
   private static final String UNPUBLISHED_SELECT =
       """
@@ -74,7 +87,7 @@ public class StaffActivityOverviewQueryRepository implements StaffActivityOvervi
       WHERE a.status = 'UNPUBLISHED'
         AND
       """
-          + MANAGEMENT_RIGHT_OF_STAFF.formatted("a.id");
+          + MANAGEMENT_RIGHT_ON_ACTIVITY;
 
   private static final String DRAFT_SELECT =
       """
@@ -87,7 +100,7 @@ public class StaffActivityOverviewQueryRepository implements StaffActivityOvervi
       FROM activity_draft d
       WHERE
       """
-          + MANAGEMENT_RIGHT_OF_STAFF.formatted("d.id");
+          + MANAGEMENT_RIGHT_ON_DRAFT;
 
   @PersistenceContext private EntityManager em;
 
