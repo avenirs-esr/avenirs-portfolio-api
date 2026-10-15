@@ -107,7 +107,7 @@ public class FeedbackDatabaseRepository
   public PagedResult&lt;Feedback&gt; findByStaff(
       UUID staffId, UUID activityId, PageCriteria pageCriteria, EFeedbackStatus... status) {
 <span class="fc" id="L109">    var specification =</span>
-<span class="fc" id="L110">        FeedbackSpecification.isAssignedToStaff(staffId)</span>
+<span class="fc" id="L110">        FeedbackSpecification.hasStaffAuthor(staffId)</span>
 <span class="fc" id="L111">            .and(FeedbackSpecification.hasStatus(status))</span>
 <span class="fc" id="L112">            .and(FeedbackSpecification.hasActivityId(activityId))</span>
 <span class="fc" id="L113">            .and(FeedbackSpecification.isLatestOfItsDeclaredActivity());</span>
@@ -135,7 +135,7 @@ public class FeedbackDatabaseRepository
   public List&lt;Feedback&gt; findLatestFeedbacksByStaffAndActivityForEachStudent(
       UUID staffId, UUID activityId) {
 <span class="fc" id="L137">    var specification =</span>
-<span class="fc" id="L138">        FeedbackSpecification.isAssignedToStaff(staffId)</span>
+<span class="fc" id="L138">        FeedbackSpecification.hasStaffAuthor(staffId)</span>
 <span class="fc" id="L139">            .and(FeedbackSpecification.hasActivityId(activityId));</span>
 
 <span class="fc" id="L141">    var sort = Sort.by(&quot;createdAt&quot;).descending();</span>
@@ -171,7 +171,7 @@ public class FeedbackDatabaseRepository
   @Override
   public int countByStatus(Staff staff, Activity activity, EFeedbackStatus status) {
 <span class="fc" id="L173">    var spec =</span>
-<span class="fc" id="L174">        FeedbackSpecification.isAssignedToStaff(staff.getId())</span>
+<span class="fc" id="L174">        FeedbackSpecification.hasStaffAuthor(staff.getId())</span>
 <span class="fc bfc" id="L175" title="All 2 branches covered.">            .and(FeedbackSpecification.hasActivityId(activity != null ? activity.getId() : null))</span>
 <span class="fc" id="L176">            .and(FeedbackSpecification.hasStatus(status))</span>
 <span class="fc" id="L177">            .and(FeedbackSpecification.isLatestOfItsDeclaredActivity());</span>

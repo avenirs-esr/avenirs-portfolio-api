@@ -4,20 +4,13 @@ import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
 
-<span class="fc" id="L10">public record ActivityStaffOverviewData(</span>
+<span class="fc" id="L9">public record ActivityStaffOverviewData(</span>
     UUID activityId,
     String title,
     EActivityThematic thematic,
-    List&lt;Staff&gt; leaders,
+    Staff author,
     EActivityStatus activityStatus,
-    Instant updatedAt) {
-
-  public ActivityStaffOverviewData withLeaders(List&lt;Staff&gt; leaders) {
-<span class="fc" id="L19">    return new ActivityStaffOverviewData(</span>
-        activityId, title, thematic, leaders, activityStatus, updatedAt);
-  }
-}
+    Instant updatedAt) {}
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
