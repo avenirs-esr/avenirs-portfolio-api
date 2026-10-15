@@ -1525,7 +1525,7 @@ public class FeedbackControllerIT extends ContainerConfigurationTest {
       UUID activityId, List<StaffAuthorizationRequest> authorizations) throws Exception {
     webTestClient
         .put()
-        .uri(ACTIVITIES_PATH + "/" + activityId + "/authorizations")
+        .uri(ACTIVITIES_PATH + "/PUBLISHED/" + activityId + "/authorizations")
         .header("X-Signed-Context", staffPayload)
         .header("X-Context-Signature", staffSignature)
         .contentType(MediaType.APPLICATION_JSON)

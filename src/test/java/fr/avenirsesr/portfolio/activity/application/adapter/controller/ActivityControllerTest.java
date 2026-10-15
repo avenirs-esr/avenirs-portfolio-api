@@ -901,7 +901,7 @@ class ActivityControllerTest {
     when(activityService.hasEnrolledStudents(draft)).thenReturn(true);
     when(draft.getFiles()).thenReturn(List.of());
     when(fileDTOMapper.toFileDTOs(List.of(), null)).thenReturn(List.of());
-    when(activityAuthorizationService.getLoggedInStaffRights(any())).thenReturn(Set.of());
+    when(activityAuthorizationService.getLoggedInStaffDraftRights(any())).thenReturn(Set.of());
     when(activityContentDtoMapper.toDTO(draft, true, Set.of(), List.of())).thenReturn(dto);
 
     BddLogger.when("getting the activity content for status DRAFT");
@@ -1013,7 +1013,7 @@ class ActivityControllerTest {
   }
 
   @Test
-  void shouldReturnTheAuthorizationsOfTheActivity() {
+  void shouldReturnTheAuthorizationsOfThePublishedActivity() {
     BddLogger.given("an activity with authorizations");
     UUID activityId = UUID.randomUUID();
     var staff = StaffFixture.create().toModel();
@@ -1028,7 +1028,8 @@ class ActivityControllerTest {
     when(activityAuthorizationDtoMapper.toDTOs(List.of(authorization))).thenReturn(List.of(dto));
 
     BddLogger.when("getting the authorizations");
-    var response = controller.getActivityAuthorizations(principal, activityId);
+    var response =
+        controller.getActivityAuthorizations(principal, EActivityStatus.PUBLISHED, activityId);
 
     BddLogger.then("it should return the mapped authorizations");
     assertEquals(200, response.getStatusCode().value());
@@ -1036,8 +1037,8 @@ class ActivityControllerTest {
   }
 
   @Test
-  void shouldDefineTheAuthorizationsOfTheActivity() {
-    BddLogger.given("an authorizations request");
+  void shouldDefineTheAuthorizationsOfTheDraft() {
+    BddLogger.given("an authorizations request on a draft");
     UUID activityId = UUID.randomUUID();
     var staff = StaffFixture.create().toModel();
     var request =
@@ -1057,16 +1058,18 @@ class ActivityControllerTest {
             new StaffInfoDTO(staff.getId(), "firstName", "lastName"),
             List.of(EActivityRight.RESPONSIBLE, EActivityRight.EDIT));
     when(activityAuthorizationDtoMapper.toDefinitions(request)).thenReturn(definitions);
-    when(activityAuthorizationService.defineActivityAuthorizations(activityId, definitions))
+    when(activityAuthorizationService.defineDraftAuthorizations(activityId, definitions))
         .thenReturn(List.of(authorization));
     when(activityAuthorizationDtoMapper.toDTOs(List.of(authorization))).thenReturn(List.of(dto));
 
     BddLogger.when("defining the authorizations");
-    var response = controller.defineActivityAuthorizations(principal, activityId, request);
+    var response =
+        controller.defineActivityAuthorizations(
+            principal, EActivityStatus.DRAFT, activityId, request);
 
     BddLogger.then("it should delegate to the service and return the mapped authorizations");
     assertEquals(200, response.getStatusCode().value());
     assertEquals(List.of(dto), response.getBody());
-    verify(activityAuthorizationService).defineActivityAuthorizations(activityId, definitions);
+    verify(activityAuthorizationService).defineDraftAuthorizations(activityId, definitions);
   }
 }

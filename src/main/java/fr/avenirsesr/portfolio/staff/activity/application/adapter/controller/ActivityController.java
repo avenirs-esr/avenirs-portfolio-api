@@ -146,7 +146,7 @@ public class ActivityController {
             yield activityContentDtoMapper.toDTO(
                 draft,
                 activityService.hasEnrolledStudents(draft),
-                activityAuthorizationService.getLoggedInStaffRights(draft.getId()),
+                activityAuthorizationService.getLoggedInStaffDraftRights(draft.getId()),
                 fileDTOMapper.toFileDTOs(draft.getFiles(), baseUrl));
           }
         };
@@ -506,33 +506,55 @@ public class ActivityController {
   }
 
   @PreAuthorize("hasAuthority('activity:read:contextual')")
-  @GetMapping("/{activityId}/authorizations")
+  @GetMapping("/{activityStatus}/{activityId}/authorizations")
   public ResponseEntity<List<ActivityAuthorizationDTO>> getActivityAuthorizations(
-      Principal principal, @PathVariable UUID activityId) {
+      Principal principal,
+      @PathVariable
+          @Parameter(
+              name = "activityStatus",
+              in = ParameterIn.PATH,
+              required = true,
+              schema = @Schema(ref = "#/components/schemas/EActivityStatus"))
+          EActivityStatus activityStatus,
+      @PathVariable UUID activityId) {
     log.debug(
-        "Received request to get authorizations of activity [{}] by user [{}]",
+        "Received request to get the {} authorizations of activity [{}] by user [{}]",
+        activityStatus,
         activityId,
         principal.getName());
 
-    var authorizations = activityAuthorizationService.getActivityAuthorizations(activityId);
+    var authorizations =
+        activityStatus == EActivityStatus.DRAFT
+            ? activityAuthorizationService.getDraftAuthorizations(activityId)
+            : activityAuthorizationService.getActivityAuthorizations(activityId);
     return ResponseEntity.ok(activityAuthorizationDtoMapper.toDTOs(authorizations));
   }
 
   @PreAuthorize("hasAuthority('activity:update')")
-  @PutMapping("/{activityId}/authorizations")
+  @PutMapping("/{activityStatus}/{activityId}/authorizations")
   public ResponseEntity<List<ActivityAuthorizationDTO>> defineActivityAuthorizations(
       Principal principal,
+      @PathVariable
+          @Parameter(
+              name = "activityStatus",
+              in = ParameterIn.PATH,
+              required = true,
+              schema = @Schema(ref = "#/components/schemas/EActivityStatus"))
+          EActivityStatus activityStatus,
       @PathVariable UUID activityId,
       @RequestBody ActivityAuthorizationsRequest body) {
     log.debug(
-        "Received request to define authorizations of activity [{}] by user [{}] body : {}",
+        "Received request to define the {} authorizations of activity [{}] by user [{}] body : {}",
+        activityStatus,
         activityId,
         principal.getName(),
         body);
 
+    var definitions = activityAuthorizationDtoMapper.toDefinitions(body);
     var authorizations =
-        activityAuthorizationService.defineActivityAuthorizations(
-            activityId, activityAuthorizationDtoMapper.toDefinitions(body));
+        activityStatus == EActivityStatus.DRAFT
+            ? activityAuthorizationService.defineDraftAuthorizations(activityId, definitions)
+            : activityAuthorizationService.defineActivityAuthorizations(activityId, definitions);
     return ResponseEntity.ok(activityAuthorizationDtoMapper.toDTOs(authorizations));
   }
 

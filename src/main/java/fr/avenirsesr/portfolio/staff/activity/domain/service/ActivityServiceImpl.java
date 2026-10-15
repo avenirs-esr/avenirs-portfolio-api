@@ -150,7 +150,7 @@ public class ActivityServiceImpl implements ActivityService {
         activityDraftRepository
             .findById(activityDraftId)
             .orElseThrow(ActivityDraftNotFoundException::new);
-    activityAuthorizationService.checkRight(staff, activityDraftId, EActivityRight.PUBLISH);
+    activityAuthorizationService.checkDraftRight(staff, activityDraftId, EActivityRight.PUBLISH);
 
     if (draft.getThematic().isEmpty()) {
       throw new FieldValidationException(
@@ -205,6 +205,7 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     var savedActivity = activityRepository.save(activity);
+    activityAuthorizationService.applyDraftAuthorizationsToActivity(savedActivity.getId());
 
     activityDraftRepository.removeFromDatabase(draft);
     removedFileIds.forEach(fileResourceService::delete);
@@ -313,12 +314,10 @@ public class ActivityServiceImpl implements ActivityService {
         activityDraftRepository
             .findById(activityDraftId)
             .orElseThrow(ActivityDraftNotFoundException::new);
-    activityAuthorizationService.checkRight(staff, activityDraftId, EActivityRight.EDIT);
+    activityAuthorizationService.checkDraftRight(staff, activityDraftId, EActivityRight.EDIT);
 
     activityDraftRepository.removeFromDatabase(draft);
-    if (!activityRepository.existsById(activityDraftId)) {
-      activityAuthorizationService.deleteAllOfActivity(activityDraftId);
-    }
+    activityAuthorizationService.deleteAllOfDraft(activityDraftId);
     log.info("Deleted activity draft with id: {}", activityDraftId);
   }
 
@@ -342,6 +341,7 @@ public class ActivityServiceImpl implements ActivityService {
     draft.ifPresent(activityDraftRepository::removeFromDatabase);
     activityRepository.removeFromDatabase(activity);
     activityAuthorizationService.deleteAllOfActivity(activityId);
+    activityAuthorizationService.deleteAllOfDraft(activityId);
     fileIds.forEach(fileResourceService::delete);
 
     log.info("Definitively deleted activity {} and every element linked to it", activityId);
@@ -474,20 +474,33 @@ public class ActivityServiceImpl implements ActivityService {
 
   private PagedResult<ActivityStaffOverviewData> withResponsibles(
       PagedResult<ActivityStaffOverviewData> pagedActivities) {
-    var responsiblesByActivityId =
+    var activityResponsibles =
         activityAuthorizationService.getResponsiblesByActivityIds(
-            pagedActivities.content().stream()
-                .map(ActivityStaffOverviewData::activityId)
-                .distinct()
-                .toList());
+            idsOf(pagedActivities.content(), false));
+    var draftResponsibles =
+        activityAuthorizationService.getResponsiblesByDraftIds(
+            idsOf(pagedActivities.content(), true));
     return new PagedResult<>(
         pagedActivities.content().stream()
             .map(
-                a ->
-                    a.withResponsibles(
-                        responsiblesByActivityId.getOrDefault(a.activityId(), List.of())))
+                a -> {
+                  var responsibles = isDraft(a) ? draftResponsibles : activityResponsibles;
+                  return a.withResponsibles(responsibles.getOrDefault(a.activityId(), List.of()));
+                })
             .toList(),
         pagedActivities.pageInfo());
+  }
+
+  private List<UUID> idsOf(List<ActivityStaffOverviewData> activities, boolean drafts) {
+    return activities.stream()
+        .filter(a -> isDraft(a) == drafts)
+        .map(ActivityStaffOverviewData::activityId)
+        .distinct()
+        .toList();
+  }
+
+  private boolean isDraft(ActivityStaffOverviewData activity) {
+    return activity.activityStatus() == EActivityStatus.DRAFT;
   }
 
   @Override
@@ -546,7 +559,7 @@ public class ActivityServiceImpl implements ActivityService {
     requireNotBlankAndMaxLength("title", title, TITLE_LENGTH);
     var draft = ActivityDraft.create(title, staff);
     var savedDraft = activityDraftRepository.save(draft);
-    activityAuthorizationService.grantAllRights(savedDraft.getId(), staff);
+    activityAuthorizationService.grantAllDraftRights(savedDraft.getId(), staff);
     return savedDraft;
   }
 
@@ -571,7 +584,7 @@ public class ActivityServiceImpl implements ActivityService {
     var loggedInStaff = loggedInUserService.getLoggedInStaff();
     var draft =
         activityDraftRepository.findById(id).orElseThrow(ActivityDraftNotFoundException::new);
-    activityAuthorizationService.checkRight(loggedInStaff, id, EActivityRight.EDIT);
+    activityAuthorizationService.checkDraftRight(loggedInStaff, id, EActivityRight.EDIT);
 
     validateTargetPerimeter(loggedInStaff, targetInstitutionIds, targetGroupIds);
     validateTargetingUpdate(id, targetInstitutionIds, targetGroupIds);
@@ -706,6 +719,7 @@ public class ActivityServiceImpl implements ActivityService {
             activity.isNational());
 
     var savedDraft = activityDraftRepository.save(draft);
+    activityAuthorizationService.copyActivityAuthorizationsToDraft(activityId);
 
     if (!hasEnrolledStudents(activity)) {
       activity.setStatus(EActivityStatus.UNPUBLISHED);
@@ -757,7 +771,7 @@ public class ActivityServiceImpl implements ActivityService {
             source.getTargetGroupIds(),
             source.isNational());
     var savedDuplicate = activityDraftRepository.save(duplicate);
-    activityAuthorizationService.grantAllRights(savedDuplicate.getId(), staff);
+    activityAuthorizationService.grantAllDraftRights(savedDuplicate.getId(), staff);
     return savedDuplicate;
   }
 
@@ -786,7 +800,7 @@ public class ActivityServiceImpl implements ActivityService {
             source.getTargetGroupIds(),
             source.isNational());
     var savedDuplicate = activityDraftRepository.save(duplicate);
-    activityAuthorizationService.grantAllRights(savedDuplicate.getId(), staff);
+    activityAuthorizationService.grantAllDraftRights(savedDuplicate.getId(), staff);
     return savedDuplicate;
   }
 
@@ -902,7 +916,7 @@ public class ActivityServiceImpl implements ActivityService {
         activityDraftRepository
             .findById(activityDraftId)
             .orElseThrow(ActivityDraftNotFoundException::new);
-    activityAuthorizationService.checkRight(staff, activityDraftId, right);
+    activityAuthorizationService.checkDraftRight(staff, activityDraftId, right);
     return draft;
   }
 
@@ -912,7 +926,7 @@ public class ActivityServiceImpl implements ActivityService {
         activityDraftRepository
             .findById(activityDraftId)
             .orElseThrow(ActivityDraftNotFoundException::new);
-    activityAuthorizationService.checkAnyRight(staff, activityDraftId, rights);
+    activityAuthorizationService.checkAnyDraftRight(staff, activityDraftId, rights);
     return draft;
   }
 
