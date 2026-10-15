@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityStaffOverviewData;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.StaffActivityOverviewRepository;
@@ -23,192 +24,172 @@ import java.util.UUID;
 import org.springframework.stereotype.Repository;
 
 @Repository
-<span class="fc" id="L26">public class StaffActivityOverviewQueryRepository implements StaffActivityOverviewRepository {</span>
+<span class="fc" id="L27">public class StaffActivityOverviewQueryRepository implements StaffActivityOverviewRepository {</span>
+  private static final String ANY_RIGHT_ON_ACTIVITY =
+      &quot;&quot;&quot;
+      EXISTS (
+          SELECT 1
+          FROM activity_authorization aa
+          JOIN activity_authorization_rights ar ON ar.activity_authorization_id = aa.id
+          WHERE aa.activity_id = a.id
+            AND aa.staff_id = :staffId
+      )
+      &quot;&quot;&quot;;
+
+  private static final String MANAGEMENT_RIGHT_ON_ACTIVITY =
+      &quot;&quot;&quot;
+      EXISTS (
+          SELECT 1
+          FROM activity_authorization aa
+          JOIN activity_authorization_rights ar ON ar.activity_authorization_id = aa.id
+          WHERE aa.activity_id = a.id
+            AND aa.staff_id = :staffId
+            AND ar.activity_right IN (:managementRights)
+      )
+      &quot;&quot;&quot;;
+
+  private static final String MANAGEMENT_RIGHT_ON_DRAFT =
+      &quot;&quot;&quot;
+      EXISTS (
+          SELECT 1
+          FROM activity_draft_authorization da
+          JOIN activity_draft_authorization_rights dr
+            ON dr.activity_draft_authorization_id = da.id
+          WHERE da.activity_draft_id = d.id
+            AND da.staff_id = :staffId
+            AND dr.activity_right IN (:managementRights)
+      )
+      &quot;&quot;&quot;;
+
+  private static final String PUBLISHED_SELECT =
+      &quot;&quot;&quot;
+      SELECT
+          a.id         AS activity_id,
+          a.title      AS title,
+          a.thematic   AS thematic,
+          a.status     AS status,
+          a.updated_at AS updated_at
+      FROM activity a
+      WHERE a.status = 'PUBLISHED'
+        AND
+      &quot;&quot;&quot;
+          + ANY_RIGHT_ON_ACTIVITY;
+
+  private static final String UNPUBLISHED_SELECT =
+      &quot;&quot;&quot;
+      SELECT
+          a.id         AS activity_id,
+          a.title      AS title,
+          a.thematic   AS thematic,
+          a.status     AS status,
+          a.updated_at AS updated_at
+      FROM activity a
+      WHERE a.status = 'UNPUBLISHED'
+        AND
+      &quot;&quot;&quot;
+          + MANAGEMENT_RIGHT_ON_ACTIVITY;
+
+  private static final String DRAFT_SELECT =
+      &quot;&quot;&quot;
+      SELECT
+          d.id         AS activity_id,
+          d.title      AS title,
+          d.thematic   AS thematic,
+          'DRAFT'      AS status,
+          d.updated_at AS updated_at
+      FROM activity_draft d
+      WHERE
+      &quot;&quot;&quot;
+          + MANAGEMENT_RIGHT_ON_DRAFT;
+
   @PersistenceContext private EntityManager em;
 
   @Override
-  public PagedResult&lt;ActivityStaffOverviewData&gt; findAllByAuthorAndStatus(
-      Staff author, EActivityStatus activityStatus, PageCriteria pageCriteria) {
+  public PagedResult&lt;ActivityStaffOverviewData&gt; findAllAccessibleByStaffAndStatus(
+      Staff staff, EActivityStatus activityStatus, PageCriteria pageCriteria) {
 
-<span class="fc" id="L33">    String activitySelect =</span>
-        &quot;&quot;&quot;
-        SELECT
-            a.id         AS activity_id,
-            a.title      AS title,
-            a.thematic   AS thematic,
-            a.author_id  AS author_id,
-            a.status     AS status,
-            a.updated_at AS updated_at
-        FROM activity a
-        WHERE a.author_id = :authorId
-        &quot;&quot;&quot;;
+    String unified =
+<span class="fc bfc" id="L112" title="All 4 branches covered.">        switch (activityStatus) {</span>
+<span class="fc" id="L113">          case PUBLISHED -&gt; PUBLISHED_SELECT;</span>
+<span class="fc" id="L114">          case UNPUBLISHED -&gt; UNPUBLISHED_SELECT;</span>
+<span class="fc" id="L115">          case DRAFT -&gt; DRAFT_SELECT;</span>
+          case null -&gt;
+<span class="fc" id="L117">              String.join(&quot; UNION ALL &quot;, PUBLISHED_SELECT, UNPUBLISHED_SELECT, DRAFT_SELECT);</span>
+<span class="fc" id="L118">        };</span>
 
-<span class="fc" id="L46">    String activitySelectWithStatus = activitySelect + &quot; AND a.status = :activityStatus&quot;;</span>
+<span class="fc" id="L120">    String dataSql = &quot;SELECT * FROM (&quot; + unified + &quot;) AS unified ORDER BY updated_at DESC&quot;;</span>
+<span class="fc" id="L121">    String countSql = &quot;SELECT COUNT(*) FROM (&quot; + unified + &quot;) AS total&quot;;</span>
 
-<span class="fc" id="L48">    String draftSelect =</span>
-        &quot;&quot;&quot;
-        SELECT
-            d.id         AS activity_id,
-            d.title      AS title,
-            d.thematic   AS thematic,
-            d.author_id  AS author_id,
-            'DRAFT'      AS status,
-            d.updated_at AS updated_at
-        FROM activity_draft d
-        WHERE d.author_id = :authorId
-        &quot;&quot;&quot;;
+<span class="fc" id="L123">    Query dataQuery =</span>
+<span class="fc" id="L124">        bindParameters(em.createNativeQuery(dataSql), staff, activityStatus)</span>
+<span class="fc" id="L125">            .setFirstResult(pageCriteria.page() * pageCriteria.pageSize())</span>
+<span class="fc" id="L126">            .setMaxResults(pageCriteria.pageSize());</span>
+<span class="fc" id="L127">    Query countQuery = bindParameters(em.createNativeQuery(countSql), staff, activityStatus);</span>
 
-    String unionSql;
-    String countSql;
+<span class="fc" id="L129">    List&lt;Object[]&gt; rows = dataQuery.getResultList();</span>
+<span class="fc" id="L130">    long total = ((Number) countQuery.getSingleResult()).longValue();</span>
 
-<span class="fc bfc" id="L64" title="All 3 branches covered.">    switch (activityStatus) {</span>
-      case DRAFT -&gt; {
-<span class="fc" id="L66">        unionSql =</span>
-            &quot;&quot;&quot;
-            SELECT *
-            FROM (
-            &quot;&quot;&quot;
-                + draftSelect
-                + &quot;&quot;&quot;
-                ) AS unified
-                ORDER BY updated_at DESC
-                &quot;&quot;&quot;;
+<span class="fc" id="L132">    List&lt;ActivityStaffOverviewData&gt; content = rows.stream().map(this::mapRow).toList();</span>
 
-<span class="fc" id="L77">        countSql =</span>
-            &quot;&quot;&quot;
-            SELECT COUNT(*)
-            FROM activity_draft d
-            WHERE d.author_id = :authorId
-            &quot;&quot;&quot;;
-<span class="fc" id="L83">      }</span>
-
-      case PUBLISHED, UNPUBLISHED -&gt; {
-<span class="fc" id="L86">        unionSql =</span>
-            &quot;&quot;&quot;
-            SELECT *
-            FROM (
-            &quot;&quot;&quot;
-                + activitySelectWithStatus
-                + &quot;&quot;&quot;
-                ) AS unified
-                ORDER BY updated_at DESC
-                &quot;&quot;&quot;;
-
-<span class="fc" id="L97">        countSql =</span>
-            &quot;&quot;&quot;
-            SELECT COUNT(*)
-            FROM activity a
-            WHERE a.author_id = :authorId
-              AND a.status = :activityStatus
-            &quot;&quot;&quot;;
-<span class="fc" id="L104">      }</span>
-
-      case null -&gt; {
-<span class="fc" id="L107">        unionSql =</span>
-            &quot;&quot;&quot;
-            SELECT *
-            FROM (
-            &quot;&quot;&quot;
-                + activitySelect
-                + &quot;&quot;&quot;
-
-                UNION ALL
-
-                &quot;&quot;&quot;
-                + draftSelect
-                + &quot;&quot;&quot;
-                ) AS unified
-                ORDER BY updated_at DESC
-                &quot;&quot;&quot;;
-
-<span class="fc" id="L124">        countSql =</span>
-            &quot;&quot;&quot;
-            SELECT COUNT(*)
-            FROM (
-                SELECT id
-                FROM activity
-                WHERE author_id = :authorId
-
-                UNION ALL
-
-                SELECT id
-                FROM activity_draft
-                WHERE author_id = :authorId
-            ) AS total
-            &quot;&quot;&quot;;
-      }
-    }
-
-<span class="fc" id="L142">    Query dataQuery =</span>
-<span class="fc" id="L143">        em.createNativeQuery(unionSql)</span>
-<span class="fc" id="L144">            .setParameter(&quot;authorId&quot;, author.getId())</span>
-<span class="fc" id="L145">            .setFirstResult(pageCriteria.page() * pageCriteria.pageSize())</span>
-<span class="fc" id="L146">            .setMaxResults(pageCriteria.pageSize());</span>
-
-<span class="fc" id="L148">    Query countQuery = em.createNativeQuery(countSql).setParameter(&quot;authorId&quot;, author.getId());</span>
-
-<span class="pc bpc" id="L150" title="1 of 4 branches missed.">    if (activityStatus == EActivityStatus.PUBLISHED</span>
-        || activityStatus == EActivityStatus.UNPUBLISHED) {
-<span class="fc" id="L152">      dataQuery.setParameter(&quot;activityStatus&quot;, activityStatus.name());</span>
-<span class="fc" id="L153">      countQuery.setParameter(&quot;activityStatus&quot;, activityStatus.name());</span>
-    }
-
-<span class="fc" id="L156">    List&lt;Object[]&gt; rows = dataQuery.getResultList();</span>
-<span class="fc" id="L157">    long total = ((Number) countQuery.getSingleResult()).longValue();</span>
-
-<span class="fc" id="L159">    List&lt;ActivityStaffOverviewData&gt; content =</span>
-<span class="fc" id="L160">        rows.stream().map(row -&gt; mapRow(row, author)).toList();</span>
-
-<span class="fc" id="L162">    return new PagedResult&lt;&gt;(</span>
-<span class="fc" id="L163">        content, new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), total));</span>
+<span class="fc" id="L134">    return new PagedResult&lt;&gt;(</span>
+<span class="fc" id="L135">        content, new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), total));</span>
   }
 
-  private ActivityStaffOverviewData mapRow(Object[] row, Staff author) {
-<span class="fc" id="L167">    String thematic = toNullableString(row[2]);</span>
-<span class="fc" id="L168">    return new ActivityStaffOverviewData(</span>
-<span class="fc" id="L169">        toUUID(row[0]),</span>
-<span class="fc" id="L170">        toString(row[1]),</span>
-<span class="fc bfc" id="L171" title="All 2 branches covered.">        thematic == null ? null : EActivityThematic.valueOf(thematic),</span>
-        author,
-<span class="fc" id="L173">        EActivityStatus.valueOf(toString(row[4])),</span>
-<span class="fc" id="L174">        toInstant(row[5]));</span>
+  private Query bindParameters(Query query, Staff staff, EActivityStatus activityStatus) {
+<span class="fc" id="L139">    query.setParameter(&quot;staffId&quot;, staff.getId());</span>
+<span class="fc bfc" id="L140" title="All 2 branches covered.">    if (activityStatus != EActivityStatus.PUBLISHED) {</span>
+<span class="fc" id="L141">      query.setParameter(</span>
+<span class="fc" id="L142">          &quot;managementRights&quot;, EActivityRight.MANAGEMENT_RIGHTS.stream().map(Enum::name).toList());</span>
+    }
+<span class="fc" id="L144">    return query;</span>
+  }
+
+  private ActivityStaffOverviewData mapRow(Object[] row) {
+<span class="fc" id="L148">    String thematic = toNullableString(row[2]);</span>
+<span class="fc" id="L149">    return new ActivityStaffOverviewData(</span>
+<span class="fc" id="L150">        toUUID(row[0]),</span>
+<span class="fc" id="L151">        toString(row[1]),</span>
+<span class="fc bfc" id="L152" title="All 2 branches covered.">        thematic == null ? null : EActivityThematic.valueOf(thematic),</span>
+<span class="fc" id="L153">        List.of(),</span>
+<span class="fc" id="L154">        EActivityStatus.valueOf(toString(row[3])),</span>
+<span class="fc" id="L155">        toInstant(row[4]));</span>
   }
 
   private String toString(Object value) {
-<span class="pc bpc" id="L178" title="2 of 3 branches missed.">    return switch (value) {</span>
-<span class="fc" id="L179">      case String s -&gt; s;</span>
-<span class="nc" id="L180">      case byte[] b -&gt; new String(b, StandardCharsets.UTF_8);</span>
+<span class="pc bpc" id="L159" title="2 of 3 branches missed.">    return switch (value) {</span>
+<span class="fc" id="L160">      case String s -&gt; s;</span>
+<span class="nc" id="L161">      case byte[] b -&gt; new String(b, StandardCharsets.UTF_8);</span>
       default -&gt;
-<span class="nc" id="L182">          throw new IllegalArgumentException(&quot;Type inattendu pour String : &quot; + value.getClass());</span>
+<span class="nc" id="L163">          throw new IllegalArgumentException(&quot;Type inattendu pour String : &quot; + value.getClass());</span>
     };
   }
 
   private String toNullableString(Object value) {
-<span class="fc bfc" id="L187" title="All 2 branches covered.">    return value == null ? null : toString(value);</span>
+<span class="fc bfc" id="L168" title="All 2 branches covered.">    return value == null ? null : toString(value);</span>
   }
 
   private UUID toUUID(Object value) {
-<span class="pc bpc" id="L191" title="3 of 4 branches missed.">    return switch (value) {</span>
-<span class="nc" id="L192">      case UUID u -&gt; u;</span>
-<span class="nc" id="L193">      case String s -&gt; UUID.fromString(s);</span>
-<span class="fc" id="L194">      case byte[] b -&gt; {</span>
-<span class="fc" id="L195">        ByteBuffer bb = ByteBuffer.wrap(b);</span>
-<span class="fc" id="L196">        yield new UUID(bb.getLong(), bb.getLong());</span>
+<span class="pc bpc" id="L172" title="3 of 4 branches missed.">    return switch (value) {</span>
+<span class="nc" id="L173">      case UUID u -&gt; u;</span>
+<span class="nc" id="L174">      case String s -&gt; UUID.fromString(s);</span>
+<span class="fc" id="L175">      case byte[] b -&gt; {</span>
+<span class="fc" id="L176">        ByteBuffer bb = ByteBuffer.wrap(b);</span>
+<span class="fc" id="L177">        yield new UUID(bb.getLong(), bb.getLong());</span>
       }
       default -&gt;
-<span class="nc" id="L199">          throw new IllegalArgumentException(&quot;Type inattendu pour UUID : &quot; + value.getClass());</span>
+<span class="nc" id="L180">          throw new IllegalArgumentException(&quot;Type inattendu pour UUID : &quot; + value.getClass());</span>
     };
   }
 
   private Instant toInstant(Object value) {
-<span class="pc bpc" id="L204" title="5 of 6 branches missed.">    return switch (value) {</span>
-<span class="nc" id="L205">      case Instant i -&gt; i;</span>
-<span class="nc" id="L206">      case Timestamp ts -&gt; ts.getTimestamp().toInstant();</span>
-<span class="fc" id="L207">      case OffsetDateTime odt -&gt; odt.toInstant();</span>
-<span class="nc" id="L208">      case LocalDateTime ldt -&gt; ldt.toInstant(ZoneOffset.UTC);</span>
-<span class="nc" id="L209">      case byte[] b -&gt; Instant.parse(new String(b, StandardCharsets.UTF_8));</span>
+<span class="pc bpc" id="L185" title="5 of 6 branches missed.">    return switch (value) {</span>
+<span class="nc" id="L186">      case Instant i -&gt; i;</span>
+<span class="nc" id="L187">      case Timestamp ts -&gt; ts.getTimestamp().toInstant();</span>
+<span class="fc" id="L188">      case OffsetDateTime odt -&gt; odt.toInstant();</span>
+<span class="nc" id="L189">      case LocalDateTime ldt -&gt; ldt.toInstant(ZoneOffset.UTC);</span>
+<span class="nc" id="L190">      case byte[] b -&gt; Instant.parse(new String(b, StandardCharsets.UTF_8));</span>
       default -&gt;
-<span class="nc" id="L211">          throw new IllegalArgumentException(&quot;Type inattendu pour Instant : &quot; + value.getClass());</span>
+<span class="nc" id="L192">          throw new IllegalArgumentException(&quot;Type inattendu pour Instant : &quot; + value.getClass());</span>
     };
   }
 }
