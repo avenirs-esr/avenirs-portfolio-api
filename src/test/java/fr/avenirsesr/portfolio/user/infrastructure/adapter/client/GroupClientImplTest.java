@@ -22,6 +22,7 @@ class GroupClientImplTest {
 
   private static final UUID GROUP_ID = UUID.fromString("4a1b1f8e-3f0a-4f4b-8f9e-6c9a0c0f1a33");
   private static final UUID PARENT_ID = UUID.fromString("5d2c2f8e-3f0a-4f4b-8f9e-6c9a0c0f1a44");
+  private static final String PARENT_NAME = "Licence Informatique";
 
   private MockWebServer mockWebServer;
   private GroupClientImpl client;
@@ -53,10 +54,11 @@ class GroupClientImplTest {
             "id": "%s",
             "name": "Licence 3 Informatique",
             "type": "PROGRAM_OPTION",
-            "parentId": "%s"
+            "parentId": "%s",
+            "parentName": "%s"
         }
         """
-            .formatted(GROUP_ID, PARENT_ID);
+            .formatted(GROUP_ID, PARENT_ID, PARENT_NAME);
     mockWebServer.enqueue(
         new MockResponse().setBody(responseBody).addHeader("Content-Type", "application/json"));
 
@@ -69,6 +71,7 @@ class GroupClientImplTest {
     assertThat(result.get().name()).isEqualTo("Licence 3 Informatique");
     assertThat(result.get().type()).isEqualTo(EGroupType.PROGRAM_OPTION);
     assertThat(result.get().parentId()).isEqualTo(PARENT_ID);
+    assertThat(result.get().parentName()).isEqualTo(PARENT_NAME);
 
     RecordedRequest request = mockWebServer.takeRequest();
     assertThat(request.getPath()).isEqualTo("/back-office/groups/" + GROUP_ID);
@@ -96,7 +99,8 @@ class GroupClientImplTest {
             "id": "%s",
             "name": "Licence Informatique",
             "type": "PROGRAM",
-            "parentId": null
+            "parentId": null,
+            "parentName": null
         }
         """
             .formatted(PARENT_ID);
@@ -111,6 +115,7 @@ class GroupClientImplTest {
     assertThat(result.get().id()).isEqualTo(PARENT_ID);
     assertThat(result.get().type()).isEqualTo(EGroupType.PROGRAM);
     assertThat(result.get().parentId()).isNull();
+    assertThat(result.get().parentName()).isNull();
 
     RecordedRequest request = mockWebServer.takeRequest();
     assertThat(request.getPath()).isEqualTo("/back-office/groups/" + GROUP_ID + "/program");
