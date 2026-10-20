@@ -13,7 +13,6 @@ import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.notification.domain.port.output.repository.NotificationRepository;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.user.domain.data.CguAcceptanceData;
-import fr.avenirsesr.portfolio.user.domain.data.LoggedInUserData;
 import fr.avenirsesr.portfolio.user.domain.data.UserQuickLinksData;
 import fr.avenirsesr.portfolio.user.domain.exception.CguNotFoundException;
 import fr.avenirsesr.portfolio.user.domain.model.Cgu;
@@ -25,6 +24,7 @@ import fr.avenirsesr.portfolio.user.domain.port.output.client.ExternalUserClient
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.CguRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserPrincipalRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,207 +54,205 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public LoggedInUserData getMe() {
-<span class="fc" id="L58">    var user = loggedInUserService.getLoggedInUser();</span>
-<span class="fc" id="L59">    return new LoggedInUserData(user.getFirstName(), user.getLastName(), lastAcceptedCgu(user));</span>
+  public Optional&lt;CguAcceptanceData&gt; getAcceptedCgu() {
+<span class="fc" id="L58">    return lastAcceptedCgu(loggedInUserService.getLoggedInUser());</span>
   }
 
   @Override
   public CguAcceptanceData acceptCgu() {
-<span class="fc" id="L64">    var user = loggedInUserService.getLoggedInUser();</span>
-<span class="fc" id="L65">    CguDTO current = cguClient.getLatest().orElseThrow(CguNotFoundException::new);</span>
+<span class="fc" id="L63">    var user = loggedInUserService.getLoggedInUser();</span>
+<span class="fc" id="L64">    CguDTO current = cguClient.getLatest().orElseThrow(CguNotFoundException::new);</span>
 
-<span class="fc" id="L67">    Cgu accepted =</span>
+<span class="fc" id="L66">    Cgu accepted =</span>
         cguRepository
-<span class="fc" id="L69">            .findByUserAndVersion(user.getId(), current.id())</span>
-<span class="fc" id="L70">            .orElseGet(() -&gt; saveAcceptance(user, current));</span>
+<span class="fc" id="L68">            .findByUserAndVersion(user.getId(), current.id())</span>
+<span class="fc" id="L69">            .orElseGet(() -&gt; saveAcceptance(user, current));</span>
 
-<span class="fc" id="L72">    return new CguAcceptanceData(accepted.getVersionId(), accepted.getAcceptedAt(), true);</span>
+<span class="fc" id="L71">    return new CguAcceptanceData(accepted.getVersionId(), accepted.getAcceptedAt(), true);</span>
   }
 
   private Cgu saveAcceptance(User user, CguDTO current) {
-<span class="fc" id="L76">    Cgu accepted = cguRepository.save(Cgu.create(user, current.id()));</span>
-<span class="fc" id="L77">    log.info(&quot;Terms of use version {} accepted by user [{}]&quot;, current.version(), user.getId());</span>
+<span class="fc" id="L75">    Cgu accepted = cguRepository.save(Cgu.create(user, current.id()));</span>
+<span class="fc" id="L76">    log.info(&quot;Terms of use version {} accepted by user [{}]&quot;, current.version(), user.getId());</span>
 
-<span class="fc" id="L79">    return accepted;</span>
+<span class="fc" id="L78">    return accepted;</span>
   }
 
-  private CguAcceptanceData lastAcceptedCgu(User user) {
-<span class="fc" id="L83">    return cguRepository</span>
-<span class="fc" id="L84">        .findLastAcceptedByUser(user.getId())</span>
-<span class="fc" id="L85">        .map(</span>
+  private Optional&lt;CguAcceptanceData&gt; lastAcceptedCgu(User user) {
+<span class="fc" id="L82">    return cguRepository</span>
+<span class="fc" id="L83">        .findLastAcceptedByUser(user.getId())</span>
+<span class="fc" id="L84">        .map(</span>
             cgu -&gt;
-<span class="fc" id="L87">                new CguAcceptanceData(</span>
-<span class="fc" id="L88">                    cgu.getVersionId(),</span>
-<span class="fc" id="L89">                    cgu.getAcceptedAt(),</span>
-<span class="fc" id="L90">                    cguClient.getLatestId().filter(cgu.getVersionId()::equals).isPresent()))</span>
-<span class="fc" id="L91">        .orElse(null);</span>
+<span class="fc" id="L86">                new CguAcceptanceData(</span>
+<span class="fc" id="L87">                    cgu.getVersionId(),</span>
+<span class="fc" id="L88">                    cgu.getAcceptedAt(),</span>
+<span class="fc" id="L89">                    cguClient.getLatestId().filter(cgu.getVersionId()::equals).isPresent()));</span>
   }
 
   @Override
   public User getUserByEppn(String eppn) {
-<span class="fc" id="L96">    return userPrincipalRepository</span>
-<span class="fc" id="L97">        .findByEppn(eppn)</span>
-<span class="fc" id="L98">        .map(user -&gt; reconcileCategoryRecord(user, eppn))</span>
-<span class="fc" id="L99">        .orElseGet(() -&gt; createUserFromExternalUser(eppn));</span>
+<span class="fc" id="L94">    return userPrincipalRepository</span>
+<span class="fc" id="L95">        .findByEppn(eppn)</span>
+<span class="fc" id="L96">        .map(user -&gt; reconcileCategoryRecord(user, eppn))</span>
+<span class="fc" id="L97">        .orElseGet(() -&gt; createUserFromExternalUser(eppn));</span>
   }
 
   private User reconcileCategoryRecord(User user, String eppn) {
-<span class="fc bfc" id="L103" title="All 4 branches covered.">    if (studentService.existsById(user.getId()) || staffService.existsById(user.getId())) {</span>
-<span class="fc" id="L104">      return user;</span>
+<span class="fc bfc" id="L101" title="All 4 branches covered.">    if (studentService.existsById(user.getId()) || staffService.existsById(user.getId())) {</span>
+<span class="fc" id="L102">      return user;</span>
     }
 
-<span class="fc" id="L107">    var externalUser = externalUserClient.getByEppn(eppn);</span>
-<span class="fc bfc" id="L108" title="All 2 branches covered.">    if (externalUser.isEmpty()) {</span>
-<span class="fc" id="L109">      log.debug(</span>
+<span class="fc" id="L105">    var externalUser = externalUserClient.getByEppn(eppn);</span>
+<span class="fc bfc" id="L106" title="All 2 branches covered.">    if (externalUser.isEmpty()) {</span>
+<span class="fc" id="L107">      log.debug(</span>
           &quot;User {} ({}) has no matching Student/Staff record and no external directory entry,&quot;
               + &quot; skipping reconciliation&quot;,
-<span class="fc" id="L112">          user.getId(),</span>
+<span class="fc" id="L110">          user.getId(),</span>
           eppn);
-<span class="fc" id="L114">      return user;</span>
+<span class="fc" id="L112">      return user;</span>
     }
 
-<span class="fc" id="L117">    log.warn(</span>
+<span class="fc" id="L115">    log.warn(</span>
         &quot;User {} ({}) has no matching Student/Staff record, reconciling from external directory&quot;,
-<span class="fc" id="L119">        user.getId(),</span>
+<span class="fc" id="L117">        user.getId(),</span>
         eppn);
-<span class="fc" id="L121">    provisionCategoryRecord(user.getId(), externalUser.get());</span>
-<span class="fc" id="L122">    return user;</span>
+<span class="fc" id="L119">    provisionCategoryRecord(user.getId(), externalUser.get());</span>
+<span class="fc" id="L120">    return user;</span>
   }
 
   @Override
   public void updateProfile(EUserCategory userCategory, String email, String bio) {
-<span class="fc" id="L127">    var user = loggedInUserService.getLoggedInUser();</span>
-<span class="fc bfc" id="L128" title="All 2 branches covered.">    if (email != null) {</span>
-<span class="pc bpc" id="L129" title="1 of 3 branches missed.">      switch (userCategory) {</span>
-<span class="fc" id="L130">        case STUDENT -&gt; user.setEmail(email);</span>
-<span class="fc" id="L131">        case STAFF -&gt; throw new UserNotAuthorizedException();</span>
+<span class="fc" id="L125">    var user = loggedInUserService.getLoggedInUser();</span>
+<span class="fc bfc" id="L126" title="All 2 branches covered.">    if (email != null) {</span>
+<span class="pc bpc" id="L127" title="1 of 3 branches missed.">      switch (userCategory) {</span>
+<span class="fc" id="L128">        case STUDENT -&gt; user.setEmail(email);</span>
+<span class="fc" id="L129">        case STAFF -&gt; throw new UserNotAuthorizedException();</span>
       }
     }
-<span class="fc" id="L134">    userRepository.save(user);</span>
+<span class="fc" id="L132">    userRepository.save(user);</span>
 
-<span class="pc bpc" id="L136" title="1 of 3 branches missed.">    switch (userCategory) {</span>
-<span class="fc" id="L137">      case STUDENT -&gt; studentService.updateProfile(user, bio);</span>
-<span class="fc" id="L138">      case STAFF -&gt; staffService.updateProfile(user, bio);</span>
-<span class="nc" id="L139">      default -&gt; throw new UserNotAuthorizedException();</span>
+<span class="pc bpc" id="L134" title="1 of 3 branches missed.">    switch (userCategory) {</span>
+<span class="fc" id="L135">      case STUDENT -&gt; studentService.updateProfile(user, bio);</span>
+<span class="fc" id="L136">      case STAFF -&gt; staffService.updateProfile(user, bio);</span>
+<span class="nc" id="L137">      default -&gt; throw new UserNotAuthorizedException();</span>
     }
-<span class="fc" id="L141">  }</span>
+<span class="fc" id="L139">  }</span>
 
   @Override
   public void updateNotificationPreferences(boolean notificationEnabled) {
-<span class="fc" id="L145">    var user = loggedInUserService.getLoggedInUser();</span>
-<span class="fc" id="L146">    user.setNotificationEnabled(notificationEnabled);</span>
-<span class="fc" id="L147">    userRepository.save(user);</span>
-<span class="fc" id="L148">  }</span>
+<span class="fc" id="L143">    var user = loggedInUserService.getLoggedInUser();</span>
+<span class="fc" id="L144">    user.setNotificationEnabled(notificationEnabled);</span>
+<span class="fc" id="L145">    userRepository.save(user);</span>
+<span class="fc" id="L146">  }</span>
 
   @Override
   public User createUser(UUID id, String firstname, String lastname, String email, String eppn) {
-<span class="fc" id="L152">    var user = User.create(id, firstname, lastname, email);</span>
-<span class="fc" id="L153">    userRepository.save(user);</span>
-<span class="fc" id="L154">    userPrincipalRepository.saveOrUpdate(user, eppn);</span>
-<span class="fc" id="L155">    return user;</span>
+<span class="fc" id="L150">    var user = User.create(id, firstname, lastname, email);</span>
+<span class="fc" id="L151">    userRepository.save(user);</span>
+<span class="fc" id="L152">    userPrincipalRepository.saveOrUpdate(user, eppn);</span>
+<span class="fc" id="L153">    return user;</span>
   }
 
   @Override
   public UserQuickLinksData getQuickLinks(EUserCategory userCategory) {
-<span class="fc" id="L160">    var notificationState =</span>
-<span class="fc bfc" id="L161" title="All 2 branches covered.">        switch (userCategory) {</span>
+<span class="fc" id="L158">    var notificationState =</span>
+<span class="fc bfc" id="L159" title="All 2 branches covered.">        switch (userCategory) {</span>
           case STUDENT -&gt; {
-<span class="fc" id="L163">            var student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L164">            yield new NotificationState(student.getUser(), student.isHasUnseenNotification());</span>
+<span class="fc" id="L161">            var student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L162">            yield new NotificationState(student.getUser(), student.isHasUnseenNotification());</span>
           }
           case STAFF -&gt; {
-<span class="fc" id="L167">            var staff = loggedInUserService.getLoggedInStaff();</span>
-<span class="fc" id="L168">            yield new NotificationState(staff.getUser(), staff.isHasUnseenNotification());</span>
+<span class="fc" id="L165">            var staff = loggedInUserService.getLoggedInStaff();</span>
+<span class="fc" id="L166">            yield new NotificationState(staff.getUser(), staff.isHasUnseenNotification());</span>
           }
         };
-<span class="fc" id="L171">    User user = notificationState.user();</span>
-<span class="fc" id="L172">    boolean hasUnseenNotification = notificationState.hasUnseenNotification();</span>
-<span class="fc" id="L173">    int unreadNotifications =</span>
-<span class="fc" id="L174">        (int) notificationRepository.countUnreadByUserAndCategory(user.getId(), userCategory);</span>
-<span class="fc" id="L175">    return new UserQuickLinksData(</span>
-<span class="fc" id="L176">        user.getId(),</span>
-<span class="fc" id="L177">        user.getFirstName(),</span>
-<span class="fc" id="L178">        user.getLastName(),</span>
+<span class="fc" id="L169">    User user = notificationState.user();</span>
+<span class="fc" id="L170">    boolean hasUnseenNotification = notificationState.hasUnseenNotification();</span>
+<span class="fc" id="L171">    int unreadNotifications =</span>
+<span class="fc" id="L172">        (int) notificationRepository.countUnreadByUserAndCategory(user.getId(), userCategory);</span>
+<span class="fc" id="L173">    return new UserQuickLinksData(</span>
+<span class="fc" id="L174">        user.getId(),</span>
+<span class="fc" id="L175">        user.getFirstName(),</span>
+<span class="fc" id="L176">        user.getLastName(),</span>
         hasUnseenNotification,
         unreadNotifications,
-<span class="fc" id="L181">        user.isNotificationEnabled());</span>
+<span class="fc" id="L179">        user.isNotificationEnabled());</span>
   }
 
   @Override
   public File uploadProfilePicture(
       EUserCategory userCategory, String fileName, String mimeType, long size, byte[] content) {
-<span class="nc bnc" id="L187" title="All 2 branches missed.">    return switch (userCategory) {</span>
-<span class="nc" id="L188">      case STUDENT -&gt; studentService.uploadProfilePicture(fileName, mimeType, size, content);</span>
-<span class="nc" id="L189">      case STAFF -&gt; staffService.uploadProfilePicture(fileName, mimeType, size, content);</span>
+<span class="nc bnc" id="L185" title="All 2 branches missed.">    return switch (userCategory) {</span>
+<span class="nc" id="L186">      case STUDENT -&gt; studentService.uploadProfilePicture(fileName, mimeType, size, content);</span>
+<span class="nc" id="L187">      case STAFF -&gt; staffService.uploadProfilePicture(fileName, mimeType, size, content);</span>
     };
   }
 
   @Override
   public void deleteProfilePicture(EUserCategory userCategory) {
-<span class="nc bnc" id="L195" title="All 3 branches missed.">    switch (userCategory) {</span>
-<span class="nc" id="L196">      case STUDENT -&gt; studentService.deleteProfilePicture();</span>
-<span class="nc" id="L197">      case STAFF -&gt; staffService.deleteProfilePicture();</span>
+<span class="nc bnc" id="L193" title="All 3 branches missed.">    switch (userCategory) {</span>
+<span class="nc" id="L194">      case STUDENT -&gt; studentService.deleteProfilePicture();</span>
+<span class="nc" id="L195">      case STAFF -&gt; staffService.deleteProfilePicture();</span>
     }
-<span class="nc" id="L199">  }</span>
+<span class="nc" id="L197">  }</span>
 
   @Override
   public File uploadCoverPicture(
       EUserCategory userCategory, String fileName, String mimeType, long size, byte[] content) {
-<span class="nc bnc" id="L204" title="All 2 branches missed.">    return switch (userCategory) {</span>
-<span class="nc" id="L205">      case STUDENT -&gt; studentService.uploadCoverPicture(fileName, mimeType, size, content);</span>
-<span class="nc" id="L206">      case STAFF -&gt; staffService.uploadCoverPicture(fileName, mimeType, size, content);</span>
+<span class="nc bnc" id="L202" title="All 2 branches missed.">    return switch (userCategory) {</span>
+<span class="nc" id="L203">      case STUDENT -&gt; studentService.uploadCoverPicture(fileName, mimeType, size, content);</span>
+<span class="nc" id="L204">      case STAFF -&gt; staffService.uploadCoverPicture(fileName, mimeType, size, content);</span>
     };
   }
 
   @Override
   public void deleteCoverPicture(EUserCategory userCategory) {
-<span class="nc bnc" id="L212" title="All 3 branches missed.">    switch (userCategory) {</span>
-<span class="nc" id="L213">      case STUDENT -&gt; studentService.deleteCoverPicture();</span>
-<span class="nc" id="L214">      case STAFF -&gt; staffService.deleteCoverPicture();</span>
+<span class="nc bnc" id="L210" title="All 3 branches missed.">    switch (userCategory) {</span>
+<span class="nc" id="L211">      case STUDENT -&gt; studentService.deleteCoverPicture();</span>
+<span class="nc" id="L212">      case STAFF -&gt; staffService.deleteCoverPicture();</span>
     }
-<span class="nc" id="L216">  }</span>
+<span class="nc" id="L214">  }</span>
 
   private User createUserFromExternalUser(String eppn) {
-<span class="fc" id="L219">    var externalUser =</span>
-<span class="fc" id="L220">        externalUserClient.getByEppn(eppn).orElseThrow(ExternalUserNotFoundException::new);</span>
+<span class="fc" id="L217">    var externalUser =</span>
+<span class="fc" id="L218">        externalUserClient.getByEppn(eppn).orElseThrow(ExternalUserNotFoundException::new);</span>
 
-<span class="fc bfc" id="L222" title="All 2 branches covered.">    if (externalUser.status() == EUserStatus.BLOCKED) {</span>
-<span class="fc" id="L223">      throw new ExternalUserNotFoundException(EErrorCode.EXTERNAL_USER_BLOCKED);</span>
+<span class="fc bfc" id="L220" title="All 2 branches covered.">    if (externalUser.status() == EUserStatus.BLOCKED) {</span>
+<span class="fc" id="L221">      throw new ExternalUserNotFoundException(EErrorCode.EXTERNAL_USER_BLOCKED);</span>
     }
 
-<span class="fc bfc" id="L226" title="All 2 branches covered.">    if (externalUser.status() == EUserStatus.REMOVED) {</span>
-<span class="fc" id="L227">      throw new ExternalUserNotFoundException(EErrorCode.EXTERNAL_USER_REMOVED);</span>
+<span class="fc bfc" id="L224" title="All 2 branches covered.">    if (externalUser.status() == EUserStatus.REMOVED) {</span>
+<span class="fc" id="L225">      throw new ExternalUserNotFoundException(EErrorCode.EXTERNAL_USER_REMOVED);</span>
     }
 
-<span class="fc" id="L230">    var user =</span>
-<span class="fc" id="L231">        createUser(</span>
-<span class="fc" id="L232">            UUID.randomUUID(),</span>
-<span class="fc" id="L233">            externalUser.firstName(),</span>
-<span class="fc" id="L234">            externalUser.lastName(),</span>
-<span class="fc" id="L235">            externalUser.email(),</span>
-<span class="fc" id="L236">            externalUser.eppn());</span>
+<span class="fc" id="L228">    var user =</span>
+<span class="fc" id="L229">        createUser(</span>
+<span class="fc" id="L230">            UUID.randomUUID(),</span>
+<span class="fc" id="L231">            externalUser.firstName(),</span>
+<span class="fc" id="L232">            externalUser.lastName(),</span>
+<span class="fc" id="L233">            externalUser.email(),</span>
+<span class="fc" id="L234">            externalUser.eppn());</span>
 
-<span class="fc" id="L238">    provisionCategoryRecord(user.getId(), externalUser);</span>
+<span class="fc" id="L236">    provisionCategoryRecord(user.getId(), externalUser);</span>
 
-<span class="fc" id="L240">    externalUserClient.activateByEppn(externalUser.eppn());</span>
+<span class="fc" id="L238">    externalUserClient.activateByEppn(externalUser.eppn());</span>
 
-<span class="fc" id="L242">    return user;</span>
+<span class="fc" id="L240">    return user;</span>
   }
 
   private void provisionCategoryRecord(UUID userId, ExternalUserDTO externalUser) {
-<span class="fc" id="L246">    externalUser</span>
-<span class="fc" id="L247">        .categories()</span>
-<span class="fc" id="L248">        .forEach(</span>
+<span class="fc" id="L244">    externalUser</span>
+<span class="fc" id="L245">        .categories()</span>
+<span class="fc" id="L246">        .forEach(</span>
             category -&gt; {
-<span class="pc bpc" id="L250" title="1 of 3 branches missed.">              switch (category) {</span>
-<span class="fc" id="L251">                case STUDENT -&gt; studentService.createStudent(userId, externalUser.email(), null);</span>
-<span class="fc" id="L252">                case STAFF -&gt; staffService.createStaff(userId, externalUser.email(), null);</span>
+<span class="pc bpc" id="L248" title="1 of 3 branches missed.">              switch (category) {</span>
+<span class="fc" id="L249">                case STUDENT -&gt; studentService.createStudent(userId, externalUser.email(), null);</span>
+<span class="fc" id="L250">                case STAFF -&gt; staffService.createStaff(userId, externalUser.email(), null);</span>
               }
-<span class="fc" id="L254">            });</span>
-<span class="fc" id="L255">  }</span>
+<span class="fc" id="L252">            });</span>
+<span class="fc" id="L253">  }</span>
 
   /** Carries the user and its unseen-notification flag out of the category switch. */
-<span class="fc" id="L258">  private record NotificationState(User user, boolean hasUnseenNotification) {}</span>
+<span class="fc" id="L256">  private record NotificationState(User user, boolean hasUnseenNotification) {}</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

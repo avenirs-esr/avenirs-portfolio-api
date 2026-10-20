@@ -4,9 +4,11 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociatedElementsData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationData;
+import fr.avenirsesr.portfolio.student.association.domain.data.AssociationLimitData;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.exception.AssociationAlreadyExistException;
 import fr.avenirsesr.portfolio.student.association.domain.exception.AssociationDoesNotExistException;
+import fr.avenirsesr.portfolio.student.association.domain.exception.MaximumAssociationReachedException;
 import fr.avenirsesr.portfolio.student.association.domain.filter.AssociationSearchFilter;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
@@ -17,6 +19,8 @@ import fr.avenirsesr.portfolio.student.association.domain.port.output.strategy.A
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -28,63 +32,74 @@ public class AssociationServiceImpl implements AssociationService {
 
   @Override
   public List&lt;Association&gt; createAll(List&lt;AssociationData&gt; associationsData) {
-<span class="fc bfc" id="L31" title="All 2 branches covered.">    if (!associationRepository.findAllIn(associationsData).isEmpty()) {</span>
-<span class="fc" id="L32">      throw new AssociationAlreadyExistException();</span>
+<span class="fc bfc" id="L35" title="All 2 branches covered.">    if (!associationRepository.findAllIn(associationsData).isEmpty()) {</span>
+<span class="fc" id="L36">      throw new AssociationAlreadyExistException();</span>
     }
 
-<span class="fc" id="L35">    var associations =</span>
-<span class="fc" id="L36">        associationsData.stream()</span>
-<span class="fc" id="L37">            .map(</span>
+<span class="fc" id="L39">    var associations =</span>
+<span class="fc" id="L40">        associationsData.stream()</span>
+<span class="fc" id="L41">            .map(</span>
                 association -&gt;
-<span class="fc" id="L39">                    Association.create(</span>
-<span class="fc" id="L40">                        association.id1(), association.id2(), association.associationType()))</span>
-<span class="fc" id="L41">            .toList();</span>
+<span class="fc" id="L43">                    Association.create(</span>
+<span class="fc" id="L44">                        association.id1(), association.id2(), association.associationType()))</span>
+<span class="fc" id="L45">            .toList();</span>
 
-<span class="fc" id="L43">    return associationRepository.saveAll(associations);</span>
+<span class="fc" id="L47">    return associationRepository.saveAll(associations);</span>
   }
 
   @Override
   public List&lt;Association&gt; getAllOf(
       UUID id, Class&lt;?&gt; clazz, List&lt;EAssociationType&gt; associationTypes) {
-<span class="fc" id="L49">    return associationRepository.findAllOf(id, clazz, associationTypes);</span>
+<span class="fc" id="L53">    return associationRepository.findAllOf(id, clazz, associationTypes);</span>
   }
 
   @Override
   public List&lt;Association&gt; getAllOf(
       List&lt;UUID&gt; ids, Class&lt;?&gt; clazz, List&lt;EAssociationType&gt; associationTypes) {
-<span class="pc bpc" id="L55" title="1 of 2 branches missed.">    if (ids.isEmpty()) {</span>
-<span class="nc" id="L56">      return List.of();</span>
+<span class="pc bpc" id="L59" title="1 of 2 branches missed.">    if (ids.isEmpty()) {</span>
+<span class="nc" id="L60">      return List.of();</span>
     }
 
-<span class="fc" id="L59">    return associationRepository.findAllOf(ids, clazz, associationTypes);</span>
+<span class="fc" id="L63">    return associationRepository.findAllOf(ids, clazz, associationTypes);</span>
   }
 
   @Override
   public Map&lt;UUID, Long&gt; countAllOf(
       List&lt;UUID&gt; ids, Class&lt;?&gt; clazz, EAssociationType associationType) {
-<span class="fc bfc" id="L65" title="All 2 branches covered.">    if (ids.isEmpty()) {</span>
-<span class="fc" id="L66">      return Map.of();</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">    if (ids.isEmpty()) {</span>
+<span class="fc" id="L70">      return Map.of();</span>
     }
 
-<span class="fc" id="L69">    return associationRepository.countAllOf(ids, clazz, associationType);</span>
+<span class="fc" id="L73">    return associationRepository.countAllOf(ids, clazz, associationType);</span>
   }
 
   @Override
   public AssociatedElementsData getAllAssociatedElementsOf(
       UUID id, EAssociationContextType contextType, boolean onlyNotCompleted) {
-<span class="fc" id="L75">    strategyOf(contextType).checkLoggedInStudentOwns(List.of(id));</span>
+<span class="fc" id="L79">    strategyOf(contextType).checkLoggedInStudentOwns(List.of(id));</span>
 
-<span class="fc" id="L77">    var clazz = contextType.toClass();</span>
+<span class="fc" id="L81">    var clazz = contextType.toClass();</span>
 
-<span class="fc" id="L79">    return associationsByAssociatedClass(</span>
-<span class="fc" id="L80">            getAllOf(id, clazz, EAssociationType.getAllBy(clazz)), clazz)</span>
-<span class="fc" id="L81">        .entrySet()</span>
-<span class="fc" id="L82">        .stream()</span>
-<span class="fc" id="L83">        .map(</span>
+<span class="fc" id="L83">    return associationsByAssociatedClass(</span>
+<span class="fc" id="L84">            getAllOf(id, clazz, EAssociationType.getAllBy(clazz)), clazz)</span>
+<span class="fc" id="L85">        .entrySet()</span>
+<span class="fc" id="L86">        .stream()</span>
+<span class="fc" id="L87">        .map(</span>
             entry -&gt;
-<span class="fc" id="L85">                strategyOf(EAssociationContextType.of(entry.getKey()))</span>
-<span class="fc" id="L86">                    .toAssociatedElements(entry.getValue(), clazz, onlyNotCompleted))</span>
-<span class="fc" id="L87">        .reduce(AssociatedElementsData.empty(), AssociatedElementsData::merge);</span>
+<span class="fc" id="L89">                strategyOf(EAssociationContextType.of(entry.getKey()))</span>
+<span class="fc" id="L90">                    .toAssociatedElements(entry.getValue(), clazz, onlyNotCompleted))</span>
+<span class="fc" id="L91">        .reduce(AssociatedElementsData.empty(), AssociatedElementsData::merge);</span>
+  }
+
+  @Override
+  public List&lt;AssociationLimitData&gt; getAssociationLimits(
+      UUID id, EAssociationContextType contextType) {
+<span class="fc" id="L97">    strategyOf(contextType).checkLoggedInStudentOwns(List.of(id));</span>
+
+<span class="fc" id="L99">    return EAssociationType.getAllBy(contextType.toClass()).stream()</span>
+<span class="fc" id="L100">        .map(associationType -&gt; limitsOf(contextType, List.of(id), associationType).get(id))</span>
+<span class="fc" id="L101">        .filter(Objects::nonNull)</span>
+<span class="fc" id="L102">        .toList();</span>
   }
 
   @Override
@@ -93,48 +108,51 @@ public class AssociationServiceImpl implements AssociationService {
       EAssociationContextType contextType,
       EAssociationContextType associatedContextType,
       List&lt;UUID&gt; associatedIds) {
-<span class="fc" id="L96">    var associationType =</span>
-<span class="fc" id="L97">        EAssociationType.of(contextType.toClass(), associatedContextType.toClass());</span>
-<span class="fc" id="L98">    var uniqueAssociatedIds = associatedIds.stream().distinct().toList();</span>
+<span class="fc" id="L111">    var associationType =</span>
+<span class="fc" id="L112">        EAssociationType.of(contextType.toClass(), associatedContextType.toClass());</span>
+<span class="fc" id="L113">    var uniqueAssociatedIds = associatedIds.stream().distinct().toList();</span>
 
-<span class="fc" id="L100">    strategyOf(contextType)</span>
-<span class="fc" id="L101">        .checkLoggedInStudentCanAssociate(id, associationType, uniqueAssociatedIds.size());</span>
-<span class="fc" id="L102">    strategyOf(associatedContextType).checkLoggedInStudentOwns(uniqueAssociatedIds);</span>
+<span class="fc" id="L115">    strategyOf(contextType)</span>
+<span class="fc" id="L116">        .checkLoggedInStudentCanAssociate(id, associationType, uniqueAssociatedIds.size());</span>
+<span class="fc" id="L117">    strategyOf(associatedContextType).checkLoggedInStudentOwns(uniqueAssociatedIds);</span>
 
-<span class="fc" id="L104">    createAll(</span>
-<span class="fc" id="L105">        uniqueAssociatedIds.stream()</span>
-<span class="fc" id="L106">            .map(</span>
+<span class="fc" id="L119">    checkLimits(contextType, List.of(id), associationType, uniqueAssociatedIds.size());</span>
+<span class="fc" id="L120">    checkLimits(associatedContextType, uniqueAssociatedIds, associationType, 1);</span>
+
+<span class="fc" id="L122">    createAll(</span>
+<span class="fc" id="L123">        uniqueAssociatedIds.stream()</span>
+<span class="fc" id="L124">            .map(</span>
                 associatedId -&gt;
-<span class="fc" id="L108">                    associationDataOf(id, contextType.toClass(), associatedId, associationType))</span>
-<span class="fc" id="L109">            .toList());</span>
+<span class="fc" id="L126">                    associationDataOf(id, contextType.toClass(), associatedId, associationType))</span>
+<span class="fc" id="L127">            .toList());</span>
 
-<span class="fc" id="L111">    return getAllAssociatedElementsOf(id, contextType, false);</span>
+<span class="fc" id="L129">    return getAllAssociatedElementsOf(id, contextType, false);</span>
   }
 
   @Override
   public void unassociate(UUID id, EAssociationContextType contextType, List&lt;UUID&gt; associationIds) {
-<span class="fc" id="L116">    strategyOf(contextType).checkLoggedInStudentCanUnassociate(List.of(id));</span>
+<span class="fc" id="L134">    strategyOf(contextType).checkLoggedInStudentCanUnassociate(List.of(id));</span>
 
-<span class="fc" id="L118">    var clazz = contextType.toClass();</span>
-<span class="fc" id="L119">    var associations =</span>
-<span class="fc" id="L120">        getAllOf(id, clazz, EAssociationType.getAllBy(clazz)).stream()</span>
-<span class="fc" id="L121">            .filter(association -&gt; associationIds.contains(association.getId()))</span>
-<span class="fc" id="L122">            .toList();</span>
+<span class="fc" id="L136">    var clazz = contextType.toClass();</span>
+<span class="fc" id="L137">    var associations =</span>
+<span class="fc" id="L138">        getAllOf(id, clazz, EAssociationType.getAllBy(clazz)).stream()</span>
+<span class="fc" id="L139">            .filter(association -&gt; associationIds.contains(association.getId()))</span>
+<span class="fc" id="L140">            .toList();</span>
 
-<span class="fc" id="L124">    if (!new HashSet&lt;&gt;(associations.stream().map(Association::getId).toList())</span>
-<span class="fc bfc" id="L125" title="All 2 branches covered.">        .containsAll(associationIds)) {</span>
-<span class="fc" id="L126">      throw new AssociationDoesNotExistException();</span>
+<span class="fc" id="L142">    if (!new HashSet&lt;&gt;(associations.stream().map(Association::getId).toList())</span>
+<span class="fc bfc" id="L143" title="All 2 branches covered.">        .containsAll(associationIds)) {</span>
+<span class="fc" id="L144">      throw new AssociationDoesNotExistException();</span>
     }
 
-<span class="fc" id="L129">    associationsByAssociatedClass(associations, clazz)</span>
-<span class="fc" id="L130">        .forEach(</span>
+<span class="fc" id="L147">    associationsByAssociatedClass(associations, clazz)</span>
+<span class="fc" id="L148">        .forEach(</span>
             (associatedClass, associatedAssociations) -&gt;
-<span class="fc" id="L132">                strategyOf(EAssociationContextType.of(associatedClass))</span>
-<span class="fc" id="L133">                    .checkLoggedInStudentCanUnassociate(</span>
-<span class="fc" id="L134">                        associatedIdsOf(associatedAssociations, clazz)));</span>
+<span class="fc" id="L150">                strategyOf(EAssociationContextType.of(associatedClass))</span>
+<span class="fc" id="L151">                    .checkLoggedInStudentCanUnassociate(</span>
+<span class="fc" id="L152">                        associatedIdsOf(associatedAssociations, clazz)));</span>
 
-<span class="fc" id="L136">    deleteAllByIds(associationIds);</span>
-<span class="fc" id="L137">  }</span>
+<span class="fc" id="L154">    deleteAllByIds(associationIds);</span>
+<span class="fc" id="L155">  }</span>
 
   @Override
   public PagedResult&lt;AssociationSearchResultData&gt; searchForAssociation(
@@ -144,89 +162,130 @@ public class AssociationServiceImpl implements AssociationService {
       String keyword,
       AssociationSearchFilter filter,
       PageCriteria pageCriteria) {
-<span class="fc" id="L147">    var associationType =</span>
-<span class="fc" id="L148">        EAssociationType.of(contextType.toClass(), associatedContextType.toClass());</span>
+<span class="fc" id="L165">    var associationType =</span>
+<span class="fc" id="L166">        EAssociationType.of(contextType.toClass(), associatedContextType.toClass());</span>
+    Set&lt;UUID&gt; associatedIds;
 
-<span class="fc" id="L150">    strategyOf(contextType).checkLoggedInStudentOwns(List.of(id));</span>
+<span class="fc bfc" id="L169" title="All 2 branches covered.">    if (id == null) {</span>
+<span class="fc" id="L170">      associatedIds = Set.of();</span>
+    } else {
+<span class="fc" id="L172">      strategyOf(contextType).checkLoggedInStudentOwns(List.of(id));</span>
+<span class="fc" id="L173">      associatedIds =</span>
+          new HashSet&lt;&gt;(
+<span class="fc" id="L175">              associatedIdsOf(</span>
+<span class="fc" id="L176">                  getAllOf(id, contextType.toClass(), List.of(associationType)),</span>
+<span class="fc" id="L177">                  contextType.toClass()));</span>
+    }
 
-<span class="fc" id="L152">    var associatedIds =</span>
-        new HashSet&lt;&gt;(
-<span class="fc" id="L154">            associatedIdsOf(</span>
-<span class="fc" id="L155">                getAllOf(id, contextType.toClass(), List.of(associationType)),</span>
-<span class="fc" id="L156">                contextType.toClass()));</span>
+<span class="fc" id="L180">    var searchResults = strategyOf(associatedContextType).search(keyword, filter, pageCriteria);</span>
+<span class="fc" id="L181">    var associableIds =</span>
+<span class="fc" id="L182">        searchResults.content().stream()</span>
+<span class="fc bfc" id="L183" title="All 4 branches covered.">            .filter(result -&gt; !result.disabled() &amp;&amp; !associatedIds.contains(result.id()))</span>
+<span class="fc" id="L184">            .map(AssociationSearchResultData::id)</span>
+<span class="fc" id="L185">            .toList();</span>
+<span class="fc" id="L186">    var limits = limitsOf(associatedContextType, associableIds, associationType);</span>
 
-<span class="fc" id="L158">    var searchResults = strategyOf(associatedContextType).search(keyword, filter, pageCriteria);</span>
+<span class="fc" id="L188">    return new PagedResult&lt;&gt;(</span>
+<span class="fc" id="L189">        searchResults.content().stream()</span>
+<span class="fc" id="L190">            .map(</span>
+                result -&gt; {
+<span class="fc" id="L192">                  var limit = limits.get(result.id());</span>
+<span class="fc bfc" id="L193" title="All 4 branches covered.">                  var limitReached = limit != null &amp;&amp; limit.remaining() == 0;</span>
 
-<span class="fc" id="L160">    return new PagedResult&lt;&gt;(</span>
-<span class="fc" id="L161">        searchResults.content().stream()</span>
-<span class="fc" id="L162">            .map(</span>
-                result -&gt;
-<span class="fc" id="L164">                    new AssociationSearchResultData(</span>
-<span class="fc" id="L165">                        result.id(),</span>
-<span class="fc" id="L166">                        result.title(),</span>
-<span class="fc" id="L167">                        result.category(),</span>
-<span class="fc bfc" id="L168" title="All 4 branches covered.">                        result.disabled() || associatedIds.contains(result.id()),</span>
-<span class="fc" id="L169">                        result.description()))</span>
-<span class="fc" id="L170">            .toList(),</span>
-<span class="fc" id="L171">        searchResults.pageInfo());</span>
-  }
-
-  @Override
-  public PagedResult&lt;AssociationSearchResultData&gt; searchForAssociationWithNewElement(
-      EAssociationContextType contextType,
-      EAssociationContextType associatedContextType,
-      String keyword,
-      AssociationSearchFilter filter,
-      PageCriteria pageCriteria) {
-<span class="fc" id="L181">    EAssociationType.of(contextType.toClass(), associatedContextType.toClass());</span>
-
-<span class="fc" id="L183">    return strategyOf(associatedContextType).search(keyword, filter, pageCriteria);</span>
+<span class="fc" id="L195">                  return new AssociationSearchResultData(</span>
+<span class="fc" id="L196">                      result.id(),</span>
+<span class="fc" id="L197">                      result.title(),</span>
+<span class="fc" id="L198">                      result.category(),</span>
+<span class="fc bfc" id="L199" title="All 6 branches covered.">                      result.disabled() || associatedIds.contains(result.id()) || limitReached,</span>
+                      limitReached,
+<span class="fc" id="L201">                      result.description());</span>
+                })
+<span class="fc" id="L203">            .toList(),</span>
+<span class="fc" id="L204">        searchResults.pageInfo());</span>
   }
 
   @Override
   public void deleteAllByIds(List&lt;UUID&gt; ids) {
-<span class="fc" id="L188">    var activities = associationRepository.findAllById(ids);</span>
+<span class="fc" id="L209">    var activities = associationRepository.findAllById(ids);</span>
 
-<span class="fc bfc" id="L190" title="All 2 branches covered.">    if (!new HashSet&lt;&gt;(activities.stream().map(Association::getId).toList()).containsAll(ids)) {</span>
-<span class="fc" id="L191">      throw new AssociationDoesNotExistException();</span>
+<span class="fc bfc" id="L211" title="All 2 branches covered.">    if (!new HashSet&lt;&gt;(activities.stream().map(Association::getId).toList()).containsAll(ids)) {</span>
+<span class="fc" id="L212">      throw new AssociationDoesNotExistException();</span>
     }
 
-<span class="fc" id="L194">    associationRepository.removeAllFromDatabase(activities);</span>
-<span class="fc" id="L195">  }</span>
+<span class="fc" id="L215">    associationRepository.removeAllFromDatabase(activities);</span>
+<span class="fc" id="L216">  }</span>
 
   @Override
   public void deleteAllOf(List&lt;UUID&gt; ids, Class&lt;?&gt; clazz) {
-<span class="fc" id="L199">    var associationTypes = EAssociationType.getAllBy(clazz);</span>
-<span class="fc" id="L200">    var associations =</span>
-<span class="fc" id="L201">        ids.stream().flatMap(id -&gt; getAllOf(id, clazz, associationTypes).stream()).toList();</span>
-<span class="fc" id="L202">    deleteAllByIds(associations.stream().map(Association::getId).toList());</span>
-<span class="fc" id="L203">  }</span>
+<span class="fc" id="L220">    var associationTypes = EAssociationType.getAllBy(clazz);</span>
+<span class="fc" id="L221">    var associations =</span>
+<span class="fc" id="L222">        ids.stream().flatMap(id -&gt; getAllOf(id, clazz, associationTypes).stream()).toList();</span>
+<span class="fc" id="L223">    deleteAllByIds(associations.stream().map(Association::getId).toList());</span>
+<span class="fc" id="L224">  }</span>
 
   private AssociationStrategy strategyOf(EAssociationContextType contextType) {
-<span class="fc" id="L206">    return strategies.stream()</span>
-<span class="fc bfc" id="L207" title="All 2 branches covered.">        .filter(strategy -&gt; strategy.getContextType() == contextType)</span>
-<span class="fc" id="L208">        .findFirst()</span>
-<span class="fc" id="L209">        .orElseThrow(</span>
-<span class="nc" id="L210">            () -&gt; new IllegalArgumentException(contextType + &quot; has no association strategy&quot;));</span>
+<span class="fc" id="L227">    return strategies.stream()</span>
+<span class="fc bfc" id="L228" title="All 2 branches covered.">        .filter(strategy -&gt; strategy.getContextType() == contextType)</span>
+<span class="fc" id="L229">        .findFirst()</span>
+<span class="fc" id="L230">        .orElseThrow(</span>
+<span class="nc" id="L231">            () -&gt; new IllegalArgumentException(contextType + &quot; has no association strategy&quot;));</span>
   }
 
   private Map&lt;Class&lt;?&gt;, List&lt;Association&gt;&gt; associationsByAssociatedClass(
       List&lt;Association&gt; associations, Class&lt;?&gt; clazz) {
-<span class="fc" id="L215">    return associations.stream()</span>
-<span class="fc" id="L216">        .collect(</span>
-<span class="fc" id="L217">            Collectors.groupingBy(</span>
-<span class="fc" id="L218">                association -&gt; association.getAssociationType().associatedKeyOf(clazz)));</span>
+<span class="fc" id="L236">    return associations.stream()</span>
+<span class="fc" id="L237">        .collect(</span>
+<span class="fc" id="L238">            Collectors.groupingBy(</span>
+<span class="fc" id="L239">                association -&gt; association.getAssociationType().associatedKeyOf(clazz)));</span>
   }
 
   private List&lt;UUID&gt; associatedIdsOf(List&lt;Association&gt; associations, Class&lt;?&gt; clazz) {
-<span class="fc" id="L222">    return associations.stream().map(association -&gt; association.associatedIdOf(clazz)).toList();</span>
+<span class="fc" id="L243">    return associations.stream().map(association -&gt; association.associatedIdOf(clazz)).toList();</span>
   }
 
   private AssociationData associationDataOf(
       UUID id, Class&lt;?&gt; clazz, UUID associatedId, EAssociationType associationType) {
-<span class="fc bfc" id="L227" title="All 2 branches covered.">    return associationType.getKey1().equals(clazz)</span>
-<span class="fc" id="L228">        ? new AssociationData(id, associatedId, associationType)</span>
-<span class="fc" id="L229">        : new AssociationData(associatedId, id, associationType);</span>
+<span class="fc bfc" id="L248" title="All 2 branches covered.">    return associationType.getKey1().equals(clazz)</span>
+<span class="fc" id="L249">        ? new AssociationData(id, associatedId, associationType)</span>
+<span class="fc" id="L250">        : new AssociationData(associatedId, id, associationType);</span>
   }
+
+  private Map&lt;UUID, AssociationLimitData&gt; limitsOf(
+      EAssociationContextType contextType, List&lt;UUID&gt; ids, EAssociationType associationType) {
+<span class="fc bfc" id="L255" title="All 2 branches covered.">    if (ids.isEmpty()) {</span>
+<span class="fc" id="L256">      return Map.of();</span>
+    }
+
+<span class="fc" id="L259">    var limits = strategyOf(contextType).getAssociationLimits(ids, associationType);</span>
+
+<span class="fc bfc" id="L261" title="All 2 branches covered.">    if (limits.isEmpty()) {</span>
+<span class="fc" id="L262">      return Map.of();</span>
+    }
+
+<span class="fc" id="L265">    var associatedContextType =</span>
+<span class="fc" id="L266">        EAssociationContextType.of(associationType.associatedKeyOf(contextType.toClass()));</span>
+<span class="fc" id="L267">    var counts = countAllOf(List.copyOf(limits.keySet()), contextType.toClass(), associationType);</span>
+
+<span class="fc" id="L269">    return limits.entrySet().stream()</span>
+<span class="fc" id="L270">        .collect(</span>
+<span class="fc" id="L271">            Collectors.toMap(</span>
+                Map.Entry::getKey,
+                limit -&gt;
+<span class="fc" id="L274">                    new AssociationLimitData(</span>
+                        associatedContextType,
+<span class="fc" id="L276">                        limit.getValue(),</span>
+<span class="fc" id="L277">                        counts.getOrDefault(limit.getKey(), 0L))));</span>
+  }
+
+  private void checkLimits(
+      EAssociationContextType contextType,
+      List&lt;UUID&gt; ids,
+      EAssociationType associationType,
+      int associationsToAdd) {
+<span class="fc" id="L285">    if (limitsOf(contextType, ids, associationType).values().stream()</span>
+<span class="fc bfc" id="L286" title="All 4 branches covered.">        .anyMatch(limit -&gt; associationsToAdd &gt; limit.remaining())) {</span>
+<span class="fc" id="L287">      throw new MaximumAssociationReachedException();</span>
+    }
+<span class="fc" id="L289">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
