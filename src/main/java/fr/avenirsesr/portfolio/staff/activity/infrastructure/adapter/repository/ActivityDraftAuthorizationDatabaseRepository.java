@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAuthorization
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityDraftAuthorizationRepository;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.mapper.ActivityDraftAuthorizationMapper;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityDraftAuthorizationEntity;
+import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.specification.ActivityAuthorizationSpecification;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -50,6 +51,28 @@ public class ActivityDraftAuthorizationDatabaseRepository
     return jpaRepository.findAllByActivityDraftIdIn(activityDraftIds).stream()
         .map(ActivityDraftAuthorizationMapper.INSTANCE::toDomain)
         .toList();
+  }
+
+  @Override
+  public List<ActivityAuthorization> findAllByActivityIdsAndStaffId(
+      Collection<UUID> activityDraftIds, UUID staffId) {
+    if (activityDraftIds.isEmpty()) {
+      return List.of();
+    }
+    return jpaRepository
+        .findAll(
+            ActivityAuthorizationSpecification.<ActivityDraftAuthorizationEntity>withEntityIdIn(
+                    "activityDraftId", activityDraftIds)
+                .and(ActivityAuthorizationSpecification.withStaffId(staffId)))
+        .stream()
+        .map(ActivityDraftAuthorizationMapper.INSTANCE::toDomain)
+        .toList();
+  }
+
+  @Override
+  public boolean existsByStaffId(UUID staffId) {
+    return jpaRepository.exists(
+        ActivityAuthorizationSpecification.<ActivityDraftAuthorizationEntity>withStaffId(staffId));
   }
 
   @Override

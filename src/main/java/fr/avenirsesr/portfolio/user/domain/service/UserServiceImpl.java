@@ -13,7 +13,6 @@ import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.notification.domain.port.output.repository.NotificationRepository;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.user.domain.data.CguAcceptanceData;
-import fr.avenirsesr.portfolio.user.domain.data.LoggedInUserData;
 import fr.avenirsesr.portfolio.user.domain.data.UserQuickLinksData;
 import fr.avenirsesr.portfolio.user.domain.exception.CguNotFoundException;
 import fr.avenirsesr.portfolio.user.domain.model.Cgu;
@@ -25,6 +24,7 @@ import fr.avenirsesr.portfolio.user.domain.port.output.client.ExternalUserClient
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.CguRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserPrincipalRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,9 +54,8 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public LoggedInUserData getMe() {
-    var user = loggedInUserService.getLoggedInUser();
-    return new LoggedInUserData(user.getFirstName(), user.getLastName(), lastAcceptedCgu(user));
+  public Optional<CguAcceptanceData> getAcceptedCgu() {
+    return lastAcceptedCgu(loggedInUserService.getLoggedInUser());
   }
 
   @Override
@@ -79,7 +78,7 @@ public class UserServiceImpl implements UserService {
     return accepted;
   }
 
-  private CguAcceptanceData lastAcceptedCgu(User user) {
+  private Optional<CguAcceptanceData> lastAcceptedCgu(User user) {
     return cguRepository
         .findLastAcceptedByUser(user.getId())
         .map(
@@ -87,8 +86,7 @@ public class UserServiceImpl implements UserService {
                 new CguAcceptanceData(
                     cgu.getVersionId(),
                     cgu.getAcceptedAt(),
-                    cguClient.getLatestId().filter(cgu.getVersionId()::equals).isPresent()))
-        .orElse(null);
+                    cguClient.getLatestId().filter(cgu.getVersionId()::equals).isPresent()));
   }
 
   @Override

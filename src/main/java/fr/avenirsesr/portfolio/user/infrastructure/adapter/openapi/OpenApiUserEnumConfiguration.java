@@ -14,6 +14,7 @@ public class OpenApiUserEnumConfiguration {
           .addSchemas("EContextType", SwaggerSchema.userContextSchema)
           .addSchemas("EUserCategory", SwaggerSchema.userCategorySchema)
           .addSchemas("ERole", SwaggerSchema.roleSchema)
+          .addSchemas("EUniverse", SwaggerSchema.universeSchema)
           .addSchemas("EInstitutionType", SwaggerSchema.institutionTypeSchema)
           .addSchemas("EGroupType", SwaggerSchema.groupTypeSchema);
     };

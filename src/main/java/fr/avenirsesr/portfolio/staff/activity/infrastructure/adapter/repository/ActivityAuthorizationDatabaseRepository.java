@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAuthorization
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityAuthorizationRepository;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.mapper.ActivityAuthorizationMapper;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityAuthorizationEntity;
+import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.specification.ActivityAuthorizationSpecification;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -49,6 +50,28 @@ public class ActivityAuthorizationDatabaseRepository
     return jpaRepository.findAllByActivityIdIn(activityIds).stream()
         .map(ActivityAuthorizationMapper.INSTANCE::toDomain)
         .toList();
+  }
+
+  @Override
+  public List<ActivityAuthorization> findAllByActivityIdsAndStaffId(
+      Collection<UUID> activityIds, UUID staffId) {
+    if (activityIds.isEmpty()) {
+      return List.of();
+    }
+    return jpaRepository
+        .findAll(
+            ActivityAuthorizationSpecification.<ActivityAuthorizationEntity>withEntityIdIn(
+                    "activityId", activityIds)
+                .and(ActivityAuthorizationSpecification.withStaffId(staffId)))
+        .stream()
+        .map(ActivityAuthorizationMapper.INSTANCE::toDomain)
+        .toList();
+  }
+
+  @Override
+  public boolean existsByStaffId(UUID staffId) {
+    return jpaRepository.exists(
+        ActivityAuthorizationSpecification.<ActivityAuthorizationEntity>withStaffId(staffId));
   }
 
   @Override

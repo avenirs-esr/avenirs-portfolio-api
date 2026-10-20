@@ -81,6 +81,17 @@ public class ActivityAuthorizationServiceImpl implements ActivityAuthorizationSe
   }
 
   @Override
+  public Map<UUID, Set<EActivityRight>> getLoggedInStaffRightsByActivityIds(
+      Collection<UUID> activityIds) {
+    return rightsByEntityId(activityAuthorizationRepository, activityIds);
+  }
+
+  @Override
+  public boolean hasLoggedInStaffAnyRight() {
+    return hasAnyRightOnAnyEntity(activityAuthorizationRepository);
+  }
+
+  @Override
   public List<ActivityAuthorization> getActivityAuthorizations(UUID activityId) {
     requireActivity(activityId);
     requireGranted(
@@ -148,6 +159,17 @@ public class ActivityAuthorizationServiceImpl implements ActivityAuthorizationSe
     return loggedInStaff()
         .map(staff -> rightsOf(activityDraftAuthorizationRepository, staff, activityDraftId))
         .orElseGet(() -> EnumSet.noneOf(EActivityRight.class));
+  }
+
+  @Override
+  public Map<UUID, Set<EActivityRight>> getLoggedInStaffDraftRightsByDraftIds(
+      Collection<UUID> activityDraftIds) {
+    return rightsByEntityId(activityDraftAuthorizationRepository, activityDraftIds);
+  }
+
+  @Override
+  public boolean hasLoggedInStaffAnyDraftRight() {
+    return hasAnyRightOnAnyEntity(activityDraftAuthorizationRepository);
   }
 
   @Override
@@ -249,6 +271,23 @@ public class ActivityAuthorizationServiceImpl implements ActivityAuthorizationSe
     return find(repository, staff, activityId)
         .map(ActivityAuthorization::getRights)
         .orElseGet(() -> EnumSet.noneOf(EActivityRight.class));
+  }
+
+  private Map<UUID, Set<EActivityRight>> rightsByEntityId(
+      StaffAuthorizationRepository repository, Collection<UUID> entityIds) {
+    var staff = loggedInStaff();
+    if (staff.isEmpty() || entityIds.isEmpty()) {
+      return Map.of();
+    }
+    return repository.findAllByActivityIdsAndStaffId(entityIds, staff.get().getId()).stream()
+        .filter(authorization -> !authorization.getRights().isEmpty())
+        .collect(
+            Collectors.toMap(
+                ActivityAuthorization::getActivityId, ActivityAuthorization::getRights));
+  }
+
+  private boolean hasAnyRightOnAnyEntity(StaffAuthorizationRepository repository) {
+    return loggedInStaff().map(staff -> repository.existsByStaffId(staff.getId())).orElse(false);
   }
 
   private Optional<ActivityAuthorization> find(

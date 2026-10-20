@@ -799,6 +799,113 @@ class ActivityAuthorizationServiceImplTest {
     }
   }
 
+  @Nested
+  class WhenGettingTheRightsOfTheLoggedInStaffOnSeveralEntities {
+
+    private UUID otherActivityId;
+
+    @BeforeEach
+    void setUpEntities() {
+      otherActivityId = UUID.randomUUID();
+    }
+
+    @Test
+    void thenTheRightsShouldBeGroupedByActivityId() {
+      BddLogger.given("a logged in staff holding rights on two activities");
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+      when(activityAuthorizationRepository.findAllByActivityIdsAndStaffId(
+              List.of(activityId, otherActivityId), staff.getId()))
+          .thenReturn(
+              List.of(
+                  authorizationOf(staff, EActivityRight.EDIT, EActivityRight.PUBLISH),
+                  ActivityAuthorization.create(
+                      otherActivityId, staff, Set.of(EActivityRight.FEEDBACK))));
+
+      BddLogger.then("each activity should map to its own rights");
+      assertThat(service.getLoggedInStaffRightsByActivityIds(List.of(activityId, otherActivityId)))
+          .containsEntry(activityId, EnumSet.of(EActivityRight.EDIT, EActivityRight.PUBLISH))
+          .containsEntry(otherActivityId, EnumSet.of(EActivityRight.FEEDBACK))
+          .hasSize(2);
+    }
+
+    @Test
+    void thenTheDraftRightsShouldBeReadFromTheDraftTable() {
+      BddLogger.given("a logged in staff holding a right on a draft");
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+      when(activityDraftAuthorizationRepository.findAllByActivityIdsAndStaffId(
+              List.of(activityId), staff.getId()))
+          .thenReturn(List.of(authorizationOf(staff, EActivityRight.EDIT)));
+
+      BddLogger.then("the draft rights should be returned and the activity table left alone");
+      assertThat(service.getLoggedInStaffDraftRightsByDraftIds(List.of(activityId)))
+          .containsOnlyKeys(activityId);
+      verify(activityAuthorizationRepository, never()).findAllByActivityIdsAndStaffId(any(), any());
+    }
+
+    @Test
+    void thenAnAuthorizationWithoutAnyRightShouldBeIgnored() {
+      BddLogger.given("an authorization row holding no right");
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+      when(activityAuthorizationRepository.findAllByActivityIdsAndStaffId(
+              List.of(activityId), staff.getId()))
+          .thenReturn(List.of(authorizationOf(staff)));
+
+      BddLogger.then("the activity should not appear in the result");
+      assertThat(service.getLoggedInStaffRightsByActivityIds(List.of(activityId))).isEmpty();
+    }
+
+    @Test
+    void thenNothingShouldBeQueriedWithoutIds() {
+      BddLogger.given("a logged in staff");
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+
+      BddLogger.then("an empty map should be returned without querying the repository");
+      assertThat(service.getLoggedInStaffRightsByActivityIds(List.of())).isEmpty();
+      verify(activityAuthorizationRepository, never()).findAllByActivityIdsAndStaffId(any(), any());
+    }
+
+    @Test
+    void thenNothingShouldBeQueriedWhenTheLoggedInUserIsNotAStaff() {
+      BddLogger.given("a logged in user that is not a staff");
+      when(loggedInUserService.getLoggedInStaff()).thenThrow(new UserIsNotStaffException());
+
+      BddLogger.then("an empty map should be returned without querying the repository");
+      assertThat(service.getLoggedInStaffRightsByActivityIds(List.of(activityId))).isEmpty();
+      assertThat(service.getLoggedInStaffDraftRightsByDraftIds(List.of(activityId))).isEmpty();
+      verify(activityAuthorizationRepository, never()).findAllByActivityIdsAndStaffId(any(), any());
+      verify(activityDraftAuthorizationRepository, never())
+          .findAllByActivityIdsAndStaffId(any(), any());
+    }
+  }
+
+  @Nested
+  class WhenCheckingIfTheLoggedInStaffHoldsAnyRight {
+
+    @Test
+    void thenItShouldReflectTheActivityAuthorizationTable() {
+      BddLogger.given("a logged in staff holding rights on an activity only");
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+      when(activityAuthorizationRepository.existsByStaffId(staff.getId())).thenReturn(true);
+      when(activityDraftAuthorizationRepository.existsByStaffId(staff.getId())).thenReturn(false);
+
+      BddLogger.then("only the activity check should be positive");
+      assertThat(service.hasLoggedInStaffAnyRight()).isTrue();
+      assertThat(service.hasLoggedInStaffAnyDraftRight()).isFalse();
+    }
+
+    @Test
+    void thenItShouldBeFalseWhenTheLoggedInUserIsNotAStaff() {
+      BddLogger.given("a logged in user that is not a staff");
+      when(loggedInUserService.getLoggedInStaff()).thenThrow(new UserIsNotStaffException());
+
+      BddLogger.then("no right should be reported and no table queried");
+      assertThat(service.hasLoggedInStaffAnyRight()).isFalse();
+      assertThat(service.hasLoggedInStaffAnyDraftRight()).isFalse();
+      verify(activityAuthorizationRepository, never()).existsByStaffId(any());
+      verify(activityDraftAuthorizationRepository, never()).existsByStaffId(any());
+    }
+  }
+
   @Test
   void shouldDeleteTheAuthorizationsOfTheActivityAndOfItsDraftSeparately() {
     BddLogger.given("an activity authorization service");

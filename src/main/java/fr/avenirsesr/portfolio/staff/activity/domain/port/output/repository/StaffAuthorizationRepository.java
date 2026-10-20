@@ -14,5 +14,10 @@ public interface StaffAuthorizationRepository extends GenericRepositoryPort<Acti
 
   List<ActivityAuthorization> findAllByActivityIds(Collection<UUID> activityIds);
 
+  List<ActivityAuthorization> findAllByActivityIdsAndStaffId(
+      Collection<UUID> activityIds, UUID staffId);
+
+  boolean existsByStaffId(UUID staffId);
+
   void deleteAllByActivityId(UUID activityId);
 }

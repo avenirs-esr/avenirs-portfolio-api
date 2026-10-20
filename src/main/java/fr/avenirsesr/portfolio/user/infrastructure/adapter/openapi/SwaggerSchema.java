@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.common.group.domain.model.enums.EGroupType;
 import fr.avenirsesr.portfolio.common.institution.domain.model.enums.EInstitutionType;
 import fr.avenirsesr.portfolio.common.security.accesscontrol.domain.model.enums.ERole;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EContextType;
+import fr.avenirsesr.portfolio.user.domain.model.enums.EUniverse;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 import java.util.Arrays;
@@ -29,6 +30,12 @@ public final class SwaggerSchema {
           .name("ERole")
           ._enum(Arrays.stream(ERole.values()).map(Enum::name).toList())
           .description("Enum for user role");
+
+  public static final Schema<String> universeSchema =
+      new StringSchema()
+          .name("EUniverse")
+          ._enum(Arrays.stream(EUniverse.values()).map(Enum::name).toList())
+          .description("Enum for universe");
 
   public static final Schema<String> institutionTypeSchema =
       new StringSchema()
