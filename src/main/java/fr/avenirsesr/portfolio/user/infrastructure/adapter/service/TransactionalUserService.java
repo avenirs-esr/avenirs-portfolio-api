@@ -4,9 +4,9 @@ import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.user.domain.data.CguAcceptanceData;
-import fr.avenirsesr.portfolio.user.domain.data.LoggedInUserData;
 import fr.avenirsesr.portfolio.user.domain.data.UserQuickLinksData;
 import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,8 +22,8 @@ public class TransactionalUserService implements UserService {
   }
 
   @Override
-  public LoggedInUserData getMe() {
-    return delegate.getMe();
+  public Optional<CguAcceptanceData> getAcceptedCgu() {
+    return delegate.getAcceptedCgu();
   }
 
   @Override

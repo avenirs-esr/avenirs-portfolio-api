@@ -17,6 +17,7 @@ import fr.avenirsesr.portfolio.user.application.adapter.request.NotificationPref
 import fr.avenirsesr.portfolio.user.application.adapter.request.ProfileUpdateRequest;
 import fr.avenirsesr.portfolio.user.domain.data.CguAcceptanceData;
 import fr.avenirsesr.portfolio.user.domain.data.UserProfileOverviewData;
+import fr.avenirsesr.portfolio.user.domain.model.enums.EUniverse;
 import fr.avenirsesr.portfolio.user.domain.port.input.StaffService;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
@@ -59,11 +60,10 @@ public class UserController {
 
   @GetMapping
   public ResponseEntity<LoggedInUserDTO> getMe(HmacAuthenticationToken authentication) {
-    var me = userService.getMe();
     Set<ERole> roles =
         authentication.getRoles().stream().map(ERole::valueOf).collect(Collectors.toSet());
-    return ResponseEntity.ok(
-        new LoggedInUserDTO(me.firstname(), me.lastname(), roles, toDto(me.acceptedCgu())));
+    var acceptedCgu = userService.getAcceptedCgu().map(UserController::toDto).orElse(null);
+    return ResponseEntity.ok(new LoggedInUserDTO(roles, EUniverse.of(roles), acceptedCgu));
   }
 
   @PostMapping("/cgu/accept")
@@ -74,10 +74,8 @@ public class UserController {
   }
 
   private static AcceptedCguDTO toDto(CguAcceptanceData acceptance) {
-    return acceptance == null
-        ? null
-        : new AcceptedCguDTO(
-            acceptance.versionId(), acceptance.acceptedAt(), acceptance.isLastVersion());
+    return new AcceptedCguDTO(
+        acceptance.versionId(), acceptance.acceptedAt(), acceptance.isLastVersion());
   }
 
   @PreAuthorize("hasAuthority('profile:read:own')")

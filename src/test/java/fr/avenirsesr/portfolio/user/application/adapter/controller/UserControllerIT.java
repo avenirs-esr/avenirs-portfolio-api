@@ -74,7 +74,7 @@ public class UserControllerIT extends ContainerConfigurationTest {
     void shouldGetStudentMe() {
       BddLogger.given("the /me endpoint");
       BddLogger.when("performing a GET as a student");
-      BddLogger.then("it should return the student's firstname, lastname and roles");
+      BddLogger.then("it should return the student's roles and the student universe");
 
       webTestClient
           .get()
@@ -85,16 +85,33 @@ public class UserControllerIT extends ContainerConfigurationTest {
           .expectStatus()
           .isOk()
           .expectBody()
-          .jsonPath("$.firstname")
-          .exists()
-          .jsonPath("$.lastname")
-          .exists()
+          .jsonPath("$.universes")
+          .isEqualTo(List.of("STUDENT"))
           .jsonPath("$.roles")
           .isArray()
           .jsonPath("$.roles")
           .value(
               new ParameterizedTypeReference<List<String>>() {},
               roles -> MatcherAssert.assertThat(roles, Matchers.hasItem("ROLE_STUDENT")));
+    }
+
+    @Test
+    void shouldGetStaffMeWithTheStaffUniverse() {
+      BddLogger.given("the /me endpoint");
+      BddLogger.when("performing a GET as a staff");
+      BddLogger.then("it should return the staff universe only");
+
+      webTestClient
+          .get()
+          .uri("/me")
+          .header("X-Signed-Context", staffPayload)
+          .header("X-Context-Signature", staffSignature)
+          .exchange()
+          .expectStatus()
+          .isOk()
+          .expectBody()
+          .jsonPath("$.universes")
+          .isEqualTo(List.of("STAFF"));
     }
 
     @Test
@@ -113,6 +130,8 @@ public class UserControllerIT extends ContainerConfigurationTest {
           .isOk()
           .expectBody()
           .jsonPath("$.roles")
+          .isEqualTo(Collections.emptyList())
+          .jsonPath("$.universes")
           .isEqualTo(Collections.emptyList());
     }
   }

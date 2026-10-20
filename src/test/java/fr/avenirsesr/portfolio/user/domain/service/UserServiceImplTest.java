@@ -17,7 +17,6 @@ import fr.avenirsesr.portfolio.common.user.domain.model.enums.EUserStatus;
 import fr.avenirsesr.portfolio.notification.domain.port.output.repository.NotificationRepository;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.user.domain.data.CguAcceptanceData;
-import fr.avenirsesr.portfolio.user.domain.data.LoggedInUserData;
 import fr.avenirsesr.portfolio.user.domain.data.UserQuickLinksData;
 import fr.avenirsesr.portfolio.user.domain.exception.CguNotFoundException;
 import fr.avenirsesr.portfolio.user.domain.model.Cgu;
@@ -638,7 +637,7 @@ class UserServiceImplTest {
   }
 
   @Nested
-  class GetMe {
+  class GetAcceptedCgu {
 
     private Cgu acceptanceOf(UUID versionId) {
       Instant acceptedAt = Instant.parse("2026-09-03T09:00:00Z");
@@ -655,13 +654,13 @@ class UserServiceImplTest {
           .thenReturn(Optional.of(acceptanceOf(published)));
       when(cguClient.getLatestId()).thenReturn(Optional.of(published));
 
-      BddLogger.when("getting the logged-in user");
-      LoggedInUserData result = userService.getMe();
+      BddLogger.when("getting the accepted terms of use of the logged-in user");
+      var result = userService.getAcceptedCgu();
 
-      BddLogger.then("the acceptance is carried along the identity, flagged as the last version");
-      assertThat(result.firstname()).isEqualTo(loggedUser.getFirstName());
-      assertThat(result.acceptedCgu().versionId()).isEqualTo(published);
-      assertThat(result.acceptedCgu().isLastVersion()).isTrue();
+      BddLogger.then("the acceptance is returned, flagged as the last version");
+      assertThat(result).isPresent();
+      assertThat(result.get().versionId()).isEqualTo(published);
+      assertThat(result.get().isLastVersion()).isTrue();
     }
 
     @Test
@@ -672,11 +671,12 @@ class UserServiceImplTest {
           .thenReturn(Optional.of(acceptanceOf(UUID.randomUUID())));
       when(cguClient.getLatestId()).thenReturn(Optional.of(UUID.randomUUID()));
 
-      BddLogger.when("getting the logged-in user");
-      LoggedInUserData result = userService.getMe();
+      BddLogger.when("getting the accepted terms of use of the logged-in user");
+      var result = userService.getAcceptedCgu();
 
       BddLogger.then("the acceptance is not flagged as the last version");
-      assertThat(result.acceptedCgu().isLastVersion()).isFalse();
+      assertThat(result).isPresent();
+      assertThat(result.get().isLastVersion()).isFalse();
     }
 
     @Test
@@ -685,11 +685,11 @@ class UserServiceImplTest {
       when(loggedInUserService.getLoggedInUser()).thenReturn(loggedUser);
       when(cguRepository.findLastAcceptedByUser(loggedUser.getId())).thenReturn(Optional.empty());
 
-      BddLogger.when("getting the logged-in user");
-      LoggedInUserData result = userService.getMe();
+      BddLogger.when("getting the accepted terms of use of the logged-in user");
+      var result = userService.getAcceptedCgu();
 
-      BddLogger.then("no accepted version is carried and the back-office is not called");
-      assertThat(result.acceptedCgu()).isNull();
+      BddLogger.then("nothing is returned and the back-office is not called");
+      assertThat(result).isEmpty();
       verifyNoInteractions(cguClient);
     }
   }

@@ -25,6 +25,10 @@ public interface ActivityAuthorizationService {
 
   Set<EActivityRight> getLoggedInStaffRights(UUID activityId);
 
+  Map<UUID, Set<EActivityRight>> getLoggedInStaffRightsByActivityIds(Collection<UUID> activityIds);
+
+  boolean hasLoggedInStaffAnyRight();
+
   List<ActivityAuthorization> getActivityAuthorizations(UUID activityId);
 
   List<ActivityAuthorization> defineActivityAuthorizations(
@@ -47,6 +51,11 @@ public interface ActivityAuthorizationService {
   void checkAnyDraftRight(Staff staff, UUID activityDraftId, Set<EActivityRight> rights);
 
   Set<EActivityRight> getLoggedInStaffDraftRights(UUID activityDraftId);
+
+  Map<UUID, Set<EActivityRight>> getLoggedInStaffDraftRightsByDraftIds(
+      Collection<UUID> activityDraftIds);
+
+  boolean hasLoggedInStaffAnyDraftRight();
 
   List<ActivityAuthorization> getDraftAuthorizations(UUID activityDraftId);
 
