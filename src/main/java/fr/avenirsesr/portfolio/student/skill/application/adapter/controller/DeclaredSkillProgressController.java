@@ -61,7 +61,6 @@ public class DeclaredSkillProgressController {
     var declaredSkillProgress =
         declaredSkillProgressService.createDeclaredSkillProgress(
             UUID.fromString(declaredSkill.getId()),
-            declaredSkill.getType(),
             declaredSkill.getLevel(),
             declaredSkill.getReflection());
     return ResponseEntity.created(
@@ -88,12 +87,11 @@ public class DeclaredSkillProgressController {
   }
 
   @PreAuthorize("hasAuthority('declared-skill:list:own')")
-  @GetMapping("/external-ids")
-  public ResponseEntity<List<UUID>> getAssociatedExternalSkillIds(Principal principal) {
+  @GetMapping("/skill-ids")
+  public ResponseEntity<List<UUID>> getDeclaredSkillIds(Principal principal) {
     log.debug(
-        "Received request to get associated external skill ids for student [{}]",
-        principal.getName());
-    return ResponseEntity.ok(declaredSkillProgressService.getAssociatedExternalSkillIds());
+        "Received request to get the declared skill ids for student [{}]", principal.getName());
+    return ResponseEntity.ok(declaredSkillProgressService.getDeclaredSkillIds());
   }
 
   @PreAuthorize("hasAuthority('declared-skill:list:own')")

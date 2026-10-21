@@ -1,0 +1,248 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+        http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet author="iamgreendev" id="create-skill-referential">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="skill_referential"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="skill_referential">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="skill_referential_pkey"/>
+            </column>
+            <column name="type" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="external_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="institution_id" type="UUID"/>
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex tableName="skill_referential" indexName="idx_skill_referential_type">
+            <column name="type"/>
+        </createIndex>
+
+        <createIndex tableName="skill_referential" indexName="idx_skill_referential_institution">
+            <column name="institution_id"/>
+        </createIndex>
+
+        <rollback>
+            <dropTable tableName="skill_referential"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="iamgreendev" id="create-skill-referential-national-unique-index" dbms="postgresql">
+        <sql>
+            CREATE UNIQUE INDEX uk_skill_referential_national_type
+                ON skill_referential (type)
+                WHERE institution_id IS NULL;
+        </sql>
+        <rollback>
+            <sql>DROP INDEX IF EXISTS uk_skill_referential_national_type;</sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="iamgreendev" id="create-skill">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="skill"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="skill">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="skill_pkey"/>
+            </column>
+            <column name="referential_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="external_code" type="VARCHAR(255)"/>
+            <column name="title" type="VARCHAR(500)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(2000)"/>
+            <column name="parent_id" type="UUID"/>
+            <column name="assessable" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="archived" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint tableName="skill"
+                             columnNames="referential_id, external_code"
+                             constraintName="uk_skill_referential_external_code"/>
+
+        <createIndex tableName="skill" indexName="idx_skill_referential">
+            <column name="referential_id"/>
+        </createIndex>
+
+        <createIndex tableName="skill" indexName="idx_skill_parent">
+            <column name="parent_id"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseTableName="skill"
+                                 baseColumnNames="referential_id"
+                                 constraintName="fk_skill_referential"
+                                 referencedTableName="skill_referential"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="skill"
+                                 baseColumnNames="parent_id"
+                                 constraintName="fk_skill_parent"
+                                 referencedTableName="skill"
+                                 referencedColumnNames="id"/>
+
+        <rollback>
+            <dropTable tableName="skill"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="iamgreendev" id="create-national-skill-details">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="national_skill_details"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="national_skill_details">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="national_skill_details_pkey"/>
+            </column>
+            <column name="skill_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="kind" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint tableName="national_skill_details"
+                             columnNames="skill_id"
+                             constraintName="uk_national_skill_details_skill"/>
+
+        <addForeignKeyConstraint baseTableName="national_skill_details"
+                                 baseColumnNames="skill_id"
+                                 constraintName="fk_national_skill_details_skill"
+                                 referencedTableName="skill"
+                                 referencedColumnNames="id"/>
+
+        <rollback>
+            <dropTable tableName="national_skill_details"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="iamgreendev" id="migrate-declared-skill-into-skill" dbms="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="declared_skill"/>
+        </preConditions>
+
+        <sql>
+            INSERT INTO skill_referential (id, type, external_id, title, institution_id, created_at, updated_at)
+            SELECT gen_random_uuid(), source.type, source.type, source.type, NULL, now(), now()
+            FROM (SELECT DISTINCT COALESCE(ds.type, 'CUSTOM') AS type FROM declared_skill ds) source
+            WHERE NOT EXISTS (
+                SELECT 1 FROM skill_referential sr
+                WHERE sr.type = source.type AND sr.institution_id IS NULL
+            );
+
+            INSERT INTO skill (id, referential_id, external_code, title, description, parent_id,
+                               assessable, archived, created_at, updated_at)
+            SELECT ds.id, sr.id, NULL, ds.libelle, NULL, NULL, true, false, ds.created_at, ds.updated_at
+            FROM declared_skill ds
+            JOIN skill_referential sr
+                ON sr.type = COALESCE(ds.type, 'CUSTOM') AND sr.institution_id IS NULL
+            WHERE NOT EXISTS (SELECT 1 FROM skill s WHERE s.id = ds.id);
+        </sql>
+
+        <rollback>
+            <sql>
+                DELETE FROM skill WHERE id IN (SELECT id FROM declared_skill);
+                DELETE FROM skill_referential WHERE institution_id IS NULL;
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="iamgreendev" id="relink-declared-skill-progress-to-skill" dbms="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="declared_skill_progress" columnName="declared_skill_id"/>
+        </preConditions>
+
+        <sql>
+            ALTER TABLE declared_skill_progress
+                DROP CONSTRAINT IF EXISTS "FK_DECLARED_SKILL_PROGRESS_ON_DECLARED_SKILL";
+            ALTER TABLE declared_skill_progress
+                DROP CONSTRAINT IF EXISTS uc_f2d56af4ab4f318916544f00b;
+        </sql>
+
+        <renameColumn tableName="declared_skill_progress"
+                      oldColumnName="declared_skill_id"
+                      newColumnName="skill_id"
+                      columnDataType="UUID"/>
+
+        <addUniqueConstraint tableName="declared_skill_progress"
+                             columnNames="student_id, skill_id"
+                             constraintName="uk_declared_skill_progress_student_skill"/>
+
+        <addForeignKeyConstraint baseTableName="declared_skill_progress"
+                                 baseColumnNames="skill_id"
+                                 constraintName="fk_declared_skill_progress_skill"
+                                 referencedTableName="skill"
+                                 referencedColumnNames="id"/>
+
+        <rollback>
+            <dropForeignKeyConstraint baseTableName="declared_skill_progress"
+                                      constraintName="fk_declared_skill_progress_skill"/>
+            <dropUniqueConstraint tableName="declared_skill_progress"
+                                  constraintName="uk_declared_skill_progress_student_skill"/>
+            <renameColumn tableName="declared_skill_progress"
+                          oldColumnName="skill_id"
+                          newColumnName="declared_skill_id"
+                          columnDataType="UUID"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="iamgreendev" id="drop-declared-skill">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="declared_skill"/>
+        </preConditions>
+
+        <dropTable tableName="declared_skill" cascadeConstraints="true"/>
+
+        <rollback/>
+    </changeSet>
+
+</databaseChangeLog>

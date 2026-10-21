@@ -130,7 +130,7 @@ public class AssociationSeeder {
                         progress ->
                             progress.getStudent() != null ? progress.getStudent().getId() : null,
                         DeclaredSkillProgressEntity::getId,
-                        Comparator.comparing(progress -> progress.getDeclaredSkill().getLibelle()));
+                        Comparator.comparing(progress -> progress.getSkill().getTitle()));
             case TRACE_DECLARED_EXPERIENCE, DECLARED_ACTIVITY_DECLARED_EXPERIENCE ->
                 id ->
                     resolveDynamicIdWithStudentParam(

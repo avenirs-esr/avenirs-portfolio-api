@@ -1,0 +1,851 @@
+[
+  {
+    "type": "CASOC",
+    "externalId": "CASOC",
+    "title": "CASOC",
+    "nodes": [
+      {
+        "id": "c98e08de-b403-5162-831a-48b2787acaa8",
+        "externalCode": null,
+        "title": "connaître et savoir s’informer sur le monde",
+        "description": null,
+        "parentId": null,
+        "kind": "DOMAIN",
+        "assessable": false
+      },
+      {
+        "id": "d3e68030-ab80-500e-b93c-43c45d57e649",
+        "externalCode": null,
+        "title": "se découvrir et s’affirmer",
+        "description": null,
+        "parentId": null,
+        "kind": "DOMAIN",
+        "assessable": false
+      },
+      {
+        "id": "0b4edb13-6997-5447-b36b-fcff7079bfd6",
+        "externalCode": null,
+        "title": "se construire et se projeter dans un monde en mouvement",
+        "description": null,
+        "parentId": null,
+        "kind": "DOMAIN",
+        "assessable": false
+      },
+      {
+        "id": "9c022917-a8bf-5e53-a959-61a7b8ae4d24",
+        "externalCode": "1",
+        "title": "Chercher et trier l’information",
+        "description": null,
+        "parentId": "c98e08de-b403-5162-831a-48b2787acaa8",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "fb997b5d-f12a-582d-951e-4f2fd6b1bbdc",
+        "externalCode": "2",
+        "title": "Connaître les personnes, lieux et ressources qui peuvent m’aider à m’informer et à m’orienter",
+        "description": null,
+        "parentId": "c98e08de-b403-5162-831a-48b2787acaa8",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "0c0134b1-268f-52bc-8254-5922900479a9",
+        "externalCode": "3",
+        "title": "Apprendre à découvrir les parcours de formation",
+        "description": null,
+        "parentId": "c98e08de-b403-5162-831a-48b2787acaa8",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "453fec75-0c64-5df7-8a55-4004cc57458d",
+        "externalCode": "4",
+        "title": "Apprendre à découvrir les métiers et le monde du travail",
+        "description": null,
+        "parentId": "c98e08de-b403-5162-831a-48b2787acaa8",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "9a03fcca-3bba-5cee-a5ac-660993ce524b",
+        "externalCode": "5",
+        "title": "M’interroger sur les clichés",
+        "description": null,
+        "parentId": "c98e08de-b403-5162-831a-48b2787acaa8",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "1d9638c3-0941-5d1f-b60d-a61a4c340f09",
+        "externalCode": "6",
+        "title": "Apprendre à me connaître",
+        "description": null,
+        "parentId": "d3e68030-ab80-500e-b93c-43c45d57e649",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "82822beb-5286-5a2b-9fe8-927b6fd9db98",
+        "externalCode": "7",
+        "title": "Définir mes projets en fonction de qui je suis",
+        "description": null,
+        "parentId": "d3e68030-ab80-500e-b93c-43c45d57e649",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "7ea75151-01ee-50ce-89a0-19e589cf5e7e",
+        "externalCode": "8",
+        "title": "M’autoriser à rêver et à avoir des ambitions",
+        "description": null,
+        "parentId": "d3e68030-ab80-500e-b93c-43c45d57e649",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "ecbc0116-03a8-5012-9f17-0d6328fb06c4",
+        "externalCode": "9",
+        "title": "Savoir me présenter et m’affirmer",
+        "description": null,
+        "parentId": "d3e68030-ab80-500e-b93c-43c45d57e649",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "ad1053eb-f732-507e-8c67-2246d477d092",
+        "externalCode": "10",
+        "title": "Identifier ce que j’ai appris et ce que je sais faire",
+        "description": null,
+        "parentId": "d3e68030-ab80-500e-b93c-43c45d57e649",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "0bee79cb-35da-5d37-a275-368a55a03ae0",
+        "externalCode": "11",
+        "title": "Accepter les imprévus et saisir les occasions",
+        "description": null,
+        "parentId": "0b4edb13-6997-5447-b36b-fcff7079bfd6",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "253d7b1f-bd94-5df1-89e5-314be8a40124",
+        "externalCode": "12",
+        "title": "M’ouvrir au monde et aux autres",
+        "description": null,
+        "parentId": "0b4edb13-6997-5447-b36b-fcff7079bfd6",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "4721a527-9dfb-5c8c-befa-3081e89b6590",
+        "externalCode": "13",
+        "title": "Me préparer aux transitions et aux changements",
+        "description": null,
+        "parentId": "0b4edb13-6997-5447-b36b-fcff7079bfd6",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "bf6e95a9-b0d9-54b9-8847-7276ab5bad77",
+        "externalCode": "14",
+        "title": "Me projeter et comprendre les conséquences de mes choix",
+        "description": null,
+        "parentId": "0b4edb13-6997-5447-b36b-fcff7079bfd6",
+        "kind": null,
+        "assessable": true
+      }
+    ]
+  },
+  {
+    "type": "CASOL",
+    "externalId": "CASOL",
+    "title": "CASOL",
+    "nodes": [
+      {
+        "id": "1087c7a7-0048-5fe0-a4df-da984492cd2d",
+        "externalCode": null,
+        "title": "s’informer et se repérer dans la société de l’information",
+        "description": null,
+        "parentId": null,
+        "kind": "DOMAIN",
+        "assessable": false
+      },
+      {
+        "id": "9d4074df-74a8-51c1-a77b-7f60374b7f42",
+        "externalCode": null,
+        "title": "se découvrir et cultiver ses ambitions",
+        "description": null,
+        "parentId": null,
+        "kind": "DOMAIN",
+        "assessable": false
+      },
+      {
+        "id": "4f46a371-74da-5e56-ab93-8531b8bcae19",
+        "externalCode": null,
+        "title": "se construire et se projeter dans un monde incertain",
+        "description": null,
+        "parentId": null,
+        "kind": "DOMAIN",
+        "assessable": false
+      },
+      {
+        "id": "7378014f-0816-5d1f-82e5-246419a841f3",
+        "externalCode": "1",
+        "title": "Chercher et traiter l’information",
+        "description": null,
+        "parentId": "1087c7a7-0048-5fe0-a4df-da984492cd2d",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "fefec4a8-91b0-5792-89c2-6137bb386517",
+        "externalCode": "2",
+        "title": "Connaître, discerner et consulter les personnes, les lieux et les ressources qui peuvent aider dans son orientation",
+        "description": null,
+        "parentId": "1087c7a7-0048-5fe0-a4df-da984492cd2d",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "67ba69b2-77cd-59fd-9964-74f2882bc7c1",
+        "externalCode": "3",
+        "title": "Explorer et se repérer dans les diplômes et les formations",
+        "description": null,
+        "parentId": "1087c7a7-0048-5fe0-a4df-da984492cd2d",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "d83a2e98-de9c-59d0-a346-1ab368449355",
+        "externalCode": "4",
+        "title": "Explorer et se repérer dans les métiers, les domaines professionnels et le monde du travail",
+        "description": null,
+        "parentId": "1087c7a7-0048-5fe0-a4df-da984492cd2d",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "22fbff0e-faa7-5f2d-9268-daa0274397ce",
+        "externalCode": "5",
+        "title": "Interroger et déconstruire les représentations",
+        "description": null,
+        "parentId": "1087c7a7-0048-5fe0-a4df-da984492cd2d",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "e7d72b1d-9ae0-5e85-bd34-f62cb431988f",
+        "externalCode": "6",
+        "title": "Apprendre à se connaître",
+        "description": null,
+        "parentId": "9d4074df-74a8-51c1-a77b-7f60374b7f42",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "880df603-69d0-543d-a468-84b4e5e22855",
+        "externalCode": "7",
+        "title": "Mettre en lien les éléments de connaissance sur soi-même et ses ambitions",
+        "description": null,
+        "parentId": "9d4074df-74a8-51c1-a77b-7f60374b7f42",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "7f650eb8-dcb0-5711-9acb-89c3caa76743",
+        "externalCode": "8",
+        "title": "S’autoriser à rêver",
+        "description": null,
+        "parentId": "9d4074df-74a8-51c1-a77b-7f60374b7f42",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "450a67de-ebf6-586e-b789-a7c566cf2785",
+        "externalCode": "9",
+        "title": "Savoir se présenter et maîtriser son image",
+        "description": null,
+        "parentId": "9d4074df-74a8-51c1-a77b-7f60374b7f42",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "5956b9e2-762a-5afe-9d71-a142eaa41c00",
+        "externalCode": "10",
+        "title": "Traduire ses expériences personnelles, scolaires et professionnelles en compétences",
+        "description": null,
+        "parentId": "9d4074df-74a8-51c1-a77b-7f60374b7f42",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "8874d118-2fe7-5d6b-9cf0-2e7797e32ac2",
+        "externalCode": "11",
+        "title": "Accepter les imprévus et saisir les opportunités",
+        "description": null,
+        "parentId": "4f46a371-74da-5e56-ab93-8531b8bcae19",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "13f5e840-fff3-55a9-a0bf-c08ccbdd9731",
+        "externalCode": "12",
+        "title": "Construire, développer et mobiliser ses réseaux",
+        "description": null,
+        "parentId": "4f46a371-74da-5e56-ab93-8531b8bcae19",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "2d645c1f-0bf4-54af-a198-c91e8a57e070",
+        "externalCode": "13",
+        "title": "Gérer et anticiper les transitions",
+        "description": null,
+        "parentId": "4f46a371-74da-5e56-ab93-8531b8bcae19",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "edac4e1f-399d-576f-aeb9-893fc3f8ac72",
+        "externalCode": "14",
+        "title": "Identifier et prendre en compte ses atouts et ses obstacles pour atteindre ses objectifs",
+        "description": null,
+        "parentId": "4f46a371-74da-5e56-ab93-8531b8bcae19",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "f58f417a-1bfd-5443-9bd0-e95e98145d79",
+        "externalCode": "15",
+        "title": "Se projeter et comprendre les implications de ses choix",
+        "description": null,
+        "parentId": "4f46a371-74da-5e56-ab93-8531b8bcae19",
+        "kind": null,
+        "assessable": true
+      }
+    ]
+  },
+  {
+    "type": "XXI",
+    "externalId": "XXI",
+    "title": "XXI",
+    "nodes": [
+      {
+        "id": "9a1c0b9b-8067-5e7c-90cd-e1fa0e65241e",
+        "externalCode": null,
+        "title": "citoyenneté mondiale",
+        "description": null,
+        "parentId": null,
+        "kind": "DOMAIN",
+        "assessable": false
+      },
+      {
+        "id": "0a0731c4-4d9d-5b6c-8193-753fa1f5c7ea",
+        "externalCode": null,
+        "title": "créativité",
+        "description": null,
+        "parentId": null,
+        "kind": "DOMAIN",
+        "assessable": false
+      },
+      {
+        "id": "b5d50530-cf76-5e7b-b3e8-5f5f5392b4e0",
+        "externalCode": null,
+        "title": "connaissance de soi",
+        "description": null,
+        "parentId": null,
+        "kind": "DOMAIN",
+        "assessable": false
+      },
+      {
+        "id": "b78a70b1-3360-55b9-9ae4-224150582502",
+        "externalCode": null,
+        "title": "communication",
+        "description": null,
+        "parentId": null,
+        "kind": "DOMAIN",
+        "assessable": false
+      },
+      {
+        "id": "f54cd64f-1a69-50ae-8c74-f1ac13b399b3",
+        "externalCode": null,
+        "title": "pensée critique",
+        "description": null,
+        "parentId": null,
+        "kind": "DOMAIN",
+        "assessable": false
+      },
+      {
+        "id": "a8b49101-acb6-5574-b7a1-af6767ee9211",
+        "externalCode": null,
+        "title": "collaboration",
+        "description": null,
+        "parentId": null,
+        "kind": "DOMAIN",
+        "assessable": false
+      },
+      {
+        "id": "9748449b-1368-54ec-9cc9-5d18151285b2",
+        "externalCode": null,
+        "title": "intelligence émotionnelle",
+        "description": null,
+        "parentId": "b5d50530-cf76-5e7b-b3e8-5f5f5392b4e0",
+        "kind": "ISSUE",
+        "assessable": false
+      },
+      {
+        "id": "052e8e7b-d09d-5c43-995e-8755925f41ec",
+        "externalCode": null,
+        "title": "engagement personnel",
+        "description": null,
+        "parentId": "b5d50530-cf76-5e7b-b3e8-5f5f5392b4e0",
+        "kind": "ISSUE",
+        "assessable": false
+      },
+      {
+        "id": "890c45fe-3599-56ae-bef1-bb3d1b888cb6",
+        "externalCode": null,
+        "title": "apprentissage individuel",
+        "description": null,
+        "parentId": "b5d50530-cf76-5e7b-b3e8-5f5f5392b4e0",
+        "kind": "ISSUE",
+        "assessable": false
+      },
+      {
+        "id": "1896e650-0dec-571c-8b6e-9a54db655c2f",
+        "externalCode": null,
+        "title": "vie en société",
+        "description": null,
+        "parentId": "9a1c0b9b-8067-5e7c-90cd-e1fa0e65241e",
+        "kind": "ISSUE",
+        "assessable": false
+      },
+      {
+        "id": "0691042b-1c5b-503e-b413-425cf3266dec",
+        "externalCode": null,
+        "title": "apprentissage collectif",
+        "description": null,
+        "parentId": "9a1c0b9b-8067-5e7c-90cd-e1fa0e65241e",
+        "kind": "ISSUE",
+        "assessable": false
+      },
+      {
+        "id": "1bdbc76a-adcc-5537-97aa-ef253d0c8999",
+        "externalCode": null,
+        "title": "maîtrise de différents moyens et outils de communication",
+        "description": null,
+        "parentId": "b78a70b1-3360-55b9-9ae4-224150582502",
+        "kind": "ISSUE",
+        "assessable": false
+      },
+      {
+        "id": "edef5cda-eab8-5a37-b19d-a53664f07035",
+        "externalCode": null,
+        "title": "communication efficace",
+        "description": null,
+        "parentId": "b78a70b1-3360-55b9-9ae4-224150582502",
+        "kind": "ISSUE",
+        "assessable": false
+      },
+      {
+        "id": "f219ab08-ce60-5a20-a566-c9ccc1738407",
+        "externalCode": null,
+        "title": "présence et écoute active",
+        "description": null,
+        "parentId": "b78a70b1-3360-55b9-9ae4-224150582502",
+        "kind": "ISSUE",
+        "assessable": false
+      },
+      {
+        "id": "66e011c6-e7fa-5aff-8b92-f2a2ae922733",
+        "externalCode": null,
+        "title": "recherche et traitement de l'information",
+        "description": null,
+        "parentId": "f54cd64f-1a69-50ae-8c74-f1ac13b399b3",
+        "kind": "ISSUE",
+        "assessable": false
+      },
+      {
+        "id": "34980808-4639-5a97-9d72-4c7cfc10e32b",
+        "externalCode": null,
+        "title": "organisation, anticipation et prise de décisions",
+        "description": null,
+        "parentId": "f54cd64f-1a69-50ae-8c74-f1ac13b399b3",
+        "kind": "ISSUE",
+        "assessable": false
+      },
+      {
+        "id": "00844a0d-57bf-579c-9ec0-f72f35969329",
+        "externalCode": null,
+        "title": "résolution de problèmes complexes",
+        "description": null,
+        "parentId": "f54cd64f-1a69-50ae-8c74-f1ac13b399b3",
+        "kind": "ISSUE",
+        "assessable": false
+      },
+      {
+        "id": "066fe8a7-a63f-5ea3-b1e2-959aa9422037",
+        "externalCode": null,
+        "title": "action et travail en équipe",
+        "description": null,
+        "parentId": "a8b49101-acb6-5574-b7a1-af6767ee9211",
+        "kind": "ISSUE",
+        "assessable": false
+      },
+      {
+        "id": "7eb58b3c-fbf1-5c89-90d6-84736ef559f9",
+        "externalCode": null,
+        "title": "repérage et positionnement",
+        "description": null,
+        "parentId": "a8b49101-acb6-5574-b7a1-af6767ee9211",
+        "kind": "ISSUE",
+        "assessable": false
+      },
+      {
+        "id": "d05f5aa0-5d35-5e65-a911-3211ca14af2b",
+        "externalCode": null,
+        "title": "résolution de problèmes grâce à des solutions nouvelles",
+        "description": null,
+        "parentId": "0a0731c4-4d9d-5b6c-8193-753fa1f5c7ea",
+        "kind": "ISSUE",
+        "assessable": false
+      },
+      {
+        "id": "eb1ef492-89cf-551f-ba50-c216e2fbf7c5",
+        "externalCode": null,
+        "title": "développement de ses idées et de son mode de pensée",
+        "description": null,
+        "parentId": "0a0731c4-4d9d-5b6c-8193-753fa1f5c7ea",
+        "kind": "ISSUE",
+        "assessable": false
+      },
+      {
+        "id": "65881641-0aff-5c24-8347-6cc659e9d62f",
+        "externalCode": "1",
+        "title": "appréhender et gérer le stress",
+        "description": null,
+        "parentId": "9748449b-1368-54ec-9cc9-5d18151285b2",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "880570db-7a20-50e1-ba3a-7a0d9e76e4f2",
+        "externalCode": "2",
+        "title": "percevoir et exprimer son individualité",
+        "description": null,
+        "parentId": "9748449b-1368-54ec-9cc9-5d18151285b2",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "b1bb26f2-5120-5caf-a80d-0bcafc6603a6",
+        "externalCode": "3",
+        "title": "reconnaître et exprimer les émotions",
+        "description": null,
+        "parentId": "9748449b-1368-54ec-9cc9-5d18151285b2",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "d1369cb0-a4f3-58b5-8471-d9487585ea9a",
+        "externalCode": "4",
+        "title": "mobiliser et maintenir sa motivation",
+        "description": null,
+        "parentId": "052e8e7b-d09d-5c43-995e-8755925f41ec",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "7d146f88-8134-5136-8e6d-816dd0956d69",
+        "externalCode": "5",
+        "title": "prendre conscience de ses objectifs et les poursuivre",
+        "description": null,
+        "parentId": "052e8e7b-d09d-5c43-995e-8755925f41ec",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "c501b469-4c45-5991-844f-0819b9de9044",
+        "externalCode": "6",
+        "title": "apprendre à apprendre",
+        "description": null,
+        "parentId": "890c45fe-3599-56ae-bef1-bb3d1b888cb6",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "f997acda-0526-5011-9dba-a282d5f7ec2c",
+        "externalCode": "7",
+        "title": "s'autoévaluer",
+        "description": null,
+        "parentId": "890c45fe-3599-56ae-bef1-bb3d1b888cb6",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "a98b8243-d937-5352-823a-4027d1b59aa7",
+        "externalCode": "8",
+        "title": "adopter différents points de vue",
+        "description": null,
+        "parentId": "1896e650-0dec-571c-8b6e-9a54db655c2f",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "f3baa494-d5ed-544f-88fe-e5b05af91b17",
+        "externalCode": "9",
+        "title": "saisir les enjeux",
+        "description": null,
+        "parentId": "1896e650-0dec-571c-8b6e-9a54db655c2f",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "78dbea99-edeb-5915-b9e7-99f202dab7a0",
+        "externalCode": "10",
+        "title": "faire des choix responsables et éthiques",
+        "description": null,
+        "parentId": "1896e650-0dec-571c-8b6e-9a54db655c2f",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "0b0e5b9d-2ff0-5219-837f-632698bd6304",
+        "externalCode": "11",
+        "title": "apprendre collectivement",
+        "description": null,
+        "parentId": "0691042b-1c5b-503e-b413-425cf3266dec",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "2cc16a9a-9ee7-556e-8ed8-921319b5f3d6",
+        "externalCode": "12",
+        "title": "communiquer à l'écrit",
+        "description": null,
+        "parentId": "1bdbc76a-adcc-5537-97aa-ef253d0c8999",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "d4a7d321-2a1a-55cc-b6e4-e5d6b81885d7",
+        "externalCode": "13",
+        "title": "communiquer à l'oral",
+        "description": null,
+        "parentId": "1bdbc76a-adcc-5537-97aa-ef253d0c8999",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "b83364c6-8097-593f-9a52-8741acb47eca",
+        "externalCode": "14",
+        "title": "communiquer en utilisant le numérique",
+        "description": null,
+        "parentId": "1bdbc76a-adcc-5537-97aa-ef253d0c8999",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "d2ffd7b4-4952-5403-921d-209dd66b90c3",
+        "externalCode": "15",
+        "title": "communiquer de manière non verbale",
+        "description": null,
+        "parentId": "1bdbc76a-adcc-5537-97aa-ef253d0c8999",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "04674040-a9ff-5dc7-b86b-fb66f7f353a3",
+        "externalCode": "16",
+        "title": "adapter ses méthodes de communication",
+        "description": null,
+        "parentId": "edef5cda-eab8-5a37-b19d-a53664f07035",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "d895d2b6-bf7a-5835-bf33-d67f3a5fd4cf",
+        "externalCode": "17",
+        "title": "être limpide, fluide et efficace",
+        "description": null,
+        "parentId": "edef5cda-eab8-5a37-b19d-a53664f07035",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "a0b57383-3a62-5ba0-adb0-74a8b04705f9",
+        "externalCode": "18",
+        "title": "transmettre un message et argumenter",
+        "description": null,
+        "parentId": "edef5cda-eab8-5a37-b19d-a53664f07035",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "00ae03b7-e88c-5873-8517-78c86cde019c",
+        "externalCode": "19",
+        "title": "être présent/présente",
+        "description": null,
+        "parentId": "f219ab08-ce60-5a20-a566-c9ccc1738407",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "122deae4-a039-5966-b716-ffe1631d444f",
+        "externalCode": "20",
+        "title": "savoir écouter",
+        "description": null,
+        "parentId": "f219ab08-ce60-5a20-a566-c9ccc1738407",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "4599c41e-9d0f-51dc-b2d9-6507c6dde18b",
+        "externalCode": "21",
+        "title": "traiter des informations et des données pertinentes",
+        "description": null,
+        "parentId": "66e011c6-e7fa-5aff-8b92-f2a2ae922733",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "83d95825-6ccf-50e3-992e-792c7dba6457",
+        "externalCode": "22",
+        "title": "rechercher des informations",
+        "description": null,
+        "parentId": "66e011c6-e7fa-5aff-8b92-f2a2ae922733",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "c9618338-4b21-5ccc-aa5f-d0d744fc6d04",
+        "externalCode": "23",
+        "title": "prendre des décisions",
+        "description": null,
+        "parentId": "34980808-4639-5a97-9d72-4c7cfc10e32b",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "5569364a-b13c-5fba-a48f-0c8e713e53e4",
+        "externalCode": "24",
+        "title": "savoir s'organiser",
+        "description": null,
+        "parentId": "34980808-4639-5a97-9d72-4c7cfc10e32b",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "ba5bdb0f-1d2c-5d6f-9528-64ddb6d44ec0",
+        "externalCode": "25",
+        "title": "prendre en considération les risques et les aléas",
+        "description": null,
+        "parentId": "34980808-4639-5a97-9d72-4c7cfc10e32b",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "9deceb79-93b9-51b9-808c-7cdf8d1a4f8e",
+        "externalCode": "26",
+        "title": "problématiser",
+        "description": null,
+        "parentId": "00844a0d-57bf-579c-9ec0-f72f35969329",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "f62a4292-bc31-5db6-ad33-f9b8d4b26e62",
+        "externalCode": "27",
+        "title": "résoudre des problèmes significatifs et complexes",
+        "description": null,
+        "parentId": "00844a0d-57bf-579c-9ec0-f72f35969329",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "55ee5524-3595-538f-a032-61a2d43d8d7e",
+        "externalCode": "28",
+        "title": "trouver et poursuivre un but commun",
+        "description": null,
+        "parentId": "066fe8a7-a63f-5ea3-b1e2-959aa9422037",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "0125dc18-e770-5673-87a7-b62bb15006fd",
+        "externalCode": "29",
+        "title": "négocier",
+        "description": null,
+        "parentId": "066fe8a7-a63f-5ea3-b1e2-959aa9422037",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "6d6a65df-ebe9-59bd-a0d2-6a406587e135",
+        "externalCode": "30",
+        "title": "coopérer",
+        "description": null,
+        "parentId": "066fe8a7-a63f-5ea3-b1e2-959aa9422037",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "92287024-98a2-516b-ad16-11173cc3ee0f",
+        "externalCode": "31",
+        "title": "appréhender les attentes d'un groupe",
+        "description": null,
+        "parentId": "7eb58b3c-fbf1-5c89-90d6-84736ef559f9",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "90a43ca9-1e24-5313-af06-91170585361c",
+        "externalCode": "32",
+        "title": "s'approprier différents rôles dans une équipe",
+        "description": null,
+        "parentId": "7eb58b3c-fbf1-5c89-90d6-84736ef559f9",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "afec1153-b569-50e0-8257-6b0cfa1593ec",
+        "externalCode": "33",
+        "title": "envisager, approfondir des idées et solutions nouvelles",
+        "description": null,
+        "parentId": "d05f5aa0-5d35-5e65-a911-3211ca14af2b",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "7cf9234e-634b-57d2-907b-39b1aac44d3b",
+        "externalCode": "34",
+        "title": "conceptualiser",
+        "description": null,
+        "parentId": "d05f5aa0-5d35-5e65-a911-3211ca14af2b",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "ec5fbd59-c4f7-5c96-9643-889041c6bb88",
+        "externalCode": "35",
+        "title": "développer la pensée divergente",
+        "description": null,
+        "parentId": "eb1ef492-89cf-551f-ba50-c216e2fbf7c5",
+        "kind": null,
+        "assessable": true
+      },
+      {
+        "id": "77507a39-2c78-51c6-964f-3287c4fd3e41",
+        "externalCode": "36",
+        "title": "développer la pensée convergente",
+        "description": null,
+        "parentId": "eb1ef492-89cf-551f-ba50-c216e2fbf7c5",
+        "kind": null,
+        "assessable": true
+      }
+    ]
+  }
+]

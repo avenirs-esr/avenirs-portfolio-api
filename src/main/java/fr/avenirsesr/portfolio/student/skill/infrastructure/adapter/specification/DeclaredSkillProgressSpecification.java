@@ -2,8 +2,6 @@ package fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.specificati
 
 import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
-import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkill;
-import fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.mapper.DeclaredSkillMapper;
 import fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.model.DeclaredSkillProgressEntity;
 import java.util.UUID;
 import org.springframework.data.domain.Sort;
@@ -11,11 +9,10 @@ import org.springframework.data.jpa.domain.Specification;
 
 public class DeclaredSkillProgressSpecification {
   public static Specification<DeclaredSkillProgressEntity> declaredSkillProgressAlreadyExists(
-      DeclaredSkill declaredSkill, UUID studentId) {
+      UUID skillId, UUID studentId) {
     return (root, query, criteriaBuilder) ->
         criteriaBuilder.and(
-            criteriaBuilder.equal(
-                root.get("declaredSkill"), DeclaredSkillMapper.INSTANCE.fromDomain(declaredSkill)),
+            criteriaBuilder.equal(root.get("skill").get("id"), skillId),
             criteriaBuilder.equal(root.get("student").get("id"), studentId));
   }
 
@@ -25,8 +22,7 @@ public class DeclaredSkillProgressSpecification {
         return criteriaBuilder.conjunction();
       }
       return criteriaBuilder.like(
-          criteriaBuilder.lower(root.get("declaredSkill").get("libelle")),
-          "%" + keyword.toLowerCase() + "%");
+          criteriaBuilder.lower(root.get("skill").get("title")), "%" + keyword.toLowerCase() + "%");
     };
   }
 
@@ -48,7 +44,7 @@ public class DeclaredSkillProgressSpecification {
         sortCriteria.order() == ESortOrder.ASC ? Sort.Direction.ASC : Sort.Direction.DESC;
 
     return switch (sortCriteria.field()) {
-      case NAME -> Sort.by(direction, "declaredSkill.libelle");
+      case NAME -> Sort.by(direction, "skill.title");
       case DATE -> Sort.by(direction, "createdAt");
     };
   }

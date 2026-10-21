@@ -12,6 +12,7 @@ import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType
 import fr.avenirsesr.portfolio.student.association.domain.port.output.strategy.AssociationStrategy;
 import fr.avenirsesr.portfolio.student.association.domain.utils.AssociationUtils;
 import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillAssociationData;
+import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillProgressData;
 import fr.avenirsesr.portfolio.student.skill.domain.exception.DeclaredSkillProgressNotFoundException;
 import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
@@ -57,8 +58,8 @@ public class DeclaredSkillAssociationStrategy implements AssociationStrategy {
                 declaredSkillProgress ->
                     new AssociationSearchResultData(
                         declaredSkillProgress.getId(),
-                        declaredSkillProgress.getSkill().getLibelle(),
-                        declaredSkillProgress.getSkill().getType().name(),
+                        declaredSkillProgress.getSkill().getTitle(),
+                        declaredSkillProgress.getSkill().getReferential().getType().name(),
                         false))
             .toList(),
         declaredSkillProgresses.pageInfo());
@@ -68,10 +69,11 @@ public class DeclaredSkillAssociationStrategy implements AssociationStrategy {
   public AssociatedElementsData toAssociatedElements(
       List<Association> associations, Class<?> subjectClass, boolean onlyNotCompleted) {
     var declaredSkillProgresses =
-        declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(
-            associations.stream()
-                .map(association -> association.associatedIdOf(subjectClass))
-                .toList());
+        declaredSkillProgressService.getDeclaredSkillProgressData(
+            declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(
+                associations.stream()
+                    .map(association -> association.associatedIdOf(subjectClass))
+                    .toList()));
 
     return AssociatedElementsData.ofDeclaredSkills(
         associations.stream()
@@ -79,11 +81,17 @@ public class DeclaredSkillAssociationStrategy implements AssociationStrategy {
                 association ->
                     new DeclaredSkillAssociationData(
                         association.getId(),
-                        AssociationUtils.elementOf(
-                            declaredSkillProgresses,
-                            association.associatedIdOf(subjectClass),
-                            DeclaredSkillProgressNotFoundException::new)))
+                        elementOf(
+                            declaredSkillProgresses, association.associatedIdOf(subjectClass))))
             .toList());
+  }
+
+  private DeclaredSkillProgressData elementOf(
+      List<DeclaredSkillProgressData> declaredSkillProgresses, UUID id) {
+    return declaredSkillProgresses.stream()
+        .filter(data -> data.declaredSkillProgress().getId().equals(id))
+        .findAny()
+        .orElseThrow(DeclaredSkillProgressNotFoundException::new);
   }
 
   private List<DeclaredSkillProgress> fetchAndCheckOwnership(List<UUID> elementIds) {

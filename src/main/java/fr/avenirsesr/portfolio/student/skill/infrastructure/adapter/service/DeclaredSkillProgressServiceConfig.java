@@ -1,13 +1,12 @@
 package fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.service;
 
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.skill.domain.port.input.SkillService;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.association.domain.port.output.strategy.AssociationStrategy;
 import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
-import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillSyncService;
 import fr.avenirsesr.portfolio.student.skill.domain.service.DeclaredSkillAssociationStrategy;
 import fr.avenirsesr.portfolio.student.skill.domain.service.DeclaredSkillProgressServiceImpl;
-import fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.client.ExternalSkillClient;
 import fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.repository.DeclaredSkillProgressDatabaseRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,20 +17,15 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @RequiredArgsConstructor
 public class DeclaredSkillProgressServiceConfig {
-  private final DeclaredSkillSyncService declaredSkillSyncService;
+  private final SkillService skillService;
   private final DeclaredSkillProgressDatabaseRepository declaredSkillProgressRepository;
-  private final ExternalSkillClient externalSkillClient;
   private final LoggedInUserService loggedInUserService;
   private final AssociationService associationService;
 
   @Bean
   public DeclaredSkillProgressService declaredSkillProgressService() {
     return new DeclaredSkillProgressServiceImpl(
-        declaredSkillSyncService,
-        declaredSkillProgressRepository,
-        externalSkillClient,
-        loggedInUserService,
-        associationService);
+        skillService, declaredSkillProgressRepository, loggedInUserService, associationService);
   }
 
   @Bean

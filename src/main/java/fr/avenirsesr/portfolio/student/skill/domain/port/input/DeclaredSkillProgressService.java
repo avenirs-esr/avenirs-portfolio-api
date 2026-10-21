@@ -2,7 +2,6 @@ package fr.avenirsesr.portfolio.student.skill.domain.port.input;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillType;
 import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillProgressData;
 import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillProgressDetails;
 import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
@@ -15,10 +14,10 @@ public interface DeclaredSkillProgressService {
   PagedResult<DeclaredSkillProgressData> getDeclaredSkillsProgresses(
       PageCriteria criteria, Boolean isValorized);
 
-  DeclaredSkillProgress createDeclaredSkillProgress(
-      UUID declaredSkillId, EExternalSkillType type, EDeclaredSkillLevel level, String reflection);
+  DeclaredSkillProgressData createDeclaredSkillProgress(
+      UUID skillId, EDeclaredSkillLevel level, String reflection);
 
-  DeclaredSkillProgress updateDeclaredSkillProgress(
+  DeclaredSkillProgressData updateDeclaredSkillProgress(
       UUID declaredSkillProgressId,
       EDeclaredSkillLevel level,
       String reflection,
@@ -29,11 +28,14 @@ public interface DeclaredSkillProgressService {
   List<DeclaredSkillProgressDetails> getDeclaredSkillProgressDetails(
       List<DeclaredSkillProgress> declaredSkillProgresses);
 
+  List<DeclaredSkillProgressData> getDeclaredSkillProgressData(
+      List<DeclaredSkillProgress> declaredSkillProgresses);
+
   void deleteDeclaredSkillProgresses(List<UUID> declaredSkillProgressIds);
 
   PagedResult<DeclaredSkillProgress> searchDeclaredSkill(String keyword, PageCriteria pageCriteria);
 
   List<DeclaredSkillProgress> findAllDeclaredSkillProgressesByIds(List<UUID> ids);
 
-  List<UUID> getAssociatedExternalSkillIds();
+  List<UUID> getDeclaredSkillIds();
 }

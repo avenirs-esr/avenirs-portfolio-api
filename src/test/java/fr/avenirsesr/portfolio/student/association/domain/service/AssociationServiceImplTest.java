@@ -20,6 +20,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.error.domain.exception.WrongClassTypeArgumentException;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
+import fr.avenirsesr.portfolio.skill.infrastructure.fixture.SkillFixture;
 import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityAssociationData;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
@@ -37,7 +38,9 @@ import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationCont
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.association.domain.port.output.repository.AssociationRepository;
 import fr.avenirsesr.portfolio.student.association.domain.port.output.strategy.AssociationStrategy;
+import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillAssociationCount;
 import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillAssociationData;
+import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillProgressData;
 import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import java.util.List;
@@ -221,6 +224,11 @@ class AssociationServiceImplTest {
 
     var declaredActivity = mock(DeclaredActivity.class);
     var declaredSkillProgress = mock(DeclaredSkillProgress.class);
+    var declaredSkillProgressData =
+        new DeclaredSkillProgressData(
+            declaredSkillProgress,
+            SkillFixture.create().toModel(),
+            new DeclaredSkillAssociationCount(0, 0));
 
     var declaredActivityAssociation =
         association(declaredActivityId, traceId, EAssociationType.DECLARED_ACTIVITY_TRACE);
@@ -245,7 +253,7 @@ class AssociationServiceImplTest {
             AssociatedElementsData.ofDeclaredSkills(
                 List.of(
                     new DeclaredSkillAssociationData(
-                        declaredSkillAssociation.getId(), declaredSkillProgress))));
+                        declaredSkillAssociation.getId(), declaredSkillProgressData))));
 
     var result = service.getAllAssociatedElementsOf(traceId, EAssociationContextType.TRACE, false);
 
@@ -261,7 +269,7 @@ class AssociationServiceImplTest {
             });
     assertThat(result.declaredSkillAssociations())
         .singleElement()
-        .satisfies(data -> assertThat(data.declaredSkill()).isEqualTo(declaredSkillProgress));
+        .satisfies(data -> assertThat(data.declaredSkill()).isEqualTo(declaredSkillProgressData));
   }
 
   @Test

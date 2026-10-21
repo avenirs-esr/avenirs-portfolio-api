@@ -1,10 +1,8 @@
 package fr.avenirsesr.portfolio.student.skill.application.adapter.dto;
 
-import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillCategoryType;
+import fr.avenirsesr.portfolio.common.skill.domain.model.enums.ESkillKind;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(requiredProperties = {"libelle", "type"})
+@Schema(requiredProperties = {"libelle"})
 public record DeclaredSkillCategoryDTO(
-    String libelle,
-    @Schema(ref = "#/components/schemas/EExternalSkillCategoryType")
-        EExternalSkillCategoryType type) {}
+    String libelle, @Schema(ref = "#/components/schemas/ESkillKind") ESkillKind type) {}

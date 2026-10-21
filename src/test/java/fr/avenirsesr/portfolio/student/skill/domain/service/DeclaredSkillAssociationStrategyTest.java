@@ -8,16 +8,19 @@ import static org.mockito.Mockito.when;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillType;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
+import fr.avenirsesr.portfolio.common.skill.domain.model.enums.ESkillReferentialType;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.skill.domain.model.Skill;
+import fr.avenirsesr.portfolio.skill.infrastructure.fixture.SkillFixture;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.student.association.domain.filter.AssociationSearchFilter;
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
+import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillAssociationCount;
+import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillProgressData;
 import fr.avenirsesr.portfolio.student.skill.domain.exception.DeclaredSkillProgressNotFoundException;
-import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkill;
 import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
@@ -86,9 +89,7 @@ class DeclaredSkillAssociationStrategyTest {
     UUID declaredSkillProgressId = UUID.randomUUID();
     var pageCriteria = new PageCriteria(0, 10);
 
-    var declaredSkill = mock(DeclaredSkill.class);
-    when(declaredSkill.getLibelle()).thenReturn("Communication");
-    when(declaredSkill.getType()).thenReturn(EExternalSkillType.ROME4);
+    Skill declaredSkill = SkillFixture.create().withTitle("Communication").toModel();
 
     var declaredSkillProgress = mock(DeclaredSkillProgress.class);
     when(declaredSkillProgress.getId()).thenReturn(declaredSkillProgressId);
@@ -102,7 +103,10 @@ class DeclaredSkillAssociationStrategyTest {
     assertThat(result.content())
         .containsExactly(
             new AssociationSearchResultData(
-                declaredSkillProgressId, "Communication", EExternalSkillType.ROME4.name(), false));
+                declaredSkillProgressId,
+                "Communication",
+                ESkillReferentialType.ROME4.name(),
+                false));
   }
 
   @Test
@@ -113,21 +117,28 @@ class DeclaredSkillAssociationStrategyTest {
     var declaredSkillProgress = mock(DeclaredSkillProgress.class);
     when(declaredSkillProgress.getId()).thenReturn(declaredSkillProgressId);
 
+    Skill skill = SkillFixture.create().toModel();
+    var data =
+        new DeclaredSkillProgressData(
+            declaredSkillProgress, skill, new DeclaredSkillAssociationCount(0, 0));
+
     var association =
         Association.create(traceId, declaredSkillProgressId, EAssociationType.TRACE_DECLARED_SKILL);
 
     when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(
             List.of(declaredSkillProgressId)))
         .thenReturn(List.of(declaredSkillProgress));
+    when(declaredSkillProgressService.getDeclaredSkillProgressData(List.of(declaredSkillProgress)))
+        .thenReturn(List.of(data));
 
     var result = strategy.toAssociatedElements(List.of(association), Trace.class, false);
 
     assertThat(result.declaredSkillAssociations())
         .singleElement()
         .satisfies(
-            data -> {
-              assertThat(data.associationId()).isEqualTo(association.getId());
-              assertThat(data.declaredSkill()).isEqualTo(declaredSkillProgress);
+            association1 -> {
+              assertThat(association1.associationId()).isEqualTo(association.getId());
+              assertThat(association1.declaredSkill()).isEqualTo(data);
             });
   }
 }

@@ -6,7 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
-import fr.avenirsesr.portfolio.student.skill.domain.port.output.repository.DeclaredSkillRepository;
+import fr.avenirsesr.portfolio.skill.domain.model.Skill;
+import fr.avenirsesr.portfolio.skill.domain.port.output.repository.SkillRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +28,7 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
 
   @Autowired private ObjectMapper objectMapper;
 
-  @Autowired private DeclaredSkillRepository declaredSkillRepository;
+  @Autowired private SkillRepository skillRepository;
 
   @Value("${user.student.payload}")
   private String studentPayload;
@@ -141,15 +142,15 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
   }
 
   @Test
-  void shouldReturnAssociatedExternalSkillIds() throws Exception {
+  void shouldReturnTheDeclaredSkillIds() throws Exception {
     BddLogger.given("a declared skill progress for the logged-in student");
     UUID declaredSkillId = createAvailableDeclaredSkillProgress().declaredSkillId();
 
-    BddLogger.when("performing a GET on " + BASE_PATH + "/external-ids");
+    BddLogger.when("performing a GET on " + BASE_PATH + "/skill-ids");
     var response =
         webTestClient
             .get()
-            .uri(BASE_PATH + "/external-ids")
+            .uri(BASE_PATH + "/skill-ids")
             .header("X-Signed-Context", studentPayload)
             .header("X-Context-Signature", studentSignature)
             .exchange()
@@ -159,12 +160,10 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
             .returnResult()
             .getResponseBody();
 
-    BddLogger.then("it should contain the external id of the declared skill");
-    List<UUID> externalIds = new ArrayList<>();
-    objectMapper
-        .readTree(response)
-        .forEach(node -> externalIds.add(UUID.fromString(node.asText())));
-    assertThat(externalIds).contains(declaredSkillId);
+    BddLogger.then("it should contain the id of the declared skill");
+    List<UUID> skillIds = new ArrayList<>();
+    objectMapper.readTree(response).forEach(node -> skillIds.add(UUID.fromString(node.asText())));
+    assertThat(skillIds).contains(declaredSkillId);
   }
 
   @Test
@@ -275,12 +274,7 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
   }
 
   private String buildDeclaredSkillsJson(UUID id) {
-    return ("{\n"
-            + "  \"id\": \"%s\",\n"
-            + "  \"level\": \"BEGINNER\",\n"
-            + "  \"type\": \"ROME4\"\n"
-            + "}\n")
-        .formatted(id);
+    return ("{\n" + "  \"id\": \"%s\",\n" + "  \"level\": \"BEGINNER\"\n" + "}\n").formatted(id);
   }
 
   private record CreatedDeclaredSkillProgress(UUID declaredSkillId, UUID progressId) {}
@@ -291,7 +285,7 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
    * earlier against the same database, are skipped so that this helper never returns 409.
    */
   private CreatedDeclaredSkillProgress createAvailableDeclaredSkillProgress() throws Exception {
-    for (var declaredSkill : declaredSkillRepository.findAll()) {
+    for (var declaredSkill : assessableSkills()) {
       var result =
           webTestClient
               .post()
@@ -349,5 +343,36 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
         .exchange()
         .expectStatus()
         .isForbidden();
+  }
+
+  @Test
+  void shouldRejectASkillThatOnlyCategorizesItsChildren() throws Exception {
+    BddLogger.given("a seeded skill that is not assessable");
+    Skill categorySkill =
+        skillRepository.findAll().stream()
+            .filter(skill -> !skill.isAssessable())
+            .findFirst()
+            .orElseThrow(
+                () -> new IllegalStateException("No category skill in the seeded catalog"));
+
+    BddLogger.when("performing a POST on " + BASE_PATH + " with that skill");
+    BddLogger.then("it should return 400 with the SKILL_NOT_ASSESSABLE code");
+    webTestClient
+        .post()
+        .uri(BASE_PATH)
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(buildDeclaredSkillsJson(categorySkill.getId()))
+        .exchange()
+        .expectStatus()
+        .isBadRequest()
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("SKILL_NOT_ASSESSABLE");
+  }
+
+  private List<Skill> assessableSkills() {
+    return skillRepository.findAll().stream().filter(Skill::isAssessable).toList();
   }
 }

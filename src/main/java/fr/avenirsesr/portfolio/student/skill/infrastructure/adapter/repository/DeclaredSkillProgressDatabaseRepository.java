@@ -38,7 +38,7 @@ public class DeclaredSkillProgressDatabaseRepository
   public boolean declaredSkillProgressAlreadyExists(DeclaredSkillProgress declaredSkillProgress) {
     return jpaRepository.exists(
         DeclaredSkillProgressSpecification.declaredSkillProgressAlreadyExists(
-            declaredSkillProgress.getSkill(), declaredSkillProgress.getStudent().getId()));
+            declaredSkillProgress.getSkill().getId(), declaredSkillProgress.getStudent().getId()));
   }
 
   @Override
@@ -57,7 +57,7 @@ public class DeclaredSkillProgressDatabaseRepository
             pageCriteria.page(),
             pageCriteria.pageSize(),
             DeclaredSkillProgressSpecification.toSort(sortCriteria)),
-        FetchGraph.init().fetch("student").fetch("declaredSkill"));
+        FetchGraph.init().fetch("student").fetch("skill"));
   }
 
   @Override

@@ -9,6 +9,9 @@ import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.Gen
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.mapper.FileMapper;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.repository.FileJpaRepository;
+import fr.avenirsesr.portfolio.skill.domain.model.Skill;
+import fr.avenirsesr.portfolio.skill.infrastructure.adapter.mapper.SkillMapper;
+import fr.avenirsesr.portfolio.skill.infrastructure.adapter.repository.SkillJpaRepository;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.Feedback;
@@ -18,9 +21,6 @@ import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.mapper.Fe
 import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.model.AssociationsJson;
 import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.model.FeedbackEntity;
 import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.specification.FeedbackSpecification;
-import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkill;
-import fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.mapper.DeclaredSkillMapper;
-import fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.repository.DeclaredSkillJpaRepository;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StudentMapper;
@@ -41,18 +41,18 @@ public class FeedbackDatabaseRepository
   private final FeedbackJpaRepository jpaRepository;
   private final FileJpaRepository fileJpaRepository;
   private final StudentJpaRepository studentJpaRepository;
-  private final DeclaredSkillJpaRepository declaredSkillJpaRepository;
+  private final SkillJpaRepository skillJpaRepository;
 
   public FeedbackDatabaseRepository(
       FeedbackJpaRepository jpaRepository,
       FileJpaRepository fileJpaRepository,
       StudentJpaRepository studentJpaRepository,
-      DeclaredSkillJpaRepository declaredSkillJpaRepository) {
+      SkillJpaRepository skillJpaRepository) {
     super(jpaRepository, jpaRepository, FeedbackEntity.class, FeedbackMapper.INSTANCE);
     this.jpaRepository = jpaRepository;
     this.fileJpaRepository = fileJpaRepository;
     this.studentJpaRepository = studentJpaRepository;
-    this.declaredSkillJpaRepository = declaredSkillJpaRepository;
+    this.skillJpaRepository = skillJpaRepository;
   }
 
   // ── save ────────────────────────────────────────────────────────────
@@ -192,7 +192,7 @@ public class FeedbackDatabaseRepository
 
     Map<UUID, File> files = resolveFiles(associations);
     Map<UUID, Student> students = resolveStudents(associations);
-    Map<UUID, DeclaredSkill> skills = resolveSkills(associations);
+    Map<UUID, Skill> skills = resolveSkills(associations);
 
     return FeedbackMapper.INSTANCE.toDomain(entity, files, students, skills);
   }
@@ -222,14 +222,13 @@ public class FeedbackDatabaseRepository
         .collect(Collectors.toMap(AvenirsBaseEntity::getId, StudentMapper.INSTANCE::toDomain));
   }
 
-  private Map<UUID, DeclaredSkill> resolveSkills(AssociationsJson associations) {
+  private Map<UUID, Skill> resolveSkills(AssociationsJson associations) {
     Set<UUID> ids =
         associations.declaredSkillProgresses().stream()
             .map(AssociationsJson.DeclaredSkillProgressSnapshot::skillId)
             .collect(Collectors.toSet());
 
-    return declaredSkillJpaRepository.findAllById(ids).stream()
-        .collect(
-            Collectors.toMap(AvenirsBaseEntity::getId, DeclaredSkillMapper.INSTANCE::toDomain));
+    return skillJpaRepository.findAllById(ids).stream()
+        .collect(Collectors.toMap(AvenirsBaseEntity::getId, SkillMapper.INSTANCE::toDomain));
   }
 }
