@@ -63,7 +63,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.student.association.domain.filter,
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.association.domain.filter,TraceAssociationSearchFilter,0,6,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.association.domain.filter,AssociationSearchFilter.None,0,3,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.program.application.adapter.controller,DeclaredProgramController,0,131,0,0,0,38,0,6,0,6
-avenirs-portfolio-api,fr.avenirsesr.portfolio.authorization.domain.service,EntityAuthorizationServiceImpl,0,117,0,8,0,24,0,10,0,6
+avenirs-portfolio-api,fr.avenirsesr.portfolio.authorization.domain.service,EntityAuthorizationServiceImpl,0,121,0,10,0,25,0,10,0,5
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.repository,DeclaredActivityDatabaseRepository,10,178,2,2,3,36,3,14,1,14
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.repository,FeedbackDatabaseRepository,51,329,1,5,8,81,6,18,5,16
 avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.application.adapter,Utils,0,42,0,6,0,10,0,4,0,1

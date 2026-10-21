@@ -12,6 +12,7 @@ import java.util.EnumMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
@@ -20,44 +21,46 @@ import java.util.stream.Collectors;
 public class EntityAuthorizationServiceImpl implements EntityAuthorizationService {
   private final Map&lt;EAuthorizationEntityType, EntityAuthorizationResolver&gt; resolvers;
 
-<span class="fc" id="L23">  public EntityAuthorizationServiceImpl(List&lt;EntityAuthorizationResolver&gt; resolvers) {</span>
-<span class="fc" id="L24">    this.resolvers = new EnumMap&lt;&gt;(EAuthorizationEntityType.class);</span>
-<span class="fc" id="L25">    this.resolvers.putAll(</span>
-<span class="fc" id="L26">        resolvers.stream()</span>
-<span class="fc" id="L27">            .collect(</span>
-<span class="fc" id="L28">                Collectors.toMap(EntityAuthorizationResolver::entityType, Function.identity())));</span>
-<span class="fc bfc" id="L29" title="All 2 branches covered.">    for (var entityType : EAuthorizationEntityType.values()) {</span>
-<span class="fc bfc" id="L30" title="All 2 branches covered.">      if (!this.resolvers.containsKey(entityType)) {</span>
-<span class="fc" id="L31">        throw new IllegalStateException(&quot;No authorization resolver for entity type &quot; + entityType);</span>
+<span class="fc" id="L24">  public EntityAuthorizationServiceImpl(List&lt;EntityAuthorizationResolver&gt; resolvers) {</span>
+<span class="fc" id="L25">    this.resolvers = new EnumMap&lt;&gt;(EAuthorizationEntityType.class);</span>
+<span class="fc" id="L26">    this.resolvers.putAll(</span>
+<span class="fc" id="L27">        resolvers.stream()</span>
+<span class="fc" id="L28">            .collect(</span>
+<span class="fc" id="L29">                Collectors.toMap(EntityAuthorizationResolver::entityType, Function.identity())));</span>
+<span class="fc bfc" id="L30" title="All 2 branches covered.">    for (var entityType : EAuthorizationEntityType.values()) {</span>
+<span class="fc bfc" id="L31" title="All 2 branches covered.">      if (!this.resolvers.containsKey(entityType)) {</span>
+<span class="fc" id="L32">        throw new IllegalStateException(&quot;No authorization resolver for entity type &quot; + entityType);</span>
       }
     }
-<span class="fc" id="L34">  }</span>
+<span class="fc" id="L35">  }</span>
 
   @Override
   public List&lt;EntityAuthorizationsData&gt; getAuthorizations(
       EAuthorizationEntityType entityType, Collection&lt;UUID&gt; entityIds) {
-<span class="fc" id="L39">    validate(entityIds);</span>
-<span class="fc" id="L40">    var distinctIds = new LinkedHashSet&lt;&gt;(entityIds);</span>
-<span class="fc" id="L41">    var authorizationsById = resolvers.get(entityType).resolve(distinctIds);</span>
-<span class="fc" id="L42">    return distinctIds.stream()</span>
-<span class="fc" id="L43">        .map(id -&gt; new EntityAuthorizationsData(id, authorizationsById.getOrDefault(id, Set.of())))</span>
-<span class="fc" id="L44">        .toList();</span>
+<span class="fc" id="L40">    validate(entityIds);</span>
+<span class="fc" id="L41">    var distinctIds = new LinkedHashSet&lt;&gt;(entityIds);</span>
+<span class="fc" id="L42">    var authorizationsById = resolvers.get(entityType).resolve(distinctIds);</span>
+<span class="fc" id="L43">    return distinctIds.stream()</span>
+<span class="fc" id="L44">        .map(id -&gt; new EntityAuthorizationsData(id, authorizationsById.getOrDefault(id, Set.of())))</span>
+<span class="fc" id="L45">        .toList();</span>
   }
 
   private void validate(Collection&lt;UUID&gt; entityIds) {
-<span class="fc" id="L48">    FieldValidationUtils.requireNotNull(&quot;entityIds&quot;, entityIds);</span>
-<span class="fc bfc" id="L49" title="All 2 branches covered.">    if (entityIds.isEmpty()) {</span>
-<span class="fc" id="L50">      throw new FieldValidationException(EErrorCode.NOT_BLANK, &quot;entityIds&quot;);</span>
+<span class="fc" id="L49">    FieldValidationUtils.requireNotNull(&quot;entityIds&quot;, entityIds);</span>
+<span class="fc bfc" id="L50" title="All 2 branches covered.">    if (entityIds.isEmpty()) {</span>
+<span class="fc" id="L51">      throw new FieldValidationException(EErrorCode.NOT_BLANK, &quot;entityIds&quot;);</span>
     }
-<span class="fc bfc" id="L52" title="All 2 branches covered.">    if (entityIds.size() &gt; MAX_ENTITY_IDS) {</span>
-<span class="fc" id="L53">      throw new FieldValidationException(EErrorCode.TOO_LONG, &quot;entityIds&quot;);</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">    if (entityIds.size() &gt; MAX_ENTITY_IDS) {</span>
+<span class="fc" id="L54">      throw new FieldValidationException(EErrorCode.TOO_LONG, &quot;entityIds&quot;);</span>
     }
-<span class="fc" id="L55">    entityIds.forEach(id -&gt; FieldValidationUtils.requireNotNull(&quot;entityIds&quot;, id));</span>
-<span class="fc" id="L56">  }</span>
+<span class="fc bfc" id="L56" title="All 2 branches covered.">    if (entityIds.stream().anyMatch(Objects::isNull)) {</span>
+<span class="fc" id="L57">      throw new FieldValidationException(EErrorCode.NOT_NULL, &quot;entityIds&quot;);</span>
+    }
+<span class="fc" id="L59">  }</span>
 
   @Override
   public boolean canAccessList(EAuthorizationEntityType entityType) {
-<span class="fc" id="L60">    return resolvers.get(entityType).hasAuthorizationOnAny();</span>
+<span class="fc" id="L63">    return resolvers.get(entityType).hasAuthorizationOnAny();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
