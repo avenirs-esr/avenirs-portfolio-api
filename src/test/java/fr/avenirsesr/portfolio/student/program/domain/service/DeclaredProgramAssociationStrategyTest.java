@@ -18,7 +18,7 @@ import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType
 import fr.avenirsesr.portfolio.student.program.domain.exception.DeclaredProgramNotFoundException;
 import fr.avenirsesr.portfolio.student.program.domain.model.DeclaredProgram;
 import fr.avenirsesr.portfolio.student.program.domain.port.input.DeclaredProgramService;
-import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
+import fr.avenirsesr.portfolio.student.skill.domain.model.SkillProgress;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.util.List;
@@ -115,20 +115,19 @@ class DeclaredProgramAssociationStrategyTest {
   @Test
   void toAssociatedElements_should_return_the_declared_programs_of_the_associations() {
     UUID declaredProgramId = UUID.randomUUID();
-    UUID declaredSkillId = UUID.randomUUID();
+    UUID skillId = UUID.randomUUID();
 
     var declaredProgram = mock(DeclaredProgram.class);
     when(declaredProgram.getId()).thenReturn(declaredProgramId);
 
     var association =
         Association.create(
-            declaredProgramId, declaredSkillId, EAssociationType.DECLARED_PROGRAM_DECLARED_SKILL);
+            declaredProgramId, skillId, EAssociationType.DECLARED_PROGRAM_DECLARED_SKILL);
 
     when(declaredProgramService.findAllByIds(List.of(declaredProgramId)))
         .thenReturn(List.of(declaredProgram));
 
-    var result =
-        strategy.toAssociatedElements(List.of(association), DeclaredSkillProgress.class, false);
+    var result = strategy.toAssociatedElements(List.of(association), SkillProgress.class, false);
 
     assertThat(result.declaredProgramAssociations())
         .singleElement()

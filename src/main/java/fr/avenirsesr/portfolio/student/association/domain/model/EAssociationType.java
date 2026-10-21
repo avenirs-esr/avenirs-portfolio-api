@@ -4,7 +4,7 @@ import fr.avenirsesr.portfolio.common.error.domain.exception.WrongClassTypeArgum
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.program.domain.model.DeclaredProgram;
-import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
+import fr.avenirsesr.portfolio.student.skill.domain.model.SkillProgress;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import java.util.Arrays;
 import java.util.List;
@@ -15,14 +15,14 @@ import lombok.Getter;
 @Getter
 public enum EAssociationType {
   DECLARED_ACTIVITY_TRACE(DeclaredActivity.class, Trace.class),
-  DECLARED_ACTIVITY_DECLARED_SKILL(DeclaredActivity.class, DeclaredSkillProgress.class),
+  DECLARED_ACTIVITY_DECLARED_SKILL(DeclaredActivity.class, SkillProgress.class),
   DECLARED_ACTIVITY_DECLARED_EXPERIENCE(DeclaredActivity.class, DeclaredExperience.class),
-  TRACE_DECLARED_SKILL(Trace.class, DeclaredSkillProgress.class),
+  TRACE_DECLARED_SKILL(Trace.class, SkillProgress.class),
   TRACE_DECLARED_EXPERIENCE(Trace.class, DeclaredExperience.class),
   TRACE_DECLARED_PROGRAM(Trace.class, DeclaredProgram.class),
-  DECLARED_EXPERIENCE_DECLARED_SKILL(DeclaredExperience.class, DeclaredSkillProgress.class),
+  DECLARED_EXPERIENCE_DECLARED_SKILL(DeclaredExperience.class, SkillProgress.class),
   DECLARED_EXPERIENCE_DECLARED_PROGRAM(DeclaredExperience.class, DeclaredProgram.class),
-  DECLARED_PROGRAM_DECLARED_SKILL(DeclaredProgram.class, DeclaredSkillProgress.class),
+  DECLARED_PROGRAM_DECLARED_SKILL(DeclaredProgram.class, SkillProgress.class),
   DECLARED_PROGRAM_DECLARED_ACTIVITY(DeclaredProgram.class, DeclaredActivity.class);
 
   private final Class<?> key1;

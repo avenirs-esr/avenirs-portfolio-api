@@ -11,7 +11,7 @@ import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.model.Ass
 import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.model.FeedbackEntity;
 import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.program.domain.model.DeclaredProgram;
-import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
+import fr.avenirsesr.portfolio.student.skill.domain.model.SkillProgress;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.Map;
@@ -96,23 +96,23 @@ public class FeedbackMapper implements Mapper<FeedbackEntity, Feedback> {
         false);
   }
 
-  private AssociationsJson.DeclaredSkillProgressSnapshot declaredSkillProgressToSnapshot(
-      DeclaredSkillProgress declaredSkill) {
-    return new AssociationsJson.DeclaredSkillProgressSnapshot(
-        declaredSkill.getId(),
-        declaredSkill.getStudent().getId(),
-        declaredSkill.getSkill().getId(),
-        declaredSkill.getLevel(),
-        declaredSkill.getReflection(),
-        declaredSkill.getCreatedAt(),
-        declaredSkill.getUpdatedAt());
+  private AssociationsJson.SkillProgressSnapshot skillProgressToSnapshot(
+      SkillProgress skillProgress) {
+    return new AssociationsJson.SkillProgressSnapshot(
+        skillProgress.getId(),
+        skillProgress.getStudent().getId(),
+        skillProgress.getSkill().getId(),
+        skillProgress.getLevel(),
+        skillProgress.getReflection(),
+        skillProgress.getCreatedAt(),
+        skillProgress.getUpdatedAt());
   }
 
-  private DeclaredSkillProgress snapshotToDeclaredSkillProgress(
-      AssociationsJson.DeclaredSkillProgressSnapshot snapshot,
+  private SkillProgress snapshotToSkillProgress(
+      AssociationsJson.SkillProgressSnapshot snapshot,
       Map<UUID, Student> students,
       Map<UUID, Skill> skills) {
-    return DeclaredSkillProgress.toDomain(
+    return SkillProgress.toDomain(
         snapshot.id(),
         students.get(snapshot.studentId()),
         skills.get(snapshot.skillId()),
@@ -162,7 +162,7 @@ public class FeedbackMapper implements Mapper<FeedbackEntity, Feedback> {
   private AssociationsJson associationsToSnapshots(FeedbackAssociations associations) {
     return new AssociationsJson(
         associations.traces().stream().map(this::traceToSnapshot).toList(),
-        associations.declaredSkills().stream().map(this::declaredSkillProgressToSnapshot).toList(),
+        associations.skillProgresses().stream().map(this::skillProgressToSnapshot).toList(),
         associations.declaredExperiences().stream()
             .map(this::declaredExperienceToSnapshot)
             .toList(),
@@ -178,8 +178,8 @@ public class FeedbackMapper implements Mapper<FeedbackEntity, Feedback> {
         associationsJson.traces().stream()
             .map(snapshot -> snapshotToTrace(snapshot, students, files))
             .toList(),
-        associationsJson.declaredSkillProgresses().stream()
-            .map(snapshot -> snapshotToDeclaredSkillProgress(snapshot, students, skills))
+        associationsJson.skillProgresses().stream()
+            .map(snapshot -> snapshotToSkillProgress(snapshot, students, skills))
             .toList(),
         associationsJson.declaredExperiences().stream()
             .map(snapshot -> snapshotToDeclaredExperience(snapshot, students))

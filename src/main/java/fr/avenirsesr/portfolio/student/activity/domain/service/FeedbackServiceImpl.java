@@ -45,9 +45,9 @@ import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperienc
 import fr.avenirsesr.portfolio.student.experience.domain.port.input.DeclaredExperienceService;
 import fr.avenirsesr.portfolio.student.program.domain.model.DeclaredProgram;
 import fr.avenirsesr.portfolio.student.program.domain.port.input.DeclaredProgramService;
-import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillProgressDetails;
-import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
-import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
+import fr.avenirsesr.portfolio.student.skill.domain.data.SkillProgressDetails;
+import fr.avenirsesr.portfolio.student.skill.domain.model.SkillProgress;
+import fr.avenirsesr.portfolio.student.skill.domain.port.input.SkillProgressService;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
@@ -63,7 +63,7 @@ public class FeedbackServiceImpl implements FeedbackService {
   private final DeclaredActivityService declaredActivityService;
   private final AssociationService associationService;
   private final TraceService traceService;
-  private final DeclaredSkillProgressService declaredSkillProgressService;
+  private final SkillProgressService skillProgressService;
   private final DeclaredExperienceService declaredExperienceService;
   private final DeclaredProgramService declaredProgramService;
   private final LoggedInUserService loggedInUserService;
@@ -86,11 +86,11 @@ public class FeedbackServiceImpl implements FeedbackService {
     var traceIds =
         AssociationUtils.getIdsOf(
             allAssociations, EAssociationType.DECLARED_ACTIVITY_TRACE, Trace.class);
-    var declaredSkillsIds =
+    var skillProgressIds =
         AssociationUtils.getIdsOf(
             allAssociations,
             EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL,
-            DeclaredSkillProgress.class);
+            SkillProgress.class);
     var declaredExperiencesIds =
         AssociationUtils.getIdsOf(
             allAssociations,
@@ -103,19 +103,19 @@ public class FeedbackServiceImpl implements FeedbackService {
             DeclaredProgram.class);
 
     List<Trace> traces = traceService.findAllTracesById(traceIds);
-    List<DeclaredSkillProgress> declaredSkills =
-        declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(declaredSkillsIds);
+    List<SkillProgress> skillProgresses =
+        skillProgressService.findAllSkillProgressesByIds(skillProgressIds);
     List<DeclaredExperience> declaredExperiences =
         declaredExperienceService.findAllByIds(declaredExperiencesIds);
     List<DeclaredProgram> declaredPrograms =
         declaredProgramService.findAllByIds(declaredProgrammesIds);
-    return new FeedbackAssociations(traces, declaredSkills, declaredExperiences, declaredPrograms);
+    return new FeedbackAssociations(traces, skillProgresses, declaredExperiences, declaredPrograms);
   }
 
   private FeedbackAssociationsData getFeedbackAssociationsData(FeedbackAssociations associations) {
     return new FeedbackAssociationsData(
         associations.traces(),
-        enrichDeclaredSkills(associations.declaredSkills()),
+        enrichSkillProgresses(associations.skillProgresses()),
         associations.declaredExperiences());
   }
 
@@ -235,11 +235,10 @@ public class FeedbackServiceImpl implements FeedbackService {
         attachments);
   }
 
-  private List<DeclaredSkillProgressDetails> enrichDeclaredSkills(
-      List<DeclaredSkillProgress> declaredSkillProgresses) {
-    return declaredSkillProgresses.isEmpty()
+  private List<SkillProgressDetails> enrichSkillProgresses(List<SkillProgress> skillProgresses) {
+    return skillProgresses.isEmpty()
         ? List.of()
-        : declaredSkillProgressService.getDeclaredSkillProgressDetails(declaredSkillProgresses);
+        : skillProgressService.getSkillProgressDetails(skillProgresses);
   }
 
   @Override

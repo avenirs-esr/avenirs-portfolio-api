@@ -182,7 +182,7 @@ public class FeedbackControllerIT extends ContainerConfigurationTest {
         .isNotEmpty()
         .jsonPath("$.associations.traces")
         .isArray()
-        .jsonPath("$.associations.declaredSkills")
+        .jsonPath("$.associations.skillProgresses")
         .isArray()
         .jsonPath("$.associations.declaredExperiences")
         .isArray();
@@ -256,7 +256,7 @@ public class FeedbackControllerIT extends ContainerConfigurationTest {
         .exists()
         .jsonPath("$.associations.traces")
         .isArray()
-        .jsonPath("$.associations.declaredSkills")
+        .jsonPath("$.associations.skillProgresses")
         .isArray()
         .jsonPath("$.associations.declaredExperiences")
         .isArray();

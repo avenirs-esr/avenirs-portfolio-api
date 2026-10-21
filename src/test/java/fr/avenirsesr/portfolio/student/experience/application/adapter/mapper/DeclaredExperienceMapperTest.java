@@ -191,6 +191,6 @@ class DeclaredExperienceMapperTest {
     assertEquals("Graduated with honors", dto.result());
     assertNotNull(dto.declaredExperienceAssociationCountDTO());
     assertEquals(2, dto.declaredExperienceAssociationCountDTO().traceAssociationsCount());
-    assertEquals(3, dto.declaredExperienceAssociationCountDTO().declaredSkillAssociationsCount());
+    assertEquals(3, dto.declaredExperienceAssociationCountDTO().skillProgressAssociationsCount());
   }
 }

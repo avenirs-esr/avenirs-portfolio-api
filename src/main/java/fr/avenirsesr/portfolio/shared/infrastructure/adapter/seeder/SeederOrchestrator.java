@@ -16,7 +16,7 @@ import fr.avenirsesr.portfolio.student.association.infrastructure.adapter.seeder
 import fr.avenirsesr.portfolio.student.experience.infrastructure.adapter.seeder.DeclaredExperienceSeeder;
 import fr.avenirsesr.portfolio.student.program.infrastructure.adapter.seeder.DeclaredProgramSeeder;
 import fr.avenirsesr.portfolio.student.selfknowledge.infrastructure.adapter.seeder.SelfKnowledgeElementSeeder;
-import fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.seeder.DeclaredSkillProgressSeeder;
+import fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.seeder.SkillProgressSeeder;
 import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.seeder.TraceSeeder;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.StaffSeeder;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.StudentSeeder;
@@ -62,7 +62,7 @@ public class SeederOrchestrator {
 
   private final DeclaredExperienceSeeder declaredExperienceSeeder;
   private final SkillCatalogSeeder skillCatalogSeeder;
-  private final DeclaredSkillProgressSeeder declaredSkillProgressSeeder;
+  private final SkillProgressSeeder skillProgressSeeder;
   private final DeclaredProgramSeeder declaredProgramSeeder;
 
   private final TraceSeeder traceSeeder;
@@ -96,8 +96,7 @@ public class SeederOrchestrator {
       userPhotoSeeder.seed(savedStudents, savedStaffs);
 
       var availableSkills = skillCatalogSeeder.seed();
-      var savedDeclaredSkillProgresses =
-          declaredSkillProgressSeeder.seed(savedStudents, availableSkills);
+      var savedSkillProgresses = skillProgressSeeder.seed(savedStudents, availableSkills);
 
       var savedTraces = traceSeeder.seed(savedStudents);
 
@@ -111,7 +110,7 @@ public class SeederOrchestrator {
       associationSeeder.seed(
           declaredActivities,
           savedTraces,
-          savedDeclaredSkillProgresses,
+          savedSkillProgresses,
           savedDeclaredExperiences,
           savedDeclaredPrograms);
 

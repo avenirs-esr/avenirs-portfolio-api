@@ -38,10 +38,10 @@ import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationCont
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.association.domain.port.output.repository.AssociationRepository;
 import fr.avenirsesr.portfolio.student.association.domain.port.output.strategy.AssociationStrategy;
-import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillAssociationCount;
-import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillAssociationData;
-import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillProgressData;
-import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
+import fr.avenirsesr.portfolio.student.skill.domain.data.SkillProgressAssociationCount;
+import fr.avenirsesr.portfolio.student.skill.domain.data.SkillProgressAssociationData;
+import fr.avenirsesr.portfolio.student.skill.domain.data.SkillProgressData;
+import fr.avenirsesr.portfolio.student.skill.domain.model.SkillProgress;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +58,7 @@ class AssociationServiceImplTest {
   @Mock private AssociationRepository associationRepository;
   @Mock private AssociationStrategy traceStrategy;
   @Mock private AssociationStrategy declaredActivityStrategy;
-  @Mock private AssociationStrategy declaredSkillStrategy;
+  @Mock private AssociationStrategy skillProgressStrategy;
   @Mock private AssociationStrategy declaredExperienceStrategy;
 
   private AssociationServiceImpl service;
@@ -70,7 +70,7 @@ class AssociationServiceImplTest {
         .when(declaredActivityStrategy.getContextType())
         .thenReturn(EAssociationContextType.DECLARED_ACTIVITY);
     lenient()
-        .when(declaredSkillStrategy.getContextType())
+        .when(skillProgressStrategy.getContextType())
         .thenReturn(EAssociationContextType.DECLARED_SKILL);
     lenient()
         .when(declaredExperienceStrategy.getContextType())
@@ -82,7 +82,7 @@ class AssociationServiceImplTest {
             List.of(
                 traceStrategy,
                 declaredActivityStrategy,
-                declaredSkillStrategy,
+                skillProgressStrategy,
                 declaredExperienceStrategy));
   }
 
@@ -220,23 +220,23 @@ class AssociationServiceImplTest {
   void getAllAssociatedElementsOf_should_merge_what_every_strategy_returns() {
     UUID traceId = UUID.randomUUID();
     UUID declaredActivityId = UUID.randomUUID();
-    UUID declaredSkillProgressId = UUID.randomUUID();
+    UUID skillProgressId = UUID.randomUUID();
 
     var declaredActivity = mock(DeclaredActivity.class);
-    var declaredSkillProgress = mock(DeclaredSkillProgress.class);
-    var declaredSkillProgressData =
-        new DeclaredSkillProgressData(
-            declaredSkillProgress,
+    var skillProgress = mock(SkillProgress.class);
+    var skillProgressData =
+        new SkillProgressData(
+            skillProgress,
             SkillFixture.create().toModel(),
-            new DeclaredSkillAssociationCount(0, 0));
+            new SkillProgressAssociationCount(0, 0));
 
     var declaredActivityAssociation =
         association(declaredActivityId, traceId, EAssociationType.DECLARED_ACTIVITY_TRACE);
-    var declaredSkillAssociation =
-        association(traceId, declaredSkillProgressId, EAssociationType.TRACE_DECLARED_SKILL);
+    var skillProgressAssociation =
+        association(traceId, skillProgressId, EAssociationType.TRACE_DECLARED_SKILL);
 
     givenAssociationsOf(
-        traceId, Trace.class, List.of(declaredActivityAssociation, declaredSkillAssociation));
+        traceId, Trace.class, List.of(declaredActivityAssociation, skillProgressAssociation));
 
     when(declaredActivityStrategy.toAssociatedElements(
             List.of(declaredActivityAssociation), Trace.class, false))
@@ -247,13 +247,13 @@ class AssociationServiceImplTest {
                         declaredActivityAssociation.getId(),
                         declaredActivity,
                         EDeclaredActivityStatus.IN_PROGRESS))));
-    when(declaredSkillStrategy.toAssociatedElements(
-            List.of(declaredSkillAssociation), Trace.class, false))
+    when(skillProgressStrategy.toAssociatedElements(
+            List.of(skillProgressAssociation), Trace.class, false))
         .thenReturn(
-            AssociatedElementsData.ofDeclaredSkills(
+            AssociatedElementsData.ofSkillProgresses(
                 List.of(
-                    new DeclaredSkillAssociationData(
-                        declaredSkillAssociation.getId(), declaredSkillProgressData))));
+                    new SkillProgressAssociationData(
+                        skillProgressAssociation.getId(), skillProgressData))));
 
     var result = service.getAllAssociatedElementsOf(traceId, EAssociationContextType.TRACE, false);
 
@@ -267,9 +267,9 @@ class AssociationServiceImplTest {
               assertThat(data.declaredActivity()).isEqualTo(declaredActivity);
               assertThat(data.status()).isEqualTo(EDeclaredActivityStatus.IN_PROGRESS);
             });
-    assertThat(result.declaredSkillAssociations())
+    assertThat(result.skillProgressAssociations())
         .singleElement()
-        .satisfies(data -> assertThat(data.declaredSkill()).isEqualTo(declaredSkillProgressData));
+        .satisfies(data -> assertThat(data.skillProgress()).isEqualTo(skillProgressData));
   }
 
   @Test
@@ -301,7 +301,7 @@ class AssociationServiceImplTest {
 
     assertThat(result).isEqualTo(AssociatedElementsData.empty());
     verify(declaredActivityStrategy, never()).toAssociatedElements(anyList(), any(), anyBoolean());
-    verify(declaredSkillStrategy, never()).toAssociatedElements(anyList(), any(), anyBoolean());
+    verify(skillProgressStrategy, never()).toAssociatedElements(anyList(), any(), anyBoolean());
     verify(declaredExperienceStrategy, never())
         .toAssociatedElements(anyList(), any(), anyBoolean());
   }
@@ -379,7 +379,7 @@ class AssociationServiceImplTest {
   @Test
   void associate_should_check_both_sides_before_creating_the_associations() {
     UUID traceId = UUID.randomUUID();
-    UUID declaredSkillProgressId = UUID.randomUUID();
+    UUID skillProgressId = UUID.randomUUID();
 
     when(associationRepository.findAllIn(anyList())).thenReturn(List.of());
     when(associationRepository.saveAll(anyList())).thenAnswer(i -> i.getArguments()[0]);
@@ -389,16 +389,16 @@ class AssociationServiceImplTest {
         traceId,
         EAssociationContextType.TRACE,
         EAssociationContextType.DECLARED_SKILL,
-        List.of(declaredSkillProgressId));
+        List.of(skillProgressId));
 
     verify(traceStrategy)
         .checkLoggedInStudentCanAssociate(traceId, EAssociationType.TRACE_DECLARED_SKILL, 1);
-    verify(declaredSkillStrategy).checkLoggedInStudentOwns(List.of(declaredSkillProgressId));
+    verify(skillProgressStrategy).checkLoggedInStudentOwns(List.of(skillProgressId));
     verify(associationRepository)
         .findAllIn(
             List.of(
                 new AssociationData(
-                    traceId, declaredSkillProgressId, EAssociationType.TRACE_DECLARED_SKILL)));
+                    traceId, skillProgressId, EAssociationType.TRACE_DECLARED_SKILL)));
     verify(associationRepository).saveAll(anyList());
   }
 
@@ -427,7 +427,7 @@ class AssociationServiceImplTest {
   @Test
   void associate_should_create_a_single_association_for_a_duplicated_id() {
     UUID traceId = UUID.randomUUID();
-    UUID declaredSkillProgressId = UUID.randomUUID();
+    UUID skillProgressId = UUID.randomUUID();
 
     when(associationRepository.findAllIn(anyList())).thenReturn(List.of());
     when(associationRepository.saveAll(anyList())).thenAnswer(i -> i.getArguments()[0]);
@@ -437,7 +437,7 @@ class AssociationServiceImplTest {
         traceId,
         EAssociationContextType.TRACE,
         EAssociationContextType.DECLARED_SKILL,
-        List.of(declaredSkillProgressId, declaredSkillProgressId));
+        List.of(skillProgressId, skillProgressId));
 
     verify(traceStrategy)
         .checkLoggedInStudentCanAssociate(traceId, EAssociationType.TRACE_DECLARED_SKILL, 1);
@@ -445,17 +445,17 @@ class AssociationServiceImplTest {
         .findAllIn(
             List.of(
                 new AssociationData(
-                    traceId, declaredSkillProgressId, EAssociationType.TRACE_DECLARED_SKILL)));
+                    traceId, skillProgressId, EAssociationType.TRACE_DECLARED_SKILL)));
   }
 
   @Test
   void associate_should_not_create_anything_when_an_associated_element_is_not_owned() {
     UUID traceId = UUID.randomUUID();
-    UUID declaredSkillProgressId = UUID.randomUUID();
+    UUID skillProgressId = UUID.randomUUID();
 
     doThrow(new UserNotAuthorizedException())
-        .when(declaredSkillStrategy)
-        .checkLoggedInStudentOwns(List.of(declaredSkillProgressId));
+        .when(skillProgressStrategy)
+        .checkLoggedInStudentOwns(List.of(skillProgressId));
 
     assertThatThrownBy(
             () ->
@@ -463,7 +463,7 @@ class AssociationServiceImplTest {
                     traceId,
                     EAssociationContextType.TRACE,
                     EAssociationContextType.DECLARED_SKILL,
-                    List.of(declaredSkillProgressId)))
+                    List.of(skillProgressId)))
         .isInstanceOf(UserNotAuthorizedException.class);
 
     verify(associationRepository, never()).saveAll(anyList());
@@ -561,26 +561,25 @@ class AssociationServiceImplTest {
   @Test
   void unassociate_should_delete_only_the_given_associations() {
     UUID traceId = UUID.randomUUID();
-    UUID declaredSkillProgressId = UUID.randomUUID();
+    UUID skillProgressId = UUID.randomUUID();
 
-    var declaredSkillAssociation =
-        association(traceId, declaredSkillProgressId, EAssociationType.TRACE_DECLARED_SKILL);
+    var skillProgressAssociation =
+        association(traceId, skillProgressId, EAssociationType.TRACE_DECLARED_SKILL);
     var declaredExperienceAssociation =
         association(traceId, UUID.randomUUID(), EAssociationType.TRACE_DECLARED_EXPERIENCE);
 
     givenAssociationsOf(
-        traceId, Trace.class, List.of(declaredSkillAssociation, declaredExperienceAssociation));
-    when(associationRepository.findAllById(List.of(declaredSkillAssociation.getId())))
-        .thenReturn(List.of(declaredSkillAssociation));
+        traceId, Trace.class, List.of(skillProgressAssociation, declaredExperienceAssociation));
+    when(associationRepository.findAllById(List.of(skillProgressAssociation.getId())))
+        .thenReturn(List.of(skillProgressAssociation));
 
     service.unassociate(
-        traceId, EAssociationContextType.TRACE, List.of(declaredSkillAssociation.getId()));
+        traceId, EAssociationContextType.TRACE, List.of(skillProgressAssociation.getId()));
 
     verify(traceStrategy).checkLoggedInStudentCanUnassociate(List.of(traceId));
-    verify(declaredSkillStrategy)
-        .checkLoggedInStudentCanUnassociate(List.of(declaredSkillProgressId));
+    verify(skillProgressStrategy).checkLoggedInStudentCanUnassociate(List.of(skillProgressId));
     verify(declaredExperienceStrategy, never()).checkLoggedInStudentCanUnassociate(anyList());
-    verify(associationRepository).removeAllFromDatabase(List.of(declaredSkillAssociation));
+    verify(associationRepository).removeAllFromDatabase(List.of(skillProgressAssociation));
   }
 
   @Test
@@ -630,21 +629,17 @@ class AssociationServiceImplTest {
 
   @Test
   void searchForAssociation_should_disable_the_elements_already_associated_with_the_element() {
-    UUID declaredSkillProgressId = UUID.randomUUID();
+    UUID skillProgressId = UUID.randomUUID();
     UUID associatedTraceId = UUID.randomUUID();
     UUID availableTraceId = UUID.randomUUID();
     var pageCriteria = new PageCriteria(0, 10);
 
     when(associationRepository.findAllOf(
-            declaredSkillProgressId,
-            DeclaredSkillProgress.class,
-            List.of(EAssociationType.TRACE_DECLARED_SKILL)))
+            skillProgressId, SkillProgress.class, List.of(EAssociationType.TRACE_DECLARED_SKILL)))
         .thenReturn(
             List.of(
                 association(
-                    associatedTraceId,
-                    declaredSkillProgressId,
-                    EAssociationType.TRACE_DECLARED_SKILL)));
+                    associatedTraceId, skillProgressId, EAssociationType.TRACE_DECLARED_SKILL)));
     when(traceStrategy.search("kw", AssociationSearchFilter.NONE, pageCriteria))
         .thenReturn(
             new PagedResult<>(
@@ -656,14 +651,14 @@ class AssociationServiceImplTest {
 
     var result =
         service.searchForAssociation(
-            declaredSkillProgressId,
+            skillProgressId,
             EAssociationContextType.DECLARED_SKILL,
             EAssociationContextType.TRACE,
             "kw",
             AssociationSearchFilter.NONE,
             pageCriteria);
 
-    verify(declaredSkillStrategy).checkLoggedInStudentOwns(List.of(declaredSkillProgressId));
+    verify(skillProgressStrategy).checkLoggedInStudentOwns(List.of(skillProgressId));
     assertThat(result.content())
         .containsExactly(
             new AssociationSearchResultData(associatedTraceId, "associated", null, true),
@@ -704,15 +699,13 @@ class AssociationServiceImplTest {
 
   @Test
   void searchForAssociation_should_pass_the_filter_to_the_searched_context() {
-    UUID declaredSkillProgressId = UUID.randomUUID();
+    UUID skillProgressId = UUID.randomUUID();
     UUID associatedTraceId = UUID.randomUUID();
     var filter = new TraceAssociationSearchFilter(true);
     var pageCriteria = new PageCriteria(0, 10);
 
     when(associationRepository.findAllOf(
-            declaredSkillProgressId,
-            DeclaredSkillProgress.class,
-            List.of(EAssociationType.TRACE_DECLARED_SKILL)))
+            skillProgressId, SkillProgress.class, List.of(EAssociationType.TRACE_DECLARED_SKILL)))
         .thenReturn(List.of());
     when(traceStrategy.search("kw", filter, pageCriteria))
         .thenReturn(
@@ -723,7 +716,7 @@ class AssociationServiceImplTest {
 
     var result =
         service.searchForAssociation(
-            declaredSkillProgressId,
+            skillProgressId,
             EAssociationContextType.DECLARED_SKILL,
             EAssociationContextType.TRACE,
             "kw",
@@ -841,15 +834,15 @@ class AssociationServiceImplTest {
 
   @Test
   void searchForAssociation_should_return_the_results_of_the_searched_context_for_a_new_element() {
-    UUID declaredSkillProgressId = UUID.randomUUID();
+    UUID skillProgressId = UUID.randomUUID();
     var pageCriteria = new PageCriteria(0, 10);
 
-    when(declaredSkillStrategy.search("kw", AssociationSearchFilter.NONE, pageCriteria))
+    when(skillProgressStrategy.search("kw", AssociationSearchFilter.NONE, pageCriteria))
         .thenReturn(
             new PagedResult<>(
                 List.of(
                     new AssociationSearchResultData(
-                        declaredSkillProgressId, "Declared skill", "Referential", false)),
+                        skillProgressId, "Skill", "Referential", false)),
                 new PageInfo(0, 10, 1)));
 
     var result =
@@ -863,8 +856,7 @@ class AssociationServiceImplTest {
 
     assertThat(result.content())
         .containsExactly(
-            new AssociationSearchResultData(
-                declaredSkillProgressId, "Declared skill", "Referential", false));
+            new AssociationSearchResultData(skillProgressId, "Skill", "Referential", false));
     assertThat(result.pageInfo()).isEqualTo(new PageInfo(0, 10, 1));
     verifyNoInteractions(associationRepository);
   }
@@ -941,7 +933,7 @@ class AssociationServiceImplTest {
         AssociationSearchFilter.NONE,
         pageCriteria);
 
-    verify(declaredSkillStrategy, never()).checkLoggedInStudentOwns(anyList());
+    verify(skillProgressStrategy, never()).checkLoggedInStudentOwns(anyList());
   }
 
   @Test

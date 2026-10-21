@@ -20,7 +20,7 @@ import fr.avenirsesr.portfolio.student.experience.domain.exception.DeclaredExper
 import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.experience.domain.model.enums.EExperienceType;
 import fr.avenirsesr.portfolio.student.experience.domain.port.output.repository.DeclaredExperienceRepository;
-import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
+import fr.avenirsesr.portfolio.student.skill.domain.port.input.SkillProgressService;
 import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStudentException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
@@ -43,7 +43,7 @@ class DeclaredExperienceServiceImplTest {
   @Mock private AssociationService associationService;
   @Mock private DeclaredExperienceRepository experienceRepository;
   @Mock private StudentService studentService;
-  @Mock private DeclaredSkillProgressService declaredSkillProgressService;
+  @Mock private SkillProgressService skillProgressService;
 
   @InjectMocks private DeclaredExperienceServiceImpl service;
 

@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import fr.avenirsesr.portfolio.common.error.domain.exception.WrongClassTypeArgumentException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperience;
-import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
+import fr.avenirsesr.portfolio.student.skill.domain.model.SkillProgress;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
@@ -13,16 +13,16 @@ class EAssociationTypeTest {
 
   @Test
   void
-      EXPERIENCE_DECLARED_SKILL_should_declare_DeclaredExperience_as_key1_and_DeclaredSkillProgress_as_key2() {
+      EXPERIENCE_DECLARED_SKILL_should_declare_DeclaredExperience_as_key1_and_SkillProgress_as_key2() {
     BddLogger.given("the EXPERIENCE_DECLARED_SKILL association type");
 
     BddLogger.when("reading its key classes");
 
-    BddLogger.then("DeclaredExperience should be key1 and DeclaredSkillProgress should be key2");
+    BddLogger.then("DeclaredExperience should be key1 and SkillProgress should be key2");
     assertEquals(
         DeclaredExperience.class, EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL.getKey1());
     assertEquals(
-        DeclaredSkillProgress.class, EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL.getKey2());
+        SkillProgress.class, EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL.getKey2());
   }
 
   @Test
@@ -38,13 +38,13 @@ class EAssociationTypeTest {
   }
 
   @Test
-  void getAllBy_should_include_EXPERIENCE_DECLARED_SKILL_for_DeclaredSkillProgress() {
-    BddLogger.given("the DeclaredSkillProgress class");
+  void getAllBy_should_include_EXPERIENCE_DECLARED_SKILL_for_SkillProgress() {
+    BddLogger.given("the SkillProgress class");
 
     BddLogger.when("calling getAllBy");
 
     BddLogger.then("it should include EXPERIENCE_DECLARED_SKILL");
-    var types = EAssociationType.getAllBy(DeclaredSkillProgress.class);
+    var types = EAssociationType.getAllBy(SkillProgress.class);
     assertTrue(types.contains(EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL));
     assertTrue(types.contains(EAssociationType.TRACE_DECLARED_SKILL));
     assertTrue(types.contains(EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL));
@@ -69,7 +69,7 @@ class EAssociationTypeTest {
   }
 
   @Test
-  void idExtractorFor_should_resolve_DeclaredSkillProgress_side_using_id2() {
+  void idExtractorFor_should_resolve_SkillProgress_side_using_id2() {
     BddLogger.given("an association of type EXPERIENCE_DECLARED_SKILL");
     UUID experienceId = UUID.randomUUID();
     UUID skillProgressId = UUID.randomUUID();
@@ -77,28 +77,27 @@ class EAssociationTypeTest {
         Association.create(
             experienceId, skillProgressId, EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL);
 
-    BddLogger.when("extracting the DeclaredSkillProgress id");
+    BddLogger.when("extracting the SkillProgress id");
 
-    BddLogger.then("it should resolve to id2, the declared skill progress id");
+    BddLogger.then("it should resolve to id2, the skill progress id");
     var extractor =
-        EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL.idExtractorFor(
-            DeclaredSkillProgress.class);
+        EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL.idExtractorFor(SkillProgress.class);
     assertEquals(skillProgressId, extractor.apply(association));
   }
 
   @Test
   void of_should_resolve_the_association_type_whatever_the_order_of_the_classes() {
-    BddLogger.given("the DeclaredExperience and DeclaredSkillProgress classes");
+    BddLogger.given("the DeclaredExperience and SkillProgress classes");
 
     BddLogger.when("calling of");
 
     BddLogger.then("it should return EXPERIENCE_DECLARED_SKILL for both orders");
     assertEquals(
         EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL,
-        EAssociationType.of(DeclaredExperience.class, DeclaredSkillProgress.class));
+        EAssociationType.of(DeclaredExperience.class, SkillProgress.class));
     assertEquals(
         EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL,
-        EAssociationType.of(DeclaredSkillProgress.class, DeclaredExperience.class));
+        EAssociationType.of(SkillProgress.class, DeclaredExperience.class));
   }
 
   @Test

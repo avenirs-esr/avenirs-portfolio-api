@@ -6,7 +6,7 @@ import fr.avenirsesr.portfolio.shared.application.adapter.mapper.OptionalMapper;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityContentDtoMapper;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.FeedbackDetailsDTO;
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackData;
-import fr.avenirsesr.portfolio.student.skill.application.adapter.mapper.DeclaredSkillProgressMapper;
+import fr.avenirsesr.portfolio.student.skill.application.adapter.mapper.SkillProgressMapper;
 import fr.avenirsesr.portfolio.student.trace.application.adapter.mapper.TraceDetailMapper;
 import fr.avenirsesr.portfolio.user.application.adapter.dto.UserInfoDTO;
 import org.mapstruct.Mapper;
@@ -17,7 +17,7 @@ import org.mapstruct.Mapping;
     uses = {
       OptionalMapper.class,
       TraceDetailMapper.class,
-      DeclaredSkillProgressMapper.class,
+      SkillProgressMapper.class,
       ActivityContentDtoMapper.class,
       FileDtoMapper.class
     })

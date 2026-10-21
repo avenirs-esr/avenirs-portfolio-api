@@ -3,7 +3,7 @@ package fr.avenirsesr.portfolio.student.association.domain.data;
 import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityAssociationData;
 import fr.avenirsesr.portfolio.student.experience.domain.data.DeclaredExperienceAssociationData;
 import fr.avenirsesr.portfolio.student.program.domain.data.DeclaredProgramAssociationData;
-import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillAssociationData;
+import fr.avenirsesr.portfolio.student.skill.domain.data.SkillProgressAssociationData;
 import fr.avenirsesr.portfolio.student.trace.domain.data.TraceAssociationData;
 import java.util.List;
 import java.util.stream.Stream;
@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 public record AssociatedElementsData(
     List<TraceAssociationData> traceAssociations,
     List<DeclaredActivityAssociationData> declaredActivityAssociations,
-    List<DeclaredSkillAssociationData> declaredSkillAssociations,
+    List<SkillProgressAssociationData> skillProgressAssociations,
     List<DeclaredExperienceAssociationData> declaredExperienceAssociations,
     List<DeclaredProgramAssociationData> declaredProgramAssociations) {
 
@@ -30,10 +30,10 @@ public record AssociatedElementsData(
         List.of(), declaredActivityAssociations, List.of(), List.of(), List.of());
   }
 
-  public static AssociatedElementsData ofDeclaredSkills(
-      List<DeclaredSkillAssociationData> declaredSkillAssociations) {
+  public static AssociatedElementsData ofSkillProgresses(
+      List<SkillProgressAssociationData> skillProgressAssociations) {
     return new AssociatedElementsData(
-        List.of(), List.of(), declaredSkillAssociations, List.of(), List.of());
+        List.of(), List.of(), skillProgressAssociations, List.of(), List.of());
   }
 
   public static AssociatedElementsData ofDeclaredExperiences(
@@ -52,7 +52,7 @@ public record AssociatedElementsData(
     return new AssociatedElementsData(
         concat(traceAssociations, other.traceAssociations),
         concat(declaredActivityAssociations, other.declaredActivityAssociations),
-        concat(declaredSkillAssociations, other.declaredSkillAssociations),
+        concat(skillProgressAssociations, other.skillProgressAssociations),
         concat(declaredExperienceAssociations, other.declaredExperienceAssociations),
         concat(declaredProgramAssociations, other.declaredProgramAssociations));
   }

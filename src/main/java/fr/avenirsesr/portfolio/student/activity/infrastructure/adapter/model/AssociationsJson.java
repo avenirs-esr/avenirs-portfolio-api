@@ -3,7 +3,7 @@ package fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.model;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.student.experience.domain.model.enums.EExperienceType;
 import fr.avenirsesr.portfolio.student.program.domain.model.enums.EProgramStatus;
-import fr.avenirsesr.portfolio.student.skill.domain.model.enums.EDeclaredSkillLevel;
+import fr.avenirsesr.portfolio.student.skill.domain.model.enums.ESkillLevel;
 import fr.avenirsesr.portfolio.student.trace.domain.model.enums.ETraceAuthorType;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -12,12 +12,12 @@ import java.util.UUID;
 
 public record AssociationsJson(
     List<TraceSnapshot> traces,
-    List<DeclaredSkillProgressSnapshot> declaredSkillProgresses,
+    List<SkillProgressSnapshot> skillProgresses,
     List<DeclaredExperienceSnapshot> declaredExperiences,
     List<DeclaredprogramSnapshot> declaredPrograms) {
   public AssociationsJson {
     traces = traces == null ? List.of() : traces;
-    declaredSkillProgresses = declaredSkillProgresses == null ? List.of() : declaredSkillProgresses;
+    skillProgresses = skillProgresses == null ? List.of() : skillProgresses;
     declaredExperiences = declaredExperiences == null ? List.of() : declaredExperiences;
     declaredPrograms = declaredPrograms == null ? List.of() : declaredPrograms;
   }
@@ -39,11 +39,11 @@ public record AssociationsJson(
       Instant createdAt,
       Instant updatedAt) {}
 
-  public record DeclaredSkillProgressSnapshot(
+  public record SkillProgressSnapshot(
       UUID id,
       UUID studentId,
       UUID skillId,
-      EDeclaredSkillLevel level,
+      ESkillLevel level,
       String reflection,
       Instant createdAt,
       Instant updatedAt) {}

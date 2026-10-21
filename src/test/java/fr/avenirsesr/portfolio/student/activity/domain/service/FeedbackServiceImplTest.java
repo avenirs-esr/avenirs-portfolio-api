@@ -48,8 +48,8 @@ import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperienc
 import fr.avenirsesr.portfolio.student.experience.domain.port.input.DeclaredExperienceService;
 import fr.avenirsesr.portfolio.student.program.domain.model.DeclaredProgram;
 import fr.avenirsesr.portfolio.student.program.domain.port.input.DeclaredProgramService;
-import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
-import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillProgressService;
+import fr.avenirsesr.portfolio.student.skill.domain.model.SkillProgress;
+import fr.avenirsesr.portfolio.student.skill.domain.port.input.SkillProgressService;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStaffException;
@@ -87,7 +87,7 @@ class FeedbackServiceImplTest {
   @Mock private DeclaredProgramService declaredProgramService;
   @Mock private AssociationService associationService;
   @Mock private TraceService traceService;
-  @Mock private DeclaredSkillProgressService declaredSkillProgressService;
+  @Mock private SkillProgressService skillProgressService;
   @Mock private LoggedInUserService loggedInUserService;
   @Mock private NotificationService notificationService;
   @Mock private FileResourceService fileResourceService;
@@ -128,8 +128,7 @@ class FeedbackServiceImplTest {
               any(UUID.class), any(Class.class), ArgumentMatchers.<List<EAssociationType>>any()))
           .thenReturn(List.of());
       when(traceService.findAllTracesById(List.of())).thenReturn(List.of());
-      when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of()))
-          .thenReturn(List.of());
+      when(skillProgressService.findAllSkillProgressesByIds(List.of())).thenReturn(List.of());
       when(feedbackRepository.findAllByDeclaredActivityId(declaredActivityId))
           .thenReturn(List.of());
       when(feedbackRepository.save(any(Feedback.class))).thenAnswer(i -> i.getArguments()[0]);
@@ -163,8 +162,7 @@ class FeedbackServiceImplTest {
               any(UUID.class), any(Class.class), ArgumentMatchers.<List<EAssociationType>>any()))
           .thenReturn(List.of());
       when(traceService.findAllTracesById(List.of())).thenReturn(List.of());
-      when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of()))
-          .thenReturn(List.of());
+      when(skillProgressService.findAllSkillProgressesByIds(List.of())).thenReturn(List.of());
       when(feedbackRepository.findAllByDeclaredActivityId(declaredActivityId))
           .thenReturn(List.of());
       when(feedbackRepository.save(any(Feedback.class))).thenAnswer(i -> i.getArguments()[0]);
@@ -228,7 +226,7 @@ class FeedbackServiceImplTest {
 
       Trace trace = mock(Trace.class);
 
-      DeclaredSkillProgress skill = mock(DeclaredSkillProgress.class);
+      SkillProgress skill = mock(SkillProgress.class);
       DeclaredExperience experience = mock(DeclaredExperience.class);
       DeclaredProgram program = mock(DeclaredProgram.class);
       when(declaredActivityService.fetchActivityAndCheckLoggedInStudentAuthorization(
@@ -253,7 +251,7 @@ class FeedbackServiceImplTest {
               List.of(
                   traceAssociation, skillAssociation, experienceAssociation, programAssociation));
       when(traceService.findAllTracesById(List.of(traceId))).thenReturn(List.of(trace));
-      when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of(skillId)))
+      when(skillProgressService.findAllSkillProgressesByIds(List.of(skillId)))
           .thenReturn(List.of(skill));
       when(declaredExperienceService.findAllByIds(List.of(experienceId)))
           .thenReturn(List.of(experience));
@@ -462,7 +460,7 @@ class FeedbackServiceImplTest {
       var experienceAssociation = mock(Association.class);
       var programAssociation = mock(Association.class);
       Trace trace = mock(Trace.class);
-      DeclaredSkillProgress skill = mock(DeclaredSkillProgress.class);
+      SkillProgress skill = mock(SkillProgress.class);
       DeclaredExperience experience = mock(DeclaredExperience.class);
       DeclaredProgram program = mock(DeclaredProgram.class);
       when(declaredActivityService.fetchActivityAndCheckLoggedInStudentAuthorization(
@@ -489,7 +487,7 @@ class FeedbackServiceImplTest {
               List.of(
                   traceAssociation, skillAssociation, experienceAssociation, programAssociation));
       when(traceService.findAllTracesById(List.of(traceId))).thenReturn(List.of(trace));
-      when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of(skillId)))
+      when(skillProgressService.findAllSkillProgressesByIds(List.of(skillId)))
           .thenReturn(List.of(skill));
       when(declaredExperienceService.findAllByIds(List.of(experienceId)))
           .thenReturn(List.of(experience));
@@ -545,8 +543,7 @@ class FeedbackServiceImplTest {
               any(UUID.class), any(Class.class), ArgumentMatchers.<List<EAssociationType>>any()))
           .thenReturn(List.of());
       when(traceService.findAllTracesById(List.of())).thenReturn(List.of());
-      when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of()))
-          .thenReturn(List.of());
+      when(skillProgressService.findAllSkillProgressesByIds(List.of())).thenReturn(List.of());
       when(feedbackRepository.save(any(Feedback.class))).thenAnswer(i -> i.getArguments()[0]);
 
       BddLogger.when("createFeedback is called");
@@ -591,8 +588,7 @@ class FeedbackServiceImplTest {
               any(UUID.class), any(Class.class), ArgumentMatchers.<List<EAssociationType>>any()))
           .thenReturn(List.of());
       when(traceService.findAllTracesById(List.of())).thenReturn(List.of());
-      when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of()))
-          .thenReturn(List.of());
+      when(skillProgressService.findAllSkillProgressesByIds(List.of())).thenReturn(List.of());
       when(feedbackRepository.save(any(Feedback.class))).thenAnswer(i -> i.getArguments()[0]);
 
       BddLogger.when("createFeedback is called");

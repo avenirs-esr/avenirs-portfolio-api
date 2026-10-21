@@ -56,7 +56,7 @@ class AssociationControllerIT extends ContainerConfigurationTest {
       BASE_PATH + "/DECLARED_EXPERIENCE";
   private static final String DECLARED_PROGRAM_BASE_PATH = "/me/declared/programs";
 
-  private static final String DECLARED_SKILL_BASE_PATH = "/me/declared/skill-progress";
+  private static final String DECLARED_SKILL_BASE_PATH = "/me/skill-progress";
   private static final String DECLARED_EXPERIENCE_BASE_PATH = "/me/declared/experiences";
   private static final String DECLARED_ACTIVITY_BASE_PATH = "/me/activity-progress";
   private static final String TRACE_OVERVIEW_URL = "/me/traces/overview";
@@ -159,7 +159,7 @@ class AssociationControllerIT extends ContainerConfigurationTest {
     return UUID.fromString(data.get(0).get("id").asText());
   }
 
-  private UUID searchDeclaredSkillIdForTrace(UUID traceId, int index) throws Exception {
+  private UUID searchSkillProgressIdForTrace(UUID traceId, int index) throws Exception {
     String body =
         webTestClient
             .get()
@@ -183,7 +183,7 @@ class AssociationControllerIT extends ContainerConfigurationTest {
     JsonNode data = objectMapper.readTree(body).get("data");
 
     if (data == null || !data.isArray() || data.size() <= index) {
-      throw new IllegalStateException("No declared skill available for association");
+      throw new IllegalStateException("No skill progress available for association");
     }
 
     return UUID.fromString(data.get(index).get("id").asText());
@@ -232,7 +232,7 @@ class AssociationControllerIT extends ContainerConfigurationTest {
         .isArray()
         .jsonPath("$.declaredActivityAssociations")
         .isArray()
-        .jsonPath("$.declaredSkillAssociations")
+        .jsonPath("$.skillProgressAssociations")
         .isArray()
         .jsonPath("$.declaredExperienceAssociations")
         .isArray()
@@ -281,17 +281,17 @@ class AssociationControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldAssociateATraceWithADeclaredSkill() throws Exception {
-    BddLogger.given("an existing trace and an available declared skill");
+  void shouldAssociateATraceWithASkillProgress() throws Exception {
+    BddLogger.given("an existing trace and an available skill progress");
     UUID traceId = getFirstTraceId();
-    UUID declaredSkillId = searchDeclaredSkillIdForTrace(traceId, 0);
+    UUID skillId = searchSkillProgressIdForTrace(traceId, 0);
 
-    when("associating the trace with the declared skill");
+    when("associating the trace with the skill progress");
 
-    JsonNode associations = associate(traceId, "TRACE", "DECLARED_SKILL", List.of(declaredSkillId));
+    JsonNode associations = associate(traceId, "TRACE", "DECLARED_SKILL", List.of(skillId));
 
     BddLogger.then("it should return the associations of the trace");
-    assertThat(associations.get("declaredSkillAssociations").isArray()).isTrue();
+    assertThat(associations.get("skillProgressAssociations").isArray()).isTrue();
   }
 
   @Test
@@ -357,14 +357,14 @@ class AssociationControllerIT extends ContainerConfigurationTest {
 
   @Test
   void shouldUnassociateTheAssociationsOfATrace() throws Exception {
-    BddLogger.given("a trace associated with a declared skill");
+    BddLogger.given("a trace associated with a skill progress");
     UUID traceId = getFirstTraceId();
-    UUID declaredSkillId = searchDeclaredSkillIdForTrace(traceId, 1);
+    UUID skillId = searchSkillProgressIdForTrace(traceId, 1);
 
-    JsonNode associations = associate(traceId, "TRACE", "DECLARED_SKILL", List.of(declaredSkillId));
+    JsonNode associations = associate(traceId, "TRACE", "DECLARED_SKILL", List.of(skillId));
     UUID associationId =
         UUID.fromString(
-            associations.get("declaredSkillAssociations").get(0).get("associationId").asText());
+            associations.get("skillProgressAssociations").get(0).get("associationId").asText());
 
     when("unassociating the association");
 
@@ -427,11 +427,11 @@ class AssociationControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldSearchDeclaredSkillsForAssociationWithATrace() throws Exception {
+  void shouldSearchSkillProgressesForAssociationWithATrace() throws Exception {
     BddLogger.given("an existing trace");
     UUID traceId = getFirstTraceId();
 
-    when("searching the declared skills to associate");
+    when("searching the skill progresses to associate");
 
     webTestClient
         .get()
@@ -616,7 +616,7 @@ class AssociationControllerIT extends ContainerConfigurationTest {
   void shouldReturn403WhenSearchingForAssociationWithoutPermission() {
     BddLogger.given("an authenticated user without the trace association permission");
 
-    when("searching the declared skills to associate");
+    when("searching the skill progresses to associate");
 
     webTestClient
         .get()
@@ -632,10 +632,10 @@ class AssociationControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldSearchDeclaredSkillsForAssociationWithANewTrace() {
+  void shouldSearchSkillProgressesForAssociationWithANewTrace() {
     BddLogger.given("a trace that does not exist yet");
 
-    when("searching the declared skills to associate");
+    when("searching the skill progresses to associate");
 
     webTestClient
         .get()
@@ -822,7 +822,7 @@ class AssociationControllerIT extends ContainerConfigurationTest {
   void shouldReturn403WhenSearchingForANewElementWithoutPermission() {
     BddLogger.given("an authenticated user without the association permission");
 
-    when("searching the declared skills to associate with a new trace");
+    when("searching the skill progresses to associate with a new trace");
 
     webTestClient
         .get()
@@ -888,30 +888,29 @@ class AssociationControllerIT extends ContainerConfigurationTest {
     return extractIdFromResponse(responseBody);
   }
 
-  private UUID createAnyAvailableDeclaredSkillProgressAs(String payload, String signature)
+  private UUID createAnyAvailableSkillProgressAs(String payload, String signature)
       throws Exception {
-    return createAnyAvailableDeclaredSkillProgressAs(List.of(), payload, signature);
+    return createAnyAvailableSkillProgressAs(List.of(), payload, signature);
   }
 
-  private UUID createAnyAvailableDeclaredSkillProgressAs(
+  private UUID createAnyAvailableSkillProgressAs(
       List<UUID> excludedSkillIds, String payload, String signature) throws Exception {
-    for (var declaredSkill : assessableSkills()) {
-      if (excludedSkillIds.contains(declaredSkill.getId())) {
+    for (var skill : assessableSkills()) {
+      if (excludedSkillIds.contains(skill.getId())) {
         continue;
       }
 
       var result =
           webTestClient
               .post()
-              .uri("/me/declared/skill-progress")
+              .uri("/me/skill-progress")
               .header("X-Signed-Context", payload)
               .header("X-Context-Signature", signature)
               .contentType(MediaType.APPLICATION_JSON)
               .bodyValue(
                   "{\n"
-                      + "  \"id\": \"%s\",\n".formatted(declaredSkill.getId())
-                      + "  \"level\": \"BEGINNER\",\n"
-                      + "  \"type\": \"ROME4\"\n"
+                      + "  \"id\": \"%s\",\n".formatted(skill.getId())
+                      + "  \"level\": \"BEGINNER\"\n"
                       + "}\n")
               .exchange()
               .expectBody(String.class)
@@ -923,7 +922,7 @@ class AssociationControllerIT extends ContainerConfigurationTest {
     }
 
     throw new IllegalStateException(
-        "No declared skill available for association in the seeded catalog");
+        "No skill progress available for association in the seeded catalog");
   }
 
   private UUID createTraceAs(String title, String payload, String signature) throws Exception {
@@ -1042,17 +1041,15 @@ class AssociationControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldAssociateDeclaredExperienceWithDeclaredSkillsSuccessfully() throws Exception {
-    BddLogger.given("a declared experience and two declared skill progresses of the student");
+  void shouldAssociateDeclaredExperienceWithSkillProgressesSuccessfully() throws Exception {
+    BddLogger.given("a declared experience and two skill progresses of the student");
 
     String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
-    UUID skill1 = createAnyAvailableDeclaredSkillProgressAs(studentPayload, studentSignature);
+    UUID skill1 = createAnyAvailableSkillProgressAs(studentPayload, studentSignature);
     UUID skill2 =
-        createAnyAvailableDeclaredSkillProgressAs(
-            List.of(skill1), studentPayload, studentSignature);
+        createAnyAvailableSkillProgressAs(List.of(skill1), studentPayload, studentSignature);
 
-    BddLogger.when(
-        "performing a POST to associate the experience with both declared skill progresses");
+    BddLogger.when("performing a POST to associate the experience with both skill progresses");
 
     String responseBody =
         webTestClient
@@ -1070,21 +1067,21 @@ class AssociationControllerIT extends ContainerConfigurationTest {
             .returnResult()
             .getResponseBody();
 
-    BddLogger.then("it should create both declared skill associations");
+    BddLogger.then("it should create both skill progress associations");
 
-    var declaredSkillAssociations =
-        objectMapper.readTree(responseBody).get("declaredSkillAssociations");
-    assertThat(declaredSkillAssociations.isArray()).isTrue();
-    assertThat(declaredSkillAssociations.size()).isEqualTo(2);
+    var skillProgressAssociations =
+        objectMapper.readTree(responseBody).get("skillProgressAssociations");
+    assertThat(skillProgressAssociations.isArray()).isTrue();
+    assertThat(skillProgressAssociations.size()).isEqualTo(2);
   }
 
   @Test
-  void shouldReturn404WhenAssociatingDeclaredSkillsWithNonExistentExperience() throws Exception {
+  void shouldReturn404WhenAssociatingSkillProgressesWithNonExistentExperience() throws Exception {
     BddLogger.given("a non-existent declared experience");
 
-    UUID skillId = createAnyAvailableDeclaredSkillProgressAs(studentPayload, studentSignature);
+    UUID skillId = createAnyAvailableSkillProgressAs(studentPayload, studentSignature);
 
-    BddLogger.when("performing a POST to associate declared skills");
+    BddLogger.when("performing a POST to associate skill progresses");
 
     webTestClient
         .post()
@@ -1105,14 +1102,14 @@ class AssociationControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldReturn403WhenAssociatingDeclaredSkillsWithOtherStudentExperience() throws Exception {
+  void shouldReturn403WhenAssociatingSkillProgressesWithOtherStudentExperience() throws Exception {
     BddLogger.given("a declared experience belonging to another student");
 
     String otherExperienceId =
         createDeclaredExperienceAs(otherStudentPayload, otherStudentSignature);
-    UUID skillId = createAnyAvailableDeclaredSkillProgressAs(studentPayload, studentSignature);
+    UUID skillId = createAnyAvailableSkillProgressAs(studentPayload, studentSignature);
 
-    BddLogger.when("performing a POST to associate declared skills");
+    BddLogger.when("performing a POST to associate skill progresses");
 
     webTestClient
         .post()
@@ -1129,13 +1126,13 @@ class AssociationControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldReturn404WhenAssociatingWithNonExistentDeclaredSkill() throws Exception {
-    BddLogger.given("a declared experience and a non-existent declared skill progress id");
+  void shouldReturn404WhenAssociatingWithNonExistentSkillProgress() throws Exception {
+    BddLogger.given("a declared experience and a non-existent skill progress id");
 
     String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
     UUID nonExistentSkillId = UUID.randomUUID();
 
-    BddLogger.when("performing a POST to associate with a non-existent declared skill");
+    BddLogger.when("performing a POST to associate with a non-existent skill progress");
 
     webTestClient
         .post()
@@ -1150,19 +1147,20 @@ class AssociationControllerIT extends ContainerConfigurationTest {
         .isNotFound()
         .expectBody()
         .jsonPath("$.code")
-        .isEqualTo("DECLARED_SKILL_PROGRESS_NOT_FOUND");
+        .isEqualTo("SKILL_PROGRESS_NOT_FOUND");
 
-    BddLogger.then("it should return 404 for declared skill progress not found");
+    BddLogger.then("it should return 404 for skill progress not found");
   }
 
   @Test
-  void shouldReturn403WhenAssociatingWithOtherStudentDeclaredSkill() throws Exception {
-    BddLogger.given("a declared skill progress belonging to another student");
+  void shouldReturn403WhenAssociatingWithOtherStudentSkillProgress() throws Exception {
+    BddLogger.given("a skill progress belonging to another student");
 
     String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
-    UUID otherStudentSkillId = UUID.fromString("72de2a8e-be49-437e-b759-15f8e3a06de3");
+    UUID otherStudentSkillId =
+        createAnyAvailableSkillProgressAs(otherStudentPayload, otherStudentSignature);
 
-    BddLogger.when("performing a POST to associate with the other student's declared skill");
+    BddLogger.when("performing a POST to associate with the other student's skill progress");
 
     webTestClient
         .post()
@@ -1183,12 +1181,12 @@ class AssociationControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldHandleEmptyDeclaredSkillListWhenAssociating() throws Exception {
-    BddLogger.given("a declared experience and an empty declared skill list");
+  void shouldHandleEmptySkillProgressListWhenAssociating() throws Exception {
+    BddLogger.given("a declared experience and an empty skill progress list");
 
     String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
 
-    BddLogger.when("performing a POST with an empty declared skill list");
+    BddLogger.when("performing a POST with an empty skill progress list");
 
     webTestClient
         .post()
@@ -1201,22 +1199,22 @@ class AssociationControllerIT extends ContainerConfigurationTest {
         .expectStatus()
         .isOk()
         .expectBody()
-        .jsonPath("$.declaredSkillAssociations")
+        .jsonPath("$.skillProgressAssociations")
         .isArray()
-        .jsonPath("$.declaredSkillAssociations")
+        .jsonPath("$.skillProgressAssociations")
         .isEmpty();
 
     BddLogger.then("it should succeed with no association created");
   }
 
   @Test
-  void shouldCreateOnlyOneAssociationWhenDeclaredSkillIdIsDuplicatedInRequest() throws Exception {
-    BddLogger.given("a request containing the same declared skill progress id twice");
+  void shouldCreateOnlyOneAssociationWhenSkillProgressIdIsDuplicatedInRequest() throws Exception {
+    BddLogger.given("a request containing the same skill progress id twice");
 
     String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
-    UUID skillId = createAnyAvailableDeclaredSkillProgressAs(studentPayload, studentSignature);
+    UUID skillId = createAnyAvailableSkillProgressAs(studentPayload, studentSignature);
 
-    BddLogger.when("performing a POST with the duplicated declared skill id");
+    BddLogger.when("performing a POST with the duplicated skill progress id");
 
     String responseBody =
         webTestClient
@@ -1237,17 +1235,17 @@ class AssociationControllerIT extends ContainerConfigurationTest {
 
     BddLogger.then("it should create a single association, not two");
 
-    var declaredSkillAssociations =
-        objectMapper.readTree(responseBody).get("declaredSkillAssociations");
-    assertThat(declaredSkillAssociations.size()).isEqualTo(1);
+    var skillProgressAssociations =
+        objectMapper.readTree(responseBody).get("skillProgressAssociations");
+    assertThat(skillProgressAssociations.size()).isEqualTo(1);
   }
 
   @Test
-  void shouldReturn409WhenDeclaredSkillAlreadyAssociated() throws Exception {
-    BddLogger.given("a declared skill progress already associated with the experience");
+  void shouldReturn409WhenSkillProgressAlreadyAssociated() throws Exception {
+    BddLogger.given("a skill progress already associated with the experience");
 
     String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
-    UUID skillId = createAnyAvailableDeclaredSkillProgressAs(studentPayload, studentSignature);
+    UUID skillId = createAnyAvailableSkillProgressAs(studentPayload, studentSignature);
 
     webTestClient
         .post()
@@ -1597,12 +1595,12 @@ class AssociationControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldKeepDeclaredSkillAssociationsWhenDeletingTraceAssociations() throws Exception {
-    BddLogger.given("a declared experience associated with a trace and a declared skill");
+  void shouldKeepSkillProgressAssociationsWhenDeletingTraceAssociations() throws Exception {
+    BddLogger.given("a declared experience associated with a trace and a skill progress");
 
     String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
     UUID traceId = createTraceAs("Trace", studentPayload, studentSignature);
-    UUID skillId = createAnyAvailableDeclaredSkillProgressAs(studentPayload, studentSignature);
+    UUID skillId = createAnyAvailableSkillProgressAs(studentPayload, studentSignature);
 
     UUID traceAssociationId =
         associateExperienceWithTraceAndGetAssociationId(experienceId, traceId);
@@ -1632,7 +1630,7 @@ class AssociationControllerIT extends ContainerConfigurationTest {
         .expectStatus()
         .isNoContent();
 
-    BddLogger.then("the declared skill association should remain untouched");
+    BddLogger.then("the skill progress association should remain untouched");
 
     webTestClient
         .get()
@@ -1645,7 +1643,7 @@ class AssociationControllerIT extends ContainerConfigurationTest {
         .expectBody()
         .jsonPath("$.traceAssociations")
         .isEmpty()
-        .jsonPath("$.declaredSkillAssociations")
+        .jsonPath("$.skillProgressAssociations")
         .value(list -> assertThat((List<?>) list).hasSize(1));
   }
 
@@ -2204,9 +2202,9 @@ class AssociationControllerIT extends ContainerConfigurationTest {
     throw new IllegalStateException("Association not found for trace " + traceId);
   }
 
-  private record CreatedDeclaredSkillProgress(UUID declaredSkillId, UUID progressId) {}
+  private record CreatedSkillProgress(UUID skillId, UUID progressId) {}
 
-  private String buildDeclaredSkillsJson(UUID id) {
+  private String buildSkillProgressJson(UUID id) {
     return ("{\n"
             + "  \"id\": \"%s\",\n"
             + "  \"level\": \"BEGINNER\",\n"
@@ -2216,12 +2214,12 @@ class AssociationControllerIT extends ContainerConfigurationTest {
   }
 
   /**
-   * Creates a declared skill progress on the first declared skill of the catalog that is not
-   * already assigned to the logged-in student. Skills assigned by the seeder, or by tests that ran
-   * earlier against the same database, are skipped so that this helper never returns 409.
+   * Creates a skill progress on the first assessable skill of the catalog that is not already
+   * assigned to the logged-in student. Skills assigned by the seeder, or by tests that ran earlier
+   * against the same database, are skipped so that this helper never returns 409.
    */
-  private CreatedDeclaredSkillProgress createAvailableDeclaredSkillProgress() throws Exception {
-    for (var declaredSkill : assessableSkills()) {
+  private CreatedSkillProgress createAvailableSkillProgress() throws Exception {
+    for (var skill : assessableSkills()) {
       var result =
           webTestClient
               .post()
@@ -2229,20 +2227,20 @@ class AssociationControllerIT extends ContainerConfigurationTest {
               .header("X-Signed-Context", studentPayload)
               .header("X-Context-Signature", studentSignature)
               .contentType(MediaType.APPLICATION_JSON)
-              .bodyValue(buildDeclaredSkillsJson(declaredSkill.getId()))
+              .bodyValue(buildSkillProgressJson(skill.getId()))
               .exchange()
               .expectBody(String.class)
               .returnResult();
 
       if (result.getStatus().is2xxSuccessful()) {
-        return new CreatedDeclaredSkillProgress(
-            declaredSkill.getId(),
+        return new CreatedSkillProgress(
+            skill.getId(),
             UUID.fromString(objectMapper.readTree(result.getResponseBody()).get("id").asText()));
       }
     }
 
     throw new IllegalStateException(
-        "No declared skill available for the logged-in student in the seeded catalog");
+        "No assessable skill available for the logged-in student in the seeded catalog");
   }
 
   private UUID createDeclaredExperience(
@@ -2299,7 +2297,7 @@ class AssociationControllerIT extends ContainerConfigurationTest {
 
   @Test
   void shouldReturn404WhenGettingAssociationsForNonExistentSkill() throws Exception {
-    BddLogger.given("a non-existent declared skill progress ID");
+    BddLogger.given("a non-existent skill progress ID");
 
     UUID nonExistentId = UUID.randomUUID();
 
@@ -2315,17 +2313,18 @@ class AssociationControllerIT extends ContainerConfigurationTest {
         .isNotFound()
         .expectBody()
         .jsonPath("$.code")
-        .isEqualTo("DECLARED_SKILL_PROGRESS_NOT_FOUND");
+        .isEqualTo("SKILL_PROGRESS_NOT_FOUND");
 
     BddLogger.then("it should return 404 with appropriate error code");
   }
 
   @Test
   void shouldReturn403WhenGettingAssociationsForOtherStudentSkill() throws Exception {
-    BddLogger.given("a declared skill progress belonging to another student");
+    BddLogger.given("a skill progress belonging to another student");
 
-    // Using a declared skill progress ID that belongs to another student
-    UUID otherStudentSkillId = UUID.fromString("72de2a8e-be49-437e-b759-15f8e3a06de3");
+    // Using a skill progress ID that belongs to another student
+    UUID otherStudentSkillId =
+        createAnyAvailableSkillProgressAs(otherStudentPayload, otherStudentSignature);
 
     BddLogger.when("performing a GET to get associations");
 
@@ -2346,7 +2345,7 @@ class AssociationControllerIT extends ContainerConfigurationTest {
 
   @Test
   void shouldReturn404WhenAssociatingWithNonExistentSkill() throws Exception {
-    BddLogger.given("a non-existent declared skill progress");
+    BddLogger.given("a non-existent skill progress");
 
     UUID nonExistentId = UUID.randomUUID();
     List<UUID> activityIds = List.of(UUID.randomUUID());
@@ -2367,16 +2366,17 @@ class AssociationControllerIT extends ContainerConfigurationTest {
         .isNotFound()
         .expectBody()
         .jsonPath("$.code")
-        .isEqualTo("DECLARED_SKILL_PROGRESS_NOT_FOUND");
+        .isEqualTo("SKILL_PROGRESS_NOT_FOUND");
 
     BddLogger.then("it should return 404");
   }
 
   @Test
   void shouldReturn403WhenAssociatingWithOtherStudentSkill() throws Exception {
-    BddLogger.given("a declared skill progress belonging to another student");
+    BddLogger.given("a skill progress belonging to another student");
 
-    UUID otherStudentSkillId = UUID.fromString("72de2a8e-be49-437e-b759-15f8e3a06de3");
+    UUID otherStudentSkillId =
+        createAnyAvailableSkillProgressAs(otherStudentPayload, otherStudentSignature);
     List<UUID> activityIds = List.of(UUID.randomUUID());
 
     BddLogger.when("performing a POST to associate activities");
@@ -2402,9 +2402,9 @@ class AssociationControllerIT extends ContainerConfigurationTest {
 
   @Test
   void shouldReturn404WhenAssociatingWithNonExistentActivities() throws Exception {
-    BddLogger.given("a declared skill progress and non-existent activity IDs");
+    BddLogger.given("a skill progress and non-existent activity IDs");
 
-    UUID createdSkillId = createAvailableDeclaredSkillProgress().progressId();
+    UUID createdSkillId = createAvailableSkillProgress().progressId();
 
     List<UUID> nonExistentActivityIds = List.of(UUID.randomUUID(), UUID.randomUUID());
 
@@ -2432,9 +2432,9 @@ class AssociationControllerIT extends ContainerConfigurationTest {
 
   @Test
   void shouldHandleEmptyActivityListWhenAssociating() throws Exception {
-    BddLogger.given("a declared skill progress and empty activity list");
+    BddLogger.given("a skill progress and empty activity list");
 
-    UUID createdSkillId = createAvailableDeclaredSkillProgress().progressId();
+    UUID createdSkillId = createAvailableSkillProgress().progressId();
 
     BddLogger.when("performing a POST with empty activity list");
 
@@ -2460,11 +2460,10 @@ class AssociationControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldDeleteTheAssociationsOfADeclaredSkill() throws Exception {
-    BddLogger.given(
-        "a declared skill progress associated with one of the logged-in student's activities");
+  void shouldDeleteTheAssociationsOfASkillProgress() throws Exception {
+    BddLogger.given("a skill progress associated with one of the logged-in student's activities");
 
-    UUID createdSkillId = createAvailableDeclaredSkillProgress().progressId();
+    UUID createdSkillId = createAvailableSkillProgress().progressId();
 
     var activityListResponse =
         webTestClient
@@ -2539,7 +2538,7 @@ class AssociationControllerIT extends ContainerConfigurationTest {
 
   @Test
   void shouldReturn404WhenDeletingAssociationsForNonExistentSkill() throws Exception {
-    BddLogger.given("a non-existent declared skill progress ID");
+    BddLogger.given("a non-existent skill progress ID");
 
     UUID nonExistentId = UUID.randomUUID();
 
@@ -2557,16 +2556,17 @@ class AssociationControllerIT extends ContainerConfigurationTest {
         .isNotFound()
         .expectBody()
         .jsonPath("$.code")
-        .isEqualTo("DECLARED_SKILL_PROGRESS_NOT_FOUND");
+        .isEqualTo("SKILL_PROGRESS_NOT_FOUND");
 
     BddLogger.then("it should return 404 with appropriate error code");
   }
 
   @Test
   void shouldReturn403WhenDeletingAssociationsForOtherStudentSkill() throws Exception {
-    BddLogger.given("a declared skill progress belonging to another student");
+    BddLogger.given("a skill progress belonging to another student");
 
-    UUID otherStudentSkillId = UUID.fromString("72de2a8e-be49-437e-b759-15f8e3a06de3");
+    UUID otherStudentSkillId =
+        createAnyAvailableSkillProgressAs(otherStudentPayload, otherStudentSignature);
 
     BddLogger.when("performing a DELETE to delete associations");
 
@@ -2589,7 +2589,7 @@ class AssociationControllerIT extends ContainerConfigurationTest {
 
   @Test
   void shouldReturn404WhenAssociatingWithNonExistentSkill_declaredExperiences() throws Exception {
-    BddLogger.given("a non-existent declared skill progress");
+    BddLogger.given("a non-existent skill progress");
 
     UUID nonExistentId = UUID.randomUUID();
     List<UUID> experienceIds = List.of(UUID.randomUUID());
@@ -2610,16 +2610,17 @@ class AssociationControllerIT extends ContainerConfigurationTest {
         .isNotFound()
         .expectBody()
         .jsonPath("$.code")
-        .isEqualTo("DECLARED_SKILL_PROGRESS_NOT_FOUND");
+        .isEqualTo("SKILL_PROGRESS_NOT_FOUND");
 
     BddLogger.then("it should return 404");
   }
 
   @Test
   void shouldReturn403WhenAssociatingWithOtherStudentSkill_declaredExperiences() throws Exception {
-    BddLogger.given("a declared skill progress belonging to another student");
+    BddLogger.given("a skill progress belonging to another student");
 
-    UUID otherStudentSkillId = UUID.fromString("72de2a8e-be49-437e-b759-15f8e3a06de3");
+    UUID otherStudentSkillId =
+        createAnyAvailableSkillProgressAs(otherStudentPayload, otherStudentSignature);
     List<UUID> experienceIds = List.of(UUID.randomUUID());
 
     BddLogger.when("performing a POST to associate declared experiences");
@@ -2645,9 +2646,9 @@ class AssociationControllerIT extends ContainerConfigurationTest {
 
   @Test
   void shouldReturn404WhenAssociatingWithNonExistentExperiences() throws Exception {
-    BddLogger.given("a declared skill progress and non-existent declared experience IDs");
+    BddLogger.given("a skill progress and non-existent declared experience IDs");
 
-    UUID createdSkillId = createAvailableDeclaredSkillProgress().progressId();
+    UUID createdSkillId = createAvailableSkillProgress().progressId();
 
     List<UUID> nonExistentExperienceIds = List.of(UUID.randomUUID(), UUID.randomUUID());
 
@@ -2675,9 +2676,9 @@ class AssociationControllerIT extends ContainerConfigurationTest {
 
   @Test
   void shouldHandleEmptyExperienceListWhenAssociating() throws Exception {
-    BddLogger.given("a declared skill progress and empty declared experience list");
+    BddLogger.given("a skill progress and empty declared experience list");
 
-    UUID createdSkillId = createAvailableDeclaredSkillProgress().progressId();
+    UUID createdSkillId = createAvailableSkillProgress().progressId();
 
     BddLogger.when("performing a POST with empty declared experience list");
 
@@ -2703,10 +2704,10 @@ class AssociationControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldAssociateDeclaredSkillWithDeclaredExperiencesSuccessfully() throws Exception {
-    BddLogger.given("a declared skill progress and two declared experiences owned by the student");
+  void shouldAssociateSkillProgressWithDeclaredExperiencesSuccessfully() throws Exception {
+    BddLogger.given("a skill progress and two declared experiences owned by the student");
 
-    UUID createdSkillId = createAvailableDeclaredSkillProgress().progressId();
+    UUID createdSkillId = createAvailableSkillProgress().progressId();
 
     UUID experienceId1 =
         createDeclaredExperience("Backend Developer", "PROFESSIONAL", "2022-01-10", null);
@@ -2772,10 +2773,10 @@ class AssociationControllerIT extends ContainerConfigurationTest {
   void shouldReturnDeclaredExperienceAssociationsOrderedByMostRecentlyAssociatedFirst()
       throws Exception {
     BddLogger.given(
-        "a declared skill progress with a professional and a personal declared experience"
+        "a skill progress with a professional and a personal declared experience"
             + " associated, the personal one being associated most recently");
 
-    UUID declaredSkillProgressId = createAvailableDeclaredSkillProgress().progressId();
+    UUID skillProgressId = createAvailableSkillProgress().progressId();
 
     UUID professionalExperienceId =
         createDeclaredExperience("Backend Developer", "PROFESSIONAL", "2022-01-10", null);
@@ -2786,16 +2787,16 @@ class AssociationControllerIT extends ContainerConfigurationTest {
         List.of(
             new AssociationData(
                 professionalExperienceId,
-                declaredSkillProgressId,
+                skillProgressId,
                 EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL)));
     associationService.createAll(
         List.of(
             new AssociationData(
                 personalExperienceId,
-                declaredSkillProgressId,
+                skillProgressId,
                 EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL)));
 
-    // The declared skill progress, the experiences and the associations above are created on the
+    // The skill progress, the experiences and the associations above are created on the
     // test thread's transaction; committing it here makes them visible to the embedded server's
     // request-handling threads used by webTestClient below.
     TestTransaction.flagForCommit();
@@ -2806,7 +2807,7 @@ class AssociationControllerIT extends ContainerConfigurationTest {
     var responseBody =
         webTestClient
             .get()
-            .uri(DECLARED_SKILL_ASSOCIATIONS_PATH + "/" + declaredSkillProgressId)
+            .uri(DECLARED_SKILL_ASSOCIATIONS_PATH + "/" + skillProgressId)
             .header("X-Signed-Context", studentPayload)
             .header("X-Context-Signature", studentSignature)
             .exchange()
@@ -2844,7 +2845,7 @@ class AssociationControllerIT extends ContainerConfigurationTest {
 
   @Test
   void shouldReturn404WhenAssociatingWithNonExistentSkill_traces() throws Exception {
-    BddLogger.given("a non-existent declared skill progress");
+    BddLogger.given("a non-existent skill progress");
 
     UUID nonExistentId = UUID.randomUUID();
     List<UUID> traceIds = List.of(UUID.randomUUID());
@@ -2865,16 +2866,17 @@ class AssociationControllerIT extends ContainerConfigurationTest {
         .isNotFound()
         .expectBody()
         .jsonPath("$.code")
-        .isEqualTo("DECLARED_SKILL_PROGRESS_NOT_FOUND");
+        .isEqualTo("SKILL_PROGRESS_NOT_FOUND");
 
     BddLogger.then("it should return 404");
   }
 
   @Test
   void shouldReturn403WhenAssociatingWithOtherStudentSkill_traces() throws Exception {
-    BddLogger.given("a declared skill progress belonging to another student");
+    BddLogger.given("a skill progress belonging to another student");
 
-    UUID otherStudentSkillId = UUID.fromString("72de2a8e-be49-437e-b759-15f8e3a06de3");
+    UUID otherStudentSkillId =
+        createAnyAvailableSkillProgressAs(otherStudentPayload, otherStudentSignature);
     List<UUID> traceIds = List.of(UUID.randomUUID());
 
     BddLogger.when("performing a POST to associate traces");
@@ -2900,9 +2902,9 @@ class AssociationControllerIT extends ContainerConfigurationTest {
 
   @Test
   void shouldReturn404WhenAssociatingWithNonExistentTraces() throws Exception {
-    BddLogger.given("a declared skill progress and non-existent trace IDs");
+    BddLogger.given("a skill progress and non-existent trace IDs");
 
-    UUID createdSkillId = createAvailableDeclaredSkillProgress().progressId();
+    UUID createdSkillId = createAvailableSkillProgress().progressId();
 
     List<UUID> nonExistentTraceIds = List.of(UUID.randomUUID(), UUID.randomUUID());
 
@@ -2929,10 +2931,10 @@ class AssociationControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldHandleEmptyTraceListWhenAssociatingWithADeclaredSkill() throws Exception {
-    BddLogger.given("a declared skill progress and empty trace list");
+  void shouldHandleEmptyTraceListWhenAssociatingWithASkillProgress() throws Exception {
+    BddLogger.given("a skill progress and empty trace list");
 
-    UUID createdSkillId = createAvailableDeclaredSkillProgress().progressId();
+    UUID createdSkillId = createAvailableSkillProgress().progressId();
 
     BddLogger.when("performing a POST with empty trace list");
 
@@ -2958,10 +2960,10 @@ class AssociationControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldAssociateDeclaredSkillWithTracesSuccessfully() throws Exception {
-    BddLogger.given("a declared skill progress and two traces owned by the student");
+  void shouldAssociateSkillProgressWithTracesSuccessfully() throws Exception {
+    BddLogger.given("a skill progress and two traces owned by the student");
 
-    UUID createdSkillId = createAvailableDeclaredSkillProgress().progressId();
+    UUID createdSkillId = createAvailableSkillProgress().progressId();
 
     UUID traceId1 = createTrace("Compte-rendu de stage");
     UUID traceId2 = createTrace("Rapport de projet");
@@ -3050,46 +3052,40 @@ class AssociationControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldAssociateADeclaredActivityWithADeclaredSkill() throws Exception {
-    BddLogger.given("an active declared activity and an available declared skill");
+  void shouldAssociateADeclaredActivityWithASkillProgress() throws Exception {
+    BddLogger.given("an active declared activity and an available skill progress");
     UUID declaredActivityId = getFirstActiveDeclaredActivityId();
-    UUID declaredSkillProgressId = createAvailableDeclaredSkillProgress().progressId();
+    UUID skillProgressId = createAvailableSkillProgress().progressId();
 
-    BddLogger.when("associating the declared activity with the declared skill");
+    BddLogger.when("associating the declared activity with the skill progress");
 
     JsonNode associations =
         associate(
-            declaredActivityId,
-            "DECLARED_ACTIVITY",
-            "DECLARED_SKILL",
-            List.of(declaredSkillProgressId));
+            declaredActivityId, "DECLARED_ACTIVITY", "DECLARED_SKILL", List.of(skillProgressId));
 
     BddLogger.then("it should return the associations of the declared activity");
     assertThat(
             associations
-                .get("declaredSkillAssociations")
+                .get("skillProgressAssociations")
                 .get(0)
-                .get("declaredSkill")
+                .get("skillProgress")
                 .get("id")
                 .asText())
-        .isEqualTo(declaredSkillProgressId.toString());
+        .isEqualTo(skillProgressId.toString());
   }
 
   @Test
   void shouldDeleteTheAssociationsOfADeclaredActivity() throws Exception {
-    BddLogger.given("a declared activity associated with a declared skill");
+    BddLogger.given("a declared activity associated with a skill progress");
     UUID declaredActivityId = getFirstActiveDeclaredActivityId();
-    UUID declaredSkillProgressId = createAvailableDeclaredSkillProgress().progressId();
+    UUID skillProgressId = createAvailableSkillProgress().progressId();
 
     JsonNode associations =
         associate(
-            declaredActivityId,
-            "DECLARED_ACTIVITY",
-            "DECLARED_SKILL",
-            List.of(declaredSkillProgressId));
+            declaredActivityId, "DECLARED_ACTIVITY", "DECLARED_SKILL", List.of(skillProgressId));
     UUID associationId =
         UUID.fromString(
-            associations.get("declaredSkillAssociations").get(0).get("associationId").asText());
+            associations.get("skillProgressAssociations").get(0).get("associationId").asText());
 
     BddLogger.when("performing a DELETE with that association id");
 
@@ -3111,7 +3107,7 @@ class AssociationControllerIT extends ContainerConfigurationTest {
   void shouldReturn404WhenAssociatingAnUnknownDeclaredActivity() throws Exception {
     BddLogger.given("an unknown declared activity");
 
-    BddLogger.when("associating it with a declared skill");
+    BddLogger.when("associating it with a skill progress");
 
     webTestClient
         .post()
@@ -3262,7 +3258,7 @@ class AssociationControllerIT extends ContainerConfigurationTest {
 
     BddLogger.then("it should return every associated element grouped by context");
     assertThat(associations.get("traceAssociations").isArray()).isTrue();
-    assertThat(associations.get("declaredSkillAssociations").isArray()).isTrue();
+    assertThat(associations.get("skillProgressAssociations").isArray()).isTrue();
     assertThat(associations.get("declaredExperienceAssociations").isArray()).isTrue();
     assertThat(associations.get("declaredProgramAssociations").isArray()).isTrue();
   }
@@ -3314,40 +3310,41 @@ class AssociationControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldAssociateSeveralDeclaredSkillsWithADeclaredProgram() throws Exception {
-    BddLogger.given("an existing declared program and two available declared skills");
+  void shouldAssociateSeveralSkillProgressesWithADeclaredProgram() throws Exception {
+    BddLogger.given("an existing declared program and two available skill progresses");
     UUID declaredProgramId = createDeclaredProgram("Mastère data", "Université");
-    UUID firstDeclaredSkillId = createAvailableDeclaredSkillProgress().progressId();
-    UUID secondDeclaredSkillId = createAvailableDeclaredSkillProgress().progressId();
+    UUID firstSkillProgressId = createAvailableSkillProgress().progressId();
+    UUID secondSkillProgressId = createAvailableSkillProgress().progressId();
 
-    when("associating the declared program with both declared skills");
+    when("associating the declared program with both skill progresses");
 
     JsonNode associations =
         associate(
             declaredProgramId,
             "DECLARED_PROGRAM",
             "DECLARED_SKILL",
-            List.of(firstDeclaredSkillId, secondDeclaredSkillId));
+            List.of(firstSkillProgressId, secondSkillProgressId));
 
-    BddLogger.then("it should return the two declared skills associated with the declared program");
-    assertThat(associations.get("declaredSkillAssociations")).hasSize(2);
-    assertThat(associations.get("declaredSkillAssociations"))
+    BddLogger.then(
+        "it should return the two skill progresses associated with the declared program");
+    assertThat(associations.get("skillProgressAssociations")).hasSize(2);
+    assertThat(associations.get("skillProgressAssociations"))
         .allSatisfy(association -> assertThat(association.get("associationId").isNull()).isFalse());
   }
 
   @Test
-  void shouldReturnTheDeclaredProgramInTheAssociationsOfItsDeclaredSkill() throws Exception {
-    BddLogger.given("a declared skill associated with a declared program");
+  void shouldReturnTheDeclaredProgramInTheAssociationsOfItsSkillProgress() throws Exception {
+    BddLogger.given("a skill progress associated with a declared program");
     UUID declaredProgramId = createDeclaredProgram("Diplôme ingénieur", "École centrale");
-    UUID declaredSkillId = createAvailableDeclaredSkillProgress().progressId();
+    UUID skillId = createAvailableSkillProgress().progressId();
 
-    associate(declaredProgramId, "DECLARED_PROGRAM", "DECLARED_SKILL", List.of(declaredSkillId));
+    associate(declaredProgramId, "DECLARED_PROGRAM", "DECLARED_SKILL", List.of(skillId));
 
-    when("getting the associations of the declared skill");
+    when("getting the associations of the skill progress");
 
-    var associations = getAssociations("DECLARED_SKILL", declaredSkillId);
+    var associations = getAssociations("DECLARED_SKILL", skillId);
 
-    BddLogger.then("it should return the declared program on the declared skill side");
+    BddLogger.then("it should return the declared program on the skill progress side");
     assertThat(associations.get("declaredProgramAssociations")).hasSize(1);
     assertThat(
             associations
@@ -3368,23 +3365,22 @@ class AssociationControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldReturn409WhenAssociatingTwiceTheSameDeclaredSkillWithADeclaredProgram()
+  void shouldReturn409WhenAssociatingTwiceTheSameSkillProgressWithADeclaredProgram()
       throws Exception {
-    BddLogger.given("a declared program already associated with a declared skill");
+    BddLogger.given("a declared program already associated with a skill progress");
     UUID declaredProgramId = createDeclaredProgram("DU communication", "Université");
-    UUID declaredSkillId = createAvailableDeclaredSkillProgress().progressId();
+    UUID skillId = createAvailableSkillProgress().progressId();
 
-    associate(declaredProgramId, "DECLARED_PROGRAM", "DECLARED_SKILL", List.of(declaredSkillId));
+    associate(declaredProgramId, "DECLARED_PROGRAM", "DECLARED_SKILL", List.of(skillId));
 
-    when("associating the same declared skill again");
+    when("associating the same skill progress again");
 
     webTestClient
         .post()
         .uri(ASSOCIATE_PATH, "DECLARED_PROGRAM", declaredProgramId, "DECLARED_SKILL")
         .contentType(APPLICATION_JSON)
         .bodyValue(
-            objectMapper.writeValueAsString(
-                new AssociationsCreationRequest(List.of(declaredSkillId))))
+            objectMapper.writeValueAsString(new AssociationsCreationRequest(List.of(skillId))))
         .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
         .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
         .exchange()
@@ -3395,11 +3391,11 @@ class AssociationControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldReturn404WhenAssociatingADeclaredProgramWithAnUnknownDeclaredSkill() throws Exception {
-    BddLogger.given("an existing declared program and an unknown declared skill");
+  void shouldReturn404WhenAssociatingADeclaredProgramWithAnUnknownSkillProgress() throws Exception {
+    BddLogger.given("an existing declared program and an unknown skill progress");
     UUID declaredProgramId = createDeclaredProgram("Formation continue", "CNAM");
 
-    when("associating the declared program with the unknown declared skill");
+    when("associating the declared program with the unknown skill progress");
 
     webTestClient
         .post()
@@ -3418,22 +3414,22 @@ class AssociationControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldUnassociateTheDeclaredSkillsOfADeclaredProgram() throws Exception {
-    BddLogger.given("a declared program associated with two declared skills");
+  void shouldUnassociateTheSkillProgressesOfADeclaredProgram() throws Exception {
+    BddLogger.given("a declared program associated with two skill progresses");
     UUID declaredProgramId = createDeclaredProgram("Certificat qualité", "AFNOR");
-    UUID firstDeclaredSkillId = createAvailableDeclaredSkillProgress().progressId();
-    UUID secondDeclaredSkillId = createAvailableDeclaredSkillProgress().progressId();
+    UUID firstSkillProgressId = createAvailableSkillProgress().progressId();
+    UUID secondSkillProgressId = createAvailableSkillProgress().progressId();
 
     JsonNode associations =
         associate(
             declaredProgramId,
             "DECLARED_PROGRAM",
             "DECLARED_SKILL",
-            List.of(firstDeclaredSkillId, secondDeclaredSkillId));
+            List.of(firstSkillProgressId, secondSkillProgressId));
 
     List<UUID> associationIds = new ArrayList<>();
     associations
-        .get("declaredSkillAssociations")
+        .get("skillProgressAssociations")
         .forEach(
             association ->
                 associationIds.add(UUID.fromString(association.get("associationId").asText())));
@@ -3451,28 +3447,28 @@ class AssociationControllerIT extends ContainerConfigurationTest {
         .expectStatus()
         .isNoContent();
 
-    BddLogger.then("the declared program should not have any declared skill left");
+    BddLogger.then("the declared program should not have any skill progress left");
     assertThat(
-            getAssociations("DECLARED_PROGRAM", declaredProgramId).get("declaredSkillAssociations"))
+            getAssociations("DECLARED_PROGRAM", declaredProgramId).get("skillProgressAssociations"))
         .isEmpty();
   }
 
   @Test
-  void shouldSearchTheDeclaredSkillsToAssociateWithADeclaredProgram() throws Exception {
-    BddLogger.given("a declared program already associated with a declared skill");
+  void shouldSearchTheSkillProgressesToAssociateWithADeclaredProgram() throws Exception {
+    BddLogger.given("a declared program already associated with a skill progress");
     UUID declaredProgramId = createDeclaredProgram("BUT informatique", "IUT");
-    UUID declaredSkillId = createAvailableDeclaredSkillProgress().progressId();
+    UUID skillId = createAvailableSkillProgress().progressId();
 
-    associate(declaredProgramId, "DECLARED_PROGRAM", "DECLARED_SKILL", List.of(declaredSkillId));
+    associate(declaredProgramId, "DECLARED_PROGRAM", "DECLARED_SKILL", List.of(skillId));
 
-    when("searching the declared skills to associate");
+    when("searching the skill progresses to associate");
 
     var results = searchForAssociation("DECLARED_PROGRAM", declaredProgramId, "DECLARED_SKILL", "");
 
-    BddLogger.then("the already associated declared skill should be disabled");
+    BddLogger.then("the already associated skill progress should be disabled");
     var alreadyAssociated =
         StreamSupport.stream(results.spliterator(), false)
-            .filter(result -> result.get("id").asText().equals(declaredSkillId.toString()))
+            .filter(result -> result.get("id").asText().equals(skillId.toString()))
             .findFirst()
             .orElseThrow();
 
@@ -3480,16 +3476,15 @@ class AssociationControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldSearchTheDeclaredProgramsToAssociateWithADeclaredSkill() throws Exception {
-    BddLogger.given("a declared skill and a declared program matching the keyword");
+  void shouldSearchTheDeclaredProgramsToAssociateWithASkillProgress() throws Exception {
+    BddLogger.given("a skill progress and a declared program matching the keyword");
     UUID declaredProgramId = createDeclaredProgram("Alternance cybersécurité", "Orange");
-    UUID declaredSkillId = createAvailableDeclaredSkillProgress().progressId();
+    UUID skillId = createAvailableSkillProgress().progressId();
 
     when("searching the declared programs to associate");
 
     var results =
-        searchForAssociation(
-            "DECLARED_SKILL", declaredSkillId, "DECLARED_PROGRAM", "cybersécurité");
+        searchForAssociation("DECLARED_SKILL", skillId, "DECLARED_PROGRAM", "cybersécurité");
 
     BddLogger.then("it should return the matching declared program with its organization");
     var found =
@@ -3504,17 +3499,16 @@ class AssociationControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldDisableTheDeclaredProgramsAlreadyAssociatedWithADeclaredSkill() throws Exception {
-    BddLogger.given("a declared skill already associated with a declared program");
+  void shouldDisableTheDeclaredProgramsAlreadyAssociatedWithASkillProgress() throws Exception {
+    BddLogger.given("a skill progress already associated with a declared program");
     UUID declaredProgramId = createDeclaredProgram("Doctorat physique", "Sorbonne");
-    UUID declaredSkillId = createAvailableDeclaredSkillProgress().progressId();
+    UUID skillId = createAvailableSkillProgress().progressId();
 
-    associate(declaredProgramId, "DECLARED_PROGRAM", "DECLARED_SKILL", List.of(declaredSkillId));
+    associate(declaredProgramId, "DECLARED_PROGRAM", "DECLARED_SKILL", List.of(skillId));
 
     when("searching the declared programs to associate");
 
-    var results =
-        searchForAssociation("DECLARED_SKILL", declaredSkillId, "DECLARED_PROGRAM", "Doctorat");
+    var results = searchForAssociation("DECLARED_SKILL", skillId, "DECLARED_PROGRAM", "Doctorat");
 
     BddLogger.then("the already associated declared program should be disabled");
     var found =
@@ -3528,11 +3522,11 @@ class AssociationControllerIT extends ContainerConfigurationTest {
 
   @Test
   void shouldDeleteTheAssociationsOfADeletedDeclaredProgram() throws Exception {
-    BddLogger.given("a declared program associated with a declared skill");
+    BddLogger.given("a declared program associated with a skill progress");
     UUID declaredProgramId = createDeclaredProgram("Prépa scientifique", "Lycée Kléber");
-    UUID declaredSkillId = createAvailableDeclaredSkillProgress().progressId();
+    UUID skillId = createAvailableSkillProgress().progressId();
 
-    associate(declaredProgramId, "DECLARED_PROGRAM", "DECLARED_SKILL", List.of(declaredSkillId));
+    associate(declaredProgramId, "DECLARED_PROGRAM", "DECLARED_SKILL", List.of(skillId));
 
     when("deleting the declared program");
 
@@ -3547,9 +3541,8 @@ class AssociationControllerIT extends ContainerConfigurationTest {
         .expectStatus()
         .isOk();
 
-    BddLogger.then("the declared skill should not reference the declared program anymore");
-    assertThat(
-            getAssociations("DECLARED_SKILL", declaredSkillId).get("declaredProgramAssociations"))
+    BddLogger.then("the skill progress should not reference the declared program anymore");
+    assertThat(getAssociations("DECLARED_SKILL", skillId).get("declaredProgramAssociations"))
         .isEmpty();
   }
 

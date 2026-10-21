@@ -353,7 +353,7 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
     var traceAssociationsCountById =
         associationService.countAllOf(
             ids, DeclaredExperience.class, EAssociationType.TRACE_DECLARED_EXPERIENCE);
-    var declaredSkillAssociationsCountById =
+    var skillProgressAssociationsCountById =
         associationService.countAllOf(
             ids, DeclaredExperience.class, EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL);
 
@@ -364,7 +364,7 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
                 experience ->
                     new DeclaredExperienceAssociationCount(
                         traceAssociationsCountById.getOrDefault(experience.getId(), 0L).intValue(),
-                        declaredSkillAssociationsCountById
+                        skillProgressAssociationsCountById
                             .getOrDefault(experience.getId(), 0L)
                             .intValue())));
   }
