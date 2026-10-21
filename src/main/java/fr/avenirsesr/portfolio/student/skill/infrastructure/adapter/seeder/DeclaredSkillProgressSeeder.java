@@ -5,7 +5,7 @@ import static fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.Seede
 
 import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
-import fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.model.DeclaredSkillEntity;
+import fr.avenirsesr.portfolio.skill.domain.model.Skill;
 import fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.model.DeclaredSkillProgressEntity;
 import fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.repository.DeclaredSkillProgressDatabaseRepository;
 import fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.seeder.fake.FakeDeclaredSkillProgress;
@@ -24,13 +24,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class DeclaredSkillProgressSeeder {
   private static final DataGeneratorProvider<SharedDataGenerator> dataGenerator =
       new DataGeneratorProvider<SharedDataGenerator>()
-          .init(DeclaredSkillSeeder.class, SharedDataGenerator.class);
+          .init(DeclaredSkillProgressSeeder.class, SharedDataGenerator.class);
 
   private final DeclaredSkillProgressDatabaseRepository studentDeclaredSkillDatabaseRepository;
 
   @Transactional
   public List<DeclaredSkillProgressEntity> seed(
-      List<StudentEntity> savedStudents, List<DeclaredSkillEntity> savedDeclaredSkills) {
+      List<StudentEntity> savedStudents, List<Skill> availableSkills) {
     log.info("Seeding student progress...");
     List<DeclaredSkillProgressEntity> studentDeclaredSkillEntities = new ArrayList<>();
     savedStudents.forEach(
@@ -42,9 +42,8 @@ public class DeclaredSkillProgressSeeder {
           List<UUID> bannedSkillsIds = new ArrayList<>();
           for (int i = 0; i < declaredSkillsCount; i++) {
             DeclaredSkillProgressEntity fakeStudentDeclaredSkillProgress =
-                FakeDeclaredSkillProgress.of(student, savedDeclaredSkills, bannedSkillsIds)
-                    .toEntity();
-            bannedSkillsIds.add(fakeStudentDeclaredSkillProgress.getDeclaredSkill().getId());
+                FakeDeclaredSkillProgress.of(student, availableSkills, bannedSkillsIds).toEntity();
+            bannedSkillsIds.add(fakeStudentDeclaredSkillProgress.getSkill().getId());
             studentDeclaredSkillEntities.add(fakeStudentDeclaredSkillProgress);
           }
         });

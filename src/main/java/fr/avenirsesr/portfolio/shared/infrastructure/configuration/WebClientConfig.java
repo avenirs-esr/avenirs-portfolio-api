@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.Aven
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.reactive.function.client.ClientRequest;
@@ -14,6 +15,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class WebClientConfig {
 
   @Bean
+  @Primary
   public WebClient webClient() {
     return WebClient.builder().filter(forwardUserContext()).build();
   }

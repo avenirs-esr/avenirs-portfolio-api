@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
-import fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.seeder.DeclaredSkillSeeder;
+import fr.avenirsesr.portfolio.skill.infrastructure.adapter.seeder.SkillCatalogSeeder;
 import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.StudentSeeder;
@@ -24,7 +24,7 @@ class TraceSeederTest extends ContainerConfigurationTest {
 
   @Autowired private UserSeeder userSeeder;
   @Autowired private StudentSeeder studentSeeder;
-  @Autowired private DeclaredSkillSeeder declaredSkillSeeder;
+  @Autowired private SkillCatalogSeeder skillCatalogSeeder;
 
   private static List<StudentEntity> students;
 
@@ -32,7 +32,7 @@ class TraceSeederTest extends ContainerConfigurationTest {
   void setUp() {
     var users = userSeeder.seed();
     students = studentSeeder.seed(users);
-    declaredSkillSeeder.seed();
+    skillCatalogSeeder.seed();
   }
 
   @Test

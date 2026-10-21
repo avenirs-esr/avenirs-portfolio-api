@@ -15,26 +15,28 @@ import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortField;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
-import fr.avenirsesr.portfolio.common.externalskill.application.adapter.dto.ExternalSkillCategoryDTO;
-import fr.avenirsesr.portfolio.common.externalskill.application.adapter.dto.ExternalSkillDetailsDTO;
-import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillCategoryType;
-import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillType;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
+import fr.avenirsesr.portfolio.common.skill.domain.model.enums.ESkillKind;
+import fr.avenirsesr.portfolio.common.skill.domain.model.enums.ESkillReferentialType;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.skill.domain.data.SkillPathSegment;
+import fr.avenirsesr.portfolio.skill.domain.exception.SkillNotAssessableException;
+import fr.avenirsesr.portfolio.skill.domain.exception.SkillNotFoundException;
+import fr.avenirsesr.portfolio.skill.domain.model.Skill;
+import fr.avenirsesr.portfolio.skill.domain.port.input.SkillService;
+import fr.avenirsesr.portfolio.skill.infrastructure.fixture.SkillFixture;
+import fr.avenirsesr.portfolio.skill.infrastructure.fixture.SkillReferentialFixture;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillAssociationCount;
 import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillProgressData;
 import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillProgressDetails;
-import fr.avenirsesr.portfolio.student.skill.domain.exception.DeclaredSkillNotFoundException;
 import fr.avenirsesr.portfolio.student.skill.domain.exception.DeclaredSkillProgressNotFoundException;
 import fr.avenirsesr.portfolio.student.skill.domain.exception.DuplicateDeclaredSkillException;
-import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkill;
+import fr.avenirsesr.portfolio.student.skill.domain.exception.SkillNotSelfDeclarableException;
 import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.skill.domain.model.enums.EDeclaredSkillLevel;
-import fr.avenirsesr.portfolio.student.skill.domain.port.input.DeclaredSkillSyncService;
 import fr.avenirsesr.portfolio.student.skill.domain.port.output.repository.DeclaredSkillProgressRepository;
-import fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.client.ExternalSkillClient;
 import fr.avenirsesr.portfolio.student.skill.infrastructure.fixture.DeclaredSkillProgressFixture;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
@@ -51,9 +53,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 public class DeclaredSkillProgressServiceImplTest {
-  @Mock private DeclaredSkillSyncService declaredSkillSyncService;
+  @Mock private SkillService skillService;
   @Mock private DeclaredSkillProgressRepository declaredSkillProgressRepository;
-  @Mock private ExternalSkillClient externalSkillClient;
   @Mock private LoggedInUserService loggedInUserService;
   @Mock private AssociationService associationService;
   @InjectMocks private DeclaredSkillProgressServiceImpl declaredSkillProgressService;
@@ -70,11 +71,14 @@ public class DeclaredSkillProgressServiceImplTest {
     lenient().when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
   }
 
-  private DeclaredSkillProgress buildDeclaredSkillProgress() {
-    DeclaredSkill skill =
-        DeclaredSkill.create(
-            randomUUID(), "Java Programming", EExternalSkillType.ROME4, List.of("Technology"));
+  private DeclaredSkillProgress buildDeclaredSkillProgress(Skill skill) {
     return DeclaredSkillProgress.create(student, skill, EDeclaredSkillLevel.BEGINNER, null);
+  }
+
+  private void stubSkillResolution(Skill skill) {
+    lenient()
+        .when(skillService.getAllWithAncestorsById(List.of(skill.getId())))
+        .thenReturn(List.of(skill));
   }
 
   @Nested
@@ -92,7 +96,8 @@ public class DeclaredSkillProgressServiceImplTest {
       void getDeclaredSkillsProgresses_shouldDelegateToRepositoryAndReturnResult() {
         BddLogger.given("the method getDeclaredSkillsProgresses");
         PageCriteria criteria = new PageCriteria(1, 8);
-        DeclaredSkillProgress declaredSkillProgress = buildDeclaredSkillProgress();
+        Skill skill = SkillFixture.create().withTitle("Java Programming").toModel();
+        DeclaredSkillProgress declaredSkillProgress = buildDeclaredSkillProgress(skill);
         PagedResult<DeclaredSkillProgress> repositoryResult =
             new PagedResult<>(List.of(declaredSkillProgress), new PageInfo(1, 8, 1));
 
@@ -103,6 +108,7 @@ public class DeclaredSkillProgressServiceImplTest {
                 (Boolean) null,
                 new SortCriteria(ESortField.NAME, ESortOrder.ASC)))
             .thenReturn(repositoryResult);
+        stubSkillResolution(skill);
 
         PagedResult<DeclaredSkillProgressData> result =
             declaredSkillProgressService.getDeclaredSkillsProgresses(criteria, null);
@@ -114,7 +120,7 @@ public class DeclaredSkillProgressServiceImplTest {
         assertThat(result.content())
             .containsExactly(
                 new DeclaredSkillProgressData(
-                    declaredSkillProgress, new DeclaredSkillAssociationCount(0, 0)));
+                    declaredSkillProgress, skill, new DeclaredSkillAssociationCount(0, 0)));
         verify(declaredSkillProgressRepository)
             .findAllByStudent(
                 student,
@@ -127,7 +133,8 @@ public class DeclaredSkillProgressServiceImplTest {
       void getDeclaredSkillsProgresses_shouldDelegateIsValorizedFilterToRepository() {
         BddLogger.given("the method getDeclaredSkillsProgresses");
         PageCriteria criteria = new PageCriteria(1, 8);
-        DeclaredSkillProgress declaredSkillProgress = buildDeclaredSkillProgress();
+        Skill skill = SkillFixture.create().withTitle("Java Programming").toModel();
+        DeclaredSkillProgress declaredSkillProgress = buildDeclaredSkillProgress(skill);
         PagedResult<DeclaredSkillProgress> repositoryResult =
             new PagedResult<>(List.of(declaredSkillProgress), new PageInfo(1, 8, 1));
 
@@ -135,6 +142,7 @@ public class DeclaredSkillProgressServiceImplTest {
         when(declaredSkillProgressRepository.findAllByStudent(
                 student, criteria, true, new SortCriteria(ESortField.NAME, ESortOrder.ASC)))
             .thenReturn(repositoryResult);
+        stubSkillResolution(skill);
 
         PagedResult<DeclaredSkillProgressData> result =
             declaredSkillProgressService.getDeclaredSkillsProgresses(criteria, true);
@@ -144,7 +152,7 @@ public class DeclaredSkillProgressServiceImplTest {
         assertThat(result.content())
             .containsExactly(
                 new DeclaredSkillProgressData(
-                    declaredSkillProgress, new DeclaredSkillAssociationCount(0, 0)));
+                    declaredSkillProgress, skill, new DeclaredSkillAssociationCount(0, 0)));
         verify(declaredSkillProgressRepository)
             .findAllByStudent(
                 student, criteria, true, new SortCriteria(ESortField.NAME, ESortOrder.ASC));
@@ -155,23 +163,17 @@ public class DeclaredSkillProgressServiceImplTest {
         BddLogger.given("the method getDeclaredSkillProgressDetails");
         DeclaredSkillProgress declaredSkillProgress =
             DeclaredSkillProgressFixture.create().withStudent(student).toModel();
+        Skill skill = declaredSkillProgress.getSkill();
+        List<SkillPathSegment> path =
+            List.of(
+                new SkillPathSegment("Domain", ESkillKind.DOMAIN),
+                new SkillPathSegment("Issue", ESkillKind.ISSUE));
 
         BddLogger.when("calling the method with a given student and declaredSkillProgressId");
         when(declaredSkillProgressRepository.findById(any(), any()))
             .thenReturn(Optional.of(declaredSkillProgress));
-
-        List<ExternalSkillCategoryDTO> categories =
-            List.of(
-                new ExternalSkillCategoryDTO("Domain", EExternalSkillCategoryType.DOMAIN),
-                new ExternalSkillCategoryDTO("Issue", EExternalSkillCategoryType.ISSUE));
-        ExternalSkillDetailsDTO externalSkillDetails =
-            new ExternalSkillDetailsDTO(
-                declaredSkillProgress.getSkill().getId(),
-                "Test Skill",
-                categories,
-                EExternalSkillType.ROME4);
-        when(externalSkillClient.getExternalSkillDetails(any(UUID.class)))
-            .thenReturn(Optional.of(externalSkillDetails));
+        stubSkillResolution(skill);
+        when(skillService.getDetailedPaths(List.of(skill))).thenReturn(Map.of(skill.getId(), path));
 
         DeclaredSkillProgressDetails declaredSkillProgressDetails =
             declaredSkillProgressService.getDeclaredSkillProgressDetails(
@@ -179,6 +181,8 @@ public class DeclaredSkillProgressServiceImplTest {
 
         BddLogger.then("it should return the expected declared skill progress details");
         assertEquals(declaredSkillProgressDetails.declaredSkillProgress(), declaredSkillProgress);
+        assertEquals(skill, declaredSkillProgressDetails.skill());
+        assertEquals(path, declaredSkillProgressDetails.path());
       }
 
       @Test
@@ -190,17 +194,17 @@ public class DeclaredSkillProgressServiceImplTest {
         DeclaredSkillProgress secondSkill =
             DeclaredSkillProgressFixture.create().withStudent(student).toModel();
 
-        List<ExternalSkillCategoryDTO> categories =
-            List.of(new ExternalSkillCategoryDTO("Domain", EExternalSkillCategoryType.DOMAIN));
-        when(externalSkillClient.getExternalSkillDetails(any(UUID.class)))
-            .thenAnswer(
-                invocation ->
-                    Optional.of(
-                        new ExternalSkillDetailsDTO(
-                            invocation.getArgument(0),
-                            "Test Skill",
-                            categories,
-                            EExternalSkillType.ROME4)));
+        List<UUID> skillIds =
+            List.of(firstSkill.getSkill().getId(), secondSkill.getSkill().getId());
+        when(skillService.getAllWithAncestorsById(skillIds))
+            .thenReturn(List.of(firstSkill.getSkill(), secondSkill.getSkill()));
+        when(skillService.getDetailedPaths(anyList()))
+            .thenReturn(
+                Map.of(
+                    firstSkill.getSkill().getId(),
+                    List.of(new SkillPathSegment("Domain", ESkillKind.DOMAIN)),
+                    secondSkill.getSkill().getId(),
+                    List.of(new SkillPathSegment("Domain", ESkillKind.DOMAIN))));
 
         BddLogger.when("calling the method with a list of declared skill progresses");
         List<DeclaredSkillProgressDetails> result =
@@ -212,7 +216,10 @@ public class DeclaredSkillProgressServiceImplTest {
             .extracting(DeclaredSkillProgressDetails::declaredSkillProgress)
             .containsExactly(firstSkill, secondSkill);
         assertThat(result)
-            .allSatisfy(details -> assertThat(details.externalCategories()).isEqualTo(categories));
+            .allSatisfy(
+                details ->
+                    assertThat(details.path())
+                        .containsExactly(new SkillPathSegment("Domain", ESkillKind.DOMAIN)));
       }
 
       @Test
@@ -252,22 +259,21 @@ public class DeclaredSkillProgressServiceImplTest {
       @Test
       void createDeclaredSkillProgress_shouldSaveWhenSkillIsAvailableAndNotDuplicate() {
         BddLogger.given("the method createDeclaredSkillProgress");
-        UUID skillId = randomUUID();
-        EExternalSkillType type = EExternalSkillType.ROME4;
         EDeclaredSkillLevel level = EDeclaredSkillLevel.BEGINNER;
         String reflection = "Reflection for declared skill progress test";
-        DeclaredSkill declaredSkill = mock(DeclaredSkill.class);
+        Skill skill = SkillFixture.create().toModel();
 
         BddLogger.when("calling the method with an available and not duplicate skill");
-        when(declaredSkillSyncService.getOrCreateFromExternalSkill(skillId))
-            .thenReturn(Optional.of(declaredSkill));
+        when(skillService.getWithAncestorsById(skill.getId())).thenReturn(skill);
         when(declaredSkillProgressRepository.declaredSkillProgressAlreadyExists(any()))
             .thenReturn(false);
+        when(declaredSkillProgressRepository.save(any(DeclaredSkillProgress.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
 
-        declaredSkillProgressService.createDeclaredSkillProgress(skillId, type, level, reflection);
+        declaredSkillProgressService.createDeclaredSkillProgress(skill.getId(), level, reflection);
 
         BddLogger.then("it should save the declared skill progress");
-        verify(declaredSkillSyncService).getOrCreateFromExternalSkill(skillId);
+        verify(skillService).getWithAncestorsById(skill.getId());
         verify(declaredSkillProgressRepository).declaredSkillProgressAlreadyExists(any());
         verify(declaredSkillProgressRepository).save(any(DeclaredSkillProgress.class));
       }
@@ -275,15 +281,12 @@ public class DeclaredSkillProgressServiceImplTest {
       @Test
       void createDeclaredSkillProgress_shouldThrowDuplicateWhenAlreadyExists() {
         BddLogger.given("the method createDeclaredSkillProgress");
-        UUID skillId = randomUUID();
-        EExternalSkillType type = EExternalSkillType.ROME4;
         EDeclaredSkillLevel level = EDeclaredSkillLevel.BEGINNER;
         String reflection = "Reflection for declared skill progress test";
-        DeclaredSkill declaredSkill = mock(DeclaredSkill.class);
+        Skill skill = SkillFixture.create().toModel();
 
         BddLogger.when("calling the method with a duplicate skill");
-        when(declaredSkillSyncService.getOrCreateFromExternalSkill(skillId))
-            .thenReturn(Optional.of(declaredSkill));
+        when(skillService.getWithAncestorsById(skill.getId())).thenReturn(skill);
         when(declaredSkillProgressRepository.declaredSkillProgressAlreadyExists(any()))
             .thenReturn(true);
 
@@ -294,9 +297,8 @@ public class DeclaredSkillProgressServiceImplTest {
             DuplicateDeclaredSkillException.class,
             () ->
                 declaredSkillProgressService.createDeclaredSkillProgress(
-                    skillId, type, level, reflection));
+                    skill.getId(), level, reflection));
 
-        verify(declaredSkillSyncService).getOrCreateFromExternalSkill(skillId);
         verify(declaredSkillProgressRepository).declaredSkillProgressAlreadyExists(any());
         verify(declaredSkillProgressRepository, never()).save(any());
       }
@@ -305,23 +307,66 @@ public class DeclaredSkillProgressServiceImplTest {
       void createDeclaredSkillProgress_shouldRethrowWhenSkillNotFound() {
         BddLogger.given("the method createDeclaredSkillProgress");
         UUID skillId = randomUUID();
-        EExternalSkillType type = EExternalSkillType.ROME4;
         EDeclaredSkillLevel level = EDeclaredSkillLevel.BEGINNER;
         String reflection = "Reflection for declared skill progress test";
 
         BddLogger.when("calling the method with an unknown skill");
-        when(declaredSkillSyncService.getOrCreateFromExternalSkill(skillId))
-            .thenReturn(Optional.empty());
+        when(skillService.getWithAncestorsById(skillId)).thenThrow(new SkillNotFoundException());
 
-        BddLogger.then("it should throw an DeclaredSkillNotFoundException");
+        BddLogger.then("it should throw a SkillNotFoundException");
 
         assertThrows(
-            DeclaredSkillNotFoundException.class,
+            SkillNotFoundException.class,
             () ->
                 declaredSkillProgressService.createDeclaredSkillProgress(
-                    skillId, type, level, reflection));
+                    skillId, level, reflection));
 
-        verify(declaredSkillSyncService).getOrCreateFromExternalSkill(skillId);
+        verifyNoInteractions(declaredSkillProgressRepository);
+      }
+
+      @Test
+      void createDeclaredSkillProgress_shouldThrowWhenTheSkillIsNotAssessable() {
+        BddLogger.given("the method createDeclaredSkillProgress");
+        EDeclaredSkillLevel level = EDeclaredSkillLevel.BEGINNER;
+        Skill categorySkill = SkillFixture.create().withAssessable(false).toModel();
+
+        BddLogger.when("calling the method with a skill that only categorizes its children");
+        when(skillService.getWithAncestorsById(categorySkill.getId())).thenReturn(categorySkill);
+
+        BddLogger.then("it should throw a SkillNotAssessableException");
+        assertThrows(
+            SkillNotAssessableException.class,
+            () ->
+                declaredSkillProgressService.createDeclaredSkillProgress(
+                    categorySkill.getId(), level, null));
+
+        verifyNoInteractions(declaredSkillProgressRepository);
+      }
+
+      @Test
+      void createDeclaredSkillProgress_shouldThrowWhenTheReferentialBelongsToAnInstitution() {
+        BddLogger.given("the method createDeclaredSkillProgress");
+        EDeclaredSkillLevel level = EDeclaredSkillLevel.BEGINNER;
+        Skill institutionSkill =
+            SkillFixture.create()
+                .withReferential(
+                    SkillReferentialFixture.create()
+                        .withType(ESkillReferentialType.APC)
+                        .withInstitutionId(randomUUID())
+                        .toModel())
+                .toModel();
+
+        BddLogger.when("calling the method with a skill of an institution referential");
+        when(skillService.getWithAncestorsById(institutionSkill.getId()))
+            .thenReturn(institutionSkill);
+
+        BddLogger.then("it should throw a SkillNotSelfDeclarableException");
+        assertThrows(
+            SkillNotSelfDeclarableException.class,
+            () ->
+                declaredSkillProgressService.createDeclaredSkillProgress(
+                    institutionSkill.getId(), level, null));
+
         verifyNoInteractions(declaredSkillProgressRepository);
       }
     }
@@ -347,6 +392,10 @@ public class DeclaredSkillProgressServiceImplTest {
                 + " and valorized");
         when(declaredSkillProgressRepository.findById(declaredSkillProgress.getId()))
             .thenReturn(Optional.of(declaredSkillProgress));
+        when(declaredSkillProgressRepository.save(any(DeclaredSkillProgress.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+        when(skillService.getWithAncestorsById(declaredSkillProgress.getSkill().getId()))
+            .thenReturn(declaredSkillProgress.getSkill());
 
         declaredSkillProgressService.updateDeclaredSkillProgress(
             declaredSkillProgress.getId(), level, reflection, valorized);

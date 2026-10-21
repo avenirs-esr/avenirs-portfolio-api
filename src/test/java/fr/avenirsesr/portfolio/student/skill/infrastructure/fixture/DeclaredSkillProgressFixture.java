@@ -1,16 +1,15 @@
 package fr.avenirsesr.portfolio.student.skill.infrastructure.fixture;
 
-import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillType;
 import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
-import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkill;
+import fr.avenirsesr.portfolio.skill.domain.model.Skill;
+import fr.avenirsesr.portfolio.skill.infrastructure.fixture.SkillFixture;
 import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.skill.domain.model.enums.EDeclaredSkillLevel;
 import fr.avenirsesr.portfolio.student.skill.domain.port.output.seeder.DeclaredSkillProgressDataGenerator;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
 
 public class DeclaredSkillProgressFixture {
@@ -25,7 +24,7 @@ public class DeclaredSkillProgressFixture {
 
   private UUID id;
   private Student student;
-  private DeclaredSkill skill;
+  private Skill skill;
   private EDeclaredSkillLevel level;
   private String reflection;
   private boolean valorized;
@@ -35,12 +34,7 @@ public class DeclaredSkillProgressFixture {
   private DeclaredSkillProgressFixture() {
     this.id = dataGenerator.with("id").uuid();
     this.student = StudentFixture.create().toModel();
-    this.skill =
-        DeclaredSkill.create(
-            UUID.randomUUID(),
-            "Test Skill",
-            EExternalSkillType.ROME4,
-            List.of("Category", "Subcategory"));
+    this.skill = SkillFixture.create().toModel();
     this.level = dataGenerator.with("level").pickIn(EDeclaredSkillLevel.class);
     this.reflection = declaredSkillProgressGenerator.with("sentence").reflection();
     this.valorized = false;
@@ -62,7 +56,7 @@ public class DeclaredSkillProgressFixture {
     return this;
   }
 
-  public DeclaredSkillProgressFixture withSkill(DeclaredSkill skill) {
+  public DeclaredSkillProgressFixture withSkill(Skill skill) {
     this.skill = skill;
     return this;
   }

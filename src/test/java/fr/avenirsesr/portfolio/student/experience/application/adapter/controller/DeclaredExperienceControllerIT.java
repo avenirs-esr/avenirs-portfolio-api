@@ -10,7 +10,8 @@ import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
-import fr.avenirsesr.portfolio.student.skill.domain.port.output.repository.DeclaredSkillRepository;
+import fr.avenirsesr.portfolio.skill.domain.model.Skill;
+import fr.avenirsesr.portfolio.skill.domain.port.output.repository.SkillRepository;
 import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.client.TraceConfigurationClient;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +49,7 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
 
   @Autowired private WebTestClient webTestClient;
   @Autowired private ObjectMapper objectMapper;
-  @Autowired private DeclaredSkillRepository declaredSkillRepository;
+  @Autowired private SkillRepository skillRepository;
 
   @Value("${user.student.payload}")
   private String studentPayload;
@@ -1104,7 +1105,7 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
 
   private UUID createAnyAvailableDeclaredSkillProgressAs(
       List<UUID> excludedSkillIds, String payload, String signature) throws Exception {
-    for (var declaredSkill : declaredSkillRepository.findAll()) {
+    for (var declaredSkill : assessableSkills()) {
       if (excludedSkillIds.contains(declaredSkill.getId())) {
         continue;
       }
@@ -1191,5 +1192,9 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .exchange()
         .expectStatus()
         .isForbidden();
+  }
+
+  private List<Skill> assessableSkills() {
+    return skillRepository.findAll().stream().filter(Skill::isAssessable).toList();
   }
 }

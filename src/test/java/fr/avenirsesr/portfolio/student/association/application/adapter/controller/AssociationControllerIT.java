@@ -11,12 +11,13 @@ import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.Aven
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
+import fr.avenirsesr.portfolio.skill.domain.model.Skill;
+import fr.avenirsesr.portfolio.skill.domain.port.output.repository.SkillRepository;
 import fr.avenirsesr.portfolio.student.association.application.adapter.request.AssociationsCreationRequest;
 import fr.avenirsesr.portfolio.student.association.application.adapter.request.AssociationsDeleteRequest;
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociationData;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
-import fr.avenirsesr.portfolio.student.skill.domain.port.output.repository.DeclaredSkillRepository;
 import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.client.TraceConfigurationClient;
 import java.util.ArrayList;
 import java.util.List;
@@ -77,7 +78,7 @@ class AssociationControllerIT extends ContainerConfigurationTest {
 
   @Autowired private WebTestClient webTestClient;
   @Autowired private ObjectMapper objectMapper;
-  @Autowired private DeclaredSkillRepository declaredSkillRepository;
+  @Autowired private SkillRepository skillRepository;
   @Autowired private AssociationService associationService;
 
   @Value("${user.student.payload}")
@@ -894,7 +895,7 @@ class AssociationControllerIT extends ContainerConfigurationTest {
 
   private UUID createAnyAvailableDeclaredSkillProgressAs(
       List<UUID> excludedSkillIds, String payload, String signature) throws Exception {
-    for (var declaredSkill : declaredSkillRepository.findAll()) {
+    for (var declaredSkill : assessableSkills()) {
       if (excludedSkillIds.contains(declaredSkill.getId())) {
         continue;
       }
@@ -2220,7 +2221,7 @@ class AssociationControllerIT extends ContainerConfigurationTest {
    * earlier against the same database, are skipped so that this helper never returns 409.
    */
   private CreatedDeclaredSkillProgress createAvailableDeclaredSkillProgress() throws Exception {
-    for (var declaredSkill : declaredSkillRepository.findAll()) {
+    for (var declaredSkill : assessableSkills()) {
       var result =
           webTestClient
               .post()
@@ -4327,5 +4328,9 @@ class AssociationControllerIT extends ContainerConfigurationTest {
         .isBadRequest();
 
     BddLogger.then("it should return 400");
+  }
+
+  private List<Skill> assessableSkills() {
+    return skillRepository.findAll().stream().filter(Skill::isAssessable).toList();
   }
 }

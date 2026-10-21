@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.student.skill.application.adapter.dto;
 
-import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillType;
+import fr.avenirsesr.portfolio.common.skill.domain.model.enums.ESkillReferentialType;
 import fr.avenirsesr.portfolio.student.skill.domain.model.enums.EDeclaredSkillLevel;
 import fr.avenirsesr.portfolio.student.trace.application.adapter.dto.TraceOverviewDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -11,6 +11,7 @@ import java.util.UUID;
 @Schema(
     requiredProperties = {
       "id",
+      "skillId",
       "title",
       "pathSegments",
       "type",
@@ -22,10 +23,12 @@ import java.util.UUID;
     })
 public record DeclaredSkillProgressDetailsDTO(
     UUID id,
+    UUID skillId,
     String title,
     List<DeclaredSkillCategoryDTO> pathSegments,
+    String description,
     String reflection,
-    @Schema(ref = "#/components/schemas/EExternalSkillType") EExternalSkillType type,
+    @Schema(ref = "#/components/schemas/ESkillReferentialType") ESkillReferentialType type,
     @Schema(ref = "#/components/schemas/EDeclaredSkillLevel") EDeclaredSkillLevel level,
     List<TraceOverviewDTO> traceAssociations,
     Instant createdAt,

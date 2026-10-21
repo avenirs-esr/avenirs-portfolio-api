@@ -2,9 +2,10 @@ package fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.seeder.fake
 
 import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
+import fr.avenirsesr.portfolio.skill.domain.model.Skill;
+import fr.avenirsesr.portfolio.skill.infrastructure.adapter.mapper.SkillMapper;
 import fr.avenirsesr.portfolio.student.skill.domain.model.enums.EDeclaredSkillLevel;
 import fr.avenirsesr.portfolio.student.skill.domain.port.output.seeder.DeclaredSkillProgressDataGenerator;
-import fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.model.DeclaredSkillEntity;
 import fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.model.DeclaredSkillProgressEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import java.time.Instant;
@@ -26,16 +27,14 @@ public class FakeDeclaredSkillProgress {
   }
 
   public static FakeDeclaredSkillProgress of(
-      StudentEntity student,
-      List<DeclaredSkillEntity> savedDeclaredSkills,
-      List<UUID> bannedSkillsIds) {
-    DeclaredSkillEntity randomSkill = getRandomADeclaredSkill(savedDeclaredSkills, bannedSkillsIds);
+      StudentEntity student, List<Skill> availableSkills, List<UUID> bannedSkillsIds) {
+    Skill randomSkill = getRandomSkill(availableSkills, bannedSkillsIds);
 
     return new FakeDeclaredSkillProgress(
         DeclaredSkillProgressEntity.of(
             dataGenerator.with("id").uuid(),
             student,
-            randomSkill,
+            SkillMapper.INSTANCE.fromDomain(randomSkill),
             dataGenerator.with("EDeclaredSkillLevel").pickIn(EDeclaredSkillLevel.class),
             declaredSkillProgressGenerator.with("sentence").reflection(),
             false,
@@ -47,15 +46,13 @@ public class FakeDeclaredSkillProgress {
     return declaredSkillProgressEntity;
   }
 
-  private static DeclaredSkillEntity getRandomADeclaredSkill(
-      List<DeclaredSkillEntity> savedDeclaredSkills, List<UUID> bannedIds) {
-
-    if (savedDeclaredSkills.size() <= 2) {
+  private static Skill getRandomSkill(List<Skill> availableSkills, List<UUID> bannedIds) {
+    if (availableSkills.size() <= 2) {
       throw new IllegalStateException("The list must contain more than 2 items.");
     }
 
-    List<DeclaredSkillEntity> allowedSkills =
-        savedDeclaredSkills.stream()
+    List<Skill> allowedSkills =
+        availableSkills.stream()
             .skip(2)
             .filter(skill -> !bannedIds.contains(skill.getId()))
             .toList();
@@ -64,7 +61,6 @@ public class FakeDeclaredSkillProgress {
       throw new IllegalStateException("No IDs available after excluding banned IDs.");
     }
 
-    return allowedSkills.get(
-        dataGenerator.with("CompetenceComplementaireDetaillee").number(allowedSkills.size()));
+    return allowedSkills.get(dataGenerator.with("skill").number(allowedSkills.size()));
   }
 }

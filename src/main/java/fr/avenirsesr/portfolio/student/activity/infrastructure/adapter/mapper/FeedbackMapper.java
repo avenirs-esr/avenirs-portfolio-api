@@ -4,13 +4,13 @@ import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.EntityGrapher;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.mapper.Mapper;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.mapper.FileMapper;
+import fr.avenirsesr.portfolio.skill.domain.model.Skill;
 import fr.avenirsesr.portfolio.student.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.student.activity.domain.model.FeedbackAssociations;
 import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.model.AssociationsJson;
 import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.model.FeedbackEntity;
 import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.program.domain.model.DeclaredProgram;
-import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkill;
 import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
@@ -111,7 +111,7 @@ public class FeedbackMapper implements Mapper<FeedbackEntity, Feedback> {
   private DeclaredSkillProgress snapshotToDeclaredSkillProgress(
       AssociationsJson.DeclaredSkillProgressSnapshot snapshot,
       Map<UUID, Student> students,
-      Map<UUID, DeclaredSkill> skills) {
+      Map<UUID, Skill> skills) {
     return DeclaredSkillProgress.toDomain(
         snapshot.id(),
         students.get(snapshot.studentId()),
@@ -171,7 +171,7 @@ public class FeedbackMapper implements Mapper<FeedbackEntity, Feedback> {
 
   private FeedbackAssociations snapshotsToAssociations(
       Map<UUID, Student> students,
-      Map<UUID, DeclaredSkill> skills,
+      Map<UUID, Skill> skills,
       Map<UUID, File> files,
       AssociationsJson associationsJson) {
     return new FeedbackAssociations(
@@ -208,7 +208,7 @@ public class FeedbackMapper implements Mapper<FeedbackEntity, Feedback> {
   @Override
   public Feedback toDomain(FeedbackEntity entity) {
     throw new UnsupportedOperationException(
-        "FeedbackMapper.toDomain requires the objects File, Student and DeclaredSkill loaded. Use"
+        "FeedbackMapper.toDomain requires the objects File, Student and Skill loaded. Use"
             + " toDomain(entity, files, students, skills).");
   }
 
@@ -221,7 +221,7 @@ public class FeedbackMapper implements Mapper<FeedbackEntity, Feedback> {
       FeedbackEntity entity,
       Map<UUID, File> files,
       Map<UUID, Student> students,
-      Map<UUID, DeclaredSkill> skills) {
+      Map<UUID, Skill> skills) {
     return Feedback.toDomain(
         entity.getId(),
         entity.getCreatedAt(),

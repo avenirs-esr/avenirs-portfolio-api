@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.common.seeder.infrastructure.configuration.Seedin
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.ActivityFileSeeder;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.UserPhotoSeeder;
 import fr.avenirsesr.portfolio.notification.infrastructure.adapter.seeder.NotificationSeeder;
+import fr.avenirsesr.portfolio.skill.infrastructure.adapter.seeder.SkillCatalogSeeder;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.seeder.ActivityDraftSeeder;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.seeder.ActivitySeeder;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.seeder.SystemActivitySeeder;
@@ -16,7 +17,6 @@ import fr.avenirsesr.portfolio.student.experience.infrastructure.adapter.seeder.
 import fr.avenirsesr.portfolio.student.program.infrastructure.adapter.seeder.DeclaredProgramSeeder;
 import fr.avenirsesr.portfolio.student.selfknowledge.infrastructure.adapter.seeder.SelfKnowledgeElementSeeder;
 import fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.seeder.DeclaredSkillProgressSeeder;
-import fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.seeder.DeclaredSkillSeeder;
 import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.seeder.TraceSeeder;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.StaffSeeder;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.StudentSeeder;
@@ -61,7 +61,7 @@ public class SeederOrchestrator {
   private final SelfKnowledgeElementSeeder selfKnowledgeElementSeeder;
 
   private final DeclaredExperienceSeeder declaredExperienceSeeder;
-  private final DeclaredSkillSeeder declaredSkillSeeder;
+  private final SkillCatalogSeeder skillCatalogSeeder;
   private final DeclaredSkillProgressSeeder declaredSkillProgressSeeder;
   private final DeclaredProgramSeeder declaredProgramSeeder;
 
@@ -95,9 +95,9 @@ public class SeederOrchestrator {
 
       userPhotoSeeder.seed(savedStudents, savedStaffs);
 
-      var savedDeclaredSkills = declaredSkillSeeder.seed();
+      var availableSkills = skillCatalogSeeder.seed();
       var savedDeclaredSkillProgresses =
-          declaredSkillProgressSeeder.seed(savedStudents, savedDeclaredSkills);
+          declaredSkillProgressSeeder.seed(savedStudents, availableSkills);
 
       var savedTraces = traceSeeder.seed(savedStudents);
 

@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.student.skill.domain.model;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
+import fr.avenirsesr.portfolio.skill.domain.model.Skill;
 import fr.avenirsesr.portfolio.student.skill.domain.model.enums.EDeclaredSkillLevel;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.Instant;
@@ -12,7 +13,7 @@ import lombok.Setter;
 @Setter
 public class DeclaredSkillProgress extends AvenirsBaseModel {
   private final Student student;
-  private final DeclaredSkill skill;
+  private final Skill skill;
   private EDeclaredSkillLevel level;
   private String reflection;
   private boolean valorized;
@@ -20,7 +21,7 @@ public class DeclaredSkillProgress extends AvenirsBaseModel {
   private DeclaredSkillProgress(
       UUID id,
       Student student,
-      DeclaredSkill skill,
+      Skill skill,
       EDeclaredSkillLevel level,
       String reflection,
       boolean valorized,
@@ -35,7 +36,7 @@ public class DeclaredSkillProgress extends AvenirsBaseModel {
   }
 
   public static DeclaredSkillProgress create(
-      Student student, DeclaredSkill skill, EDeclaredSkillLevel level, String reflection) {
+      Student student, Skill skill, EDeclaredSkillLevel level, String reflection) {
     return new DeclaredSkillProgress(
         UUID.randomUUID(), student, skill, level, reflection, false, Instant.now(), Instant.now());
   }
@@ -43,7 +44,7 @@ public class DeclaredSkillProgress extends AvenirsBaseModel {
   public static DeclaredSkillProgress toDomain(
       UUID id,
       Student student,
-      DeclaredSkill skill,
+      Skill skill,
       EDeclaredSkillLevel level,
       String reflection,
       boolean valorized,
