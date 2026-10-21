@@ -14,7 +14,5 @@ public interface SkillRepository extends GenericRepositoryPort<Skill> {
 
   List<Skill> findAllByReferential(SkillReferential referential);
 
-  long countByReferential(SkillReferential referential);
-
   void archiveAll(List<UUID> skillIds);
 }

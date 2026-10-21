@@ -42,8 +42,6 @@ public interface SkillJpaRepository
       """)
   List<SkillEntity> findAllByReferentialId(@Param("referentialId") UUID referentialId);
 
-  long countByReferentialId(UUID referentialId);
-
   @Transactional
   @Modifying
   @Query(
