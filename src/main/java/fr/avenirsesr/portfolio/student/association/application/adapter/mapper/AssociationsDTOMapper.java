@@ -5,7 +5,7 @@ import fr.avenirsesr.portfolio.student.association.application.adapter.dto.Assoc
 import fr.avenirsesr.portfolio.student.association.domain.data.AssociatedElementsData;
 import fr.avenirsesr.portfolio.student.experience.application.adapter.mapper.DeclaredExperienceMapper;
 import fr.avenirsesr.portfolio.student.program.application.adapter.mapper.DeclaredProgramViewMapper;
-import fr.avenirsesr.portfolio.student.skill.application.adapter.mapper.DeclaredSkillProgressMapper;
+import fr.avenirsesr.portfolio.student.skill.application.adapter.mapper.SkillProgressMapper;
 import fr.avenirsesr.portfolio.student.trace.application.adapter.mapper.TraceOverviewMapper;
 import org.mapstruct.Mapper;
 
@@ -14,7 +14,7 @@ import org.mapstruct.Mapper;
     uses = {
       TraceOverviewMapper.class,
       DeclaredActivityAssociationMapper.class,
-      DeclaredSkillProgressMapper.class,
+      SkillProgressMapper.class,
       DeclaredExperienceMapper.class,
       DeclaredProgramViewMapper.class
     })

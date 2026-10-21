@@ -37,9 +37,9 @@ public class SeederConfig {
   public static final int COHORT_NB_USERS_MIN = 1;
   public static final int COHORT_NB_USERS_MAX = 15;
 
-  // Student Declared Skills
-  public static final int MIN_DECLARED_SKILLS_PER_STUDENT = 1;
-  public static final int MAX_DECLARED_SKILLS_PER_STUDENT = 4;
+  // Student Skill Progresses
+  public static final int MIN_SKILL_PROGRESSES_PER_STUDENT = 1;
+  public static final int MAX_SKILL_PROGRESSES_PER_STUDENT = 4;
 
   // Student Self Knowledge Elements
   public static final int MIN_SELF_KNOWLEDGE_ELEMENT_RATING = 1;

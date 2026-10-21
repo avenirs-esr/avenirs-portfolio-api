@@ -19,7 +19,7 @@ import fr.avenirsesr.portfolio.student.association.domain.filter.TraceAssociatio
 import fr.avenirsesr.portfolio.student.association.domain.model.Association;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
-import fr.avenirsesr.portfolio.student.skill.domain.model.DeclaredSkillProgress;
+import fr.avenirsesr.portfolio.student.skill.domain.model.SkillProgress;
 import fr.avenirsesr.portfolio.student.trace.domain.data.TraceViewData;
 import fr.avenirsesr.portfolio.student.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.student.trace.domain.filter.TraceFilter;
@@ -192,18 +192,17 @@ class TraceAssociationStrategyTest {
   @Test
   void toAssociatedElements_should_return_the_traces_of_the_associations() {
     UUID traceId = UUID.randomUUID();
-    UUID declaredSkillProgressId = UUID.randomUUID();
+    UUID skillProgressId = UUID.randomUUID();
 
     var trace = mock(Trace.class);
     when(trace.getId()).thenReturn(traceId);
 
     var association =
-        Association.create(traceId, declaredSkillProgressId, EAssociationType.TRACE_DECLARED_SKILL);
+        Association.create(traceId, skillProgressId, EAssociationType.TRACE_DECLARED_SKILL);
 
     when(traceService.findAllTracesById(List.of(traceId))).thenReturn(List.of(trace));
 
-    var result =
-        strategy.toAssociatedElements(List.of(association), DeclaredSkillProgress.class, false);
+    var result = strategy.toAssociatedElements(List.of(association), SkillProgress.class, false);
 
     assertThat(result.traceAssociations())
         .singleElement()
@@ -217,17 +216,15 @@ class TraceAssociationStrategyTest {
   @Test
   void toAssociatedElements_should_throw_when_a_trace_is_missing() {
     UUID traceId = UUID.randomUUID();
-    UUID declaredSkillProgressId = UUID.randomUUID();
+    UUID skillProgressId = UUID.randomUUID();
 
     var association =
-        Association.create(traceId, declaredSkillProgressId, EAssociationType.TRACE_DECLARED_SKILL);
+        Association.create(traceId, skillProgressId, EAssociationType.TRACE_DECLARED_SKILL);
 
     when(traceService.findAllTracesById(List.of(traceId))).thenReturn(List.of());
 
     assertThatThrownBy(
-            () ->
-                strategy.toAssociatedElements(
-                    List.of(association), DeclaredSkillProgress.class, false))
+            () -> strategy.toAssociatedElements(List.of(association), SkillProgress.class, false))
         .isInstanceOf(TraceNotFoundException.class);
   }
 }

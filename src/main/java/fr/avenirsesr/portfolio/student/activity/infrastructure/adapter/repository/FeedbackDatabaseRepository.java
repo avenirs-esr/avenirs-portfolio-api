@@ -214,8 +214,8 @@ public class FeedbackDatabaseRepository
     Set<UUID> ids =
         Stream.concat(
                 associations.traces().stream().map(AssociationsJson.TraceSnapshot::studentId),
-                associations.declaredSkillProgresses().stream()
-                    .map(AssociationsJson.DeclaredSkillProgressSnapshot::studentId))
+                associations.skillProgresses().stream()
+                    .map(AssociationsJson.SkillProgressSnapshot::studentId))
             .collect(Collectors.toSet());
 
     return studentJpaRepository.findAllById(ids).stream()
@@ -224,8 +224,8 @@ public class FeedbackDatabaseRepository
 
   private Map<UUID, Skill> resolveSkills(AssociationsJson associations) {
     Set<UUID> ids =
-        associations.declaredSkillProgresses().stream()
-            .map(AssociationsJson.DeclaredSkillProgressSnapshot::skillId)
+        associations.skillProgresses().stream()
+            .map(AssociationsJson.SkillProgressSnapshot::skillId)
             .collect(Collectors.toSet());
 
     return skillJpaRepository.findAllById(ids).stream()

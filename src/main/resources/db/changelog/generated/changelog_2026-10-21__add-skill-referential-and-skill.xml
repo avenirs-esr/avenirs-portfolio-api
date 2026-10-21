@@ -235,6 +235,46 @@
         </rollback>
     </changeSet>
 
+    <changeSet author="iamgreendev" id="rename-declared-skill-progress-to-skill-progress" dbms="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="declared_skill_progress"/>
+        </preConditions>
+
+        <sql>
+            ALTER TABLE declared_skill_progress
+                RENAME CONSTRAINT uk_declared_skill_progress_student_skill
+                TO uk_skill_progress_student_skill;
+            ALTER TABLE declared_skill_progress
+                RENAME CONSTRAINT fk_declared_skill_progress_skill
+                TO fk_skill_progress_skill;
+        </sql>
+
+        <renameTable oldTableName="declared_skill_progress" newTableName="skill_progress"/>
+
+        <sql>
+            UPDATE feedback
+            SET associations = (associations - 'declaredSkillProgresses')
+                || jsonb_build_object('skillProgresses', associations -> 'declaredSkillProgresses')
+            WHERE associations ? 'declaredSkillProgresses';
+        </sql>
+
+        <rollback>
+            <renameTable oldTableName="skill_progress" newTableName="declared_skill_progress"/>
+            <sql>
+                ALTER TABLE declared_skill_progress
+                    RENAME CONSTRAINT uk_skill_progress_student_skill
+                    TO uk_declared_skill_progress_student_skill;
+                ALTER TABLE declared_skill_progress
+                    RENAME CONSTRAINT fk_skill_progress_skill
+                    TO fk_declared_skill_progress_skill;
+                UPDATE feedback
+                SET associations = (associations - 'skillProgresses')
+                    || jsonb_build_object('declaredSkillProgresses', associations -> 'skillProgresses')
+                WHERE associations ? 'skillProgresses';
+            </sql>
+        </rollback>
+    </changeSet>
+
     <changeSet author="iamgreendev" id="drop-declared-skill">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="declared_skill"/>

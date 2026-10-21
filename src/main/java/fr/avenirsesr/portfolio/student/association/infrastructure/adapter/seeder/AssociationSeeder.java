@@ -14,7 +14,7 @@ import fr.avenirsesr.portfolio.student.association.infrastructure.adapter.model.
 import fr.avenirsesr.portfolio.student.association.infrastructure.adapter.seeder.data.AssociationCreationData;
 import fr.avenirsesr.portfolio.student.experience.infrastructure.adapter.model.DeclaredExperienceEntity;
 import fr.avenirsesr.portfolio.student.program.domain.model.DeclaredProgram;
-import fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.model.DeclaredSkillProgressEntity;
+import fr.avenirsesr.portfolio.student.skill.infrastructure.adapter.model.SkillProgressEntity;
 import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.model.TraceEntity;
 import java.util.Collections;
 import java.util.Comparator;
@@ -45,7 +45,7 @@ public class AssociationSeeder {
   public List<AssociationEntity> seed(
       List<DeclaredActivityEntity> savedActivities,
       List<TraceEntity> savedTraces,
-      List<DeclaredSkillProgressEntity> savedDeclaredSkillProgresses,
+      List<SkillProgressEntity> savedSkillProgresses,
       List<DeclaredExperienceEntity> savedDeclaredExperiences,
       List<DeclaredProgram> savedDeclaredPrograms) {
     log.info("Seeding associations...");
@@ -82,7 +82,7 @@ public class AssociationSeeder {
             creationData.stream()
                 .map(
                     mapToAssociationCreationData(
-                        savedDeclaredSkillProgresses,
+                        savedSkillProgresses,
                         savedDeclaredExperiences,
                         savedDeclaredPrograms,
                         savedActivities))
@@ -93,7 +93,7 @@ public class AssociationSeeder {
   }
 
   private Function<AssociationCreationData, AssociationData> mapToAssociationCreationData(
-      List<DeclaredSkillProgressEntity> savedDeclaredSkillProgresses,
+      List<SkillProgressEntity> savedSkillProgresses,
       List<DeclaredExperienceEntity> savedDeclaredExperiences,
       List<DeclaredProgram> savedDeclaredPrograms,
       List<DeclaredActivityEntity> savedDeclaredActivity) {
@@ -126,10 +126,10 @@ public class AssociationSeeder {
                 id ->
                     resolveDynamicIdWithStudentParam(
                         id,
-                        savedDeclaredSkillProgresses,
+                        savedSkillProgresses,
                         progress ->
                             progress.getStudent() != null ? progress.getStudent().getId() : null,
-                        DeclaredSkillProgressEntity::getId,
+                        SkillProgressEntity::getId,
                         Comparator.comparing(progress -> progress.getSkill().getTitle()));
             case TRACE_DECLARED_EXPERIENCE, DECLARED_ACTIVITY_DECLARED_EXPERIENCE ->
                 id ->

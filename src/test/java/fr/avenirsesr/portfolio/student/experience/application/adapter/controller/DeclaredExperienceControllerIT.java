@@ -827,11 +827,11 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
   @Transactional
   @Test
   void shouldReturnDeclaredExperienceAssociationCountsInView() throws Exception {
-    BddLogger.given("a declared experience associated with a trace and a declared skill");
+    BddLogger.given("a declared experience associated with a trace and a skill progress");
 
     String experienceId = createDeclaredExperienceAs(studentPayload, studentSignature);
     UUID traceId = createTraceAs("My trace", studentPayload, studentSignature);
-    UUID skillId = createAnyAvailableDeclaredSkillProgressAs(studentPayload, studentSignature);
+    UUID skillId = createAnyAvailableSkillProgressAs(studentPayload, studentSignature);
 
     webTestClient
         .post()
@@ -891,7 +891,7 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
     assertThat(
             experienceNode
                 .get("declaredExperienceAssociationCountDTO")
-                .get("declaredSkillAssociationsCount")
+                .get("skillProgressAssociationsCount")
                 .asInt())
         .isEqualTo(1);
   }
@@ -1098,28 +1098,28 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
     return extractIdFromResponse(responseBody);
   }
 
-  private UUID createAnyAvailableDeclaredSkillProgressAs(String payload, String signature)
+  private UUID createAnyAvailableSkillProgressAs(String payload, String signature)
       throws Exception {
-    return createAnyAvailableDeclaredSkillProgressAs(List.of(), payload, signature);
+    return createAnyAvailableSkillProgressAs(List.of(), payload, signature);
   }
 
-  private UUID createAnyAvailableDeclaredSkillProgressAs(
+  private UUID createAnyAvailableSkillProgressAs(
       List<UUID> excludedSkillIds, String payload, String signature) throws Exception {
-    for (var declaredSkill : assessableSkills()) {
-      if (excludedSkillIds.contains(declaredSkill.getId())) {
+    for (var skill : assessableSkills()) {
+      if (excludedSkillIds.contains(skill.getId())) {
         continue;
       }
 
       var result =
           webTestClient
               .post()
-              .uri("/me/declared/skill-progress")
+              .uri("/me/skill-progress")
               .header("X-Signed-Context", payload)
               .header("X-Context-Signature", signature)
               .contentType(MediaType.APPLICATION_JSON)
               .bodyValue(
                   "{\n"
-                      + "  \"id\": \"%s\",\n".formatted(declaredSkill.getId())
+                      + "  \"id\": \"%s\",\n".formatted(skill.getId())
                       + "  \"level\": \"BEGINNER\",\n"
                       + "  \"type\": \"ROME4\"\n"
                       + "}\n")
@@ -1133,7 +1133,7 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
     }
 
     throw new IllegalStateException(
-        "No declared skill available for association in the seeded catalog");
+        "No skill progress available for association in the seeded catalog");
   }
 
   private UUID createTraceAs(String title, String payload, String signature) throws Exception {
