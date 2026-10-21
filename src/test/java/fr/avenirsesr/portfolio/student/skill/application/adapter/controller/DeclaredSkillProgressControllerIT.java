@@ -346,6 +346,32 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
   }
 
   @Test
+  void shouldExposeTheAncestorTitlesOfADeclaredSkill() throws Exception {
+    BddLogger.given("a declared skill progress on a skill nested in its referential");
+    var created = createAvailableDeclaredSkillProgress();
+
+    BddLogger.when("performing a GET on " + BASE_PATH + "/{id}");
+    BddLogger.then("the path segments carry the ancestor libelles and their kind");
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/" + created.progressId())
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.skillId")
+        .isEqualTo(created.declaredSkillId().toString())
+        .jsonPath("$.pathSegments")
+        .isNotEmpty()
+        .jsonPath("$.pathSegments[0].libelle")
+        .isNotEmpty()
+        .jsonPath("$.pathSegments[0].type")
+        .isEqualTo("DOMAIN");
+  }
+
+  @Test
   void shouldRejectASkillThatOnlyCategorizesItsChildren() throws Exception {
     BddLogger.given("a seeded skill that is not assessable");
     Skill categorySkill =
