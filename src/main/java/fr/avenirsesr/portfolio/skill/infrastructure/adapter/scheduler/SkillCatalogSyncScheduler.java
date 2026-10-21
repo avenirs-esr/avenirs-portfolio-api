@@ -17,6 +17,11 @@ public class SkillCatalogSyncScheduler {
   @Scheduled(cron = "${skill.catalog.sync.cron}")
   public void synchronize() {
     log.info("Starting the scheduled national skill catalog synchronization");
-    skillSyncService.syncNationalCatalogs();
+    try {
+      skillSyncService.syncNationalCatalogs();
+    } catch (Exception e) {
+      log.error("Scheduled national skill catalog synchronization failed: {}", e.getMessage());
+      log.debug("Full error details:", e);
+    }
   }
 }

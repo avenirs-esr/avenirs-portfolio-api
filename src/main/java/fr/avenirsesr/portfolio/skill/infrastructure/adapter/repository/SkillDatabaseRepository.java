@@ -83,11 +83,6 @@ public class SkillDatabaseRepository extends GenericJpaRepositoryAdapter<Skill, 
   }
 
   @Override
-  public long countByReferential(SkillReferential referential) {
-    return jpaRepository.countByReferentialId(referential.getId());
-  }
-
-  @Override
   public void archiveAll(List<UUID> skillIds) {
     if (skillIds == null || skillIds.isEmpty()) {
       return;

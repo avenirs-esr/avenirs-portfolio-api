@@ -1,9 +1,6 @@
 package fr.avenirsesr.portfolio.skill.infrastructure.adapter.scheduler;
 
-import fr.avenirsesr.portfolio.skill.domain.model.SkillReferential;
 import fr.avenirsesr.portfolio.skill.domain.port.input.SkillSyncService;
-import fr.avenirsesr.portfolio.skill.domain.port.output.repository.SkillReferentialRepository;
-import fr.avenirsesr.portfolio.skill.domain.port.output.repository.SkillRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,8 +16,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class SkillCatalogSyncRunner implements CommandLineRunner {
   private final SkillSyncService skillSyncService;
-  private final SkillRepository skillRepository;
-  private final SkillReferentialRepository skillReferentialRepository;
 
   @Value("${skill.catalog.sync.on-startup:true}")
   private boolean syncOnStartup;
@@ -32,21 +27,12 @@ public class SkillCatalogSyncRunner implements CommandLineRunner {
       return;
     }
 
-    if (!isCatalogEmpty()) {
-      log.info("National skill catalog already populated, synchronization on startup skipped");
-      return;
+    try {
+      log.info("Synchronizing the national skill catalogs from interoperability");
+      skillSyncService.syncNationalCatalogs();
+    } catch (Exception e) {
+      log.error("National skill catalog synchronization on startup failed: {}", e.getMessage());
+      log.debug("Full error details:", e);
     }
-
-    log.info("National skill catalog is empty, synchronizing from interoperability");
-    skillSyncService.syncNationalCatalogs();
-  }
-
-  private boolean isCatalogEmpty() {
-    return skillReferentialRepository.findAllNational().stream().mapToLong(this::countSkills).sum()
-        == 0;
-  }
-
-  private long countSkills(SkillReferential referential) {
-    return skillRepository.countByReferential(referential);
   }
 }
