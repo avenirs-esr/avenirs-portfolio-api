@@ -255,7 +255,7 @@
             UPDATE feedback
             SET associations = (associations - 'declaredSkillProgresses')
                 || jsonb_build_object('skillProgresses', associations -> 'declaredSkillProgresses')
-            WHERE associations ? 'declaredSkillProgresses';
+            WHERE jsonb_exists(associations, 'declaredSkillProgresses');
         </sql>
 
         <rollback>
@@ -270,7 +270,7 @@
                 UPDATE feedback
                 SET associations = (associations - 'skillProgresses')
                     || jsonb_build_object('declaredSkillProgresses', associations -> 'skillProgresses')
-                WHERE associations ? 'skillProgresses';
+                WHERE jsonb_exists(associations, 'skillProgresses');
             </sql>
         </rollback>
     </changeSet>
