@@ -190,376 +190,377 @@ public class ActivityServiceImpl implements ActivityService {
 <span class="fc" id="L190">                draft.getTargetInstitutionIds(),</span>
 <span class="fc" id="L191">                draft.getTargetGroupIds()));</span>
 <span class="fc" id="L192">    activity.setNational(draft.isNational());</span>
+<span class="fc" id="L193">    activity.setAssessment(draft.getAssessment().orElse(null));</span>
 
-<span class="fc" id="L194">    var removedFileIds = new ArrayList&lt;UUID&gt;();</span>
-<span class="fc bfc" id="L195" title="All 2 branches covered.">    if (publishedActivity.isPresent()) {</span>
-<span class="fc" id="L196">      var draftFileIds = draft.getFiles().stream().map(File::getId).collect(Collectors.toSet());</span>
-<span class="fc" id="L197">      activity.getFiles().stream()</span>
-<span class="fc" id="L198">          .map(File::getId)</span>
-<span class="pc bnc" id="L199" title="All 2 branches missed.">          .filter(id -&gt; !draftFileIds.contains(id))</span>
-<span class="fc" id="L200">          .forEach(removedFileIds::add);</span>
-<span class="fc" id="L201">      var enrolledDeclaredActivities = declaredActivityService.getEnrolledStudents(activity);</span>
-<span class="fc bfc" id="L202" title="All 2 branches covered.">      var updatedFields = updateActivity(activity, draft, !enrolledDeclaredActivities.isEmpty());</span>
-<span class="fc" id="L203">      activity.setStatus(EActivityStatus.PUBLISHED);</span>
-<span class="fc" id="L204">      notifyActivityUpdated(updatedFields, enrolledDeclaredActivities);</span>
+<span class="fc" id="L195">    var removedFileIds = new ArrayList&lt;UUID&gt;();</span>
+<span class="fc bfc" id="L196" title="All 2 branches covered.">    if (publishedActivity.isPresent()) {</span>
+<span class="fc" id="L197">      var draftFileIds = draft.getFiles().stream().map(File::getId).collect(Collectors.toSet());</span>
+<span class="fc" id="L198">      activity.getFiles().stream()</span>
+<span class="fc" id="L199">          .map(File::getId)</span>
+<span class="pc bnc" id="L200" title="All 2 branches missed.">          .filter(id -&gt; !draftFileIds.contains(id))</span>
+<span class="fc" id="L201">          .forEach(removedFileIds::add);</span>
+<span class="fc" id="L202">      var enrolledDeclaredActivities = declaredActivityService.getEnrolledStudents(activity);</span>
+<span class="fc bfc" id="L203" title="All 2 branches covered.">      var updatedFields = updateActivity(activity, draft, !enrolledDeclaredActivities.isEmpty());</span>
+<span class="fc" id="L204">      activity.setStatus(EActivityStatus.PUBLISHED);</span>
+<span class="fc" id="L205">      notifyActivityUpdated(updatedFields, enrolledDeclaredActivities);</span>
     }
 
-<span class="fc" id="L207">    var savedActivity = activityRepository.save(activity);</span>
-<span class="fc" id="L208">    activityAuthorizationService.applyDraftAuthorizationsToActivity(savedActivity.getId());</span>
+<span class="fc" id="L208">    var savedActivity = activityRepository.save(activity);</span>
+<span class="fc" id="L209">    activityAuthorizationService.applyDraftAuthorizationsToActivity(savedActivity.getId());</span>
 
-<span class="fc" id="L210">    activityDraftRepository.removeFromDatabase(draft);</span>
-<span class="fc" id="L211">    removedFileIds.forEach(fileResourceService::delete);</span>
-<span class="fc" id="L212">    return savedActivity;</span>
+<span class="fc" id="L211">    activityDraftRepository.removeFromDatabase(draft);</span>
+<span class="fc" id="L212">    removedFileIds.forEach(fileResourceService::delete);</span>
+<span class="fc" id="L213">    return savedActivity;</span>
   }
 
-<span class="fc" id="L215">  private record FieldSync&lt;T&gt;(</span>
+<span class="fc" id="L216">  private record FieldSync&lt;T&gt;(</span>
       EActivityUpdatableField field, T currentValue, T newValue, Consumer&lt;T&gt; setter) {
     boolean applyIfChanged() {
-<span class="fc bfc" id="L218" title="All 2 branches covered.">      if (Objects.equals(currentValue, newValue)) {</span>
-<span class="fc" id="L219">        return false;</span>
+<span class="fc bfc" id="L219" title="All 2 branches covered.">      if (Objects.equals(currentValue, newValue)) {</span>
+<span class="fc" id="L220">        return false;</span>
       }
-<span class="fc" id="L221">      setter.accept(newValue);</span>
-<span class="fc" id="L222">      return true;</span>
+<span class="fc" id="L222">      setter.accept(newValue);</span>
+<span class="fc" id="L223">      return true;</span>
     }
   }
 
   private List&lt;EActivityUpdatableField&gt; updateActivity(
       Activity activity, ActivityDraft draft, boolean hasEnrolledStudents) {
-<span class="fc" id="L228">    var syncs =</span>
-<span class="fc" id="L229">        List.of(</span>
+<span class="fc" id="L229">    var syncs =</span>
+<span class="fc" id="L230">        List.of(</span>
             new FieldSync&lt;&gt;(
-<span class="fc" id="L231">                ACTIVITY_TITLE, activity.getTitle(), draft.getTitle(), activity::setTitle),</span>
+<span class="fc" id="L232">                ACTIVITY_TITLE, activity.getTitle(), draft.getTitle(), activity::setTitle),</span>
             new FieldSync&lt;&gt;(
                 SUMMARY,
-<span class="fc" id="L234">                activity.getSummary(),</span>
-<span class="fc" id="L235">                draft.getSummary().orElse(null),</span>
-<span class="fc" id="L236">                activity::setSummary),</span>
+<span class="fc" id="L235">                activity.getSummary(),</span>
+<span class="fc" id="L236">                draft.getSummary().orElse(null),</span>
+<span class="fc" id="L237">                activity::setSummary),</span>
             new FieldSync&lt;&gt;(
                 DESCRIPTION,
-<span class="fc" id="L239">                activity.getDescription(),</span>
-<span class="fc" id="L240">                draft.getDescription().orElse(null),</span>
-<span class="fc" id="L241">                activity::setDescription),</span>
+<span class="fc" id="L240">                activity.getDescription(),</span>
+<span class="fc" id="L241">                draft.getDescription().orElse(null),</span>
+<span class="fc" id="L242">                activity::setDescription),</span>
             new FieldSync&lt;&gt;(
                 RECOMMENDED_COMPLETION_CONTEXTS,
-<span class="fc" id="L244">                activity.getRecommendedCompletionContexts().orElse(null),</span>
-<span class="fc" id="L245">                draft.getRecommendedCompletionContexts().orElse(null),</span>
-<span class="fc" id="L246">                activity::setRecommendedCompletionContexts),</span>
+<span class="fc" id="L245">                activity.getRecommendedCompletionContexts().orElse(null),</span>
+<span class="fc" id="L246">                draft.getRecommendedCompletionContexts().orElse(null),</span>
+<span class="fc" id="L247">                activity::setRecommendedCompletionContexts),</span>
             new FieldSync&lt;&gt;(
                 THEMATIC,
-<span class="fc" id="L249">                activity.getThematic(),</span>
-<span class="fc" id="L250">                draft.getThematic().orElse(null),</span>
-<span class="fc" id="L251">                activity::setThematic),</span>
+<span class="fc" id="L250">                activity.getThematic(),</span>
+<span class="fc" id="L251">                draft.getThematic().orElse(null),</span>
+<span class="fc" id="L252">                activity::setThematic),</span>
             new FieldSync&lt;&gt;(
                 BANNER,
-<span class="fc" id="L254">                activity.getBanner().orElse(null),</span>
-<span class="fc" id="L255">                draft.getBanner().orElse(null),</span>
-<span class="fc" id="L256">                activity::setBanner),</span>
+<span class="fc" id="L255">                activity.getBanner().orElse(null),</span>
+<span class="fc" id="L256">                draft.getBanner().orElse(null),</span>
+<span class="fc" id="L257">                activity::setBanner),</span>
             new FieldSync&lt;&gt;(
                 FILES_AND_LINKS,
-<span class="fc" id="L259">                new HashSet&lt;&gt;(activity.getLinks()),</span>
-<span class="fc" id="L260">                new HashSet&lt;&gt;(draft.getLinks()),</span>
-<span class="fc" id="L261">                links -&gt; activity.setLinks(links.stream().toList())),</span>
+<span class="fc" id="L260">                new HashSet&lt;&gt;(activity.getLinks()),</span>
+<span class="fc" id="L261">                new HashSet&lt;&gt;(draft.getLinks()),</span>
+<span class="fc" id="L262">                links -&gt; activity.setLinks(links.stream().toList())),</span>
             new FieldSync&lt;&gt;(
-<span class="fc" id="L263">                FILES_AND_LINKS, activity.getFiles(), draft.getFiles(), activity::setFiles));</span>
+<span class="fc" id="L264">                FILES_AND_LINKS, activity.getFiles(), draft.getFiles(), activity::setFiles));</span>
 
-<span class="fc" id="L265">    var updatedFields =</span>
-<span class="fc" id="L266">        syncs.stream().filter(FieldSync::applyIfChanged).map(FieldSync::field).distinct().toList();</span>
+<span class="fc" id="L266">    var updatedFields =</span>
+<span class="fc" id="L267">        syncs.stream().filter(FieldSync::applyIfChanged).map(FieldSync::field).distinct().toList();</span>
 
-<span class="fc" id="L268">    activity.setStartDate(draft.getStartDate().orElse(null));</span>
-<span class="fc" id="L269">    activity.setEndDate(draft.getEndDate().orElse(null));</span>
-<span class="fc" id="L270">    activity.setTargetInstitutionIds(draft.getTargetInstitutionIds());</span>
-<span class="fc" id="L271">    activity.setTargetGroupIds(draft.getTargetGroupIds());</span>
-<span class="fc" id="L272">    activity.setNational(draft.isNational());</span>
+<span class="fc" id="L269">    activity.setStartDate(draft.getStartDate().orElse(null));</span>
+<span class="fc" id="L270">    activity.setEndDate(draft.getEndDate().orElse(null));</span>
+<span class="fc" id="L271">    activity.setTargetInstitutionIds(draft.getTargetInstitutionIds());</span>
+<span class="fc" id="L272">    activity.setTargetGroupIds(draft.getTargetGroupIds());</span>
+<span class="fc" id="L273">    activity.setNational(draft.isNational());</span>
 
-<span class="fc bfc" id="L274" title="All 2 branches covered.">    if (!hasEnrolledStudents) {</span>
-<span class="fc" id="L275">      activity.setTraceAllowedAssociations(draft.getTraceAllowedAssociations());</span>
-<span class="fc" id="L276">      activity.setFeedbackAllowedIterations(draft.getFeedbackAllowedIterations());</span>
-<span class="fc" id="L277">      activity.setEnableReflection(draft.isEnableReflection());</span>
+<span class="fc bfc" id="L275" title="All 2 branches covered.">    if (!hasEnrolledStudents) {</span>
+<span class="fc" id="L276">      activity.setTraceAllowedAssociations(draft.getTraceAllowedAssociations());</span>
+<span class="fc" id="L277">      activity.setFeedbackAllowedIterations(draft.getFeedbackAllowedIterations());</span>
+<span class="fc" id="L278">      activity.setEnableReflection(draft.isEnableReflection());</span>
     }
 
-<span class="fc" id="L280">    return updatedFields;</span>
+<span class="fc" id="L281">    return updatedFields;</span>
   }
 
   private void notifyActivityUpdated(
       List&lt;EActivityUpdatableField&gt; updatedFields, List&lt;DeclaredActivity&gt; declaredActivities) {
-<span class="fc bfc" id="L285" title="All 4 branches covered.">    if (declaredActivities.isEmpty() || updatedFields.isEmpty()) {</span>
-<span class="fc" id="L286">      return;</span>
+<span class="fc bfc" id="L286" title="All 4 branches covered.">    if (declaredActivities.isEmpty() || updatedFields.isEmpty()) {</span>
+<span class="fc" id="L287">      return;</span>
     }
-<span class="fc" id="L288">    notificationService.notifyAll(</span>
-<span class="fc" id="L289">        declaredActivities.stream()</span>
-<span class="fc" id="L290">            .map(</span>
+<span class="fc" id="L289">    notificationService.notifyAll(</span>
+<span class="fc" id="L290">        declaredActivities.stream()</span>
+<span class="fc" id="L291">            .map(</span>
                 declaredActivity -&gt;
-<span class="fc" id="L292">                    new ActivityUpdatedNotification(</span>
-<span class="fc" id="L293">                        declaredActivity.getStudent().getUser(), declaredActivity, updatedFields))</span>
-<span class="fc" id="L294">            .toList());</span>
-<span class="fc" id="L295">  }</span>
+<span class="fc" id="L293">                    new ActivityUpdatedNotification(</span>
+<span class="fc" id="L294">                        declaredActivity.getStudent().getUser(), declaredActivity, updatedFields))</span>
+<span class="fc" id="L295">            .toList());</span>
+<span class="fc" id="L296">  }</span>
 
   @Override
   public Activity unpublish(UUID activityId) {
-<span class="fc" id="L299">    var staff = loggedInUserService.getLoggedInStaff();</span>
-<span class="fc" id="L300">    var activity =</span>
-<span class="fc" id="L301">        activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);</span>
-<span class="fc" id="L302">    activityAuthorizationService.checkRight(staff, activityId, EActivityRight.PUBLISH);</span>
-<span class="fc bfc" id="L303" title="All 2 branches covered.">    if (activity.getStatus() == EActivityStatus.UNPUBLISHED) {</span>
-<span class="fc" id="L304">      throw new ActivityUnpublishedException();</span>
+<span class="fc" id="L300">    var staff = loggedInUserService.getLoggedInStaff();</span>
+<span class="fc" id="L301">    var activity =</span>
+<span class="fc" id="L302">        activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);</span>
+<span class="fc" id="L303">    activityAuthorizationService.checkRight(staff, activityId, EActivityRight.PUBLISH);</span>
+<span class="fc bfc" id="L304" title="All 2 branches covered.">    if (activity.getStatus() == EActivityStatus.UNPUBLISHED) {</span>
+<span class="fc" id="L305">      throw new ActivityUnpublishedException();</span>
     }
-<span class="fc" id="L306">    activity.setStatus(EActivityStatus.UNPUBLISHED);</span>
-<span class="fc" id="L307">    return activityRepository.save(activity);</span>
+<span class="fc" id="L307">    activity.setStatus(EActivityStatus.UNPUBLISHED);</span>
+<span class="fc" id="L308">    return activityRepository.save(activity);</span>
   }
 
   @Override
   public void deleteDraft(UUID activityDraftId) {
-<span class="fc" id="L312">    var staff = loggedInUserService.getLoggedInStaff();</span>
-<span class="fc" id="L313">    var draft =</span>
+<span class="fc" id="L313">    var staff = loggedInUserService.getLoggedInStaff();</span>
+<span class="fc" id="L314">    var draft =</span>
         activityDraftRepository
-<span class="fc" id="L315">            .findById(activityDraftId)</span>
-<span class="fc" id="L316">            .orElseThrow(ActivityDraftNotFoundException::new);</span>
-<span class="fc" id="L317">    activityAuthorizationService.checkDraftRight(staff, activityDraftId, EActivityRight.EDIT);</span>
+<span class="fc" id="L316">            .findById(activityDraftId)</span>
+<span class="fc" id="L317">            .orElseThrow(ActivityDraftNotFoundException::new);</span>
+<span class="fc" id="L318">    activityAuthorizationService.checkDraftRight(staff, activityDraftId, EActivityRight.EDIT);</span>
 
-<span class="fc" id="L319">    activityDraftRepository.removeFromDatabase(draft);</span>
-<span class="fc" id="L320">    activityAuthorizationService.deleteAllOfDraft(activityDraftId);</span>
-<span class="fc" id="L321">    log.info(&quot;Deleted activity draft with id: {}&quot;, activityDraftId);</span>
-<span class="fc" id="L322">  }</span>
+<span class="fc" id="L320">    activityDraftRepository.removeFromDatabase(draft);</span>
+<span class="fc" id="L321">    activityAuthorizationService.deleteAllOfDraft(activityDraftId);</span>
+<span class="fc" id="L322">    log.info(&quot;Deleted activity draft with id: {}&quot;, activityDraftId);</span>
+<span class="fc" id="L323">  }</span>
 
   @Override
   public void deleteActivityDefinitively(UUID activityId) {
-<span class="fc" id="L326">    var activity =</span>
-<span class="fc" id="L327">        activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);</span>
-<span class="fc" id="L328">    var draft = activityDraftRepository.findById(activityId);</span>
+<span class="fc" id="L327">    var activity =</span>
+<span class="fc" id="L328">        activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);</span>
+<span class="fc" id="L329">    var draft = activityDraftRepository.findById(activityId);</span>
 
-<span class="fc" id="L330">    var fileIds =</span>
-<span class="fc" id="L331">        Stream.concat(</span>
-<span class="fc" id="L332">                fileIdsOf(activity.getBanner().orElse(null), activity.getFiles()),</span>
+<span class="fc" id="L331">    var fileIds =</span>
+<span class="fc" id="L332">        Stream.concat(</span>
+<span class="fc" id="L333">                fileIdsOf(activity.getBanner().orElse(null), activity.getFiles()),</span>
                 draft
-<span class="fc" id="L334">                    .map(it -&gt; fileIdsOf(it.getBanner().orElse(null), it.getFiles()))</span>
-<span class="fc" id="L335">                    .orElseGet(Stream::empty))</span>
-<span class="fc" id="L336">            .distinct()</span>
-<span class="fc" id="L337">            .toList();</span>
+<span class="fc" id="L335">                    .map(it -&gt; fileIdsOf(it.getBanner().orElse(null), it.getFiles()))</span>
+<span class="fc" id="L336">                    .orElseGet(Stream::empty))</span>
+<span class="fc" id="L337">            .distinct()</span>
+<span class="fc" id="L338">            .toList();</span>
 
-<span class="fc" id="L339">    declaredActivityService.deleteAllOfActivity(activity);</span>
-<span class="fc" id="L340">    activityViewRepository.deleteAllByActivityId(activityId);</span>
-<span class="fc" id="L341">    draft.ifPresent(activityDraftRepository::removeFromDatabase);</span>
-<span class="fc" id="L342">    activityRepository.removeFromDatabase(activity);</span>
-<span class="fc" id="L343">    activityAuthorizationService.deleteAllOfActivity(activityId);</span>
-<span class="fc" id="L344">    activityAuthorizationService.deleteAllOfDraft(activityId);</span>
-<span class="fc" id="L345">    fileIds.forEach(fileResourceService::delete);</span>
+<span class="fc" id="L340">    declaredActivityService.deleteAllOfActivity(activity);</span>
+<span class="fc" id="L341">    activityViewRepository.deleteAllByActivityId(activityId);</span>
+<span class="fc" id="L342">    draft.ifPresent(activityDraftRepository::removeFromDatabase);</span>
+<span class="fc" id="L343">    activityRepository.removeFromDatabase(activity);</span>
+<span class="fc" id="L344">    activityAuthorizationService.deleteAllOfActivity(activityId);</span>
+<span class="fc" id="L345">    activityAuthorizationService.deleteAllOfDraft(activityId);</span>
+<span class="fc" id="L346">    fileIds.forEach(fileResourceService::delete);</span>
 
-<span class="fc" id="L347">    log.info(&quot;Definitively deleted activity {} and every element linked to it&quot;, activityId);</span>
-<span class="fc" id="L348">  }</span>
+<span class="fc" id="L348">    log.info(&quot;Definitively deleted activity {} and every element linked to it&quot;, activityId);</span>
+<span class="fc" id="L349">  }</span>
 
   private Stream&lt;UUID&gt; fileIdsOf(File banner, List&lt;File&gt; files) {
-<span class="fc" id="L351">    return Stream.concat(Stream.ofNullable(banner), files.stream()).map(File::getId);</span>
+<span class="fc" id="L352">    return Stream.concat(Stream.ofNullable(banner), files.stream()).map(File::getId);</span>
   }
 
   @Override
   public Activity getActivityById(UUID id) {
-<span class="fc" id="L356">    return activityRepository.findById(id).orElseThrow(ActivityNotFoundException::new);</span>
+<span class="fc" id="L357">    return activityRepository.findById(id).orElseThrow(ActivityNotFoundException::new);</span>
   }
 
   @Override
   public ActivityDraft getActivityDraftById(UUID id) {
-<span class="fc" id="L361">    return getDraftWithAnyRight(id, EActivityRight.MANAGEMENT_RIGHTS);</span>
+<span class="fc" id="L362">    return getDraftWithAnyRight(id, EActivityRight.MANAGEMENT_RIGHTS);</span>
   }
 
   @Override
   public ActivityPresentationData getActivityPresentation(EActivityStatus activityStatus, UUID id) {
-<span class="fc bfc" id="L366" title="All 2 branches covered.">    return switch (activityStatus) {</span>
+<span class="fc bfc" id="L367" title="All 2 branches covered.">    return switch (activityStatus) {</span>
       case PUBLISHED, UNPUBLISHED -&gt; {
-<span class="fc" id="L368">        Activity activity =</span>
-<span class="fc" id="L369">            activityRepository.findById(id).orElseThrow(ActivityNotFoundException::new);</span>
-<span class="fc" id="L370">        var declaredActivity = declaredActivityService.getByActivity(activity);</span>
-<span class="fc" id="L371">        var declaredActivityId = declaredActivity.map(DeclaredActivity::getId);</span>
-<span class="fc" id="L372">        var declaredActivityStatus =</span>
-<span class="fc" id="L373">            declaredActivity.map(declaredActivityService::getDeclaredActivityStatus);</span>
-<span class="fc" id="L374">        activityViewRepository.recordView(</span>
-<span class="fc" id="L375">            activity.getId(), loggedInUserService.getLoggedInStudent().getId());</span>
-<span class="fc" id="L376">        yield ActivityPresentationDataMapper.toData(</span>
+<span class="fc" id="L369">        Activity activity =</span>
+<span class="fc" id="L370">            activityRepository.findById(id).orElseThrow(ActivityNotFoundException::new);</span>
+<span class="fc" id="L371">        var declaredActivity = declaredActivityService.getByActivity(activity);</span>
+<span class="fc" id="L372">        var declaredActivityId = declaredActivity.map(DeclaredActivity::getId);</span>
+<span class="fc" id="L373">        var declaredActivityStatus =</span>
+<span class="fc" id="L374">            declaredActivity.map(declaredActivityService::getDeclaredActivityStatus);</span>
+<span class="fc" id="L375">        activityViewRepository.recordView(</span>
+<span class="fc" id="L376">            activity.getId(), loggedInUserService.getLoggedInStudent().getId());</span>
+<span class="fc" id="L377">        yield ActivityPresentationDataMapper.toData(</span>
             activity,
-<span class="fc" id="L378">            declaredActivityId.orElse(null),</span>
-<span class="fc" id="L379">            declaredActivityStatus.orElse(null),</span>
-<span class="fc" id="L380">            FileDataMapper.mapFileData(</span>
-<span class="fc" id="L381">                activity.getBanner(), FileStorageConstants.DEFAULT_COVER_FILE_URL));</span>
+<span class="fc" id="L379">            declaredActivityId.orElse(null),</span>
+<span class="fc" id="L380">            declaredActivityStatus.orElse(null),</span>
+<span class="fc" id="L381">            FileDataMapper.mapFileData(</span>
+<span class="fc" id="L382">                activity.getBanner(), FileStorageConstants.DEFAULT_COVER_FILE_URL));</span>
       }
       case DRAFT -&gt; {
-<span class="fc" id="L384">        var draft =</span>
-<span class="fc" id="L385">            activityDraftRepository.findById(id).orElseThrow(ActivityDraftNotFoundException::new);</span>
-<span class="fc" id="L386">        yield ActivityPresentationDataMapper.toData(</span>
+<span class="fc" id="L385">        var draft =</span>
+<span class="fc" id="L386">            activityDraftRepository.findById(id).orElseThrow(ActivityDraftNotFoundException::new);</span>
+<span class="fc" id="L387">        yield ActivityPresentationDataMapper.toData(</span>
             draft,
-<span class="fc" id="L388">            FileDataMapper.mapFileData(</span>
-<span class="fc" id="L389">                draft.getBanner(), FileStorageConstants.DEFAULT_COVER_FILE_URL));</span>
+<span class="fc" id="L389">            FileDataMapper.mapFileData(</span>
+<span class="fc" id="L390">                draft.getBanner(), FileStorageConstants.DEFAULT_COVER_FILE_URL));</span>
       }
     };
   }
 
   @Override
   public ActivityDashboardData getActivityDashboard(UUID activityId) {
-<span class="fc" id="L396">    loggedInUserService.getLoggedInStaff();</span>
-<span class="fc" id="L397">    var activity =</span>
-<span class="fc" id="L398">        activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);</span>
+<span class="fc" id="L397">    loggedInUserService.getLoggedInStaff();</span>
+<span class="fc" id="L398">    var activity =</span>
+<span class="fc" id="L399">        activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);</span>
 
-<span class="fc" id="L400">    return new ActivityDashboardData(</span>
-<span class="fc" id="L401">        activityViewRepository.countUniqueViews(activityId),</span>
-<span class="fc" id="L402">        declaredActivityService.countEnrolledStudents(activity),</span>
-<span class="fc" id="L403">        declaredActivityService.countUnsubscriptionsSince(</span>
-<span class="fc" id="L404">            activity, Instant.now().minus(DURATION_FOR_RECENT_UNSUBSCRIPTIONS)),</span>
-<span class="fc" id="L405">        countInactiveStudents(activityId, activity));</span>
+<span class="fc" id="L401">    return new ActivityDashboardData(</span>
+<span class="fc" id="L402">        activityViewRepository.countUniqueViews(activityId),</span>
+<span class="fc" id="L403">        declaredActivityService.countEnrolledStudents(activity),</span>
+<span class="fc" id="L404">        declaredActivityService.countUnsubscriptionsSince(</span>
+<span class="fc" id="L405">            activity, Instant.now().minus(DURATION_FOR_RECENT_UNSUBSCRIPTIONS)),</span>
+<span class="fc" id="L406">        countInactiveStudents(activityId, activity));</span>
   }
 
   private int countInactiveStudents(UUID activityId, Activity activity) {
-<span class="fc" id="L409">    var enrolledStudentIds = declaredActivityService.getEnrolledStudentIds(activity);</span>
-<span class="fc bfc" id="L410" title="All 2 branches covered.">    if (enrolledStudentIds.isEmpty()) {</span>
-<span class="fc" id="L411">      return 0;</span>
+<span class="fc" id="L410">    var enrolledStudentIds = declaredActivityService.getEnrolledStudentIds(activity);</span>
+<span class="fc bfc" id="L411" title="All 2 branches covered.">    if (enrolledStudentIds.isEmpty()) {</span>
+<span class="fc" id="L412">      return 0;</span>
     }
-<span class="fc" id="L413">    var since = Instant.now().minus(DURATION_FOR_STUDENT_INACTIVITY);</span>
-<span class="fc" id="L414">    return enrolledStudentIds.size()</span>
-<span class="fc" id="L415">        - activityViewRepository.countViewersSince(activityId, enrolledStudentIds, since);</span>
+<span class="fc" id="L414">    var since = Instant.now().minus(DURATION_FOR_STUDENT_INACTIVITY);</span>
+<span class="fc" id="L415">    return enrolledStudentIds.size()</span>
+<span class="fc" id="L416">        - activityViewRepository.countViewersSince(activityId, enrolledStudentIds, since);</span>
   }
 
   @Override
   public List&lt;InactiveStudentData&gt; getInactiveStudents(UUID activityId) {
-<span class="fc" id="L420">    loggedInUserService.getLoggedInStaff();</span>
-<span class="fc" id="L421">    var activity =</span>
-<span class="fc" id="L422">        activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);</span>
+<span class="fc" id="L421">    loggedInUserService.getLoggedInStaff();</span>
+<span class="fc" id="L422">    var activity =</span>
+<span class="fc" id="L423">        activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);</span>
 
-<span class="fc" id="L424">    var since = Instant.now().minus(DURATION_FOR_STUDENT_INACTIVITY);</span>
-<span class="fc" id="L425">    var inactiveDeclaredActivities =</span>
-<span class="fc" id="L426">        declaredActivityService.getEnrolledStudentsNotViewedSince(activity, since);</span>
-<span class="fc bfc" id="L427" title="All 2 branches covered.">    if (inactiveDeclaredActivities.isEmpty()) {</span>
-<span class="fc" id="L428">      return List.of();</span>
+<span class="fc" id="L425">    var since = Instant.now().minus(DURATION_FOR_STUDENT_INACTIVITY);</span>
+<span class="fc" id="L426">    var inactiveDeclaredActivities =</span>
+<span class="fc" id="L427">        declaredActivityService.getEnrolledStudentsNotViewedSince(activity, since);</span>
+<span class="fc bfc" id="L428" title="All 2 branches covered.">    if (inactiveDeclaredActivities.isEmpty()) {</span>
+<span class="fc" id="L429">      return List.of();</span>
     }
 
-<span class="fc" id="L431">    var lastViewedAtByStudent =</span>
-<span class="fc" id="L432">        activityViewRepository.findLastViewedAtByStudents(</span>
+<span class="fc" id="L432">    var lastViewedAtByStudent =</span>
+<span class="fc" id="L433">        activityViewRepository.findLastViewedAtByStudents(</span>
             activityId,
-<span class="fc" id="L434">            inactiveDeclaredActivities.stream()</span>
-<span class="fc" id="L435">                .map(declaredActivity -&gt; declaredActivity.getStudent().getId())</span>
-<span class="fc" id="L436">                .toList());</span>
+<span class="fc" id="L435">            inactiveDeclaredActivities.stream()</span>
+<span class="fc" id="L436">                .map(declaredActivity -&gt; declaredActivity.getStudent().getId())</span>
+<span class="fc" id="L437">                .toList());</span>
 
-<span class="fc" id="L438">    return inactiveDeclaredActivities.stream()</span>
-<span class="fc" id="L439">        .map(</span>
+<span class="fc" id="L439">    return inactiveDeclaredActivities.stream()</span>
+<span class="fc" id="L440">        .map(</span>
             declaredActivity -&gt;
-<span class="fc" id="L441">                new InactiveStudentData(</span>
-<span class="fc" id="L442">                    declaredActivity.getStudent(),</span>
-<span class="fc" id="L443">                    declaredActivity.getCreatedAt(),</span>
-<span class="fc" id="L444">                    lastViewedAtByStudent.get(declaredActivity.getStudent().getId())))</span>
-<span class="fc" id="L445">        .toList();</span>
+<span class="fc" id="L442">                new InactiveStudentData(</span>
+<span class="fc" id="L443">                    declaredActivity.getStudent(),</span>
+<span class="fc" id="L444">                    declaredActivity.getCreatedAt(),</span>
+<span class="fc" id="L445">                    lastViewedAtByStudent.get(declaredActivity.getStudent().getId())))</span>
+<span class="fc" id="L446">        .toList();</span>
   }
 
   @Override
   public Map&lt;EActivityThematic, List&lt;Activity&gt;&gt; getActivityNavigation() {
-<span class="fc" id="L450">    return activityRepository.findAll().stream()</span>
-<span class="fc bfc" id="L451" title="All 2 branches covered.">        .filter(a -&gt; a.getStatus() != EActivityStatus.UNPUBLISHED)</span>
-<span class="fc" id="L452">        .collect(</span>
-<span class="fc" id="L453">            Collectors.groupingBy(</span>
+<span class="fc" id="L451">    return activityRepository.findAll().stream()</span>
+<span class="fc bfc" id="L452" title="All 2 branches covered.">        .filter(a -&gt; a.getStatus() != EActivityStatus.UNPUBLISHED)</span>
+<span class="fc" id="L453">        .collect(</span>
+<span class="fc" id="L454">            Collectors.groupingBy(</span>
                 Activity::getThematic,
-<span class="fc" id="L455">                () -&gt; new EnumMap&lt;&gt;(EActivityThematic.class),</span>
-<span class="fc" id="L456">                Collectors.toList()));</span>
+<span class="fc" id="L456">                () -&gt; new EnumMap&lt;&gt;(EActivityThematic.class),</span>
+<span class="fc" id="L457">                Collectors.toList()));</span>
   }
 
   @Override
   public PagedResult&lt;ActivityStaffOverviewData&gt; staffActivityWorkingSpace(
       PageCriteria pageCriteria, EActivityStatus activityStatus) {
-<span class="fc" id="L462">    var staff = loggedInUserService.getLoggedInStaff();</span>
-<span class="fc" id="L463">    return withLeaders(</span>
-<span class="fc" id="L464">        staffActivityOverviewRepository.findAllAccessibleByStaffAndStatus(</span>
+<span class="fc" id="L463">    var staff = loggedInUserService.getLoggedInStaff();</span>
+<span class="fc" id="L464">    return withLeaders(</span>
+<span class="fc" id="L465">        staffActivityOverviewRepository.findAllAccessibleByStaffAndStatus(</span>
             staff, activityStatus, pageCriteria));
   }
 
   @Override
   public PagedResult&lt;ActivityStaffOverviewData&gt; staffActivityLibrary(
       EActivityThematic thematic, PageCriteria pageCriteria) {
-<span class="fc" id="L471">    loggedInUserService.getLoggedInStaff();</span>
-<span class="fc" id="L472">    return withLeaders(activityRepository.findAllStaffOverview(thematic, pageCriteria));</span>
+<span class="fc" id="L472">    loggedInUserService.getLoggedInStaff();</span>
+<span class="fc" id="L473">    return withLeaders(activityRepository.findAllStaffOverview(thematic, pageCriteria));</span>
   }
 
   private PagedResult&lt;ActivityStaffOverviewData&gt; withLeaders(
       PagedResult&lt;ActivityStaffOverviewData&gt; pagedActivities) {
-<span class="fc" id="L477">    var activityLeaders =</span>
-<span class="fc" id="L478">        activityAuthorizationService.getLeadersByActivityIds(</span>
-<span class="fc" id="L479">            idsOf(pagedActivities.content(), false));</span>
-<span class="fc" id="L480">    var draftLeaders =</span>
-<span class="fc" id="L481">        activityAuthorizationService.getLeadersByDraftIds(idsOf(pagedActivities.content(), true));</span>
-<span class="fc" id="L482">    return new PagedResult&lt;&gt;(</span>
-<span class="fc" id="L483">        pagedActivities.content().stream()</span>
-<span class="fc" id="L484">            .map(</span>
+<span class="fc" id="L478">    var activityLeaders =</span>
+<span class="fc" id="L479">        activityAuthorizationService.getLeadersByActivityIds(</span>
+<span class="fc" id="L480">            idsOf(pagedActivities.content(), false));</span>
+<span class="fc" id="L481">    var draftLeaders =</span>
+<span class="fc" id="L482">        activityAuthorizationService.getLeadersByDraftIds(idsOf(pagedActivities.content(), true));</span>
+<span class="fc" id="L483">    return new PagedResult&lt;&gt;(</span>
+<span class="fc" id="L484">        pagedActivities.content().stream()</span>
+<span class="fc" id="L485">            .map(</span>
                 a -&gt; {
-<span class="fc bfc" id="L486" title="All 2 branches covered.">                  var leaders = isDraft(a) ? draftLeaders : activityLeaders;</span>
-<span class="fc" id="L487">                  return a.withLeaders(leaders.getOrDefault(a.activityId(), List.of()));</span>
+<span class="fc bfc" id="L487" title="All 2 branches covered.">                  var leaders = isDraft(a) ? draftLeaders : activityLeaders;</span>
+<span class="fc" id="L488">                  return a.withLeaders(leaders.getOrDefault(a.activityId(), List.of()));</span>
                 })
-<span class="fc" id="L489">            .toList(),</span>
-<span class="fc" id="L490">        pagedActivities.pageInfo());</span>
+<span class="fc" id="L490">            .toList(),</span>
+<span class="fc" id="L491">        pagedActivities.pageInfo());</span>
   }
 
   private List&lt;UUID&gt; idsOf(List&lt;ActivityStaffOverviewData&gt; activities, boolean drafts) {
-<span class="fc" id="L494">    return activities.stream()</span>
-<span class="fc bfc" id="L495" title="All 2 branches covered.">        .filter(a -&gt; isDraft(a) == drafts)</span>
-<span class="fc" id="L496">        .map(ActivityStaffOverviewData::activityId)</span>
-<span class="fc" id="L497">        .distinct()</span>
-<span class="fc" id="L498">        .toList();</span>
+<span class="fc" id="L495">    return activities.stream()</span>
+<span class="fc bfc" id="L496" title="All 2 branches covered.">        .filter(a -&gt; isDraft(a) == drafts)</span>
+<span class="fc" id="L497">        .map(ActivityStaffOverviewData::activityId)</span>
+<span class="fc" id="L498">        .distinct()</span>
+<span class="fc" id="L499">        .toList();</span>
   }
 
   private boolean isDraft(ActivityStaffOverviewData activity) {
-<span class="fc bfc" id="L502" title="All 2 branches covered.">    return activity.activityStatus() == EActivityStatus.DRAFT;</span>
+<span class="fc bfc" id="L503" title="All 2 branches covered.">    return activity.activityStatus() == EActivityStatus.DRAFT;</span>
   }
 
   @Override
   public PagedResult&lt;ActivityWithStudentStatusData&gt; activitiesView(
       EActivityThematic thematic, PageCriteria pageCriteria) {
-<span class="fc" id="L508">    var student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L509">    var scope = studentScope(student);</span>
-<span class="fc" id="L510">    var pagedActivities =</span>
-<span class="fc" id="L511">        activityRepository.findAll(</span>
-<span class="fc" id="L512">            thematic, pageCriteria, scope.institutionIds(), scope.groupIds());</span>
-<span class="fc" id="L513">    var subscribedActivities = declaredActivityService.getAllDeclaredActivitiesOf(student);</span>
-<span class="fc" id="L514">    var statusByDeclaredActivity =</span>
-<span class="fc" id="L515">        declaredActivityService.getDeclaredActivityStatus(subscribedActivities);</span>
+<span class="fc" id="L509">    var student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L510">    var scope = studentScope(student);</span>
+<span class="fc" id="L511">    var pagedActivities =</span>
+<span class="fc" id="L512">        activityRepository.findAll(</span>
+<span class="fc" id="L513">            thematic, pageCriteria, scope.institutionIds(), scope.groupIds());</span>
+<span class="fc" id="L514">    var subscribedActivities = declaredActivityService.getAllDeclaredActivitiesOf(student);</span>
+<span class="fc" id="L515">    var statusByDeclaredActivity =</span>
+<span class="fc" id="L516">        declaredActivityService.getDeclaredActivityStatus(subscribedActivities);</span>
 
-<span class="fc" id="L517">    return new PagedResult&lt;&gt;(</span>
-<span class="fc" id="L518">        pagedActivities.content().stream()</span>
-<span class="fc" id="L519">            .map(</span>
+<span class="fc" id="L518">    return new PagedResult&lt;&gt;(</span>
+<span class="fc" id="L519">        pagedActivities.content().stream()</span>
+<span class="fc" id="L520">            .map(</span>
                 activity -&gt; {
-<span class="fc" id="L521">                  var declaredActivity =</span>
-<span class="fc" id="L522">                      subscribedActivities.stream()</span>
-<span class="fc" id="L523">                          .filter(a -&gt; a.getActivity().equals(activity))</span>
-<span class="fc" id="L524">                          .findFirst();</span>
+<span class="fc" id="L522">                  var declaredActivity =</span>
+<span class="fc" id="L523">                      subscribedActivities.stream()</span>
+<span class="fc" id="L524">                          .filter(a -&gt; a.getActivity().equals(activity))</span>
+<span class="fc" id="L525">                          .findFirst();</span>
 
-<span class="fc" id="L526">                  return new ActivityWithStudentStatusData(</span>
+<span class="fc" id="L527">                  return new ActivityWithStudentStatusData(</span>
                       activity,
-<span class="fc" id="L528">                      activity.getCreatedAt().isAfter(Instant.now().minus(DURATION_FOR_LATEST)),</span>
-<span class="fc" id="L529">                      declaredActivity.map(statusByDeclaredActivity::get).orElse(null));</span>
+<span class="fc" id="L529">                      activity.getCreatedAt().isAfter(Instant.now().minus(DURATION_FOR_LATEST)),</span>
+<span class="fc" id="L530">                      declaredActivity.map(statusByDeclaredActivity::get).orElse(null));</span>
                 })
-<span class="fc" id="L531">            .toList(),</span>
-<span class="fc" id="L532">        pagedActivities.pageInfo());</span>
+<span class="fc" id="L532">            .toList(),</span>
+<span class="fc" id="L533">        pagedActivities.pageInfo());</span>
   }
 
   @Override
   public PagedResult&lt;ActivityWithStudentStatusData&gt; latestActivitiesView(
       PageCriteria pageCriteria) {
-<span class="fc" id="L538">    var student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L539">    var subscribedActivities = declaredActivityService.getAllDeclaredActivitiesOf(student);</span>
-<span class="fc" id="L540">    var scope = studentScope(student);</span>
-<span class="fc" id="L541">    var pagedActivities =</span>
-<span class="fc" id="L542">        activityRepository.findLatest(</span>
+<span class="fc" id="L539">    var student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L540">    var subscribedActivities = declaredActivityService.getAllDeclaredActivitiesOf(student);</span>
+<span class="fc" id="L541">    var scope = studentScope(student);</span>
+<span class="fc" id="L542">    var pagedActivities =</span>
+<span class="fc" id="L543">        activityRepository.findLatest(</span>
             DURATION_FOR_LATEST,
-<span class="fc" id="L544">            subscribedActivities.stream().map(DeclaredActivity::getActivity).toList(),</span>
+<span class="fc" id="L545">            subscribedActivities.stream().map(DeclaredActivity::getActivity).toList(),</span>
             pageCriteria,
-<span class="fc" id="L546">            scope.institutionIds(),</span>
-<span class="fc" id="L547">            scope.groupIds());</span>
-<span class="fc" id="L548">    return new PagedResult&lt;&gt;(</span>
-<span class="fc" id="L549">        pagedActivities.content().stream()</span>
-<span class="fc" id="L550">            .map(activity -&gt; new ActivityWithStudentStatusData(activity, true, null))</span>
-<span class="fc" id="L551">            .toList(),</span>
-<span class="fc" id="L552">        pagedActivities.pageInfo());</span>
+<span class="fc" id="L547">            scope.institutionIds(),</span>
+<span class="fc" id="L548">            scope.groupIds());</span>
+<span class="fc" id="L549">    return new PagedResult&lt;&gt;(</span>
+<span class="fc" id="L550">        pagedActivities.content().stream()</span>
+<span class="fc" id="L551">            .map(activity -&gt; new ActivityWithStudentStatusData(activity, true, null))</span>
+<span class="fc" id="L552">            .toList(),</span>
+<span class="fc" id="L553">        pagedActivities.pageInfo());</span>
   }
 
   @Override
   public ActivityDraft createActivityDraft(String title) {
-<span class="fc" id="L557">    var staff = loggedInUserService.getLoggedInStaff();</span>
-<span class="fc" id="L558">    requireNotBlankAndMaxLength(&quot;title&quot;, title, TITLE_LENGTH);</span>
-<span class="fc" id="L559">    var draft = ActivityDraft.create(title, staff);</span>
-<span class="fc" id="L560">    var savedDraft = activityDraftRepository.save(draft);</span>
-<span class="fc" id="L561">    activityAuthorizationService.grantAllDraftRights(savedDraft.getId(), staff);</span>
-<span class="fc" id="L562">    return savedDraft;</span>
+<span class="fc" id="L558">    var staff = loggedInUserService.getLoggedInStaff();</span>
+<span class="fc" id="L559">    requireNotBlankAndMaxLength(&quot;title&quot;, title, TITLE_LENGTH);</span>
+<span class="fc" id="L560">    var draft = ActivityDraft.create(title, staff);</span>
+<span class="fc" id="L561">    var savedDraft = activityDraftRepository.save(draft);</span>
+<span class="fc" id="L562">    activityAuthorizationService.grantAllDraftRights(savedDraft.getId(), staff);</span>
+<span class="fc" id="L563">    return savedDraft;</span>
   }
 
   @Override
@@ -580,362 +581,365 @@ public class ActivityServiceImpl implements ActivityService {
       List&lt;UUID&gt; targetInstitutionIds,
       List&lt;UUID&gt; targetGroupIds,
       Boolean national) {
-<span class="fc" id="L583">    var loggedInStaff = loggedInUserService.getLoggedInStaff();</span>
-<span class="fc" id="L584">    var draft =</span>
-<span class="fc" id="L585">        activityDraftRepository.findById(id).orElseThrow(ActivityDraftNotFoundException::new);</span>
-<span class="fc" id="L586">    activityAuthorizationService.checkDraftRight(loggedInStaff, id, EActivityRight.EDIT);</span>
+<span class="fc" id="L584">    var loggedInStaff = loggedInUserService.getLoggedInStaff();</span>
+<span class="fc" id="L585">    var draft =</span>
+<span class="fc" id="L586">        activityDraftRepository.findById(id).orElseThrow(ActivityDraftNotFoundException::new);</span>
+<span class="fc" id="L587">    activityAuthorizationService.checkDraftRight(loggedInStaff, id, EActivityRight.EDIT);</span>
 
-<span class="fc" id="L588">    validateTargetPerimeter(loggedInStaff, targetInstitutionIds, targetGroupIds);</span>
-<span class="fc" id="L589">    validateTargetingUpdate(id, targetInstitutionIds, targetGroupIds);</span>
+<span class="fc" id="L589">    validateTargetPerimeter(loggedInStaff, targetInstitutionIds, targetGroupIds);</span>
+<span class="fc" id="L590">    validateTargetingUpdate(id, targetInstitutionIds, targetGroupIds);</span>
 
-<span class="fc" id="L591">    validateOptionalTextMaxLength(&quot;summary&quot;, summary, SUMMARY_LENGTH);</span>
-<span class="fc" id="L592">    validateOptionalTextMaxLength(&quot;description&quot;, description, RICH_DESCRIPTION_LENGTH);</span>
-<span class="fc" id="L593">    validateOptionalTextMaxLength(</span>
+<span class="fc" id="L592">    validateOptionalTextMaxLength(&quot;summary&quot;, summary, SUMMARY_LENGTH);</span>
+<span class="fc" id="L593">    validateOptionalTextMaxLength(&quot;description&quot;, description, RICH_DESCRIPTION_LENGTH);</span>
+<span class="fc" id="L594">    validateOptionalTextMaxLength(</span>
         &quot;recommendedCompletionContexts&quot;,
         recommendedCompletionContexts,
         ACTIVITY_RECOMMENDED_COMPLETION_CONTEXTS);
-<span class="fc bfc" id="L597" title="All 2 branches covered.">    if (startDate != null) {</span>
-<span class="fc" id="L598">      validateDateOrder(startDate, endDate);</span>
+<span class="fc bfc" id="L598" title="All 2 branches covered.">    if (startDate != null) {</span>
+<span class="fc" id="L599">      validateDateOrder(startDate, endDate);</span>
     }
-<span class="fc bfc" id="L600" title="All 6 branches covered.">    if ((startDate == null) != (endDate == null)</span>
-<span class="fc bfc" id="L601" title="All 4 branches covered.">        || (Boolean.TRUE.equals(enableCompletionPeriod) &amp;&amp; startDate == null)) {</span>
-<span class="fc" id="L602">      throw new ActivityDatesException();</span>
-    }
-
-<span class="fc bfc" id="L605" title="All 2 branches covered.">    if (title != null) {</span>
-<span class="fc" id="L606">      requireNotBlankAndMaxLength(&quot;title&quot;, title, TITLE_LENGTH);</span>
-<span class="fc" id="L607">      draft.setTitle(title);</span>
-    }
-<span class="fc bfc" id="L609" title="All 2 branches covered.">    if (thematic != null) draft.setThematic(thematic);</span>
-<span class="fc bfc" id="L610" title="All 2 branches covered.">    if (summary != null) draft.setSummary(summary);</span>
-<span class="fc bfc" id="L611" title="All 2 branches covered.">    if (description != null) draft.setDescription(description);</span>
-<span class="fc bfc" id="L612" title="All 2 branches covered.">    if (recommendedCompletionContexts != null)</span>
-<span class="fc" id="L613">      draft.setRecommendedCompletionContexts(recommendedCompletionContexts);</span>
-<span class="fc bfc" id="L614" title="All 2 branches covered.">    if (Boolean.TRUE.equals(enableCompletionPeriod)) {</span>
-<span class="fc" id="L615">      draft.setStartDate(startDate);</span>
-<span class="fc" id="L616">      draft.setEndDate(endDate);</span>
-<span class="fc bfc" id="L617" title="All 2 branches covered.">    } else if (Boolean.FALSE.equals(enableCompletionPeriod)) {</span>
-<span class="fc" id="L618">      draft.setStartDate(null);</span>
-<span class="fc" id="L619">      draft.setEndDate(null);</span>
+<span class="fc bfc" id="L601" title="All 6 branches covered.">    if ((startDate == null) != (endDate == null)</span>
+<span class="fc bfc" id="L602" title="All 4 branches covered.">        || (Boolean.TRUE.equals(enableCompletionPeriod) &amp;&amp; startDate == null)) {</span>
+<span class="fc" id="L603">      throw new ActivityDatesException();</span>
     }
 
-<span class="fc bfc" id="L622" title="All 2 branches covered.">    if (!hasEnrolledStudents(draft)) {</span>
-<span class="fc bfc" id="L623" title="All 2 branches covered.">      if (traceAllowedAssociations != null)</span>
-<span class="fc" id="L624">        draft.setTraceAllowedAssociations(traceAllowedAssociations);</span>
-<span class="fc bfc" id="L625" title="All 2 branches covered.">      if (feedbackAllowedIterations != null)</span>
-<span class="fc" id="L626">        draft.setFeedbackAllowedIterations(feedbackAllowedIterations);</span>
-<span class="fc bfc" id="L627" title="All 2 branches covered.">      if (enableReflection != null) draft.setEnableReflection(enableReflection);</span>
+<span class="fc bfc" id="L606" title="All 2 branches covered.">    if (title != null) {</span>
+<span class="fc" id="L607">      requireNotBlankAndMaxLength(&quot;title&quot;, title, TITLE_LENGTH);</span>
+<span class="fc" id="L608">      draft.setTitle(title);</span>
+    }
+<span class="fc bfc" id="L610" title="All 2 branches covered.">    if (thematic != null) draft.setThematic(thematic);</span>
+<span class="fc bfc" id="L611" title="All 2 branches covered.">    if (summary != null) draft.setSummary(summary);</span>
+<span class="fc bfc" id="L612" title="All 2 branches covered.">    if (description != null) draft.setDescription(description);</span>
+<span class="fc bfc" id="L613" title="All 2 branches covered.">    if (recommendedCompletionContexts != null)</span>
+<span class="fc" id="L614">      draft.setRecommendedCompletionContexts(recommendedCompletionContexts);</span>
+<span class="fc bfc" id="L615" title="All 2 branches covered.">    if (Boolean.TRUE.equals(enableCompletionPeriod)) {</span>
+<span class="fc" id="L616">      draft.setStartDate(startDate);</span>
+<span class="fc" id="L617">      draft.setEndDate(endDate);</span>
+<span class="fc bfc" id="L618" title="All 2 branches covered.">    } else if (Boolean.FALSE.equals(enableCompletionPeriod)) {</span>
+<span class="fc" id="L619">      draft.setStartDate(null);</span>
+<span class="fc" id="L620">      draft.setEndDate(null);</span>
     }
 
-<span class="fc bfc" id="L630" title="All 4 branches covered.">    if (links != null &amp;&amp; !links.isEmpty()) {</span>
-<span class="fc" id="L631">      links.forEach(</span>
+<span class="fc bfc" id="L623" title="All 2 branches covered.">    if (!hasEnrolledStudents(draft)) {</span>
+<span class="fc bfc" id="L624" title="All 2 branches covered.">      if (traceAllowedAssociations != null)</span>
+<span class="fc" id="L625">        draft.setTraceAllowedAssociations(traceAllowedAssociations);</span>
+<span class="fc bfc" id="L626" title="All 2 branches covered.">      if (feedbackAllowedIterations != null)</span>
+<span class="fc" id="L627">        draft.setFeedbackAllowedIterations(feedbackAllowedIterations);</span>
+<span class="fc bfc" id="L628" title="All 2 branches covered.">      if (enableReflection != null) draft.setEnableReflection(enableReflection);</span>
+    }
+
+<span class="fc bfc" id="L631" title="All 4 branches covered.">    if (links != null &amp;&amp; !links.isEmpty()) {</span>
+<span class="fc" id="L632">      links.forEach(</span>
           link -&gt; {
-<span class="fc" id="L633">            requireNotBlankAndMaxLength(&quot;link&quot;, link, LINK_LENGTH);</span>
-<span class="fc" id="L634">            validateUrl(link);</span>
-<span class="fc" id="L635">          });</span>
-<span class="fc" id="L636">      draft.setLinks(links);</span>
+<span class="fc" id="L634">            requireNotBlankAndMaxLength(&quot;link&quot;, link, LINK_LENGTH);</span>
+<span class="fc" id="L635">            validateUrl(link);</span>
+<span class="fc" id="L636">          });</span>
+<span class="fc" id="L637">      draft.setLinks(links);</span>
     }
 
-<span class="fc bfc" id="L639" title="All 2 branches covered.">    if (targetInstitutionIds != null) draft.setTargetInstitutionIds(targetInstitutionIds);</span>
-<span class="fc bfc" id="L640" title="All 2 branches covered.">    if (targetGroupIds != null) draft.setTargetGroupIds(targetGroupIds);</span>
-<span class="fc bfc" id="L641" title="All 2 branches covered.">    if (national != null) draft.setNational(national);</span>
+<span class="fc bfc" id="L640" title="All 2 branches covered.">    if (targetInstitutionIds != null) draft.setTargetInstitutionIds(targetInstitutionIds);</span>
+<span class="fc bfc" id="L641" title="All 2 branches covered.">    if (targetGroupIds != null) draft.setTargetGroupIds(targetGroupIds);</span>
+<span class="fc bfc" id="L642" title="All 2 branches covered.">    if (national != null) draft.setNational(national);</span>
 
-<span class="fc" id="L643">    var updatedDraft = activityDraftRepository.save(draft);</span>
-<span class="fc" id="L644">    log.info(&quot;Updated activity draft with id: {}&quot;, id);</span>
-<span class="fc" id="L645">    return updatedDraft;</span>
+<span class="fc" id="L644">    var updatedDraft = activityDraftRepository.save(draft);</span>
+<span class="fc" id="L645">    log.info(&quot;Updated activity draft with id: {}&quot;, id);</span>
+<span class="fc" id="L646">    return updatedDraft;</span>
   }
 
   private void validateTargetPerimeter(
       Staff staff, List&lt;UUID&gt; targetInstitutionIds, List&lt;UUID&gt; targetGroupIds) {
-<span class="fc bfc" id="L650" title="All 4 branches covered.">    boolean hasInstitutionTargets = targetInstitutionIds != null &amp;&amp; !targetInstitutionIds.isEmpty();</span>
-<span class="fc bfc" id="L651" title="All 4 branches covered.">    boolean hasGroupTargets = targetGroupIds != null &amp;&amp; !targetGroupIds.isEmpty();</span>
+<span class="fc bfc" id="L651" title="All 4 branches covered.">    boolean hasInstitutionTargets = targetInstitutionIds != null &amp;&amp; !targetInstitutionIds.isEmpty();</span>
+<span class="fc bfc" id="L652" title="All 4 branches covered.">    boolean hasGroupTargets = targetGroupIds != null &amp;&amp; !targetGroupIds.isEmpty();</span>
 
-<span class="fc bfc" id="L653" title="All 4 branches covered.">    if ((hasInstitutionTargets || hasGroupTargets)</span>
-<span class="fc bfc" id="L654" title="All 2 branches covered.">        &amp;&amp; !accessClient.staffHasAccess(</span>
-<span class="fc" id="L655">            eppnOf(staff.getId()), targetInstitutionIds, targetGroupIds)) {</span>
-<span class="fc" id="L656">      throw new ActivityTargetNotAccessibleException();</span>
+<span class="fc bfc" id="L654" title="All 4 branches covered.">    if ((hasInstitutionTargets || hasGroupTargets)</span>
+<span class="fc bfc" id="L655" title="All 2 branches covered.">        &amp;&amp; !accessClient.staffHasAccess(</span>
+<span class="fc" id="L656">            eppnOf(staff.getId()), targetInstitutionIds, targetGroupIds)) {</span>
+<span class="fc" id="L657">      throw new ActivityTargetNotAccessibleException();</span>
     }
-<span class="fc" id="L658">  }</span>
+<span class="fc" id="L659">  }</span>
 
   private StudentAccessScope studentScope(Student student) {
-<span class="fc" id="L661">    return accessClient.getStudentScope(eppnOf(student.getId()));</span>
+<span class="fc" id="L662">    return accessClient.getStudentScope(eppnOf(student.getId()));</span>
   }
 
   private String eppnOf(UUID userId) {
-<span class="fc" id="L665">    return userPrincipalRepository.findEppnByUserId(userId).orElseThrow(UserNotFoundException::new);</span>
+<span class="fc" id="L666">    return userPrincipalRepository.findEppnByUserId(userId).orElseThrow(UserNotFoundException::new);</span>
   }
 
   private void validateTargetingUpdate(
       UUID activityId, List&lt;UUID&gt; targetInstitutionIds, List&lt;UUID&gt; targetGroupIds) {
-<span class="fc" id="L670">    var publishedActivity =</span>
+<span class="fc" id="L671">    var publishedActivity =</span>
         activityRepository
-<span class="fc" id="L672">            .findById(activityId)</span>
-<span class="fc bfc" id="L673" title="All 2 branches covered.">            .filter(activity -&gt; activity.getStatus() == EActivityStatus.PUBLISHED);</span>
-<span class="fc bfc" id="L674" title="All 2 branches covered.">    if (publishedActivity.isEmpty()) {</span>
-<span class="fc" id="L675">      return;</span>
+<span class="fc" id="L673">            .findById(activityId)</span>
+<span class="fc bfc" id="L674" title="All 2 branches covered.">            .filter(activity -&gt; activity.getStatus() == EActivityStatus.PUBLISHED);</span>
+<span class="fc bfc" id="L675" title="All 2 branches covered.">    if (publishedActivity.isEmpty()) {</span>
+<span class="fc" id="L676">      return;</span>
     }
 
-<span class="fc" id="L678">    var activity = publishedActivity.get();</span>
-<span class="fc bfc" id="L679" title="All 2 branches covered.">    if (targetInstitutionIds != null</span>
-<span class="fc bfc" id="L680" title="All 4 branches covered.">            &amp;&amp; !targetInstitutionIds.containsAll(activity.getTargetInstitutionIds())</span>
-<span class="fc bfc" id="L681" title="All 2 branches covered.">        || targetGroupIds != null &amp;&amp; !targetGroupIds.containsAll(activity.getTargetGroupIds())) {</span>
-<span class="fc" id="L682">      throw new ActivityTargetRemovalNotAllowedException();</span>
+<span class="fc" id="L679">    var activity = publishedActivity.get();</span>
+<span class="fc bfc" id="L680" title="All 2 branches covered.">    if (targetInstitutionIds != null</span>
+<span class="fc bfc" id="L681" title="All 4 branches covered.">            &amp;&amp; !targetInstitutionIds.containsAll(activity.getTargetInstitutionIds())</span>
+<span class="fc bfc" id="L682" title="All 2 branches covered.">        || targetGroupIds != null &amp;&amp; !targetGroupIds.containsAll(activity.getTargetGroupIds())) {</span>
+<span class="fc" id="L683">      throw new ActivityTargetRemovalNotAllowedException();</span>
     }
-<span class="fc" id="L684">  }</span>
+<span class="fc" id="L685">  }</span>
 
   @Override
   public ActivityDraft createDraftFromActivity(UUID activityId) {
-<span class="fc" id="L688">    var staff = loggedInUserService.getLoggedInStaff();</span>
-<span class="fc" id="L689">    var activity =</span>
-<span class="fc" id="L690">        activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);</span>
-<span class="fc" id="L691">    activityAuthorizationService.checkRight(staff, activityId, EActivityRight.EDIT);</span>
+<span class="fc" id="L689">    var staff = loggedInUserService.getLoggedInStaff();</span>
+<span class="fc" id="L690">    var activity =</span>
+<span class="fc" id="L691">        activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);</span>
+<span class="fc" id="L692">    activityAuthorizationService.checkRight(staff, activityId, EActivityRight.EDIT);</span>
 
-<span class="fc" id="L693">    var activityDraft = activityDraftRepository.findById(activityId);</span>
-<span class="fc bfc" id="L694" title="All 2 branches covered.">    if (activityDraft.isPresent()) {</span>
-<span class="fc" id="L695">      return activityDraft.get();</span>
+<span class="fc" id="L694">    var activityDraft = activityDraftRepository.findById(activityId);</span>
+<span class="fc bfc" id="L695" title="All 2 branches covered.">    if (activityDraft.isPresent()) {</span>
+<span class="fc" id="L696">      return activityDraft.get();</span>
     }
-<span class="fc" id="L697">    var draft =</span>
-<span class="fc" id="L698">        ActivityDraft.toDomain(</span>
+<span class="fc" id="L698">    var draft =</span>
+<span class="fc" id="L699">        ActivityDraft.toDomain(</span>
             activityId,
-<span class="fc" id="L700">            activity.getCreatedAt(),</span>
-<span class="fc" id="L701">            activity.getUpdatedAt(),</span>
-<span class="fc" id="L702">            activity.getTitle(),</span>
-<span class="fc" id="L703">            activity.getAuthor(),</span>
-<span class="fc" id="L704">            activity.getThematic(),</span>
-<span class="fc" id="L705">            activity.getSummary(),</span>
-<span class="fc" id="L706">            activity.getDescription(),</span>
-<span class="fc" id="L707">            activity.getRecommendedCompletionContexts().orElse(null),</span>
-<span class="fc" id="L708">            activity.getStartDate().orElse(null),</span>
-<span class="fc" id="L709">            activity.getEndDate().orElse(null),</span>
-<span class="fc" id="L710">            activity.getTraceAllowedAssociations(),</span>
-<span class="fc" id="L711">            activity.getFeedbackAllowedIterations(),</span>
-<span class="fc" id="L712">            activity.isEnableReflection(),</span>
-<span class="fc" id="L713">            activity.getBanner().orElse(null),</span>
-<span class="fc" id="L714">            activity.getLinks(),</span>
-<span class="fc" id="L715">            activity.getFiles(),</span>
-<span class="fc" id="L716">            activity.getTargetInstitutionIds(),</span>
-<span class="fc" id="L717">            activity.getTargetGroupIds(),</span>
-<span class="fc" id="L718">            activity.isNational());</span>
+<span class="fc" id="L701">            activity.getCreatedAt(),</span>
+<span class="fc" id="L702">            activity.getUpdatedAt(),</span>
+<span class="fc" id="L703">            activity.getTitle(),</span>
+<span class="fc" id="L704">            activity.getAuthor(),</span>
+<span class="fc" id="L705">            activity.getThematic(),</span>
+<span class="fc" id="L706">            activity.getSummary(),</span>
+<span class="fc" id="L707">            activity.getDescription(),</span>
+<span class="fc" id="L708">            activity.getRecommendedCompletionContexts().orElse(null),</span>
+<span class="fc" id="L709">            activity.getStartDate().orElse(null),</span>
+<span class="fc" id="L710">            activity.getEndDate().orElse(null),</span>
+<span class="fc" id="L711">            activity.getTraceAllowedAssociations(),</span>
+<span class="fc" id="L712">            activity.getFeedbackAllowedIterations(),</span>
+<span class="fc" id="L713">            activity.isEnableReflection(),</span>
+<span class="fc" id="L714">            activity.getBanner().orElse(null),</span>
+<span class="fc" id="L715">            activity.getLinks(),</span>
+<span class="fc" id="L716">            activity.getFiles(),</span>
+<span class="fc" id="L717">            activity.getTargetInstitutionIds(),</span>
+<span class="fc" id="L718">            activity.getTargetGroupIds(),</span>
+<span class="fc" id="L719">            activity.isNational(),</span>
+<span class="fc" id="L720">            activity.getAssessment().orElse(null));</span>
 
-<span class="fc" id="L720">    var savedDraft = activityDraftRepository.save(draft);</span>
-<span class="fc" id="L721">    activityAuthorizationService.copyActivityAuthorizationsToDraft(activityId);</span>
+<span class="fc" id="L722">    var savedDraft = activityDraftRepository.save(draft);</span>
+<span class="fc" id="L723">    activityAuthorizationService.copyActivityAuthorizationsToDraft(activityId);</span>
 
-<span class="fc bfc" id="L723" title="All 2 branches covered.">    if (!hasEnrolledStudents(activity)) {</span>
-<span class="fc" id="L724">      activity.setStatus(EActivityStatus.UNPUBLISHED);</span>
-<span class="fc" id="L725">      activityRepository.save(activity);</span>
-<span class="fc" id="L726">      log.info(&quot;Unpublished activity {} after creating edition draft&quot;, activityId);</span>
+<span class="fc bfc" id="L725" title="All 2 branches covered.">    if (!hasEnrolledStudents(activity)) {</span>
+<span class="fc" id="L726">      activity.setStatus(EActivityStatus.UNPUBLISHED);</span>
+<span class="fc" id="L727">      activityRepository.save(activity);</span>
+<span class="fc" id="L728">      log.info(&quot;Unpublished activity {} after creating edition draft&quot;, activityId);</span>
     }
 
-<span class="fc" id="L729">    return savedDraft;</span>
+<span class="fc" id="L731">    return savedDraft;</span>
   }
 
   @Override
   public ActivityDraft duplicateActivity(UUID activityId, String title) {
-<span class="fc" id="L734">    var staff = loggedInUserService.getLoggedInStaff();</span>
-<span class="fc" id="L735">    requireNotBlankAndMaxLength(&quot;title&quot;, title, TITLE_LENGTH);</span>
+<span class="fc" id="L736">    var staff = loggedInUserService.getLoggedInStaff();</span>
+<span class="fc" id="L737">    requireNotBlankAndMaxLength(&quot;title&quot;, title, TITLE_LENGTH);</span>
 
-<span class="fc" id="L737">    var now = Instant.now();</span>
-<span class="fc" id="L738">    var publishedSource = activityRepository.findById(activityId);</span>
+<span class="fc" id="L739">    var now = Instant.now();</span>
+<span class="fc" id="L740">    var publishedSource = activityRepository.findById(activityId);</span>
 
-<span class="fc bfc" id="L740" title="All 2 branches covered.">    if (publishedSource.isPresent()) {</span>
-<span class="fc" id="L741">      return saveDuplicateFrom(publishedSource.get(), staff, title, now);</span>
+<span class="fc bfc" id="L742" title="All 2 branches covered.">    if (publishedSource.isPresent()) {</span>
+<span class="fc" id="L743">      return saveDuplicateFrom(publishedSource.get(), staff, title, now);</span>
     }
 
-<span class="fc" id="L744">    var draftSource =</span>
-<span class="fc" id="L745">        activityDraftRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);</span>
-<span class="fc" id="L746">    return saveDuplicateFrom(draftSource, staff, title, now);</span>
+<span class="fc" id="L746">    var draftSource =</span>
+<span class="fc" id="L747">        activityDraftRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);</span>
+<span class="fc" id="L748">    return saveDuplicateFrom(draftSource, staff, title, now);</span>
   }
 
   private ActivityDraft saveDuplicateFrom(Activity source, Staff staff, String title, Instant now) {
     var duplicate =
-<span class="fc" id="L751">        ActivityDraft.toDomain(</span>
-<span class="fc" id="L752">            UUID.randomUUID(),</span>
+<span class="fc" id="L753">        ActivityDraft.toDomain(</span>
+<span class="fc" id="L754">            UUID.randomUUID(),</span>
             now,
             now,
             title,
             staff,
-<span class="fc" id="L757">            source.getThematic(),</span>
-<span class="fc" id="L758">            source.getSummary(),</span>
-<span class="fc" id="L759">            source.getDescription(),</span>
-<span class="fc" id="L760">            source.getRecommendedCompletionContexts().orElse(null),</span>
-<span class="fc" id="L761">            source.getStartDate().orElse(null),</span>
-<span class="fc" id="L762">            source.getEndDate().orElse(null),</span>
-<span class="fc" id="L763">            source.getTraceAllowedAssociations(),</span>
-<span class="fc" id="L764">            source.getFeedbackAllowedIterations(),</span>
-<span class="fc" id="L765">            source.isEnableReflection(),</span>
-<span class="fc" id="L766">            source.getBanner().map(banner -&gt; fileResourceService.copy(banner.getId())).orElse(null),</span>
-<span class="fc" id="L767">            source.getLinks(),</span>
-<span class="fc" id="L768">            source.getFiles().stream().map(file -&gt; fileResourceService.copy(file.getId())).toList(),</span>
-<span class="fc" id="L769">            source.getTargetInstitutionIds(),</span>
-<span class="fc" id="L770">            source.getTargetGroupIds(),</span>
-<span class="fc" id="L771">            source.isNational());</span>
-<span class="fc" id="L772">    var savedDuplicate = activityDraftRepository.save(duplicate);</span>
-<span class="fc" id="L773">    activityAuthorizationService.grantAllDraftRights(savedDuplicate.getId(), staff);</span>
-<span class="fc" id="L774">    return savedDuplicate;</span>
+<span class="fc" id="L759">            source.getThematic(),</span>
+<span class="fc" id="L760">            source.getSummary(),</span>
+<span class="fc" id="L761">            source.getDescription(),</span>
+<span class="fc" id="L762">            source.getRecommendedCompletionContexts().orElse(null),</span>
+<span class="fc" id="L763">            source.getStartDate().orElse(null),</span>
+<span class="fc" id="L764">            source.getEndDate().orElse(null),</span>
+<span class="fc" id="L765">            source.getTraceAllowedAssociations(),</span>
+<span class="fc" id="L766">            source.getFeedbackAllowedIterations(),</span>
+<span class="fc" id="L767">            source.isEnableReflection(),</span>
+<span class="fc" id="L768">            source.getBanner().map(banner -&gt; fileResourceService.copy(banner.getId())).orElse(null),</span>
+<span class="fc" id="L769">            source.getLinks(),</span>
+<span class="fc" id="L770">            source.getFiles().stream().map(file -&gt; fileResourceService.copy(file.getId())).toList(),</span>
+<span class="fc" id="L771">            source.getTargetInstitutionIds(),</span>
+<span class="fc" id="L772">            source.getTargetGroupIds(),</span>
+<span class="fc" id="L773">            source.isNational(),</span>
+<span class="fc" id="L774">            source.getAssessment().orElse(null));</span>
+<span class="fc" id="L775">    var savedDuplicate = activityDraftRepository.save(duplicate);</span>
+<span class="fc" id="L776">    activityAuthorizationService.grantAllDraftRights(savedDuplicate.getId(), staff);</span>
+<span class="fc" id="L777">    return savedDuplicate;</span>
   }
 
   private ActivityDraft saveDuplicateFrom(
       ActivityDraft source, Staff staff, String title, Instant now) {
     var duplicate =
-<span class="fc" id="L780">        ActivityDraft.toDomain(</span>
-<span class="fc" id="L781">            UUID.randomUUID(),</span>
+<span class="fc" id="L783">        ActivityDraft.toDomain(</span>
+<span class="fc" id="L784">            UUID.randomUUID(),</span>
             now,
             now,
             title,
             staff,
-<span class="fc" id="L786">            source.getThematic().orElse(null),</span>
-<span class="fc" id="L787">            source.getSummary().orElse(null),</span>
-<span class="fc" id="L788">            source.getDescription().orElse(null),</span>
-<span class="fc" id="L789">            source.getRecommendedCompletionContexts().orElse(null),</span>
-<span class="fc" id="L790">            source.getStartDate().orElse(null),</span>
-<span class="fc" id="L791">            source.getEndDate().orElse(null),</span>
-<span class="fc" id="L792">            source.getTraceAllowedAssociations(),</span>
-<span class="fc" id="L793">            source.getFeedbackAllowedIterations(),</span>
-<span class="fc" id="L794">            source.isEnableReflection(),</span>
-<span class="fc" id="L795">            source.getBanner().map(banner -&gt; fileResourceService.copy(banner.getId())).orElse(null),</span>
-<span class="fc" id="L796">            source.getLinks(),</span>
-<span class="fc" id="L797">            source.getFiles().stream().map(file -&gt; fileResourceService.copy(file.getId())).toList(),</span>
-<span class="fc" id="L798">            source.getTargetInstitutionIds(),</span>
-<span class="fc" id="L799">            source.getTargetGroupIds(),</span>
-<span class="fc" id="L800">            source.isNational());</span>
-<span class="fc" id="L801">    var savedDuplicate = activityDraftRepository.save(duplicate);</span>
-<span class="fc" id="L802">    activityAuthorizationService.grantAllDraftRights(savedDuplicate.getId(), staff);</span>
-<span class="fc" id="L803">    return savedDuplicate;</span>
+<span class="fc" id="L789">            source.getThematic().orElse(null),</span>
+<span class="fc" id="L790">            source.getSummary().orElse(null),</span>
+<span class="fc" id="L791">            source.getDescription().orElse(null),</span>
+<span class="fc" id="L792">            source.getRecommendedCompletionContexts().orElse(null),</span>
+<span class="fc" id="L793">            source.getStartDate().orElse(null),</span>
+<span class="fc" id="L794">            source.getEndDate().orElse(null),</span>
+<span class="fc" id="L795">            source.getTraceAllowedAssociations(),</span>
+<span class="fc" id="L796">            source.getFeedbackAllowedIterations(),</span>
+<span class="fc" id="L797">            source.isEnableReflection(),</span>
+<span class="fc" id="L798">            source.getBanner().map(banner -&gt; fileResourceService.copy(banner.getId())).orElse(null),</span>
+<span class="fc" id="L799">            source.getLinks(),</span>
+<span class="fc" id="L800">            source.getFiles().stream().map(file -&gt; fileResourceService.copy(file.getId())).toList(),</span>
+<span class="fc" id="L801">            source.getTargetInstitutionIds(),</span>
+<span class="fc" id="L802">            source.getTargetGroupIds(),</span>
+<span class="fc" id="L803">            source.isNational(),</span>
+<span class="fc" id="L804">            source.getAssessment().orElse(null));</span>
+<span class="fc" id="L805">    var savedDuplicate = activityDraftRepository.save(duplicate);</span>
+<span class="fc" id="L806">    activityAuthorizationService.grantAllDraftRights(savedDuplicate.getId(), staff);</span>
+<span class="fc" id="L807">    return savedDuplicate;</span>
   }
 
   private boolean hasEnrolledStudents(Activity activity) {
-<span class="fc bfc" id="L807" title="All 2 branches covered.">    return declaredActivityService.countEnrolledStudents(activity) &gt; 0;</span>
+<span class="fc bfc" id="L811" title="All 2 branches covered.">    return declaredActivityService.countEnrolledStudents(activity) &gt; 0;</span>
   }
 
   @Override
   public Boolean hasEnrolledStudents(ActivityDraft draft) {
-<span class="fc" id="L812">    return activityRepository.findById(draft.getId()).map(this::hasEnrolledStudents).orElse(false);</span>
+<span class="fc" id="L816">    return activityRepository.findById(draft.getId()).map(this::hasEnrolledStudents).orElse(false);</span>
   }
 
   @Override
   public Boolean hasDraftForActivity(UUID activityId) {
-<span class="fc" id="L817">    return activityDraftRepository.existsById(activityId);</span>
+<span class="fc" id="L821">    return activityDraftRepository.existsById(activityId);</span>
   }
 
   @Override
   public File uploadDraftBanner(
       UUID activityDraftId, String fileName, String mimeType, long size, byte[] content) {
-<span class="fc" id="L823">    var draft = getDraftWithRight(activityDraftId, EActivityRight.EDIT);</span>
-<span class="pc bpc" id="L824" title="1 of 2 branches missed.">    if (!EFileType.fromMimeType(mimeType).isImage()) {</span>
-<span class="nc" id="L825">      throw new FileTypeNotSupportedException();</span>
+<span class="fc" id="L827">    var draft = getDraftWithRight(activityDraftId, EActivityRight.EDIT);</span>
+<span class="pc bpc" id="L828" title="1 of 2 branches missed.">    if (!EFileType.fromMimeType(mimeType).isImage()) {</span>
+<span class="nc" id="L829">      throw new FileTypeNotSupportedException();</span>
     }
-<span class="fc" id="L827">    var file = fileResourceService.upload(fileName, mimeType, size, content, false);</span>
-<span class="fc" id="L828">    draft.setBanner(file);</span>
-<span class="fc" id="L829">    activityDraftRepository.save(draft);</span>
-<span class="fc" id="L830">    return file;</span>
+<span class="fc" id="L831">    var file = fileResourceService.upload(fileName, mimeType, size, content, false);</span>
+<span class="fc" id="L832">    draft.setBanner(file);</span>
+<span class="fc" id="L833">    activityDraftRepository.save(draft);</span>
+<span class="fc" id="L834">    return file;</span>
   }
 
   @Override
   public void deleteDraftBanner(UUID activityDraftId) {
-<span class="nc" id="L835">    var draft = getDraftWithRight(activityDraftId, EActivityRight.EDIT);</span>
-<span class="nc" id="L836">    draft.getBanner().ifPresent(banner -&gt; fileResourceService.delete(banner.getId()));</span>
-<span class="nc" id="L837">    draft.setBanner(null);</span>
-<span class="nc" id="L838">    activityDraftRepository.save(draft);</span>
-<span class="nc" id="L839">  }</span>
+<span class="nc" id="L839">    var draft = getDraftWithRight(activityDraftId, EActivityRight.EDIT);</span>
+<span class="nc" id="L840">    draft.getBanner().ifPresent(banner -&gt; fileResourceService.delete(banner.getId()));</span>
+<span class="nc" id="L841">    draft.setBanner(null);</span>
+<span class="nc" id="L842">    activityDraftRepository.save(draft);</span>
+<span class="nc" id="L843">  }</span>
 
   @Override
   public File addDraftFile(
       UUID activityDraftId, String fileName, String mimeType, long size, byte[] content) {
-<span class="fc" id="L844">    var draft = getDraftWithRight(activityDraftId, EActivityRight.EDIT);</span>
-<span class="fc bfc" id="L845" title="All 2 branches covered.">    if (!ALLOWED_DRAFT_FILE_TYPES.contains(EFileType.fromMimeType(mimeType))) {</span>
-<span class="fc" id="L846">      throw new FileTypeNotSupportedException();</span>
+<span class="fc" id="L848">    var draft = getDraftWithRight(activityDraftId, EActivityRight.EDIT);</span>
+<span class="fc bfc" id="L849" title="All 2 branches covered.">    if (!ALLOWED_DRAFT_FILE_TYPES.contains(EFileType.fromMimeType(mimeType))) {</span>
+<span class="fc" id="L850">      throw new FileTypeNotSupportedException();</span>
     }
-<span class="fc" id="L848">    var file = fileResourceService.upload(fileName, mimeType, size, content, true);</span>
-<span class="fc" id="L849">    draft.addFile(file);</span>
-<span class="fc" id="L850">    activityDraftRepository.save(draft);</span>
-<span class="fc" id="L851">    return file;</span>
+<span class="fc" id="L852">    var file = fileResourceService.upload(fileName, mimeType, size, content, true);</span>
+<span class="fc" id="L853">    draft.addFile(file);</span>
+<span class="fc" id="L854">    activityDraftRepository.save(draft);</span>
+<span class="fc" id="L855">    return file;</span>
   }
 
   @Override
   public void deleteDraftFile(UUID activityDraftId, UUID fileId) {
-<span class="nc" id="L856">    var draft = getDraftWithRight(activityDraftId, EActivityRight.EDIT);</span>
-<span class="nc" id="L857">    requireFileAttached(draft.getFiles(), fileId);</span>
-<span class="nc" id="L858">    draft.removeFile(fileId);</span>
-<span class="nc" id="L859">    activityDraftRepository.save(draft);</span>
-<span class="nc" id="L860">    var stillUsedByPublishedActivity =</span>
+<span class="nc" id="L860">    var draft = getDraftWithRight(activityDraftId, EActivityRight.EDIT);</span>
+<span class="nc" id="L861">    requireFileAttached(draft.getFiles(), fileId);</span>
+<span class="nc" id="L862">    draft.removeFile(fileId);</span>
+<span class="nc" id="L863">    activityDraftRepository.save(draft);</span>
+<span class="nc" id="L864">    var stillUsedByPublishedActivity =</span>
         activityRepository
-<span class="nc" id="L862">            .findById(activityDraftId)</span>
-<span class="nc" id="L863">            .map(activity -&gt; activity.getFiles().stream().anyMatch(f -&gt; f.getId().equals(fileId)))</span>
-<span class="nc" id="L864">            .orElse(false);</span>
-<span class="nc bnc" id="L865" title="All 2 branches missed.">    if (!stillUsedByPublishedActivity) {</span>
-<span class="nc" id="L866">      fileResourceService.delete(fileId);</span>
+<span class="nc" id="L866">            .findById(activityDraftId)</span>
+<span class="nc" id="L867">            .map(activity -&gt; activity.getFiles().stream().anyMatch(f -&gt; f.getId().equals(fileId)))</span>
+<span class="nc" id="L868">            .orElse(false);</span>
+<span class="nc bnc" id="L869" title="All 2 branches missed.">    if (!stillUsedByPublishedActivity) {</span>
+<span class="nc" id="L870">      fileResourceService.delete(fileId);</span>
     }
-<span class="nc" id="L868">  }</span>
+<span class="nc" id="L872">  }</span>
 
   @Override
   public FileDownload downloadActivityFile(UUID activityId, UUID fileId) {
-<span class="fc" id="L872">    var activity =</span>
-<span class="fc" id="L873">        activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);</span>
-<span class="fc bfc" id="L874" title="All 2 branches covered.">    if (!canDownloadActivityFiles(activity)) {</span>
-<span class="fc" id="L875">      throw new UserNotAuthorizedException();</span>
+<span class="fc" id="L876">    var activity =</span>
+<span class="fc" id="L877">        activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);</span>
+<span class="fc bfc" id="L878" title="All 2 branches covered.">    if (!canDownloadActivityFiles(activity)) {</span>
+<span class="fc" id="L879">      throw new UserNotAuthorizedException();</span>
     }
-<span class="fc" id="L877">    requireFileAttached(activity.getFiles(), fileId);</span>
-<span class="fc" id="L878">    return fileResourceService.download(fileId);</span>
+<span class="fc" id="L881">    requireFileAttached(activity.getFiles(), fileId);</span>
+<span class="fc" id="L882">    return fileResourceService.download(fileId);</span>
   }
 
   @Override
   public FileDownload downloadDraftFile(UUID activityDraftId, UUID fileId) {
-<span class="fc" id="L883">    var draft = getDraftWithAnyRight(activityDraftId, EActivityRight.MANAGEMENT_RIGHTS);</span>
-<span class="fc" id="L884">    requireFileAttached(draft.getFiles(), fileId);</span>
-<span class="fc" id="L885">    return fileResourceService.download(fileId);</span>
+<span class="fc" id="L887">    var draft = getDraftWithAnyRight(activityDraftId, EActivityRight.MANAGEMENT_RIGHTS);</span>
+<span class="fc" id="L888">    requireFileAttached(draft.getFiles(), fileId);</span>
+<span class="fc" id="L889">    return fileResourceService.download(fileId);</span>
   }
 
   private boolean canDownloadActivityFiles(Activity activity) {
-<span class="fc bfc" id="L889" title="All 2 branches covered.">    if (isLoggedInUserStaff()) {</span>
-<span class="fc" id="L890">      return true;</span>
+<span class="fc bfc" id="L893" title="All 2 branches covered.">    if (isLoggedInUserStaff()) {</span>
+<span class="fc" id="L894">      return true;</span>
     }
-<span class="fc" id="L892">    return studentRepository</span>
-<span class="fc" id="L893">        .findById(loggedInUserService.getLoggedInUser().getId())</span>
-<span class="fc" id="L894">        .map(student -&gt; declaredActivityService.isEnrolled(activity, student))</span>
-<span class="fc" id="L895">        .orElse(false);</span>
+<span class="fc" id="L896">    return studentRepository</span>
+<span class="fc" id="L897">        .findById(loggedInUserService.getLoggedInUser().getId())</span>
+<span class="fc" id="L898">        .map(student -&gt; declaredActivityService.isEnrolled(activity, student))</span>
+<span class="fc" id="L899">        .orElse(false);</span>
   }
 
   private void requireFileAttached(List&lt;File&gt; files, UUID fileId) {
-<span class="fc bfc" id="L899" title="All 2 branches covered.">    if (files.stream().noneMatch(file -&gt; file.getId().equals(fileId))) {</span>
-<span class="fc" id="L900">      throw new FileNotFoundException();</span>
+<span class="fc bfc" id="L903" title="All 2 branches covered.">    if (files.stream().noneMatch(file -&gt; file.getId().equals(fileId))) {</span>
+<span class="fc" id="L904">      throw new FileNotFoundException();</span>
     }
-<span class="fc" id="L902">  }</span>
+<span class="fc" id="L906">  }</span>
 
   private boolean isLoggedInUserStaff() {
     try {
-<span class="pc bpc" id="L906" title="1 of 2 branches missed.">      return loggedInUserService.getLoggedInStaff() != null;</span>
-<span class="fc" id="L907">    } catch (UserIsNotStaffException e) {</span>
-<span class="fc" id="L908">      return false;</span>
+<span class="pc bpc" id="L910" title="1 of 2 branches missed.">      return loggedInUserService.getLoggedInStaff() != null;</span>
+<span class="fc" id="L911">    } catch (UserIsNotStaffException e) {</span>
+<span class="fc" id="L912">      return false;</span>
     }
   }
 
   private ActivityDraft getDraftWithRight(UUID activityDraftId, EActivityRight right) {
-<span class="fc" id="L913">    var staff = loggedInUserService.getLoggedInStaff();</span>
-<span class="fc" id="L914">    var draft =</span>
+<span class="fc" id="L917">    var staff = loggedInUserService.getLoggedInStaff();</span>
+<span class="fc" id="L918">    var draft =</span>
         activityDraftRepository
-<span class="fc" id="L916">            .findById(activityDraftId)</span>
-<span class="fc" id="L917">            .orElseThrow(ActivityDraftNotFoundException::new);</span>
-<span class="fc" id="L918">    activityAuthorizationService.checkDraftRight(staff, activityDraftId, right);</span>
-<span class="fc" id="L919">    return draft;</span>
+<span class="fc" id="L920">            .findById(activityDraftId)</span>
+<span class="fc" id="L921">            .orElseThrow(ActivityDraftNotFoundException::new);</span>
+<span class="fc" id="L922">    activityAuthorizationService.checkDraftRight(staff, activityDraftId, right);</span>
+<span class="fc" id="L923">    return draft;</span>
   }
 
   private ActivityDraft getDraftWithAnyRight(UUID activityDraftId, Set&lt;EActivityRight&gt; rights) {
-<span class="fc" id="L923">    var staff = loggedInUserService.getLoggedInStaff();</span>
-<span class="fc" id="L924">    var draft =</span>
+<span class="fc" id="L927">    var staff = loggedInUserService.getLoggedInStaff();</span>
+<span class="fc" id="L928">    var draft =</span>
         activityDraftRepository
-<span class="fc" id="L926">            .findById(activityDraftId)</span>
-<span class="fc" id="L927">            .orElseThrow(ActivityDraftNotFoundException::new);</span>
-<span class="fc" id="L928">    activityAuthorizationService.checkAnyDraftRight(staff, activityDraftId, rights);</span>
-<span class="fc" id="L929">    return draft;</span>
+<span class="fc" id="L930">            .findById(activityDraftId)</span>
+<span class="fc" id="L931">            .orElseThrow(ActivityDraftNotFoundException::new);</span>
+<span class="fc" id="L932">    activityAuthorizationService.checkAnyDraftRight(staff, activityDraftId, rights);</span>
+<span class="fc" id="L933">    return draft;</span>
   }
 
   @Override
   public PagedResult&lt;Activity&gt; getActivitiesWithFeedbacks(
       List&lt;EFeedbackStatus&gt; statuses, PageCriteria pageCriteria) {
-<span class="fc" id="L935">    Staff staff = loggedInUserService.getLoggedInStaff();</span>
+<span class="fc" id="L939">    Staff staff = loggedInUserService.getLoggedInStaff();</span>
     var statusArray =
-<span class="fc bfc" id="L937" title="All 2 branches covered.">        statuses == null ? new EFeedbackStatus[0] : statuses.toArray(EFeedbackStatus[]::new);</span>
-<span class="fc" id="L938">    return activityRepository.findWithFeedbacks(staff.getId(), pageCriteria, statusArray);</span>
+<span class="fc bfc" id="L941" title="All 2 branches covered.">        statuses == null ? new EFeedbackStatus[0] : statuses.toArray(EFeedbackStatus[]::new);</span>
+<span class="fc" id="L942">    return activityRepository.findWithFeedbacks(staff.getId(), pageCriteria, statusArray);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
