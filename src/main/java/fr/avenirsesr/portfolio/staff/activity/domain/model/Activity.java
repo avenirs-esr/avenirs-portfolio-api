@@ -46,6 +46,9 @@ public class Activity extends AvenirsBaseModel {
   private List<UUID> targetGroupIds;
   private boolean national;
 
+  @Getter(AccessLevel.NONE)
+  private ActivityAssessment assessment;
+
   private Activity(
       UUID id,
       Staff author,
@@ -66,6 +69,7 @@ public class Activity extends AvenirsBaseModel {
       List<UUID> targetInstitutionIds,
       List<UUID> targetGroupIds,
       boolean national,
+      ActivityAssessment assessment,
       Instant createdAt,
       Instant updatedAt) {
     super(id, createdAt, updatedAt);
@@ -88,6 +92,7 @@ public class Activity extends AvenirsBaseModel {
         new ArrayList<>(targetInstitutionIds == null ? List.of() : targetInstitutionIds);
     this.targetGroupIds = new ArrayList<>(targetGroupIds == null ? List.of() : targetGroupIds);
     this.national = national;
+    this.assessment = assessment;
   }
 
   public static Activity create(
@@ -129,6 +134,7 @@ public class Activity extends AvenirsBaseModel {
         targetInstitutionIds,
         targetGroupIds,
         false,
+        null,
         now,
         now);
   }
@@ -153,6 +159,7 @@ public class Activity extends AvenirsBaseModel {
       List<UUID> targetInstitutionIds,
       List<UUID> targetGroupIds,
       boolean national,
+      ActivityAssessment assessment,
       Instant createdAt,
       Instant updatedAt) {
     return new Activity(
@@ -175,6 +182,7 @@ public class Activity extends AvenirsBaseModel {
         targetInstitutionIds,
         targetGroupIds,
         national,
+        assessment,
         createdAt,
         updatedAt);
   }
@@ -193,6 +201,10 @@ public class Activity extends AvenirsBaseModel {
 
   public Optional<File> getBanner() {
     return Optional.ofNullable(banner);
+  }
+
+  public Optional<ActivityAssessment> getAssessment() {
+    return Optional.ofNullable(assessment);
   }
 
   public void addFile(File file) {

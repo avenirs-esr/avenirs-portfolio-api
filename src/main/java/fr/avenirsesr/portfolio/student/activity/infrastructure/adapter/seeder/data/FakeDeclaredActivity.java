@@ -32,6 +32,7 @@ public class FakeDeclaredActivity {
             hasFinished ? Instant.now() : null,
             false,
             null,
+            null,
             Instant.now(),
             Instant.now()));
   }

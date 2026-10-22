@@ -95,6 +95,8 @@ public class ActivityDraftEntity extends PeriodEntity<LocalDate> {
   @Column(name = "is_national", nullable = false)
   private boolean national;
 
+  @Embedded private ActivityAssessmentEmbeddable assessment;
+
   public ActivityDraftEntity(
       UUID id,
       String title,
@@ -114,6 +116,7 @@ public class ActivityDraftEntity extends PeriodEntity<LocalDate> {
       List<UUID> targetInstitutionIds,
       List<UUID> targetGroupIds,
       boolean national,
+      ActivityAssessmentEmbeddable assessment,
       Instant createdAt,
       Instant updatedAt) {
     this.setId(id);
@@ -134,6 +137,7 @@ public class ActivityDraftEntity extends PeriodEntity<LocalDate> {
     this.targetInstitutionIds = targetInstitutionIds;
     this.targetGroupIds = targetGroupIds;
     this.national = national;
+    this.assessment = assessment;
     this.setCreatedAt(createdAt);
     this.setUpdatedAt(updatedAt);
   }
@@ -157,6 +161,7 @@ public class ActivityDraftEntity extends PeriodEntity<LocalDate> {
       List<UUID> targetInstitutionIds,
       List<UUID> targetGroupIds,
       boolean national,
+      ActivityAssessmentEmbeddable assessment,
       Instant createdAt,
       Instant updatedAt) {
     return new ActivityDraftEntity(
@@ -178,6 +183,7 @@ public class ActivityDraftEntity extends PeriodEntity<LocalDate> {
         targetInstitutionIds,
         targetGroupIds,
         national,
+        assessment,
         createdAt,
         updatedAt);
   }

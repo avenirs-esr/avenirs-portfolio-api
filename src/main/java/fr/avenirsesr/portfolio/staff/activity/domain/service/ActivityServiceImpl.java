@@ -190,6 +190,7 @@ public class ActivityServiceImpl implements ActivityService {
                 draft.getTargetInstitutionIds(),
                 draft.getTargetGroupIds()));
     activity.setNational(draft.isNational());
+    activity.setAssessment(draft.getAssessment().orElse(null));
 
     var removedFileIds = new ArrayList<UUID>();
     if (publishedActivity.isPresent()) {
@@ -715,7 +716,8 @@ public class ActivityServiceImpl implements ActivityService {
             activity.getFiles(),
             activity.getTargetInstitutionIds(),
             activity.getTargetGroupIds(),
-            activity.isNational());
+            activity.isNational(),
+            activity.getAssessment().orElse(null));
 
     var savedDraft = activityDraftRepository.save(draft);
     activityAuthorizationService.copyActivityAuthorizationsToDraft(activityId);
@@ -768,7 +770,8 @@ public class ActivityServiceImpl implements ActivityService {
             source.getFiles().stream().map(file -> fileResourceService.copy(file.getId())).toList(),
             source.getTargetInstitutionIds(),
             source.getTargetGroupIds(),
-            source.isNational());
+            source.isNational(),
+            source.getAssessment().orElse(null));
     var savedDuplicate = activityDraftRepository.save(duplicate);
     activityAuthorizationService.grantAllDraftRights(savedDuplicate.getId(), staff);
     return savedDuplicate;
@@ -797,7 +800,8 @@ public class ActivityServiceImpl implements ActivityService {
             source.getFiles().stream().map(file -> fileResourceService.copy(file.getId())).toList(),
             source.getTargetInstitutionIds(),
             source.getTargetGroupIds(),
-            source.isNational());
+            source.isNational(),
+            source.getAssessment().orElse(null));
     var savedDuplicate = activityDraftRepository.save(duplicate);
     activityAuthorizationService.grantAllDraftRights(savedDuplicate.getId(), staff);
     return savedDuplicate;

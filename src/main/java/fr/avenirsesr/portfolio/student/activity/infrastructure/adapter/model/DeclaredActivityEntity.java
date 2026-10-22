@@ -55,6 +55,8 @@ public class DeclaredActivityEntity extends PeriodEntity<LocalDate> {
   @Column(name = "unsubscribed_at")
   private Instant unsubscribedAt;
 
+  @Embedded private DeclaredActivityAssessmentEmbeddable assessment;
+
   private DeclaredActivityEntity(
       UUID id,
       StudentEntity student,
@@ -66,6 +68,7 @@ public class DeclaredActivityEntity extends PeriodEntity<LocalDate> {
       Instant finishedAt,
       boolean valorized,
       Instant unsubscribedAt,
+      DeclaredActivityAssessmentEmbeddable assessment,
       Instant createdAt,
       Instant updatedAt) {
     setId(id);
@@ -80,6 +83,7 @@ public class DeclaredActivityEntity extends PeriodEntity<LocalDate> {
     this.finishedAt = finishedAt;
     this.valorized = valorized;
     this.unsubscribedAt = unsubscribedAt;
+    this.assessment = assessment;
   }
 
   public static DeclaredActivityEntity of(
@@ -93,6 +97,7 @@ public class DeclaredActivityEntity extends PeriodEntity<LocalDate> {
       Instant finishedAt,
       boolean valorized,
       Instant unsubscribedAt,
+      DeclaredActivityAssessmentEmbeddable assessment,
       Instant createdAt,
       Instant updatedAt) {
     return new DeclaredActivityEntity(
@@ -106,6 +111,7 @@ public class DeclaredActivityEntity extends PeriodEntity<LocalDate> {
         finishedAt,
         valorized,
         unsubscribedAt,
+        assessment,
         createdAt,
         updatedAt);
   }

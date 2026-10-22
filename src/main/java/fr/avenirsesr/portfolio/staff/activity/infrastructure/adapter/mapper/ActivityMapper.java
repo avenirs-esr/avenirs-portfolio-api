@@ -34,6 +34,7 @@ public class ActivityMapper implements Mapper<ActivityEntity, Activity> {
             domain.getTargetInstitutionIds(),
             domain.getTargetGroupIds(),
             domain.isNational(),
+            domain.getAssessment().map(ActivityAssessmentMapper.INSTANCE::fromDomain).orElse(null),
             domain.getCreatedAt(),
             domain.getUpdatedAt());
     return entity;
@@ -62,6 +63,9 @@ public class ActivityMapper implements Mapper<ActivityEntity, Activity> {
             entity.getTargetInstitutionIds(),
             entity.getTargetGroupIds(),
             entity.isNational(),
+            entity.getAssessment() == null
+                ? null
+                : ActivityAssessmentMapper.INSTANCE.toDomain(entity.getAssessment()),
             entity.getCreatedAt(),
             entity.getUpdatedAt());
     return domain;
@@ -97,6 +101,9 @@ public class ActivityMapper implements Mapper<ActivityEntity, Activity> {
             entity.getTargetInstitutionIds(),
             entity.getTargetGroupIds(),
             entity.isNational(),
+            entity.getAssessment() == null
+                ? null
+                : ActivityAssessmentMapper.INSTANCE.toDomain(entity.getAssessment()),
             entity.getCreatedAt(),
             entity.getUpdatedAt());
     return domain;
