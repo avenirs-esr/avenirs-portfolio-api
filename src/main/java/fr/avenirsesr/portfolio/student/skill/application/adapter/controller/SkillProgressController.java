@@ -38,7 +38,8 @@ public class SkillProgressController {
       @RequestParam(required = false) Boolean isValorized) {
     var pageCriteria = new PageCriteria(page, pageSize);
     log.debug(
-        "Received request to list the skill progresses of user [{}] (page= {}, fileSize= {}, isValorized={})",
+        "Received request to list the skill progresses of user [{}] (page= {}, fileSize= {},"
+            + " isValorized={})",
         principal.getName(),
         pageCriteria.page(),
         pageCriteria.pageSize(),
