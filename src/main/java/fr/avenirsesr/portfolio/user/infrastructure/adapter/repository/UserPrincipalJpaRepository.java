@@ -1,6 +1,8 @@
 package fr.avenirsesr.portfolio.user.infrastructure.adapter.repository;
 
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserPrincipalEntity;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,4 +14,6 @@ public interface UserPrincipalJpaRepository
   Optional<UserPrincipalEntity> findByUserId(UUID userId);
 
   Optional<UserPrincipalEntity> findByEppn(String eppn);
+
+  List<UserPrincipalEntity> findAllByEppnIn(Collection<String> eppns);
 }

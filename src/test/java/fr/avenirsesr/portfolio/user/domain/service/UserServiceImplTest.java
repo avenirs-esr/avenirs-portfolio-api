@@ -32,6 +32,7 @@ import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -691,6 +692,124 @@ class UserServiceImplTest {
       BddLogger.then("nothing is returned and the back-office is not called");
       assertThat(result).isEmpty();
       verifyNoInteractions(cguClient);
+    }
+  }
+
+  @Nested
+  class WhenLookingUpProfilesByEppn {
+
+    private static final String CONNECTED_EPPN = "lucas.tessier@university.com";
+    private static final String UNKNOWN_EPPN = "never.connected@university.com";
+
+    @Test
+    void shouldReportNoConnectionWhenNoAccountExistsForTheEppn() {
+      BddLogger.given("an eppn no account was ever created for");
+      when(userPrincipalRepository.findAllByEppns(List.of(UNKNOWN_EPPN))).thenReturn(Map.of());
+      when(staffService.findProfilePictureIdsByIds(Set.of())).thenReturn(Map.of());
+      when(studentService.findProfilePictureIdsByIds(Set.of())).thenReturn(Map.of());
+
+      BddLogger.when("looking up its profile");
+      var profiles = userService.findProfilesByEppns(List.of(UNKNOWN_EPPN));
+
+      BddLogger.then("it should report the eppn as never connected, without user nor picture");
+      assertThat(profiles).hasSize(1);
+      assertThat(profiles.getFirst().eppn()).isEqualTo(UNKNOWN_EPPN);
+      assertThat(profiles.getFirst().hasConnected()).isFalse();
+      assertThat(profiles.getFirst().userId()).isNull();
+      assertThat(profiles.getFirst().profilePictureId()).isNull();
+    }
+
+    @Test
+    void shouldReturnTheProfilePictureOfAConnectedUser() {
+      BddLogger.given("a connected user owning a profile picture");
+      User user = UserFixture.create().toModel();
+      UUID pictureId = UUID.randomUUID();
+      when(userPrincipalRepository.findAllByEppns(List.of(CONNECTED_EPPN)))
+          .thenReturn(Map.of(CONNECTED_EPPN, user));
+      when(staffService.findProfilePictureIdsByIds(Set.of(user.getId()))).thenReturn(Map.of());
+      when(studentService.findProfilePictureIdsByIds(Set.of(user.getId())))
+          .thenReturn(Map.of(user.getId(), pictureId));
+
+      BddLogger.when("looking up its profile");
+      var profiles = userService.findProfilesByEppns(List.of(CONNECTED_EPPN));
+
+      BddLogger.then("it should report the connection and the picture");
+      assertThat(profiles).hasSize(1);
+      assertThat(profiles.getFirst().hasConnected()).isTrue();
+      assertThat(profiles.getFirst().userId()).isEqualTo(user.getId());
+      assertThat(profiles.getFirst().profilePictureId()).isEqualTo(pictureId);
+    }
+
+    @Test
+    void shouldReportTheConnectionWithoutPictureWhenTheUserUploadedNone() {
+      BddLogger.given("a connected user who never uploaded a profile picture");
+      User user = UserFixture.create().toModel();
+      when(userPrincipalRepository.findAllByEppns(List.of(CONNECTED_EPPN)))
+          .thenReturn(Map.of(CONNECTED_EPPN, user));
+      when(staffService.findProfilePictureIdsByIds(Set.of(user.getId()))).thenReturn(Map.of());
+      when(studentService.findProfilePictureIdsByIds(Set.of(user.getId()))).thenReturn(Map.of());
+
+      BddLogger.when("looking up its profile");
+      var profiles = userService.findProfilesByEppns(List.of(CONNECTED_EPPN));
+
+      BddLogger.then("it should report the connection with a null picture");
+      assertThat(profiles.getFirst().hasConnected()).isTrue();
+      assertThat(profiles.getFirst().profilePictureId()).isNull();
+    }
+
+    @Test
+    void shouldPreferTheStudentPictureWhenTheUserHoldsBothProfiles() {
+      BddLogger.given("a user holding both a student and a staff profile, each with a picture");
+      User user = UserFixture.create().toModel();
+      UUID studentPictureId = UUID.randomUUID();
+      UUID staffPictureId = UUID.randomUUID();
+      when(userPrincipalRepository.findAllByEppns(List.of(CONNECTED_EPPN)))
+          .thenReturn(Map.of(CONNECTED_EPPN, user));
+      when(staffService.findProfilePictureIdsByIds(Set.of(user.getId())))
+          .thenReturn(Map.of(user.getId(), staffPictureId));
+      when(studentService.findProfilePictureIdsByIds(Set.of(user.getId())))
+          .thenReturn(Map.of(user.getId(), studentPictureId));
+
+      BddLogger.when("looking up its profile");
+      var profiles = userService.findProfilesByEppns(List.of(CONNECTED_EPPN));
+
+      BddLogger.then("it should return the picture of its student profile");
+      assertThat(profiles.getFirst().profilePictureId()).isEqualTo(studentPictureId);
+    }
+
+    @Test
+    void shouldQueryEachRepositoryOnceAndKeepTheRequestedOrder() {
+      BddLogger.given("a batch repeating one eppn and mixing a connected and an unknown one");
+      User user = UserFixture.create().toModel();
+      when(userPrincipalRepository.findAllByEppns(List.of(CONNECTED_EPPN, UNKNOWN_EPPN)))
+          .thenReturn(Map.of(CONNECTED_EPPN, user));
+      when(staffService.findProfilePictureIdsByIds(Set.of(user.getId()))).thenReturn(Map.of());
+      when(studentService.findProfilePictureIdsByIds(Set.of(user.getId()))).thenReturn(Map.of());
+
+      BddLogger.when("looking up the profiles");
+      var profiles =
+          userService.findProfilesByEppns(List.of(CONNECTED_EPPN, UNKNOWN_EPPN, CONNECTED_EPPN));
+
+      BddLogger.then("it should deduplicate the eppns, keep their order and batch the lookups");
+      assertThat(profiles).hasSize(2);
+      assertThat(profiles.get(0).eppn()).isEqualTo(CONNECTED_EPPN);
+      assertThat(profiles.get(0).hasConnected()).isTrue();
+      assertThat(profiles.get(1).eppn()).isEqualTo(UNKNOWN_EPPN);
+      assertThat(profiles.get(1).hasConnected()).isFalse();
+      verify(userPrincipalRepository, times(1)).findAllByEppns(any());
+      verify(staffService, times(1)).findProfilePictureIdsByIds(any());
+      verify(studentService, times(1)).findProfilePictureIdsByIds(any());
+    }
+
+    @Test
+    void shouldReturnNothingWithoutQueryingAnythingWhenNoEppnIsGiven() {
+      BddLogger.given("no eppn at all");
+
+      BddLogger.when("looking up the profiles");
+      BddLogger.then("it should return nothing without querying the repositories");
+      assertThat(userService.findProfilesByEppns(List.of())).isEmpty();
+      assertThat(userService.findProfilesByEppns(null)).isEmpty();
+      verifyNoInteractions(userPrincipalRepository, staffService, studentService);
     }
   }
 }

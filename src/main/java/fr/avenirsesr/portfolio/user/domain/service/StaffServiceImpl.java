@@ -15,6 +15,10 @@ import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.domain.port.input.StaffService;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StaffRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +40,22 @@ public class StaffServiceImpl implements StaffService {
               log.error("Staff {} not found", id);
               return new UserIsNotStaffException();
             });
+  }
+
+  @Override
+  public Map<UUID, UUID> findProfilePictureIdsByIds(Collection<UUID> ids) {
+    if (ids == null || ids.isEmpty()) {
+      return Map.of();
+    }
+
+    Map<UUID, UUID> pictureIdsByUserId = new LinkedHashMap<>();
+    for (Staff staff : staffRepository.findAllById(List.copyOf(ids))) {
+      staff
+          .getProfilePicture()
+          .ifPresent(picture -> pictureIdsByUserId.put(staff.getId(), picture.getId()));
+    }
+
+    return pictureIdsByUserId;
   }
 
   @Override

@@ -4,8 +4,10 @@ import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.user.domain.data.CguAcceptanceData;
+import fr.avenirsesr.portfolio.user.domain.data.UserProfileLookupData;
 import fr.avenirsesr.portfolio.user.domain.data.UserQuickLinksData;
 import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,12 @@ public class TransactionalUserService implements UserService {
   @Override
   public User getUser(UUID id) {
     return delegate.getUser(id);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<UserProfileLookupData> findProfilesByEppns(List<String> eppns) {
+    return delegate.findProfilesByEppns(eppns);
   }
 
   @Override

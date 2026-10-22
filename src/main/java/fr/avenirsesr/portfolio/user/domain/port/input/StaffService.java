@@ -4,12 +4,17 @@ import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.user.domain.data.UserProfileOverviewData;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
+import java.util.Collection;
+import java.util.Map;
 import java.util.UUID;
 
 public interface StaffService {
   Staff getStaffById(UUID id);
 
   boolean existsById(UUID id);
+
+  /** Profile picture ids of the given users, keyed by user id. Users without one are absent. */
+  Map<UUID, UUID> findProfilePictureIdsByIds(Collection<UUID> ids);
 
   UserProfileOverviewData getStaffProfile();
 

@@ -5,6 +5,9 @@ import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserPrincipalR
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserPrincipalEntity;
 import java.time.Instant;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Repository;
@@ -23,6 +26,20 @@ public class UserPrincipalDatabaseRepository implements UserPrincipalRepository 
         .findByEppn(eppn)
         .map(UserPrincipalEntity::getUser)
         .map(UserMapper.INSTANCE::toDomain);
+  }
+
+  @Override
+  public Map<String, User> findAllByEppns(Collection<String> eppns) {
+    if (eppns == null || eppns.isEmpty()) {
+      return Map.of();
+    }
+
+    Map<String, User> usersByEppn = new LinkedHashMap<>();
+    for (UserPrincipalEntity principal : jpaRepository.findAllByEppnIn(eppns)) {
+      usersByEppn.put(principal.getEppn(), UserMapper.INSTANCE.toDomain(principal.getUser()));
+    }
+
+    return usersByEppn;
   }
 
   @Override
