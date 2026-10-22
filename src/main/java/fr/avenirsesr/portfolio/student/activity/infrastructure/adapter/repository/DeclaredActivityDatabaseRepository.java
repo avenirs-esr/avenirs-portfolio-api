@@ -6,7 +6,9 @@ import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
+import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.mapper.DeclaredActivityMapper;
 import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.model.DeclaredActivityEntity;
@@ -16,6 +18,7 @@ import fr.avenirsesr.portfolio.user.infrastructure.adapter.repository.GenericUse
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -90,6 +93,26 @@ public class DeclaredActivityDatabaseRepository
             .and(
                 DeclaredActivitySpecification.isValorized(isValorized)
                     .and(DeclaredActivitySpecification.search(keyword))),
+        PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort),
+        fetchGraph);
+  }
+
+  @Override
+  public PagedResult<DeclaredActivity> findAllSubmittedForAssessmentBy(
+      UUID staffId,
+      Collection<EDeclaredActivityStatus> statuses,
+      PageCriteria pageCriteria,
+      FetchGraph fetchGraph) {
+    var specification =
+        DeclaredActivitySpecification.isSubmittedForAssessment()
+            .and(DeclaredActivitySpecification.isNotUnsubscribed())
+            .and(
+                DeclaredActivitySpecification.activityHasStaffRight(
+                    staffId, EActivityRight.EVALUATION))
+            .and(DeclaredActivitySpecification.hasAssessmentStatusIn(statuses));
+    var sort = Sort.by(Sort.Direction.DESC, "submittedAt");
+    return findAll(
+        specification,
         PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort),
         fetchGraph);
   }

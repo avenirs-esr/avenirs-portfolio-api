@@ -2242,6 +2242,63 @@ class ActivityServiceImplTest {
     }
 
     @Nested
+    class WhenGettingDeclaredActivitiesToAssess {
+
+      PageCriteria pageCriteria;
+      Staff staff;
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("getting the declared activities to assess");
+        pageCriteria = mock(PageCriteria.class);
+        staff = mock(Staff.class);
+      }
+
+      @Test
+      void thenItShouldReturnTheSubmittedDeclaredActivitiesWithTheirStatus() {
+        BddLogger.then("the submitted declared activities should be returned with their status");
+
+        when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+        when(activityAuthorizationService.hasLoggedInStaffRightOnAnyActivity(
+                EActivityRight.EVALUATION))
+            .thenReturn(true);
+
+        DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
+        PageInfo pageInfo = new PageInfo(0, 10, 1);
+        when(declaredActivityService.getDeclaredActivitiesToAssessBy(
+                staff, List.of(EDeclaredActivityStatus.SUBMITTED), pageCriteria))
+            .thenReturn(new PagedResult<>(List.of(declaredActivity), pageInfo));
+        when(declaredActivityService.getDeclaredActivityStatus(List.of(declaredActivity)))
+            .thenReturn(Map.of(declaredActivity, EDeclaredActivityStatus.SUBMITTED));
+
+        var result =
+            activityService.getDeclaredActivitiesToAssess(
+                List.of(EDeclaredActivityStatus.SUBMITTED), pageCriteria);
+
+        assertEquals(pageInfo, result.pageInfo());
+        assertEquals(1, result.content().size());
+        assertEquals(declaredActivity, result.content().getFirst().declaredActivity());
+        assertEquals(EDeclaredActivityStatus.SUBMITTED, result.content().getFirst().status());
+      }
+
+      @Test
+      void thenItShouldThrowWhenTheStaffHasNoEvaluationRight() {
+        BddLogger.then("a staff without any evaluation right should not be allowed");
+
+        when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+        when(activityAuthorizationService.hasLoggedInStaffRightOnAnyActivity(
+                EActivityRight.EVALUATION))
+            .thenReturn(false);
+
+        assertThrows(
+            UserNotAuthorizedException.class,
+            () -> activityService.getDeclaredActivitiesToAssess(null, pageCriteria));
+
+        verifyNoInteractions(declaredActivityService);
+      }
+    }
+
+    @Nested
     class WhenGettingActivitiesView {
 
       PageCriteria pageCriteria;
