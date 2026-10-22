@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SkillCatalogClientImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.skill.infrastructure.adapter.client</a> &gt; <span class="el_source">SkillCatalogClientImpl.java</span></div><h1>SkillCatalogClientImpl.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.skill.infrastructure.adapter.client;
+
+import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.AvenirsSecurityHeaders;
+import fr.avenirsesr.portfolio.common.skill.application.adapter.dto.SkillCatalogDTO;
+import fr.avenirsesr.portfolio.common.skill.domain.model.enums.ESkillReferentialType;
+import fr.avenirsesr.portfolio.skill.domain.port.output.client.SkillCatalogClient;
+import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
+
+<span class="fc" id="L14">@Slf4j</span>
+@Component
+public class SkillCatalogClientImpl implements SkillCatalogClient {
+
+  private final WebClient webClient;
+
+  @Value(&quot;${avenirs.interoperability.api-key}&quot;)
+  private String apiKey;
+
+  @Value(&quot;${avenirs.interoperability.skill-catalog.endpoint}&quot;)
+  private String skillCatalogEndpoint;
+
+<span class="fc" id="L26">  public SkillCatalogClientImpl(@Qualifier(&quot;skillCatalogWebClient&quot;) WebClient webClient) {</span>
+<span class="fc" id="L27">    this.webClient = webClient;</span>
+<span class="fc" id="L28">  }</span>
+
+  @Override
+  public Optional&lt;SkillCatalogDTO&gt; fetchNationalCatalog(ESkillReferentialType type) {
+    try {
+<span class="nc" id="L33">      log.info(&quot;Fetching the {} skill catalog from interoperability&quot;, type);</span>
+<span class="nc" id="L34">      return Optional.ofNullable(</span>
+          webClient
+<span class="nc" id="L36">              .get()</span>
+<span class="nc" id="L37">              .uri(skillCatalogEndpoint + &quot;/&quot; + type.name())</span>
+<span class="nc" id="L38">              .header(AvenirsSecurityHeaders.API_KEY, apiKey)</span>
+<span class="nc" id="L39">              .retrieve()</span>
+<span class="nc" id="L40">              .bodyToMono(SkillCatalogDTO.class)</span>
+<span class="nc" id="L41">              .block());</span>
+<span class="nc" id="L42">    } catch (Exception e) {</span>
+<span class="nc" id="L43">      log.error(</span>
+          &quot;Failed to fetch the {} skill catalog from interoperability at '{}'. Error: {}&quot;,
+          type,
+          skillCatalogEndpoint,
+<span class="nc" id="L47">          e.getMessage());</span>
+<span class="nc" id="L48">      log.debug(&quot;Full error details:&quot;, e);</span>
+<span class="nc" id="L49">      return Optional.empty();</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

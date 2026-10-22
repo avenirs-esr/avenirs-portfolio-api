@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SkillProgressAssociationStrategy.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.student.skill.domain.service</a> &gt; <span class="el_source">SkillProgressAssociationStrategy.java</span></div><h1>SkillProgressAssociationStrategy.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.student.skill.domain.service;
+
+import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.student.association.domain.data.AssociatedElementsData;
+import fr.avenirsesr.portfolio.student.association.domain.data.AssociationSearchResultData;
+import fr.avenirsesr.portfolio.student.association.domain.filter.AssociationSearchFilter;
+import fr.avenirsesr.portfolio.student.association.domain.model.Association;
+import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationContextType;
+import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
+import fr.avenirsesr.portfolio.student.association.domain.port.output.strategy.AssociationStrategy;
+import fr.avenirsesr.portfolio.student.association.domain.utils.AssociationUtils;
+import fr.avenirsesr.portfolio.student.skill.domain.data.SkillProgressAssociationData;
+import fr.avenirsesr.portfolio.student.skill.domain.data.SkillProgressData;
+import fr.avenirsesr.portfolio.student.skill.domain.exception.SkillProgressNotFoundException;
+import fr.avenirsesr.portfolio.student.skill.domain.model.SkillProgress;
+import fr.avenirsesr.portfolio.student.skill.domain.port.input.SkillProgressService;
+import java.util.List;
+import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
+public class SkillProgressAssociationStrategy implements AssociationStrategy {
+  private final SkillProgressService skillProgressService;
+  private final LoggedInUserService loggedInUserService;
+
+  @Override
+  public EAssociationContextType getContextType() {
+<span class="fc" id="L30">    return EAssociationContextType.DECLARED_SKILL;</span>
+  }
+
+  @Override
+  public void checkLoggedInStudentOwns(List&lt;UUID&gt; elementIds) {
+<span class="fc" id="L35">    fetchAndCheckOwnership(elementIds);</span>
+<span class="fc" id="L36">  }</span>
+
+  @Override
+  public void checkLoggedInStudentCanAssociate(
+      UUID elementId, EAssociationType associationType, int associationsToAdd) {
+<span class="fc" id="L41">    checkLoggedInStudentOwns(List.of(elementId));</span>
+<span class="fc" id="L42">  }</span>
+
+  @Override
+  public void checkLoggedInStudentCanUnassociate(List&lt;UUID&gt; elementIds) {
+<span class="fc" id="L46">    checkLoggedInStudentOwns(elementIds);</span>
+<span class="fc" id="L47">  }</span>
+
+  @Override
+  public PagedResult&lt;AssociationSearchResultData&gt; search(
+      String keyword, AssociationSearchFilter filter, PageCriteria pageCriteria) {
+<span class="fc" id="L52">    var skillProgresses = skillProgressService.searchSkillProgress(keyword, pageCriteria);</span>
+
+<span class="fc" id="L54">    return new PagedResult&lt;&gt;(</span>
+<span class="fc" id="L55">        skillProgresses.content().stream()</span>
+<span class="fc" id="L56">            .map(</span>
+                skillProgress -&gt;
+<span class="fc" id="L58">                    new AssociationSearchResultData(</span>
+<span class="fc" id="L59">                        skillProgress.getId(),</span>
+<span class="fc" id="L60">                        skillProgress.getSkill().getTitle(),</span>
+<span class="fc" id="L61">                        skillProgress.getSkill().getReferential().getType().name(),</span>
+                        false))
+<span class="fc" id="L63">            .toList(),</span>
+<span class="fc" id="L64">        skillProgresses.pageInfo());</span>
+  }
+
+  @Override
+  public AssociatedElementsData toAssociatedElements(
+      List&lt;Association&gt; associations, Class&lt;?&gt; subjectClass, boolean onlyNotCompleted) {
+<span class="fc" id="L70">    var skillProgresses =</span>
+<span class="fc" id="L71">        skillProgressService.getSkillProgressData(</span>
+<span class="fc" id="L72">            skillProgressService.findAllSkillProgressesByIds(</span>
+<span class="fc" id="L73">                associations.stream()</span>
+<span class="fc" id="L74">                    .map(association -&gt; association.associatedIdOf(subjectClass))</span>
+<span class="fc" id="L75">                    .toList()));</span>
+
+<span class="fc" id="L77">    return AssociatedElementsData.ofSkillProgresses(</span>
+<span class="fc" id="L78">        associations.stream()</span>
+<span class="fc" id="L79">            .map(</span>
+                association -&gt;
+<span class="fc" id="L81">                    new SkillProgressAssociationData(</span>
+<span class="fc" id="L82">                        association.getId(),</span>
+<span class="fc" id="L83">                        elementOf(skillProgresses, association.associatedIdOf(subjectClass))))</span>
+<span class="fc" id="L84">            .toList());</span>
+  }
+
+  private SkillProgressData elementOf(List&lt;SkillProgressData&gt; skillProgresses, UUID id) {
+<span class="fc" id="L88">    return skillProgresses.stream()</span>
+<span class="fc" id="L89">        .filter(data -&gt; data.skillProgress().getId().equals(id))</span>
+<span class="fc" id="L90">        .findAny()</span>
+<span class="fc" id="L91">        .orElseThrow(SkillProgressNotFoundException::new);</span>
+  }
+
+  private List&lt;SkillProgress&gt; fetchAndCheckOwnership(List&lt;UUID&gt; elementIds) {
+<span class="fc" id="L95">    var skillProgresses = skillProgressService.findAllSkillProgressesByIds(elementIds);</span>
+
+<span class="fc" id="L97">    AssociationUtils.checkOwnership(</span>
+        elementIds,
+        skillProgresses,
+        SkillProgress::getStudent,
+<span class="fc" id="L101">        loggedInUserService.getLoggedInStudent(),</span>
+        SkillProgressNotFoundException::new);
+
+<span class="fc" id="L104">    return skillProgresses;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

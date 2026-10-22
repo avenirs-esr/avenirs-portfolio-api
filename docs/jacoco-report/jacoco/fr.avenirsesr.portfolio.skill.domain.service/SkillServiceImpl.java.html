@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SkillServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.skill.domain.service</a> &gt; <span class="el_source">SkillServiceImpl.java</span></div><h1>SkillServiceImpl.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.skill.domain.service;
+
+import fr.avenirsesr.portfolio.common.skill.domain.model.enums.ESkillKind;
+import fr.avenirsesr.portfolio.skill.domain.data.SkillPathSegment;
+import fr.avenirsesr.portfolio.skill.domain.exception.SkillNotFoundException;
+import fr.avenirsesr.portfolio.skill.domain.model.Skill;
+import fr.avenirsesr.portfolio.skill.domain.port.input.SkillService;
+import fr.avenirsesr.portfolio.skill.domain.port.output.repository.NationalSkillDetailsRepository;
+import fr.avenirsesr.portfolio.skill.domain.port.output.repository.SkillRepository;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
+public class SkillServiceImpl implements SkillService {
+  private final SkillRepository skillRepository;
+  private final NationalSkillDetailsRepository nationalSkillDetailsRepository;
+
+  @Override
+  public Skill getWithAncestorsById(UUID id) {
+<span class="fc" id="L23">    return skillRepository.findWithAncestorsById(id).orElseThrow(SkillNotFoundException::new);</span>
+  }
+
+  @Override
+  public List&lt;Skill&gt; getAllWithAncestorsById(List&lt;UUID&gt; ids) {
+<span class="fc" id="L28">    return skillRepository.findAllWithAncestorsById(ids);</span>
+  }
+
+  @Override
+  public List&lt;SkillPathSegment&gt; getDetailedPath(Skill skill) {
+<span class="fc" id="L33">    return getDetailedPaths(List.of(skill)).getOrDefault(skill.getId(), List.of());</span>
+  }
+
+  @Override
+  public Map&lt;UUID, List&lt;SkillPathSegment&gt;&gt; getDetailedPaths(List&lt;Skill&gt; skills) {
+<span class="fc" id="L38">    List&lt;UUID&gt; ancestorIds =</span>
+<span class="fc" id="L39">        skills.stream()</span>
+<span class="fc" id="L40">            .flatMap(skill -&gt; skill.getAncestors().stream())</span>
+<span class="fc" id="L41">            .map(Skill::getId)</span>
+<span class="fc" id="L42">            .distinct()</span>
+<span class="fc" id="L43">            .toList();</span>
+
+<span class="fc" id="L45">    Map&lt;UUID, ESkillKind&gt; kindBySkillId =</span>
+<span class="fc" id="L46">        nationalSkillDetailsRepository.findKindsBySkillIds(ancestorIds);</span>
+
+<span class="fc" id="L48">    Map&lt;UUID, List&lt;SkillPathSegment&gt;&gt; pathBySkillId = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L49">    skills.forEach(</span>
+        skill -&gt;
+<span class="fc" id="L51">            pathBySkillId.put(</span>
+<span class="fc" id="L52">                skill.getId(),</span>
+<span class="fc" id="L53">                skill.getAncestors().stream()</span>
+<span class="fc" id="L54">                    .map(</span>
+                        ancestor -&gt;
+<span class="fc" id="L56">                            new SkillPathSegment(</span>
+<span class="fc" id="L57">                                ancestor.getTitle(), kindBySkillId.get(ancestor.getId())))</span>
+<span class="fc" id="L58">                    .toList()));</span>
+
+<span class="fc" id="L60">    return pathBySkillId;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

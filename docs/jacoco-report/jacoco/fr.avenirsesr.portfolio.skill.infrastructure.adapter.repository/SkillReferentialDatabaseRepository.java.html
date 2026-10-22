@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SkillReferentialDatabaseRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.skill.infrastructure.adapter.repository</a> &gt; <span class="el_source">SkillReferentialDatabaseRepository.java</span></div><h1>SkillReferentialDatabaseRepository.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.skill.infrastructure.adapter.repository;
+
+import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
+import fr.avenirsesr.portfolio.common.skill.domain.model.enums.ESkillReferentialType;
+import fr.avenirsesr.portfolio.skill.domain.model.SkillReferential;
+import fr.avenirsesr.portfolio.skill.domain.port.output.repository.SkillReferentialRepository;
+import fr.avenirsesr.portfolio.skill.infrastructure.adapter.mapper.SkillReferentialMapper;
+import fr.avenirsesr.portfolio.skill.infrastructure.adapter.model.SkillReferentialEntity;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public class SkillReferentialDatabaseRepository
+    extends GenericJpaRepositoryAdapter&lt;SkillReferential, SkillReferentialEntity&gt;
+    implements SkillReferentialRepository {
+  private final SkillReferentialJpaRepository jpaRepository;
+
+  public SkillReferentialDatabaseRepository(SkillReferentialJpaRepository jpaRepository) {
+<span class="fc" id="L21">    super(</span>
+        jpaRepository,
+        jpaRepository,
+        SkillReferentialEntity.class,
+        SkillReferentialMapper.INSTANCE);
+<span class="fc" id="L26">    this.jpaRepository = jpaRepository;</span>
+<span class="fc" id="L27">  }</span>
+
+  @Override
+  public Optional&lt;SkillReferential&gt; findNationalByType(ESkillReferentialType type) {
+<span class="fc" id="L31">    return jpaRepository</span>
+<span class="fc" id="L32">        .findByTypeAndInstitutionIdIsNull(type)</span>
+<span class="fc" id="L33">        .map(SkillReferentialMapper.INSTANCE::toDomain);</span>
+  }
+
+  @Override
+  public List&lt;SkillReferential&gt; findAllNational() {
+<span class="fc" id="L38">    return jpaRepository.findAllByInstitutionIdIsNull().stream()</span>
+<span class="fc" id="L39">        .map(SkillReferentialMapper.INSTANCE::toDomain)</span>
+<span class="fc" id="L40">        .toList();</span>
+  }
+
+  @Override
+  public List&lt;SkillReferential&gt; findAllByInstitutionId(UUID institutionId) {
+<span class="nc" id="L45">    return jpaRepository.findAllByInstitutionId(institutionId).stream()</span>
+<span class="nc" id="L46">        .map(SkillReferentialMapper.INSTANCE::toDomain)</span>
+<span class="nc" id="L47">        .toList();</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

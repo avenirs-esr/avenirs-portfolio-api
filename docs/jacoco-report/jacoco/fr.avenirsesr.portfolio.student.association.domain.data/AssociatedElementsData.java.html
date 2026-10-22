@@ -3,7 +3,7 @@
 import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityAssociationData;
 import fr.avenirsesr.portfolio.student.experience.domain.data.DeclaredExperienceAssociationData;
 import fr.avenirsesr.portfolio.student.program.domain.data.DeclaredProgramAssociationData;
-import fr.avenirsesr.portfolio.student.skill.domain.data.DeclaredSkillAssociationData;
+import fr.avenirsesr.portfolio.student.skill.domain.data.SkillProgressAssociationData;
 import fr.avenirsesr.portfolio.student.trace.domain.data.TraceAssociationData;
 import java.util.List;
 import java.util.stream.Stream;
@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 <span class="fc" id="L11">public record AssociatedElementsData(</span>
     List&lt;TraceAssociationData&gt; traceAssociations,
     List&lt;DeclaredActivityAssociationData&gt; declaredActivityAssociations,
-    List&lt;DeclaredSkillAssociationData&gt; declaredSkillAssociations,
+    List&lt;SkillProgressAssociationData&gt; skillProgressAssociations,
     List&lt;DeclaredExperienceAssociationData&gt; declaredExperienceAssociations,
     List&lt;DeclaredProgramAssociationData&gt; declaredProgramAssociations) {
 
@@ -30,10 +30,10 @@ import java.util.stream.Stream;
 <span class="fc" id="L30">        List.of(), declaredActivityAssociations, List.of(), List.of(), List.of());</span>
   }
 
-  public static AssociatedElementsData ofDeclaredSkills(
-      List&lt;DeclaredSkillAssociationData&gt; declaredSkillAssociations) {
+  public static AssociatedElementsData ofSkillProgresses(
+      List&lt;SkillProgressAssociationData&gt; skillProgressAssociations) {
 <span class="fc" id="L35">    return new AssociatedElementsData(</span>
-<span class="fc" id="L36">        List.of(), List.of(), declaredSkillAssociations, List.of(), List.of());</span>
+<span class="fc" id="L36">        List.of(), List.of(), skillProgressAssociations, List.of(), List.of());</span>
   }
 
   public static AssociatedElementsData ofDeclaredExperiences(
@@ -52,7 +52,7 @@ import java.util.stream.Stream;
 <span class="fc" id="L52">    return new AssociatedElementsData(</span>
 <span class="fc" id="L53">        concat(traceAssociations, other.traceAssociations),</span>
 <span class="fc" id="L54">        concat(declaredActivityAssociations, other.declaredActivityAssociations),</span>
-<span class="fc" id="L55">        concat(declaredSkillAssociations, other.declaredSkillAssociations),</span>
+<span class="fc" id="L55">        concat(skillProgressAssociations, other.skillProgressAssociations),</span>
 <span class="fc" id="L56">        concat(declaredExperienceAssociations, other.declaredExperienceAssociations),</span>
 <span class="fc" id="L57">        concat(declaredProgramAssociations, other.declaredProgramAssociations));</span>
   }
