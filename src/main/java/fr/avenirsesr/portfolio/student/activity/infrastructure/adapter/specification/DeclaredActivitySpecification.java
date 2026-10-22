@@ -1,11 +1,18 @@
 package fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.specification;
 
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
+import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityAuthorizationEntity;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityViewEntity;
+import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.model.DeclaredActivityEntity;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.specification.StudentSpecification;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import java.time.Instant;
 import java.util.Collection;
+import java.util.Set;
 import java.util.UUID;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
@@ -61,6 +68,46 @@ public final class DeclaredActivitySpecification {
               cb.equal(view.get("studentId"), root.get("student").get("id")),
               cb.greaterThanOrEqualTo(view.<Instant>get("lastViewedAt"), since));
       return cb.not(cb.exists(recentViews));
+    };
+  }
+
+  public static Specification<DeclaredActivityEntity> isSubmittedForAssessment() {
+    return (root, query, cb) -> cb.isNotNull(root.get("submittedAt"));
+  }
+
+  public static Specification<DeclaredActivityEntity> activityHasStaffRight(
+      UUID staffId, EActivityRight right) {
+    return (root, query, cb) -> {
+      var authorizations = query.subquery(Integer.class);
+      var authorization = authorizations.from(ActivityAuthorizationEntity.class);
+      authorizations
+          .select(cb.literal(1))
+          .where(
+              cb.equal(authorization.get("activityId"), root.get("activity").get("id")),
+              cb.equal(authorization.get("staff").get("id"), staffId),
+              cb.isMember(right, authorization.<Set<EActivityRight>>get("rights")));
+      return cb.exists(authorizations);
+    };
+  }
+
+  public static Specification<DeclaredActivityEntity> hasAssessmentStatusIn(
+      Collection<EDeclaredActivityStatus> statuses) {
+    return (root, query, cb) -> {
+      if (statuses == null || statuses.isEmpty()) {
+        return cb.conjunction();
+      }
+      return cb.or(
+          statuses.stream()
+              .map(status -> assessmentStatusPredicate(status, root, cb))
+              .toArray(Predicate[]::new));
+    };
+  }
+
+  private static Predicate assessmentStatusPredicate(
+      EDeclaredActivityStatus status, Root<DeclaredActivityEntity> root, CriteriaBuilder cb) {
+    return switch (status) {
+      case SUBMITTED -> cb.isNotNull(root.get("submittedAt"));
+      case CONSULTED, SUBSCRIBED, IN_PROGRESS, COMPLETED, UNSUBSCRIBED -> cb.disjunction();
     };
   }
 

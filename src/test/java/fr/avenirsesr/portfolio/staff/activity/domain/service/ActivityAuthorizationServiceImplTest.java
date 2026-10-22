@@ -906,6 +906,44 @@ class ActivityAuthorizationServiceImplTest {
     }
   }
 
+  @Nested
+  class WhenCheckingIfTheLoggedInStaffHoldsARightOnAnyActivity {
+
+    @Test
+    void thenItShouldReflectTheActivityAuthorizationTable() {
+      BddLogger.given("a logged in staff holding the evaluation right on an activity");
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+      when(activityAuthorizationRepository.existsByStaffIdAndRight(
+              staff.getId(), EActivityRight.EVALUATION))
+          .thenReturn(true);
+
+      BddLogger.then("the right should be reported");
+      assertThat(service.hasLoggedInStaffRightOnAnyActivity(EActivityRight.EVALUATION)).isTrue();
+    }
+
+    @Test
+    void thenItShouldBeFalseWhenTheStaffHoldsTheRightNowhere() {
+      BddLogger.given("a logged in staff holding the evaluation right on no activity");
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+      when(activityAuthorizationRepository.existsByStaffIdAndRight(
+              staff.getId(), EActivityRight.EVALUATION))
+          .thenReturn(false);
+
+      BddLogger.then("no right should be reported");
+      assertThat(service.hasLoggedInStaffRightOnAnyActivity(EActivityRight.EVALUATION)).isFalse();
+    }
+
+    @Test
+    void thenItShouldBeFalseWhenTheLoggedInUserIsNotAStaff() {
+      BddLogger.given("a logged in user that is not a staff");
+      when(loggedInUserService.getLoggedInStaff()).thenThrow(new UserIsNotStaffException());
+
+      BddLogger.then("no right should be reported and no table queried");
+      assertThat(service.hasLoggedInStaffRightOnAnyActivity(EActivityRight.EVALUATION)).isFalse();
+      verify(activityAuthorizationRepository, never()).existsByStaffIdAndRight(any(), any());
+    }
+  }
+
   @Test
   void shouldDeleteTheAuthorizationsOfTheActivityAndOfItsDraftSeparately() {
     BddLogger.given("an activity authorization service");

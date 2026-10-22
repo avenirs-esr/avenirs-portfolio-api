@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityDeta
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
+import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -31,6 +32,12 @@ public class TransactionalDeclaredActivityService implements DeclaredActivitySer
   @Override
   public List<DeclaredActivity> getAllDeclaredActivitiesOf(Student student) {
     return delegate.getAllDeclaredActivitiesOf(student);
+  }
+
+  @Override
+  public PagedResult<DeclaredActivity> getDeclaredActivitiesToAssessBy(
+      Staff staff, List<EDeclaredActivityStatus> statuses, PageCriteria pageCriteria) {
+    return delegate.getDeclaredActivitiesToAssessBy(staff, statuses, pageCriteria);
   }
 
   @Override
