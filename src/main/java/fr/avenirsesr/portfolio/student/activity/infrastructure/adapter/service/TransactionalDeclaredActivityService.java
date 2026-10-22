@@ -59,6 +59,12 @@ public class TransactionalDeclaredActivityService implements DeclaredActivitySer
     delegate.finish(declaredActivityId);
   }
 
+  @Transactional
+  @Override
+  public void submitForAssessment(UUID declaredActivityId) {
+    delegate.submitForAssessment(declaredActivityId);
+  }
+
   @Override
   public void updateReflection(UUID declaredActivityId, String reflection) {
     delegate.updateReflection(declaredActivityId, reflection);

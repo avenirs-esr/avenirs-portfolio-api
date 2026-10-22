@@ -20,9 +20,11 @@ import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.notification.domain.model.enums.ENotificationType;
 import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityAssessmentException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityNotFoundException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityUnpublishedException;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAssessment;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityDetailsData;
@@ -482,6 +484,172 @@ class DeclaredActivityServiceImplTest {
     assertThatThrownBy(() -> service.finish(declaredActivityId))
         .isInstanceOf(DeclaredActivityAlreadyFinishedException.class);
 
+    verify(declaredActivityRepository, never()).save(any());
+  }
+
+  @Test
+  void submitForAssessment_should_set_submittedAt_and_save_when_the_activity_is_assessable() {
+    BddLogger.given("A logged-in student and his declared activity of an assessable activity");
+    UUID declaredActivityId = UUID.randomUUID();
+    DeclaredActivity declaredActivity = assessableDeclaredActivity();
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+    when(declaredActivityRepository.save(any(DeclaredActivity.class)))
+        .thenAnswer(i -> i.getArguments()[0]);
+
+    BddLogger.when("He submits it for assessment");
+    service.submitForAssessment(declaredActivityId);
+
+    BddLogger.then("The submission date is set and the declared activity is saved");
+    verify(declaredActivityRepository).save(activityCaptor.capture());
+    assertThat(activityCaptor.getValue().getSubmittedAt()).isPresent();
+  }
+
+  @Test
+  void submitForAssessment_should_make_the_declared_activity_SUBMITTED() {
+    BddLogger.given("A declared activity submitted for assessment");
+    DeclaredActivity declaredActivity = assessableDeclaredActivity();
+    declaredActivity.setSubmittedAt(Instant.now());
+
+    when(feedbackRepository.findDeclaredActivityIdsHavingActiveFeedbacks(
+            List.of(declaredActivity.getId())))
+        .thenReturn(List.of());
+
+    BddLogger.when("Its status is computed");
+    BddLogger.then("It is SUBMITTED");
+    assertThat(service.getDeclaredActivityStatus(declaredActivity))
+        .isEqualTo(EDeclaredActivityStatus.SUBMITTED);
+  }
+
+  @Test
+  void submitForAssessment_should_throw_ActivityAssessmentException_when_not_assessable() {
+    BddLogger.given("A logged-in student and his declared activity of a non assessable activity");
+    UUID declaredActivityId = UUID.randomUUID();
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(
+            UUID.randomUUID(),
+            student,
+            ActivityFixture.create().toModel(),
+            Instant.now(),
+            null,
+            null,
+            null,
+            null);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("He submits it for assessment");
+
+    BddLogger.then("An ActivityAssessmentException is thrown");
+    assertThatThrownBy(() -> service.submitForAssessment(declaredActivityId))
+        .isInstanceOf(ActivityAssessmentException.class);
+    verify(declaredActivityRepository, never()).save(any());
+  }
+
+  @Test
+  void submitForAssessment_should_throw_ActivityAssessmentException_when_assessment_is_empty() {
+    BddLogger.given("A declared activity of an activity whose assessment enables nothing");
+    UUID declaredActivityId = UUID.randomUUID();
+    DeclaredActivity declaredActivity =
+        assessableDeclaredActivity(new ActivityAssessment(false, null, false));
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("He submits it for assessment");
+
+    BddLogger.then("An ActivityAssessmentException is thrown");
+    assertThatThrownBy(() -> service.submitForAssessment(declaredActivityId))
+        .isInstanceOf(ActivityAssessmentException.class);
+    verify(declaredActivityRepository, never()).save(any());
+  }
+
+  @Test
+  void submitForAssessment_should_throw_UserNotAuthorizedException_when_belonging_to_another() {
+    BddLogger.given("A declared activity belonging to another student");
+    UUID declaredActivityId = UUID.randomUUID();
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(
+            UUID.randomUUID(),
+            StudentFixture.create().toModel(),
+            ActivityFixture.create()
+                .withAssessment(new ActivityAssessment(true, null, null))
+                .toModel(),
+            Instant.now(),
+            null,
+            null,
+            null,
+            null);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("He submits it for assessment");
+
+    BddLogger.then("A UserNotAuthorizedException is thrown");
+    assertThatThrownBy(() -> service.submitForAssessment(declaredActivityId))
+        .isInstanceOf(UserNotAuthorizedException.class);
+    verify(declaredActivityRepository, never()).save(any());
+  }
+
+  @Test
+  void submitForAssessment_should_throw_DeclaredActivityNotFoundException_when_not_found() {
+    BddLogger.given("A non-existent declared activity id");
+    UUID declaredActivityId = UUID.randomUUID();
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.empty());
+
+    BddLogger.when("He submits it for assessment");
+
+    BddLogger.then("A DeclaredActivityNotFoundException is thrown");
+    assertThatThrownBy(() -> service.submitForAssessment(declaredActivityId))
+        .isInstanceOf(DeclaredActivityNotFoundException.class);
+    verify(declaredActivityRepository, never()).save(any());
+  }
+
+  @Test
+  void submitForAssessment_should_throw_DeclaredActivityLockedException_when_already_submitted() {
+    BddLogger.given("A declared activity already submitted for assessment");
+    UUID declaredActivityId = UUID.randomUUID();
+    DeclaredActivity declaredActivity = assessableDeclaredActivity();
+    declaredActivity.setSubmittedAt(Instant.now());
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("He submits it for assessment again");
+
+    BddLogger.then("A DeclaredActivityLockedException is thrown");
+    assertThatThrownBy(() -> service.submitForAssessment(declaredActivityId))
+        .isInstanceOf(DeclaredActivityLockedException.class);
+    verify(declaredActivityRepository, never()).save(any());
+  }
+
+  @Test
+  void submitForAssessment_should_throw_DeclaredActivityUnsubscribedException_when_unsubscribed() {
+    BddLogger.given("A declared activity the student unsubscribed from");
+    UUID declaredActivityId = UUID.randomUUID();
+    DeclaredActivity declaredActivity = assessableDeclaredActivity();
+    declaredActivity.unsubscribe(Instant.now());
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("He submits it for assessment");
+
+    BddLogger.then("A DeclaredActivityUnsubscribedException is thrown");
+    assertThatThrownBy(() -> service.submitForAssessment(declaredActivityId))
+        .isInstanceOf(DeclaredActivityUnsubscribedException.class);
     verify(declaredActivityRepository, never()).save(any());
   }
 
@@ -1180,6 +1348,22 @@ class DeclaredActivityServiceImplTest {
 
     BddLogger.then("He is considered enrolled");
     assertThat(service.isEnrolled(activity, student)).isTrue();
+  }
+
+  private DeclaredActivity assessableDeclaredActivity() {
+    return assessableDeclaredActivity(new ActivityAssessment(true, null, null));
+  }
+
+  private DeclaredActivity assessableDeclaredActivity(ActivityAssessment assessment) {
+    return DeclaredActivity.create(
+        UUID.randomUUID(),
+        student,
+        ActivityFixture.create().withAssessment(assessment).toModel(),
+        Instant.now(),
+        null,
+        null,
+        null,
+        null);
   }
 
   private DeclaredActivity unsubscribedDeclaredActivity() {
