@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository;
 
 import fr.avenirsesr.portfolio.common.data.domain.port.output.repository.GenericRepositoryPort;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAuthorization;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -18,6 +19,8 @@ public interface StaffAuthorizationRepository extends GenericRepositoryPort<Acti
       Collection<UUID> activityIds, UUID staffId);
 
   boolean existsByStaffId(UUID staffId);
+
+  boolean existsByStaffIdAndRight(UUID staffId, EActivityRight right);
 
   void deleteAllByActivityId(UUID activityId);
 }

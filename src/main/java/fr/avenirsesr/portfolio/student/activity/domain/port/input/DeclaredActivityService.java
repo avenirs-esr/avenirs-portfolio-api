@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityDetailsData;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
+import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -19,6 +20,9 @@ public interface DeclaredActivityService {
       PageCriteria pageCriteria, Boolean isValorized);
 
   List<DeclaredActivity> getAllDeclaredActivitiesOf(Student student);
+
+  PagedResult<DeclaredActivity> getDeclaredActivitiesToAssessBy(
+      Staff staff, List<EDeclaredActivityStatus> statuses, PageCriteria pageCriteria);
 
   Optional<DeclaredActivity> getByActivity(Activity activity);
 

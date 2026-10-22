@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.repository
 
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAuthorization;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityAuthorizationRepository;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.mapper.ActivityAuthorizationMapper;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityAuthorizationEntity;
@@ -72,6 +73,13 @@ public class ActivityAuthorizationDatabaseRepository
   public boolean existsByStaffId(UUID staffId) {
     return jpaRepository.exists(
         ActivityAuthorizationSpecification.<ActivityAuthorizationEntity>withStaffId(staffId));
+  }
+
+  @Override
+  public boolean existsByStaffIdAndRight(UUID staffId, EActivityRight right) {
+    return jpaRepository.exists(
+        ActivityAuthorizationSpecification.<ActivityAuthorizationEntity>withStaffId(staffId)
+            .and(ActivityAuthorizationSpecification.withRight(right)));
   }
 
   @Override

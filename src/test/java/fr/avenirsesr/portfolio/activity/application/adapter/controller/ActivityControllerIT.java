@@ -22,6 +22,7 @@ import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.Activi
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.StaffAuthorizationRequest;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
+import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.client.AccessClientStub;
 import java.time.LocalDate;
@@ -49,6 +50,9 @@ class ActivityControllerIT extends ContainerConfigurationTest {
   private static final String BASE_PATH = "/me/activities";
   private static final String NAVIGATION_PATH = BASE_PATH + "/navigation";
   private static final String WITH_FEEDBACKS_PATH = BASE_PATH + "/with-feedbacks";
+  private static final String ASSESSMENTS_PATH = BASE_PATH + "/assessments";
+  private static final String SUBMIT_FOR_ASSESSMENT_PATH =
+      "/me/activity-progress/{declaredActivityId}/submit-for-assessment";
   private static final String PRESENTATION_PATH =
       BASE_PATH + "/PUBLISHED/{activityId}/presentation";
   private static final String DRAFT_PATH = BASE_PATH + "/draft";
@@ -308,6 +312,123 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             .exchange()
             .expectStatus()
             .isForbidden();
+      }
+    }
+
+    @Nested
+    class WhenGettingDeclaredActivitiesToAssess {
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("performing a GET on " + ASSESSMENTS_PATH);
+      }
+
+      @Test
+      void thenItShouldReturnTheDeclaredActivitiesSubmittedOnTheStaffActivities() throws Exception {
+        BddLogger.given("an assessable activity of the staff a student submitted for assessment");
+        UUID activityId =
+            publishAssessableActivityAsStaff(
+                "Activité évaluable à remonter", new ActivityAssessmentRequest(true, null, null));
+        UUID declaredActivityId = submitForAssessmentAsStudent(activityId);
+
+        BddLogger.then("it should return the submission with the learner, the activity and more");
+        JsonNode submission = findSubmission(declaredActivityId, null);
+
+        assertNotNull(submission);
+        assertEquals(activityId.toString(), submission.get("activity").get("id").asText());
+        assertEquals(
+            "Activité évaluable à remonter", submission.get("activity").get("title").asText());
+        assertTrue(submission.get("student").hasNonNull("id"));
+        assertTrue(submission.get("student").hasNonNull("firstName"));
+        assertTrue(submission.get("student").hasNonNull("lastName"));
+        assertTrue(submission.get("assessment").get("comment").asBoolean());
+        assertTrue(submission.get("assessment").get("grade").isNull());
+        assertTrue(submission.hasNonNull("submittedAt"));
+        assertEquals("SUBMITTED", submission.get("status").asText());
+      }
+
+      @Test
+      void thenItShouldFilterByStatus() throws Exception {
+        BddLogger.given("an assessable activity of the staff a student submitted for assessment");
+        UUID activityId =
+            publishAssessableActivityAsStaff(
+                "Activité évaluable à filtrer", new ActivityAssessmentRequest(true, null, null));
+        UUID declaredActivityId = submitForAssessmentAsStudent(activityId);
+
+        BddLogger.then("the SUBMITTED filter should keep it");
+        assertNotNull(findSubmission(declaredActivityId, EDeclaredActivityStatus.SUBMITTED));
+
+        BddLogger.and("the CONSULTED filter should leave it out");
+        assertNull(findSubmission(declaredActivityId, EDeclaredActivityStatus.CONSULTED));
+      }
+
+      @Test
+      void thenItShouldNotReturnADeclaredActivityThatWasNotSubmitted() throws Exception {
+        BddLogger.given("an assessable activity of the staff a student only subscribed to");
+        UUID activityId =
+            publishAssessableActivityAsStaff(
+                "Activité évaluable non soumise", new ActivityAssessmentRequest(true, null, null));
+        UUID declaredActivityId = subscribeStudentToActivityAndGetDeclaredActivityId(activityId);
+
+        BddLogger.then("it should not be returned");
+        assertNull(findSubmission(declaredActivityId, null));
+      }
+
+      @Test
+      void thenItShouldReturn401WhenNotAuthenticated() {
+        BddLogger.then("it should return 401");
+
+        webTestClient
+            .get()
+            .uri(ASSESSMENTS_PATH)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isUnauthorized();
+      }
+
+      @Test
+      void thenItShouldReturn403WhenUserHasNoActivityReadPermission() {
+        BddLogger.then("it should return 403");
+
+        webTestClient
+            .get()
+            .uri(ASSESSMENTS_PATH)
+            .headers(ActivityControllerIT.this::addNoPermissionHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isForbidden();
+      }
+
+      private JsonNode findSubmission(UUID declaredActivityId, EDeclaredActivityStatus status)
+          throws Exception {
+        String body =
+            webTestClient
+                .get()
+                .uri(
+                    uriBuilder -> {
+                      uriBuilder.path(ASSESSMENTS_PATH).queryParam("pageSize", 100);
+                      if (status != null) {
+                        uriBuilder.queryParam("statuses", status.name());
+                      }
+                      return uriBuilder.build();
+                    })
+                .headers(ActivityControllerIT.this::addStaffHeaders)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(String.class)
+                .returnResult()
+                .getResponseBody();
+
+        for (JsonNode item : objectMapper.readTree(body).get("data")) {
+          if (declaredActivityId.toString().equals(item.get("id").asText())) {
+            return item;
+          }
+        }
+        return null;
       }
     }
 
@@ -4235,6 +4356,29 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         .exchange()
         .expectStatus()
         .isOk();
+  }
+
+  private UUID publishAssessableActivityAsStaff(String title, ActivityAssessmentRequest assessment)
+      throws Exception {
+    UUID draftId = createDraftAndGetId(title);
+    fillDraftWithSummaryAndDescription(draftId);
+    fillDraftWithAssessment(draftId, assessment);
+
+    return publishDraft(draftId);
+  }
+
+  private UUID submitForAssessmentAsStudent(UUID activityId) throws Exception {
+    UUID declaredActivityId = subscribeStudentToActivityAndGetDeclaredActivityId(activityId);
+
+    webTestClient
+        .put()
+        .uri(SUBMIT_FOR_ASSESSMENT_PATH, declaredActivityId)
+        .headers(this::addStudentHeaders)
+        .exchange()
+        .expectStatus()
+        .isNoContent();
+
+    return declaredActivityId;
   }
 
   private UUID publishNewActivity(String title) throws Exception {

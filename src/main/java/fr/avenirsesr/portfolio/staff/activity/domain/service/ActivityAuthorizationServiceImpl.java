@@ -92,6 +92,13 @@ public class ActivityAuthorizationServiceImpl implements ActivityAuthorizationSe
   }
 
   @Override
+  public boolean hasLoggedInStaffRightOnAnyActivity(EActivityRight right) {
+    return loggedInStaff()
+        .map(staff -> activityAuthorizationRepository.existsByStaffIdAndRight(staff.getId(), right))
+        .orElse(false);
+  }
+
+  @Override
   public List<ActivityAuthorization> getActivityAuthorizations(UUID activityId) {
     requireActivity(activityId);
     requireGranted(

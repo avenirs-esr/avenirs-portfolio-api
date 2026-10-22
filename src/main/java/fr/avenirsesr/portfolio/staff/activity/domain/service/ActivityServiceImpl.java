@@ -41,7 +41,9 @@ import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.Acti
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityRepository;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityViewRepository;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.StaffActivityOverviewRepository;
+import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityToAssessData;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
+import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStaffException;
@@ -951,5 +953,30 @@ public class ActivityServiceImpl implements ActivityService {
     var statusArray =
         statuses == null ? new EFeedbackStatus[0] : statuses.toArray(EFeedbackStatus[]::new);
     return activityRepository.findWithFeedbacks(staff.getId(), pageCriteria, statusArray);
+  }
+
+  @Override
+  public PagedResult<DeclaredActivityToAssessData> getDeclaredActivitiesToAssess(
+      List<EDeclaredActivityStatus> statuses, PageCriteria pageCriteria) {
+    Staff staff = loggedInUserService.getLoggedInStaff();
+
+    if (!activityAuthorizationService.hasLoggedInStaffRightOnAnyActivity(
+        EActivityRight.EVALUATION)) {
+      throw new UserNotAuthorizedException();
+    }
+
+    var pagedResult =
+        declaredActivityService.getDeclaredActivitiesToAssessBy(staff, statuses, pageCriteria);
+    var statusByDeclaredActivity =
+        declaredActivityService.getDeclaredActivityStatus(pagedResult.content());
+
+    return new PagedResult<>(
+        pagedResult.content().stream()
+            .map(
+                declaredActivity ->
+                    new DeclaredActivityToAssessData(
+                        declaredActivity, statusByDeclaredActivity.get(declaredActivity)))
+            .toList(),
+        pagedResult.pageInfo());
   }
 }

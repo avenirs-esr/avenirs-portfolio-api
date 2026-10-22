@@ -27,6 +27,7 @@ import fr.avenirsesr.portfolio.student.activity.domain.port.input.FeedbackServic
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.FeedbackRepository;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
+import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -62,6 +63,16 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   public List<DeclaredActivity> getAllDeclaredActivitiesOf(Student student) {
     var graph = FetchGraph.init().add("activity").fetch("author");
     return declaredActivityRepository.findAllByStudent(student, graph);
+  }
+
+  @Override
+  public PagedResult<DeclaredActivity> getDeclaredActivitiesToAssessBy(
+      Staff staff, List<EDeclaredActivityStatus> statuses, PageCriteria pageCriteria) {
+    var graph =
+        FetchGraph.init().add("student").fetch("user").root().add("activity").fetch("author");
+
+    return declaredActivityRepository.findAllSubmittedForAssessmentBy(
+        staff.getId(), statuses, pageCriteria, graph);
   }
 
   @Override
