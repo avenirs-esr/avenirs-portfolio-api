@@ -23,6 +23,10 @@ public class DeclaredActivityMapper implements Mapper<DeclaredActivityEntity, De
         declaredActivity.getFinishedAt().orElse(null),
         declaredActivity.isValorized(),
         declaredActivity.getUnsubscribedAt().orElse(null),
+        declaredActivity
+            .getAssessment()
+            .map(DeclaredActivityAssessmentMapper.INSTANCE::fromDomain)
+            .orElse(null),
         declaredActivity.getCreatedAt(),
         declaredActivity.getUpdatedAt());
   }
@@ -40,6 +44,9 @@ public class DeclaredActivityMapper implements Mapper<DeclaredActivityEntity, De
         entity.getFinishedAt(),
         entity.isValorized(),
         entity.getUnsubscribedAt(),
+        entity.getAssessment() == null
+            ? null
+            : DeclaredActivityAssessmentMapper.INSTANCE.toDomain(entity.getAssessment()),
         entity.getCreatedAt(),
         entity.getUpdatedAt());
   }
@@ -62,6 +69,9 @@ public class DeclaredActivityMapper implements Mapper<DeclaredActivityEntity, De
         entity.getFinishedAt(),
         entity.isValorized(),
         entity.getUnsubscribedAt(),
+        entity.getAssessment() == null
+            ? null
+            : DeclaredActivityAssessmentMapper.INSTANCE.toDomain(entity.getAssessment()),
         entity.getCreatedAt(),
         entity.getUpdatedAt());
   }

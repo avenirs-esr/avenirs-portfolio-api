@@ -33,6 +33,7 @@ public class ActivityDraft extends AvenirsBaseModel {
   @Getter private int traceAllowedAssociations;
   @Getter private int feedbackAllowedIterations;
   @Getter private boolean enableReflection;
+  private ActivityAssessment assessment;
 
   private static final int DEFAULT_TRACE_ALLOWED_ASSOCIATION = -1;
   private static final int DEFAULT_FEEDBACK_ALLOWED_ITERATIONS = -1;
@@ -57,7 +58,8 @@ public class ActivityDraft extends AvenirsBaseModel {
       List<File> files,
       List<UUID> targetInstitutionIds,
       List<UUID> targetGroupIds,
-      boolean national) {
+      boolean national,
+      ActivityAssessment assessment) {
     super(id, createdAt, updatedAt);
     this.title = title;
     this.author = author;
@@ -77,6 +79,7 @@ public class ActivityDraft extends AvenirsBaseModel {
         new ArrayList<>(targetInstitutionIds == null ? List.of() : targetInstitutionIds);
     this.targetGroupIds = new ArrayList<>(targetGroupIds == null ? List.of() : targetGroupIds);
     this.national = national;
+    this.assessment = assessment;
   }
 
   public static ActivityDraft create(String title, Staff createdBy) {
@@ -100,7 +103,8 @@ public class ActivityDraft extends AvenirsBaseModel {
         List.of(),
         List.of(),
         List.of(),
-        false);
+        false,
+        null);
   }
 
   public static ActivityDraft toDomain(
@@ -123,7 +127,8 @@ public class ActivityDraft extends AvenirsBaseModel {
       List<File> files,
       List<UUID> targetInstitutionIds,
       List<UUID> targetGroupIds,
-      boolean national) {
+      boolean national,
+      ActivityAssessment assessment) {
     return new ActivityDraft(
         id,
         createdAt,
@@ -144,7 +149,8 @@ public class ActivityDraft extends AvenirsBaseModel {
         files,
         targetInstitutionIds,
         targetGroupIds,
-        national);
+        national,
+        assessment);
   }
 
   public Optional<EActivityThematic> getThematic() {
@@ -173,6 +179,10 @@ public class ActivityDraft extends AvenirsBaseModel {
 
   public Optional<File> getBanner() {
     return Optional.ofNullable(banner);
+  }
+
+  public Optional<ActivityAssessment> getAssessment() {
+    return Optional.ofNullable(assessment);
   }
 
   public void addLinks(List<String> links) {

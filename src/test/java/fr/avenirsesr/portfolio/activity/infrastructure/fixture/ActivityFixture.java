@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.activity.infrastructure.fixture;
 
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAssessment;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
@@ -38,6 +39,7 @@ public class ActivityFixture {
   private List<UUID> targetInstitutionIds = List.of();
   private List<UUID> targetGroupIds = List.of();
   private boolean national = false;
+  private ActivityAssessment assessment = null;
   private Instant createdAt = Instant.now();
   private Instant updatedAt = Instant.now();
 
@@ -145,6 +147,11 @@ public class ActivityFixture {
     return this;
   }
 
+  public ActivityFixture withAssessment(ActivityAssessment assessment) {
+    this.assessment = assessment;
+    return this;
+  }
+
   public Activity toModel() {
     return Activity.toDomain(
         id,
@@ -166,6 +173,7 @@ public class ActivityFixture {
         targetInstitutionIds,
         targetGroupIds,
         national,
+        assessment,
         createdAt,
         updatedAt);
   }

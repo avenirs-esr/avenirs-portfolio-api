@@ -8,9 +8,11 @@ import fr.avenirsesr.portfolio.common.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAssessment;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.mapper.ActivityMapper;
+import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityAssessmentEmbeddable;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityEntity;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StaffMapper;
@@ -57,6 +59,7 @@ class ActivityMapperTest {
       List.of("https://example.com/link1", "https://example.com/link2");
   private final List<UUID> targetInstitutionIds = List.of(UUID.randomUUID());
   private final List<UUID> targetGroupIds = List.of(UUID.randomUUID());
+  private final ActivityAssessment assessment = new ActivityAssessment(true, 20, false);
 
   @BeforeEach
   void setUp() {
@@ -81,6 +84,7 @@ class ActivityMapperTest {
             targetInstitutionIds,
             targetGroupIds,
             true,
+            assessment,
             createdAt,
             updatedAt);
   }
@@ -107,6 +111,9 @@ class ActivityMapperTest {
     assertEquals(targetInstitutionIds, entity.getTargetInstitutionIds());
     assertEquals(targetGroupIds, entity.getTargetGroupIds());
     assertTrue(entity.isNational());
+    assertEquals(assessment.comment(), entity.getAssessment().getComment());
+    assertEquals(assessment.grade(), entity.getAssessment().getGrade());
+    assertEquals(assessment.validation(), entity.getAssessment().getValidation());
     assertEquals(createdAt, entity.getCreatedAt());
     assertEquals(updatedAt, entity.getUpdatedAt());
   }
@@ -129,6 +136,9 @@ class ActivityMapperTest {
     entity.setTargetInstitutionIds(targetInstitutionIds);
     entity.setTargetGroupIds(targetGroupIds);
     entity.setNational(true);
+    entity.setAssessment(
+        new ActivityAssessmentEmbeddable(
+            assessment.comment(), assessment.grade(), assessment.validation()));
     entity.setCreatedAt(createdAt);
     entity.setUpdatedAt(updatedAt);
 
@@ -150,6 +160,7 @@ class ActivityMapperTest {
     assertEquals(enableRefection, mappedActivity.isEnableReflection());
     assertEquals(targetInstitutionIds, mappedActivity.getTargetInstitutionIds());
     assertEquals(targetGroupIds, mappedActivity.getTargetGroupIds());
+    assertEquals(assessment, mappedActivity.getAssessment().orElseThrow());
     assertEquals(createdAt, mappedActivity.getCreatedAt());
     assertEquals(updatedAt, mappedActivity.getUpdatedAt());
   }

@@ -1890,6 +1890,7 @@ class ActivityServiceImplTest {
                 List.of(),
                 List.of(),
                 false,
+                null,
                 Instant.now(),
                 Instant.now());
 
@@ -3252,7 +3253,8 @@ class ActivityServiceImplTest {
                   files,
                   List.of(sourceInstitutionId),
                   List.of(sourceGroupId),
-                  false);
+                  false,
+                  null);
           return d;
         }
       }
@@ -3278,6 +3280,7 @@ class ActivityServiceImplTest {
             List.of(sourceInstitutionId),
             List.of(sourceGroupId),
             false,
+            null,
             Instant.parse("2020-01-01T00:00:00Z"),
             Instant.parse("2021-01-01T00:00:00Z"));
       }
