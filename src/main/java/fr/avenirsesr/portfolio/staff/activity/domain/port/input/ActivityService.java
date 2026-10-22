@@ -10,6 +10,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityStaffOverviewD
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityWithStudentStatusData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.InactiveStudentData;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAssessment;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityDraft;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
@@ -85,7 +86,8 @@ public interface ActivityService {
       Boolean enableCompletionPeriod,
       List<UUID> targetInstitutionIds,
       List<UUID> targetGroupIds,
-      Boolean national);
+      Boolean national,
+      ActivityAssessment assessment);
 
   ActivityDraft createDraftFromActivity(UUID activityId);
 

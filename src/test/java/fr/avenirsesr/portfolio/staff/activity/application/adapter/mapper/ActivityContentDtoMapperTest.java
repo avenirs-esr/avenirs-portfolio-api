@@ -8,6 +8,7 @@ import fr.avenirsesr.portfolio.shared.application.adapter.dto.FileDTO;
 import fr.avenirsesr.portfolio.shared.application.adapter.mapper.OptionalMapper;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityContentDTO;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAssessment;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityDraft;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
@@ -186,5 +187,48 @@ class ActivityContentDtoMapperTest {
     BddLogger.then("the rights should be empty");
     assertTrue(mapper.toDTO(activity).rights().isEmpty());
     assertTrue(mapper.toDTO(activity, List.of()).rights().isEmpty());
+  }
+
+  @Test
+  void shouldMapAssessmentFromActivity() {
+    BddLogger.given("an activity allowing a comment and a grade");
+    Activity activity =
+        ActivityFixture.create().withAssessment(new ActivityAssessment(true, 20, null)).toModel();
+
+    BddLogger.when("mapping to ActivityContentDTO");
+    ActivityContentDTO dto = mapper.toDTO(activity);
+
+    BddLogger.then("the assessment should be carried by the DTO");
+    assertNotNull(dto.assessment());
+    assertEquals(Boolean.TRUE, dto.assessment().comment());
+    assertEquals(20, dto.assessment().grade());
+    assertNull(dto.assessment().validation());
+  }
+
+  @Test
+  void shouldMapAssessmentFromDraft() {
+    BddLogger.given("an activity draft allowing a validation");
+    ActivityDraft draft = ActivityDraft.create("draft title", StaffFixture.create().toModel());
+    draft.setAssessment(new ActivityAssessment(null, null, true));
+
+    BddLogger.when("mapping to ActivityContentDTO");
+    ActivityContentDTO dto = mapper.toDTO(draft, null, Set.of(), List.of());
+
+    BddLogger.then("the assessment should be carried by the DTO");
+    assertNotNull(dto.assessment());
+    assertEquals(Boolean.TRUE, dto.assessment().validation());
+    assertNull(dto.assessment().grade());
+  }
+
+  @Test
+  void shouldMapAssessmentToNullWhenAbsent() {
+    BddLogger.given("an activity and a draft without assessment");
+    Activity activity = ActivityFixture.create().toModel();
+    ActivityDraft draft = ActivityDraft.create("draft title", StaffFixture.create().toModel());
+
+    BddLogger.when("mapping to ActivityContentDTO");
+    BddLogger.then("the assessment should be null");
+    assertNull(mapper.toDTO(activity).assessment());
+    assertNull(mapper.toDTO(draft, null, Set.of(), List.of()).assessment());
   }
 }

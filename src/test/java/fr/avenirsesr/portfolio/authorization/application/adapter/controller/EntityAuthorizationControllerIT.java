@@ -452,6 +452,7 @@ class EntityAuthorizationControllerIT extends ContainerConfigurationTest {
                     false,
                     null,
                     null,
+                    null,
                     null)))
         .accept(MediaType.APPLICATION_JSON)
         .exchange()

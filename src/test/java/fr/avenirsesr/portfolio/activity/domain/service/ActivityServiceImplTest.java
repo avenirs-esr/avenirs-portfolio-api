@@ -52,6 +52,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityStaffOverviewD
 import fr.avenirsesr.portfolio.staff.activity.domain.data.InactiveStudentData;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.*;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAssessment;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityDraft;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
@@ -322,6 +323,7 @@ class ActivityServiceImplTest {
                     true,
                     institutionIds,
                     groupIds,
+                    null,
                     null);
 
             verify(draft).setTitle("Nouveau titre");
@@ -347,7 +349,7 @@ class ActivityServiceImplTest {
 
             activityService.updateActivityDraft(
                 draftId, null, null, null, null, null, null, null, null, null, null, null, false,
-                null, null, null);
+                null, null, null, null);
 
             verify(draft, never()).setTitle(any());
             verify(draft, never()).setThematic(any());
@@ -361,6 +363,7 @@ class ActivityServiceImplTest {
             verify(draft, never()).setTargetInstitutionIds(any());
             verify(draft, never()).setTargetGroupIds(any());
             verify(draft, never()).setNational(anyBoolean());
+            verify(draft, never()).setAssessment(any());
             verify(activityDraftRepository).save(draft);
           }
 
@@ -370,10 +373,182 @@ class ActivityServiceImplTest {
 
             activityService.updateActivityDraft(
                 draftId, null, null, null, null, null, null, null, null, null, null, null, null,
-                null, null, true);
+                null, null, true, null);
 
             verify(draft).setNational(true);
             verify(activityDraftRepository).save(draft);
+          }
+
+          @Test
+          void thenItShouldUpdateTheAssessmentWhenProvided() {
+            BddLogger.then("the assessment should be updated when provided");
+
+            var assessment = new ActivityAssessment(true, 20, null);
+            activityService.updateActivityDraft(
+                draftId,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                assessment);
+
+            verify(draft).setAssessment(assessment);
+            verify(activityDraftRepository).save(draft);
+          }
+
+          @Test
+          void thenItShouldClearTheAssessmentWhenNothingIsEnabled() {
+            BddLogger.then("the assessment should be cleared when nothing is enabled");
+
+            activityService.updateActivityDraft(
+                draftId,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                new ActivityAssessment(false, null, false));
+
+            verify(draft).setAssessment(null);
+            verify(activityDraftRepository).save(draft);
+          }
+
+          @Test
+          void thenItShouldAcceptEveryAllowedAssessmentCombination() {
+            BddLogger.then("comment, grade and validation combinations should be accepted");
+
+            List<ActivityAssessment> allowed =
+                List.of(
+                    new ActivityAssessment(true, null, null),
+                    new ActivityAssessment(true, 20, null),
+                    new ActivityAssessment(true, null, true),
+                    new ActivityAssessment(null, 20, null),
+                    new ActivityAssessment(null, null, true));
+
+            allowed.forEach(
+                assessment -> {
+                  activityService.updateActivityDraft(
+                      draftId,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      null,
+                      assessment);
+                  verify(draft).setAssessment(assessment);
+                });
+          }
+
+          @Test
+          void thenItShouldRejectAnAssessmentCombiningAGradeAndAValidation() {
+            BddLogger.then("an assessment enabling both a grade and a validation should fail");
+
+            assertThrows(
+                ActivityAssessmentException.class,
+                () ->
+                    activityService.updateActivityDraft(
+                        draftId,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        new ActivityAssessment(true, 20, true)));
+
+            verify(draft, never()).setAssessment(any());
+            verify(activityDraftRepository, never()).save(draft);
+          }
+
+          @Test
+          void thenItShouldRejectAnAssessmentGradeOutOfRange() {
+            BddLogger.then("an assessment grade outside of the allowed range should fail");
+
+            assertThrows(
+                ActivityAssessmentException.class,
+                () ->
+                    activityService.updateActivityDraft(
+                        draftId,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        new ActivityAssessment(null, 21, null)));
+
+            assertThrows(
+                ActivityAssessmentException.class,
+                () ->
+                    activityService.updateActivityDraft(
+                        draftId,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        new ActivityAssessment(null, 0, null)));
+
+            verify(activityDraftRepository, never()).save(draft);
           }
 
           @Test
@@ -396,6 +571,7 @@ class ActivityServiceImplTest {
                 false,
                 null,
                 null,
+                null,
                 null);
 
             verify(draft).setTitle("Titre seul");
@@ -415,7 +591,7 @@ class ActivityServiceImplTest {
 
             activityService.updateActivityDraft(
                 draftId, null, null, null, null, null, null, null, null, null, null, null, false,
-                null, null, null);
+                null, null, null, null);
 
             verify(draft).setStartDate(null);
             verify(draft).setEndDate(null);
@@ -439,6 +615,7 @@ class ActivityServiceImplTest {
                 null,
                 null,
                 false,
+                null,
                 null,
                 null,
                 null);
@@ -467,6 +644,7 @@ class ActivityServiceImplTest {
                 true,
                 null,
                 null,
+                null,
                 null);
 
             verify(draft).setStartDate(LocalDate.parse("2026-06-01"));
@@ -481,6 +659,7 @@ class ActivityServiceImplTest {
             activityService.updateActivityDraft(
                 draftId,
                 "Nouveau titre",
+                null,
                 null,
                 null,
                 null,
@@ -523,6 +702,7 @@ class ActivityServiceImplTest {
                         true,
                         null,
                         null,
+                        null,
                         null));
 
             verify(activityDraftRepository, never()).save(any());
@@ -537,7 +717,7 @@ class ActivityServiceImplTest {
                 () ->
                     activityService.updateActivityDraft(
                         draftId, null, null, null, null, null, null, null, null, null, null, null,
-                        true, null, null, null));
+                        true, null, null, null, null));
 
             verify(activityDraftRepository, never()).save(any());
           }
@@ -565,6 +745,7 @@ class ActivityServiceImplTest {
                         true,
                         null,
                         null,
+                        null,
                         null));
 
             verify(activityDraftRepository, never()).save(any());
@@ -580,7 +761,7 @@ class ActivityServiceImplTest {
             ActivityDraft result =
                 activityService.updateActivityDraft(
                     draftId, "Titre", null, null, null, null, null, null, null, null, null, null,
-                    false, null, null, null);
+                    false, null, null, null, null);
 
             assertEquals(savedDraft, result);
           }
@@ -606,7 +787,7 @@ class ActivityServiceImplTest {
                 () ->
                     activityService.updateActivityDraft(
                         draftId, "Titre", null, null, null, null, null, null, null, null, null,
-                        null, false, null, null, null));
+                        null, false, null, null, null, null));
 
             verify(activityDraftRepository, never()).save(any());
           }
@@ -631,7 +812,7 @@ class ActivityServiceImplTest {
               () ->
                   activityService.updateActivityDraft(
                       draftId, "Titre", null, null, null, null, null, null, null, null, null, null,
-                      false, null, null, null));
+                      false, null, null, null, null));
 
           verify(activityDraftRepository, never()).save(any());
         }
@@ -690,6 +871,7 @@ class ActivityServiceImplTest {
                       false,
                       List.of(UUID.randomUUID()),
                       List.of(),
+                      null,
                       null));
 
           verify(activityDraftRepository, never()).save(any());
@@ -718,6 +900,7 @@ class ActivityServiceImplTest {
                       false,
                       List.of(),
                       List.of(UUID.randomUUID()),
+                      null,
                       null));
 
           verify(activityDraftRepository, never()).save(any());
@@ -759,6 +942,7 @@ class ActivityServiceImplTest {
                   false,
                   institutionIds,
                   groupIds,
+                  null,
                   null);
 
           verify(draft).setTargetInstitutionIds(institutionIds);
@@ -788,7 +972,7 @@ class ActivityServiceImplTest {
           ActivityDraft result =
               activityService.updateActivityDraft(
                   draftId, null, null, null, null, null, null, null, null, null, null, null, false,
-                  List.of(), List.of(), null);
+                  List.of(), List.of(), null, null);
 
           verify(draft).setTargetInstitutionIds(List.of());
           assertEquals(draft, result);
@@ -841,6 +1025,7 @@ class ActivityServiceImplTest {
                       false,
                       List.of(),
                       List.of(alreadyTargetedGroupId),
+                      null,
                       null));
 
           verify(activityDraftRepository, never()).save(any());
@@ -869,6 +1054,7 @@ class ActivityServiceImplTest {
                       false,
                       List.of(alreadyTargetedInstitutionId),
                       List.of(),
+                      null,
                       null));
 
           verify(activityDraftRepository, never()).save(any());
@@ -898,6 +1084,7 @@ class ActivityServiceImplTest {
                   false,
                   updatedInstitutionIds,
                   List.of(alreadyTargetedGroupId),
+                  null,
                   null);
 
           verify(draft).setTargetInstitutionIds(updatedInstitutionIds);
@@ -911,7 +1098,7 @@ class ActivityServiceImplTest {
           ActivityDraft result =
               activityService.updateActivityDraft(
                   draftId, null, null, null, null, null, null, null, null, null, null, null, false,
-                  null, null, null);
+                  null, null, null, null);
 
           verify(draft, never()).setTargetInstitutionIds(any());
           verify(draft, never()).setTargetGroupIds(any());
@@ -1208,6 +1395,32 @@ class ActivityServiceImplTest {
 
               verify(activityRepository, never()).save(any());
               verify(activityDraftRepository, never()).removeFromDatabase(any());
+            }
+
+            @Test
+            void thenItShouldThrowActivityAssessmentExceptionWhenTheAssessmentIsInvalid() {
+              BddLogger.then("the service should throw ActivityAssessmentException");
+
+              when(draft.getAssessment())
+                  .thenReturn(Optional.of(new ActivityAssessment(true, 20, true)));
+
+              assertThrows(
+                  ActivityAssessmentException.class, () -> activityService.publish(draftId));
+
+              verify(activityRepository, never()).save(any());
+              verify(activityDraftRepository, never()).removeFromDatabase(any());
+            }
+
+            @Test
+            void thenItShouldCarryTheDraftAssessmentToThePublishedActivity() {
+              BddLogger.then("the published activity should carry the draft assessment");
+
+              var assessment = new ActivityAssessment(true, null, true);
+              when(draft.getAssessment()).thenReturn(Optional.of(assessment));
+
+              Activity result = activityService.publish(draftId);
+
+              assertEquals(assessment, result.getAssessment().orElseThrow());
             }
           }
 

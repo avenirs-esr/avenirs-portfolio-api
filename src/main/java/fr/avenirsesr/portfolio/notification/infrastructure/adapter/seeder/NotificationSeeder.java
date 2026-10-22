@@ -159,6 +159,7 @@ public class NotificationSeeder {
         draft.getStartDate().isPresent() && draft.getEndDate().isPresent(),
         null,
         null,
+        null,
         null);
 
     activityService.publish(draft.getId());

@@ -388,7 +388,8 @@ public class ActivityController {
             body.enableCompletionPeriod(),
             body.targetInstitutionIds(),
             body.targetGroupIds(),
-            body.national());
+            body.national(),
+            body.assessment() == null ? null : body.assessment().toDomain());
     return ResponseEntity.ok(new ActivityDraftUpdateResponse(draft.getId()));
   }
 

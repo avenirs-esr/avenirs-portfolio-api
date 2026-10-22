@@ -29,6 +29,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.data.InactiveStudentData;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.*;
 import fr.avenirsesr.portfolio.staff.activity.domain.mapper.ActivityPresentationDataMapper;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAssessment;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityDraft;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
@@ -166,6 +167,8 @@ public class ActivityServiceImpl implements ActivityService {
       throw new FieldValidationException(
           EErrorCode.NOT_BLANK, "description must be defined to publish an activity");
     }
+
+    draft.getAssessment().ifPresent(ActivityAssessment::validate);
 
     var publishedActivity = activityRepository.findById(activityDraftId);
 
@@ -580,7 +583,8 @@ public class ActivityServiceImpl implements ActivityService {
       Boolean enableCompletionPeriod,
       List<UUID> targetInstitutionIds,
       List<UUID> targetGroupIds,
-      Boolean national) {
+      Boolean national,
+      ActivityAssessment assessment) {
     var loggedInStaff = loggedInUserService.getLoggedInStaff();
     var draft =
         activityDraftRepository.findById(id).orElseThrow(ActivityDraftNotFoundException::new);
@@ -601,6 +605,9 @@ public class ActivityServiceImpl implements ActivityService {
     if ((startDate == null) != (endDate == null)
         || (Boolean.TRUE.equals(enableCompletionPeriod) && startDate == null)) {
       throw new ActivityDatesException();
+    }
+    if (assessment != null) {
+      assessment.validate();
     }
 
     if (title != null) {
@@ -640,6 +647,10 @@ public class ActivityServiceImpl implements ActivityService {
     if (targetInstitutionIds != null) draft.setTargetInstitutionIds(targetInstitutionIds);
     if (targetGroupIds != null) draft.setTargetGroupIds(targetGroupIds);
     if (national != null) draft.setNational(national);
+
+    if (assessment != null) {
+      draft.setAssessment(assessment.isEmpty() ? null : assessment);
+    }
 
     var updatedDraft = activityDraftRepository.save(draft);
     log.info("Updated activity draft with id: {}", id);
