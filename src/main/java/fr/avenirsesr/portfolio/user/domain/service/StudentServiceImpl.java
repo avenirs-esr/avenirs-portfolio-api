@@ -16,7 +16,10 @@ import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
+import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +41,22 @@ public class StudentServiceImpl implements StudentService {
               log.error("Student {} not found", studentId);
               return new UserIsNotStudentException();
             });
+  }
+
+  @Override
+  public Map<UUID, UUID> findProfilePictureIdsByIds(Collection<UUID> ids) {
+    if (ids == null || ids.isEmpty()) {
+      return Map.of();
+    }
+
+    Map<UUID, UUID> pictureIdsByUserId = new LinkedHashMap<>();
+    for (Student student : studentRepository.findAllById(List.copyOf(ids))) {
+      student
+          .getProfilePicture()
+          .ifPresent(picture -> pictureIdsByUserId.put(student.getId(), picture.getId()));
+    }
+
+    return pictureIdsByUserId;
   }
 
   @Override

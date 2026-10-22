@@ -5,13 +5,17 @@ import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.user.domain.port.output.BaseUserService;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.user.domain.data.CguAcceptanceData;
+import fr.avenirsesr.portfolio.user.domain.data.UserProfileLookupData;
 import fr.avenirsesr.portfolio.user.domain.data.UserQuickLinksData;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 @SuppressWarnings("PMD.MissingOverride")
 public interface UserService extends BaseUserService {
   User getUser(UUID id);
+
+  List<UserProfileLookupData> findProfilesByEppns(List<String> eppns);
 
   Optional<CguAcceptanceData> getAcceptedCgu();
 

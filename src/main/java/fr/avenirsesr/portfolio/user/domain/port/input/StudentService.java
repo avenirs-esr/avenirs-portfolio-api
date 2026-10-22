@@ -5,13 +5,18 @@ import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.student.selfknowledge.domain.model.enums.ESelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.user.domain.data.UserProfileOverviewData;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public interface StudentService {
   Student getStudentById(UUID studentId);
 
   boolean existsById(UUID studentId);
+
+  /** Profile picture ids of the given users, keyed by user id. Users without one are absent. */
+  Map<UUID, UUID> findProfilePictureIdsByIds(Collection<UUID> ids);
 
   UserProfileOverviewData getStudentProfile();
 

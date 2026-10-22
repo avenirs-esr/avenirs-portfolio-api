@@ -13,6 +13,7 @@ import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.notification.domain.port.output.repository.NotificationRepository;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.user.domain.data.CguAcceptanceData;
+import fr.avenirsesr.portfolio.user.domain.data.UserProfileLookupData;
 import fr.avenirsesr.portfolio.user.domain.data.UserQuickLinksData;
 import fr.avenirsesr.portfolio.user.domain.exception.CguNotFoundException;
 import fr.avenirsesr.portfolio.user.domain.model.Cgu;
@@ -24,7 +25,12 @@ import fr.avenirsesr.portfolio.user.domain.port.output.client.ExternalUserClient
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.CguRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserPrincipalRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,6 +57,39 @@ public class UserServiceImpl implements UserService {
               log.error("User {} not found", id);
               return new UserNotFoundException();
             });
+  }
+
+  /**
+   * Resolves the Cofolio profile of each given eppn in two batches, whatever the number of eppns:
+   * one lookup of the accounts, then one lookup of the pictures per category. A person holding both
+   * a student and a staff profile is reported with the picture of its student one.
+   */
+  @Override
+  public List<UserProfileLookupData> findProfilesByEppns(List<String> eppns) {
+    List<String> distinctEppns =
+        eppns == null ? List.of() : List.copyOf(new LinkedHashSet<>(eppns));
+    if (distinctEppns.isEmpty()) {
+      return List.of();
+    }
+
+    Map<String, User> usersByEppn = userPrincipalRepository.findAllByEppns(distinctEppns);
+    Set<UUID> userIds = new LinkedHashSet<>();
+    usersByEppn.values().forEach(user -> userIds.add(user.getId()));
+
+    Map<UUID, UUID> pictureIdsByUserId =
+        new HashMap<>(staffService.findProfilePictureIdsByIds(userIds));
+    pictureIdsByUserId.putAll(studentService.findProfilePictureIdsByIds(userIds));
+
+    return distinctEppns.stream()
+        .map(
+            eppn -> {
+              User user = usersByEppn.get(eppn);
+              return user == null
+                  ? UserProfileLookupData.neverConnected(eppn)
+                  : new UserProfileLookupData(
+                      eppn, user.getId(), pictureIdsByUserId.get(user.getId()));
+            })
+        .toList();
   }
 
   @Override
