@@ -4,6 +4,7 @@ public enum EDeclaredActivityStatus {
   SUBSCRIBED,
   IN_PROGRESS,
   SUBMITTED,
+  CONSULTED,
   COMPLETED,
   UNSUBSCRIBED
 }

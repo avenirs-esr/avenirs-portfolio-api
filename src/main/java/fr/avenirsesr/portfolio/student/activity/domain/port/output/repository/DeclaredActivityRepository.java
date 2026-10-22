@@ -6,8 +6,10 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.port.output.repository.GenericRepositoryPort;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
+import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -26,6 +28,12 @@ public interface DeclaredActivityRepository extends GenericRepositoryPort<Declar
 
   PagedResult<DeclaredActivity> findStudentActivitiesByProgressAndDate(
       Student student, PageCriteria pageCriteria, Boolean isValorized, FetchGraph fetchGraph);
+
+  PagedResult<DeclaredActivity> findAllSubmittedForAssessmentBy(
+      UUID staffId,
+      Collection<EDeclaredActivityStatus> statuses,
+      PageCriteria pageCriteria,
+      FetchGraph fetchGraph);
 
   Optional<DeclaredActivity> findByActivity(Student student, Activity activity);
 

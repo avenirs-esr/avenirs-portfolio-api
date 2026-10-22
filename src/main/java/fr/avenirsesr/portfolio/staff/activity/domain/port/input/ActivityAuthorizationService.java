@@ -29,6 +29,8 @@ public interface ActivityAuthorizationService {
 
   boolean hasLoggedInStaffAnyRight();
 
+  boolean hasLoggedInStaffRightOnAnyActivity(EActivityRight right);
+
   List<ActivityAuthorization> getActivityAuthorizations(UUID activityId);
 
   List<ActivityAuthorization> defineActivityAuthorizations(

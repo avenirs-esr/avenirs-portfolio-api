@@ -27,6 +27,10 @@ import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityAuthorizationService;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
+import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.DeclaredActivityToAssessDTO;
+import fr.avenirsesr.portfolio.student.activity.application.adapter.mapper.DeclaredActivityToAssessDTOMapper;
+import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityToAssessData;
+import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -61,6 +65,7 @@ public class ActivityController {
   private final ActivityFeedbacksPreviewMapper activityFeedbacksPreviewMapper;
   private final InactiveStudentDtoMapper inactiveStudentDtoMapper;
   private final ActivityAuthorizationDtoMapper activityAuthorizationDtoMapper;
+  private final DeclaredActivityToAssessDTOMapper declaredActivityToAssessDTOMapper;
   private final FileDTOMapper fileDTOMapper;
 
   @PreAuthorize("hasAuthority('activity:read:contextual')")
@@ -584,6 +589,38 @@ public class ActivityController {
     var response =
         new PagedResponse<>(
             pagedResult.content().stream().map(activityFeedbacksPreviewMapper::toDTO).toList(),
+            PageInfoDTO.fromDomain(pagedResult.pageInfo()));
+
+    return ResponseEntity.ok(response);
+  }
+
+  @PreAuthorize("hasAuthority('activity:read:contextual')")
+  @GetMapping("/assessments")
+  public ResponseEntity<PagedResponse<DeclaredActivityToAssessDTO>> getDeclaredActivitiesToAssess(
+      Principal principal,
+      @Parameter(
+              array =
+                  @ArraySchema(
+                      schema = @Schema(ref = "#/components/schemas/EDeclaredActivityStatus")))
+          @RequestParam(required = false)
+          List<EDeclaredActivityStatus> statuses,
+      @RequestParam(required = false) Integer page,
+      @RequestParam(required = false) Integer pageSize) {
+    var pageCriteria = new PageCriteria(page, pageSize);
+    log.debug(
+        "Received request to get the declared activities to assess by user [{}] (statuses={},"
+            + " page={}, pageSize={})",
+        principal.getName(),
+        statuses,
+        pageCriteria.page(),
+        pageCriteria.pageSize());
+
+    PagedResult<DeclaredActivityToAssessData> pagedResult =
+        activityService.getDeclaredActivitiesToAssess(statuses, pageCriteria);
+
+    var response =
+        new PagedResponse<>(
+            pagedResult.content().stream().map(declaredActivityToAssessDTOMapper::toDTO).toList(),
             PageInfoDTO.fromDomain(pagedResult.pageInfo()));
 
     return ResponseEntity.ok(response);
