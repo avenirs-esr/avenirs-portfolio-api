@@ -21,7 +21,12 @@ import org.springframework.web.reactive.function.client.WebClient;
 class GroupClientImplTest {
 
   private static final UUID GROUP_ID = UUID.fromString("4a1b1f8e-3f0a-4f4b-8f9e-6c9a0c0f1a33");
+  private static final UUID INSTITUTION_ID =
+      UUID.fromString("6a3c1f8e-3f0a-4f4b-8f9e-6c9a0c0f1a55");
+  private static final String INSTITUTION_NAME = "institution-name";
   private static final UUID PARENT_ID = UUID.fromString("5d2c2f8e-3f0a-4f4b-8f9e-6c9a0c0f1a44");
+  private static final String PARENT_NAME = "parent-name";
+  private static final int USERS_COUNT = 1;
 
   private MockWebServer mockWebServer;
   private GroupClientImpl client;
@@ -53,10 +58,15 @@ class GroupClientImplTest {
             "id": "%s",
             "name": "Licence 3 Informatique",
             "type": "PROGRAM_OPTION",
-            "parentId": "%s"
+            "institutionId": "%s",
+            "institutionName": "%s",
+            "parentId": "%s",
+            "parentName": "%s",
+            "usersCount": %d
         }
         """
-            .formatted(GROUP_ID, PARENT_ID);
+            .formatted(
+                GROUP_ID, INSTITUTION_ID, INSTITUTION_NAME, PARENT_ID, PARENT_NAME, USERS_COUNT);
     mockWebServer.enqueue(
         new MockResponse().setBody(responseBody).addHeader("Content-Type", "application/json"));
 
@@ -96,10 +106,14 @@ class GroupClientImplTest {
             "id": "%s",
             "name": "Licence Informatique",
             "type": "PROGRAM",
-            "parentId": null
+            "institutionId": "%s",
+            "institutionName": "%s",
+            "parentId": null,
+            "parentName": null,
+            "usersCount": %d
         }
         """
-            .formatted(PARENT_ID);
+            .formatted(PARENT_ID, INSTITUTION_ID, INSTITUTION_NAME, USERS_COUNT);
     mockWebServer.enqueue(
         new MockResponse().setBody(responseBody).addHeader("Content-Type", "application/json"));
 

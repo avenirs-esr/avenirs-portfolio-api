@@ -44,9 +44,25 @@ class StudentInfoDTOMapperTest {
     when(accessClient.getStudentScope(EPPN))
         .thenReturn(new StudentAccessScope(List.of(), List.of(groupId1, groupId2)));
     GroupDTO program1 =
-        new GroupDTO(UUID.randomUUID(), "Licence Informatique", EGroupType.PROGRAM, null);
+        new GroupDTO(
+            UUID.randomUUID(),
+            "Licence Informatique",
+            EGroupType.PROGRAM,
+            null,
+            null,
+            null,
+            null,
+            0);
     GroupDTO program2 =
-        new GroupDTO(UUID.randomUUID(), "Licence Mathématiques", EGroupType.PROGRAM, null);
+        new GroupDTO(
+            UUID.randomUUID(),
+            "Licence Mathématiques",
+            EGroupType.PROGRAM,
+            null,
+            null,
+            null,
+            null,
+            0);
     when(groupClient.getProgramOfGroup(groupId1)).thenReturn(Optional.of(program1));
     when(groupClient.getProgramOfGroup(groupId2)).thenReturn(Optional.of(program2));
 
@@ -71,7 +87,15 @@ class StudentInfoDTOMapperTest {
     when(accessClient.getStudentScope(EPPN))
         .thenReturn(new StudentAccessScope(List.of(), List.of(groupId1, groupId2)));
     GroupDTO program =
-        new GroupDTO(UUID.randomUUID(), "Licence Informatique", EGroupType.PROGRAM, null);
+        new GroupDTO(
+            UUID.randomUUID(),
+            "Licence Informatique",
+            EGroupType.PROGRAM,
+            null,
+            null,
+            null,
+            null,
+            0);
     when(groupClient.getProgramOfGroup(groupId1)).thenReturn(Optional.of(program));
     when(groupClient.getProgramOfGroup(groupId2)).thenReturn(Optional.of(program));
 
