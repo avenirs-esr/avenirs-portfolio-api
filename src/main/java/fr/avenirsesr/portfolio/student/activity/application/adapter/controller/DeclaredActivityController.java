@@ -132,6 +132,18 @@ public class DeclaredActivityController {
   }
 
   @PreAuthorize("hasAuthority('declared-activity:update:own')")
+  @PutMapping("/{declaredActivityId}/submit-for-assessment")
+  public ResponseEntity<Void> submitForAssessment(
+      Principal principal, @Valid @PathVariable UUID declaredActivityId) {
+    log.debug(
+        "Received request to submit declared activity [{}] for assessment for student [{}]",
+        declaredActivityId,
+        principal.getName());
+    declaredActivityService.submitForAssessment(declaredActivityId);
+    return ResponseEntity.noContent().build();
+  }
+
+  @PreAuthorize("hasAuthority('declared-activity:update:own')")
   @PutMapping("/{activityId}/reflection")
   public ResponseEntity<String> updateReflection(
       @PathVariable("activityId") UUID activityId,

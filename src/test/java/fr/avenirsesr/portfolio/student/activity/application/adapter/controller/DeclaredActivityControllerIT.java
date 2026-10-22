@@ -16,6 +16,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.test.web.reactive.server.WebTestClient.ResponseSpec;
 import org.springframework.transaction.annotation.Transactional;
 
 public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
@@ -37,6 +38,18 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
 
   @Value("${user.no-permission.signature}")
   private String noPermissionSignature;
+
+  @Value("${user.second.student.payload}")
+  private String secondStudentPayload;
+
+  @Value("${user.second.student.signature}")
+  private String secondStudentSignature;
+
+  @Value("${user.staff.payload}")
+  private String staffPayload;
+
+  @Value("${user.staff.signature}")
+  private String staffSignature;
 
   private final String activityId = "3f7c9a2e-5d44-4b7a-9c6f-2a6e8e91b1a1";
 
@@ -323,6 +336,136 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .expectBody()
         .jsonPath("$.code")
         .isEqualTo("DECLARED_ACTIVITY_UNSUBSCRIBED");
+  }
+
+  @Test
+  void shouldSubmitADeclaredActivityOfAnAssessableActivityForAssessment() throws Exception {
+    BddLogger.given("a student subscribed to an activity expecting an assessment");
+    String assessableActivityId =
+        publishActivityAsStaff("Activité évaluable à soumettre", "{\"comment\": true}");
+    String id = subscribeAndGetId(assessableActivityId);
+
+    BddLogger.when("he submits it for assessment");
+    submitForAssessment(id).expectStatus().isNoContent();
+
+    BddLogger.then("the declared activity is SUBMITTED");
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/" + id)
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.status")
+        .isEqualTo("SUBMITTED");
+
+    BddLogger.and("submitting it again is rejected");
+    submitForAssessment(id)
+        .expectStatus()
+        .isEqualTo(HttpStatus.CONFLICT)
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("DECLARED_ACTIVITY_LOCKED");
+  }
+
+  @Test
+  void shouldRejectTheSubmissionOfADeclaredActivityWithoutAssessment() throws Exception {
+    BddLogger.given("a student subscribed to an activity expecting no assessment");
+    String activityWithoutAssessmentId =
+        publishActivityAsStaff("Activité sans appréciation à soumettre", "null");
+    String id = subscribeAndGetId(activityWithoutAssessmentId);
+
+    BddLogger.when("he submits it for assessment");
+    BddLogger.then("it should return 400 ACTIVITY_ASSESSMENT");
+    submitForAssessment(id)
+        .expectStatus()
+        .isBadRequest()
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("ACTIVITY_ASSESSMENT");
+  }
+
+  @Test
+  void shouldRejectTheSubmissionOfADeclaredActivityOfAnotherStudent() throws Exception {
+    BddLogger.given("a declared activity of another student");
+    String assessableActivityId =
+        publishActivityAsStaff("Activité évaluable d'un autre étudiant", "{\"comment\": true}");
+    String id = subscribeAndGetId(assessableActivityId);
+
+    BddLogger.when("another student submits it for assessment");
+    BddLogger.then("it should return 403");
+    webTestClient
+        .put()
+        .uri(BASE_PATH + "/" + id + "/submit-for-assessment")
+        .header("X-Signed-Context", secondStudentPayload)
+        .header("X-Context-Signature", secondStudentSignature)
+        .exchange()
+        .expectStatus()
+        .isForbidden();
+  }
+
+  @Test
+  void shouldReturn404WhenSubmittingAnUnknownDeclaredActivity() {
+    BddLogger.given("an unknown declared activity id");
+    BddLogger.when("the student submits it for assessment");
+    BddLogger.then("it should return 404");
+    submitForAssessment(notFoundId).expectStatus().isNotFound();
+  }
+
+  private ResponseSpec submitForAssessment(String id) {
+    return webTestClient
+        .put()
+        .uri(BASE_PATH + "/" + id + "/submit-for-assessment")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Signature", studentSignature)
+        .exchange();
+  }
+
+  private String publishActivityAsStaff(String title, String assessment) throws Exception {
+    String draftResponse =
+        webTestClient
+            .post()
+            .uri("/me/activities/draft")
+            .header("X-Signed-Context", staffPayload)
+            .header("X-Context-Signature", staffSignature)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue("{\"title\": \"" + title + "\"}")
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    String draftId = objectMapper.readTree(draftResponse).get("draftId").asText();
+
+    webTestClient
+        .patch()
+        .uri("/me/activities/" + draftId)
+        .header("X-Signed-Context", staffPayload)
+        .header("X-Context-Signature", staffSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(
+            "{\"thematic\": \"EXPERIENCES\", \"summary\": \"Un résumé valide\","
+                + " \"description\": \"Une consigne valide\", \"assessment\": "
+                + assessment
+                + "}")
+        .exchange()
+        .expectStatus()
+        .isOk();
+
+    webTestClient
+        .post()
+        .uri("/me/activities/publish/" + draftId)
+        .header("X-Signed-Context", staffPayload)
+        .header("X-Context-Signature", staffSignature)
+        .exchange()
+        .expectStatus()
+        .isOk();
+
+    return draftId;
   }
 
   private void unsubscribe(String subscribedActivityId) {

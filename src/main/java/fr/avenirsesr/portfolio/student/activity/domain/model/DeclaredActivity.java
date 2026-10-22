@@ -27,6 +27,9 @@ public class DeclaredActivity extends AvenirsBaseModel {
   @Getter(AccessLevel.NONE)
   private Instant finishedAt;
 
+  @Getter(AccessLevel.NONE)
+  private Instant submittedAt;
+
   private boolean valorized;
 
   @Getter(AccessLevel.NONE)
@@ -44,6 +47,7 @@ public class DeclaredActivity extends AvenirsBaseModel {
       LocalDate startDate,
       LocalDate endDate,
       Instant finishedAt,
+      Instant submittedAt,
       boolean valorized,
       Instant unsubscribedAt,
       DeclaredActivityAssessment assessment,
@@ -57,6 +61,7 @@ public class DeclaredActivity extends AvenirsBaseModel {
     this.startDate = startDate;
     this.endDate = endDate;
     this.finishedAt = finishedAt;
+    this.submittedAt = submittedAt;
     this.valorized = valorized;
     this.unsubscribedAt = unsubscribedAt;
     this.assessment = assessment;
@@ -80,6 +85,7 @@ public class DeclaredActivity extends AvenirsBaseModel {
         startDate,
         endDate,
         finishedAt,
+        null,
         false,
         null,
         null,
@@ -96,6 +102,7 @@ public class DeclaredActivity extends AvenirsBaseModel {
       LocalDate startDate,
       LocalDate endDate,
       Instant finishedAt,
+      Instant submittedAt,
       boolean valorized,
       Instant unsubscribedAt,
       DeclaredActivityAssessment assessment,
@@ -110,6 +117,7 @@ public class DeclaredActivity extends AvenirsBaseModel {
         startDate,
         endDate,
         finishedAt,
+        submittedAt,
         valorized,
         unsubscribedAt,
         assessment,
@@ -119,6 +127,10 @@ public class DeclaredActivity extends AvenirsBaseModel {
 
   public Optional<Instant> getFinishedAt() {
     return Optional.ofNullable(finishedAt);
+  }
+
+  public Optional<Instant> getSubmittedAt() {
+    return Optional.ofNullable(submittedAt);
   }
 
   public Optional<Instant> getStartedAt() {

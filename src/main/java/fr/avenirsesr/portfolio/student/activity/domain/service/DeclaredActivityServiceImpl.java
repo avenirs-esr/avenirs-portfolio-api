@@ -11,6 +11,7 @@ import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorize
 import fr.avenirsesr.portfolio.notification.domain.model.enums.ENotificationType;
 import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityAssessmentException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityUnpublishedException;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
@@ -164,6 +165,32 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     }
 
     declaredActivity.setFinishedAt(Instant.now());
+
+    declaredActivityRepository.save(declaredActivity);
+  }
+
+  @Override
+  public void submitForAssessment(UUID declaredActivityId) {
+    DeclaredActivity declaredActivity =
+        fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
+
+    if (declaredActivity.isUnsubscribed()) {
+      throw new DeclaredActivityUnsubscribedException();
+    }
+
+    if (declaredActivity.getSubmittedAt().isPresent()) {
+      throw new DeclaredActivityLockedException();
+    }
+
+    if (declaredActivity
+        .getActivity()
+        .getAssessment()
+        .filter(assessment -> !assessment.isEmpty())
+        .isEmpty()) {
+      throw new ActivityAssessmentException("The activity does not expect an assessment");
+    }
+
+    declaredActivity.setSubmittedAt(Instant.now());
 
     declaredActivityRepository.save(declaredActivity);
   }
@@ -370,7 +397,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
       return EDeclaredActivityStatus.COMPLETED;
     }
 
-    if (hasActiveFeedback) {
+    if (hasActiveFeedback || declaredActivity.getSubmittedAt().isPresent()) {
       return EDeclaredActivityStatus.SUBMITTED;
     }
 
