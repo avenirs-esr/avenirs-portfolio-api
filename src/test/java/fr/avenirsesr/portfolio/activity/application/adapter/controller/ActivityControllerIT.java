@@ -1386,6 +1386,107 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       }
 
       @Test
+      void thenItShouldClearTheAssessmentWhenAnEmptyObjectIsSent() throws Exception {
+        BddLogger.and("given an existing activity draft with an assessment");
+        UUID draftId = createDraftAndGetId("Brouillon évaluation effacée par objet vide");
+        patchAssessment(draftId, new ActivityAssessmentRequest(true, 20, null))
+            .expectStatus()
+            .isOk();
+
+        BddLogger.then("an empty assessment object should clear it");
+
+        webTestClient
+            .patch()
+            .uri(DRAFT_UPDATE_PATH, draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue("{\"assessment\":{}}")
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk();
+
+        webTestClient
+            .get()
+            .uri(CONTENT_PATH, "DRAFT", draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.assessment")
+            .doesNotExist();
+      }
+
+      @Test
+      void thenItShouldKeepTheCommentWhenOnlyTheGradingIsDisabled() throws Exception {
+        BddLogger.and("given an existing activity draft graded out of 20 with a comment");
+        UUID draftId = createDraftAndGetId("Brouillon notation désactivée");
+        patchAssessment(draftId, new ActivityAssessmentRequest(true, 20, null))
+            .expectStatus()
+            .isOk();
+
+        BddLogger.then("resending the comment alone should drop the grade");
+
+        patchAssessment(draftId, new ActivityAssessmentRequest(true, null, null))
+            .expectStatus()
+            .isOk();
+
+        webTestClient
+            .get()
+            .uri(CONTENT_PATH, "DRAFT", draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.assessment.comment")
+            .isEqualTo(true)
+            .jsonPath("$.assessment.grade")
+            .doesNotExist()
+            .jsonPath("$.assessment.validation")
+            .doesNotExist();
+      }
+
+      @Test
+      void thenItShouldLeaveTheAssessmentUntouchedWhenTheFieldIsAbsent() throws Exception {
+        BddLogger.and("given an existing activity draft with an assessment");
+        UUID draftId = createDraftAndGetId("Brouillon évaluation préservée");
+        patchAssessment(draftId, new ActivityAssessmentRequest(true, 20, null))
+            .expectStatus()
+            .isOk();
+
+        BddLogger.then("a patch without the assessment field should preserve it");
+
+        webTestClient
+            .patch()
+            .uri(DRAFT_UPDATE_PATH, draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue("{\"title\":\"Titre seul\"}")
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk();
+
+        webTestClient
+            .get()
+            .uri(CONTENT_PATH, "DRAFT", draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.assessment.comment")
+            .isEqualTo(true)
+            .jsonPath("$.assessment.grade")
+            .isEqualTo(20);
+      }
+
+      @Test
       void thenItShouldReturn400WhenTheAssessmentCombinesAGradeAndAValidation() throws Exception {
         BddLogger.and("given an existing activity draft");
         UUID draftId = createDraftAndGetId("Brouillon note et validation");
