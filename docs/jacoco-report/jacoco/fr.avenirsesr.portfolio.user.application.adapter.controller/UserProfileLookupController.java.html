@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserProfileLookupController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.user.application.adapter.controller</a> &gt; <span class="el_source">UserProfileLookupController.java</span></div><h1>UserProfileLookupController.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.user.application.adapter.controller;
+
+import fr.avenirsesr.portfolio.user.application.adapter.dto.UserProfileDTO;
+import fr.avenirsesr.portfolio.user.application.adapter.request.UserProfileLookupRequest;
+import fr.avenirsesr.portfolio.user.domain.data.UserProfileLookupData;
+import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
+import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+/**
+ * Lets the back-office tell, for the users it administers, who already logged in to Cofolio and
+ * which profile picture they uploaded. Reading the profile of somebody else is gated by the
+ * permission to consult the users of one's institution.
+ *
+ * &lt;p&gt;The lookup is a POST although it reads: the eppns are sent in the body because a page of users
+ * holds up to a hundred of them, which no longer fits comfortably in a query string.
+ */
+<span class="fc" id="L25">@Slf4j</span>
+@AllArgsConstructor
+@RestController
+@RequestMapping(&quot;/users&quot;)
+public class UserProfileLookupController {
+
+  private final UserService userService;
+
+  @PreAuthorize(&quot;hasAuthority('external-user:read')&quot;)
+  @PostMapping(&quot;/profiles&quot;)
+  public ResponseEntity&lt;List&lt;UserProfileDTO&gt;&gt; findProfilesByEppns(
+      @RequestBody UserProfileLookupRequest request) {
+<span class="nc" id="L37">    log.debug(</span>
+        &quot;Looking up the profiles of {} eppn(s)&quot;,
+<span class="nc bnc" id="L39" title="All 2 branches missed.">        request.eppns() == null ? 0 : request.eppns().size());</span>
+
+<span class="nc" id="L41">    List&lt;UserProfileDTO&gt; profiles =</span>
+<span class="nc" id="L42">        userService.findProfilesByEppns(request.eppns()).stream()</span>
+<span class="nc" id="L43">            .map(UserProfileLookupController::toDto)</span>
+<span class="nc" id="L44">            .toList();</span>
+
+<span class="nc" id="L46">    return ResponseEntity.ok(profiles);</span>
+  }
+
+  private static UserProfileDTO toDto(UserProfileLookupData profile) {
+<span class="nc" id="L50">    return new UserProfileDTO(</span>
+<span class="nc" id="L51">        profile.eppn(), profile.hasConnected(), profile.userId(), profile.profilePictureId());</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

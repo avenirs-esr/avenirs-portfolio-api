@@ -5,6 +5,9 @@ import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserPrincipalR
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserPrincipalEntity;
 import java.time.Instant;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Repository;
@@ -13,47 +16,61 @@ import org.springframework.stereotype.Repository;
 public class UserPrincipalDatabaseRepository implements UserPrincipalRepository {
   private final UserPrincipalJpaRepository jpaRepository;
 
-<span class="fc" id="L16">  public UserPrincipalDatabaseRepository(UserPrincipalJpaRepository jpaRepository) {</span>
-<span class="fc" id="L17">    this.jpaRepository = jpaRepository;</span>
-<span class="fc" id="L18">  }</span>
+<span class="fc" id="L19">  public UserPrincipalDatabaseRepository(UserPrincipalJpaRepository jpaRepository) {</span>
+<span class="fc" id="L20">    this.jpaRepository = jpaRepository;</span>
+<span class="fc" id="L21">  }</span>
 
   @Override
   public Optional&lt;User&gt; findByEppn(String eppn) {
-<span class="fc" id="L22">    return jpaRepository</span>
-<span class="fc" id="L23">        .findByEppn(eppn)</span>
-<span class="fc" id="L24">        .map(UserPrincipalEntity::getUser)</span>
-<span class="fc" id="L25">        .map(UserMapper.INSTANCE::toDomain);</span>
+<span class="fc" id="L25">    return jpaRepository</span>
+<span class="fc" id="L26">        .findByEppn(eppn)</span>
+<span class="fc" id="L27">        .map(UserPrincipalEntity::getUser)</span>
+<span class="fc" id="L28">        .map(UserMapper.INSTANCE::toDomain);</span>
+  }
+
+  @Override
+  public Map&lt;String, User&gt; findAllByEppns(Collection&lt;String&gt; eppns) {
+<span class="nc bnc" id="L33" title="All 4 branches missed.">    if (eppns == null || eppns.isEmpty()) {</span>
+<span class="nc" id="L34">      return Map.of();</span>
+    }
+
+<span class="nc" id="L37">    Map&lt;String, User&gt; usersByEppn = new LinkedHashMap&lt;&gt;();</span>
+<span class="nc bnc" id="L38" title="All 2 branches missed.">    for (UserPrincipalEntity principal : jpaRepository.findAllByEppnIn(eppns)) {</span>
+<span class="nc" id="L39">      usersByEppn.put(principal.getEppn(), UserMapper.INSTANCE.toDomain(principal.getUser()));</span>
+<span class="nc" id="L40">    }</span>
+
+<span class="nc" id="L42">    return usersByEppn;</span>
   }
 
   @Override
   public Optional&lt;String&gt; findEppnByUserId(UUID userId) {
-<span class="fc" id="L30">    return jpaRepository.findByUserId(userId).map(UserPrincipalEntity::getEppn);</span>
+<span class="fc" id="L47">    return jpaRepository.findByUserId(userId).map(UserPrincipalEntity::getEppn);</span>
   }
 
   @Override
   public void saveOrUpdate(User user, String eppn) {
-<span class="fc" id="L35">    var existing = jpaRepository.findByUserId(user.getId());</span>
+<span class="fc" id="L52">    var existing = jpaRepository.findByUserId(user.getId());</span>
 
-<span class="fc" id="L37">    var now = Instant.now();</span>
+<span class="fc" id="L54">    var now = Instant.now();</span>
 
-<span class="fc bfc" id="L39" title="All 2 branches covered.">    if (existing.isPresent()) {</span>
-<span class="fc" id="L40">      var entity = existing.get();</span>
+<span class="fc bfc" id="L56" title="All 2 branches covered.">    if (existing.isPresent()) {</span>
+<span class="fc" id="L57">      var entity = existing.get();</span>
 
-<span class="fc" id="L42">      entity.setEppn(eppn);</span>
-<span class="fc" id="L43">      entity.setUpdatedAt(now);</span>
+<span class="fc" id="L59">      entity.setEppn(eppn);</span>
+<span class="fc" id="L60">      entity.setUpdatedAt(now);</span>
 
-<span class="fc" id="L45">      jpaRepository.save(entity);</span>
-<span class="fc" id="L46">      return;</span>
+<span class="fc" id="L62">      jpaRepository.save(entity);</span>
+<span class="fc" id="L63">      return;</span>
     }
 
-<span class="fc" id="L49">    jpaRepository.save(</span>
-<span class="fc" id="L50">        UserPrincipalEntity.of(</span>
-<span class="fc" id="L51">            UUID.randomUUID(), UserMapper.INSTANCE.fromDomain(user), eppn, now, now));</span>
-<span class="fc" id="L52">  }</span>
+<span class="fc" id="L66">    jpaRepository.save(</span>
+<span class="fc" id="L67">        UserPrincipalEntity.of(</span>
+<span class="fc" id="L68">            UUID.randomUUID(), UserMapper.INSTANCE.fromDomain(user), eppn, now, now));</span>
+<span class="fc" id="L69">  }</span>
 
   @Override
   public long countAll() {
-<span class="fc" id="L56">    return jpaRepository.count();</span>
+<span class="fc" id="L73">    return jpaRepository.count();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
