@@ -30,6 +30,7 @@ public class FakeDeclaredActivity {
             hasDate ? LocalDate.now().plusMonths(1) : null,
             hasDate ? LocalDate.now().plusMonths(2) : null,
             hasFinished ? Instant.now() : null,
+            null,
             false,
             null,
             null,

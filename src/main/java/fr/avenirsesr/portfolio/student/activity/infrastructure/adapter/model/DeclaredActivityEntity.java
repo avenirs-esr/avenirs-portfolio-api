@@ -49,6 +49,9 @@ public class DeclaredActivityEntity extends PeriodEntity<LocalDate> {
   @Formula("CASE WHEN finished_at IS NULL THEN 0 ELSE 1 END")
   private Integer isFinishedOrder;
 
+  @Column(name = "submitted_at")
+  private Instant submittedAt;
+
   @Column(nullable = false)
   private boolean valorized;
 
@@ -66,6 +69,7 @@ public class DeclaredActivityEntity extends PeriodEntity<LocalDate> {
       LocalDate startDate,
       LocalDate endDate,
       Instant finishedAt,
+      Instant submittedAt,
       boolean valorized,
       Instant unsubscribedAt,
       DeclaredActivityAssessmentEmbeddable assessment,
@@ -81,6 +85,7 @@ public class DeclaredActivityEntity extends PeriodEntity<LocalDate> {
     this.startDate = startDate;
     this.endDate = endDate;
     this.finishedAt = finishedAt;
+    this.submittedAt = submittedAt;
     this.valorized = valorized;
     this.unsubscribedAt = unsubscribedAt;
     this.assessment = assessment;
@@ -95,6 +100,7 @@ public class DeclaredActivityEntity extends PeriodEntity<LocalDate> {
       LocalDate startDate,
       LocalDate endDate,
       Instant finishedAt,
+      Instant submittedAt,
       boolean valorized,
       Instant unsubscribedAt,
       DeclaredActivityAssessmentEmbeddable assessment,
@@ -109,6 +115,7 @@ public class DeclaredActivityEntity extends PeriodEntity<LocalDate> {
         startDate,
         endDate,
         finishedAt,
+        submittedAt,
         valorized,
         unsubscribedAt,
         assessment,
