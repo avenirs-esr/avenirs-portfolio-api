@@ -22,4 +22,5 @@ public record ActivityDraftUpdateRequest(
     Boolean enableCompletionPeriod,
     List<UUID> targetInstitutionIds,
     List<UUID> targetGroupIds,
-    Boolean national) {}
+    Boolean national,
+    @Schema(nullable = true) ActivityAssessmentRequest assessment) {}

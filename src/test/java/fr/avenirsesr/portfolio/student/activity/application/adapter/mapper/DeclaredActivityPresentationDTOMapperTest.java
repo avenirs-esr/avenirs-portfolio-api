@@ -186,6 +186,7 @@ class DeclaredActivityPresentationDTOMapperTest {
         List.of(),
         List.of(),
         false,
+        null,
         activity.getCreatedAt(),
         activity.getUpdatedAt());
   }

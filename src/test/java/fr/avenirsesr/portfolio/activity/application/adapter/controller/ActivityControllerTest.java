@@ -795,6 +795,7 @@ class ActivityControllerTest {
             List.of(),
             List.of(),
             false,
+            null,
             Instant.now(),
             Instant.now());
 
@@ -844,6 +845,7 @@ class ActivityControllerTest {
             List.of(),
             List.of(),
             false,
+            null,
             Instant.now(),
             Instant.now());
 
@@ -894,6 +896,7 @@ class ActivityControllerTest {
             List.of(),
             List.of(),
             false,
+            null,
             Instant.now(),
             Instant.now());
 

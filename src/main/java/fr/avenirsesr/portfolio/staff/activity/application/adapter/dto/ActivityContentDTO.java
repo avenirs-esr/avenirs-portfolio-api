@@ -47,5 +47,6 @@ public record ActivityContentDTO(
     List<UUID> targetInstitutionIds,
     List<UUID> targetGroupIds,
     boolean national,
+    ActivityAssessmentDTO assessment,
     Instant createdAt,
     Instant updatedAt) {}

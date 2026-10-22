@@ -144,6 +144,7 @@ public class ActivityDraftSeeder {
                     data.startDate().isPresent() && data.endDate().isPresent(),
                     null,
                     null,
+                    null,
                     null);
 
             entityManager.flush();

@@ -14,6 +14,7 @@ import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.Aven
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityAssessmentRequest;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityAuthorizationsRequest;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDraftCreationRequest;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDraftUpdateRequest;
@@ -40,6 +41,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.test.web.reactive.server.WebTestClient.ResponseSpec;
 import org.springframework.web.reactive.function.BodyInserters;
 
 class ActivityControllerIT extends ContainerConfigurationTest {
@@ -583,6 +585,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             false,
             targetInstitutionIds,
             targetGroupIds,
+            null,
             null);
       }
 
@@ -1040,6 +1043,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                     true,
                     null,
                     null,
+                    null,
                     null));
 
         webTestClient
@@ -1081,6 +1085,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                     false,
                     null,
                     null,
+                    null,
                     null));
 
         webTestClient
@@ -1110,7 +1115,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             objectMapper.writeValueAsString(
                 new ActivityDraftUpdateRequest(
                     null, null, null, null, null, null, null, null, null, null, null, false, null,
-                    null, null));
+                    null, null, null));
 
         webTestClient
             .patch()
@@ -1161,6 +1166,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                     null,
                     null,
                     false,
+                    null,
                     null,
                     null,
                     null));
@@ -1215,6 +1221,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                     true,
                     null,
                     null,
+                    null,
                     null));
 
         webTestClient
@@ -1243,7 +1250,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             objectMapper.writeValueAsString(
                 new ActivityDraftUpdateRequest(
                     "Titre", null, null, null, null, null, null, null, null, null, null, false,
-                    null, null, null));
+                    null, null, null, null));
 
         webTestClient
             .patch()
@@ -1284,6 +1291,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                     false,
                     null,
                     null,
+                    null,
                     null));
 
         webTestClient
@@ -1309,7 +1317,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             objectMapper.writeValueAsString(
                 new ActivityDraftUpdateRequest(
                     "Titre", null, null, null, null, null, null, null, null, null, null, false,
-                    null, null, null));
+                    null, null, null, null));
 
         webTestClient
             .patch()
@@ -1320,6 +1328,123 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             .exchange()
             .expectStatus()
             .isUnauthorized();
+      }
+
+      @Test
+      void thenItShouldStoreTheAssessmentAndExposeItInTheContent() throws Exception {
+        BddLogger.and("given an existing activity draft");
+        UUID draftId = createDraftAndGetId("Brouillon avec paramétrage d'évaluation");
+
+        BddLogger.then("the assessment should be stored and returned by the content endpoint");
+
+        patchAssessment(draftId, new ActivityAssessmentRequest(true, 20, null))
+            .expectStatus()
+            .isOk();
+
+        webTestClient
+            .get()
+            .uri(CONTENT_PATH, "DRAFT", draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.assessment.comment")
+            .isEqualTo(true)
+            .jsonPath("$.assessment.grade")
+            .isEqualTo(20)
+            .jsonPath("$.assessment.validation")
+            .doesNotExist();
+      }
+
+      @Test
+      void thenItShouldClearTheAssessmentWhenNothingIsEnabled() throws Exception {
+        BddLogger.and("given an existing activity draft with an assessment");
+        UUID draftId = createDraftAndGetId("Brouillon évaluation effacée");
+        patchAssessment(draftId, new ActivityAssessmentRequest(null, null, true))
+            .expectStatus()
+            .isOk();
+
+        BddLogger.then("an assessment enabling nothing should clear it");
+
+        patchAssessment(draftId, new ActivityAssessmentRequest(false, null, false))
+            .expectStatus()
+            .isOk();
+
+        webTestClient
+            .get()
+            .uri(CONTENT_PATH, "DRAFT", draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.assessment")
+            .doesNotExist();
+      }
+
+      @Test
+      void thenItShouldReturn400WhenTheAssessmentCombinesAGradeAndAValidation() throws Exception {
+        BddLogger.and("given an existing activity draft");
+        UUID draftId = createDraftAndGetId("Brouillon note et validation");
+
+        BddLogger.then("enabling both a grade and a validation should return 400");
+
+        patchAssessment(draftId, new ActivityAssessmentRequest(true, 20, true))
+            .expectStatus()
+            .isBadRequest()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("ACTIVITY_ASSESSMENT");
+      }
+
+      @Test
+      void thenItShouldReturn400WhenTheAssessmentGradeIsOutOfRange() throws Exception {
+        BddLogger.and("given an existing activity draft");
+        UUID draftId = createDraftAndGetId("Brouillon barème hors limites");
+
+        BddLogger.then("a grade outside of the allowed range should return 400");
+
+        patchAssessment(draftId, new ActivityAssessmentRequest(null, 21, null))
+            .expectStatus()
+            .isBadRequest()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("ACTIVITY_ASSESSMENT");
+      }
+
+      private ResponseSpec patchAssessment(UUID draftId, ActivityAssessmentRequest assessment)
+          throws Exception {
+        String requestBody =
+            objectMapper.writeValueAsString(
+                new ActivityDraftUpdateRequest(
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    assessment));
+
+        return webTestClient
+            .patch()
+            .uri(DRAFT_UPDATE_PATH, draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(requestBody)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange();
       }
 
       private void setCompletionPeriod(UUID draftId, String startDate, String endDate)
@@ -1339,6 +1464,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                     null,
                     null,
                     true,
+                    null,
                     null,
                     null,
                     null));
@@ -1738,6 +1864,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             false,
             targetInstitutionIds,
             targetGroupIds,
+            null,
             null);
       }
 
@@ -1788,6 +1915,41 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             .exists()
             .jsonPath("$.createdItemId")
             .isNotEmpty();
+      }
+
+      @Test
+      void thenItShouldCarryTheDraftAssessmentToThePublishedActivity() throws Exception {
+        BddLogger.and("given an existing activity draft configured with an assessment");
+        UUID draftId = createDraftAndGetId("Brouillon publié avec évaluation");
+        fillDraftWithSummaryAndDescription(draftId);
+        fillDraftWithAssessment(draftId, new ActivityAssessmentRequest(true, null, true));
+
+        BddLogger.then("the published activity should expose the same assessment");
+
+        webTestClient
+            .post()
+            .uri(PUBLISH_PATH, draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk();
+
+        webTestClient
+            .get()
+            .uri(CONTENT_PATH, "PUBLISHED", draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.assessment.comment")
+            .isEqualTo(true)
+            .jsonPath("$.assessment.validation")
+            .isEqualTo(true)
+            .jsonPath("$.assessment.grade")
+            .doesNotExist();
       }
 
       @Test
@@ -3211,7 +3373,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         return objectMapper.writeValueAsString(
             new ActivityDraftUpdateRequest(
                 title, null, null, null, null, null, null, null, null, null, null, false, null,
-                null, null));
+                null, null, null));
       }
 
       @Test
@@ -3892,6 +4054,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                 false,
                 null,
                 null,
+                null,
                 null));
 
     webTestClient
@@ -3924,7 +4087,42 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                 false,
                 null,
                 null,
+                null,
                 null));
+
+    webTestClient
+        .patch()
+        .uri(DRAFT_UPDATE_PATH, draftId)
+        .headers(this::addStaffHeaders)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(requestBody)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isOk();
+  }
+
+  private void fillDraftWithAssessment(UUID draftId, ActivityAssessmentRequest assessment)
+      throws Exception {
+    String requestBody =
+        objectMapper.writeValueAsString(
+            new ActivityDraftUpdateRequest(
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                assessment));
 
     webTestClient
         .patch()
