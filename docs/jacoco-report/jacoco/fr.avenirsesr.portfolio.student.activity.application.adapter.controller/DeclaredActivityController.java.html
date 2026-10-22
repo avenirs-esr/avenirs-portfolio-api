@@ -131,13 +131,25 @@ public class DeclaredActivityController {
   }
 
   @PreAuthorize(&quot;hasAuthority('declared-activity:update:own')&quot;)
+  @PutMapping(&quot;/{declaredActivityId}/submit-for-assessment&quot;)
+  public ResponseEntity&lt;Void&gt; submitForAssessment(
+      Principal principal, @Valid @PathVariable UUID declaredActivityId) {
+<span class="fc" id="L137">    log.debug(</span>
+        &quot;Received request to submit declared activity [{}] for assessment for student [{}]&quot;,
+        declaredActivityId,
+<span class="fc" id="L140">        principal.getName());</span>
+<span class="fc" id="L141">    declaredActivityService.submitForAssessment(declaredActivityId);</span>
+<span class="fc" id="L142">    return ResponseEntity.noContent().build();</span>
+  }
+
+  @PreAuthorize(&quot;hasAuthority('declared-activity:update:own')&quot;)
   @PutMapping(&quot;/{activityId}/reflection&quot;)
   public ResponseEntity&lt;String&gt; updateReflection(
       @PathVariable(&quot;activityId&quot;) UUID activityId,
       @Valid @RequestBody UpdateReflectionRequest request) {
 
-<span class="nc" id="L139">    declaredActivityService.updateReflection(activityId, request.reflection());</span>
-<span class="nc" id="L140">    return ResponseEntity.ok(&quot;Declared activities successfully updated&quot;);</span>
+<span class="nc" id="L151">    declaredActivityService.updateReflection(activityId, request.reflection());</span>
+<span class="nc" id="L152">    return ResponseEntity.ok(&quot;Declared activities successfully updated&quot;);</span>
   }
 
   @PreAuthorize(&quot;hasAuthority('activity:read:contextual')&quot;)
@@ -146,20 +158,20 @@ public class DeclaredActivityController {
       HttpServletRequest request,
       Principal principal,
       @Valid @PathVariable UUID declaredActivityId) {
-<span class="fc" id="L149">    log.debug(</span>
+<span class="fc" id="L161">    log.debug(</span>
         &quot;Received request to get declared activity [{}] details for student [{}]&quot;,
         declaredActivityId,
-<span class="fc" id="L152">        principal.getName());</span>
-<span class="fc" id="L153">    String baseUrl = extractOrigin(request);</span>
-<span class="fc" id="L154">    var details = declaredActivityService.getDeclaredActivityDetails(declaredActivityId);</span>
-<span class="fc" id="L155">    var status = declaredActivityService.getDeclaredActivityStatus(details.declaredActivity());</span>
+<span class="fc" id="L164">        principal.getName());</span>
+<span class="fc" id="L165">    String baseUrl = extractOrigin(request);</span>
+<span class="fc" id="L166">    var details = declaredActivityService.getDeclaredActivityDetails(declaredActivityId);</span>
+<span class="fc" id="L167">    var status = declaredActivityService.getDeclaredActivityStatus(details.declaredActivity());</span>
 
-<span class="fc" id="L157">    return ResponseEntity.ok(</span>
-<span class="fc" id="L158">        declaredActivityDetailsDTOMapper.toDTO(</span>
+<span class="fc" id="L169">    return ResponseEntity.ok(</span>
+<span class="fc" id="L170">        declaredActivityDetailsDTOMapper.toDTO(</span>
             details,
             status,
-<span class="fc" id="L161">            fileDTOMapper.toFileDTOs(</span>
-<span class="fc" id="L162">                details.declaredActivity().getActivity().getFiles(), baseUrl)));</span>
+<span class="fc" id="L173">            fileDTOMapper.toFileDTOs(</span>
+<span class="fc" id="L174">                details.declaredActivity().getActivity().getFiles(), baseUrl)));</span>
   }
 
   @PreAuthorize(&quot;hasAuthority('declared-activity:update:own')&quot;)
@@ -167,12 +179,12 @@ public class DeclaredActivityController {
   public ResponseEntity&lt;String&gt; updateDeclaredActivity(
       @Valid @RequestBody DeclaredActivityUpdateRequest declaredActivityUpdateRequest,
       @PathVariable UUID declaredActivityId) {
-<span class="fc" id="L170">    var optionalPeriod = Optional.ofNullable(declaredActivityUpdateRequest.period());</span>
-<span class="fc" id="L171">    LocalDate startDate = optionalPeriod.map(DeclaredActivityPeriodDTO::startDate).orElse(null);</span>
-<span class="fc" id="L172">    LocalDate endDate = optionalPeriod.map(DeclaredActivityPeriodDTO::endDate).orElse(null);</span>
-<span class="pc" id="L173">    declaredActivityService.updateDeclaredActivity(</span>
-<span class="fc" id="L174">        declaredActivityId, startDate, endDate, declaredActivityUpdateRequest.valorized());</span>
-<span class="nc" id="L175">    return ResponseEntity.ok(&quot;Declared activity successfully updated&quot;);</span>
+<span class="fc" id="L182">    var optionalPeriod = Optional.ofNullable(declaredActivityUpdateRequest.period());</span>
+<span class="fc" id="L183">    LocalDate startDate = optionalPeriod.map(DeclaredActivityPeriodDTO::startDate).orElse(null);</span>
+<span class="fc" id="L184">    LocalDate endDate = optionalPeriod.map(DeclaredActivityPeriodDTO::endDate).orElse(null);</span>
+<span class="pc" id="L185">    declaredActivityService.updateDeclaredActivity(</span>
+<span class="fc" id="L186">        declaredActivityId, startDate, endDate, declaredActivityUpdateRequest.valorized());</span>
+<span class="nc" id="L187">    return ResponseEntity.ok(&quot;Declared activity successfully updated&quot;);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
