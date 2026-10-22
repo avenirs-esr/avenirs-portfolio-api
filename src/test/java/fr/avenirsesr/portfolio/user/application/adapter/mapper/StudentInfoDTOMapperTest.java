@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import fr.avenirsesr.portfolio.common.group.application.adapter.dto.GroupDTO;
 import fr.avenirsesr.portfolio.common.group.domain.model.enums.EGroupType;
+import fr.avenirsesr.portfolio.common.institution.application.adapter.dto.InstitutionReferenceDTO;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.user.application.adapter.dto.StudentInfoDTO;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
@@ -48,9 +49,7 @@ class StudentInfoDTOMapperTest {
             UUID.randomUUID(),
             "Licence Informatique",
             EGroupType.PROGRAM,
-            null,
-            null,
-            null,
+            new InstitutionReferenceDTO(UUID.randomUUID(), "Université"),
             null,
             0);
     GroupDTO program2 =
@@ -58,9 +57,7 @@ class StudentInfoDTOMapperTest {
             UUID.randomUUID(),
             "Licence Mathématiques",
             EGroupType.PROGRAM,
-            null,
-            null,
-            null,
+            new InstitutionReferenceDTO(UUID.randomUUID(), "Université"),
             null,
             0);
     when(groupClient.getProgramOfGroup(groupId1)).thenReturn(Optional.of(program1));
@@ -91,9 +88,7 @@ class StudentInfoDTOMapperTest {
             UUID.randomUUID(),
             "Licence Informatique",
             EGroupType.PROGRAM,
-            null,
-            null,
-            null,
+            new InstitutionReferenceDTO(UUID.randomUUID(), "Université"),
             null,
             0);
     when(groupClient.getProgramOfGroup(groupId1)).thenReturn(Optional.of(program));

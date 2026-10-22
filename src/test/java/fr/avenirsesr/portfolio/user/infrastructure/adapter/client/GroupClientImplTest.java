@@ -58,10 +58,8 @@ class GroupClientImplTest {
             "id": "%s",
             "name": "Licence 3 Informatique",
             "type": "PROGRAM_OPTION",
-            "institutionId": "%s",
-            "institutionName": "%s",
-            "parentId": "%s",
-            "parentName": "%s",
+            "institution": {"id": "%s", "name": "%s"},
+            "parent": {"id": "%s", "name": "%s", "type": "PROGRAM"},
             "usersCount": %d
         }
         """
@@ -78,7 +76,8 @@ class GroupClientImplTest {
     assertThat(result.get().id()).isEqualTo(GROUP_ID);
     assertThat(result.get().name()).isEqualTo("Licence 3 Informatique");
     assertThat(result.get().type()).isEqualTo(EGroupType.PROGRAM_OPTION);
-    assertThat(result.get().parentId()).isEqualTo(PARENT_ID);
+    assertThat(result.get().institution().id()).isEqualTo(INSTITUTION_ID);
+    assertThat(result.get().parent().id()).isEqualTo(PARENT_ID);
 
     RecordedRequest request = mockWebServer.takeRequest();
     assertThat(request.getPath()).isEqualTo("/back-office/groups/" + GROUP_ID);
@@ -106,10 +105,8 @@ class GroupClientImplTest {
             "id": "%s",
             "name": "Licence Informatique",
             "type": "PROGRAM",
-            "institutionId": "%s",
-            "institutionName": "%s",
-            "parentId": null,
-            "parentName": null,
+            "institution": {"id": "%s", "name": "%s"},
+            "parent": null,
             "usersCount": %d
         }
         """
@@ -124,7 +121,7 @@ class GroupClientImplTest {
     assertThat(result).isPresent();
     assertThat(result.get().id()).isEqualTo(PARENT_ID);
     assertThat(result.get().type()).isEqualTo(EGroupType.PROGRAM);
-    assertThat(result.get().parentId()).isNull();
+    assertThat(result.get().parent()).isNull();
 
     RecordedRequest request = mockWebServer.takeRequest();
     assertThat(request.getPath()).isEqualTo("/back-office/groups/" + GROUP_ID + "/program");
