@@ -3562,14 +3562,14 @@ class ActivityServiceImplTest {
     }
 
     @Test
-    void createsDraft_whenNoExistingDraft() {
+    void deletesActivityAndCreatesNoDraft_whenNoEnrolledStudents() {
       Activity activity = givenAnActivity();
       when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
-      when(activityDraftRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
       var result = activityService.createDraftFromActivity(activityId);
-      assertThat(result.getId()).isEqualTo(activityId);
-      verify(activityDraftRepository).save(any(ActivityDraft.class));
-      verify(activityAuthorizationService).copyActivityAuthorizationsToDraft(activityId);
+      assertThat(result).isEqualTo(null);
+      verify(activityRepository).removeFromDatabase(activity);
+      verify(activityDraftRepository, never()).save(any());
+      verify(activityAuthorizationService, never()).copyActivityAuthorizationsToDraft(any());
     }
 
     @Test
