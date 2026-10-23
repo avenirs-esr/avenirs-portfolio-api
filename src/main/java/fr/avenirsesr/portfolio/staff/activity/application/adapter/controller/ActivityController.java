@@ -275,6 +275,9 @@ public class ActivityController {
         principal.getName());
 
     var draft = activityService.createDraftFromActivity(activityId);
+    if (draft == null) {
+      return ResponseEntity.noContent().build();
+    }
     return ResponseEntity.ok(new ActivityDraftCreationResponse(draft.getId()));
   }
 

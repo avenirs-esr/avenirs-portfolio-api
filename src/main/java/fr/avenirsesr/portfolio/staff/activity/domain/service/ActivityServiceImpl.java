@@ -330,7 +330,6 @@ public class ActivityServiceImpl implements ActivityService {
     var activity =
         activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);
     var draft = activityDraftRepository.findById(activityId);
-
     var fileIds =
         Stream.concat(
                 fileIdsOf(activity.getBanner().orElse(null), activity.getFiles()),
@@ -703,9 +702,16 @@ public class ActivityServiceImpl implements ActivityService {
     activityAuthorizationService.checkRight(staff, activityId, EActivityRight.EDIT);
 
     var activityDraft = activityDraftRepository.findById(activityId);
+
     if (activityDraft.isPresent()) {
       return activityDraft.get();
     }
+
+    if (!hasEnrolledStudents(activity)) {
+      activityRepository.removeFromDatabase(activity);
+      return null;
+    }
+
     var draft =
         ActivityDraft.toDomain(
             activityId,
@@ -732,12 +738,7 @@ public class ActivityServiceImpl implements ActivityService {
 
     var savedDraft = activityDraftRepository.save(draft);
     activityAuthorizationService.copyActivityAuthorizationsToDraft(activityId);
-
-    if (!hasEnrolledStudents(activity)) {
-      activity.setStatus(EActivityStatus.UNPUBLISHED);
-      activityRepository.save(activity);
-      log.info("Unpublished activity {} after creating edition draft", activityId);
-    }
+    activity.setStatus(EActivityStatus.UNPUBLISHED);
 
     return savedDraft;
   }
