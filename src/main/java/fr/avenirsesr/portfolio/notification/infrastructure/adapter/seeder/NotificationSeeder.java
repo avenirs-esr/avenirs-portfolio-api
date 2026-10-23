@@ -16,10 +16,7 @@ import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.Activ
 import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.model.DeclaredActivityEntity;
 import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -116,7 +113,6 @@ public class NotificationSeeder {
             ELanguage.FRENCH));
 
     var draft = activityService.createDraftFromActivity(activityId);
-
     String title = null;
     EActivityThematic thematic = null;
     String summary = null;
@@ -127,7 +123,8 @@ public class NotificationSeeder {
     for (var field : updatedFields) {
       switch (field) {
         case ACTIVITY_TITLE -> title = draft.getTitle() + " (modifié)";
-        case THEMATIC -> thematic = nextThematic(draft.getThematic().orElse(null));
+        case THEMATIC ->
+            thematic = nextThematic(Objects.requireNonNull(draft.getThematic().orElse(null)));
         case SUMMARY -> summary = draft.getSummary().orElse("") + " (modifié)";
         case DESCRIPTION -> description = draft.getDescription().orElse("") + " (modifié)";
         case RECOMMENDED_COMPLETION_CONTEXTS ->
