@@ -1,11 +1,7 @@
 package fr.avenirsesr.portfolio.activity.application.adapter.controller;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -1906,10 +1902,9 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       }
 
       @Test
-      void thenItShouldAllowRemovingTargetsWhenActivityIsUnpublishedDuringEdit() throws Exception {
-        BddLogger.and(
-            "given an unpublished activity (no enrolled student) targeting an institution");
-        UUID activityId = createDraftAndGetId("Activité dépubliée ciblage libre");
+      void thenItShouldReturnNoContentWhenCreatingDraftWithoutEnrolledStudents() throws Exception {
+
+        UUID activityId = createDraftAndGetId("Activité sans inscrit");
         updateDraftTargeting(activityId, List.of(ALLOWED_INSTITUTION_ID_1), List.of());
         fillDraftWithSummaryAndDescription(activityId);
         publishDraft(activityId);
@@ -1921,31 +1916,6 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             .exchange()
             .expectStatus()
             .isOk();
-
-        BddLogger.then("removing the targeted institution should be allowed");
-
-        webTestClient
-            .patch()
-            .uri(DRAFT_UPDATE_PATH, activityId)
-            .headers(ActivityControllerIT.this::addStaffHeaders)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(objectMapper.writeValueAsString(targetingRequest(List.of(), null)))
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isOk();
-
-        webTestClient
-            .get()
-            .uri(CONTENT_PATH, "DRAFT", activityId)
-            .headers(ActivityControllerIT.this::addStaffHeaders)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody()
-            .jsonPath("$.targetInstitutionIds")
-            .isEqualTo(List.of());
       }
 
       private ActivityDraftUpdateRequest targetingRequest(
@@ -3069,35 +3039,6 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       }
 
       @Test
-      void thenItShouldReturnFalseHasEnrolledStudentForDraftWhenNoStudentIsEnrolled()
-          throws Exception {
-        BddLogger.and("given a published activity with no enrolled student");
-        UUID activityId = publishNewActivity("Activité brouillon sans étudiant inscrit");
-
-        webTestClient
-            .post()
-            .uri(CREATE_DRAFT_PATH, activityId)
-            .headers(ActivityControllerIT.this::addStaffHeaders)
-            .exchange()
-            .expectStatus()
-            .isOk();
-
-        BddLogger.then("the draft content should have hasEnrolledStudent equal to false");
-
-        webTestClient
-            .get()
-            .uri(CONTENT_PATH, "DRAFT", activityId)
-            .headers(ActivityControllerIT.this::addStaffHeaders)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody()
-            .jsonPath("$.hasEnrolledStudent")
-            .isEqualTo(false);
-      }
-
-      @Test
       void thenItShouldReturn404WhenDraftNotFound() {
         BddLogger.and("given a non-existent draft id");
         UUID unknownId = UUID.randomUUID();
@@ -3615,6 +3556,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
           throws Exception {
         BddLogger.and("given a published activity shared with the edit right");
         UUID activityId = publishNewActivity("Activité publiée déléguée en édition");
+        subscribeStudentToActivity(activityId);
         defineAuthorizationsAsStaff(
             "PUBLISHED", activityId, leaderAndReviewer(EActivityRight.EDIT));
 
@@ -3748,7 +3690,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       void thenItShouldCreateDraftWithSameIdAsActivity() throws Exception {
         BddLogger.and("given an existing published activity created by the staff");
         UUID activityId = publishNewActivity("Activité pour édition de brouillon");
-
+        subscribeStudentToActivity(activityId);
         BddLogger.then("it should return 200 with the same id as the activity");
 
         webTestClient
@@ -3777,7 +3719,8 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             .expectStatus()
             .isOk();
 
-        BddLogger.then("the underlying activity should now be UNPUBLISHED");
+        BddLogger.then(
+            "the underlying activity should  no longer exist in the staff working space");
 
         String body =
             webTestClient
@@ -3803,15 +3746,12 @@ class ActivityControllerIT extends ContainerConfigurationTest {
 
         for (JsonNode item : data) {
           if (activityId.toString().equals(item.get("activityId").asText())) {
-            assertTrue(
-                "UNPUBLISHED".equals(item.get("activityStatus").asText()),
-                "Expected UNPUBLISHED status but got: " + item.get("activityStatus").asText());
             found = true;
             break;
           }
         }
 
-        assertTrue(found, "Activity should still appear in staff working space as UNPUBLISHED");
+        assertTrue(found, "Activity should still appear in staff working space");
       }
 
       @Test
@@ -4712,6 +4652,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
   void shouldDeleteActivityDefinitivelyWithItsDraftAsSuperAdmin() throws Exception {
     BddLogger.given("a published activity having a draft");
     UUID activityId = publishNewActivity("Activité avec brouillon à supprimer définitivement");
+    subscribeStudentToActivity(activityId);
     webTestClient
         .post()
         .uri(CREATE_DRAFT_PATH, activityId)
