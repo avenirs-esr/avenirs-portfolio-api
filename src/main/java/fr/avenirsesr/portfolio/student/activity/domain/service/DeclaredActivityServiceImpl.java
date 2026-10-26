@@ -49,12 +49,12 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
 
   @Override
   public PagedResult<DeclaredActivity> getDeclaredActivities(
-      PageCriteria pageCriteria, Boolean isValorized) {
+      PageCriteria pageCriteria, String keyword, Boolean isValorized) {
     Student student = loggedInUserService.getLoggedInStudent();
     var graph = FetchGraph.init().add("activity").fetch("author");
 
     return declaredActivityRepository.findStudentActivitiesByProgressAndDate(
-        student, pageCriteria, isValorized, graph);
+        student, keyword, pageCriteria, isValorized, graph);
   }
 
   @Override

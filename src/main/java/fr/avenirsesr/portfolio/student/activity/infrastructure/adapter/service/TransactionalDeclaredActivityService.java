@@ -24,8 +24,8 @@ public class TransactionalDeclaredActivityService implements DeclaredActivitySer
 
   @Override
   public PagedResult<DeclaredActivity> getDeclaredActivities(
-      PageCriteria pageCriteria, Boolean isValorized) {
-    return delegate.getDeclaredActivities(pageCriteria, isValorized);
+      PageCriteria pageCriteria, String keyword, Boolean isValorized) {
+    return delegate.getDeclaredActivities(pageCriteria, keyword, isValorized);
   }
 
   @Override
