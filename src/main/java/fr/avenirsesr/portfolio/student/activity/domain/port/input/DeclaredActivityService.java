@@ -3,6 +3,8 @@ package fr.avenirsesr.portfolio.student.activity.domain.port.input;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityAssessmentDetailsData;
 import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityDetailsData;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
@@ -18,7 +20,11 @@ import java.util.UUID;
 
 public interface DeclaredActivityService {
   PagedResult<DeclaredActivity> getDeclaredActivities(
-      PageCriteria pageCriteria, String keyword, Boolean isValorized);
+      PageCriteria pageCriteria,
+      String keyword,
+      List<EActivityThematic> thematic,
+      List<EActivityStatus> status,
+      Boolean isValorized);
 
   List<DeclaredActivity> getAllDeclaredActivitiesOf(Student student);
 

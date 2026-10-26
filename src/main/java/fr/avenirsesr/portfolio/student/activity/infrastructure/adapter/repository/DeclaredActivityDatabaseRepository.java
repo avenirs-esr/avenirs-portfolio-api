@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.repository;
 
+import static fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.specification.DeclaredActivitySpecification.has;
 import static fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.specification.DeclaredActivitySpecification.hasActivityIdInAndStudent;
 
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
@@ -7,6 +8,8 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.DeclaredActivityRepository;
@@ -82,6 +85,8 @@ public class DeclaredActivityDatabaseRepository
   public PagedResult<DeclaredActivity> findStudentActivitiesByProgressAndDate(
       Student student,
       String keyword,
+      List<EActivityThematic> thematic,
+      List<EActivityStatus> status,
       PageCriteria pageCriteria,
       Boolean isValorized,
       FetchGraph fetchGraph) {
@@ -92,7 +97,9 @@ public class DeclaredActivityDatabaseRepository
         hasStudent(student)
             .and(
                 DeclaredActivitySpecification.isValorized(isValorized)
-                    .and(DeclaredActivitySpecification.search(keyword))),
+                    .and(DeclaredActivitySpecification.search(keyword))
+                    .and(DeclaredActivitySpecification.has("thematic", thematic))
+                    .and(has("status", status))),
         PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort),
         fetchGraph);
   }

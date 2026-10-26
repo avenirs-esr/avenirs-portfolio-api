@@ -12,6 +12,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.time.Instant;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import lombok.NoArgsConstructor;
@@ -42,6 +43,16 @@ public final class DeclaredActivitySpecification {
       return criteriaBuilder.like(
           criteriaBuilder.lower(root.get("activity").get("title")),
           "%" + keyword.toLowerCase() + "%");
+    };
+  }
+
+  public static Specification<DeclaredActivityEntity> has(String field, List<?> values) {
+    return (root, query, criteriaBuilder) -> {
+      if (values == null || values.isEmpty()) {
+        return criteriaBuilder.conjunction();
+      }
+      var activity = root.join("activity");
+      return activity.get(field).in(values);
     };
   }
 
