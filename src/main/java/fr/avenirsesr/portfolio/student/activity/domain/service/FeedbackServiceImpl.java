@@ -20,7 +20,7 @@ import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityAuthorizationService;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
-import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackAssociationsData;
+import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityAssociationsData;
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackDashboardData;
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackData;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.DeclaredActivityNotFoundException;
@@ -112,8 +112,8 @@ public class FeedbackServiceImpl implements FeedbackService {
     return new FeedbackAssociations(traces, skillProgresses, declaredExperiences, declaredPrograms);
   }
 
-  private FeedbackAssociationsData getFeedbackAssociationsData(FeedbackAssociations associations) {
-    return new FeedbackAssociationsData(
+  private DeclaredActivityAssociationsData toAssociationsData(FeedbackAssociations associations) {
+    return new DeclaredActivityAssociationsData(
         associations.traces(),
         enrichSkillProgresses(associations.skillProgresses()),
         associations.declaredExperiences());
@@ -204,7 +204,7 @@ public class FeedbackServiceImpl implements FeedbackService {
         feedback.getFeedback().orElse(null),
         feedback.getStatus(),
         feedback.getIteration(),
-        getFeedbackAssociationsData(feedback.getAssociations()),
+        toAssociationsData(feedback.getAssociations()),
         feedback.getAttachments());
   }
 
@@ -231,7 +231,7 @@ public class FeedbackServiceImpl implements FeedbackService {
         feedbackText,
         feedback.getStatus(),
         feedback.getIteration(),
-        getFeedbackAssociationsData(feedback.getAssociations()),
+        toAssociationsData(feedback.getAssociations()),
         attachments);
   }
 

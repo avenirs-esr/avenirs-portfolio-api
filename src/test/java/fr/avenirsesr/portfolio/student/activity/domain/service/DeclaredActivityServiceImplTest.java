@@ -25,7 +25,9 @@ import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityNotFoundE
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityUnpublishedException;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAssessment;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
+import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityAuthorizationService;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityDetailsData;
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackData;
@@ -38,7 +40,12 @@ import fr.avenirsesr.portfolio.student.activity.domain.port.input.FeedbackServic
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.FeedbackRepository;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
+import fr.avenirsesr.portfolio.student.experience.domain.port.input.DeclaredExperienceService;
+import fr.avenirsesr.portfolio.student.skill.domain.port.input.SkillProgressService;
+import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
+import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
+import fr.avenirsesr.portfolio.user.infrastructure.fixture.StaffFixture;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.Duration;
 import java.time.Instant;
@@ -64,6 +71,10 @@ class DeclaredActivityServiceImplTest {
   @Mock private FeedbackRepository feedbackRepository;
   @Mock private FeedbackService feedbackService;
   @Mock private NotificationService notificationService;
+  @Mock private ActivityAuthorizationService activityAuthorizationService;
+  @Mock private TraceService traceService;
+  @Mock private SkillProgressService skillProgressService;
+  @Mock private DeclaredExperienceService declaredExperienceService;
   @InjectMocks private DeclaredActivityServiceImpl service;
 
   private DeclaredActivityService declaredActivityService;
@@ -84,7 +95,11 @@ class DeclaredActivityServiceImplTest {
             loggedInUserService,
             feedbackRepository,
             feedbackService,
-            notificationService);
+            notificationService,
+            activityAuthorizationService,
+            traceService,
+            skillProgressService,
+            declaredExperienceService);
   }
 
   @Test
@@ -679,6 +694,87 @@ class DeclaredActivityServiceImplTest {
     assertThatThrownBy(() -> service.submitForAssessment(declaredActivityId))
         .isInstanceOf(DeclaredActivityUnsubscribedException.class);
     verify(declaredActivityRepository, never()).save(any());
+  }
+
+  @Test
+  void getAssessmentDetails_should_return_the_submission_when_the_staff_can_evaluate() {
+    BddLogger.given("A submitted declared activity and a staff allowed to evaluate it");
+    UUID declaredActivityId = UUID.randomUUID();
+    Staff staff = StaffFixture.create().toModel();
+    DeclaredActivity declaredActivity = assessableDeclaredActivity();
+    declaredActivity.setSubmittedAt(Instant.now());
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("He gets the assessment details");
+    var details = service.getAssessmentDetails(declaredActivityId);
+
+    BddLogger.then("The submission, its associations and its status are returned");
+    assertThat(details.declaredActivity()).isEqualTo(declaredActivity);
+    assertThat(details.status()).isEqualTo(EDeclaredActivityStatus.SUBMITTED);
+    assertThat(details.associations().traces()).isEmpty();
+    assertThat(details.associations().skillProgresses()).isEmpty();
+    assertThat(details.associations().declaredExperiences()).isEmpty();
+    verify(activityAuthorizationService)
+        .checkRight(staff, declaredActivity.getActivity().getId(), EActivityRight.EVALUATION);
+  }
+
+  @Test
+  void getAssessmentDetails_should_throw_UserNotAuthorizedException_without_evaluation_right() {
+    BddLogger.given("A submitted declared activity of an activity the staff cannot evaluate");
+    UUID declaredActivityId = UUID.randomUUID();
+    Staff staff = StaffFixture.create().toModel();
+    DeclaredActivity declaredActivity = assessableDeclaredActivity();
+    declaredActivity.setSubmittedAt(Instant.now());
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+    doThrow(new UserNotAuthorizedException())
+        .when(activityAuthorizationService)
+        .checkRight(staff, declaredActivity.getActivity().getId(), EActivityRight.EVALUATION);
+
+    BddLogger.when("He gets the assessment details");
+
+    BddLogger.then("A UserNotAuthorizedException is thrown");
+    assertThatThrownBy(() -> service.getAssessmentDetails(declaredActivityId))
+        .isInstanceOf(UserNotAuthorizedException.class);
+  }
+
+  @Test
+  void getAssessmentDetails_should_throw_DeclaredActivityNotFoundException_when_not_submitted() {
+    BddLogger.given("A declared activity that was not submitted for assessment");
+    UUID declaredActivityId = UUID.randomUUID();
+    Staff staff = StaffFixture.create().toModel();
+    DeclaredActivity declaredActivity = assessableDeclaredActivity();
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("The staff gets the assessment details");
+
+    BddLogger.then("A DeclaredActivityNotFoundException is thrown");
+    assertThatThrownBy(() -> service.getAssessmentDetails(declaredActivityId))
+        .isInstanceOf(DeclaredActivityNotFoundException.class);
+  }
+
+  @Test
+  void getAssessmentDetails_should_throw_DeclaredActivityNotFoundException_when_not_found() {
+    BddLogger.given("A non-existent declared activity id");
+    UUID declaredActivityId = UUID.randomUUID();
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(StaffFixture.create().toModel());
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.empty());
+
+    BddLogger.when("The staff gets the assessment details");
+
+    BddLogger.then("A DeclaredActivityNotFoundException is thrown");
+    assertThatThrownBy(() -> service.getAssessmentDetails(declaredActivityId))
+        .isInstanceOf(DeclaredActivityNotFoundException.class);
   }
 
   @Test

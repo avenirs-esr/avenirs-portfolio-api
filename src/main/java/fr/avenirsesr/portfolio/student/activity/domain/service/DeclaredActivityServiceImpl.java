@@ -14,8 +14,12 @@ import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityAssessmentException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityUnpublishedException;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
+import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityAuthorizationService;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
+import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityAssessmentDetailsData;
+import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityAssociationsData;
 import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityDetailsData;
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackData;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.*;
@@ -27,7 +31,15 @@ import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivi
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.FeedbackService;
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.FeedbackRepository;
+import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
+import fr.avenirsesr.portfolio.student.association.domain.utils.AssociationUtils;
+import fr.avenirsesr.portfolio.student.experience.domain.model.DeclaredExperience;
+import fr.avenirsesr.portfolio.student.experience.domain.port.input.DeclaredExperienceService;
+import fr.avenirsesr.portfolio.student.skill.domain.model.SkillProgress;
+import fr.avenirsesr.portfolio.student.skill.domain.port.input.SkillProgressService;
+import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
+import fr.avenirsesr.portfolio.student.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.Instant;
@@ -49,6 +61,10 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   private final FeedbackRepository feedbackRepository;
   private final FeedbackService feedbackService;
   private final NotificationService notificationService;
+  private final ActivityAuthorizationService activityAuthorizationService;
+  private final TraceService traceService;
+  private final SkillProgressService skillProgressService;
+  private final DeclaredExperienceService declaredExperienceService;
 
   @Override
   public PagedResult<DeclaredActivity> getDeclaredActivities(
@@ -250,6 +266,71 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
                         declaredActivity.getStudent().getUser(), feedback))
             .toList();
     return new DeclaredActivityDetailsData(declaredActivity, feedbacks);
+  }
+
+  @Override
+  public DeclaredActivityAssessmentDetailsData getAssessmentDetails(UUID declaredActivityId) {
+    Staff staff = loggedInUserService.getLoggedInStaff();
+    var graph =
+        FetchGraph.init()
+            .add("student")
+            .fetch("user")
+            .root()
+            .add("activity")
+            .fetch("author")
+            .fetch("files");
+
+    DeclaredActivity declaredActivity =
+        declaredActivityRepository
+            .findById(declaredActivityId, graph)
+            .orElseThrow(DeclaredActivityNotFoundException::new);
+
+    activityAuthorizationService.checkRight(
+        staff, declaredActivity.getActivity().getId(), EActivityRight.EVALUATION);
+
+    if (declaredActivity.getSubmittedAt().isEmpty()) {
+      throw new DeclaredActivityNotFoundException();
+    }
+
+    return new DeclaredActivityAssessmentDetailsData(
+        declaredActivity,
+        getAssociations(declaredActivityId),
+        getDeclaredActivityStatus(declaredActivity));
+  }
+
+  private DeclaredActivityAssociationsData getAssociations(UUID declaredActivityId) {
+    var associations =
+        associationService.getAllOf(
+            declaredActivityId,
+            DeclaredActivity.class,
+            List.of(
+                EAssociationType.DECLARED_ACTIVITY_TRACE,
+                EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL,
+                EAssociationType.DECLARED_ACTIVITY_DECLARED_EXPERIENCE));
+
+    List<Trace> traces =
+        traceService.findAllTracesById(
+            AssociationUtils.getIdsOf(
+                associations, EAssociationType.DECLARED_ACTIVITY_TRACE, Trace.class));
+    List<SkillProgress> skillProgresses =
+        skillProgressService.findAllSkillProgressesByIds(
+            AssociationUtils.getIdsOf(
+                associations,
+                EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL,
+                SkillProgress.class));
+    List<DeclaredExperience> declaredExperiences =
+        declaredExperienceService.findAllByIds(
+            AssociationUtils.getIdsOf(
+                associations,
+                EAssociationType.DECLARED_ACTIVITY_DECLARED_EXPERIENCE,
+                DeclaredExperience.class));
+
+    return new DeclaredActivityAssociationsData(
+        traces,
+        skillProgresses.isEmpty()
+            ? List.of()
+            : skillProgressService.getSkillProgressDetails(skillProgresses),
+        declaredExperiences);
   }
 
   private void validateActivityDates(LocalDate startDate, LocalDate endDate, Instant subscribedAt) {

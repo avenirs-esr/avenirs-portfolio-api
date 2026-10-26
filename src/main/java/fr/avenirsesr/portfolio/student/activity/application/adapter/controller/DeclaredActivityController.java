@@ -8,7 +8,9 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.CreationResponse;
 import fr.avenirsesr.portfolio.shared.application.adapter.mapper.FileDTOMapper;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityContentDtoMapper;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.*;
+import fr.avenirsesr.portfolio.student.activity.application.adapter.mapper.DeclaredActivityAssessmentDetailsDTOMapper;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.mapper.DeclaredActivityDetailsDTOMapper;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.mapper.DeclaredActivityViewDTOMapper;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
@@ -44,6 +46,9 @@ public class DeclaredActivityController {
   private final DeclaredActivityService declaredActivityService;
   private final DeclaredActivityViewDTOMapper declaredActivityViewDTOMapper;
   private final DeclaredActivityDetailsDTOMapper declaredActivityDetailsDTOMapper;
+  private final DeclaredActivityAssessmentDetailsDTOMapper
+      declaredActivityAssessmentDetailsDTOMapper;
+  private final ActivityContentDtoMapper activityContentDtoMapper;
   private final FileDTOMapper fileDTOMapper;
 
   @PreAuthorize("hasAuthority('declared-activity:list:own')")
@@ -172,6 +177,27 @@ public class DeclaredActivityController {
             status,
             fileDTOMapper.toFileDTOs(
                 details.declaredActivity().getActivity().getFiles(), baseUrl)));
+  }
+
+  @PreAuthorize("hasAuthority('activity:read:contextual')")
+  @GetMapping("/assessments/{declaredActivityId}")
+  public ResponseEntity<DeclaredActivityAssessmentDetailsDTO> getAssessmentDetails(
+      HttpServletRequest request,
+      Principal principal,
+      @Valid @PathVariable UUID declaredActivityId) {
+    log.debug(
+        "Received request to get the assessment details of declared activity [{}] for staff [{}]",
+        declaredActivityId,
+        principal.getName());
+    String baseUrl = extractOrigin(request);
+    var details = declaredActivityService.getAssessmentDetails(declaredActivityId);
+    var activity = details.declaredActivity().getActivity();
+
+    return ResponseEntity.ok(
+        declaredActivityAssessmentDetailsDTOMapper.toDTO(
+            details,
+            activityContentDtoMapper.toDTO(
+                activity, fileDTOMapper.toFileDTOs(activity.getFiles(), baseUrl))));
   }
 
   @PreAuthorize("hasAuthority('declared-activity:update:own')")

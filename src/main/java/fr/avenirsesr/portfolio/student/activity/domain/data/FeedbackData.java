@@ -22,5 +22,5 @@ public record FeedbackData(
     String feedback,
     EFeedbackStatus status,
     int iteration,
-    FeedbackAssociationsData associations,
+    DeclaredActivityAssociationsData associations,
     List<File> attachments) {}
