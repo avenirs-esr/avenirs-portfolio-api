@@ -461,8 +461,8 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
 <span class="fc" id="L461">        FetchGraph.init().add(&quot;student&quot;).fetch(&quot;user&quot;).root().add(&quot;activity&quot;).fetch(&quot;author&quot;);</span>
 <span class="fc" id="L462">    var declaredActivities = declaredActivityRepository.findAllByActivity(activity, graph);</span>
 
-<span class="fc bfc" id="L464" title="All 2 branches covered.">    if (declaredActivities.isEmpty()) {</span>
-<span class="fc" id="L465">      return;</span>
+<span class="pc bpc" id="L464" title="1 of 2 branches missed.">    if (declaredActivities.isEmpty()) {</span>
+<span class="nc" id="L465">      return;</span>
     }
 
 <span class="fc" id="L468">    var declaredActivityIds = declaredActivities.stream().map(DeclaredActivity::getId).toList();</span>
