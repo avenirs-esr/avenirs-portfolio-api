@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.student.activity.application.adapter.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -97,6 +98,57 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .expectBody()
         .jsonPath("$.data")
         .isArray();
+  }
+
+  private String getDeclaredActivityTitle() throws Exception {
+    byte[] response =
+        webTestClient
+            .get()
+            .uri(BASE_PATH)
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Signature", studentSignature)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .returnResult()
+            .getResponseBody();
+
+    JsonNode root = objectMapper.readTree(response);
+
+    for (JsonNode activity : root.path("data")) {
+      if (declaredActivityId.equals(activity.path("id").asText())) {
+        return activity.path("title").asText();
+      }
+    }
+
+    throw new AssertionError("Declared activity not found: " + declaredActivityId);
+  }
+
+  @Test
+  @Transactional
+  void shouldGetDeclaredActivitiesFilteredBySearch() throws Exception {
+    BddLogger.given("a declared activity exists");
+
+    String title = getDeclaredActivityTitle();
+
+    assertThat(title).isNotBlank();
+
+    BddLogger.when("searching declared activities by title");
+
+    BddLogger.then("it should return the matching declared activity");
+
+    webTestClient
+        .get()
+        .uri(uriBuilder -> uriBuilder.path(BASE_PATH).queryParam("keyword", title).build())
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.data[?(@.id == '" + declaredActivityId + "')].id")
+        .exists();
   }
 
   @Test

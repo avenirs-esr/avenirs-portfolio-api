@@ -52,7 +52,8 @@ public class DeclaredActivityController {
       Principal principal,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize,
-      @RequestParam(required = false) Boolean isValorized) {
+      @RequestParam(required = false) Boolean isValorized,
+      @RequestParam(required = false) String keyword) {
     var pageCriteria = new PageCriteria(page, pageSize);
 
     log.debug(
@@ -64,7 +65,7 @@ public class DeclaredActivityController {
         isValorized);
 
     PagedResult<DeclaredActivity> pagedResult =
-        declaredActivityService.getDeclaredActivities(pageCriteria, isValorized);
+        declaredActivityService.getDeclaredActivities(pageCriteria, keyword, isValorized);
 
     var statusByDeclaredActivity =
         declaredActivityService.getDeclaredActivityStatus(pagedResult.content());

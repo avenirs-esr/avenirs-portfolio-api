@@ -16,7 +16,7 @@ import java.util.UUID;
 
 public interface DeclaredActivityService {
   PagedResult<DeclaredActivity> getDeclaredActivities(
-      PageCriteria pageCriteria, Boolean isValorized);
+      PageCriteria pageCriteria, String keyword, Boolean isValorized);
 
   List<DeclaredActivity> getAllDeclaredActivitiesOf(Student student);
 

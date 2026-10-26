@@ -77,12 +77,19 @@ public class DeclaredActivityDatabaseRepository
 
   @Override
   public PagedResult<DeclaredActivity> findStudentActivitiesByProgressAndDate(
-      Student student, PageCriteria pageCriteria, Boolean isValorized, FetchGraph fetchGraph) {
+      Student student,
+      String keyword,
+      PageCriteria pageCriteria,
+      Boolean isValorized,
+      FetchGraph fetchGraph) {
     var sort =
         Sort.by(Sort.Direction.ASC, "isFinishedOrder")
             .and(Sort.by(Sort.Direction.DESC, "updatedAt"));
     return findAll(
-        hasStudent(student).and(DeclaredActivitySpecification.isValorized(isValorized)),
+        hasStudent(student)
+            .and(
+                DeclaredActivitySpecification.isValorized(isValorized)
+                    .and(DeclaredActivitySpecification.search(keyword))),
         PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort),
         fetchGraph);
   }
