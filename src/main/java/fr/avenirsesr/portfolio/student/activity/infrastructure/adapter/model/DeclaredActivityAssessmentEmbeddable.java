@@ -2,9 +2,14 @@ package fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.model;
 
 import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.RICH_TEXT_LENGTH;
 
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StaffEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.Size;
+import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,4 +30,14 @@ public class DeclaredActivityAssessmentEmbeddable {
 
   @Column(name = "assessment_validation")
   private Boolean validation;
+
+  @Column(name = "assessment_requested_at")
+  private Instant requestedAt;
+
+  @Column(name = "assessment_assessed_at")
+  private Instant assessedAt;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "assessment_assessed_by_id")
+  private StaffEntity assessedBy;
 }

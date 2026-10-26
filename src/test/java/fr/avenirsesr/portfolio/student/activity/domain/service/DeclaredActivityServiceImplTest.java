@@ -508,6 +508,34 @@ class DeclaredActivityServiceImplTest {
   }
 
   @Test
+  void submitForAssessment_should_record_the_assessment_request_date() {
+    BddLogger.given("A logged-in student and his declared activity of an assessable activity");
+    UUID declaredActivityId = UUID.randomUUID();
+    DeclaredActivity declaredActivity = assessableDeclaredActivity();
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+    when(declaredActivityRepository.save(any(DeclaredActivity.class)))
+        .thenAnswer(i -> i.getArguments()[0]);
+
+    BddLogger.when("He submits it for assessment");
+    service.submitForAssessment(declaredActivityId);
+
+    BddLogger.then("The assessment holds the request date and waits for the assessor");
+    verify(declaredActivityRepository).save(activityCaptor.capture());
+    DeclaredActivity saved = activityCaptor.getValue();
+    assertThat(saved.getAssessment())
+        .get()
+        .satisfies(
+            assessment -> {
+              assertThat(assessment.requestedAt()).isEqualTo(saved.getSubmittedAt().orElseThrow());
+              assertThat(assessment.assessedAt()).isNull();
+              assertThat(assessment.assessedBy()).isNull();
+            });
+  }
+
+  @Test
   void submitForAssessment_should_make_the_declared_activity_SUBMITTED() {
     BddLogger.given("A declared activity submitted for assessment");
     DeclaredActivity declaredActivity = assessableDeclaredActivity();
