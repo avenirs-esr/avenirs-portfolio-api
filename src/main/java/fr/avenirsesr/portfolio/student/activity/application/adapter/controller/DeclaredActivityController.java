@@ -9,12 +9,16 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.CreationResponse;
 import fr.avenirsesr.portfolio.shared.application.adapter.mapper.FileDTOMapper;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityContentDtoMapper;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.*;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.mapper.DeclaredActivityAssessmentDetailsDTOMapper;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.mapper.DeclaredActivityDetailsDTOMapper;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.mapper.DeclaredActivityViewDTOMapper;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.security.Principal;
@@ -58,7 +62,13 @@ public class DeclaredActivityController {
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize,
       @RequestParam(required = false) Boolean isValorized,
-      @RequestParam(required = false) String keyword) {
+      @RequestParam(required = false) String keyword,
+      @Parameter(schema = @Schema(ref = "#/components/schemas/EActivityThematic"))
+          @RequestParam(required = false)
+          List<EActivityThematic> thematic,
+      @Parameter(schema = @Schema(ref = "#/components/schemas/EActivityStatus"))
+          @RequestParam(required = false)
+          List<EActivityStatus> status) {
     var pageCriteria = new PageCriteria(page, pageSize);
 
     log.debug(
@@ -70,7 +80,8 @@ public class DeclaredActivityController {
         isValorized);
 
     PagedResult<DeclaredActivity> pagedResult =
-        declaredActivityService.getDeclaredActivities(pageCriteria, keyword, isValorized);
+        declaredActivityService.getDeclaredActivities(
+            pageCriteria, keyword, thematic, status, isValorized);
 
     var statusByDeclaredActivity =
         declaredActivityService.getDeclaredActivityStatus(pagedResult.content());

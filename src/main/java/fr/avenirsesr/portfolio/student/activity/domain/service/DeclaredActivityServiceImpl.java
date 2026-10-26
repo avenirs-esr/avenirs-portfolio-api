@@ -21,6 +21,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAssessment;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityAuthorizationService;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityAssessmentDetailsData;
@@ -75,12 +76,16 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
 
   @Override
   public PagedResult<DeclaredActivity> getDeclaredActivities(
-      PageCriteria pageCriteria, String keyword, Boolean isValorized) {
+      PageCriteria pageCriteria,
+      String keyword,
+      List<EActivityThematic> thematic,
+      List<EActivityStatus> status,
+      Boolean isValorized) {
     Student student = loggedInUserService.getLoggedInStudent();
     var graph = FetchGraph.init().add("activity").fetch("author");
 
     return declaredActivityRepository.findStudentActivitiesByProgressAndDate(
-        student, keyword, pageCriteria, isValorized, graph);
+        student, keyword, thematic, status, pageCriteria, isValorized, graph);
   }
 
   @Override

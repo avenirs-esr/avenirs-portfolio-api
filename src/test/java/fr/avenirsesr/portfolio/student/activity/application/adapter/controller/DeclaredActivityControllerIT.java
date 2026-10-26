@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -175,6 +176,30 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .expectBody()
         .jsonPath("$.data[?(@.id == '" + declaredActivityId + "')].id")
         .exists();
+  }
+
+  @Test
+  @Transactional
+  void shouldGetDeclaredActivityByThematic() {
+
+    webTestClient
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(BASE_PATH)
+                    .queryParam("thematic", EActivityThematic.SELF_KNOWLEDGE)
+                    .build())
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.data[0].activityId")
+        .isEqualTo(activityId)
+        .jsonPath("$.data[0].thematic")
+        .isEqualTo("SELF_KNOWLEDGE");
   }
 
   @Test
