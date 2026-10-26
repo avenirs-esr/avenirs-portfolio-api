@@ -6,6 +6,7 @@ import static fr.avenirsesr.portfolio.shared.application.adapter.Utils.extractOr
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.file.application.adapter.dto.FileDTO;
 import fr.avenirsesr.portfolio.common.security.accesscontrol.domain.model.enums.ERole;
+import fr.avenirsesr.portfolio.common.security.accesscontrol.domain.model.enums.EUniverse;
 import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.HmacAuthenticationToken;
 import fr.avenirsesr.portfolio.file.application.adapter.mapper.FileDtoMapper;
 import fr.avenirsesr.portfolio.user.application.adapter.dto.AcceptedCguDTO;
@@ -17,7 +18,6 @@ import fr.avenirsesr.portfolio.user.application.adapter.request.NotificationPref
 import fr.avenirsesr.portfolio.user.application.adapter.request.ProfileUpdateRequest;
 import fr.avenirsesr.portfolio.user.domain.data.CguAcceptanceData;
 import fr.avenirsesr.portfolio.user.domain.data.UserProfileOverviewData;
-import fr.avenirsesr.portfolio.user.domain.model.enums.EUniverse;
 import fr.avenirsesr.portfolio.user.domain.port.input.StaffService;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
