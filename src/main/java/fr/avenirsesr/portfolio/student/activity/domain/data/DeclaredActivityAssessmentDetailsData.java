@@ -1,0 +1,9 @@
+package fr.avenirsesr.portfolio.student.activity.domain.data;
+
+import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
+import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
+
+public record DeclaredActivityAssessmentDetailsData(
+    DeclaredActivity declaredActivity,
+    DeclaredActivityAssociationsData associations,
+    EDeclaredActivityStatus status) {}

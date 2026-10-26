@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 
 @Schema(requiredProperties = {"traces", "skillProgresses", "declaredExperiences"})
-public record FeedbackAssociationsDTO(
+public record DeclaredActivityAssociationsDTO(
     List<TraceDetailDTO> traces,
     List<SkillProgressDetailsDTO> skillProgresses,
     List<DeclaredExperienceViewDTO> declaredExperiences) {}

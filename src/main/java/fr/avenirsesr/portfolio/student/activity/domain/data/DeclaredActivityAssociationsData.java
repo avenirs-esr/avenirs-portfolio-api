@@ -5,12 +5,12 @@ import fr.avenirsesr.portfolio.student.skill.domain.data.SkillProgressDetails;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import java.util.List;
 
-public record FeedbackAssociationsData(
+public record DeclaredActivityAssociationsData(
     List<Trace> traces,
     List<SkillProgressDetails> skillProgresses,
     List<DeclaredExperience> declaredExperiences) {
 
-  public static FeedbackAssociationsData empty() {
-    return new FeedbackAssociationsData(List.of(), List.of(), List.of());
+  public static DeclaredActivityAssociationsData empty() {
+    return new DeclaredActivityAssociationsData(List.of(), List.of(), List.of());
   }
 }
