@@ -344,6 +344,11 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         assertTrue(submission.get("assessment").get("comment").asBoolean());
         assertTrue(submission.get("assessment").get("grade").isNull());
         assertTrue(submission.hasNonNull("submittedAt"));
+        assertEquals(
+            submission.get("submittedAt").asText(),
+            submission.get("assessmentRequestedAt").asText());
+        assertTrue(submission.get("assessedAt").isNull());
+        assertTrue(submission.get("assessedBy").isNull());
         assertEquals("SUBMITTED", submission.get("status").asText());
       }
 
