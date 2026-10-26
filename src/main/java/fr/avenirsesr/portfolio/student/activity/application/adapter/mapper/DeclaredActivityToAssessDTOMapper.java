@@ -21,6 +21,22 @@ public interface DeclaredActivityToAssessDTOMapper {
   @Mapping(source = "declaredActivity.activity", target = "activity")
   @Mapping(source = "declaredActivity.activity.assessment", target = "assessment")
   @Mapping(source = "declaredActivity.submittedAt", target = "submittedAt")
+  @Mapping(
+      target = "assessmentRequestedAt",
+      expression =
+          "java(declaredActivityToAssess.declaredActivity().getAssessment()"
+              + ".map(value -> value.requestedAt()).orElse(null))")
+  @Mapping(
+      target = "assessedAt",
+      expression =
+          "java(declaredActivityToAssess.declaredActivity().getAssessment()"
+              + ".map(value -> value.assessedAt()).orElse(null))")
+  @Mapping(
+      target = "assessedBy",
+      expression =
+          "java(declaredActivityToAssess.declaredActivity().getAssessment()"
+              + ".map(value -> value.assessedBy())"
+              + ".map(assessor -> toUserInfoDTO(assessor.getUser())).orElse(null))")
   DeclaredActivityToAssessDTO toDTO(DeclaredActivityToAssessData declaredActivityToAssess);
 
   UserInfoDTO toUserInfoDTO(User user);

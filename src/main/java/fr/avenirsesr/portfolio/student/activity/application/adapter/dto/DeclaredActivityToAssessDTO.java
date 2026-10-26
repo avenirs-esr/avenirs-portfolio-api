@@ -15,4 +15,7 @@ public record DeclaredActivityToAssessDTO(
     ActivityPreviewDTO activity,
     ActivityAssessmentDTO assessment,
     Instant submittedAt,
+    Instant assessmentRequestedAt,
+    Instant assessedAt,
+    UserInfoDTO assessedBy,
     @Schema(ref = "#/components/schemas/EDeclaredActivityStatus") EDeclaredActivityStatus status) {}

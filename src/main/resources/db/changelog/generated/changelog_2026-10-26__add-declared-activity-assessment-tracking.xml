@@ -1,0 +1,39 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+        http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet author="iamgreendev" id="add-assessment-tracking-to-declared-activity">
+        <addColumn tableName="declared_activity">
+            <column name="assessment_requested_at" type="timestamp(6)"/>
+            <column name="assessment_assessed_at" type="timestamp(6)"/>
+            <column name="assessment_assessed_by_id" type="UUID"/>
+        </addColumn>
+
+        <createIndex tableName="declared_activity" indexName="idx_declared_activity_assessed_by">
+            <column name="assessment_assessed_by_id"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseTableName="declared_activity"
+                                 baseColumnNames="assessment_assessed_by_id"
+                                 constraintName="fk_declared_activity_assessed_by_staff"
+                                 referencedTableName="staff"
+                                 referencedColumnNames="id"/>
+
+        <rollback>
+            <dropForeignKeyConstraint baseTableName="declared_activity"
+                                      constraintName="fk_declared_activity_assessed_by_staff"/>
+            <dropIndex tableName="declared_activity" indexName="idx_declared_activity_assessed_by"/>
+            <dropColumn tableName="declared_activity" columnName="assessment_requested_at"/>
+            <dropColumn tableName="declared_activity" columnName="assessment_assessed_at"/>
+            <dropColumn tableName="declared_activity" columnName="assessment_assessed_by_id"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

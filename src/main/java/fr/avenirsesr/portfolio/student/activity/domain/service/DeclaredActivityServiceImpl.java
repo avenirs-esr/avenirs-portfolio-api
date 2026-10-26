@@ -20,6 +20,7 @@ import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityDeta
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackData;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.*;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
+import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivityAssessment;
 import fr.avenirsesr.portfolio.student.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
@@ -201,7 +202,9 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
       throw new ActivityAssessmentException("The activity does not expect an assessment");
     }
 
-    declaredActivity.setSubmittedAt(Instant.now());
+    var requestedAt = Instant.now();
+    declaredActivity.setSubmittedAt(requestedAt);
+    declaredActivity.setAssessment(DeclaredActivityAssessment.requested(requestedAt));
 
     declaredActivityRepository.save(declaredActivity);
   }
