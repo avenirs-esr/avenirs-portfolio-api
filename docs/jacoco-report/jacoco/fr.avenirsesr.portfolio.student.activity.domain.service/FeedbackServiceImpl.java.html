@@ -20,7 +20,7 @@ import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityAuthorizationService;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
-import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackAssociationsData;
+import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityAssociationsData;
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackDashboardData;
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackData;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.DeclaredActivityNotFoundException;
@@ -112,8 +112,8 @@ public class FeedbackServiceImpl implements FeedbackService {
 <span class="fc" id="L112">    return new FeedbackAssociations(traces, skillProgresses, declaredExperiences, declaredPrograms);</span>
   }
 
-  private FeedbackAssociationsData getFeedbackAssociationsData(FeedbackAssociations associations) {
-<span class="fc" id="L116">    return new FeedbackAssociationsData(</span>
+  private DeclaredActivityAssociationsData toAssociationsData(FeedbackAssociations associations) {
+<span class="fc" id="L116">    return new DeclaredActivityAssociationsData(</span>
 <span class="fc" id="L117">        associations.traces(),</span>
 <span class="fc" id="L118">        enrichSkillProgresses(associations.skillProgresses()),</span>
 <span class="fc" id="L119">        associations.declaredExperiences());</span>
@@ -204,7 +204,7 @@ public class FeedbackServiceImpl implements FeedbackService {
 <span class="fc" id="L204">        feedback.getFeedback().orElse(null),</span>
 <span class="fc" id="L205">        feedback.getStatus(),</span>
 <span class="fc" id="L206">        feedback.getIteration(),</span>
-<span class="fc" id="L207">        getFeedbackAssociationsData(feedback.getAssociations()),</span>
+<span class="fc" id="L207">        toAssociationsData(feedback.getAssociations()),</span>
 <span class="fc" id="L208">        feedback.getAttachments());</span>
   }
 
@@ -231,7 +231,7 @@ public class FeedbackServiceImpl implements FeedbackService {
         feedbackText,
 <span class="fc" id="L232">        feedback.getStatus(),</span>
 <span class="fc" id="L233">        feedback.getIteration(),</span>
-<span class="fc" id="L234">        getFeedbackAssociationsData(feedback.getAssociations()),</span>
+<span class="fc" id="L234">        toAssociationsData(feedback.getAssociations()),</span>
         attachments);
   }
 
