@@ -16,6 +16,7 @@ public class DeclaredActivityAssessmentMapper
         domain.comment(),
         domain.grade(),
         domain.validation(),
+        domain.status(),
         domain.requestedAt(),
         domain.assessedAt(),
         domain.assessedBy() == null ? null : StaffMapper.INSTANCE.fromDomain(domain.assessedBy()));
@@ -27,6 +28,7 @@ public class DeclaredActivityAssessmentMapper
         entity.getComment(),
         entity.getGrade(),
         entity.getValidation(),
+        entity.getStatus(),
         entity.getRequestedAt(),
         entity.getAssessedAt(),
         entity.getAssessedBy() == null

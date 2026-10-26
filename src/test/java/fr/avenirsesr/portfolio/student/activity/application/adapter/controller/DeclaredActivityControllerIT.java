@@ -22,6 +22,7 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
 
   private static final String BASE_PATH = "/me/activity-progress";
   private static final String FEEDBACK_BASE_PATH = BASE_PATH + "/feedbacks";
+  private static final String ACTIVITY_BASE_PATH = "/me/activities";
 
   @Autowired private WebTestClient webTestClient;
   @Autowired private ObjectMapper objectMapper;
@@ -650,6 +651,147 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .exchange()
         .expectStatus()
         .isNotFound();
+  }
+
+  @Test
+  void shouldSaveTheAssessmentDraft() throws Exception {
+    BddLogger.given("a declared activity on an activity expecting a comment and a grade");
+    String assessableActivityId =
+        publishAssessableActivity(
+            "Activité évaluée enregistrement", "{\"comment\":true,\"grade\":20}");
+    String id = subscribeAndGetId(assessableActivityId);
+
+    BddLogger.when("the evaluator saves an assessment");
+    BddLogger.then("it should return 204");
+
+    saveAssessment(id, "{\"comment\":\"Bon travail\",\"grade\":15}", staffPayload, staffSignature)
+        .expectStatus()
+        .isNoContent();
+
+    BddLogger.and("saving it again should still return 204");
+
+    saveAssessment(
+            id, "{\"comment\":\"Bon travail revu\",\"grade\":16}", staffPayload, staffSignature)
+        .expectStatus()
+        .isNoContent();
+  }
+
+  @Test
+  void shouldRejectAnAssessmentFieldThatIsNotEnabled() throws Exception {
+    BddLogger.given("a declared activity on an activity expecting a comment only");
+    String assessableActivityId =
+        publishAssessableActivity("Activité évaluée commentaire", "{\"comment\":true}");
+    String id = subscribeAndGetId(assessableActivityId);
+
+    BddLogger.when("the evaluator saves an assessment holding a grade");
+    BddLogger.then("it should return 400");
+
+    saveAssessment(id, "{\"comment\":\"Bon travail\",\"grade\":15}", staffPayload, staffSignature)
+        .expectStatus()
+        .isBadRequest()
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("ACTIVITY_ASSESSMENT");
+  }
+
+  @Test
+  void shouldRejectAnAssessmentOnAnActivityExpectingNone() throws Exception {
+    BddLogger.given("a declared activity on an activity expecting no assessment");
+    String assessableActivityId = publishAssessableActivity("Activité sans évaluation", "{}");
+    String id = subscribeAndGetId(assessableActivityId);
+
+    BddLogger.when("the evaluator saves an assessment");
+    BddLogger.then("it should return 400");
+
+    saveAssessment(id, "{\"comment\":\"Bon travail\"}", staffPayload, staffSignature)
+        .expectStatus()
+        .isBadRequest()
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("ACTIVITY_ASSESSMENT");
+  }
+
+  @Test
+  void shouldRejectTheAssessmentOfAStaffWithoutTheEvaluationRight() throws Exception {
+    BddLogger.given("a declared activity on an activity another staff does not evaluate");
+    String assessableActivityId =
+        publishAssessableActivity("Activité évaluée droits", "{\"comment\":true}");
+    String id = subscribeAndGetId(assessableActivityId);
+
+    BddLogger.when("that other staff saves an assessment");
+    BddLogger.then("it should return 403");
+
+    saveAssessment(id, "{\"comment\":\"Bon travail\"}", anotherStaffPayload, anotherStaffSignature)
+        .expectStatus()
+        .isForbidden();
+  }
+
+  @Test
+  void shouldReturnNotFoundWhenAssessingAnUnknownDeclaredActivity() {
+    BddLogger.given("an unknown declared activity");
+
+    BddLogger.when("the evaluator saves an assessment");
+    BddLogger.then("it should return 404");
+
+    saveAssessment(notFoundId, "{\"comment\":\"Bon travail\"}", staffPayload, staffSignature)
+        .expectStatus()
+        .isNotFound();
+  }
+
+  private ResponseSpec saveAssessment(
+      String assessedDeclaredActivityId, String body, String payload, String signature) {
+    return webTestClient
+        .put()
+        .uri(BASE_PATH + "/" + assessedDeclaredActivityId + "/assessment")
+        .header("X-Signed-Context", payload)
+        .header("X-Context-Signature", signature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(body)
+        .exchange();
+  }
+
+  private String publishAssessableActivity(String title, String assessmentSetup) throws Exception {
+    String creation =
+        webTestClient
+            .post()
+            .uri(ACTIVITY_BASE_PATH + "/draft")
+            .header("X-Signed-Context", staffPayload)
+            .header("X-Context-Signature", staffSignature)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue("{\"title\":\"" + title + "\"}")
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+    String draftId = objectMapper.readTree(creation).get("draftId").asText();
+
+    webTestClient
+        .patch()
+        .uri(ACTIVITY_BASE_PATH + "/" + draftId)
+        .header("X-Signed-Context", staffPayload)
+        .header("X-Context-Signature", staffSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(
+            "{\"thematic\":\"EXPERIENCES\",\"summary\":\"Un résumé valide pour la publication\","
+                + "\"description\":\"Une consigne valide pour la publication\",\"assessment\":"
+                + assessmentSetup
+                + "}")
+        .exchange()
+        .expectStatus()
+        .isOk();
+
+    webTestClient
+        .post()
+        .uri(ACTIVITY_BASE_PATH + "/publish/" + draftId)
+        .header("X-Signed-Context", staffPayload)
+        .header("X-Context-Signature", staffSignature)
+        .exchange()
+        .expectStatus()
+        .isOk();
+
+    return draftId;
   }
 
   private String askForFeedbackAndGetId(String declaredActivityId) throws Exception {

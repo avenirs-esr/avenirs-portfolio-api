@@ -158,6 +158,20 @@ public class DeclaredActivityController {
   }
 
   @PreAuthorize("hasAuthority('activity:read:contextual')")
+  @PutMapping("/{declaredActivityId}/assessment")
+  public ResponseEntity<Void> saveAssessmentDraft(
+      Principal principal,
+      @Valid @PathVariable UUID declaredActivityId,
+      @Valid @RequestBody DeclaredActivityAssessmentRequest request) {
+    log.debug(
+        "Received request to save the assessment draft of declared activity [{}] by user [{}]",
+        declaredActivityId,
+        principal.getName());
+    declaredActivityService.saveAssessmentDraft(declaredActivityId, request.toDraft());
+    return ResponseEntity.noContent().build();
+  }
+
+  @PreAuthorize("hasAuthority('activity:read:contextual')")
   @GetMapping("/{declaredActivityId}")
   public ResponseEntity<DeclaredActivityDetailsDTO> getDeclaredActivityDetails(
       HttpServletRequest request,

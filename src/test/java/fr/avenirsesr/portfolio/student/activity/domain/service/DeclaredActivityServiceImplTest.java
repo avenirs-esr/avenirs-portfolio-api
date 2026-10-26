@@ -33,7 +33,9 @@ import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityDeta
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackData;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.*;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
+import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivityAssessment;
 import fr.avenirsesr.portfolio.student.activity.domain.model.Feedback;
+import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EAssessmentStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.FeedbackService;
@@ -100,6 +102,222 @@ class DeclaredActivityServiceImplTest {
             traceService,
             skillProgressService,
             declaredExperienceService);
+  }
+
+  @Test
+  void saveAssessmentDraft_should_save_the_assessment_as_a_draft() {
+    BddLogger.given("An evaluator and a declared activity whose activity expects a graded comment");
+    Staff staff = StaffFixture.create().toModel();
+    Activity activity =
+        ActivityFixture.create().withAssessment(new ActivityAssessment(true, 20, null)).toModel();
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(
+            declaredActivityId, student, activity, null, null, null, null, null);
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+    when(declaredActivityRepository.findById(declaredActivityId))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("He saves an assessment");
+    service.saveAssessmentDraft(
+        declaredActivityId, DeclaredActivityAssessment.draft("Bon travail", 15, null));
+
+    BddLogger.then("The assessment is stored as a draft");
+    verify(activityAuthorizationService)
+        .checkRight(staff, activity.getId(), EActivityRight.EVALUATION);
+    verify(declaredActivityRepository).save(activityCaptor.capture());
+
+    assertThat(activityCaptor.getValue().getAssessment())
+        .contains(DeclaredActivityAssessment.draft("Bon travail", 15, null));
+  }
+
+  @Test
+  void saveAssessmentDraft_should_throw_UserNotAuthorizedException_without_the_evaluation_right() {
+    BddLogger.given("A staff member without the evaluation right on the activity");
+    Staff staff = StaffFixture.create().toModel();
+    Activity activity =
+        ActivityFixture.create().withAssessment(new ActivityAssessment(true, null, null)).toModel();
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(
+            declaredActivityId, student, activity, null, null, null, null, null);
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+    when(declaredActivityRepository.findById(declaredActivityId))
+        .thenReturn(Optional.of(declaredActivity));
+    doThrow(new UserNotAuthorizedException())
+        .when(activityAuthorizationService)
+        .checkRight(staff, activity.getId(), EActivityRight.EVALUATION);
+
+    BddLogger.when("He saves an assessment");
+
+    BddLogger.then("A UserNotAuthorizedException is thrown and nothing is saved");
+    assertThatThrownBy(
+            () ->
+                service.saveAssessmentDraft(
+                    declaredActivityId,
+                    DeclaredActivityAssessment.draft("Bon travail", null, null)))
+        .isInstanceOf(UserNotAuthorizedException.class);
+
+    verify(declaredActivityRepository, never()).save(any());
+  }
+
+  @Test
+  void saveAssessmentDraft_should_throw_DeclaredActivityNotFoundException_when_it_does_not_exist() {
+    BddLogger.given("An evaluator and an unknown declared activity");
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(StaffFixture.create().toModel());
+    when(declaredActivityRepository.findById(declaredActivityId)).thenReturn(Optional.empty());
+
+    BddLogger.when("He saves an assessment");
+
+    BddLogger.then("A DeclaredActivityNotFoundException is thrown");
+    assertThatThrownBy(
+            () ->
+                service.saveAssessmentDraft(
+                    declaredActivityId,
+                    DeclaredActivityAssessment.draft("Bon travail", null, null)))
+        .isInstanceOf(DeclaredActivityNotFoundException.class);
+
+    verify(declaredActivityRepository, never()).save(any());
+  }
+
+  @Test
+  void
+      saveAssessmentDraft_should_throw_ActivityAssessmentException_when_no_assessment_is_expected() {
+    BddLogger.given("An evaluator and a declared activity whose activity expects no assessment");
+    Activity activity = ActivityFixture.create().toModel();
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(
+            declaredActivityId, student, activity, null, null, null, null, null);
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(StaffFixture.create().toModel());
+    when(declaredActivityRepository.findById(declaredActivityId))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("He saves an assessment");
+
+    BddLogger.then("An ActivityAssessmentException is thrown and nothing is saved");
+    assertThatThrownBy(
+            () ->
+                service.saveAssessmentDraft(
+                    declaredActivityId,
+                    DeclaredActivityAssessment.draft("Bon travail", null, null)))
+        .isInstanceOf(ActivityAssessmentException.class);
+
+    verify(declaredActivityRepository, never()).save(any());
+  }
+
+  @Test
+  void saveAssessmentDraft_should_throw_ActivityAssessmentException_when_a_field_is_disabled() {
+    BddLogger.given("An evaluator and a declared activity expecting a comment only");
+    Activity activity =
+        ActivityFixture.create().withAssessment(new ActivityAssessment(true, null, null)).toModel();
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(
+            declaredActivityId, student, activity, null, null, null, null, null);
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(StaffFixture.create().toModel());
+    when(declaredActivityRepository.findById(declaredActivityId))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("He saves an assessment holding a grade");
+
+    BddLogger.then("An ActivityAssessmentException is thrown and nothing is saved");
+    assertThatThrownBy(
+            () ->
+                service.saveAssessmentDraft(
+                    declaredActivityId, DeclaredActivityAssessment.draft("Bon travail", 15, null)))
+        .isInstanceOf(ActivityAssessmentException.class);
+
+    verify(declaredActivityRepository, never()).save(any());
+  }
+
+  @Test
+  void
+      saveAssessmentDraft_should_throw_ActivityAssessmentException_when_the_grade_is_out_of_range() {
+    BddLogger.given("An evaluator and a declared activity graded out of 10");
+    Activity activity =
+        ActivityFixture.create().withAssessment(new ActivityAssessment(null, 10, null)).toModel();
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(
+            declaredActivityId, student, activity, null, null, null, null, null);
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(StaffFixture.create().toModel());
+    when(declaredActivityRepository.findById(declaredActivityId))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("He saves an assessment graded above the scale");
+
+    BddLogger.then("An ActivityAssessmentException is thrown and nothing is saved");
+    assertThatThrownBy(
+            () ->
+                service.saveAssessmentDraft(
+                    declaredActivityId, DeclaredActivityAssessment.draft(null, 11, null)))
+        .isInstanceOf(ActivityAssessmentException.class);
+
+    verify(declaredActivityRepository, never()).save(any());
+  }
+
+  @Test
+  void saveAssessmentDraft_should_accept_a_grade_of_zero() {
+    BddLogger.given("An evaluator and a declared activity graded out of 20");
+    Activity activity =
+        ActivityFixture.create().withAssessment(new ActivityAssessment(null, 20, null)).toModel();
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(
+            declaredActivityId, student, activity, null, null, null, null, null);
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(StaffFixture.create().toModel());
+    when(declaredActivityRepository.findById(declaredActivityId))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("He saves an assessment graded zero");
+    service.saveAssessmentDraft(
+        declaredActivityId, DeclaredActivityAssessment.draft(null, 0, null));
+
+    BddLogger.then("The assessment is stored as a draft");
+    verify(declaredActivityRepository).save(activityCaptor.capture());
+
+    assertThat(activityCaptor.getValue().getAssessment())
+        .contains(DeclaredActivityAssessment.draft(null, 0, null));
+  }
+
+  @Test
+  void saveAssessmentDraft_should_throw_ActivityAssessmentException_when_it_was_already_sent() {
+    BddLogger.given("An evaluator and a declared activity holding a sent assessment");
+    Activity activity =
+        ActivityFixture.create().withAssessment(new ActivityAssessment(true, null, null)).toModel();
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.toDomain(
+            declaredActivityId,
+            student,
+            activity,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            false,
+            null,
+            new DeclaredActivityAssessment(
+                "Envoyé", null, null, EAssessmentStatus.PUBLISHED, null, null, null),
+            Instant.now(),
+            Instant.now());
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(StaffFixture.create().toModel());
+    when(declaredActivityRepository.findById(declaredActivityId))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("He saves an assessment");
+
+    BddLogger.then("An ActivityAssessmentException is thrown and nothing is saved");
+    assertThatThrownBy(
+            () ->
+                service.saveAssessmentDraft(
+                    declaredActivityId, DeclaredActivityAssessment.draft("Brouillon", null, null)))
+        .isInstanceOf(ActivityAssessmentException.class);
+
+    verify(declaredActivityRepository, never()).save(any());
   }
 
   @Test

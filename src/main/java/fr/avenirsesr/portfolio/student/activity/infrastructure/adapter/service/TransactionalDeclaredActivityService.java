@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityAssessmentDetailsData;
 import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityDetailsData;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
+import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivityAssessment;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
@@ -76,6 +77,12 @@ public class TransactionalDeclaredActivityService implements DeclaredActivitySer
   @Override
   public void updateReflection(UUID declaredActivityId, String reflection) {
     delegate.updateReflection(declaredActivityId, reflection);
+  }
+
+  @Transactional
+  @Override
+  public void saveAssessmentDraft(UUID declaredActivityId, DeclaredActivityAssessment assessment) {
+    delegate.saveAssessmentDraft(declaredActivityId, assessment);
   }
 
   @Override

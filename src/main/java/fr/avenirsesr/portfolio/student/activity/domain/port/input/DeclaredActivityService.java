@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityAssessmentDetailsData;
 import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityDetailsData;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
+import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivityAssessment;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
@@ -39,6 +40,8 @@ public interface DeclaredActivityService {
   void submitForAssessment(UUID declaredActivityId);
 
   void updateReflection(UUID declaredActivityId, String reflection);
+
+  void saveAssessmentDraft(UUID declaredActivityId, DeclaredActivityAssessment assessment);
 
   DeclaredActivityDetailsData getDeclaredActivityDetails(UUID declaredActivityId);
 
