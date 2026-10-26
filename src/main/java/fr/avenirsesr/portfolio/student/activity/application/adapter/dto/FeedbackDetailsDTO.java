@@ -29,7 +29,7 @@ public record FeedbackDetailsDTO(
     String reflexion,
     String feedback,
     @Schema(ref = "#/components/schemas/EFeedbackStatus") EFeedbackStatus status,
-    FeedbackAssociationsDTO associations,
+    DeclaredActivityAssociationsDTO associations,
     List<FileDTO> attachments,
     Instant createdAt,
     Instant updatedAt) {}

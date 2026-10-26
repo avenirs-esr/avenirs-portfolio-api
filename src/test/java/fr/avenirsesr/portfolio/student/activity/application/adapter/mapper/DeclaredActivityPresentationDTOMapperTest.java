@@ -10,8 +10,8 @@ import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityCo
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityContentDtoMapper;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.DeclaredActivityDetailsDTO;
+import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityAssociationsData;
 import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityDetailsData;
-import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackAssociationsData;
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackData;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
@@ -104,7 +104,7 @@ class DeclaredActivityPresentationDTOMapperTest {
             null,
             EFeedbackStatus.NEW,
             1,
-            FeedbackAssociationsData.empty(),
+            DeclaredActivityAssociationsData.empty(),
             List.of());
 
     FeedbackData feedbackData2 =
@@ -117,7 +117,7 @@ class DeclaredActivityPresentationDTOMapperTest {
             "Mon retour",
             EFeedbackStatus.SUBMITTED,
             2,
-            FeedbackAssociationsData.empty(),
+            DeclaredActivityAssociationsData.empty(),
             List.of());
 
     BddLogger.when("mapping DeclaredActivityDetailsData with feedbacks");

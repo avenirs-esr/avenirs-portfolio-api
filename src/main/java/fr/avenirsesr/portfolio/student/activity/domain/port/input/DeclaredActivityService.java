@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.student.activity.domain.port.input;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityAssessmentDetailsData;
 import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityDetailsData;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
@@ -40,6 +41,8 @@ public interface DeclaredActivityService {
   void updateReflection(UUID declaredActivityId, String reflection);
 
   DeclaredActivityDetailsData getDeclaredActivityDetails(UUID declaredActivityId);
+
+  DeclaredActivityAssessmentDetailsData getAssessmentDetails(UUID declaredActivityId);
 
   void updateDeclaredActivity(
       UUID declaredActivityId, LocalDate startDate, LocalDate endDate, Boolean valorized);

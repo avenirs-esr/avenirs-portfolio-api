@@ -51,6 +51,12 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
   @Value("${user.staff.signature}")
   private String staffSignature;
 
+  @Value("${user.anotherStaff.payload}")
+  private String anotherStaffPayload;
+
+  @Value("${user.anotherStaff.signature}")
+  private String anotherStaffSignature;
+
   private final String activityId = "3f7c9a2e-5d44-4b7a-9c6f-2a6e8e91b1a1";
 
   /** Activities owned by this class only, so that unsubscribing does not disturb other tests. */
@@ -414,6 +420,123 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
     submitForAssessment(notFoundId).expectStatus().isNotFound();
   }
 
+  @Test
+  void shouldGetTheAssessmentDetailsOfASubmittedDeclaredActivityAsStaff() throws Exception {
+    BddLogger.given("a student who submitted an assessable activity for assessment");
+    String assessableActivityId =
+        publishActivityAsStaff("Activité évaluable à consulter", "{\"comment\": true}");
+    String id = subscribeAndGetId(assessableActivityId);
+    updateReflection(id, "Ma prise de recul");
+    submitForAssessment(id).expectStatus().isNoContent();
+
+    BddLogger.when("the staff gets the assessment details of the submission");
+    BddLogger.then("it should return the learner, the activity, the realization and the setup");
+    getAssessmentDetails(id, staffPayload, staffSignature)
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.declaredActivityId")
+        .isEqualTo(id)
+        .jsonPath("$.activity.id")
+        .isEqualTo(assessableActivityId)
+        .jsonPath("$.activity.title")
+        .isEqualTo("Activité évaluable à consulter")
+        .jsonPath("$.activity.assessment.comment")
+        .isEqualTo(true)
+        .jsonPath("$.student.firstName")
+        .exists()
+        .jsonPath("$.student.lastName")
+        .exists()
+        .jsonPath("$.reflexion")
+        .isEqualTo("Ma prise de recul")
+        .jsonPath("$.associations.traces")
+        .isArray()
+        .jsonPath("$.associations.skillProgresses")
+        .isArray()
+        .jsonPath("$.associations.declaredExperiences")
+        .isArray()
+        .jsonPath("$.assessment.requestedAt")
+        .exists()
+        .jsonPath("$.submittedAt")
+        .exists()
+        .jsonPath("$.status")
+        .isEqualTo("SUBMITTED");
+  }
+
+  @Test
+  void shouldReturn404WhenGettingTheAssessmentDetailsOfANotSubmittedDeclaredActivity()
+      throws Exception {
+    BddLogger.given("a declared activity that was not submitted for assessment");
+    String assessableActivityId =
+        publishActivityAsStaff("Activité évaluable non consultable", "{\"comment\": true}");
+    String id = subscribeAndGetId(assessableActivityId);
+
+    BddLogger.when("the staff gets its assessment details");
+    BddLogger.then("it should return 404");
+    getAssessmentDetails(id, staffPayload, staffSignature).expectStatus().isNotFound();
+  }
+
+  @Test
+  void shouldReturn403WhenGettingTheAssessmentDetailsWithoutTheEvaluationRight() throws Exception {
+    BddLogger.given("a submission on an activity another staff holds no right on");
+    String assessableActivityId =
+        publishActivityAsStaff("Activité évaluable d'un autre staff", "{\"comment\": true}");
+    String id = subscribeAndGetId(assessableActivityId);
+    submitForAssessment(id).expectStatus().isNoContent();
+
+    BddLogger.when("that staff gets its assessment details");
+    BddLogger.then("it should return 403");
+    getAssessmentDetails(id, anotherStaffPayload, anotherStaffSignature)
+        .expectStatus()
+        .isForbidden();
+
+    BddLogger.and("the student who submitted it cannot read the staff view either");
+    getAssessmentDetails(id, studentPayload, studentSignature).expectStatus().isForbidden();
+  }
+
+  @Test
+  void shouldReturn404WhenGettingTheAssessmentDetailsOfAnUnknownDeclaredActivity() {
+    BddLogger.given("an unknown declared activity id");
+    BddLogger.when("the staff gets its assessment details");
+    BddLogger.then("it should return 404");
+    getAssessmentDetails(notFoundId, staffPayload, staffSignature).expectStatus().isNotFound();
+  }
+
+  @Test
+  void shouldReturn401WhenGettingTheAssessmentDetailsUnauthenticated() {
+    BddLogger.given("a declared activity id");
+    BddLogger.when("getting its assessment details without being authenticated");
+    BddLogger.then("it should return 401");
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/assessments/" + declaredActivityId)
+        .exchange()
+        .expectStatus()
+        .isUnauthorized();
+  }
+
+  private ResponseSpec getAssessmentDetails(String id, String payload, String signature) {
+    return webTestClient
+        .get()
+        .uri(BASE_PATH + "/assessments/" + id)
+        .header("X-Signed-Context", payload)
+        .header("X-Context-Signature", signature)
+        .exchange();
+  }
+
+  private void updateReflection(String id, String reflection) {
+    webTestClient
+        .put()
+        .uri(BASE_PATH + "/" + id + "/reflection")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue("{\"reflection\": \"" + reflection + "\"}")
+        .exchange()
+        .expectStatus()
+        .isOk();
+  }
+
   private ResponseSpec submitForAssessment(String id) {
     return webTestClient
         .put()
@@ -449,7 +572,8 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(
             "{\"thematic\": \"EXPERIENCES\", \"summary\": \"Un résumé valide\","
-                + " \"description\": \"Une consigne valide\", \"assessment\": "
+                + " \"description\": \"Une consigne valide\", \"enableReflection\": true,"
+                + " \"assessment\": "
                 + assessment
                 + "}")
         .exchange()
