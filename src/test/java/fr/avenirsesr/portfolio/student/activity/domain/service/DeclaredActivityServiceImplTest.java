@@ -133,6 +133,7 @@ class DeclaredActivityServiceImplTest {
               assertThat(sent.validation()).isNull();
               assertThat(sent.assessedAt()).isNotNull();
               assertThat(sent.assessedBy()).isEqualTo(staff);
+              assertThat(sent.modifiedAt()).isNull();
             });
     assertThat(activityCaptor.getValue().getFinishedAt()).isPresent();
 
@@ -389,34 +390,69 @@ class DeclaredActivityServiceImplTest {
   }
 
   @Test
-  void sendAssessment_should_throw_ActivityAssessmentException_when_it_was_already_sent() {
-    BddLogger.given("An evaluator and a declared activity holding a sent assessment");
+  void sendAssessment_should_overwrite_a_sent_assessment_without_notifying_the_student() {
+    BddLogger.given("An evaluator and a declared activity whose assessment was sent and consulted");
+    Instant requestedAt = Instant.now().minus(Duration.ofDays(3));
+    Instant sentAt = Instant.now().minus(Duration.ofDays(2));
+    Instant consultedAt = Instant.now().minus(Duration.ofDays(1));
+    Staff staff = StaffFixture.create().toModel();
+    Activity activity =
+        ActivityFixture.create().withAssessment(new ActivityAssessment(true, 20, null)).toModel();
+    DeclaredActivity declaredActivity =
+        declaredActivityWith(
+            activity,
+            DeclaredActivityAssessment.requested(requestedAt)
+                .send("Bon travail", 15, null, sentAt, StaffFixture.create().toModel())
+                .consult(consultedAt));
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+    when(declaredActivityRepository.findById(declaredActivityId))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("He sends another version of the assessment");
+    service.sendAssessment(declaredActivityId, "Très bon travail", 17, null);
+
+    BddLogger.then("The assessment is overwritten and the student is not notified again");
+    verify(declaredActivityRepository).save(activityCaptor.capture());
+
+    assertThat(activityCaptor.getValue().getAssessment())
+        .hasValueSatisfying(
+            modified -> {
+              assertThat(modified.comment()).isEqualTo("Très bon travail");
+              assertThat(modified.grade()).isEqualTo(17);
+              assertThat(modified.requestedAt()).isEqualTo(requestedAt);
+              assertThat(modified.assessedAt()).isEqualTo(sentAt);
+              assertThat(modified.assessedBy()).isEqualTo(staff);
+              assertThat(modified.modifiedAt()).isAfter(sentAt);
+              assertThat(modified.consultedAt()).isEqualTo(consultedAt);
+            });
+    verify(notificationService, never()).notify(any());
+  }
+
+  @Test
+  void sendAssessment_should_validate_the_modification_of_a_sent_assessment() {
+    BddLogger.given("An evaluator and a declared activity whose assessment was sent");
     Activity activity =
         ActivityFixture.create().withAssessment(new ActivityAssessment(true, null, null)).toModel();
     DeclaredActivity declaredActivity =
         declaredActivityWith(
             activity,
-            new DeclaredActivityAssessment(
-                "Envoyé",
-                null,
-                null,
-                null,
-                Instant.now(),
-                StaffFixture.create().toModel(),
-                null,
-                null));
+            DeclaredActivityAssessment.requested(null)
+                .send("Bon travail", null, null, Instant.now(), StaffFixture.create().toModel()));
 
     when(loggedInUserService.getLoggedInStaff()).thenReturn(StaffFixture.create().toModel());
     when(declaredActivityRepository.findById(declaredActivityId))
         .thenReturn(Optional.of(declaredActivity));
 
-    BddLogger.when("He sends an assessment again");
+    BddLogger.when("He sends another version without comment");
 
-    BddLogger.then("An ActivityAssessmentException is thrown and nothing is sent");
-    assertThatThrownBy(
-            () -> service.sendAssessment(declaredActivityId, "Autre version", null, null))
-        .isInstanceOf(ActivityAssessmentException.class);
+    BddLogger.then("A FieldValidationException is thrown and nothing is saved");
+    FieldValidationException exception =
+        Assertions.assertThrows(
+            FieldValidationException.class,
+            () -> service.sendAssessment(declaredActivityId, null, null, null));
 
+    Assertions.assertEquals(EErrorCode.NOT_BLANK, exception.getErrorCode());
     verify(declaredActivityRepository, never()).save(any());
     verify(notificationService, never()).notify(any());
   }
