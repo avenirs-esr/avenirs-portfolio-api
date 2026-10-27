@@ -6,6 +6,9 @@ import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortField;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.CreationResponse;
 import fr.avenirsesr.portfolio.shared.application.adapter.mapper.FileDTOMapper;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityContentDtoMapper;
@@ -68,8 +71,19 @@ public class DeclaredActivityController {
           List<EActivityThematic> thematic,
       @Parameter(schema = @Schema(ref = "#/components/schemas/EActivityStatus"))
           @RequestParam(required = false)
-          List<EActivityStatus> status) {
+          List<EActivityStatus> status,
+      @Parameter(schema = @Schema(ref = "#/components/schemas/ESortField"))
+          @RequestParam(required = false)
+          ESortField sortField,
+      @Parameter(schema = @Schema(ref = "#/components/schemas/ESortOrder"))
+          @RequestParam(required = false)
+          ESortOrder sortOrder) {
     var pageCriteria = new PageCriteria(page, pageSize);
+
+    SortCriteria sortCriteria =
+        (sortField != null && sortOrder != null)
+            ? new SortCriteria(sortField, sortOrder)
+            : new SortCriteria(ESortField.DATE, ESortOrder.DESC);
 
     log.debug(
         "Received request to get declared activities view of user [{}] (page= {}, fileSize= {},"
@@ -81,7 +95,7 @@ public class DeclaredActivityController {
 
     PagedResult<DeclaredActivity> pagedResult =
         declaredActivityService.getDeclaredActivities(
-            pageCriteria, keyword, thematic, status, isValorized);
+            pageCriteria, keyword, thematic, status, sortCriteria, isValorized);
 
     var statusByDeclaredActivity =
         declaredActivityService.getDeclaredActivityStatus(pagedResult.content());

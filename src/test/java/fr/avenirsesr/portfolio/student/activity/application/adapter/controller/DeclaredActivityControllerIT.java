@@ -3,14 +3,23 @@ package fr.avenirsesr.portfolio.student.activity.application.adapter.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortField;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
@@ -146,6 +155,69 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
     throw new AssertionError("Declared activity not found: " + declaredActivityId);
   }
 
+  private String getDeclaredActivityView(ESortField sortField, ESortOrder sortOrder) {
+    return webTestClient
+        .get()
+        .uri(
+            uriBuilder -> {
+              uriBuilder.path(BASE_PATH).queryParam("pageSize", 100);
+              if (sortField != null) {
+                uriBuilder.queryParam("sortField", sortField);
+              }
+              if (sortOrder != null) {
+                uriBuilder.queryParam("sortOrder", sortOrder);
+              }
+              return uriBuilder.build();
+            })
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(String.class)
+        .returnResult()
+        .getResponseBody();
+  }
+
+  private List<JsonNode> getActivities(ESortField sortField, ESortOrder sortOrder)
+      throws JsonProcessingException {
+    String response = getDeclaredActivityView(sortField, sortOrder);
+
+    JsonNode root = objectMapper.readTree(response);
+
+    JsonNode activities = root.path("data");
+
+    if (!activities.isArray()) {
+      throw new IllegalStateException("Expected an activities array in the response");
+    }
+
+    List<JsonNode> result = new ArrayList<>();
+    activities.forEach(result::add);
+
+    return result;
+  }
+
+  @Transactional
+  @ParameterizedTest
+  @EnumSource(
+      value = ESortOrder.class,
+      names = {"ASC", "DESC"})
+  void shouldSortActivitiesByDate(ESortOrder sortOrder) throws Exception {
+
+    List<JsonNode> activities = getActivities(ESortField.DATE, sortOrder);
+
+    Comparator<JsonNode> comparator =
+        Comparator.comparingInt(
+                (JsonNode activity) -> "COMPLETED".equals(activity.path("status").asText()) ? 1 : 0)
+            .thenComparing(
+                (JsonNode activity) -> Instant.parse(activity.get("updatedAt").asText()),
+                sortOrder == ESortOrder.ASC
+                    ? Comparator.naturalOrder()
+                    : Comparator.reverseOrder());
+
+    assertThat(activities).isSortedAccordingTo(comparator);
+  }
+
   @Test
   @Transactional
   void shouldGetDeclaredActivitiesFilteredBySearch() throws Exception {
@@ -200,6 +272,16 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .isEqualTo(activityId)
         .jsonPath("$.data[0].thematic")
         .isEqualTo("SELF_KNOWLEDGE");
+  }
+
+  @Test
+  @Transactional
+  void shouldUseDefaultSortingWhenNoSortParametersProvided() {
+    String defaultResponse = getDeclaredActivityView(null, null);
+
+    String descendingResponse = getDeclaredActivityView(ESortField.DATE, ESortOrder.DESC);
+
+    assertThat(defaultResponse).isEqualTo(descendingResponse);
   }
 
   @Test

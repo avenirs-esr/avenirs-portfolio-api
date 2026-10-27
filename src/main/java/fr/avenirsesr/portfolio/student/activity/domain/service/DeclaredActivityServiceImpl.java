@@ -10,6 +10,7 @@ import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValida
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.notification.domain.model.enums.ENotificationType;
 import fr.avenirsesr.portfolio.notification.domain.model.notification.AssessmentSentNotification;
@@ -80,12 +81,13 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
       String keyword,
       List<EActivityThematic> thematic,
       List<EActivityStatus> status,
+      SortCriteria sortCriterias,
       Boolean isValorized) {
     Student student = loggedInUserService.getLoggedInStudent();
     var graph = FetchGraph.init().add("activity").fetch("author");
 
     return declaredActivityRepository.findStudentActivitiesByProgressAndDate(
-        student, keyword, thematic, status, pageCriteria, isValorized, graph);
+        student, keyword, thematic, status, sortCriterias, pageCriteria, isValorized, graph);
   }
 
   @Override
