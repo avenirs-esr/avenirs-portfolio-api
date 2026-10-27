@@ -1,9 +1,9 @@
 package fr.avenirsesr.portfolio.authorization.domain.service;
 
 import fr.avenirsesr.portfolio.authorization.domain.data.EntityAuthorizationsData;
-import fr.avenirsesr.portfolio.authorization.domain.model.enums.EAuthorizationEntityType;
 import fr.avenirsesr.portfolio.authorization.domain.port.input.EntityAuthorizationService;
 import fr.avenirsesr.portfolio.authorization.domain.port.output.EntityAuthorizationResolver;
+import fr.avenirsesr.portfolio.common.authorization.domain.model.enums.EAuthorizationEntityType;
 import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
 import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils;

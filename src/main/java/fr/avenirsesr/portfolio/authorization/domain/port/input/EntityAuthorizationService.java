@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.authorization.domain.port.input;
 
 import fr.avenirsesr.portfolio.authorization.domain.data.EntityAuthorizationsData;
-import fr.avenirsesr.portfolio.authorization.domain.model.enums.EAuthorizationEntityType;
+import fr.avenirsesr.portfolio.common.authorization.domain.model.enums.EAuthorizationEntityType;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;

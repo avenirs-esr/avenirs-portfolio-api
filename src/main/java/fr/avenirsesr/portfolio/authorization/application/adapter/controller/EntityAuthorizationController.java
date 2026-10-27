@@ -4,8 +4,8 @@ import fr.avenirsesr.portfolio.authorization.application.adapter.dto.EntityAutho
 import fr.avenirsesr.portfolio.authorization.application.adapter.dto.ListAccessDTO;
 import fr.avenirsesr.portfolio.authorization.application.adapter.mapper.EntityAuthorizationDtoMapper;
 import fr.avenirsesr.portfolio.authorization.application.adapter.request.EntityAuthorizationsRequest;
-import fr.avenirsesr.portfolio.authorization.domain.model.enums.EAuthorizationEntityType;
 import fr.avenirsesr.portfolio.authorization.domain.port.input.EntityAuthorizationService;
+import fr.avenirsesr.portfolio.common.authorization.domain.model.enums.EAuthorizationEntityType;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Schema;

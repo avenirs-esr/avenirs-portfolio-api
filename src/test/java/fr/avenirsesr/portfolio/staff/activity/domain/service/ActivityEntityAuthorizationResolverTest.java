@@ -2,8 +2,8 @@ package fr.avenirsesr.portfolio.staff.activity.domain.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import fr.avenirsesr.portfolio.authorization.domain.model.enums.EAuthorization;
-import fr.avenirsesr.portfolio.authorization.domain.model.enums.EAuthorizationEntityType;
+import fr.avenirsesr.portfolio.common.authorization.domain.model.enums.EAuthorization;
+import fr.avenirsesr.portfolio.common.authorization.domain.model.enums.EAuthorizationEntityType;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import java.util.EnumSet;

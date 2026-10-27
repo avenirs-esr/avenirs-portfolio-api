@@ -8,9 +8,9 @@ import fr.avenirsesr.portfolio.authorization.application.adapter.dto.EntityAutho
 import fr.avenirsesr.portfolio.authorization.application.adapter.mapper.EntityAuthorizationDtoMapper;
 import fr.avenirsesr.portfolio.authorization.application.adapter.request.EntityAuthorizationsRequest;
 import fr.avenirsesr.portfolio.authorization.domain.data.EntityAuthorizationsData;
-import fr.avenirsesr.portfolio.authorization.domain.model.enums.EAuthorization;
-import fr.avenirsesr.portfolio.authorization.domain.model.enums.EAuthorizationEntityType;
 import fr.avenirsesr.portfolio.authorization.domain.port.input.EntityAuthorizationService;
+import fr.avenirsesr.portfolio.common.authorization.domain.model.enums.EAuthorization;
+import fr.avenirsesr.portfolio.common.authorization.domain.model.enums.EAuthorizationEntityType;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import java.util.List;
 import java.util.Set;
