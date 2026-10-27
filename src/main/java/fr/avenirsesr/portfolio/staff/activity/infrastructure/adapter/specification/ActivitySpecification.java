@@ -15,6 +15,7 @@ import jakarta.persistence.criteria.Subquery;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -105,6 +106,31 @@ public class ActivitySpecification {
               cb.equal(authorization.get("activityId"), root.get("id")),
               cb.equal(authorization.get("staff").get("id"), staffId),
               cb.isMember(right, authorization.<Set<EActivityRight>>get("rights")));
+      return cb.exists(subquery);
+    };
+  }
+
+  public static Specification<ActivityEntity> targetingAnyInstitution(
+      Collection<UUID> institutionIds) {
+    return (root, query, cb) -> {
+      Subquery<UUID> subquery = query.subquery(UUID.class);
+      Root<ActivityEntity> subRoot = subquery.from(ActivityEntity.class);
+      Join<ActivityEntity, UUID> targetJoin = subRoot.join("targetInstitutionIds");
+      subquery.select(targetJoin).where(cb.equal(subRoot, root), targetJoin.in(institutionIds));
+      return cb.exists(subquery);
+    };
+  }
+
+  public static Specification<ActivityEntity> withAuthorizationOfStaff(UUID staffId) {
+    return (root, query, cb) -> {
+      Subquery<Integer> subquery = query.subquery(Integer.class);
+      Root<ActivityAuthorizationEntity> authorization =
+          subquery.from(ActivityAuthorizationEntity.class);
+      subquery
+          .select(cb.literal(1))
+          .where(
+              cb.equal(authorization.get("activityId"), root.get("id")),
+              cb.equal(authorization.get("staff").get("id"), staffId));
       return cb.exists(subquery);
     };
   }

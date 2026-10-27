@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import fr.avenirsesr.portfolio.authorization.application.adapter.dto.EntityAuthorizationsDTO;
 import fr.avenirsesr.portfolio.authorization.domain.data.EntityAuthorizationsData;
-import fr.avenirsesr.portfolio.authorization.domain.model.enums.EAuthorization;
+import fr.avenirsesr.portfolio.common.authorization.domain.model.enums.EAuthorization;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import java.util.List;
 import java.util.Set;

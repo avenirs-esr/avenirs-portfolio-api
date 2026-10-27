@@ -1,8 +1,8 @@
 package fr.avenirsesr.portfolio.staff.activity.domain.service;
 
-import fr.avenirsesr.portfolio.authorization.domain.model.enums.EAuthorization;
-import fr.avenirsesr.portfolio.authorization.domain.model.enums.EAuthorizationEntityType;
 import fr.avenirsesr.portfolio.authorization.domain.port.output.EntityAuthorizationResolver;
+import fr.avenirsesr.portfolio.common.authorization.domain.model.enums.EAuthorization;
+import fr.avenirsesr.portfolio.common.authorization.domain.model.enums.EAuthorizationEntityType;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import java.util.Collection;
 import java.util.Map;
