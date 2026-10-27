@@ -275,14 +275,13 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     DeclaredActivity declaredActivity = fetchDeclaredActivityAsEvaluator(staff, declaredActivityId);
 
     DeclaredActivityAssessment currentAssessment = assessmentOf(declaredActivity);
-
-    if (currentAssessment.isSent()) {
-      throw new ActivityAssessmentException("This assessment has already been sent");
-    }
+    boolean alreadySent = currentAssessment.isSent();
 
     Instant now = Instant.now();
     DeclaredActivityAssessment assessment =
-        currentAssessment.send(comment, grade, validation, now, staff);
+        alreadySent
+            ? currentAssessment.modify(comment, grade, validation, now, staff)
+            : currentAssessment.send(comment, grade, validation, now, staff);
 
     ActivityAssessment setup = requireAssessmentSetup(declaredActivity.getActivity());
     validateAssessment(setup, assessment);
@@ -295,6 +294,11 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     }
 
     declaredActivityRepository.save(declaredActivity);
+
+    if (alreadySent) {
+      log.debug("Modified the assessment of declared activity [{}]", declaredActivityId);
+      return;
+    }
 
     notificationService.notify(
         new AssessmentSentNotification(declaredActivity.getStudent().getUser(), declaredActivity));

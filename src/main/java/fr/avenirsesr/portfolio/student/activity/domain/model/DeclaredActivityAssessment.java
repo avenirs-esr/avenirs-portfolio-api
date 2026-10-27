@@ -27,6 +27,12 @@ public record DeclaredActivityAssessment(
         comment, grade, validation, requestedAt, assessedAt, assessedBy, modifiedAt, consultedAt);
   }
 
+  public DeclaredActivityAssessment modify(
+      String comment, Integer grade, Boolean validation, Instant modifiedAt, Staff assessedBy) {
+    return new DeclaredActivityAssessment(
+        comment, grade, validation, requestedAt, assessedAt, assessedBy, modifiedAt, consultedAt);
+  }
+
   public DeclaredActivityAssessment consult(Instant consultedAt) {
     return new DeclaredActivityAssessment(
         comment, grade, validation, requestedAt, assessedAt, assessedBy, modifiedAt, consultedAt);

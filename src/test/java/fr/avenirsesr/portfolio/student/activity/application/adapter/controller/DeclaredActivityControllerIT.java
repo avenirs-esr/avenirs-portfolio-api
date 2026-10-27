@@ -835,7 +835,9 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .isNoContent();
 
     BddLogger.and("the student should have been notified");
-    JsonNode notification = findStudentNotificationOf(id);
+    List<JsonNode> notifications = findStudentNotificationsOf(id);
+    assertEquals(1, notifications.size());
+    JsonNode notification = notifications.getFirst();
     assertEquals("ASSESSMENT_SENT", notification.get("type").asText());
     assertEquals(title, notification.get("parameters").get("activityTitle").asText());
 
@@ -853,14 +855,45 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .isEqualTo("COMPLETED")
         .jsonPath("$.finishedAt")
         .exists();
+  }
 
-    BddLogger.and("sending it again should return 400");
-    sendAssessment(id, "{\"comment\":\"Autre version\",\"grade\":12}", staffPayload, staffSignature)
+  @Test
+  void shouldOverwriteASentAssessmentWithoutNotifyingTheStudentAgain() throws Exception {
+    BddLogger.given("a declared activity whose assessment was already sent");
+    String assessableActivityId =
+        publishAssessableActivity(
+            "Activité évaluée modification", "{\"comment\":true,\"grade\":20}");
+    String id = subscribeAndGetId(assessableActivityId);
+    enableStudentNotifications();
+
+    sendAssessment(id, "{\"comment\":\"Bon travail\",\"grade\":15}", staffPayload, staffSignature)
         .expectStatus()
-        .isBadRequest()
+        .isNoContent();
+
+    BddLogger.when("the evaluator sends another version of the assessment");
+    BddLogger.then("it should return 204");
+
+    sendAssessment(
+            id, "{\"comment\":\"Très bon travail\",\"grade\":17}", staffPayload, staffSignature)
+        .expectStatus()
+        .isNoContent();
+
+    BddLogger.and("the student should read the new version");
+    getDeclaredActivityDetails(id)
+        .expectStatus()
+        .isOk()
         .expectBody()
-        .jsonPath("$.code")
-        .isEqualTo("ACTIVITY_ASSESSMENT");
+        .jsonPath("$.assessment.comment")
+        .isEqualTo("Très bon travail")
+        .jsonPath("$.assessment.grade")
+        .isEqualTo(17)
+        .jsonPath("$.assessment.sentAt")
+        .exists()
+        .jsonPath("$.assessment.modifiedAt")
+        .exists();
+
+    BddLogger.and("the student should have been notified of the first sending only");
+    assertEquals(1, findStudentNotificationsOf(id).size());
   }
 
   @Test
@@ -1070,7 +1103,7 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .isNoContent();
   }
 
-  private JsonNode findStudentNotificationOf(String elementId) throws Exception {
+  private List<JsonNode> findStudentNotificationsOf(String elementId) throws Exception {
     String body =
         webTestClient
             .get()
@@ -1089,13 +1122,13 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
             .returnResult()
             .getResponseBody();
 
+    List<JsonNode> notifications = new ArrayList<>();
     for (JsonNode notification : objectMapper.readTree(body).get("data")) {
       if (elementId.equals(notification.get("elementId").asText())) {
-        return notification;
+        notifications.add(notification);
       }
     }
-
-    throw new AssertionError("No notification found for element " + elementId);
+    return notifications;
   }
 
   private String publishAssessableActivity(String title, String assessmentSetup) throws Exception {
