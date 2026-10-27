@@ -29,7 +29,7 @@ public interface ActivityAuthorizationService {
 
   boolean hasLoggedInStaffAnyRight();
 
-  boolean hasLoggedInStaffRightOnAnyActivity(EActivityRight right);
+  boolean hasLoggedInStaffAuthorizationOnAnyActivity(EActivityRight right);
 
   List<ActivityAuthorization> getActivityAuthorizations(UUID activityId);
 
