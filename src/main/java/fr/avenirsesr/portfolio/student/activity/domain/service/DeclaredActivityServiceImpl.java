@@ -1,19 +1,24 @@
 package fr.avenirsesr.portfolio.student.activity.domain.service;
 
 import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.RICH_TEXT_LENGTH;
+import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.requireNotBlankAndMaxLength;
+import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.requireNotNull;
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateDateOrder;
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateOptionalEnrichedTextMaxLength;
+import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateOptionalTextMaxLength;
 
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.notification.domain.model.enums.ENotificationType;
+import fr.avenirsesr.portfolio.notification.domain.model.notification.AssessmentSentNotification;
 import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityAssessmentException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityUnpublishedException;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAssessment;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityAuthorizationService;
@@ -54,6 +59,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @AllArgsConstructor
 public class DeclaredActivityServiceImpl implements DeclaredActivityService {
+  private static final int MIN_ASSESSMENT_GRADE = 0;
+
   private final DeclaredActivityRepository declaredActivityRepository;
   private final ActivityService activityService;
   private final AssociationService associationService;
@@ -252,6 +259,107 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
       declaredActivity.setStartedAt(Instant.now());
     }
     declaredActivityRepository.save(declaredActivity);
+  }
+
+  @Override
+  public void sendAssessment(
+      UUID declaredActivityId, String comment, Integer grade, Boolean validation) {
+    Staff staff = loggedInUserService.getLoggedInStaff();
+    DeclaredActivity declaredActivity = fetchDeclaredActivityAsEvaluator(staff, declaredActivityId);
+
+    DeclaredActivityAssessment currentAssessment = assessmentOf(declaredActivity);
+
+    if (currentAssessment.isSent()) {
+      throw new ActivityAssessmentException("This assessment has already been sent");
+    }
+
+    Instant now = Instant.now();
+    DeclaredActivityAssessment assessment =
+        currentAssessment.send(comment, grade, validation, now, staff);
+
+    ActivityAssessment setup = requireAssessmentSetup(declaredActivity.getActivity());
+    validateAssessment(setup, assessment);
+    requireCompleteAssessment(setup, assessment);
+
+    declaredActivity.setAssessment(assessment);
+
+    if (declaredActivity.getFinishedAt().isEmpty()) {
+      declaredActivity.setFinishedAt(now);
+    }
+
+    declaredActivityRepository.save(declaredActivity);
+
+    notificationService.notify(
+        new AssessmentSentNotification(declaredActivity.getStudent().getUser(), declaredActivity));
+
+    log.debug(
+        "Sent the assessment of declared activity [{}] to student [{}]",
+        declaredActivityId,
+        declaredActivity.getStudent().getId());
+  }
+
+  private DeclaredActivity fetchDeclaredActivityAsEvaluator(Staff staff, UUID declaredActivityId) {
+    DeclaredActivity declaredActivity =
+        declaredActivityRepository
+            .findById(declaredActivityId)
+            .orElseThrow(DeclaredActivityNotFoundException::new);
+
+    activityAuthorizationService.checkRight(
+        staff, declaredActivity.getActivity().getId(), EActivityRight.EVALUATION);
+
+    return declaredActivity;
+  }
+
+  private DeclaredActivityAssessment assessmentOf(DeclaredActivity declaredActivity) {
+    return declaredActivity
+        .getAssessment()
+        .orElseGet(
+            () ->
+                DeclaredActivityAssessment.requested(
+                    declaredActivity.getSubmittedAt().orElse(null)));
+  }
+
+  private ActivityAssessment requireAssessmentSetup(Activity activity) {
+    return activity
+        .getAssessment()
+        .filter(activityAssessment -> !activityAssessment.isEmpty())
+        .orElseThrow(
+            () -> new ActivityAssessmentException("This activity does not expect an assessment"));
+  }
+
+  private void requireCompleteAssessment(
+      ActivityAssessment setup, DeclaredActivityAssessment assessment) {
+    if (setup.isCommentEnabled()) {
+      requireNotBlankAndMaxLength("comment", assessment.comment(), RICH_TEXT_LENGTH);
+    }
+    if (setup.isGradeEnabled()) {
+      requireNotNull("grade", assessment.grade());
+    }
+    if (setup.isValidationEnabled()) {
+      requireNotNull("validation", assessment.validation());
+    }
+  }
+
+  private void validateAssessment(ActivityAssessment setup, DeclaredActivityAssessment assessment) {
+    validateOptionalTextMaxLength("comment", assessment.comment(), RICH_TEXT_LENGTH);
+
+    if (assessment.comment() != null && !setup.isCommentEnabled()) {
+      throw new ActivityAssessmentException("This activity does not expect an assessment comment");
+    }
+    if (assessment.validation() != null && !setup.isValidationEnabled()) {
+      throw new ActivityAssessmentException(
+          "This activity does not expect an assessment validation");
+    }
+    if (assessment.grade() != null) {
+      if (!setup.isGradeEnabled()) {
+        throw new ActivityAssessmentException("This activity does not expect an assessment grade");
+      }
+      if (assessment.grade() < MIN_ASSESSMENT_GRADE || assessment.grade() > setup.grade()) {
+        throw new ActivityAssessmentException(
+            "The assessment grade must be between %d and %d"
+                .formatted(MIN_ASSESSMENT_GRADE, setup.grade()));
+      }
+    }
   }
 
   @Override
@@ -567,6 +675,8 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
 
     associationService.deleteAllOf(List.of(declaredActivityId), DeclaredActivity.class);
     notificationService.deleteNotificationsOf(ENotificationType.ASK_FOR_FEEDBACK, feedbackIds);
+    notificationService.deleteNotificationsOf(
+        ENotificationType.ASSESSMENT_SENT, List.of(declaredActivityId));
     feedbackService.deleteByDeclaredActivityId(declaredActivity);
     declaredActivityRepository.removeFromDatabase(declaredActivity);
 
@@ -594,6 +704,8 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     notificationService.deleteNotificationsOf(ENotificationType.ASK_FOR_FEEDBACK, feedbackIds);
     notificationService.deleteNotificationsOf(
         ENotificationType.ACTIVITY_MODIFIED, declaredActivityIds);
+    notificationService.deleteNotificationsOf(
+        ENotificationType.ASSESSMENT_SENT, declaredActivityIds);
     declaredActivityRepository.removeAllFromDatabase(declaredActivities);
 
     log.debug(

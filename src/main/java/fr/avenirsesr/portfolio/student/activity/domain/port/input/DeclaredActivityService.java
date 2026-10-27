@@ -40,6 +40,8 @@ public interface DeclaredActivityService {
 
   void updateReflection(UUID declaredActivityId, String reflection);
 
+  void sendAssessment(UUID declaredActivityId, String comment, Integer grade, Boolean validation);
+
   DeclaredActivityDetailsData getDeclaredActivityDetails(UUID declaredActivityId);
 
   DeclaredActivityAssessmentDetailsData getAssessmentDetails(UUID declaredActivityId);

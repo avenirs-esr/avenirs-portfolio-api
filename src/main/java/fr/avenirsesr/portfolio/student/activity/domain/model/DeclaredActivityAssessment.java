@@ -14,4 +14,14 @@ public record DeclaredActivityAssessment(
   public static DeclaredActivityAssessment requested(Instant requestedAt) {
     return new DeclaredActivityAssessment(null, null, null, requestedAt, null, null);
   }
+
+  public boolean isSent() {
+    return assessedAt != null;
+  }
+
+  public DeclaredActivityAssessment send(
+      String comment, Integer grade, Boolean validation, Instant assessedAt, Staff assessedBy) {
+    return new DeclaredActivityAssessment(
+        comment, grade, validation, requestedAt, assessedAt, assessedBy);
+  }
 }
