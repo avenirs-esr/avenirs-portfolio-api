@@ -2259,7 +2259,7 @@ class ActivityServiceImplTest {
         BddLogger.then("the submitted declared activities should be returned with their status");
 
         when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
-        when(activityAuthorizationService.hasLoggedInStaffRightOnAnyActivity(
+        when(activityAuthorizationService.hasLoggedInStaffAuthorizationOnAnyActivity(
                 EActivityRight.EVALUATION))
             .thenReturn(true);
 
@@ -2286,7 +2286,7 @@ class ActivityServiceImplTest {
         BddLogger.then("a staff without any evaluation right should not be allowed");
 
         when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
-        when(activityAuthorizationService.hasLoggedInStaffRightOnAnyActivity(
+        when(activityAuthorizationService.hasLoggedInStaffAuthorizationOnAnyActivity(
                 EActivityRight.EVALUATION))
             .thenReturn(false);
 

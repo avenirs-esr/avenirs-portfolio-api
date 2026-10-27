@@ -92,7 +92,7 @@ public class ActivityAuthorizationServiceImpl implements ActivityAuthorizationSe
   }
 
   @Override
-  public boolean hasLoggedInStaffRightOnAnyActivity(EActivityRight right) {
+  public boolean hasLoggedInStaffAuthorizationOnAnyActivity(EActivityRight right) {
     return loggedInStaff()
         .map(staff -> activityAuthorizationRepository.existsByStaffIdAndRight(staff.getId(), right))
         .orElse(false);

@@ -957,7 +957,7 @@ public class ActivityServiceImpl implements ActivityService {
       List<EDeclaredActivityStatus> statuses, PageCriteria pageCriteria) {
     Staff staff = loggedInUserService.getLoggedInStaff();
 
-    if (!activityAuthorizationService.hasLoggedInStaffRightOnAnyActivity(
+    if (!activityAuthorizationService.hasLoggedInStaffAuthorizationOnAnyActivity(
         EActivityRight.EVALUATION)) {
       throw new UserNotAuthorizedException();
     }
