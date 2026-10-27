@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ActivityUserEntityAuthorizationReader.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.staff.activity.domain.service</a> &gt; <span class="el_source">ActivityUserEntityAuthorizationReader.java</span></div><h1>ActivityUserEntityAuthorizationReader.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.staff.activity.domain.service;
+
+import fr.avenirsesr.portfolio.authorization.domain.data.UserEntityAuthorizationsData;
+import fr.avenirsesr.portfolio.authorization.domain.port.output.UserEntityAuthorizationReader;
+import fr.avenirsesr.portfolio.common.authorization.domain.model.enums.EAuthorization;
+import fr.avenirsesr.portfolio.common.authorization.domain.model.enums.EAuthorizationEntityType;
+import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAuthorizationSummary;
+import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityAuthorizationRepository;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
+
+@AllArgsConstructor
+public class ActivityUserEntityAuthorizationReader implements UserEntityAuthorizationReader {
+  private final ActivityAuthorizationRepository activityAuthorizationRepository;
+
+  @Override
+  public EAuthorizationEntityType entityType() {
+<span class="fc" id="L22">    return EAuthorizationEntityType.ACTIVITY;</span>
+  }
+
+  @Override
+  public boolean hasAny(UUID staffId, Set&lt;UUID&gt; institutionIds) {
+<span class="nc" id="L27">    return activityAuthorizationRepository.existsByStaffIdAndTargetInstitutionIds(</span>
+        staffId, institutionIds);
+  }
+
+  @Override
+  public PagedResult&lt;UserEntityAuthorizationsData&gt; findPage(
+      UUID staffId, Set&lt;UUID&gt; institutionIds, PageCriteria pageCriteria) {
+<span class="nc" id="L34">    PagedResult&lt;ActivityAuthorizationSummary&gt; page =</span>
+<span class="nc" id="L35">        activityAuthorizationRepository.findPageByStaffIdAndTargetInstitutionIds(</span>
+            staffId, institutionIds, pageCriteria);
+<span class="nc" id="L37">    return new PagedResult&lt;&gt;(</span>
+<span class="nc" id="L38">        page.content().stream()</span>
+<span class="nc" id="L39">            .map(</span>
+                summary -&gt;
+<span class="nc" id="L41">                    new UserEntityAuthorizationsData(</span>
+<span class="nc" id="L42">                        summary.activityId(),</span>
+<span class="nc" id="L43">                        summary.activityTitle(),</span>
+<span class="nc" id="L44">                        summary.rights().stream()</span>
+<span class="nc" id="L45">                            .map(right -&gt; EAuthorization.valueOf(right.name()))</span>
+<span class="nc" id="L46">                            .collect(Collectors.toSet())))</span>
+<span class="nc" id="L47">            .toList(),</span>
+<span class="nc" id="L48">        page.pageInfo());</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
