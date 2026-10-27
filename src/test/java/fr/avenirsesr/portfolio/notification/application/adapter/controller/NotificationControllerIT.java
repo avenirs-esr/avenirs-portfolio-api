@@ -143,7 +143,9 @@ public class NotificationControllerIT extends ContainerConfigurationTest {
     BddLogger.when("GET /me/notifications/STUDENT is called");
     webTestClient
         .get()
-        .uri(BASE_PATH + "/STUDENT")
+        .uri(
+            uriBuilder ->
+                uriBuilder.path(BASE_PATH + "/STUDENT").queryParam("pageSize", 100).build())
         .header("X-Signed-Context", studentPayload)
         .header("X-Context-Signature", studentSignature)
         .accept(MediaType.APPLICATION_JSON)
@@ -151,10 +153,12 @@ public class NotificationControllerIT extends ContainerConfigurationTest {
         .expectStatus()
         .isOk()
         .expectBody()
-        .jsonPath("$.data")
-        .isArray()
-        .jsonPath("$.page.totalElements")
-        .isEqualTo(4);
+        .jsonPath("$.data[?(@.id == '" + studentNotificationId + "')]")
+        .exists()
+        .jsonPath("$.data[?(@.id == '" + universalNotificationId + "')]")
+        .exists()
+        .jsonPath("$.data[?(@.id == '" + staffNotificationId + "')]")
+        .doesNotExist();
   }
 
   @Test
