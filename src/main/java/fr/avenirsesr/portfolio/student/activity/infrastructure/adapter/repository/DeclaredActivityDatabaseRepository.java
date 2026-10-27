@@ -6,6 +6,8 @@ import static fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.sp
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
@@ -87,12 +89,15 @@ public class DeclaredActivityDatabaseRepository
       String keyword,
       List<EActivityThematic> thematic,
       List<EActivityStatus> status,
+      SortCriteria sortCriteria,
       PageCriteria pageCriteria,
       Boolean isValorized,
       FetchGraph fetchGraph) {
-    var sort =
-        Sort.by(Sort.Direction.ASC, "isFinishedOrder")
-            .and(Sort.by(Sort.Direction.DESC, "updatedAt"));
+
+    Sort.Direction direction =
+        sortCriteria.order() == ESortOrder.ASC ? Sort.Direction.ASC : Sort.Direction.DESC;
+    var sort = Sort.by(Sort.Direction.ASC, "isFinishedOrder").and(Sort.by(direction, "updatedAt"));
+
     return findAll(
         hasStudent(student)
             .and(

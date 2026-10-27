@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.service;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
@@ -32,8 +33,10 @@ public class TransactionalDeclaredActivityService implements DeclaredActivitySer
       String keyword,
       List<EActivityThematic> thematic,
       List<EActivityStatus> status,
+      SortCriteria sortCriterias,
       Boolean isValorized) {
-    return delegate.getDeclaredActivities(pageCriteria, keyword, thematic, status, isValorized);
+    return delegate.getDeclaredActivities(
+        pageCriteria, keyword, thematic, status, sortCriterias, isValorized);
   }
 
   @Override

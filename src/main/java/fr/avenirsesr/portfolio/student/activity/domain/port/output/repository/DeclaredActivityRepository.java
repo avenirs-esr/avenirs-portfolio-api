@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.student.activity.domain.port.output.repository;
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.port.output.repository.GenericRepositoryPort;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
@@ -33,6 +34,7 @@ public interface DeclaredActivityRepository extends GenericRepositoryPort<Declar
       String keyword,
       List<EActivityThematic> thematic,
       List<EActivityStatus> status,
+      SortCriteria sortCriterias,
       PageCriteria pageCriteria,
       Boolean isValorized,
       FetchGraph fetchGraph);
