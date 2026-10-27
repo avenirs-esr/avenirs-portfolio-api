@@ -836,6 +836,76 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .isNotFound();
   }
 
+  @Test
+  void shouldExposeTheSentAssessmentToTheStudentOnly() throws Exception {
+    BddLogger.given("a declared activity on an activity expecting a comment and a grade");
+    String assessableActivityId =
+        publishAssessableActivity(
+            "Activité évaluée consultation", "{\"comment\":true,\"grade\":20}");
+    String id = subscribeAndGetId(assessableActivityId);
+
+    BddLogger.when("the student gets its details before any assessment is sent");
+    BddLogger.then("no assessment should be exposed");
+
+    getDeclaredActivityDetails(id)
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.assessment")
+        .doesNotExist();
+
+    BddLogger.and("once the evaluator sends it, the student should receive it");
+    sendAssessment(id, "{\"comment\":\"Bon travail\",\"grade\":15}", staffPayload, staffSignature)
+        .expectStatus()
+        .isNoContent();
+
+    getDeclaredActivityDetails(id)
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.assessment.grade")
+        .isEqualTo(15)
+        .jsonPath("$.assessment.maxGrade")
+        .isEqualTo(20)
+        .jsonPath("$.assessment.comment")
+        .isEqualTo("Bon travail")
+        .jsonPath("$.assessment.sentAt")
+        .exists()
+        .jsonPath("$.assessment.modifiedAt")
+        .doesNotExist()
+        .jsonPath("$.assessment.assessedBy.firstName")
+        .exists()
+        .jsonPath("$.assessment.assessedBy.lastName")
+        .exists();
+
+    BddLogger.and("reading it again should still expose it");
+    getDeclaredActivityDetails(id)
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.assessment.comment")
+        .isEqualTo("Bon travail");
+
+    BddLogger.and("another student should not reach those details");
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/" + id)
+        .header("X-Signed-Context", secondStudentPayload)
+        .header("X-Context-Signature", secondStudentSignature)
+        .exchange()
+        .expectStatus()
+        .isForbidden();
+  }
+
+  private ResponseSpec getDeclaredActivityDetails(String declaredActivityId) {
+    return webTestClient
+        .get()
+        .uri(BASE_PATH + "/" + declaredActivityId)
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Signature", studentSignature)
+        .exchange();
+  }
+
   private ResponseSpec sendAssessment(
       String assessedDeclaredActivityId, String body, String payload, String signature) {
     return webTestClient

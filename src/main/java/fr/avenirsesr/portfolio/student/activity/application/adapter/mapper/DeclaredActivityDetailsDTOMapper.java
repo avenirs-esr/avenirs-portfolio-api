@@ -1,12 +1,17 @@
 package fr.avenirsesr.portfolio.student.activity.application.adapter.mapper;
 
+import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.FileDTO;
 import fr.avenirsesr.portfolio.shared.application.adapter.mapper.OptionalMapper;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityContentDtoMapper;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAssessment;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.DeclaredActivityDetailsDTO;
+import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.ReceivedAssessmentDTO;
 import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityDetailsData;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
+import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivityAssessment;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
+import fr.avenirsesr.portfolio.user.application.adapter.dto.UserInfoDTO;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +37,9 @@ public interface DeclaredActivityDetailsDTOMapper {
   @Mapping(source = "data.declaredActivity.valorized", target = "valorized")
   @Mapping(source = "data.declaredActivity.createdAt", target = "createdAt")
   @Mapping(source = "data.declaredActivity.updatedAt", target = "updatedAt")
+  @Mapping(
+      target = "assessment",
+      expression = "java(toReceivedAssessment(data.declaredActivity()))")
   DeclaredActivityDetailsDTO toDTO(
       DeclaredActivityDetailsData data, EDeclaredActivityStatus status);
 
@@ -48,6 +56,9 @@ public interface DeclaredActivityDetailsDTOMapper {
   @Mapping(source = "data.declaredActivity.valorized", target = "valorized")
   @Mapping(source = "data.declaredActivity.createdAt", target = "createdAt")
   @Mapping(source = "data.declaredActivity.updatedAt", target = "updatedAt")
+  @Mapping(
+      target = "assessment",
+      expression = "java(toReceivedAssessment(data.declaredActivity()))")
   DeclaredActivityDetailsDTO toDTO(
       DeclaredActivityDetailsData data, EDeclaredActivityStatus status, List<FileDTO> files);
 
@@ -55,7 +66,33 @@ public interface DeclaredActivityDetailsDTOMapper {
   @Mapping(source = "valorized", target = "valorized")
   @Mapping(target = "status", ignore = true)
   @Mapping(target = "feedbacks", ignore = true)
+  @Mapping(target = "assessment", ignore = true)
   DeclaredActivityDetailsDTO toDTO(DeclaredActivity declaredActivity);
+
+  UserInfoDTO toUserInfoDTO(User user);
+
+  default ReceivedAssessmentDTO toReceivedAssessment(DeclaredActivity declaredActivity) {
+    return declaredActivity
+        .getAssessment()
+        .filter(DeclaredActivityAssessment::isSent)
+        .map(
+            assessment ->
+                new ReceivedAssessmentDTO(
+                    assessment.grade(),
+                    declaredActivity
+                        .getActivity()
+                        .getAssessment()
+                        .map(ActivityAssessment::grade)
+                        .orElse(null),
+                    assessment.validation(),
+                    assessment.comment(),
+                    assessment.assessedAt(),
+                    assessment.modifiedAt(),
+                    assessment.assessedBy() == null
+                        ? null
+                        : toUserInfoDTO(assessment.assessedBy().getUser())))
+        .orElse(null);
+  }
 
   default Instant unwrap(Optional<Instant> value) {
     return value == null ? null : value.orElse(null);
