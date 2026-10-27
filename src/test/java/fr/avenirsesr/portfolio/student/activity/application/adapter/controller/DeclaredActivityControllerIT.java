@@ -23,6 +23,7 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
 
   private static final String BASE_PATH = "/me/activity-progress";
   private static final String FEEDBACK_BASE_PATH = BASE_PATH + "/feedbacks";
+  private static final String ACTIVITY_BASE_PATH = "/me/activities";
 
   @Autowired private WebTestClient webTestClient;
   @Autowired private ObjectMapper objectMapper;
@@ -123,7 +124,7 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
     byte[] response =
         webTestClient
             .get()
-            .uri(BASE_PATH)
+            .uri(uriBuilder -> uriBuilder.path(BASE_PATH).queryParam("pageSize", 100).build())
             .header("X-Signed-Context", studentPayload)
             .header("X-Context-Signature", studentSignature)
             .exchange()
@@ -159,7 +160,13 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
 
     webTestClient
         .get()
-        .uri(uriBuilder -> uriBuilder.path(BASE_PATH).queryParam("keyword", title).build())
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(BASE_PATH)
+                    .queryParam("keyword", title)
+                    .queryParam("pageSize", 100)
+                    .build())
         .header("X-Signed-Context", studentPayload)
         .header("X-Context-Signature", studentSignature)
         .exchange()
@@ -702,6 +709,228 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .exchange()
         .expectStatus()
         .isNotFound();
+  }
+
+  @Test
+  void shouldSendTheAssessmentAndNotifyTheStudent() throws Exception {
+    BddLogger.given("a declared activity on an activity expecting a comment and a grade");
+    String title = "Activité évaluée envoi";
+    String assessableActivityId =
+        publishAssessableActivity(title, "{\"comment\":true,\"grade\":20}");
+    String id = subscribeAndGetId(assessableActivityId);
+    enableStudentNotifications();
+
+    BddLogger.when("the evaluator sends an assessment");
+    BddLogger.then("it should return 204");
+
+    sendAssessment(id, "{\"comment\":\"Bon travail\",\"grade\":15}", staffPayload, staffSignature)
+        .expectStatus()
+        .isNoContent();
+
+    BddLogger.and("the student should have been notified");
+    JsonNode notification = findStudentNotificationOf(id);
+    assertEquals("ASSESSMENT_SENT", notification.get("type").asText());
+    assertEquals(title, notification.get("parameters").get("activityTitle").asText());
+
+    BddLogger.and("the declared activity should be completed");
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/" + id)
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.status")
+        .isEqualTo("COMPLETED")
+        .jsonPath("$.finishedAt")
+        .exists();
+
+    BddLogger.and("sending it again should return 400");
+    sendAssessment(id, "{\"comment\":\"Autre version\",\"grade\":12}", staffPayload, staffSignature)
+        .expectStatus()
+        .isBadRequest()
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("ACTIVITY_ASSESSMENT");
+  }
+
+  @Test
+  void shouldRejectAnIncompleteAssessment() throws Exception {
+    BddLogger.given("a declared activity on an activity expecting a comment and a grade");
+    String assessableActivityId =
+        publishAssessableActivity("Activité évaluée incomplète", "{\"comment\":true,\"grade\":20}");
+    String id = subscribeAndGetId(assessableActivityId);
+
+    BddLogger.when("the evaluator sends an assessment without grade");
+    BddLogger.then("it should return 400");
+
+    sendAssessment(id, "{\"comment\":\"Bon travail\"}", staffPayload, staffSignature)
+        .expectStatus()
+        .isBadRequest()
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("NOT_NULL");
+  }
+
+  @Test
+  void shouldRejectAnAssessmentFieldThatIsNotEnabled() throws Exception {
+    BddLogger.given("a declared activity on an activity expecting a comment only");
+    String assessableActivityId =
+        publishAssessableActivity("Activité évaluée commentaire", "{\"comment\":true}");
+    String id = subscribeAndGetId(assessableActivityId);
+
+    BddLogger.when("the evaluator sends an assessment holding a grade");
+    BddLogger.then("it should return 400");
+
+    sendAssessment(id, "{\"comment\":\"Bon travail\",\"grade\":15}", staffPayload, staffSignature)
+        .expectStatus()
+        .isBadRequest()
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("ACTIVITY_ASSESSMENT");
+  }
+
+  @Test
+  void shouldRejectAnAssessmentOnAnActivityExpectingNone() throws Exception {
+    BddLogger.given("a declared activity on an activity expecting no assessment");
+    String assessableActivityId = publishAssessableActivity("Activité sans évaluation", "{}");
+    String id = subscribeAndGetId(assessableActivityId);
+
+    BddLogger.when("the evaluator sends an assessment");
+    BddLogger.then("it should return 400");
+
+    sendAssessment(id, "{\"comment\":\"Bon travail\"}", staffPayload, staffSignature)
+        .expectStatus()
+        .isBadRequest()
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("ACTIVITY_ASSESSMENT");
+  }
+
+  @Test
+  void shouldRejectTheAssessmentOfAStaffWithoutTheEvaluationRight() throws Exception {
+    BddLogger.given("a declared activity on an activity another staff does not evaluate");
+    String assessableActivityId =
+        publishAssessableActivity("Activité évaluée droits", "{\"comment\":true}");
+    String id = subscribeAndGetId(assessableActivityId);
+
+    BddLogger.when("that other staff sends an assessment");
+    BddLogger.then("it should return 403");
+
+    sendAssessment(id, "{\"comment\":\"Bon travail\"}", anotherStaffPayload, anotherStaffSignature)
+        .expectStatus()
+        .isForbidden();
+  }
+
+  @Test
+  void shouldReturnNotFoundWhenAssessingAnUnknownDeclaredActivity() {
+    BddLogger.given("an unknown declared activity");
+
+    BddLogger.when("the evaluator sends an assessment");
+    BddLogger.then("it should return 404");
+
+    sendAssessment(notFoundId, "{\"comment\":\"Bon travail\"}", staffPayload, staffSignature)
+        .expectStatus()
+        .isNotFound();
+  }
+
+  private ResponseSpec sendAssessment(
+      String assessedDeclaredActivityId, String body, String payload, String signature) {
+    return webTestClient
+        .put()
+        .uri(BASE_PATH + "/" + assessedDeclaredActivityId + "/assessment")
+        .header("X-Signed-Context", payload)
+        .header("X-Context-Signature", signature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(body)
+        .exchange();
+  }
+
+  private void enableStudentNotifications() {
+    webTestClient
+        .patch()
+        .uri("/me/preferences/notification")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue("{\"notificationEnabled\":true}")
+        .exchange()
+        .expectStatus()
+        .isNoContent();
+  }
+
+  private JsonNode findStudentNotificationOf(String elementId) throws Exception {
+    String body =
+        webTestClient
+            .get()
+            .uri(
+                uriBuilder ->
+                    uriBuilder
+                        .path("/me/notifications/STUDENT")
+                        .queryParam("pageSize", 100)
+                        .build())
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Signature", studentSignature)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    for (JsonNode notification : objectMapper.readTree(body).get("data")) {
+      if (elementId.equals(notification.get("elementId").asText())) {
+        return notification;
+      }
+    }
+
+    throw new AssertionError("No notification found for element " + elementId);
+  }
+
+  private String publishAssessableActivity(String title, String assessmentSetup) throws Exception {
+    String creation =
+        webTestClient
+            .post()
+            .uri(ACTIVITY_BASE_PATH + "/draft")
+            .header("X-Signed-Context", staffPayload)
+            .header("X-Context-Signature", staffSignature)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue("{\"title\":\"" + title + "\"}")
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+    String draftId = objectMapper.readTree(creation).get("draftId").asText();
+
+    webTestClient
+        .patch()
+        .uri(ACTIVITY_BASE_PATH + "/" + draftId)
+        .header("X-Signed-Context", staffPayload)
+        .header("X-Context-Signature", staffSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(
+            "{\"thematic\":\"EXPERIENCES\",\"summary\":\"Un résumé valide pour la publication\","
+                + "\"description\":\"Une consigne valide pour la publication\",\"assessment\":"
+                + assessmentSetup
+                + "}")
+        .exchange()
+        .expectStatus()
+        .isOk();
+
+    webTestClient
+        .post()
+        .uri(ACTIVITY_BASE_PATH + "/publish/" + draftId)
+        .header("X-Signed-Context", staffPayload)
+        .header("X-Context-Signature", staffSignature)
+        .exchange()
+        .expectStatus()
+        .isOk();
+
+    return draftId;
   }
 
   private String askForFeedbackAndGetId(String declaredActivityId) throws Exception {

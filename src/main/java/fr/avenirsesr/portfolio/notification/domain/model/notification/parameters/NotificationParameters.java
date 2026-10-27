@@ -3,7 +3,7 @@ package fr.avenirsesr.portfolio.notification.domain.model.notification.parameter
 import java.util.List;
 
 public sealed interface NotificationParameters
-    permits AskForFeedbackParameters, ActivityModifiedParameters {
+    permits AskForFeedbackParameters, ActivityModifiedParameters, AssessmentSentParameters {
 
   List<String> toStringList();
 }

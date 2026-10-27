@@ -18,6 +18,7 @@ import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.notification.domain.model.enums.ENotificationType;
+import fr.avenirsesr.portfolio.notification.domain.model.notification.AssessmentSentNotification;
 import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityAssessmentException;
@@ -33,6 +34,7 @@ import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityDeta
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackData;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.*;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
+import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivityAssessment;
 import fr.avenirsesr.portfolio.student.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
@@ -100,6 +102,323 @@ class DeclaredActivityServiceImplTest {
             traceService,
             skillProgressService,
             declaredExperienceService);
+  }
+
+  @Test
+  void sendAssessment_should_send_the_assessment_and_notify_the_student() {
+    BddLogger.given("An evaluator and a declared activity whose activity expects a graded comment");
+    Staff staff = StaffFixture.create().toModel();
+    Activity activity =
+        ActivityFixture.create().withAssessment(new ActivityAssessment(true, 20, null)).toModel();
+    DeclaredActivity declaredActivity = declaredActivityWith(activity, null);
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+    when(declaredActivityRepository.findById(declaredActivityId))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("He sends an assessment");
+    service.sendAssessment(declaredActivityId, "Bon travail", 15, null);
+
+    BddLogger.then(
+        "The assessment is set, the declared activity finished and the student notified");
+    verify(activityAuthorizationService)
+        .checkRight(staff, activity.getId(), EActivityRight.EVALUATION);
+    verify(declaredActivityRepository).save(activityCaptor.capture());
+
+    assertThat(activityCaptor.getValue().getAssessment())
+        .hasValueSatisfying(
+            sent -> {
+              assertThat(sent.comment()).isEqualTo("Bon travail");
+              assertThat(sent.grade()).isEqualTo(15);
+              assertThat(sent.validation()).isNull();
+              assertThat(sent.assessedAt()).isNotNull();
+              assertThat(sent.assessedBy()).isEqualTo(staff);
+            });
+    assertThat(activityCaptor.getValue().getFinishedAt()).isPresent();
+
+    ArgumentCaptor<AssessmentSentNotification> notificationCaptor = ArgumentCaptor.captor();
+    verify(notificationService).notify(notificationCaptor.capture());
+
+    var notification = notificationCaptor.getValue().build();
+    assertThat(notification.getType()).isEqualTo(ENotificationType.ASSESSMENT_SENT);
+    assertThat(notification.getUser()).isEqualTo(student.getUser());
+    assertThat(notification.getElementId()).isEqualTo(declaredActivityId);
+  }
+
+  @Test
+  void sendAssessment_should_keep_the_date_at_which_the_assessment_was_requested() {
+    BddLogger.given("An evaluator and a declared activity submitted for assessment a day ago");
+    Instant requestedAt = Instant.now().minus(Duration.ofDays(1));
+    Activity activity =
+        ActivityFixture.create().withAssessment(new ActivityAssessment(true, null, null)).toModel();
+    DeclaredActivity declaredActivity =
+        declaredActivityWith(activity, DeclaredActivityAssessment.requested(requestedAt));
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(StaffFixture.create().toModel());
+    when(declaredActivityRepository.findById(declaredActivityId))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("He sends an assessment");
+    service.sendAssessment(declaredActivityId, "Bon travail", null, null);
+
+    BddLogger.then("The assessment keeps its request date");
+    verify(declaredActivityRepository).save(activityCaptor.capture());
+
+    assertThat(activityCaptor.getValue().getAssessment())
+        .hasValueSatisfying(sent -> assertThat(sent.requestedAt()).isEqualTo(requestedAt));
+  }
+
+  @Test
+  void sendAssessment_should_keep_the_date_at_which_the_declared_activity_was_finished() {
+    BddLogger.given("An evaluator and a declared activity finished a week ago");
+    Instant finishedAt = Instant.now().minus(Duration.ofDays(7));
+    Activity activity =
+        ActivityFixture.create().withAssessment(new ActivityAssessment(true, null, null)).toModel();
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.toDomain(
+            declaredActivityId,
+            student,
+            activity,
+            null,
+            null,
+            null,
+            null,
+            finishedAt,
+            Instant.now(),
+            false,
+            null,
+            null,
+            Instant.now(),
+            Instant.now());
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(StaffFixture.create().toModel());
+    when(declaredActivityRepository.findById(declaredActivityId))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("He sends an assessment");
+    service.sendAssessment(declaredActivityId, "Bon travail", null, null);
+
+    BddLogger.then("The declared activity keeps its own completion date");
+    verify(declaredActivityRepository).save(activityCaptor.capture());
+
+    assertThat(activityCaptor.getValue().getFinishedAt()).contains(finishedAt);
+  }
+
+  @Test
+  void sendAssessment_should_accept_a_grade_of_zero() {
+    BddLogger.given("An evaluator and a declared activity graded out of 20");
+    Activity activity =
+        ActivityFixture.create().withAssessment(new ActivityAssessment(null, 20, null)).toModel();
+    DeclaredActivity declaredActivity = declaredActivityWith(activity, null);
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(StaffFixture.create().toModel());
+    when(declaredActivityRepository.findById(declaredActivityId))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("He sends an assessment graded zero");
+    service.sendAssessment(declaredActivityId, null, 0, null);
+
+    BddLogger.then("The assessment is set");
+    verify(declaredActivityRepository).save(activityCaptor.capture());
+
+    assertThat(activityCaptor.getValue().getAssessment())
+        .hasValueSatisfying(sent -> assertThat(sent.grade()).isZero());
+  }
+
+  @Test
+  void sendAssessment_should_throw_FieldValidationException_when_the_comment_is_missing() {
+    BddLogger.given("An evaluator and a declared activity whose activity expects a comment");
+    Activity activity =
+        ActivityFixture.create().withAssessment(new ActivityAssessment(true, null, null)).toModel();
+    DeclaredActivity declaredActivity = declaredActivityWith(activity, null);
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(StaffFixture.create().toModel());
+    when(declaredActivityRepository.findById(declaredActivityId))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("He sends an assessment without comment");
+
+    BddLogger.then("A FieldValidationException is thrown and nothing is sent");
+    FieldValidationException exception =
+        Assertions.assertThrows(
+            FieldValidationException.class,
+            () -> service.sendAssessment(declaredActivityId, null, null, null));
+
+    Assertions.assertEquals(EErrorCode.NOT_BLANK, exception.getErrorCode());
+    verify(declaredActivityRepository, never()).save(any());
+    verify(notificationService, never()).notify(any());
+  }
+
+  @Test
+  void sendAssessment_should_throw_FieldValidationException_when_the_grade_is_missing() {
+    BddLogger.given("An evaluator and a declared activity whose activity expects a grade");
+    Activity activity =
+        ActivityFixture.create().withAssessment(new ActivityAssessment(null, 20, null)).toModel();
+    DeclaredActivity declaredActivity = declaredActivityWith(activity, null);
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(StaffFixture.create().toModel());
+    when(declaredActivityRepository.findById(declaredActivityId))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("He sends an assessment without grade");
+
+    BddLogger.then("A FieldValidationException is thrown and nothing is sent");
+    FieldValidationException exception =
+        Assertions.assertThrows(
+            FieldValidationException.class,
+            () -> service.sendAssessment(declaredActivityId, null, null, null));
+
+    Assertions.assertEquals(EErrorCode.NOT_NULL, exception.getErrorCode());
+    verify(declaredActivityRepository, never()).save(any());
+    verify(notificationService, never()).notify(any());
+  }
+
+  @Test
+  void sendAssessment_should_throw_ActivityAssessmentException_when_a_field_is_disabled() {
+    BddLogger.given("An evaluator and a declared activity expecting a comment only");
+    Activity activity =
+        ActivityFixture.create().withAssessment(new ActivityAssessment(true, null, null)).toModel();
+    DeclaredActivity declaredActivity = declaredActivityWith(activity, null);
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(StaffFixture.create().toModel());
+    when(declaredActivityRepository.findById(declaredActivityId))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("He sends an assessment holding a grade");
+
+    BddLogger.then("An ActivityAssessmentException is thrown and nothing is sent");
+    assertThatThrownBy(() -> service.sendAssessment(declaredActivityId, "Bon travail", 15, null))
+        .isInstanceOf(ActivityAssessmentException.class);
+
+    verify(declaredActivityRepository, never()).save(any());
+    verify(notificationService, never()).notify(any());
+  }
+
+  @Test
+  void sendAssessment_should_throw_ActivityAssessmentException_when_the_grade_is_out_of_range() {
+    BddLogger.given("An evaluator and a declared activity graded out of 10");
+    Activity activity =
+        ActivityFixture.create().withAssessment(new ActivityAssessment(null, 10, null)).toModel();
+    DeclaredActivity declaredActivity = declaredActivityWith(activity, null);
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(StaffFixture.create().toModel());
+    when(declaredActivityRepository.findById(declaredActivityId))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("He sends an assessment graded above the scale");
+
+    BddLogger.then("An ActivityAssessmentException is thrown and nothing is sent");
+    assertThatThrownBy(() -> service.sendAssessment(declaredActivityId, null, 11, null))
+        .isInstanceOf(ActivityAssessmentException.class);
+
+    verify(declaredActivityRepository, never()).save(any());
+    verify(notificationService, never()).notify(any());
+  }
+
+  @Test
+  void sendAssessment_should_throw_ActivityAssessmentException_when_no_assessment_is_expected() {
+    BddLogger.given("An evaluator and a declared activity whose activity expects no assessment");
+    DeclaredActivity declaredActivity =
+        declaredActivityWith(ActivityFixture.create().toModel(), null);
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(StaffFixture.create().toModel());
+    when(declaredActivityRepository.findById(declaredActivityId))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("He sends an assessment");
+
+    BddLogger.then("An ActivityAssessmentException is thrown and nothing is sent");
+    assertThatThrownBy(() -> service.sendAssessment(declaredActivityId, "Bon travail", null, null))
+        .isInstanceOf(ActivityAssessmentException.class);
+
+    verify(declaredActivityRepository, never()).save(any());
+    verify(notificationService, never()).notify(any());
+  }
+
+  @Test
+  void sendAssessment_should_throw_ActivityAssessmentException_when_it_was_already_sent() {
+    BddLogger.given("An evaluator and a declared activity holding a sent assessment");
+    Activity activity =
+        ActivityFixture.create().withAssessment(new ActivityAssessment(true, null, null)).toModel();
+    DeclaredActivity declaredActivity =
+        declaredActivityWith(
+            activity,
+            new DeclaredActivityAssessment(
+                "Envoyé", null, null, null, Instant.now(), StaffFixture.create().toModel()));
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(StaffFixture.create().toModel());
+    when(declaredActivityRepository.findById(declaredActivityId))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("He sends an assessment again");
+
+    BddLogger.then("An ActivityAssessmentException is thrown and nothing is sent");
+    assertThatThrownBy(
+            () -> service.sendAssessment(declaredActivityId, "Autre version", null, null))
+        .isInstanceOf(ActivityAssessmentException.class);
+
+    verify(declaredActivityRepository, never()).save(any());
+    verify(notificationService, never()).notify(any());
+  }
+
+  @Test
+  void sendAssessment_should_throw_UserNotAuthorizedException_without_the_evaluation_right() {
+    BddLogger.given("A staff member without the evaluation right on the activity");
+    Staff staff = StaffFixture.create().toModel();
+    Activity activity =
+        ActivityFixture.create().withAssessment(new ActivityAssessment(true, null, null)).toModel();
+    DeclaredActivity declaredActivity = declaredActivityWith(activity, null);
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+    when(declaredActivityRepository.findById(declaredActivityId))
+        .thenReturn(Optional.of(declaredActivity));
+    doThrow(new UserNotAuthorizedException())
+        .when(activityAuthorizationService)
+        .checkRight(staff, activity.getId(), EActivityRight.EVALUATION);
+
+    BddLogger.when("He sends an assessment");
+
+    BddLogger.then("A UserNotAuthorizedException is thrown and nothing is sent");
+    assertThatThrownBy(() -> service.sendAssessment(declaredActivityId, "Bon travail", null, null))
+        .isInstanceOf(UserNotAuthorizedException.class);
+
+    verify(declaredActivityRepository, never()).save(any());
+    verify(notificationService, never()).notify(any());
+  }
+
+  @Test
+  void sendAssessment_should_throw_DeclaredActivityNotFoundException_when_it_does_not_exist() {
+    BddLogger.given("An evaluator and an unknown declared activity");
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(StaffFixture.create().toModel());
+    when(declaredActivityRepository.findById(declaredActivityId)).thenReturn(Optional.empty());
+
+    BddLogger.when("He sends an assessment");
+
+    BddLogger.then("A DeclaredActivityNotFoundException is thrown and nothing is sent");
+    assertThatThrownBy(() -> service.sendAssessment(declaredActivityId, "Bon travail", null, null))
+        .isInstanceOf(DeclaredActivityNotFoundException.class);
+
+    verify(declaredActivityRepository, never()).save(any());
+    verify(notificationService, never()).notify(any());
+  }
+
+  private DeclaredActivity declaredActivityWith(
+      Activity activity, DeclaredActivityAssessment assessment) {
+    return DeclaredActivity.toDomain(
+        declaredActivityId,
+        student,
+        activity,
+        null,
+        null,
+        null,
+        null,
+        null,
+        Instant.now(),
+        false,
+        null,
+        assessment,
+        Instant.now(),
+        Instant.now());
   }
 
   @Test
