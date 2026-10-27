@@ -1,16 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ActivityAuthorizationDatabaseRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.repository</a> &gt; <span class="el_source">ActivityAuthorizationDatabaseRepository.java</span></div><h1>ActivityAuthorizationDatabaseRepository.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.repository;
 
+import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAuthorization;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAuthorizationSummary;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityAuthorizationRepository;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.mapper.ActivityAuthorizationMapper;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityAuthorizationEntity;
+import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityEntity;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.specification.ActivityAuthorizationSpecification;
+import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.specification.ActivitySpecification;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -18,73 +31,120 @@ public class ActivityAuthorizationDatabaseRepository
     extends GenericJpaRepositoryAdapter&lt;ActivityAuthorization, ActivityAuthorizationEntity&gt;
     implements ActivityAuthorizationRepository {
   private final ActivityAuthorizationJpaRepository jpaRepository;
+  private final ActivityJpaRepository activityJpaRepository;
 
   protected ActivityAuthorizationDatabaseRepository(
-      ActivityAuthorizationJpaRepository jpaRepository) {
-<span class="fc" id="L24">    super(</span>
+      ActivityAuthorizationJpaRepository jpaRepository,
+      ActivityJpaRepository activityJpaRepository) {
+<span class="fc" id="L39">    super(</span>
         jpaRepository,
         jpaRepository,
         ActivityAuthorizationEntity.class,
         ActivityAuthorizationMapper.INSTANCE);
-<span class="fc" id="L29">    this.jpaRepository = jpaRepository;</span>
-<span class="fc" id="L30">  }</span>
+<span class="fc" id="L44">    this.jpaRepository = jpaRepository;</span>
+<span class="fc" id="L45">    this.activityJpaRepository = activityJpaRepository;</span>
+<span class="fc" id="L46">  }</span>
 
   @Override
   public List&lt;ActivityAuthorization&gt; findAllByActivityId(UUID activityId) {
-<span class="fc" id="L34">    return jpaRepository.findAllByActivityId(activityId).stream()</span>
-<span class="fc" id="L35">        .map(ActivityAuthorizationMapper.INSTANCE::toDomain)</span>
-<span class="fc" id="L36">        .toList();</span>
+<span class="fc" id="L50">    return jpaRepository.findAllByActivityId(activityId).stream()</span>
+<span class="fc" id="L51">        .map(ActivityAuthorizationMapper.INSTANCE::toDomain)</span>
+<span class="fc" id="L52">        .toList();</span>
   }
 
   @Override
   public Optional&lt;ActivityAuthorization&gt; findByActivityIdAndStaffId(UUID activityId, UUID staffId) {
-<span class="fc" id="L41">    return jpaRepository</span>
-<span class="fc" id="L42">        .findByActivityIdAndStaff_Id(activityId, staffId)</span>
-<span class="fc" id="L43">        .map(ActivityAuthorizationMapper.INSTANCE::toDomain);</span>
+<span class="fc" id="L57">    return jpaRepository</span>
+<span class="fc" id="L58">        .findByActivityIdAndStaff_Id(activityId, staffId)</span>
+<span class="fc" id="L59">        .map(ActivityAuthorizationMapper.INSTANCE::toDomain);</span>
   }
 
   @Override
   public List&lt;ActivityAuthorization&gt; findAllByActivityIds(Collection&lt;UUID&gt; activityIds) {
-<span class="pc bpc" id="L48" title="1 of 2 branches missed.">    if (activityIds.isEmpty()) {</span>
-<span class="nc" id="L49">      return List.of();</span>
+<span class="pc bpc" id="L64" title="1 of 2 branches missed.">    if (activityIds.isEmpty()) {</span>
+<span class="nc" id="L65">      return List.of();</span>
     }
-<span class="fc" id="L51">    return jpaRepository.findAllByActivityIdIn(activityIds).stream()</span>
-<span class="fc" id="L52">        .map(ActivityAuthorizationMapper.INSTANCE::toDomain)</span>
-<span class="fc" id="L53">        .toList();</span>
-  }
-
-  @Override
-  public List&lt;ActivityAuthorization&gt; findAllByActivityIdsAndStaffId(
-      Collection&lt;UUID&gt; activityIds, UUID staffId) {
-<span class="pc bpc" id="L59" title="1 of 2 branches missed.">    if (activityIds.isEmpty()) {</span>
-<span class="nc" id="L60">      return List.of();</span>
-    }
-<span class="fc" id="L62">    return jpaRepository</span>
-<span class="fc" id="L63">        .findAll(</span>
-<span class="fc" id="L64">            ActivityAuthorizationSpecification.&lt;ActivityAuthorizationEntity&gt;withEntityIdIn(</span>
-                    &quot;activityId&quot;, activityIds)
-<span class="fc" id="L66">                .and(ActivityAuthorizationSpecification.withStaffId(staffId)))</span>
-<span class="fc" id="L67">        .stream()</span>
+<span class="fc" id="L67">    return jpaRepository.findAllByActivityIdIn(activityIds).stream()</span>
 <span class="fc" id="L68">        .map(ActivityAuthorizationMapper.INSTANCE::toDomain)</span>
 <span class="fc" id="L69">        .toList();</span>
   }
 
   @Override
+  public List&lt;ActivityAuthorization&gt; findAllByActivityIdsAndStaffId(
+      Collection&lt;UUID&gt; activityIds, UUID staffId) {
+<span class="pc bpc" id="L75" title="1 of 2 branches missed.">    if (activityIds.isEmpty()) {</span>
+<span class="nc" id="L76">      return List.of();</span>
+    }
+<span class="fc" id="L78">    return jpaRepository</span>
+<span class="fc" id="L79">        .findAll(</span>
+<span class="fc" id="L80">            ActivityAuthorizationSpecification.&lt;ActivityAuthorizationEntity&gt;withEntityIdIn(</span>
+                    &quot;activityId&quot;, activityIds)
+<span class="fc" id="L82">                .and(ActivityAuthorizationSpecification.withStaffId(staffId)))</span>
+<span class="fc" id="L83">        .stream()</span>
+<span class="fc" id="L84">        .map(ActivityAuthorizationMapper.INSTANCE::toDomain)</span>
+<span class="fc" id="L85">        .toList();</span>
+  }
+
+  @Override
   public boolean existsByStaffId(UUID staffId) {
-<span class="nc" id="L74">    return jpaRepository.exists(</span>
-<span class="nc" id="L75">        ActivityAuthorizationSpecification.&lt;ActivityAuthorizationEntity&gt;withStaffId(staffId));</span>
+<span class="nc" id="L90">    return jpaRepository.exists(</span>
+<span class="nc" id="L91">        ActivityAuthorizationSpecification.&lt;ActivityAuthorizationEntity&gt;withStaffId(staffId));</span>
   }
 
   @Override
   public boolean existsByStaffIdAndRight(UUID staffId, EActivityRight right) {
-<span class="fc" id="L80">    return jpaRepository.exists(</span>
-<span class="fc" id="L81">        ActivityAuthorizationSpecification.&lt;ActivityAuthorizationEntity&gt;withStaffId(staffId)</span>
-<span class="fc" id="L82">            .and(ActivityAuthorizationSpecification.withRight(right)));</span>
+<span class="fc" id="L96">    return jpaRepository.exists(</span>
+<span class="fc" id="L97">        ActivityAuthorizationSpecification.&lt;ActivityAuthorizationEntity&gt;withStaffId(staffId)</span>
+<span class="fc" id="L98">            .and(ActivityAuthorizationSpecification.withRight(right)));</span>
   }
 
   @Override
   public void deleteAllByActivityId(UUID activityId) {
-<span class="fc" id="L87">    jpaRepository.deleteAllByActivityId(activityId);</span>
-<span class="fc" id="L88">  }</span>
+<span class="fc" id="L103">    jpaRepository.deleteAllByActivityId(activityId);</span>
+<span class="fc" id="L104">  }</span>
+
+  @Override
+  public boolean existsByStaffIdAndTargetInstitutionIds(
+      UUID staffId, Collection&lt;UUID&gt; institutionIds) {
+<span class="fc bfc" id="L109" title="All 2 branches covered.">    return !institutionIds.isEmpty()</span>
+<span class="fc bfc" id="L110" title="All 2 branches covered.">        &amp;&amp; activityJpaRepository.exists(visibleToStaff(staffId, institutionIds));</span>
+  }
+
+  @Override
+  public PagedResult&lt;ActivityAuthorizationSummary&gt; findPageByStaffIdAndTargetInstitutionIds(
+      UUID staffId, Collection&lt;UUID&gt; institutionIds, PageCriteria pageCriteria) {
+<span class="fc" id="L116">    var pageRequest =</span>
+<span class="fc" id="L117">        PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), Sort.by(&quot;title&quot;, &quot;id&quot;));</span>
+<span class="fc bfc" id="L118" title="All 2 branches covered.">    if (institutionIds.isEmpty()) {</span>
+<span class="fc" id="L119">      return new PagedResult&lt;&gt;(</span>
+<span class="fc" id="L120">          List.of(), new PageInfo(pageRequest.getPageNumber(), pageRequest.getPageSize(), 0));</span>
+    }
+<span class="fc" id="L122">    Page&lt;ActivityEntity&gt; page =</span>
+<span class="fc" id="L123">        activityJpaRepository.findAll(visibleToStaff(staffId, institutionIds), pageRequest);</span>
+<span class="fc" id="L124">    Map&lt;UUID, Set&lt;EActivityRight&gt;&gt; rightsByActivityId =</span>
+<span class="fc" id="L125">        findAllByActivityIdsAndStaffId(</span>
+<span class="fc" id="L126">                page.getContent().stream().map(ActivityEntity::getId).toList(), staffId)</span>
+<span class="fc" id="L127">            .stream()</span>
+<span class="fc" id="L128">            .collect(</span>
+<span class="fc" id="L129">                Collectors.toMap(</span>
+                    ActivityAuthorization::getActivityId, ActivityAuthorization::getRights));
+<span class="fc" id="L131">    return new PagedResult&lt;&gt;(</span>
+<span class="fc" id="L132">        page.getContent().stream()</span>
+<span class="fc" id="L133">            .map(</span>
+                row -&gt;
+<span class="fc" id="L135">                    new ActivityAuthorizationSummary(</span>
+<span class="fc" id="L136">                        row.getId(),</span>
+<span class="fc" id="L137">                        row.getTitle(),</span>
+<span class="fc" id="L138">                        rightsByActivityId.getOrDefault(row.getId(), Set.of())))</span>
+<span class="fc" id="L139">            .toList(),</span>
+        new PageInfo(
+<span class="fc" id="L141">            pageRequest.getPageNumber(), pageRequest.getPageSize(), page.getTotalElements()));</span>
+  }
+
+  private static Specification&lt;ActivityEntity&gt; visibleToStaff(
+      UUID staffId, Collection&lt;UUID&gt; institutionIds) {
+<span class="fc" id="L146">    return ActivitySpecification.withAuthorizationOfStaff(staffId)</span>
+<span class="fc" id="L147">        .and(ActivitySpecification.targetingAnyInstitution(institutionIds));</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
