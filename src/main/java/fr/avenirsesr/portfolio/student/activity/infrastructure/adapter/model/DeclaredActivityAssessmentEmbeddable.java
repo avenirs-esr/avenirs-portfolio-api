@@ -40,4 +40,10 @@ public class DeclaredActivityAssessmentEmbeddable {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "assessment_assessed_by_id")
   private StaffEntity assessedBy;
+
+  @Column(name = "assessment_modified_at")
+  private Instant modifiedAt;
+
+  @Column(name = "assessment_consulted_at")
+  private Instant consultedAt;
 }

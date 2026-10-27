@@ -310,6 +310,17 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     return declaredActivity;
   }
 
+  private void consultSentAssessment(DeclaredActivity declaredActivity) {
+    declaredActivity
+        .getAssessment()
+        .filter(DeclaredActivityAssessment::isSent)
+        .ifPresent(
+            assessment -> {
+              declaredActivity.setAssessment(assessment.consult(Instant.now()));
+              declaredActivityRepository.save(declaredActivity);
+            });
+  }
+
   private DeclaredActivityAssessment assessmentOf(DeclaredActivity declaredActivity) {
     return declaredActivity
         .getAssessment()
@@ -366,6 +377,9 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   public DeclaredActivityDetailsData getDeclaredActivityDetails(UUID declaredActivityId) {
     DeclaredActivity declaredActivity =
         fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
+
+    consultSentAssessment(declaredActivity);
+
     List<FeedbackData> feedbacks =
         feedbackRepository.findAllByDeclaredActivityId(declaredActivityId).stream()
             .map(

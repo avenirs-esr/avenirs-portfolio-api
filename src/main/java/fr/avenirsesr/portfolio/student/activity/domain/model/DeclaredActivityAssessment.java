@@ -9,10 +9,12 @@ public record DeclaredActivityAssessment(
     Boolean validation,
     Instant requestedAt,
     Instant assessedAt,
-    Staff assessedBy) {
+    Staff assessedBy,
+    Instant modifiedAt,
+    Instant consultedAt) {
 
   public static DeclaredActivityAssessment requested(Instant requestedAt) {
-    return new DeclaredActivityAssessment(null, null, null, requestedAt, null, null);
+    return new DeclaredActivityAssessment(null, null, null, requestedAt, null, null, null, null);
   }
 
   public boolean isSent() {
@@ -22,6 +24,11 @@ public record DeclaredActivityAssessment(
   public DeclaredActivityAssessment send(
       String comment, Integer grade, Boolean validation, Instant assessedAt, Staff assessedBy) {
     return new DeclaredActivityAssessment(
-        comment, grade, validation, requestedAt, assessedAt, assessedBy);
+        comment, grade, validation, requestedAt, assessedAt, assessedBy, modifiedAt, consultedAt);
+  }
+
+  public DeclaredActivityAssessment consult(Instant consultedAt) {
+    return new DeclaredActivityAssessment(
+        comment, grade, validation, requestedAt, assessedAt, assessedBy, modifiedAt, consultedAt);
   }
 }

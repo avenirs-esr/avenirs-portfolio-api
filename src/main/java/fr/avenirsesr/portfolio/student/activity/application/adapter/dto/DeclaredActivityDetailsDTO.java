@@ -20,4 +20,5 @@ public record DeclaredActivityDetailsDTO(
     boolean valorized,
     Instant createdAt,
     Instant updatedAt,
-    List<FeedbackOverviewDTO> feedbacks) {}
+    List<FeedbackOverviewDTO> feedbacks,
+    ReceivedAssessmentDTO assessment) {}

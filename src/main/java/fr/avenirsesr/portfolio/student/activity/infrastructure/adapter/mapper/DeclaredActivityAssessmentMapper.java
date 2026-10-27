@@ -18,7 +18,9 @@ public class DeclaredActivityAssessmentMapper
         domain.validation(),
         domain.requestedAt(),
         domain.assessedAt(),
-        domain.assessedBy() == null ? null : StaffMapper.INSTANCE.fromDomain(domain.assessedBy()));
+        domain.assessedBy() == null ? null : StaffMapper.INSTANCE.fromDomain(domain.assessedBy()),
+        domain.modifiedAt(),
+        domain.consultedAt());
   }
 
   @Override
@@ -31,6 +33,8 @@ public class DeclaredActivityAssessmentMapper
         entity.getAssessedAt(),
         entity.getAssessedBy() == null
             ? null
-            : StaffMapper.INSTANCE.toDomain(entity.getAssessedBy()));
+            : StaffMapper.INSTANCE.toDomain(entity.getAssessedBy()),
+        entity.getModifiedAt(),
+        entity.getConsultedAt());
   }
 }

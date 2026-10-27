@@ -344,7 +344,14 @@ class DeclaredActivityServiceImplTest {
         declaredActivityWith(
             activity,
             new DeclaredActivityAssessment(
-                "Envoyé", null, null, null, Instant.now(), StaffFixture.create().toModel()));
+                "Envoyé",
+                null,
+                null,
+                null,
+                Instant.now(),
+                StaffFixture.create().toModel(),
+                null,
+                null));
 
     when(loggedInUserService.getLoggedInStaff()).thenReturn(StaffFixture.create().toModel());
     when(declaredActivityRepository.findById(declaredActivityId))
@@ -1210,6 +1217,88 @@ class DeclaredActivityServiceImplTest {
     assertThat(result.feedbacks()).isEmpty();
     verify(feedbackRepository).findAllByDeclaredActivityId(declaredActivityId);
     verifyNoInteractions(feedbackService);
+  }
+
+  @Test
+  void getDeclaredActivityDetails_should_set_the_consultation_date_of_a_sent_assessment() {
+    BddLogger.given("A logged-in student and his declared activity holding a sent assessment");
+    Activity activity =
+        ActivityFixture.create().withAssessment(new ActivityAssessment(true, 20, null)).toModel();
+    DeclaredActivity declaredActivity =
+        declaredActivityWith(
+            activity,
+            DeclaredActivityAssessment.requested(null)
+                .send("Bon travail", 15, null, Instant.now(), StaffFixture.create().toModel()));
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+    when(feedbackRepository.findAllByDeclaredActivityId(declaredActivityId)).thenReturn(List.of());
+
+    BddLogger.when("He requests the details of that declared activity");
+    service.getDeclaredActivityDetails(declaredActivityId);
+
+    BddLogger.then("The assessment keeps its content and gets a consultation date");
+    verify(declaredActivityRepository).save(activityCaptor.capture());
+
+    assertThat(activityCaptor.getValue().getAssessment())
+        .hasValueSatisfying(
+            consulted -> {
+              assertThat(consulted.comment()).isEqualTo("Bon travail");
+              assertThat(consulted.grade()).isEqualTo(15);
+              assertThat(consulted.consultedAt()).isNotNull();
+            });
+  }
+
+  @Test
+  void getDeclaredActivityDetails_should_update_the_consultation_date_on_each_read() {
+    BddLogger.given("A logged-in student and his declared activity consulted a week ago");
+    Instant lastConsultedAt = Instant.now().minus(Duration.ofDays(7));
+    Activity activity =
+        ActivityFixture.create().withAssessment(new ActivityAssessment(true, 20, null)).toModel();
+    DeclaredActivity declaredActivity =
+        declaredActivityWith(
+            activity,
+            DeclaredActivityAssessment.requested(null)
+                .send("Bon travail", 15, null, Instant.now(), StaffFixture.create().toModel())
+                .consult(lastConsultedAt));
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+    when(feedbackRepository.findAllByDeclaredActivityId(declaredActivityId)).thenReturn(List.of());
+
+    BddLogger.when("He requests the details of that declared activity again");
+    service.getDeclaredActivityDetails(declaredActivityId);
+
+    BddLogger.then("The consultation date moves to the latest read");
+    verify(declaredActivityRepository).save(activityCaptor.capture());
+
+    assertThat(activityCaptor.getValue().getAssessment())
+        .hasValueSatisfying(
+            consulted -> assertThat(consulted.consultedAt()).isAfter(lastConsultedAt));
+  }
+
+  @Test
+  void getDeclaredActivityDetails_should_not_consult_an_assessment_not_sent_yet() {
+    BddLogger.given("A logged-in student and his declared activity submitted for assessment");
+    Activity activity =
+        ActivityFixture.create().withAssessment(new ActivityAssessment(true, 20, null)).toModel();
+    DeclaredActivity declaredActivity =
+        declaredActivityWith(activity, DeclaredActivityAssessment.requested(Instant.now()));
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+    when(feedbackRepository.findAllByDeclaredActivityId(declaredActivityId)).thenReturn(List.of());
+
+    BddLogger.when("He requests the details of that declared activity");
+    service.getDeclaredActivityDetails(declaredActivityId);
+
+    BddLogger.then("No consultation date is set and nothing is saved");
+    assertThat(declaredActivity.getAssessment())
+        .hasValueSatisfying(assessment -> assertThat(assessment.consultedAt()).isNull());
+    verify(declaredActivityRepository, never()).save(any());
   }
 
   @Test

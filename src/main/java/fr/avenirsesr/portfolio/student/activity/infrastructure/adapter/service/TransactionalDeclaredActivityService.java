@@ -85,6 +85,7 @@ public class TransactionalDeclaredActivityService implements DeclaredActivitySer
     delegate.sendAssessment(declaredActivityId, comment, grade, validation);
   }
 
+  @Transactional
   @Override
   public DeclaredActivityDetailsData getDeclaredActivityDetails(UUID declaredActivityId) {
     return delegate.getDeclaredActivityDetails(declaredActivityId);
