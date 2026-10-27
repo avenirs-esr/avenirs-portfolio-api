@@ -15,123 +15,97 @@ import jakarta.persistence.criteria.Subquery;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import org.springframework.data.jpa.domain.Specification;
 
-<span class="nc" id="L24">public class ActivitySpecification {</span>
+<span class="nc" id="L23">public class ActivitySpecification {</span>
   public static Specification&lt;ActivityEntity&gt; isPublished() {
-<span class="fc" id="L26">    return (root, query, criteriaBuilder) -&gt;</span>
-<span class="fc" id="L27">        criteriaBuilder.equal(root.get(&quot;status&quot;), EActivityStatus.PUBLISHED);</span>
+<span class="fc" id="L25">    return (root, query, criteriaBuilder) -&gt;</span>
+<span class="fc" id="L26">        criteriaBuilder.equal(root.get(&quot;status&quot;), EActivityStatus.PUBLISHED);</span>
   }
 
   public static Specification&lt;ActivityEntity&gt; withThematic(EActivityThematic thematic) {
-<span class="fc" id="L31">    return (root, query, criteriaBuilder) -&gt; criteriaBuilder.equal(root.get(&quot;thematic&quot;), thematic);</span>
+<span class="fc" id="L30">    return (root, query, criteriaBuilder) -&gt; criteriaBuilder.equal(root.get(&quot;thematic&quot;), thematic);</span>
   }
 
   public static Specification&lt;ActivityEntity&gt; latest(Duration duration) {
-<span class="nc" id="L35">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="nc" id="L36">      Instant threshold = Instant.now().minus(duration);</span>
-<span class="nc" id="L37">      return criteriaBuilder.greaterThan(root.get(&quot;createdAt&quot;), threshold);</span>
+<span class="nc" id="L34">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="nc" id="L35">      Instant threshold = Instant.now().minus(duration);</span>
+<span class="nc" id="L36">      return criteriaBuilder.greaterThan(root.get(&quot;createdAt&quot;), threshold);</span>
     };
   }
 
   public static Specification&lt;ActivityEntity&gt; exclude(List&lt;ActivityEntity&gt; activities) {
-<span class="nc" id="L42">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="nc bnc" id="L43" title="All 4 branches missed.">      if (activities == null || activities.isEmpty()) {</span>
-<span class="nc" id="L44">        return criteriaBuilder.conjunction();</span>
+<span class="nc" id="L41">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="nc bnc" id="L42" title="All 4 branches missed.">      if (activities == null || activities.isEmpty()) {</span>
+<span class="nc" id="L43">        return criteriaBuilder.conjunction();</span>
       }
-<span class="nc" id="L46">      return root.in(activities).not();</span>
+<span class="nc" id="L45">      return root.in(activities).not();</span>
     };
   }
 
   public static Specification&lt;ActivityEntity&gt; visibleByInstitutions(List&lt;UUID&gt; institutionIds) {
-<span class="fc" id="L51">    return visibleByTarget(&quot;targetInstitutionIds&quot;, institutionIds);</span>
+<span class="fc" id="L50">    return visibleByTarget(&quot;targetInstitutionIds&quot;, institutionIds);</span>
   }
 
   public static Specification&lt;ActivityEntity&gt; visibleByGroups(List&lt;UUID&gt; groupIds) {
-<span class="fc" id="L55">    return visibleByTarget(&quot;targetGroupIds&quot;, groupIds);</span>
+<span class="fc" id="L54">    return visibleByTarget(&quot;targetGroupIds&quot;, groupIds);</span>
   }
 
   private static Specification&lt;ActivityEntity&gt; visibleByTarget(
       String targetAttribute, List&lt;UUID&gt; studentIds) {
-<span class="fc" id="L60">    return (root, query, cb) -&gt; {</span>
-<span class="fc" id="L61">      Predicate noTarget = cb.isEmpty(root.get(targetAttribute));</span>
-<span class="pc bpc" id="L62" title="1 of 4 branches missed.">      if (studentIds == null || studentIds.isEmpty()) {</span>
-<span class="fc" id="L63">        return noTarget;</span>
+<span class="fc" id="L59">    return (root, query, cb) -&gt; {</span>
+<span class="fc" id="L60">      Predicate noTarget = cb.isEmpty(root.get(targetAttribute));</span>
+<span class="pc bpc" id="L61" title="1 of 4 branches missed.">      if (studentIds == null || studentIds.isEmpty()) {</span>
+<span class="fc" id="L62">        return noTarget;</span>
       }
 
-<span class="fc" id="L66">      Subquery&lt;UUID&gt; subquery = query.subquery(UUID.class);</span>
-<span class="fc" id="L67">      Root&lt;ActivityEntity&gt; subRoot = subquery.from(ActivityEntity.class);</span>
-<span class="fc" id="L68">      Join&lt;ActivityEntity, UUID&gt; targetJoin = subRoot.join(targetAttribute);</span>
-<span class="fc" id="L69">      subquery.select(targetJoin).where(cb.equal(subRoot, root), targetJoin.in(studentIds));</span>
+<span class="fc" id="L65">      Subquery&lt;UUID&gt; subquery = query.subquery(UUID.class);</span>
+<span class="fc" id="L66">      Root&lt;ActivityEntity&gt; subRoot = subquery.from(ActivityEntity.class);</span>
+<span class="fc" id="L67">      Join&lt;ActivityEntity, UUID&gt; targetJoin = subRoot.join(targetAttribute);</span>
+<span class="fc" id="L68">      subquery.select(targetJoin).where(cb.equal(subRoot, root), targetJoin.in(studentIds));</span>
 
-<span class="fc" id="L71">      return cb.or(noTarget, cb.exists(subquery));</span>
+<span class="fc" id="L70">      return cb.or(noTarget, cb.exists(subquery));</span>
     };
   }
 
   public static Specification&lt;ActivityEntity&gt; hasFeedback(
       UUID staffId, EFeedbackStatus... statuses) {
-<span class="fc" id="L77">    return (root, query, cb) -&gt; {</span>
-<span class="fc" id="L78">      Subquery&lt;Integer&gt; subquery = query.subquery(Integer.class);</span>
-<span class="fc" id="L79">      Root&lt;FeedbackEntity&gt; feedback = subquery.from(FeedbackEntity.class);</span>
-<span class="fc" id="L80">      Join&lt;FeedbackEntity, DeclaredActivityEntity&gt; declaredActivity =</span>
-<span class="fc" id="L81">          feedback.join(&quot;declaredActivity&quot;);</span>
+<span class="fc" id="L76">    return (root, query, cb) -&gt; {</span>
+<span class="fc" id="L77">      Subquery&lt;Integer&gt; subquery = query.subquery(Integer.class);</span>
+<span class="fc" id="L78">      Root&lt;FeedbackEntity&gt; feedback = subquery.from(FeedbackEntity.class);</span>
+<span class="fc" id="L79">      Join&lt;FeedbackEntity, DeclaredActivityEntity&gt; declaredActivity =</span>
+<span class="fc" id="L80">          feedback.join(&quot;declaredActivity&quot;);</span>
 
-<span class="fc" id="L83">      List&lt;Predicate&gt; predicates = new ArrayList&lt;&gt;(2);</span>
-<span class="fc" id="L84">      predicates.add(cb.equal(declaredActivity.get(&quot;activity&quot;), root));</span>
+<span class="fc" id="L82">      List&lt;Predicate&gt; predicates = new ArrayList&lt;&gt;(2);</span>
+<span class="fc" id="L83">      predicates.add(cb.equal(declaredActivity.get(&quot;activity&quot;), root));</span>
 
-<span class="pc bpc" id="L86" title="1 of 4 branches missed.">      if (statuses != null &amp;&amp; statuses.length &gt; 0) {</span>
-<span class="fc" id="L87">        predicates.add(feedback.get(&quot;status&quot;).in((Object[]) statuses));</span>
+<span class="pc bpc" id="L85" title="1 of 4 branches missed.">      if (statuses != null &amp;&amp; statuses.length &gt; 0) {</span>
+<span class="fc" id="L86">        predicates.add(feedback.get(&quot;status&quot;).in((Object[]) statuses));</span>
       }
 
-<span class="fc" id="L90">      subquery.select(cb.literal(1)).where(predicates.toArray(Predicate[]::new));</span>
+<span class="fc" id="L89">      subquery.select(cb.literal(1)).where(predicates.toArray(Predicate[]::new));</span>
 
-<span class="fc" id="L92">      return cb.and(</span>
-<span class="fc" id="L93">          cb.exists(subquery),</span>
-<span class="fc" id="L94">          staffHasRight(staffId, EActivityRight.FEEDBACK).toPredicate(root, query, cb));</span>
+<span class="fc" id="L91">      return cb.and(</span>
+<span class="fc" id="L92">          cb.exists(subquery),</span>
+<span class="fc" id="L93">          staffHasRight(staffId, EActivityRight.FEEDBACK).toPredicate(root, query, cb));</span>
     };
   }
 
   public static Specification&lt;ActivityEntity&gt; staffHasRight(UUID staffId, EActivityRight right) {
-<span class="fc" id="L99">    return (root, query, cb) -&gt; {</span>
-<span class="fc" id="L100">      Subquery&lt;Integer&gt; subquery = query.subquery(Integer.class);</span>
-<span class="fc" id="L101">      Root&lt;ActivityAuthorizationEntity&gt; authorization =</span>
-<span class="fc" id="L102">          subquery.from(ActivityAuthorizationEntity.class);</span>
-<span class="fc" id="L103">      subquery</span>
-<span class="fc" id="L104">          .select(cb.literal(1))</span>
-<span class="fc" id="L105">          .where(</span>
-<span class="fc" id="L106">              cb.equal(authorization.get(&quot;activityId&quot;), root.get(&quot;id&quot;)),</span>
-<span class="fc" id="L107">              cb.equal(authorization.get(&quot;staff&quot;).get(&quot;id&quot;), staffId),</span>
-<span class="fc" id="L108">              cb.isMember(right, authorization.&lt;Set&lt;EActivityRight&gt;&gt;get(&quot;rights&quot;)));</span>
-<span class="fc" id="L109">      return cb.exists(subquery);</span>
-    };
-  }
-
-  public static Specification&lt;ActivityEntity&gt; targetingAnyInstitution(
-      Collection&lt;UUID&gt; institutionIds) {
-<span class="fc" id="L115">    return (root, query, cb) -&gt; {</span>
-<span class="fc" id="L116">      Subquery&lt;UUID&gt; subquery = query.subquery(UUID.class);</span>
-<span class="fc" id="L117">      Root&lt;ActivityEntity&gt; subRoot = subquery.from(ActivityEntity.class);</span>
-<span class="fc" id="L118">      Join&lt;ActivityEntity, UUID&gt; targetJoin = subRoot.join(&quot;targetInstitutionIds&quot;);</span>
-<span class="fc" id="L119">      subquery.select(targetJoin).where(cb.equal(subRoot, root), targetJoin.in(institutionIds));</span>
-<span class="fc" id="L120">      return cb.exists(subquery);</span>
-    };
-  }
-
-  public static Specification&lt;ActivityEntity&gt; withAuthorizationOfStaff(UUID staffId) {
-<span class="fc" id="L125">    return (root, query, cb) -&gt; {</span>
-<span class="fc" id="L126">      Subquery&lt;Integer&gt; subquery = query.subquery(Integer.class);</span>
-<span class="fc" id="L127">      Root&lt;ActivityAuthorizationEntity&gt; authorization =</span>
-<span class="fc" id="L128">          subquery.from(ActivityAuthorizationEntity.class);</span>
-<span class="fc" id="L129">      subquery</span>
-<span class="fc" id="L130">          .select(cb.literal(1))</span>
-<span class="fc" id="L131">          .where(</span>
-<span class="fc" id="L132">              cb.equal(authorization.get(&quot;activityId&quot;), root.get(&quot;id&quot;)),</span>
-<span class="fc" id="L133">              cb.equal(authorization.get(&quot;staff&quot;).get(&quot;id&quot;), staffId));</span>
-<span class="fc" id="L134">      return cb.exists(subquery);</span>
+<span class="fc" id="L98">    return (root, query, cb) -&gt; {</span>
+<span class="fc" id="L99">      Subquery&lt;Integer&gt; subquery = query.subquery(Integer.class);</span>
+<span class="fc" id="L100">      Root&lt;ActivityAuthorizationEntity&gt; authorization =</span>
+<span class="fc" id="L101">          subquery.from(ActivityAuthorizationEntity.class);</span>
+<span class="fc" id="L102">      subquery</span>
+<span class="fc" id="L103">          .select(cb.literal(1))</span>
+<span class="fc" id="L104">          .where(</span>
+<span class="fc" id="L105">              cb.equal(authorization.get(&quot;activityId&quot;), root.get(&quot;id&quot;)),</span>
+<span class="fc" id="L106">              cb.equal(authorization.get(&quot;staff&quot;).get(&quot;id&quot;), staffId),</span>
+<span class="fc" id="L107">              cb.isMember(right, authorization.&lt;Set&lt;EActivityRight&gt;&gt;get(&quot;rights&quot;)));</span>
+<span class="fc" id="L108">      return cb.exists(subquery);</span>
     };
   }
 }

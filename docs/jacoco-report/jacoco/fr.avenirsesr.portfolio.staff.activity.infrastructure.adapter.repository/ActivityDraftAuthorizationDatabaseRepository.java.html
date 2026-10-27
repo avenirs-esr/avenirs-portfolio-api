@@ -2,6 +2,7 @@
 
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAuthorization;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityDraftAuthorizationRepository;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.mapper.ActivityDraftAuthorizationMapper;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityDraftAuthorizationEntity;
@@ -20,64 +21,71 @@ public class ActivityDraftAuthorizationDatabaseRepository
 
   protected ActivityDraftAuthorizationDatabaseRepository(
       ActivityDraftAuthorizationJpaRepository jpaRepository) {
-<span class="fc" id="L23">    super(</span>
+<span class="fc" id="L24">    super(</span>
         jpaRepository,
         jpaRepository,
         ActivityDraftAuthorizationEntity.class,
         ActivityDraftAuthorizationMapper.INSTANCE);
-<span class="fc" id="L28">    this.jpaRepository = jpaRepository;</span>
-<span class="fc" id="L29">  }</span>
+<span class="fc" id="L29">    this.jpaRepository = jpaRepository;</span>
+<span class="fc" id="L30">  }</span>
 
   @Override
   public List&lt;ActivityAuthorization&gt; findAllByActivityId(UUID activityDraftId) {
-<span class="fc" id="L33">    return jpaRepository.findAllByActivityDraftId(activityDraftId).stream()</span>
-<span class="fc" id="L34">        .map(ActivityDraftAuthorizationMapper.INSTANCE::toDomain)</span>
-<span class="fc" id="L35">        .toList();</span>
+<span class="fc" id="L34">    return jpaRepository.findAllByActivityDraftId(activityDraftId).stream()</span>
+<span class="fc" id="L35">        .map(ActivityDraftAuthorizationMapper.INSTANCE::toDomain)</span>
+<span class="fc" id="L36">        .toList();</span>
   }
 
   @Override
   public Optional&lt;ActivityAuthorization&gt; findByActivityIdAndStaffId(
       UUID activityDraftId, UUID staffId) {
-<span class="fc" id="L41">    return jpaRepository</span>
-<span class="fc" id="L42">        .findByActivityDraftIdAndStaff_Id(activityDraftId, staffId)</span>
-<span class="fc" id="L43">        .map(ActivityDraftAuthorizationMapper.INSTANCE::toDomain);</span>
+<span class="fc" id="L42">    return jpaRepository</span>
+<span class="fc" id="L43">        .findByActivityDraftIdAndStaff_Id(activityDraftId, staffId)</span>
+<span class="fc" id="L44">        .map(ActivityDraftAuthorizationMapper.INSTANCE::toDomain);</span>
   }
 
   @Override
   public List&lt;ActivityAuthorization&gt; findAllByActivityIds(Collection&lt;UUID&gt; activityDraftIds) {
-<span class="pc bpc" id="L48" title="1 of 2 branches missed.">    if (activityDraftIds.isEmpty()) {</span>
-<span class="nc" id="L49">      return List.of();</span>
+<span class="pc bpc" id="L49" title="1 of 2 branches missed.">    if (activityDraftIds.isEmpty()) {</span>
+<span class="nc" id="L50">      return List.of();</span>
     }
-<span class="fc" id="L51">    return jpaRepository.findAllByActivityDraftIdIn(activityDraftIds).stream()</span>
-<span class="fc" id="L52">        .map(ActivityDraftAuthorizationMapper.INSTANCE::toDomain)</span>
-<span class="fc" id="L53">        .toList();</span>
+<span class="fc" id="L52">    return jpaRepository.findAllByActivityDraftIdIn(activityDraftIds).stream()</span>
+<span class="fc" id="L53">        .map(ActivityDraftAuthorizationMapper.INSTANCE::toDomain)</span>
+<span class="fc" id="L54">        .toList();</span>
   }
 
   @Override
   public List&lt;ActivityAuthorization&gt; findAllByActivityIdsAndStaffId(
       Collection&lt;UUID&gt; activityDraftIds, UUID staffId) {
-<span class="pc bpc" id="L59" title="1 of 2 branches missed.">    if (activityDraftIds.isEmpty()) {</span>
-<span class="nc" id="L60">      return List.of();</span>
+<span class="pc bpc" id="L60" title="1 of 2 branches missed.">    if (activityDraftIds.isEmpty()) {</span>
+<span class="nc" id="L61">      return List.of();</span>
     }
-<span class="fc" id="L62">    return jpaRepository</span>
-<span class="fc" id="L63">        .findAll(</span>
-<span class="fc" id="L64">            ActivityAuthorizationSpecification.&lt;ActivityDraftAuthorizationEntity&gt;withEntityIdIn(</span>
+<span class="fc" id="L63">    return jpaRepository</span>
+<span class="fc" id="L64">        .findAll(</span>
+<span class="fc" id="L65">            ActivityAuthorizationSpecification.&lt;ActivityDraftAuthorizationEntity&gt;withEntityIdIn(</span>
                     &quot;activityDraftId&quot;, activityDraftIds)
-<span class="fc" id="L66">                .and(ActivityAuthorizationSpecification.withStaffId(staffId)))</span>
-<span class="fc" id="L67">        .stream()</span>
-<span class="fc" id="L68">        .map(ActivityDraftAuthorizationMapper.INSTANCE::toDomain)</span>
-<span class="fc" id="L69">        .toList();</span>
+<span class="fc" id="L67">                .and(ActivityAuthorizationSpecification.withStaffId(staffId)))</span>
+<span class="fc" id="L68">        .stream()</span>
+<span class="fc" id="L69">        .map(ActivityDraftAuthorizationMapper.INSTANCE::toDomain)</span>
+<span class="fc" id="L70">        .toList();</span>
   }
 
   @Override
   public boolean existsByStaffId(UUID staffId) {
-<span class="fc" id="L74">    return jpaRepository.exists(</span>
-<span class="fc" id="L75">        ActivityAuthorizationSpecification.&lt;ActivityDraftAuthorizationEntity&gt;withStaffId(staffId));</span>
+<span class="fc" id="L75">    return jpaRepository.exists(</span>
+<span class="fc" id="L76">        ActivityAuthorizationSpecification.&lt;ActivityDraftAuthorizationEntity&gt;withStaffId(staffId));</span>
+  }
+
+  @Override
+  public boolean existsByStaffIdAndRight(UUID staffId, EActivityRight right) {
+<span class="nc" id="L81">    return jpaRepository.exists(</span>
+<span class="nc" id="L82">        ActivityAuthorizationSpecification.&lt;ActivityDraftAuthorizationEntity&gt;withStaffId(staffId)</span>
+<span class="nc" id="L83">            .and(ActivityAuthorizationSpecification.withRight(right)));</span>
   }
 
   @Override
   public void deleteAllByActivityId(UUID activityDraftId) {
-<span class="fc" id="L80">    jpaRepository.deleteAllByActivityDraftId(activityDraftId);</span>
-<span class="fc" id="L81">  }</span>
+<span class="fc" id="L88">    jpaRepository.deleteAllByActivityDraftId(activityDraftId);</span>
+<span class="fc" id="L89">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
