@@ -12,10 +12,14 @@ import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
+import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -197,6 +201,36 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
     return result;
   }
 
+  private List<JsonNode> getDeclaredActivitiesFilteredBy(String filter, Object... values)
+      throws Exception {
+    String response =
+        webTestClient
+            .get()
+            .uri(
+                uriBuilder ->
+                    uriBuilder
+                        .path(BASE_PATH)
+                        .queryParam("pageSize", 100)
+                        .queryParam(filter, values)
+                        .build())
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Signature", studentSignature)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    List<JsonNode> result = new ArrayList<>();
+    objectMapper.readTree(response).path("data").forEach(result::add);
+    return result;
+  }
+
+  private static List<String> idsOf(List<JsonNode> activities) {
+    return activities.stream().map(activity -> activity.path("id").asText()).toList();
+  }
+
   @Transactional
   @ParameterizedTest
   @EnumSource(
@@ -251,27 +285,127 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
-  @Transactional
-  void shouldGetDeclaredActivityByThematics() {
+  void shouldGetDeclaredActivityByThematics() throws Exception {
+    BddLogger.given("declared activities on different thematics");
 
+    String selfKnowledge =
+        subscribeAndGetId(
+            publishActivityAsStaff(
+                "Filtre thématique connaissance de soi", EActivityThematic.SELF_KNOWLEDGE, "null"));
+    String programs =
+        subscribeAndGetId(
+            publishActivityAsStaff(
+                "Filtre thématique formations", EActivityThematic.PROGRAMS, "null"));
+    String experiences =
+        subscribeAndGetId(
+            publishActivityAsStaff(
+                "Filtre thématique expériences", EActivityThematic.EXPERIENCES, "null"));
+
+    BddLogger.when("filtering on two of them");
+    List<JsonNode> activities =
+        getDeclaredActivitiesFilteredBy(
+            "thematics", EActivityThematic.SELF_KNOWLEDGE, EActivityThematic.PROGRAMS);
+
+    BddLogger.then("only declared activities of those two thematics are returned");
+    assertThat(activities)
+        .allSatisfy(
+            activity ->
+                assertThat(activity.path("thematic").asText()).isIn("SELF_KNOWLEDGE", "PROGRAMS"));
+    assertThat(idsOf(activities)).contains(selfKnowledge, programs).doesNotContain(experiences);
+  }
+
+  @Test
+  void shouldGetDeclaredActivityByStatuses() throws Exception {
+    BddLogger.given("declared activities in every status");
+
+    String subscribed = subscribeAndGetId(publishActivityAsStaff("Filtre statut inscrite", "null"));
+
+    String inProgress = subscribeAndGetId(publishActivityAsStaff("Filtre statut en cours", "null"));
+    updateReflection(inProgress, "Ma prise de recul");
+
+    String submittedForAssessment =
+        subscribeAndGetId(
+            publishActivityAsStaff("Filtre statut soumise évaluation", "{\"comment\": true}"));
+    submitForAssessment(submittedForAssessment).expectStatus().isNoContent();
+
+    String withPendingFeedback =
+        subscribeAndGetId(publishActivityAsStaff("Filtre statut feedback en attente", "null"));
+    askForFeedbackAndGetId(withPendingFeedback);
+
+    String withAnsweredFeedback =
+        subscribeAndGetId(publishActivityAsStaff("Filtre statut feedback répondu", "null"));
+    updateReflection(withAnsweredFeedback, "Ma prise de recul");
+    String feedbackId = askForFeedbackAndGetId(withAnsweredFeedback);
     webTestClient
-        .get()
-        .uri(
-            uriBuilder ->
-                uriBuilder
-                    .path(BASE_PATH)
-                    .queryParam("thematics", EActivityThematic.SELF_KNOWLEDGE)
-                    .build())
+        .put()
+        .uri(FEEDBACK_BASE_PATH + "/" + feedbackId)
+        .header("X-Signed-Context", staffPayload)
+        .header("X-Context-Signature", staffSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue("{\"feedback\": \"Great work\"}")
+        .exchange()
+        .expectStatus()
+        .isNoContent();
+    webTestClient
+        .post()
+        .uri(FEEDBACK_BASE_PATH + "/" + feedbackId + "/submit")
+        .header("X-Signed-Context", staffPayload)
+        .header("X-Context-Signature", staffSignature)
+        .exchange()
+        .expectStatus()
+        .isNoContent();
+
+    String completed = subscribeAndGetId(publishActivityAsStaff("Filtre statut terminée", "null"));
+    updateReflection(completed, "Ma prise de recul");
+    webTestClient
+        .put()
+        .uri(BASE_PATH + "/finish/" + completed)
         .header("X-Signed-Context", studentPayload)
         .header("X-Context-Signature", studentSignature)
         .exchange()
         .expectStatus()
-        .isOk()
-        .expectBody()
-        .jsonPath("$.data[0].activityId")
-        .isEqualTo(activityId)
-        .jsonPath("$.data[0].thematic")
-        .isEqualTo("SELF_KNOWLEDGE");
+        .isNoContent();
+
+    String assessed =
+        subscribeAndGetId(publishAssessableActivity("Filtre statut évaluée", "{\"comment\":true}"));
+    submitForAssessment(assessed).expectStatus().isNoContent();
+    sendAssessment(assessed, "{\"comment\":\"Bon travail\"}", staffPayload, staffSignature)
+        .expectStatus()
+        .isNoContent();
+
+    String unsubscribedActivityId = publishActivityAsStaff("Filtre statut désinscrite", "null");
+    String unsubscribed = subscribeAndGetId(unsubscribedActivityId);
+    unsubscribe(unsubscribedActivityId);
+
+    Map<EDeclaredActivityStatus, List<String>> idsByStatus =
+        Map.of(
+            EDeclaredActivityStatus.SUBSCRIBED, List.of(subscribed),
+            EDeclaredActivityStatus.IN_PROGRESS, List.of(inProgress, withAnsweredFeedback),
+            EDeclaredActivityStatus.SUBMITTED, List.of(submittedForAssessment, withPendingFeedback),
+            EDeclaredActivityStatus.COMPLETED, List.of(completed, assessed),
+            EDeclaredActivityStatus.UNSUBSCRIBED, List.of(unsubscribed));
+
+    List<Set<EDeclaredActivityStatus>> complementaryFilters =
+        List.of(
+            EnumSet.of(
+                EDeclaredActivityStatus.SUBSCRIBED,
+                EDeclaredActivityStatus.SUBMITTED,
+                EDeclaredActivityStatus.UNSUBSCRIBED),
+            EnumSet.of(EDeclaredActivityStatus.IN_PROGRESS, EDeclaredActivityStatus.COMPLETED));
+
+    for (Set<EDeclaredActivityStatus> filter : complementaryFilters) {
+      BddLogger.when("filtering on " + filter);
+      List<JsonNode> activities = getDeclaredActivitiesFilteredBy("statuses", filter.toArray());
+
+      BddLogger.then("only declared activities displayed with one of those statuses are returned");
+      List<String> expectedStatuses = filter.stream().map(Enum::name).toList();
+      assertThat(activities)
+          .allSatisfy(
+              activity -> assertThat(activity.path("status").asText()).isIn(expectedStatuses));
+      assertThat(idsOf(activities))
+          .containsAll(
+              filter.stream().flatMap(status -> idsByStatus.get(status).stream()).toList());
+    }
   }
 
   @Test
@@ -660,11 +794,12 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .exchange();
   }
 
-  private String publishActivityAsStaff(String title, String assessment) throws Exception {
+  private String publishActivityAsStaff(String title, EActivityThematic thematic, String assessment)
+      throws Exception {
     String draftResponse =
         webTestClient
             .post()
-            .uri("/me/activities/draft")
+            .uri(ACTIVITY_BASE_PATH + "/draft")
             .header("X-Signed-Context", staffPayload)
             .header("X-Context-Signature", staffSignature)
             .contentType(MediaType.APPLICATION_JSON)
@@ -680,12 +815,14 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
 
     webTestClient
         .patch()
-        .uri("/me/activities/" + draftId)
+        .uri(ACTIVITY_BASE_PATH + "/" + draftId)
         .header("X-Signed-Context", staffPayload)
         .header("X-Context-Signature", staffSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(
-            "{\"thematic\": \"EXPERIENCES\", \"summary\": \"Un résumé valide\","
+            "{\"thematic\": \""
+                + thematic
+                + "\", \"summary\": \"Un résumé valide\","
                 + " \"description\": \"Une consigne valide\", \"enableReflection\": true,"
                 + " \"assessment\": "
                 + assessment
@@ -704,6 +841,10 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .isOk();
 
     return draftId;
+  }
+
+  private String publishActivityAsStaff(String title, String assessment) throws Exception {
+    return publishActivityAsStaff(title, EActivityThematic.EXPERIENCES, assessment);
   }
 
   private void unsubscribe(String subscribedActivityId) {
