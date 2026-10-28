@@ -114,8 +114,9 @@ public final class DeclaredActivitySpecification {
   private static Predicate assessmentStatusPredicate(
       EDeclaredActivityStatus status, Root<DeclaredActivityEntity> root, CriteriaBuilder cb) {
     return switch (status) {
-      case SUBMITTED -> cb.isNotNull(root.get("submittedAt"));
-      case CONSULTED, SUBSCRIBED, IN_PROGRESS, COMPLETED, UNSUBSCRIBED -> cb.disjunction();
+      case SUBMITTED_FOR_ASSESSMENT -> cb.isNotNull(root.get("submittedAt"));
+      case SUBMITTED_FOR_FEEDBACK, CONSULTED, SUBSCRIBED, IN_PROGRESS, COMPLETED, UNSUBSCRIBED ->
+          cb.disjunction();
     };
   }
 

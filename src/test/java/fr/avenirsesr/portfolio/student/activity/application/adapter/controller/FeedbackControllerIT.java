@@ -549,6 +549,28 @@ public class FeedbackControllerIT extends ContainerConfigurationTest {
 
   @Test
   @Transactional
+  void shouldMarkTheDeclaredActivityAsSubmittedForFeedbackWhenFeedbackIsAsked() throws Exception {
+    BddLogger.given("a student subscribed to an activity");
+
+    BddLogger.when("he asks for a feedback");
+    askForFeedbackAndGetId(declaredActivityId);
+
+    BddLogger.then("the declared activity is SUBMITTED_FOR_FEEDBACK");
+    webTestClient
+        .get()
+        .uri(ACTIVITY_BASE_PATH + "/" + declaredActivityId)
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.status")
+        .isEqualTo("SUBMITTED_FOR_FEEDBACK");
+  }
+
+  @Test
+  @Transactional
   void shouldReturn400WhenFeedbackTextIsNullOnSubmit() throws Exception {
     BddLogger.given("a feedback that was never updated — its feedback text is null");
     String feedbackId = askForFeedbackAndGetId(declaredActivityId);

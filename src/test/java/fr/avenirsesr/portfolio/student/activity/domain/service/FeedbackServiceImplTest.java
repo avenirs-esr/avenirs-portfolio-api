@@ -27,6 +27,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityAuthoriz
 import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackDashboardData;
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackData;
+import fr.avenirsesr.portfolio.student.activity.domain.exception.DeclaredActivityLockedException;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.DeclaredActivityNotFoundException;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.DeclaredActivityUnsubscribedException;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.FeedbackInProcessException;
@@ -37,6 +38,7 @@ import fr.avenirsesr.portfolio.student.activity.domain.exception.FeedbackSubmitt
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.student.activity.domain.model.FeedbackAssociations;
+import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.DeclaredActivityRepository;
@@ -200,6 +202,29 @@ class FeedbackServiceImplTest {
       BddLogger.then("A DeclaredActivityUnsubscribedException is thrown and nothing is saved");
       assertThatThrownBy(() -> service.createFeedback(declaredActivityId))
           .isInstanceOf(DeclaredActivityUnsubscribedException.class);
+      verify(feedbackRepository, never()).save(any());
+    }
+
+    @Test
+    void should_throw_DeclaredActivityLockedException_when_submitted_for_assessment() {
+      BddLogger.given("A logged-in student and an activity he already submitted for assessment");
+      UUID declaredActivityId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().toModel();
+      DeclaredActivity declaredActivity =
+          DeclaredActivity.create(
+              UUID.randomUUID(), student, activity, null, null, null, null, null);
+
+      when(declaredActivityService.fetchActivityAndCheckLoggedInStudentAuthorization(
+              declaredActivityId))
+          .thenReturn(declaredActivity);
+      when(declaredActivityService.getDeclaredActivityStatus(declaredActivity))
+          .thenReturn(EDeclaredActivityStatus.SUBMITTED_FOR_ASSESSMENT);
+
+      BddLogger.when("createFeedback is called");
+
+      BddLogger.then("A DeclaredActivityLockedException is thrown and nothing is saved");
+      assertThatThrownBy(() -> service.createFeedback(declaredActivityId))
+          .isInstanceOf(DeclaredActivityLockedException.class);
       verify(feedbackRepository, never()).save(any());
     }
 

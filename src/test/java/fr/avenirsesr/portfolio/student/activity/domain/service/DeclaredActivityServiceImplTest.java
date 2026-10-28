@@ -877,7 +877,22 @@ class DeclaredActivityServiceImplTest {
   }
 
   @Test
-  void submitForAssessment_should_make_the_declared_activity_SUBMITTED() {
+  void getDeclaredActivityStatus_should_be_SUBMITTED_FOR_FEEDBACK_when_a_feedback_is_active() {
+    BddLogger.given("A declared activity with an active feedback, not submitted for assessment");
+    DeclaredActivity declaredActivity = assessableDeclaredActivity();
+
+    when(feedbackRepository.findDeclaredActivityIdsHavingActiveFeedbacks(
+            List.of(declaredActivity.getId())))
+        .thenReturn(List.of(declaredActivity.getId()));
+
+    BddLogger.when("Its status is computed");
+    BddLogger.then("It is SUBMITTED_FOR_FEEDBACK");
+    assertThat(service.getDeclaredActivityStatus(declaredActivity))
+        .isEqualTo(EDeclaredActivityStatus.SUBMITTED_FOR_FEEDBACK);
+  }
+
+  @Test
+  void submitForAssessment_should_make_the_declared_activity_SUBMITTED_FOR_ASSESSMENT() {
     BddLogger.given("A declared activity submitted for assessment");
     DeclaredActivity declaredActivity = assessableDeclaredActivity();
     declaredActivity.setSubmittedAt(Instant.now());
@@ -887,9 +902,9 @@ class DeclaredActivityServiceImplTest {
         .thenReturn(List.of());
 
     BddLogger.when("Its status is computed");
-    BddLogger.then("It is SUBMITTED");
+    BddLogger.then("It is SUBMITTED_FOR_ASSESSMENT");
     assertThat(service.getDeclaredActivityStatus(declaredActivity))
-        .isEqualTo(EDeclaredActivityStatus.SUBMITTED);
+        .isEqualTo(EDeclaredActivityStatus.SUBMITTED_FOR_ASSESSMENT);
   }
 
   @Test
@@ -1004,6 +1019,27 @@ class DeclaredActivityServiceImplTest {
   }
 
   @Test
+  void submitForAssessment_should_throw_DeclaredActivityLockedException_when_feedback_is_active() {
+    BddLogger.given("A declared activity with an active feedback");
+    UUID declaredActivityId = UUID.randomUUID();
+    DeclaredActivity declaredActivity = assessableDeclaredActivity();
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+    when(feedbackRepository.findDeclaredActivityIdsHavingActiveFeedbacks(
+            List.of(declaredActivity.getId())))
+        .thenReturn(List.of(declaredActivity.getId()));
+
+    BddLogger.when("He submits it for assessment");
+
+    BddLogger.then("A DeclaredActivityLockedException is thrown");
+    assertThatThrownBy(() -> service.submitForAssessment(declaredActivityId))
+        .isInstanceOf(DeclaredActivityLockedException.class);
+    verify(declaredActivityRepository, never()).save(any());
+  }
+
+  @Test
   void submitForAssessment_should_throw_DeclaredActivityUnsubscribedException_when_unsubscribed() {
     BddLogger.given("A declared activity the student unsubscribed from");
     UUID declaredActivityId = UUID.randomUUID();
@@ -1039,7 +1075,7 @@ class DeclaredActivityServiceImplTest {
 
     BddLogger.then("The submission, its associations and its status are returned");
     assertThat(details.declaredActivity()).isEqualTo(declaredActivity);
-    assertThat(details.status()).isEqualTo(EDeclaredActivityStatus.SUBMITTED);
+    assertThat(details.status()).isEqualTo(EDeclaredActivityStatus.SUBMITTED_FOR_ASSESSMENT);
     assertThat(details.associations().traces()).isEmpty();
     assertThat(details.associations().skillProgresses()).isEmpty();
     assertThat(details.associations().declaredExperiences()).isEmpty();

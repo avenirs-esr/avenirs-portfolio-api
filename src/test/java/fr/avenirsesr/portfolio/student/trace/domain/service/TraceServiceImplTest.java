@@ -776,7 +776,7 @@ class TraceServiceImplTest {
                 List.of(firstDeclaredActivity, secondDeclaredActivity)))
             .thenReturn(
                 Map.of(
-                    firstDeclaredActivity, EDeclaredActivityStatus.SUBMITTED,
+                    firstDeclaredActivity, EDeclaredActivityStatus.SUBMITTED_FOR_ASSESSMENT,
                     secondDeclaredActivity, EDeclaredActivityStatus.IN_PROGRESS));
 
         List<TraceLockedDeclaredActivitiesData> result =
@@ -799,7 +799,7 @@ class TraceServiceImplTest {
             "Submitted activity",
             firstResult.lockedDeclaredActivities().getFirst().activityTitle());
         assertEquals(
-            EDeclaredActivityStatus.SUBMITTED,
+            EDeclaredActivityStatus.SUBMITTED_FOR_ASSESSMENT,
             firstResult.lockedDeclaredActivities().getFirst().activityStatus());
 
         assertEquals(secondTrace.getId(), secondResult.traceId());
@@ -908,7 +908,8 @@ class TraceServiceImplTest {
   }
 
   private boolean isLocked(EDeclaredActivityStatus status) {
-    return status == EDeclaredActivityStatus.SUBMITTED
+    return status == EDeclaredActivityStatus.SUBMITTED_FOR_FEEDBACK
+        || status == EDeclaredActivityStatus.SUBMITTED_FOR_ASSESSMENT
         || status == EDeclaredActivityStatus.COMPLETED;
   }
 }

@@ -126,13 +126,13 @@ class DeclaredActivityPresentationDTOMapperTest {
         mapper.toDTO(
             new DeclaredActivityDetailsData(
                 declaredActivity, List.of(feedbackData1, feedbackData2)),
-            EDeclaredActivityStatus.SUBMITTED);
+            EDeclaredActivityStatus.SUBMITTED_FOR_ASSESSMENT);
 
     BddLogger.then("the feedbacks list is mapped and contains 2 FeedbackOverviewDTOs");
 
     assertNotNull(dto.feedbacks());
     assertEquals(2, dto.feedbacks().size());
-    assertEquals(EDeclaredActivityStatus.SUBMITTED, dto.status());
+    assertEquals(EDeclaredActivityStatus.SUBMITTED_FOR_ASSESSMENT, dto.status());
     assertEquals(feedbackId1, dto.feedbacks().get(0).id());
     assertEquals(EFeedbackStatus.NEW, dto.feedbacks().get(0).status());
     assertEquals(feedbackId2, dto.feedbacks().get(1).id());

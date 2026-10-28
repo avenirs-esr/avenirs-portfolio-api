@@ -345,7 +345,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             submission.get("assessmentRequestedAt").asText());
         assertTrue(submission.get("assessedAt").isNull());
         assertTrue(submission.get("assessedBy").isNull());
-        assertEquals("SUBMITTED", submission.get("status").asText());
+        assertEquals("SUBMITTED_FOR_ASSESSMENT", submission.get("status").asText());
       }
 
       @Test
@@ -356,8 +356,9 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                 "Activité évaluable à filtrer", new ActivityAssessmentRequest(true, null, null));
         UUID declaredActivityId = submitForAssessmentAsStudent(activityId);
 
-        BddLogger.then("the SUBMITTED filter should keep it");
-        assertNotNull(findSubmission(declaredActivityId, EDeclaredActivityStatus.SUBMITTED));
+        BddLogger.then("the SUBMITTED_FOR_ASSESSMENT filter should keep it");
+        assertNotNull(
+            findSubmission(declaredActivityId, EDeclaredActivityStatus.SUBMITTED_FOR_ASSESSMENT));
 
         BddLogger.and("the CONSULTED filter should leave it out");
         assertNull(findSubmission(declaredActivityId, EDeclaredActivityStatus.CONSULTED));

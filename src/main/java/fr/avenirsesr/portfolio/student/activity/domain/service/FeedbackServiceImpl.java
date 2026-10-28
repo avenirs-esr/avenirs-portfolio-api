@@ -23,6 +23,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityAssociationsData;
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackDashboardData;
 import fr.avenirsesr.portfolio.student.activity.domain.data.FeedbackData;
+import fr.avenirsesr.portfolio.student.activity.domain.exception.DeclaredActivityLockedException;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.DeclaredActivityNotFoundException;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.DeclaredActivityUnsubscribedException;
 import fr.avenirsesr.portfolio.student.activity.domain.exception.FeedbackInProcessException;
@@ -33,6 +34,7 @@ import fr.avenirsesr.portfolio.student.activity.domain.exception.FeedbackSubmitt
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.student.activity.domain.model.FeedbackAssociations;
+import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.FeedbackService;
@@ -127,6 +129,11 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     if (declaredActivity.isUnsubscribed()) {
       throw new DeclaredActivityUnsubscribedException();
+    }
+
+    if (declaredActivityService.getDeclaredActivityStatus(declaredActivity)
+        == EDeclaredActivityStatus.SUBMITTED_FOR_ASSESSMENT) {
+      throw new DeclaredActivityLockedException();
     }
 
     validateOptionalEnrichedTextMaxLength(

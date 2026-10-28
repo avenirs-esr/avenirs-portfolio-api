@@ -2266,19 +2266,20 @@ class ActivityServiceImplTest {
         DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
         PageInfo pageInfo = new PageInfo(0, 10, 1);
         when(declaredActivityService.getDeclaredActivitiesToAssessBy(
-                staff, List.of(EDeclaredActivityStatus.SUBMITTED), pageCriteria))
+                staff, List.of(EDeclaredActivityStatus.SUBMITTED_FOR_ASSESSMENT), pageCriteria))
             .thenReturn(new PagedResult<>(List.of(declaredActivity), pageInfo));
         when(declaredActivityService.getDeclaredActivityStatus(List.of(declaredActivity)))
-            .thenReturn(Map.of(declaredActivity, EDeclaredActivityStatus.SUBMITTED));
+            .thenReturn(Map.of(declaredActivity, EDeclaredActivityStatus.SUBMITTED_FOR_ASSESSMENT));
 
         var result =
             activityService.getDeclaredActivitiesToAssess(
-                List.of(EDeclaredActivityStatus.SUBMITTED), pageCriteria);
+                List.of(EDeclaredActivityStatus.SUBMITTED_FOR_ASSESSMENT), pageCriteria);
 
         assertEquals(pageInfo, result.pageInfo());
         assertEquals(1, result.content().size());
         assertEquals(declaredActivity, result.content().getFirst().declaredActivity());
-        assertEquals(EDeclaredActivityStatus.SUBMITTED, result.content().getFirst().status());
+        assertEquals(
+            EDeclaredActivityStatus.SUBMITTED_FOR_ASSESSMENT, result.content().getFirst().status());
       }
 
       @Test
