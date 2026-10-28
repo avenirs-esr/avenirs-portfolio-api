@@ -858,11 +858,11 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldOverwriteASentAssessmentWithoutNotifyingTheStudentAgain() throws Exception {
+  void shouldOverwriteASentAssessmentAndNotifyTheStudentOfTheModification() throws Exception {
     BddLogger.given("a declared activity whose assessment was already sent");
+    String title = "Activité évaluée modification";
     String assessableActivityId =
-        publishAssessableActivity(
-            "Activité évaluée modification", "{\"comment\":true,\"grade\":20}");
+        publishAssessableActivity(title, "{\"comment\":true,\"grade\":20}");
     String id = subscribeAndGetId(assessableActivityId);
     enableStudentNotifications();
 
@@ -892,8 +892,14 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .jsonPath("$.assessment.modifiedAt")
         .exists();
 
-    BddLogger.and("the student should have been notified of the first sending only");
-    assertEquals(1, findStudentNotificationsOf(id).size());
+    BddLogger.and("the student should have been notified of the sending and of the modification");
+    List<JsonNode> notifications = findStudentNotificationsOf(id);
+    assertThat(notifications)
+        .extracting(notification -> notification.get("type").asText())
+        .containsExactlyInAnyOrder("ASSESSMENT_SENT", "ASSESSMENT_MODIFIED");
+    notifications.forEach(
+        notification ->
+            assertEquals(title, notification.get("parameters").get("activityTitle").asText()));
   }
 
   @Test
