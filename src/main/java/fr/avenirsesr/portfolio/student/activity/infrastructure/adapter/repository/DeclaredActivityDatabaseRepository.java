@@ -1,6 +1,5 @@
 package fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.repository;
 
-import static fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.specification.DeclaredActivitySpecification.has;
 import static fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.specification.DeclaredActivitySpecification.hasActivityIdInAndStudent;
 
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
@@ -10,7 +9,6 @@ import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
-import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
@@ -88,7 +86,7 @@ public class DeclaredActivityDatabaseRepository
       Student student,
       String keyword,
       List<EActivityThematic> thematics,
-      List<EActivityStatus> statuses,
+      List<EDeclaredActivityStatus> statuses,
       SortCriteria sortCriteria,
       PageCriteria pageCriteria,
       Boolean isValorized,
@@ -104,7 +102,7 @@ public class DeclaredActivityDatabaseRepository
                 DeclaredActivitySpecification.isValorized(isValorized)
                     .and(DeclaredActivitySpecification.search(keyword))
                     .and(DeclaredActivitySpecification.has("thematic", thematics))
-                    .and(has("status", statuses))),
+                    .and(DeclaredActivitySpecification.hasStatusIn(statuses))),
         PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort),
         fetchGraph);
   }
