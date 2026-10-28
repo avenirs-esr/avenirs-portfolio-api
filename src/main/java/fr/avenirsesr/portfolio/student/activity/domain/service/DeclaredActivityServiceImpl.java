@@ -79,15 +79,15 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   public PagedResult<DeclaredActivity> getDeclaredActivities(
       PageCriteria pageCriteria,
       String keyword,
-      List<EActivityThematic> thematic,
-      List<EActivityStatus> status,
+      List<EActivityThematic> thematics,
+      List<EActivityStatus> statuses,
       SortCriteria sortCriterias,
       Boolean isValorized) {
     Student student = loggedInUserService.getLoggedInStudent();
     var graph = FetchGraph.init().add("activity").fetch("author");
 
     return declaredActivityRepository.findStudentActivitiesByProgressAndDate(
-        student, keyword, thematic, status, sortCriterias, pageCriteria, isValorized, graph);
+        student, keyword, thematics, statuses, sortCriterias, pageCriteria, isValorized, graph);
   }
 
   @Override

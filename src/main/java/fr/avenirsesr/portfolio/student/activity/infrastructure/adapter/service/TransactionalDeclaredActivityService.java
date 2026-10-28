@@ -31,12 +31,12 @@ public class TransactionalDeclaredActivityService implements DeclaredActivitySer
   public PagedResult<DeclaredActivity> getDeclaredActivities(
       PageCriteria pageCriteria,
       String keyword,
-      List<EActivityThematic> thematic,
-      List<EActivityStatus> status,
+      List<EActivityThematic> thematics,
+      List<EActivityStatus> statuses,
       SortCriteria sortCriterias,
       Boolean isValorized) {
     return delegate.getDeclaredActivities(
-        pageCriteria, keyword, thematic, status, sortCriterias, isValorized);
+        pageCriteria, keyword, thematics, statuses, sortCriterias, isValorized);
   }
 
   @Override

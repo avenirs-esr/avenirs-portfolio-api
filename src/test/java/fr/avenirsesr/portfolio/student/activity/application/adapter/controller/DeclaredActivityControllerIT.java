@@ -252,7 +252,7 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
 
   @Test
   @Transactional
-  void shouldGetDeclaredActivityByThematic() {
+  void shouldGetDeclaredActivityByThematics() {
 
     webTestClient
         .get()
@@ -260,7 +260,7 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
             uriBuilder ->
                 uriBuilder
                     .path(BASE_PATH)
-                    .queryParam("thematic", EActivityThematic.SELF_KNOWLEDGE)
+                    .queryParam("thematics", EActivityThematic.SELF_KNOWLEDGE)
                     .build())
         .header("X-Signed-Context", studentPayload)
         .header("X-Context-Signature", studentSignature)
