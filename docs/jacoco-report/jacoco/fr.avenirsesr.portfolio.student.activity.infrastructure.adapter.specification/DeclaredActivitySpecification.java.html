@@ -14,10 +14,7 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.time.Instant;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -25,130 +22,130 @@ import org.springframework.data.jpa.domain.Specification;
 public final class DeclaredActivitySpecification {
   public static Specification&lt;DeclaredActivityEntity&gt; hasActivityIdIn(
       Collection&lt;UUID&gt; activityIds) {
-<span class="fc" id="L28">    return (root, query, cb) -&gt; root.get(&quot;activity&quot;).get(&quot;id&quot;).in(activityIds);</span>
+<span class="fc" id="L25">    return (root, query, cb) -&gt; root.get(&quot;activity&quot;).get(&quot;id&quot;).in(activityIds);</span>
   }
 
   public static Specification&lt;DeclaredActivityEntity&gt; hasActivityIdInAndStudent(
       Collection&lt;UUID&gt; activityIds, Student student) {
-<span class="fc" id="L33">    return Specification.where(StudentSpecification.&lt;DeclaredActivityEntity&gt;hasStudent(student))</span>
-<span class="fc" id="L34">        .and(hasActivityIdIn(activityIds));</span>
+<span class="fc" id="L30">    return Specification.where(StudentSpecification.&lt;DeclaredActivityEntity&gt;hasStudent(student))</span>
+<span class="fc" id="L31">        .and(hasActivityIdIn(activityIds));</span>
   }
 
   public static Specification&lt;DeclaredActivityEntity&gt; hasActivityId(UUID activityId) {
-<span class="fc" id="L38">    return (root, query, cb) -&gt; cb.equal(root.get(&quot;activity&quot;).get(&quot;id&quot;), activityId);</span>
+<span class="fc" id="L35">    return (root, query, cb) -&gt; cb.equal(root.get(&quot;activity&quot;).get(&quot;id&quot;), activityId);</span>
   }
 
   public static Specification&lt;DeclaredActivityEntity&gt; search(String keyword) {
-<span class="fc" id="L42">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="fc bfc" id="L43" title="All 4 branches covered.">      if (keyword == null || keyword.trim().isEmpty()) {</span>
-<span class="fc" id="L44">        return criteriaBuilder.conjunction();</span>
+<span class="fc" id="L39">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="fc bfc" id="L40" title="All 4 branches covered.">      if (keyword == null || keyword.trim().isEmpty()) {</span>
+<span class="fc" id="L41">        return criteriaBuilder.conjunction();</span>
       }
-<span class="fc" id="L46">      return criteriaBuilder.like(</span>
-<span class="fc" id="L47">          criteriaBuilder.lower(root.get(&quot;activity&quot;).get(&quot;title&quot;)),</span>
-<span class="fc" id="L48">          &quot;%&quot; + keyword.toLowerCase() + &quot;%&quot;);</span>
+<span class="fc" id="L43">      return criteriaBuilder.like(</span>
+<span class="fc" id="L44">          criteriaBuilder.lower(root.get(&quot;activity&quot;).get(&quot;title&quot;)),</span>
+<span class="fc" id="L45">          &quot;%&quot; + keyword.toLowerCase() + &quot;%&quot;);</span>
     };
   }
 
   public static Specification&lt;DeclaredActivityEntity&gt; has(String field, List&lt;?&gt; values) {
-<span class="fc" id="L53">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="pc bpc" id="L54" title="1 of 4 branches missed.">      if (values == null || values.isEmpty()) {</span>
-<span class="fc" id="L55">        return criteriaBuilder.conjunction();</span>
+<span class="fc" id="L50">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="pc bpc" id="L51" title="1 of 4 branches missed.">      if (values == null || values.isEmpty()) {</span>
+<span class="fc" id="L52">        return criteriaBuilder.conjunction();</span>
       }
-<span class="fc" id="L57">      var activity = root.join(&quot;activity&quot;);</span>
-<span class="fc" id="L58">      return activity.get(field).in(values);</span>
+<span class="fc" id="L54">      var activity = root.join(&quot;activity&quot;);</span>
+<span class="fc" id="L55">      return activity.get(field).in(values);</span>
     };
   }
 
   public static Specification&lt;DeclaredActivityEntity&gt; isNotCompleted() {
-<span class="nc" id="L63">    return (root, query, cb) -&gt; cb.isNull(root.get(&quot;finishedAt&quot;));</span>
+<span class="nc" id="L60">    return (root, query, cb) -&gt; cb.isNull(root.get(&quot;finishedAt&quot;));</span>
   }
 
   public static Specification&lt;DeclaredActivityEntity&gt; isCompleted() {
-<span class="nc" id="L67">    return (root, query, cb) -&gt; cb.isNotNull(root.get(&quot;finishedAt&quot;));</span>
+<span class="nc" id="L64">    return (root, query, cb) -&gt; cb.isNotNull(root.get(&quot;finishedAt&quot;));</span>
   }
 
   public static Specification&lt;DeclaredActivityEntity&gt; isNotUnsubscribed() {
-<span class="fc" id="L71">    return (root, query, cb) -&gt; cb.isNull(root.get(&quot;unsubscribedAt&quot;));</span>
+<span class="fc" id="L68">    return (root, query, cb) -&gt; cb.isNull(root.get(&quot;unsubscribedAt&quot;));</span>
   }
 
   public static Specification&lt;DeclaredActivityEntity&gt; hasNotBeenViewedSince(Instant since) {
-<span class="fc" id="L75">    return (root, query, cb) -&gt; {</span>
-<span class="fc" id="L76">      var recentViews = query.subquery(UUID.class);</span>
-<span class="fc" id="L77">      var view = recentViews.from(ActivityViewEntity.class);</span>
-<span class="fc" id="L78">      recentViews</span>
-<span class="fc" id="L79">          .select(view.get(&quot;id&quot;))</span>
-<span class="fc" id="L80">          .where(</span>
-<span class="fc" id="L81">              cb.equal(view.get(&quot;activityId&quot;), root.get(&quot;activity&quot;).get(&quot;id&quot;)),</span>
-<span class="fc" id="L82">              cb.equal(view.get(&quot;studentId&quot;), root.get(&quot;student&quot;).get(&quot;id&quot;)),</span>
-<span class="fc" id="L83">              cb.greaterThanOrEqualTo(view.&lt;Instant&gt;get(&quot;lastViewedAt&quot;), since));</span>
-<span class="fc" id="L84">      return cb.not(cb.exists(recentViews));</span>
+<span class="fc" id="L72">    return (root, query, cb) -&gt; {</span>
+<span class="fc" id="L73">      var recentViews = query.subquery(UUID.class);</span>
+<span class="fc" id="L74">      var view = recentViews.from(ActivityViewEntity.class);</span>
+<span class="fc" id="L75">      recentViews</span>
+<span class="fc" id="L76">          .select(view.get(&quot;id&quot;))</span>
+<span class="fc" id="L77">          .where(</span>
+<span class="fc" id="L78">              cb.equal(view.get(&quot;activityId&quot;), root.get(&quot;activity&quot;).get(&quot;id&quot;)),</span>
+<span class="fc" id="L79">              cb.equal(view.get(&quot;studentId&quot;), root.get(&quot;student&quot;).get(&quot;id&quot;)),</span>
+<span class="fc" id="L80">              cb.greaterThanOrEqualTo(view.&lt;Instant&gt;get(&quot;lastViewedAt&quot;), since));</span>
+<span class="fc" id="L81">      return cb.not(cb.exists(recentViews));</span>
     };
   }
 
   public static Specification&lt;DeclaredActivityEntity&gt; hasStatusIn(
       Collection&lt;EDeclaredActivityStatus&gt; statuses) {
-<span class="fc" id="L90">    return (root, query, cb) -&gt; {</span>
-<span class="pc bpc" id="L91" title="1 of 4 branches missed.">      if (statuses == null || statuses.isEmpty()) {</span>
-<span class="fc" id="L92">        return cb.conjunction();</span>
+<span class="fc" id="L87">    return (root, query, cb) -&gt; {</span>
+<span class="pc bpc" id="L88" title="1 of 4 branches missed.">      if (statuses == null || statuses.isEmpty()) {</span>
+<span class="fc" id="L89">        return cb.conjunction();</span>
       }
-<span class="fc" id="L94">      return cb.or(</span>
-<span class="fc" id="L95">          statuses.stream()</span>
-<span class="fc" id="L96">              .map(status -&gt; statusPredicate(status, root, query, cb))</span>
-<span class="fc" id="L97">              .toArray(Predicate[]::new));</span>
+<span class="fc" id="L91">      return cb.or(</span>
+<span class="fc" id="L92">          statuses.stream()</span>
+<span class="fc" id="L93">              .map(status -&gt; statusPredicate(status, root, query, cb))</span>
+<span class="fc" id="L94">              .toArray(Predicate[]::new));</span>
     };
   }
 
   public static Specification&lt;DeclaredActivityEntity&gt; isSubmittedForAssessment() {
-<span class="fc" id="L102">    return (root, query, cb) -&gt; cb.isNotNull(root.get(&quot;submittedAt&quot;));</span>
+<span class="fc" id="L99">    return (root, query, cb) -&gt; cb.isNotNull(root.get(&quot;submittedAt&quot;));</span>
   }
 
   public static Specification&lt;DeclaredActivityEntity&gt; activityHasStaffRight(
       UUID staffId, EActivityRight right) {
-<span class="fc" id="L107">    return (root, query, cb) -&gt; {</span>
-<span class="fc" id="L108">      var authorizations = query.subquery(Integer.class);</span>
-<span class="fc" id="L109">      var authorization = authorizations.from(ActivityAuthorizationEntity.class);</span>
-<span class="fc" id="L110">      authorizations</span>
-<span class="fc" id="L111">          .select(cb.literal(1))</span>
-<span class="fc" id="L112">          .where(</span>
-<span class="fc" id="L113">              cb.equal(authorization.get(&quot;activityId&quot;), root.get(&quot;activity&quot;).get(&quot;id&quot;)),</span>
-<span class="fc" id="L114">              cb.equal(authorization.get(&quot;staff&quot;).get(&quot;id&quot;), staffId),</span>
-<span class="fc" id="L115">              cb.isMember(right, authorization.&lt;Set&lt;EActivityRight&gt;&gt;get(&quot;rights&quot;)));</span>
-<span class="fc" id="L116">      return cb.exists(authorizations);</span>
+<span class="fc" id="L104">    return (root, query, cb) -&gt; {</span>
+<span class="fc" id="L105">      var authorizations = query.subquery(Integer.class);</span>
+<span class="fc" id="L106">      var authorization = authorizations.from(ActivityAuthorizationEntity.class);</span>
+<span class="fc" id="L107">      authorizations</span>
+<span class="fc" id="L108">          .select(cb.literal(1))</span>
+<span class="fc" id="L109">          .where(</span>
+<span class="fc" id="L110">              cb.equal(authorization.get(&quot;activityId&quot;), root.get(&quot;activity&quot;).get(&quot;id&quot;)),</span>
+<span class="fc" id="L111">              cb.equal(authorization.get(&quot;staff&quot;).get(&quot;id&quot;), staffId),</span>
+<span class="fc" id="L112">              cb.isMember(right, authorization.&lt;Set&lt;EActivityRight&gt;&gt;get(&quot;rights&quot;)));</span>
+<span class="fc" id="L113">      return cb.exists(authorizations);</span>
     };
   }
 
   public static Specification&lt;DeclaredActivityEntity&gt; hasAssessmentStatusIn(
       Collection&lt;EDeclaredActivityStatus&gt; statuses) {
-<span class="fc" id="L122">    return (root, query, cb) -&gt; {</span>
-<span class="pc bpc" id="L123" title="1 of 4 branches missed.">      if (statuses == null || statuses.isEmpty()) {</span>
-<span class="fc" id="L124">        return cb.conjunction();</span>
+<span class="fc" id="L119">    return (root, query, cb) -&gt; {</span>
+<span class="pc bpc" id="L120" title="1 of 4 branches missed.">      if (statuses == null || statuses.isEmpty()) {</span>
+<span class="fc" id="L121">        return cb.conjunction();</span>
       }
-<span class="fc" id="L126">      return cb.or(</span>
-<span class="fc" id="L127">          statuses.stream()</span>
-<span class="fc" id="L128">              .map(status -&gt; assessmentStatusPredicate(status, root, cb))</span>
-<span class="fc" id="L129">              .toArray(Predicate[]::new));</span>
+<span class="fc" id="L123">      return cb.or(</span>
+<span class="fc" id="L124">          statuses.stream()</span>
+<span class="fc" id="L125">              .map(status -&gt; assessmentStatusPredicate(status, root, cb))</span>
+<span class="fc" id="L126">              .toArray(Predicate[]::new));</span>
     };
   }
 
   private static Predicate isActive(Root&lt;DeclaredActivityEntity&gt; root, CriteriaBuilder cb) {
-<span class="fc" id="L134">    return cb.and(cb.isNull(root.get(&quot;unsubscribedAt&quot;)), cb.isNull(root.get(&quot;finishedAt&quot;)));</span>
+<span class="fc" id="L131">    return cb.and(cb.isNull(root.get(&quot;unsubscribedAt&quot;)), cb.isNull(root.get(&quot;finishedAt&quot;)));</span>
   }
 
   private static Predicate hasActiveFeedback(
       Root&lt;DeclaredActivityEntity&gt; root, CriteriaQuery&lt;?&gt; query, CriteriaBuilder cb) {
-<span class="fc" id="L139">    var feedbacks = query.subquery(Integer.class);</span>
-<span class="fc" id="L140">    var feedback = feedbacks.from(FeedbackEntity.class);</span>
-<span class="fc" id="L141">    feedbacks</span>
-<span class="fc" id="L142">        .select(cb.literal(1))</span>
-<span class="fc" id="L143">        .where(</span>
-<span class="fc" id="L144">            cb.equal(feedback.get(&quot;declaredActivity&quot;).get(&quot;id&quot;), root.get(&quot;id&quot;)),</span>
-<span class="fc" id="L145">            feedback.get(&quot;status&quot;).in(List.of(EFeedbackStatus.NEW, EFeedbackStatus.IN_PROCESS)));</span>
-<span class="fc" id="L146">    return cb.exists(feedbacks);</span>
+<span class="fc" id="L136">    var feedbacks = query.subquery(Integer.class);</span>
+<span class="fc" id="L137">    var feedback = feedbacks.from(FeedbackEntity.class);</span>
+<span class="fc" id="L138">    feedbacks</span>
+<span class="fc" id="L139">        .select(cb.literal(1))</span>
+<span class="fc" id="L140">        .where(</span>
+<span class="fc" id="L141">            cb.equal(feedback.get(&quot;declaredActivity&quot;).get(&quot;id&quot;), root.get(&quot;id&quot;)),</span>
+<span class="fc" id="L142">            feedback.get(&quot;status&quot;).in(List.of(EFeedbackStatus.NEW, EFeedbackStatus.IN_PROCESS)));</span>
+<span class="fc" id="L143">    return cb.exists(feedbacks);</span>
   }
 
   private static Predicate isSubmitted(
       Root&lt;DeclaredActivityEntity&gt; root, CriteriaQuery&lt;?&gt; query, CriteriaBuilder cb) {
-<span class="fc" id="L151">    return cb.or(cb.isNotNull(root.get(&quot;submittedAt&quot;)), hasActiveFeedback(root, query, cb));</span>
+<span class="fc" id="L148">    return cb.or(cb.isNotNull(root.get(&quot;submittedAt&quot;)), hasActiveFeedback(root, query, cb));</span>
   }
 
   private static Predicate statusPredicate(
@@ -156,39 +153,39 @@ public final class DeclaredActivitySpecification {
       Root&lt;DeclaredActivityEntity&gt; root,
       CriteriaQuery&lt;?&gt; query,
       CriteriaBuilder cb) {
-<span class="pc bpc" id="L159" title="1 of 6 branches missed.">    return switch (status) {</span>
-<span class="fc" id="L160">      case UNSUBSCRIBED -&gt; cb.isNotNull(root.get(&quot;unsubscribedAt&quot;));</span>
+<span class="pc bpc" id="L156" title="1 of 6 branches missed.">    return switch (status) {</span>
+<span class="fc" id="L157">      case UNSUBSCRIBED -&gt; cb.isNotNull(root.get(&quot;unsubscribedAt&quot;));</span>
       case COMPLETED -&gt;
-<span class="fc" id="L162">          cb.and(cb.isNull(root.get(&quot;unsubscribedAt&quot;)), cb.isNotNull(root.get(&quot;finishedAt&quot;)));</span>
-<span class="fc" id="L163">      case SUBMITTED -&gt; cb.and(isActive(root, cb), isSubmitted(root, query, cb));</span>
+<span class="fc" id="L159">          cb.and(cb.isNull(root.get(&quot;unsubscribedAt&quot;)), cb.isNotNull(root.get(&quot;finishedAt&quot;)));</span>
+<span class="fc" id="L160">      case SUBMITTED -&gt; cb.and(isActive(root, cb), isSubmitted(root, query, cb));</span>
       case IN_PROGRESS -&gt;
-<span class="fc" id="L165">          cb.and(</span>
-<span class="fc" id="L166">              isActive(root, cb),</span>
-<span class="fc" id="L167">              cb.not(isSubmitted(root, query, cb)),</span>
-<span class="fc" id="L168">              cb.isNotNull(root.get(&quot;startedAt&quot;)));</span>
+<span class="fc" id="L162">          cb.and(</span>
+<span class="fc" id="L163">              isActive(root, cb),</span>
+<span class="fc" id="L164">              cb.not(isSubmitted(root, query, cb)),</span>
+<span class="fc" id="L165">              cb.isNotNull(root.get(&quot;startedAt&quot;)));</span>
       case SUBSCRIBED -&gt;
-<span class="fc" id="L170">          cb.and(</span>
-<span class="fc" id="L171">              isActive(root, cb),</span>
-<span class="fc" id="L172">              cb.not(isSubmitted(root, query, cb)),</span>
-<span class="fc" id="L173">              cb.isNull(root.get(&quot;startedAt&quot;)));</span>
-<span class="nc" id="L174">      case CONSULTED -&gt; cb.disjunction();</span>
+<span class="fc" id="L167">          cb.and(</span>
+<span class="fc" id="L168">              isActive(root, cb),</span>
+<span class="fc" id="L169">              cb.not(isSubmitted(root, query, cb)),</span>
+<span class="fc" id="L170">              cb.isNull(root.get(&quot;startedAt&quot;)));</span>
+<span class="nc" id="L171">      case CONSULTED -&gt; cb.disjunction();</span>
     };
   }
 
   private static Predicate assessmentStatusPredicate(
       EDeclaredActivityStatus status, Root&lt;DeclaredActivityEntity&gt; root, CriteriaBuilder cb) {
-<span class="fc bfc" id="L180" title="All 2 branches covered.">    return switch (status) {</span>
-<span class="fc" id="L181">      case SUBMITTED -&gt; cb.isNotNull(root.get(&quot;submittedAt&quot;));</span>
-<span class="fc" id="L182">      case CONSULTED, SUBSCRIBED, IN_PROGRESS, COMPLETED, UNSUBSCRIBED -&gt; cb.disjunction();</span>
+<span class="fc bfc" id="L177" title="All 2 branches covered.">    return switch (status) {</span>
+<span class="fc" id="L178">      case SUBMITTED -&gt; cb.isNotNull(root.get(&quot;submittedAt&quot;));</span>
+<span class="fc" id="L179">      case CONSULTED, SUBSCRIBED, IN_PROGRESS, COMPLETED, UNSUBSCRIBED -&gt; cb.disjunction();</span>
     };
   }
 
   public static Specification&lt;DeclaredActivityEntity&gt; isValorized(Boolean isValorized) {
-<span class="fc" id="L187">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="fc bfc" id="L188" title="All 2 branches covered.">      if (isValorized == null) {</span>
-<span class="fc" id="L189">        return criteriaBuilder.conjunction();</span>
+<span class="fc" id="L184">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="fc bfc" id="L185" title="All 2 branches covered.">      if (isValorized == null) {</span>
+<span class="fc" id="L186">        return criteriaBuilder.conjunction();</span>
       }
-<span class="fc" id="L191">      return criteriaBuilder.equal(root.get(&quot;valorized&quot;), isValorized);</span>
+<span class="fc" id="L188">      return criteriaBuilder.equal(root.get(&quot;valorized&quot;), isValorized);</span>
     };
   }
 }
