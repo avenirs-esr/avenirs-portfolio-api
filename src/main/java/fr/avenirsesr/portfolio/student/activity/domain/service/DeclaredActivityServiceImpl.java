@@ -220,7 +220,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
       throw new DeclaredActivityUnsubscribedException();
     }
 
-    if (declaredActivity.getSubmittedAt().isPresent()) {
+    if (isSubmittedOrFinished(getDeclaredActivityStatus(declaredActivity))) {
       throw new DeclaredActivityLockedException();
     }
 
@@ -621,8 +621,12 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
       return EDeclaredActivityStatus.COMPLETED;
     }
 
-    if (hasActiveFeedback || declaredActivity.getSubmittedAt().isPresent()) {
-      return EDeclaredActivityStatus.SUBMITTED;
+    if (declaredActivity.getSubmittedAt().isPresent()) {
+      return EDeclaredActivityStatus.SUBMITTED_FOR_ASSESSMENT;
+    }
+
+    if (hasActiveFeedback) {
+      return EDeclaredActivityStatus.SUBMITTED_FOR_FEEDBACK;
     }
 
     if (declaredActivity.getStartedAt().isPresent()
@@ -738,9 +742,12 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
 
   private boolean isSubmittedOrFinished(
       DeclaredActivity declaredActivity, boolean hasActiveFeedback) {
-    EDeclaredActivityStatus status = getDeclaredActivityStatus(declaredActivity, hasActiveFeedback);
+    return isSubmittedOrFinished(getDeclaredActivityStatus(declaredActivity, hasActiveFeedback));
+  }
 
-    return status == EDeclaredActivityStatus.SUBMITTED
+  private boolean isSubmittedOrFinished(EDeclaredActivityStatus status) {
+    return status == EDeclaredActivityStatus.SUBMITTED_FOR_FEEDBACK
+        || status == EDeclaredActivityStatus.SUBMITTED_FOR_ASSESSMENT
         || status == EDeclaredActivityStatus.COMPLETED;
   }
 }

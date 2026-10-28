@@ -421,7 +421,8 @@ public class TraceServiceImpl implements TraceService {
   }
 
   private boolean isLocked(EDeclaredActivityStatus status) {
-    return status == EDeclaredActivityStatus.SUBMITTED
+    return status == EDeclaredActivityStatus.SUBMITTED_FOR_FEEDBACK
+        || status == EDeclaredActivityStatus.SUBMITTED_FOR_ASSESSMENT
         || status == EDeclaredActivityStatus.COMPLETED;
   }
 

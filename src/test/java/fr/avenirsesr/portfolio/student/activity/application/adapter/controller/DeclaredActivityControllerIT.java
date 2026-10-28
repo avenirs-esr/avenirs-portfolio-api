@@ -468,7 +468,7 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
     BddLogger.when("he submits it for assessment");
     submitForAssessment(id).expectStatus().isNoContent();
 
-    BddLogger.then("the declared activity is SUBMITTED");
+    BddLogger.then("the declared activity is SUBMITTED_FOR_ASSESSMENT");
     webTestClient
         .get()
         .uri(BASE_PATH + "/" + id)
@@ -479,10 +479,29 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .isOk()
         .expectBody()
         .jsonPath("$.status")
-        .isEqualTo("SUBMITTED");
+        .isEqualTo("SUBMITTED_FOR_ASSESSMENT");
 
     BddLogger.and("submitting it again is rejected");
     submitForAssessment(id)
+        .expectStatus()
+        .isEqualTo(HttpStatus.CONFLICT)
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("DECLARED_ACTIVITY_LOCKED");
+  }
+
+  @Test
+  @Transactional
+  void shouldRejectAskingForFeedbackOnADeclaredActivitySubmittedForAssessment() throws Exception {
+    BddLogger.given("a declared activity already submitted for assessment");
+    String assessableActivityId =
+        publishActivityAsStaff("Activité évaluable puis feedback", "{\"comment\": true}");
+    String id = subscribeAndGetId(assessableActivityId);
+    submitForAssessment(id).expectStatus().isNoContent();
+
+    BddLogger.when("the student asks for a feedback");
+    BddLogger.then("it should return 409 DECLARED_ACTIVITY_LOCKED");
+    askForFeedback(id)
         .expectStatus()
         .isEqualTo(HttpStatus.CONFLICT)
         .expectBody()
@@ -574,7 +593,7 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .jsonPath("$.submittedAt")
         .exists()
         .jsonPath("$.status")
-        .isEqualTo("SUBMITTED");
+        .isEqualTo("SUBMITTED_FOR_ASSESSMENT");
   }
 
   @Test
@@ -649,6 +668,15 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .exchange()
         .expectStatus()
         .isOk();
+  }
+
+  private ResponseSpec askForFeedback(String id) {
+    return webTestClient
+        .post()
+        .uri(FEEDBACK_BASE_PATH + "/" + id + "/ask-for-feedback")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Signature", studentSignature)
+        .exchange();
   }
 
   private ResponseSpec submitForAssessment(String id) {
