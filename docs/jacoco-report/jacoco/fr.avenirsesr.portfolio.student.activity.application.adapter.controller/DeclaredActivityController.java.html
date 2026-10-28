@@ -12,13 +12,13 @@ import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.CreationResponse;
 import fr.avenirsesr.portfolio.shared.application.adapter.mapper.FileDTOMapper;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityContentDtoMapper;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.*;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.mapper.DeclaredActivityAssessmentDetailsDTOMapper;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.mapper.DeclaredActivityDetailsDTOMapper;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.mapper.DeclaredActivityViewDTOMapper;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
-import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -69,9 +69,9 @@ public class DeclaredActivityController {
       @Parameter(schema = @Schema(ref = &quot;#/components/schemas/EActivityThematic&quot;))
           @RequestParam(required = false)
           List&lt;EActivityThematic&gt; thematic,
-      @Parameter(schema = @Schema(ref = &quot;#/components/schemas/EDeclaredActivityStatus&quot;))
+      @Parameter(schema = @Schema(ref = &quot;#/components/schemas/EActivityStatus&quot;))
           @RequestParam(required = false)
-          List&lt;EDeclaredActivityStatus&gt; status,
+          List&lt;EActivityStatus&gt; status,
       @Parameter(schema = @Schema(ref = &quot;#/components/schemas/ESortField&quot;))
           @RequestParam(required = false)
           ESortField sortField,
@@ -153,12 +153,12 @@ public class DeclaredActivityController {
   @PutMapping(&quot;/finish/{declaredActivityId}&quot;)
   public ResponseEntity&lt;Void&gt; finish(
       Principal principal, @Valid @PathVariable UUID declaredActivityId) {
-<span class="fc" id="L156">    log.debug(</span>
+<span class="nc" id="L156">    log.debug(</span>
         &quot;Received request to finish declared activity [{}] for student [{}]&quot;,
         declaredActivityId,
-<span class="fc" id="L159">        principal.getName());</span>
-<span class="fc" id="L160">    declaredActivityService.finish(declaredActivityId);</span>
-<span class="fc" id="L161">    return ResponseEntity.noContent().build();</span>
+<span class="nc" id="L159">        principal.getName());</span>
+<span class="nc" id="L160">    declaredActivityService.finish(declaredActivityId);</span>
+<span class="nc" id="L161">    return ResponseEntity.noContent().build();</span>
   }
 
   @PreAuthorize(&quot;hasAuthority('declared-activity:update:own')&quot;)
