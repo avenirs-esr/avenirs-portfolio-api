@@ -18,6 +18,10 @@ public record ActivityAssessment(Boolean comment, Integer grade, Boolean validat
     return Boolean.TRUE.equals(validation);
   }
 
+  public boolean isCommentRequired() {
+    return isCommentEnabled() && !isGradeEnabled() && !isValidationEnabled();
+  }
+
   public boolean isEmpty() {
     return !isCommentEnabled() && !isGradeEnabled() && !isValidationEnabled();
   }

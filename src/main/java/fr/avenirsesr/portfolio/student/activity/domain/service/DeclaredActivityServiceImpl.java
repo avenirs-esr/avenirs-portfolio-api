@@ -347,7 +347,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
 
   private void requireCompleteAssessment(
       ActivityAssessment setup, DeclaredActivityAssessment assessment) {
-    if (setup.isCommentEnabled()) {
+    if (setup.isCommentRequired()) {
       requireNotBlankAndMaxLength("comment", assessment.comment(), RICH_TEXT_LENGTH);
     }
     if (setup.isGradeEnabled()) {

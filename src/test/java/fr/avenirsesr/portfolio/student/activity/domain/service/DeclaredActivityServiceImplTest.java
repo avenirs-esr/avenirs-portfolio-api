@@ -226,8 +226,61 @@ class DeclaredActivityServiceImplTest {
   }
 
   @Test
+  void sendAssessment_should_accept_a_grade_without_comment_when_the_comment_is_optional() {
+    BddLogger.given("An evaluator and a declared activity whose activity expects a graded comment");
+    Activity activity =
+        ActivityFixture.create().withAssessment(new ActivityAssessment(true, 20, null)).toModel();
+    DeclaredActivity declaredActivity = declaredActivityWith(activity, null);
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(StaffFixture.create().toModel());
+    when(declaredActivityRepository.findById(declaredActivityId))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("He sends an assessment holding a grade only");
+    service.sendAssessment(declaredActivityId, null, 15, null);
+
+    BddLogger.then("The assessment is set without comment and the student notified");
+    verify(declaredActivityRepository).save(activityCaptor.capture());
+
+    assertThat(activityCaptor.getValue().getAssessment())
+        .hasValueSatisfying(
+            sent -> {
+              assertThat(sent.comment()).isNull();
+              assertThat(sent.grade()).isEqualTo(15);
+            });
+    verify(notificationService).notify(any());
+  }
+
+  @Test
+  void sendAssessment_should_accept_a_validation_without_comment_when_the_comment_is_optional() {
+    BddLogger.given(
+        "An evaluator and a declared activity whose activity expects a validation and a comment");
+    Activity activity =
+        ActivityFixture.create().withAssessment(new ActivityAssessment(true, null, true)).toModel();
+    DeclaredActivity declaredActivity = declaredActivityWith(activity, null);
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(StaffFixture.create().toModel());
+    when(declaredActivityRepository.findById(declaredActivityId))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("He sends an assessment holding a validation only");
+    service.sendAssessment(declaredActivityId, null, null, false);
+
+    BddLogger.then("The assessment is set without comment and the student notified");
+    verify(declaredActivityRepository).save(activityCaptor.capture());
+
+    assertThat(activityCaptor.getValue().getAssessment())
+        .hasValueSatisfying(
+            sent -> {
+              assertThat(sent.comment()).isNull();
+              assertThat(sent.validation()).isFalse();
+            });
+    verify(notificationService).notify(any());
+  }
+
+  @Test
   void sendAssessment_should_throw_FieldValidationException_when_the_comment_is_missing() {
-    BddLogger.given("An evaluator and a declared activity whose activity expects a comment");
+    BddLogger.given("An evaluator and a declared activity whose activity expects a comment only");
     Activity activity =
         ActivityFixture.create().withAssessment(new ActivityAssessment(true, null, null)).toModel();
     DeclaredActivity declaredActivity = declaredActivityWith(activity, null);

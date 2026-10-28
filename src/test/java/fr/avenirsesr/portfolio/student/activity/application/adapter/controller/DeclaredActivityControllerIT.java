@@ -882,6 +882,38 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
+  void shouldSendAnAssessmentWithoutCommentWhenTheCommentIsOptional() throws Exception {
+    BddLogger.given("a declared activity on an activity expecting a comment and a grade");
+    String assessableActivityId =
+        publishAssessableActivity(
+            "Activité évaluée sans commentaire", "{\"comment\":true,\"grade\":20}");
+    String id = subscribeAndGetId(assessableActivityId);
+
+    BddLogger.when("the evaluator sends an assessment holding a grade only");
+    BddLogger.then("it should return 204");
+
+    sendAssessment(id, "{\"grade\":15}", staffPayload, staffSignature).expectStatus().isNoContent();
+  }
+
+  @Test
+  void shouldRejectAnAssessmentWithoutCommentWhenTheCommentIsTheOnlyOption() throws Exception {
+    BddLogger.given("a declared activity on an activity expecting a comment only");
+    String assessableActivityId =
+        publishAssessableActivity("Activité évaluée commentaire seul", "{\"comment\":true}");
+    String id = subscribeAndGetId(assessableActivityId);
+
+    BddLogger.when("the evaluator sends an assessment without comment");
+    BddLogger.then("it should return 400");
+
+    sendAssessment(id, "{}", staffPayload, staffSignature)
+        .expectStatus()
+        .isBadRequest()
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("NOT_BLANK");
+  }
+
+  @Test
   void shouldRejectAnAssessmentFieldThatIsNotEnabled() throws Exception {
     BddLogger.given("a declared activity on an activity expecting a comment only");
     String assessableActivityId =
