@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.student.selfknowledge.infrastructure.adapter.mapper;
 
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.mapper.Mapper;
+import fr.avenirsesr.portfolio.file.infrastructure.adapter.mapper.FileMapper;
 import fr.avenirsesr.portfolio.student.selfknowledge.domain.model.SelfKnowledgeElement;
 import fr.avenirsesr.portfolio.student.selfknowledge.infrastructure.adapter.model.SelfKnowledgeElementEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StudentMapper;
@@ -20,7 +21,9 @@ public class SelfKnowledgeElementMapper
         element.getSelfKnowledgeCategory(),
         element.isValorized(),
         element.getCreatedAt(),
-        element.getUpdatedAt());
+        element.getUpdatedAt(),
+        element.getFiles().stream().map(FileMapper.INSTANCE::fromDomain).toList(),
+        element.getLinks());
   }
 
   @Override
@@ -34,6 +37,8 @@ public class SelfKnowledgeElementMapper
         entity.getSelfKnowledgeCategory(),
         entity.isValorized(),
         entity.getCreatedAt(),
-        entity.getUpdatedAt());
+        entity.getUpdatedAt(),
+        entity.getFiles().stream().map(FileMapper.INSTANCE::toDomain).toList(),
+        entity.getLinks());
   }
 }

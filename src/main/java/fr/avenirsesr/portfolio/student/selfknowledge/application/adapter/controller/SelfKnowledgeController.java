@@ -113,7 +113,8 @@ public class SelfKnowledgeController {
             selfKnowledgeCategory,
             selfKnowledgeElementRequest.title(),
             selfKnowledgeElementRequest.description(),
-            selfKnowledgeElementRequest.rating());
+            selfKnowledgeElementRequest.rating(),
+            selfKnowledgeElementRequest.links());
     return ResponseEntity.ok(selfKnowledgeElementViewMapper.toDTO(selfKnowledgeElement));
   }
 

@@ -64,7 +64,8 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
       ESelfKnowledgeCategory selfKnowledgeCategory,
       String title,
       String description,
-      Integer rating) {
+      Integer rating,
+      List<String> links) {
     Student student = loggedInUserService.getLoggedInStudent();
 
     checkTitleField(title);
@@ -73,7 +74,14 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
 
     SelfKnowledgeElement selfKnowledgeElement =
         SelfKnowledgeElement.create(
-            UUID.randomUUID(), student, title, description, rating, selfKnowledgeCategory);
+            UUID.randomUUID(),
+            student,
+            title,
+            description,
+            rating,
+            selfKnowledgeCategory,
+            List.of(),
+            links);
     return selfKnowledgeElementRepository.save(selfKnowledgeElement);
   }
 

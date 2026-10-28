@@ -682,14 +682,14 @@ class SelfKnowledgeServiceImplTest {
           String title = "Empathie";
           String description = "J’ai une bonne capacité à écouter et comprendre les autres.";
           Integer rating = 5;
-
+          String link = "https://www.fortnite.com";
           when(selfKnowledgeElementRepository.save(any(SelfKnowledgeElement.class)))
               .thenAnswer(invocation -> invocation.getArgument(0));
 
           BddLogger.when("creating self knowledge element");
           SelfKnowledgeElement result =
               selfKnowledgeService.createSelfKnowledgeElement(
-                  selfKnowledgeCategory, title, description, rating);
+                  selfKnowledgeCategory, title, description, rating, List.of(link));
 
           BddLogger.then("it should create self knowledge element");
 
@@ -698,6 +698,7 @@ class SelfKnowledgeServiceImplTest {
           assertThat(result.getTitle()).isEqualTo(title);
           assertThat(result.getDescription()).isEqualTo(description);
           assertThat(result.getRating()).isEqualTo(rating);
+          assertThat(result.getLinks()).contains(link);
           assertThat(result.getStudent()).isEqualTo(student);
           assertThat(result.getSelfKnowledgeCategory()).isEqualTo(selfKnowledgeCategory);
 
@@ -719,7 +720,7 @@ class SelfKnowledgeServiceImplTest {
               SelfKnowledgeInvalidTitleException.class,
               () ->
                   selfKnowledgeService.createSelfKnowledgeElement(
-                      ESelfKnowledgeCategory.STRENGTHS, tooLongTitle, "Description", 1));
+                      ESelfKnowledgeCategory.STRENGTHS, tooLongTitle, "Description", 1, List.of()));
 
           verify(selfKnowledgeElementRepository, never()).save(any());
         }
@@ -738,7 +739,7 @@ class SelfKnowledgeServiceImplTest {
               SelfKnowledgeInvalidDescriptionException.class,
               () ->
                   selfKnowledgeService.createSelfKnowledgeElement(
-                      ESelfKnowledgeCategory.STRENGTHS, "Title", tooLongDescription, 1));
+                      ESelfKnowledgeCategory.STRENGTHS, "Title", tooLongDescription, 1, List.of()));
 
           verify(selfKnowledgeElementRepository, never()).save(any());
         }
@@ -755,7 +756,7 @@ class SelfKnowledgeServiceImplTest {
               SelfKnowledgeInvalidRatingException.class,
               () ->
                   selfKnowledgeService.createSelfKnowledgeElement(
-                      ESelfKnowledgeCategory.STRENGTHS, "Title", "Description", -999));
+                      ESelfKnowledgeCategory.STRENGTHS, "Title", "Description", -999, List.of()));
 
           verify(selfKnowledgeElementRepository, never()).save(any());
         }
@@ -1057,7 +1058,7 @@ class SelfKnowledgeServiceImplTest {
               UserNotFoundException.class,
               () ->
                   selfKnowledgeService.createSelfKnowledgeElement(
-                      ESelfKnowledgeCategory.STRENGTHS, "Title", "Description", 1));
+                      ESelfKnowledgeCategory.STRENGTHS, "Title", "Description", 1, List.of()));
         }
       }
 
@@ -1205,7 +1206,7 @@ class SelfKnowledgeServiceImplTest {
               UserIsNotStudentException.class,
               () ->
                   selfKnowledgeService.createSelfKnowledgeElement(
-                      ESelfKnowledgeCategory.STRENGTHS, "Title", "Description", 1));
+                      ESelfKnowledgeCategory.STRENGTHS, "Title", "Description", 1, List.of()));
         }
       }
 
