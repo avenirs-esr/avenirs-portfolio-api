@@ -14,13 +14,21 @@ import fr.avenirsesr.portfolio.shared.application.adapter.mapper.FileDTOMapper;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityContentDtoMapper;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
-import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.*;
+import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.DeclaredActivityAssessmentDetailsDTO;
+import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.DeclaredActivityAssessmentRequest;
+import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.DeclaredActivityDetailsDTO;
+import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.DeclaredActivityPeriodDTO;
+import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.DeclaredActivityUpdateRequest;
+import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.DeclaredActivityViewDTO;
+import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.SubscribeDeclaredActivityRequest;
+import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.UpdateReflectionRequest;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.mapper.DeclaredActivityAssessmentDetailsDTOMapper;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.mapper.DeclaredActivityDetailsDTOMapper;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.mapper.DeclaredActivityViewDTOMapper;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -66,10 +74,13 @@ public class DeclaredActivityController {
       @RequestParam(required = false) Integer pageSize,
       @RequestParam(required = false) Boolean isValorized,
       @RequestParam(required = false) String keyword,
-      @Parameter(schema = @Schema(ref = "#/components/schemas/EActivityThematic"))
+      @Parameter(
+              array =
+                  @ArraySchema(schema = @Schema(ref = "#/components/schemas/EActivityThematic")))
           @RequestParam(required = false)
           List<EActivityThematic> thematics,
-      @Parameter(schema = @Schema(ref = "#/components/schemas/EActivityStatus"))
+      @Parameter(
+              array = @ArraySchema(schema = @Schema(ref = "#/components/schemas/EActivityStatus")))
           @RequestParam(required = false)
           List<EActivityStatus> statuses,
       @Parameter(schema = @Schema(ref = "#/components/schemas/ESortField"))
