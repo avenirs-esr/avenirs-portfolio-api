@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DeclaredActivityDatabaseRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.repository</a> &gt; <span class="el_source">DeclaredActivityDatabaseRepository.java</span></div><h1>DeclaredActivityDatabaseRepository.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.repository;
 
-import static fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.specification.DeclaredActivitySpecification.has;
 import static fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.specification.DeclaredActivitySpecification.hasActivityIdInAndStudent;
 
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
@@ -10,7 +9,6 @@ import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
-import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
@@ -40,72 +38,72 @@ public class DeclaredActivityDatabaseRepository
   @PersistenceContext private EntityManager em;
 
   public DeclaredActivityDatabaseRepository(DeclaredActivityJpaRepository jpaRepository) {
-<span class="fc" id="L43">    super(</span>
+<span class="fc" id="L41">    super(</span>
         jpaRepository,
         jpaRepository,
         DeclaredActivityEntity.class,
         DeclaredActivityMapper.INSTANCE);
-<span class="fc" id="L48">    this.jpaRepository = jpaRepository;</span>
-<span class="fc" id="L49">  }</span>
+<span class="fc" id="L46">    this.jpaRepository = jpaRepository;</span>
+<span class="fc" id="L47">  }</span>
 
   @Override
   public void removeFromDatabase(DeclaredActivity declaredActivity) {
-<span class="fc" id="L53">    jpaRepository.deleteById(declaredActivity.getId());</span>
-<span class="fc" id="L54">  }</span>
+<span class="fc" id="L51">    jpaRepository.deleteById(declaredActivity.getId());</span>
+<span class="fc" id="L52">  }</span>
 
   @Override
   public List&lt;DeclaredActivity&gt; findAllByStudent(Student student, FetchGraph fetchGraph) {
-<span class="fc" id="L58">    return findAll(hasStudent(student), fetchGraph);</span>
+<span class="fc" id="L56">    return findAll(hasStudent(student), fetchGraph);</span>
   }
 
   @Override
   public PagedResult&lt;DeclaredActivity&gt; findAllByStudent(
       Student student, String keyword, PageCriteria pageCriteria, FetchGraph fetchGraph) {
-<span class="fc" id="L64">    var specification = hasStudent(student).and(DeclaredActivitySpecification.search(keyword));</span>
-<span class="fc" id="L65">    return findAll(</span>
-<span class="fc" id="L66">        specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()), fetchGraph);</span>
+<span class="fc" id="L62">    var specification = hasStudent(student).and(DeclaredActivitySpecification.search(keyword));</span>
+<span class="fc" id="L63">    return findAll(</span>
+<span class="fc" id="L64">        specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()), fetchGraph);</span>
   }
 
   @Override
   public List&lt;DeclaredActivity&gt; findAllByActivityIdAndStudent(
       List&lt;UUID&gt; activityIds, Student student, FetchGraph fetchGraph) {
-<span class="pc bpc" id="L72" title="2 of 4 branches missed.">    if (activityIds == null || activityIds.isEmpty()) {</span>
-<span class="nc" id="L73">      return List.of();</span>
+<span class="pc bpc" id="L70" title="2 of 4 branches missed.">    if (activityIds == null || activityIds.isEmpty()) {</span>
+<span class="nc" id="L71">      return List.of();</span>
     }
 
-<span class="fc" id="L76">    return findAll(hasActivityIdInAndStudent(activityIds, student), fetchGraph);</span>
+<span class="fc" id="L74">    return findAll(hasActivityIdInAndStudent(activityIds, student), fetchGraph);</span>
   }
 
   @Override
   public List&lt;DeclaredActivity&gt; findAllNotCompletedActivitiesByIds(
       List&lt;UUID&gt; activityIds, FetchGraph fetchGraph) {
-<span class="nc" id="L82">    var specification = DeclaredActivitySpecification.isNotCompleted();</span>
-<span class="nc" id="L83">    return findAllById(activityIds, specification, fetchGraph);</span>
+<span class="nc" id="L80">    var specification = DeclaredActivitySpecification.isNotCompleted();</span>
+<span class="nc" id="L81">    return findAllById(activityIds, specification, fetchGraph);</span>
   }
 
   @Override
   public PagedResult&lt;DeclaredActivity&gt; findStudentActivitiesByProgressAndDate(
       Student student,
       String keyword,
-      List&lt;EActivityThematic&gt; thematic,
-      List&lt;EActivityStatus&gt; status,
+      List&lt;EActivityThematic&gt; thematics,
+      List&lt;EDeclaredActivityStatus&gt; statuses,
       SortCriteria sortCriteria,
       PageCriteria pageCriteria,
       Boolean isValorized,
       FetchGraph fetchGraph) {
 
     Sort.Direction direction =
-<span class="fc bfc" id="L98" title="All 2 branches covered.">        sortCriteria.order() == ESortOrder.ASC ? Sort.Direction.ASC : Sort.Direction.DESC;</span>
-<span class="fc" id="L99">    var sort = Sort.by(Sort.Direction.ASC, &quot;isFinishedOrder&quot;).and(Sort.by(direction, &quot;updatedAt&quot;));</span>
+<span class="fc bfc" id="L96" title="All 2 branches covered.">        sortCriteria.order() == ESortOrder.ASC ? Sort.Direction.ASC : Sort.Direction.DESC;</span>
+<span class="fc" id="L97">    var sort = Sort.by(Sort.Direction.ASC, &quot;isFinishedOrder&quot;).and(Sort.by(direction, &quot;updatedAt&quot;));</span>
 
-<span class="fc" id="L101">    return findAll(</span>
-<span class="fc" id="L102">        hasStudent(student)</span>
-<span class="fc" id="L103">            .and(</span>
-<span class="fc" id="L104">                DeclaredActivitySpecification.isValorized(isValorized)</span>
-<span class="fc" id="L105">                    .and(DeclaredActivitySpecification.search(keyword))</span>
-<span class="fc" id="L106">                    .and(DeclaredActivitySpecification.has(&quot;thematic&quot;, thematic))</span>
-<span class="fc" id="L107">                    .and(has(&quot;status&quot;, status))),</span>
-<span class="fc" id="L108">        PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort),</span>
+<span class="fc" id="L99">    return findAll(</span>
+<span class="fc" id="L100">        hasStudent(student)</span>
+<span class="fc" id="L101">            .and(</span>
+<span class="fc" id="L102">                DeclaredActivitySpecification.isValorized(isValorized)</span>
+<span class="fc" id="L103">                    .and(DeclaredActivitySpecification.search(keyword))</span>
+<span class="fc" id="L104">                    .and(DeclaredActivitySpecification.has(&quot;thematic&quot;, thematics))</span>
+<span class="fc" id="L105">                    .and(DeclaredActivitySpecification.hasStatusIn(statuses))),</span>
+<span class="fc" id="L106">        PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort),</span>
         fetchGraph);
   }
 
@@ -116,72 +114,72 @@ public class DeclaredActivityDatabaseRepository
       PageCriteria pageCriteria,
       FetchGraph fetchGraph) {
     var specification =
-<span class="fc" id="L119">        DeclaredActivitySpecification.isSubmittedForAssessment()</span>
-<span class="fc" id="L120">            .and(DeclaredActivitySpecification.isNotUnsubscribed())</span>
-<span class="fc" id="L121">            .and(</span>
-<span class="fc" id="L122">                DeclaredActivitySpecification.activityHasStaffRight(</span>
+<span class="fc" id="L117">        DeclaredActivitySpecification.isSubmittedForAssessment()</span>
+<span class="fc" id="L118">            .and(DeclaredActivitySpecification.isNotUnsubscribed())</span>
+<span class="fc" id="L119">            .and(</span>
+<span class="fc" id="L120">                DeclaredActivitySpecification.activityHasStaffRight(</span>
                     staffId, EActivityRight.EVALUATION))
-<span class="fc" id="L124">            .and(DeclaredActivitySpecification.hasAssessmentStatusIn(statuses));</span>
-<span class="fc" id="L125">    var sort = Sort.by(Sort.Direction.DESC, &quot;submittedAt&quot;);</span>
-<span class="fc" id="L126">    return findAll(</span>
+<span class="fc" id="L122">            .and(DeclaredActivitySpecification.hasAssessmentStatusIn(statuses));</span>
+<span class="fc" id="L123">    var sort = Sort.by(Sort.Direction.DESC, &quot;submittedAt&quot;);</span>
+<span class="fc" id="L124">    return findAll(</span>
         specification,
-<span class="fc" id="L128">        PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort),</span>
+<span class="fc" id="L126">        PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort),</span>
         fetchGraph);
   }
 
   @Override
   public Optional&lt;DeclaredActivity&gt; findByActivity(Student student, Activity activity) {
-<span class="fc" id="L134">    return jpaRepository</span>
-<span class="fc" id="L135">        .findByStudentIdAndActivityId(student.getId(), activity.getId())</span>
-<span class="fc" id="L136">        .map(DeclaredActivityMapper.INSTANCE::toDomain);</span>
+<span class="fc" id="L132">    return jpaRepository</span>
+<span class="fc" id="L133">        .findByStudentIdAndActivityId(student.getId(), activity.getId())</span>
+<span class="fc" id="L134">        .map(DeclaredActivityMapper.INSTANCE::toDomain);</span>
   }
 
   @Override
   public int countEnrolledByActivity(Activity activity) {
-<span class="fc" id="L141">    return jpaRepository.countByActivityIdAndUnsubscribedAtIsNull(activity.getId());</span>
+<span class="fc" id="L139">    return jpaRepository.countByActivityIdAndUnsubscribedAtIsNull(activity.getId());</span>
   }
 
   @Override
   public int countUnsubscribedByActivitySince(Activity activity, Instant since) {
-<span class="fc" id="L146">    return jpaRepository.countByActivityIdAndUnsubscribedAtGreaterThanEqual(</span>
-<span class="fc" id="L147">        activity.getId(), since);</span>
+<span class="fc" id="L144">    return jpaRepository.countByActivityIdAndUnsubscribedAtGreaterThanEqual(</span>
+<span class="fc" id="L145">        activity.getId(), since);</span>
   }
 
   @Override
   public List&lt;DeclaredActivity&gt; findAllEnrolledByActivity(
       Activity activity, FetchGraph fetchGraph) {
-<span class="fc" id="L153">    return findAll(isEnrolledIn(activity), fetchGraph);</span>
+<span class="fc" id="L151">    return findAll(isEnrolledIn(activity), fetchGraph);</span>
   }
 
   @Override
   public List&lt;DeclaredActivity&gt; findAllEnrolledNotViewedSince(
       Activity activity, Instant since, FetchGraph fetchGraph) {
-<span class="fc" id="L159">    return findAll(</span>
-<span class="fc" id="L160">        isEnrolledIn(activity).and(DeclaredActivitySpecification.hasNotBeenViewedSince(since)),</span>
+<span class="fc" id="L157">    return findAll(</span>
+<span class="fc" id="L158">        isEnrolledIn(activity).and(DeclaredActivitySpecification.hasNotBeenViewedSince(since)),</span>
         fetchGraph);
   }
 
   @Override
   public List&lt;UUID&gt; findEnrolledStudentIdsByActivity(Activity activity) {
-<span class="fc" id="L166">    var cb = em.getCriteriaBuilder();</span>
-<span class="fc" id="L167">    var query = cb.createQuery(UUID.class);</span>
-<span class="fc" id="L168">    var root = query.from(DeclaredActivityEntity.class);</span>
+<span class="fc" id="L164">    var cb = em.getCriteriaBuilder();</span>
+<span class="fc" id="L165">    var query = cb.createQuery(UUID.class);</span>
+<span class="fc" id="L166">    var root = query.from(DeclaredActivityEntity.class);</span>
 
-<span class="fc" id="L170">    query</span>
-<span class="fc" id="L171">        .select(root.get(&quot;student&quot;).get(&quot;id&quot;))</span>
-<span class="fc" id="L172">        .where(isEnrolledIn(activity).toPredicate(root, query, cb));</span>
+<span class="fc" id="L168">    query</span>
+<span class="fc" id="L169">        .select(root.get(&quot;student&quot;).get(&quot;id&quot;))</span>
+<span class="fc" id="L170">        .where(isEnrolledIn(activity).toPredicate(root, query, cb));</span>
 
-<span class="fc" id="L174">    return em.createQuery(query).getResultList();</span>
+<span class="fc" id="L172">    return em.createQuery(query).getResultList();</span>
   }
 
   @Override
   public List&lt;DeclaredActivity&gt; findAllByActivity(Activity activity, FetchGraph fetchGraph) {
-<span class="fc" id="L179">    return findAll(DeclaredActivitySpecification.hasActivityId(activity.getId()), fetchGraph);</span>
+<span class="fc" id="L177">    return findAll(DeclaredActivitySpecification.hasActivityId(activity.getId()), fetchGraph);</span>
   }
 
   private static Specification&lt;DeclaredActivityEntity&gt; isEnrolledIn(Activity activity) {
-<span class="fc" id="L183">    return DeclaredActivitySpecification.hasActivityId(activity.getId())</span>
-<span class="fc" id="L184">        .and(DeclaredActivitySpecification.isNotUnsubscribed());</span>
+<span class="fc" id="L181">    return DeclaredActivitySpecification.hasActivityId(activity.getId())</span>
+<span class="fc" id="L182">        .and(DeclaredActivitySpecification.isNotUnsubscribed());</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
