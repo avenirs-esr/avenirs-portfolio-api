@@ -347,14 +347,14 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
 
   private void requireCompleteAssessment(
       ActivityAssessment setup, DeclaredActivityAssessment assessment) {
-<span class="fc bfc" id="L350" title="All 2 branches covered.">    if (setup.isCommentEnabled()) {</span>
+<span class="fc bfc" id="L350" title="All 2 branches covered.">    if (setup.isCommentRequired()) {</span>
 <span class="fc" id="L351">      requireNotBlankAndMaxLength(&quot;comment&quot;, assessment.comment(), RICH_TEXT_LENGTH);</span>
     }
 <span class="fc bfc" id="L353" title="All 2 branches covered.">    if (setup.isGradeEnabled()) {</span>
 <span class="fc" id="L354">      requireNotNull(&quot;grade&quot;, assessment.grade());</span>
     }
-<span class="pc bpc" id="L356" title="1 of 2 branches missed.">    if (setup.isValidationEnabled()) {</span>
-<span class="nc" id="L357">      requireNotNull(&quot;validation&quot;, assessment.validation());</span>
+<span class="fc bfc" id="L356" title="All 2 branches covered.">    if (setup.isValidationEnabled()) {</span>
+<span class="fc" id="L357">      requireNotNull(&quot;validation&quot;, assessment.validation());</span>
     }
 <span class="fc" id="L359">  }</span>
 
@@ -364,7 +364,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
 <span class="pc bpc" id="L364" title="1 of 4 branches missed.">    if (assessment.comment() != null &amp;&amp; !setup.isCommentEnabled()) {</span>
 <span class="nc" id="L365">      throw new ActivityAssessmentException(&quot;This activity does not expect an assessment comment&quot;);</span>
     }
-<span class="pc bpc" id="L367" title="3 of 4 branches missed.">    if (assessment.validation() != null &amp;&amp; !setup.isValidationEnabled()) {</span>
+<span class="pc bpc" id="L367" title="1 of 4 branches missed.">    if (assessment.validation() != null &amp;&amp; !setup.isValidationEnabled()) {</span>
 <span class="nc" id="L368">      throw new ActivityAssessmentException(</span>
           &quot;This activity does not expect an assessment validation&quot;);
     }
