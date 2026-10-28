@@ -80,7 +80,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
       PageCriteria pageCriteria,
       String keyword,
       List<EActivityThematic> thematics,
-      List<EActivityStatus> statuses,
+      List<EDeclaredActivityStatus> statuses,
       SortCriteria sortCriterias,
       Boolean isValorized) {
     Student student = loggedInUserService.getLoggedInStudent();

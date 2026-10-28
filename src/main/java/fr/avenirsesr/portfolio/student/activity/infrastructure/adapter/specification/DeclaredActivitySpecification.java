@@ -4,14 +4,20 @@ import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityAuthorizationEntity;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityViewEntity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
+import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.model.DeclaredActivityEntity;
+import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.model.FeedbackEntity;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.specification.StudentSpecification;
 import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.time.Instant;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -79,6 +85,19 @@ public final class DeclaredActivitySpecification {
     };
   }
 
+  public static Specification<DeclaredActivityEntity> hasStatusIn(
+      Collection<EDeclaredActivityStatus> statuses) {
+    return (root, query, cb) -> {
+      if (statuses == null || statuses.isEmpty()) {
+        return cb.conjunction();
+      }
+      return cb.or(
+          statuses.stream()
+              .map(status -> statusPredicate(status, root, query, cb))
+              .toArray(Predicate[]::new));
+    };
+  }
+
   public static Specification<DeclaredActivityEntity> isSubmittedForAssessment() {
     return (root, query, cb) -> cb.isNotNull(root.get("submittedAt"));
   }
@@ -111,10 +130,71 @@ public final class DeclaredActivitySpecification {
     };
   }
 
+  private static Predicate isActive(Root<DeclaredActivityEntity> root, CriteriaBuilder cb) {
+    return cb.and(cb.isNull(root.get("unsubscribedAt")), cb.isNull(root.get("finishedAt")));
+  }
+
+  private static Predicate isStarted(Root<DeclaredActivityEntity> root, CriteriaBuilder cb) {
+    var startedAt = root.<Instant>get("startedAt");
+    return cb.and(cb.isNotNull(startedAt), cb.lessThan(startedAt, Instant.now()));
+  }
+
+  private static Predicate hasActiveFeedback(
+      Root<DeclaredActivityEntity> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
+    var feedbacks = query.subquery(Integer.class);
+    var feedback = feedbacks.from(FeedbackEntity.class);
+    feedbacks
+        .select(cb.literal(1))
+        .where(
+            cb.equal(feedback.get("declaredActivity").get("id"), root.get("id")),
+            feedback.get("status").in(List.of(EFeedbackStatus.NEW, EFeedbackStatus.IN_PROCESS)));
+    return cb.exists(feedbacks);
+  }
+
+  private static Predicate isSubmittedForAssessment(
+      Root<DeclaredActivityEntity> root, CriteriaBuilder cb) {
+    return cb.isNotNull(root.get("submittedAt"));
+  }
+
+  private static Predicate isSubmittedForFeedback(
+      Root<DeclaredActivityEntity> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
+    return cb.and(cb.not(isSubmittedForAssessment(root, cb)), hasActiveFeedback(root, query, cb));
+  }
+
+  private static Predicate isSubmitted(
+      Root<DeclaredActivityEntity> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
+    return cb.or(isSubmittedForAssessment(root, cb), hasActiveFeedback(root, query, cb));
+  }
+
+  /** Mirrors DeclaredActivityServiceImpl#getDeclaredActivityStatus. */
+  private static Predicate statusPredicate(
+      EDeclaredActivityStatus status,
+      Root<DeclaredActivityEntity> root,
+      CriteriaQuery<?> query,
+      CriteriaBuilder cb) {
+    return switch (status) {
+      case UNSUBSCRIBED -> cb.isNotNull(root.get("unsubscribedAt"));
+      case COMPLETED ->
+          cb.and(cb.isNull(root.get("unsubscribedAt")), cb.isNotNull(root.get("finishedAt")));
+      case SUBMITTED_FOR_ASSESSMENT ->
+          cb.and(isActive(root, cb), isSubmittedForAssessment(root, cb));
+      case SUBMITTED_FOR_FEEDBACK ->
+          cb.and(isActive(root, cb), isSubmittedForFeedback(root, query, cb));
+      case IN_PROGRESS ->
+          cb.and(isActive(root, cb), isStarted(root, cb), cb.not(isSubmitted(root, query, cb)));
+      case SUBSCRIBED ->
+          cb.and(
+              isActive(root, cb),
+              cb.not(isStarted(root, cb)),
+              cb.not(isSubmitted(root, query, cb)));
+      case CONSULTED -> cb.disjunction();
+    };
+  }
+
   private static Predicate assessmentStatusPredicate(
       EDeclaredActivityStatus status, Root<DeclaredActivityEntity> root, CriteriaBuilder cb) {
     return switch (status) {
-      case SUBMITTED_FOR_ASSESSMENT -> cb.isNotNull(root.get("submittedAt"));
+      case SUBMITTED_FOR_ASSESSMENT -> isSubmittedForAssessment(root, cb);
       case SUBMITTED_FOR_FEEDBACK, CONSULTED, SUBSCRIBED, IN_PROGRESS, COMPLETED, UNSUBSCRIBED ->
           cb.disjunction();
     };
