@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.student.selfknowledge.infrastructure.fixture;
 
+import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.student.selfknowledge.domain.model.SelfKnowledgeElement;
 import fr.avenirsesr.portfolio.student.selfknowledge.domain.model.enums.ESelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
@@ -19,6 +20,8 @@ public class SelfKnowledgeElementFixture {
   private boolean valorized;
   private Instant createdAt;
   private Instant updatedAt;
+  private List<File> files;
+  List<String> links;
 
   private SelfKnowledgeElementFixture() {
     this.id = UUID.randomUUID();
@@ -92,6 +95,16 @@ public class SelfKnowledgeElementFixture {
     return this;
   }
 
+  public SelfKnowledgeElementFixture withFiles(List<File> files) {
+    this.files = files;
+    return this;
+  }
+
+  public SelfKnowledgeElementFixture withLinks(List<String> links) {
+    this.links = links;
+    return this;
+  }
+
   public SelfKnowledgeElement toModel() {
     return SelfKnowledgeElement.toDomain(
         id,
@@ -102,6 +115,8 @@ public class SelfKnowledgeElementFixture {
         selfKnowledgeCategory,
         valorized,
         createdAt,
-        updatedAt);
+        updatedAt,
+        files,
+        links);
   }
 }

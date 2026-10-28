@@ -1,6 +1,12 @@
 package fr.avenirsesr.portfolio.student.selfknowledge.infrastructure.adapter.seeder.data;
 
+import java.util.List;
 import java.util.UUID;
 
 public record SelfKnowledgeElementCreationData(
-    UUID studentId, String title, String description, Integer rating, String category) {}
+    UUID studentId,
+    String title,
+    String description,
+    Integer rating,
+    String category,
+    List<String> links) {}

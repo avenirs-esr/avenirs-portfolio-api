@@ -1,0 +1,33 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="derghan.a (generated)" id="1793186151854-29">
+        <createTable tableName="self_knowledge_element_files">
+            <column name="self_knowledge_element_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="derghan.a (generated)" id="1793195416486-30">
+        <createTable tableName="self_knowledge_element_links">
+            <column name="self_knowledge_element_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="link" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="derghan.a (generated)" id="1793195416486-13">
+        <modifyDataType columnName="link" newDataType="varchar(255)" tableName="trace"/>
+    </changeSet>
+    <changeSet author="derghan.a (generated)" id="1793186151854-38">
+        <addForeignKeyConstraint baseColumnNames="self_knowledge_element_id" baseTableName="self_knowledge_element_files" constraintName="FK5butrpslxr14wxklfedjxaj3v" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="self_knowledge_element" validate="true"/>
+    </changeSet>
+    <changeSet author="derghan.a (generated)" id="1793186151854-39">
+        <addForeignKeyConstraint baseColumnNames="file_id" baseTableName="self_knowledge_element_files" constraintName="FKm3m73odx61nb1a2h4g3cf0yrt" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="file" validate="true"/>
+    </changeSet>
+
+</databaseChangeLog>

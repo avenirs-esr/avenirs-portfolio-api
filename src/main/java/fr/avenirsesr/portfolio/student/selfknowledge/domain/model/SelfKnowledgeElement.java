@@ -1,9 +1,12 @@
 package fr.avenirsesr.portfolio.student.selfknowledge.domain.model;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
+import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.student.selfknowledge.domain.model.enums.ESelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,6 +20,8 @@ public class SelfKnowledgeElement extends AvenirsBaseModel {
   private Integer rating;
   private final ESelfKnowledgeCategory selfKnowledgeCategory;
   private boolean valorized;
+  private List<File> files;
+  private List<String> links;
 
   private SelfKnowledgeElement(
       UUID id,
@@ -27,7 +32,9 @@ public class SelfKnowledgeElement extends AvenirsBaseModel {
       ESelfKnowledgeCategory selfKnowledgeCategory,
       boolean valorized,
       Instant createdAt,
-      Instant updatedAt) {
+      Instant updatedAt,
+      List<File> files,
+      List<String> links) {
     super(id, createdAt, updatedAt);
     this.student = student;
     this.title = title;
@@ -35,6 +42,8 @@ public class SelfKnowledgeElement extends AvenirsBaseModel {
     this.rating = rating;
     this.selfKnowledgeCategory = selfKnowledgeCategory;
     this.valorized = valorized;
+    this.files = files;
+    this.links = new ArrayList<>(links == null ? List.of() : links);
   }
 
   public static SelfKnowledgeElement create(
@@ -43,7 +52,9 @@ public class SelfKnowledgeElement extends AvenirsBaseModel {
       String title,
       String description,
       Integer rating,
-      ESelfKnowledgeCategory selfKnowledgeCategory) {
+      ESelfKnowledgeCategory selfKnowledgeCategory,
+      List<File> files,
+      List<String> links) {
     return new SelfKnowledgeElement(
         id,
         student,
@@ -53,7 +64,9 @@ public class SelfKnowledgeElement extends AvenirsBaseModel {
         selfKnowledgeCategory,
         false,
         Instant.now(),
-        Instant.now());
+        Instant.now(),
+        files,
+        links);
   }
 
   public static SelfKnowledgeElement toDomain(
@@ -65,7 +78,9 @@ public class SelfKnowledgeElement extends AvenirsBaseModel {
       ESelfKnowledgeCategory selfKnowledgeCategory,
       boolean valorized,
       Instant createdAt,
-      Instant updatedAt) {
+      Instant updatedAt,
+      List<File> files,
+      List<String> links) {
     return new SelfKnowledgeElement(
         id,
         student,
@@ -75,6 +90,8 @@ public class SelfKnowledgeElement extends AvenirsBaseModel {
         selfKnowledgeCategory,
         valorized,
         createdAt,
-        updatedAt);
+        updatedAt,
+        files,
+        links);
   }
 }

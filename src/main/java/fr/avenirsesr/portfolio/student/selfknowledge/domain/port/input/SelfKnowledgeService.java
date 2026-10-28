@@ -20,7 +20,8 @@ public interface SelfKnowledgeService {
       ESelfKnowledgeCategory selfKnowledgeCategory,
       String title,
       String description,
-      Integer rating);
+      Integer rating,
+      List<String> links);
 
   SelfKnowledgeElement updateSelfKnowledgeElement(
       UUID selfKnowledgeElementId,

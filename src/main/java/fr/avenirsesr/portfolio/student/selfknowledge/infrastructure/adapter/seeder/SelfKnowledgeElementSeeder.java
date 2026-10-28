@@ -51,7 +51,8 @@ public class SelfKnowledgeElementSeeder {
                   ESelfKnowledgeCategory.valueOf(element.category()),
                   element.title(),
                   element.description(),
-                  element.rating()));
+                  element.rating(),
+                  element.links()));
         });
 
     log.info("✔ {} studentSelfKnowledgeElements created", elements.size());
