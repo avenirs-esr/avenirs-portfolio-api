@@ -18,6 +18,7 @@ import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.notification.domain.model.enums.ENotificationType;
+import fr.avenirsesr.portfolio.notification.domain.model.notification.AssessmentModifiedNotification;
 import fr.avenirsesr.portfolio.notification.domain.model.notification.AssessmentSentNotification;
 import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
@@ -390,7 +391,7 @@ class DeclaredActivityServiceImplTest {
   }
 
   @Test
-  void sendAssessment_should_overwrite_a_sent_assessment_without_notifying_the_student() {
+  void sendAssessment_should_overwrite_a_sent_assessment_and_notify_the_student_of_it() {
     BddLogger.given("An evaluator and a declared activity whose assessment was sent and consulted");
     Instant requestedAt = Instant.now().minus(Duration.ofDays(3));
     Instant sentAt = Instant.now().minus(Duration.ofDays(2));
@@ -412,7 +413,7 @@ class DeclaredActivityServiceImplTest {
     BddLogger.when("He sends another version of the assessment");
     service.sendAssessment(declaredActivityId, "Très bon travail", 17, null);
 
-    BddLogger.then("The assessment is overwritten and the student is not notified again");
+    BddLogger.then("The assessment is overwritten and the student notified of the modification");
     verify(declaredActivityRepository).save(activityCaptor.capture());
 
     assertThat(activityCaptor.getValue().getAssessment())
@@ -426,7 +427,14 @@ class DeclaredActivityServiceImplTest {
               assertThat(modified.modifiedAt()).isAfter(sentAt);
               assertThat(modified.consultedAt()).isEqualTo(consultedAt);
             });
-    verify(notificationService, never()).notify(any());
+
+    ArgumentCaptor<AssessmentModifiedNotification> notificationCaptor = ArgumentCaptor.captor();
+    verify(notificationService).notify(notificationCaptor.capture());
+
+    var notification = notificationCaptor.getValue().build();
+    assertThat(notification.getType()).isEqualTo(ENotificationType.ASSESSMENT_MODIFIED);
+    assertThat(notification.getUser()).isEqualTo(student.getUser());
+    assertThat(notification.getElementId()).isEqualTo(declaredActivityId);
   }
 
   @Test

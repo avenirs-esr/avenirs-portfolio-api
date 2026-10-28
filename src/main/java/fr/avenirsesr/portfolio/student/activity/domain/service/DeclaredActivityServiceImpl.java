@@ -11,8 +11,10 @@ import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.notification.domain.model.enums.ENotificationType;
+import fr.avenirsesr.portfolio.notification.domain.model.notification.AssessmentModifiedNotification;
 import fr.avenirsesr.portfolio.notification.domain.model.notification.AssessmentSentNotification;
 import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
@@ -295,16 +297,15 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
 
     declaredActivityRepository.save(declaredActivity);
 
-    if (alreadySent) {
-      log.debug("Modified the assessment of declared activity [{}]", declaredActivityId);
-      return;
-    }
-
+    User studentUser = declaredActivity.getStudent().getUser();
     notificationService.notify(
-        new AssessmentSentNotification(declaredActivity.getStudent().getUser(), declaredActivity));
+        alreadySent
+            ? new AssessmentModifiedNotification(studentUser, declaredActivity)
+            : new AssessmentSentNotification(studentUser, declaredActivity));
 
     log.debug(
-        "Sent the assessment of declared activity [{}] to student [{}]",
+        "Sent the {} of declared activity [{}] to student [{}]",
+        alreadySent ? "modified assessment" : "assessment",
         declaredActivityId,
         declaredActivity.getStudent().getId());
   }
@@ -706,6 +707,8 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     notificationService.deleteNotificationsOf(ENotificationType.ASK_FOR_FEEDBACK, feedbackIds);
     notificationService.deleteNotificationsOf(
         ENotificationType.ASSESSMENT_SENT, List.of(declaredActivityId));
+    notificationService.deleteNotificationsOf(
+        ENotificationType.ASSESSMENT_MODIFIED, List.of(declaredActivityId));
     feedbackService.deleteByDeclaredActivityId(declaredActivity);
     declaredActivityRepository.removeFromDatabase(declaredActivity);
 
@@ -735,6 +738,8 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
         ENotificationType.ACTIVITY_MODIFIED, declaredActivityIds);
     notificationService.deleteNotificationsOf(
         ENotificationType.ASSESSMENT_SENT, declaredActivityIds);
+    notificationService.deleteNotificationsOf(
+        ENotificationType.ASSESSMENT_MODIFIED, declaredActivityIds);
     declaredActivityRepository.removeAllFromDatabase(declaredActivities);
 
     log.debug(
