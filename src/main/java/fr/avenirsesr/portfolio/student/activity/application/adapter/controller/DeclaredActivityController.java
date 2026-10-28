@@ -68,10 +68,10 @@ public class DeclaredActivityController {
       @RequestParam(required = false) String keyword,
       @Parameter(schema = @Schema(ref = "#/components/schemas/EActivityThematic"))
           @RequestParam(required = false)
-          List<EActivityThematic> thematic,
+          List<EActivityThematic> thematics,
       @Parameter(schema = @Schema(ref = "#/components/schemas/EActivityStatus"))
           @RequestParam(required = false)
-          List<EActivityStatus> status,
+          List<EActivityStatus> statuses,
       @Parameter(schema = @Schema(ref = "#/components/schemas/ESortField"))
           @RequestParam(required = false)
           ESortField sortField,
@@ -95,7 +95,7 @@ public class DeclaredActivityController {
 
     PagedResult<DeclaredActivity> pagedResult =
         declaredActivityService.getDeclaredActivities(
-            pageCriteria, keyword, thematic, status, sortCriteria, isValorized);
+            pageCriteria, keyword, thematics, statuses, sortCriteria, isValorized);
 
     var statusByDeclaredActivity =
         declaredActivityService.getDeclaredActivityStatus(pagedResult.content());
