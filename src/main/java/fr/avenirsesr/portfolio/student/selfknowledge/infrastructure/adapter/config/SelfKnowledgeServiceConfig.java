@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.student.selfknowledge.infrastructure.adapter.config;
 
+import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.selfknowledge.domain.port.input.SelfKnowledgeService;
 import fr.avenirsesr.portfolio.student.selfknowledge.domain.port.output.repository.SelfKnowledgeElementRepository;
@@ -17,10 +18,11 @@ public class SelfKnowledgeServiceConfig {
   private final StudentService studentService;
   private final SelfKnowledgeElementRepository selfKnowledgeElementRepository;
   private final LoggedInUserService loggedInUserService;
+  private final FileResourceService fileResourceService;
 
   @Bean
   public SelfKnowledgeService selfKnowledgeService() {
     return new SelfKnowledgeServiceImpl(
-        studentService, selfKnowledgeElementRepository, loggedInUserService);
+        studentService, selfKnowledgeElementRepository, loggedInUserService, fileResourceService);
   }
 }

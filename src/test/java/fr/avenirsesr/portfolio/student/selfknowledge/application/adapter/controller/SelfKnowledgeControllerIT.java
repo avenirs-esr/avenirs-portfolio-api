@@ -9,21 +9,26 @@ import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.Aven
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
 import fr.avenirsesr.portfolio.student.selfknowledge.domain.model.enums.ESelfKnowledgeCategory;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.reactive.function.BodyInserters;
 
 class SelfKnowledgeControllerIT extends ContainerConfigurationTest {
 
   private static final String BASE_PATH = "/me/self-knowledge";
   private static final String CATEGORIES_BASE_PATH = BASE_PATH + "/categories";
   private static final String CATEGORIES_AVAILABLE_BASE_PATH = CATEGORIES_BASE_PATH + "/available";
-
+  private static final String ATTACHMENT_FILE_NAME = "test-document.pdf";
+  private static final String ATTACHMENT_CONTENT = "Contenu du document de test";
   @Autowired private WebTestClient webTestClient;
   @Autowired private ObjectMapper objectMapper;
 
@@ -412,5 +417,81 @@ class SelfKnowledgeControllerIT extends ContainerConfigurationTest {
         .exchange()
         .expectStatus()
         .isOk();
+  }
+
+  private BodyInserters.MultipartInserter attachmentBody() {
+    var builder = new MultipartBodyBuilder();
+    builder
+        .part(
+            "file",
+            new ByteArrayResource(ATTACHMENT_CONTENT.getBytes(StandardCharsets.UTF_8)) {
+              @Override
+              public String getFilename() {
+                return ATTACHMENT_FILE_NAME;
+              }
+            })
+        .contentType(MediaType.APPLICATION_PDF);
+    return BodyInserters.fromMultipartData(builder.build());
+  }
+
+  private String attachmentsPath(String selfKnowledgeElementId) {
+    return BASE_PATH + "/" + selfKnowledgeElementId + "/attachments";
+  }
+
+  private String uploadAttachmentAndGetId(String selfKnowledgeElementId) throws Exception {
+    String body =
+        webTestClient
+            .post()
+            .uri(attachmentsPath(selfKnowledgeElementId))
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Signature", studentSignature)
+            .contentType(MediaType.MULTIPART_FORM_DATA)
+            .body(attachmentBody())
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+    return objectMapper.readTree(body).get("id").asText();
+  }
+
+  @Test
+  void shouldUploadAttachmentToSelfKnowledgeElement() throws Exception {
+    String categoryId = ESelfKnowledgeCategory.INSPIRATIONS.name();
+    String elementId = createElement(categoryId, "Test attachment", "Description du test", 3);
+    String attachmentId = uploadAttachmentAndGetId(elementId);
+
+    assertThat(attachmentId).isNotNull();
+    assertThat(attachmentId).isNotBlank();
+
+    String response =
+        webTestClient
+            .get()
+            .uri(BASE_PATH + "/element/{selfKnowledgeElementId}", elementId)
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Signature", studentSignature)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    JsonNode element = objectMapper.readTree(response);
+    JsonNode files = element.get("files");
+    assertThat(files).isNotNull();
+    assertThat(files.isArray()).isTrue();
+
+    boolean attachmentExists = false;
+
+    for (JsonNode file : files) {
+      if (attachmentId.equals(file.path("id").asText())) {
+        attachmentExists = true;
+        break;
+      }
+    }
+
+    assertThat(attachmentExists).isTrue();
   }
 }

@@ -1,9 +1,13 @@
 package fr.avenirsesr.portfolio.student.selfknowledge.application.adapter.controller;
 
+import static fr.avenirsesr.portfolio.common.file.application.adapter.MultipartFileReader.readBytes;
+
 import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.file.application.adapter.dto.FileDTO;
+import fr.avenirsesr.portfolio.file.application.adapter.mapper.FileDtoMapper;
 import fr.avenirsesr.portfolio.student.selfknowledge.application.adapter.dto.SelfKnowledgeCategoryDTO;
 import fr.avenirsesr.portfolio.student.selfknowledge.application.adapter.dto.SelfKnowledgeElementDetailsDTO;
 import fr.avenirsesr.portfolio.student.selfknowledge.application.adapter.dto.SelfKnowledgeElementRequest;
@@ -21,10 +25,13 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
+import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -36,6 +43,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @AllArgsConstructor
@@ -46,6 +54,7 @@ public class SelfKnowledgeController {
   private final SelfKnowledgeCategoryMapper selfKnowledgeCategoryMapper;
   private final SelfKnowledgeElementDetailsMapper selfKnowledgeElementDetailsMapper;
   private final SelfKnowledgeElementViewMapper selfKnowledgeElementViewMapper;
+  private final FileDtoMapper fileDtoMapper;
 
   @PreAuthorize("hasAuthority('self-knowledge:list:own')")
   @GetMapping("/elements")
@@ -180,6 +189,29 @@ public class SelfKnowledgeController {
         selfKnowledgeService.getSelfKnowledgeCategoriesAvailable().stream()
             .map(selfKnowledgeCategoryMapper::toSelfKnowledgeCategoryDTO)
             .toList());
+  }
+
+  @PreAuthorize("hasAuthority('self-knowledge:create:own')")
+  @PostMapping(
+      value = "/{selfKnowledgeElementId}/attachments",
+      consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<FileDTO> uploadSelfKnowledgeAttachment(
+      Principal principal,
+      @Valid @PathVariable UUID selfKnowledgeElementId,
+      @RequestParam("file") MultipartFile file) {
+    log.debug(
+        "Received request to upload an attachment on SelfKnowledge [{}] by user [{}] ",
+        selfKnowledgeElementId,
+        principal.getName());
+
+    var uploaded =
+        selfKnowledgeService.uploadAttachment(
+            selfKnowledgeElementId,
+            file.getOriginalFilename(),
+            file.getContentType(),
+            file.getSize(),
+            readBytes(file));
+    return ResponseEntity.status(HttpStatus.CREATED).body(fileDtoMapper.fromDomain(uploaded));
   }
 
   @PreAuthorize("hasAuthority('self-knowledge:delete:own')")

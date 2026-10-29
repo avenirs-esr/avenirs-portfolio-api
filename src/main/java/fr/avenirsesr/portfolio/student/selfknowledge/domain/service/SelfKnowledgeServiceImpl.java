@@ -8,6 +8,8 @@ import static fr.avenirsesr.portfolio.common.validation.domain.constraints.Field
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
+import fr.avenirsesr.portfolio.file.domain.model.File;
+import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.selfknowledge.domain.data.SelfKnowledgeElementDetails;
 import fr.avenirsesr.portfolio.student.selfknowledge.domain.exception.*;
@@ -31,6 +33,7 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
   private final StudentService studentService;
   private final SelfKnowledgeElementRepository selfKnowledgeElementRepository;
   private final LoggedInUserService loggedInUserService;
+  private final FileResourceService fileResourceService;
 
   @Override
   public PagedResult<SelfKnowledgeElement> getSelfKnowledgeElements(
@@ -80,8 +83,7 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
             description,
             rating,
             selfKnowledgeCategory,
-            List.of(),
-            links);
+            links != null ? links : List.of());
     return selfKnowledgeElementRepository.save(selfKnowledgeElement);
   }
 
@@ -183,6 +185,25 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
     selfKnowledgeElementRepository.deleteAllByStudentAndCategories(
         student, selfKnowledgeCategories);
     studentService.removeSelfKnowledgeCategories(student, selfKnowledgeCategories);
+  }
+
+  @Override
+  public File uploadAttachment(
+      UUID selfKnowledgeElementId, String fileName, String mimeType, long size, byte[] content) {
+    Student student = loggedInUserService.getLoggedInStudent();
+    SelfKnowledgeElement selfKnowledgeElement =
+        selfKnowledgeElementRepository
+            .findById(selfKnowledgeElementId)
+            .orElseThrow(SelfKnowledgeElementNotFoundException::new);
+
+    if (!student.getId().equals(selfKnowledgeElement.getStudent().getId())) {
+      throw new UserNotAuthorizedException();
+    }
+
+    File file = fileResourceService.upload(fileName, mimeType, size, content, true);
+    selfKnowledgeElement.addFile(file);
+    selfKnowledgeElementRepository.save(selfKnowledgeElement);
+    return file;
   }
 
   private static void checkTitleField(String title) {

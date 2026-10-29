@@ -9,8 +9,11 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
+import fr.avenirsesr.portfolio.common.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.file.domain.model.File;
+import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.selfknowledge.domain.data.SelfKnowledgeElementDetails;
 import fr.avenirsesr.portfolio.student.selfknowledge.domain.exception.SelfKnowledgeCategoryIsMandatoryException;
@@ -29,6 +32,8 @@ import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStudentException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
+import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -46,10 +51,14 @@ class SelfKnowledgeServiceImplTest {
   @Mock private StudentService studentService;
   @Mock private SelfKnowledgeElementRepository selfKnowledgeElementRepository;
   @Mock private LoggedInUserService loggedInUserService;
+  @Mock private FileResourceService fileResourceService;
 
   @InjectMocks private SelfKnowledgeServiceImpl selfKnowledgeService;
 
   private Student student;
+  private static final String FILE_NAME = "test-document.pdf";
+  private static final String MIME_TYPE = "application/pdf";
+  private static final byte[] CONTENT = "content".getBytes(StandardCharsets.UTF_8);
 
   @BeforeEach
   void setUp() {
@@ -1241,6 +1250,67 @@ class SelfKnowledgeServiceImplTest {
                       List.of(UUID.randomUUID(), UUID.randomUUID())));
         }
       }
+    }
+
+    @Nested
+    class WhenAddingAttachmentToSelfKnowledgeElement {
+
+      private SelfKnowledgeElement selfKnowledgeElement;
+      private UUID selfKnowledgeElementId;
+
+      @BeforeEach
+      void setUp() {
+        BddLogger.given("a logged in student");
+
+        when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+
+        selfKnowledgeElement = SelfKnowledgeElementFixture.create().withStudent(student).toModel();
+
+        selfKnowledgeElementId = selfKnowledgeElement.getId();
+      }
+
+      @Test
+      void itShouldAddAttachmentToSelfKnowledgeElement() {
+        BddLogger.given("an existing self knowledge element");
+
+        when(selfKnowledgeElementRepository.findById(selfKnowledgeElementId))
+            .thenReturn(Optional.of(selfKnowledgeElement));
+
+        File uploadedFile = attachment();
+
+        when(fileResourceService.upload(FILE_NAME, MIME_TYPE, CONTENT.length, CONTENT, true))
+            .thenReturn(uploadedFile);
+
+        when(selfKnowledgeElementRepository.save(any(SelfKnowledgeElement.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        BddLogger.when("uploading an attachment to the self knowledge element");
+
+        File result =
+            selfKnowledgeService.uploadAttachment(
+                selfKnowledgeElementId, FILE_NAME, MIME_TYPE, CONTENT.length, CONTENT);
+
+        BddLogger.then("the attachment should be added and the element saved");
+
+        assertThat(result).isEqualTo(uploadedFile);
+
+        verify(loggedInUserService).getLoggedInStudent();
+
+        verify(fileResourceService).upload(FILE_NAME, MIME_TYPE, CONTENT.length, CONTENT, true);
+
+        verify(selfKnowledgeElementRepository).save(selfKnowledgeElement);
+      }
+    }
+
+    private File attachment() {
+      return File.create(
+          UUID.randomUUID(),
+          EFileType.PDF,
+          FILE_NAME,
+          CONTENT.length,
+          "uri/" + FILE_NAME,
+          UserFixture.create().toModel(),
+          true);
     }
   }
 }
