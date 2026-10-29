@@ -18,7 +18,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.file.infrastructure.service,UserPh
 avenirs-portfolio-api,fr.avenirsesr.portfolio.file.infrastructure.adapter.client,LocalFileClient,12,53,0,0,3,15,1,4,1,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.authorization.application.adapter.controller,InternalUserAuthorizationController,68,4,0,0,13,1,2,1,2,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.authorization.application.adapter.controller,EntityAuthorizationController,0,30,0,0,0,7,0,2,0,2
-avenirs-portfolio-api,fr.avenirsesr.portfolio.student.selfknowledge.domain.service,SelfKnowledgeServiceImpl,0,367,3,35,0,95,3,33,0,17
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.selfknowledge.domain.service,SelfKnowledgeServiceImpl,4,378,4,36,1,97,4,33,0,17
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.specification,StudentSpecification,0,12,0,0,0,2,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.repository,CguDatabaseRepository,0,33,0,0,0,9,0,3,0,3
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.repository,UserPrincipalDatabaseRepository,36,70,6,2,7,21,4,6,1,5
