@@ -739,7 +739,7 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .jsonPath("$.submittedAt")
         .exists()
         .jsonPath("$.status")
-        .isEqualTo("UNPROCESSED");
+        .isEqualTo("OPENED");
   }
 
   @Test
@@ -754,7 +754,7 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .isOk()
         .expectBody()
         .jsonPath("$.status")
-        .isEqualTo("UNPROCESSED");
+        .isEqualTo("OPENED");
 
     BddLogger.when("the staff sends the assessment");
     sendAssessment(id, "{\"comment\":\"Bon travail\"}", staffPayload, staffSignature)

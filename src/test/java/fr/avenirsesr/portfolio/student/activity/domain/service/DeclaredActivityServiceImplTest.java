@@ -1173,7 +1173,7 @@ class DeclaredActivityServiceImplTest {
 
     BddLogger.then("The submission, its associations and its status are returned");
     assertThat(details.declaredActivity()).isEqualTo(declaredActivity);
-    assertThat(details.status()).isEqualTo(EActivityAssessmentStatus.UNPROCESSED);
+    assertThat(details.status()).isEqualTo(EActivityAssessmentStatus.OPENED);
     assertThat(details.associations().traces()).isEmpty();
     assertThat(details.associations().skillProgresses()).isEmpty();
     assertThat(details.associations().declaredExperiences()).isEmpty();
@@ -1201,8 +1201,8 @@ class DeclaredActivityServiceImplTest {
     BddLogger.when("A staff gets the assessment details");
     var details = service.getAssessmentDetails(declaredActivityId);
 
-    BddLogger.then("The assessment is saved as opened and becomes unprocessed");
-    assertThat(details.status()).isEqualTo(EActivityAssessmentStatus.UNPROCESSED);
+    BddLogger.then("The assessment is saved and becomes opened");
+    assertThat(details.status()).isEqualTo(EActivityAssessmentStatus.OPENED);
     verify(declaredActivityRepository).save(activityCaptor.capture());
     assertThat(activityCaptor.getValue().getAssessment())
         .hasValueSatisfying(
@@ -1229,8 +1229,8 @@ class DeclaredActivityServiceImplTest {
     BddLogger.when("A staff gets the assessment details again");
     var details = service.getAssessmentDetails(declaredActivityId);
 
-    BddLogger.then("The assessment stays unprocessed and the first opening date is kept");
-    assertThat(details.status()).isEqualTo(EActivityAssessmentStatus.UNPROCESSED);
+    BddLogger.then("The assessment stays opened and the first opening date is kept");
+    assertThat(details.status()).isEqualTo(EActivityAssessmentStatus.OPENED);
     assertThat(declaredActivity.getAssessment())
         .hasValueSatisfying(assessment -> assertThat(assessment.openedAt()).isEqualTo(openedAt));
     verify(declaredActivityRepository, never()).save(any());
