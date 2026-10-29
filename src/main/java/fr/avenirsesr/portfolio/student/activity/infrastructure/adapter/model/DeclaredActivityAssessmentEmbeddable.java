@@ -44,9 +44,9 @@ public class DeclaredActivityAssessmentEmbeddable {
   @Column(name = "assessment_modified_at")
   private Instant modifiedAt;
 
-  @Column(name = "assessment_consulted_at")
-  private Instant consultedAt;
+  @Column(name = "assessment_student_consulted_at")
+  private Instant studentConsultedAt;
 
-  @Column(name = "assessment_opened_at")
-  private Instant openedAt;
+  @Column(name = "assessment_staff_opened_at")
+  private Instant staffOpenedAt;
 }
