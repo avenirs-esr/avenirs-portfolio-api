@@ -421,42 +421,43 @@ public class TraceServiceImpl implements TraceService {
 <span class="fc" id="L421">  }</span>
 
   private boolean isLocked(EDeclaredActivityStatus status) {
-<span class="pc bpc" id="L424" title="1 of 4 branches missed.">    return status == EDeclaredActivityStatus.SUBMITTED</span>
+<span class="pc bpc" id="L424" title="2 of 6 branches missed.">    return status == EDeclaredActivityStatus.SUBMITTED_FOR_FEEDBACK</span>
+        || status == EDeclaredActivityStatus.SUBMITTED_FOR_ASSESSMENT
         || status == EDeclaredActivityStatus.COMPLETED;
   }
 
   private TraceDeclaredActivityData toTraceDeclaredActivityData(
       DeclaredActivity declaredActivity, EDeclaredActivityStatus status) {
-<span class="fc" id="L430">    return new TraceDeclaredActivityData(</span>
-<span class="fc" id="L431">        declaredActivity.getId(), declaredActivity.getActivity().getTitle(), status);</span>
+<span class="fc" id="L431">    return new TraceDeclaredActivityData(</span>
+<span class="fc" id="L432">        declaredActivity.getId(), declaredActivity.getActivity().getTitle(), status);</span>
   }
 
   @Override
   public File uploadAttachment(
       UUID traceId, String fileName, String mimeType, long size, byte[] content) {
-<span class="fc" id="L437">    var loggedInStudent = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L438">    var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);</span>
-<span class="fc" id="L439">    checkIfStudentIsAuthorizedOnTrace(loggedInStudent, trace);</span>
-<span class="pc bpc" id="L440" title="1 of 2 branches missed.">    if (trace.getLink().isPresent()) {</span>
-<span class="nc" id="L441">      throw new InvalidTraceTypeException();</span>
+<span class="fc" id="L438">    var loggedInStudent = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L439">    var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);</span>
+<span class="fc" id="L440">    checkIfStudentIsAuthorizedOnTrace(loggedInStudent, trace);</span>
+<span class="pc bpc" id="L441" title="1 of 2 branches missed.">    if (trace.getLink().isPresent()) {</span>
+<span class="nc" id="L442">      throw new InvalidTraceTypeException();</span>
     }
 
-<span class="fc" id="L444">    var file = fileResourceService.upload(fileName, mimeType, size, content, true);</span>
-<span class="fc" id="L445">    trace.setAttachment(file);</span>
-<span class="fc" id="L446">    traceRepository.save(trace);</span>
-<span class="fc" id="L447">    return file;</span>
+<span class="fc" id="L445">    var file = fileResourceService.upload(fileName, mimeType, size, content, true);</span>
+<span class="fc" id="L446">    trace.setAttachment(file);</span>
+<span class="fc" id="L447">    traceRepository.save(trace);</span>
+<span class="fc" id="L448">    return file;</span>
   }
 
   @Override
   public FileDownload downloadAttachment(UUID traceId) {
-<span class="nc" id="L452">    var loggedInStudent = loggedInUserService.getLoggedInStudent();</span>
-<span class="nc" id="L453">    var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);</span>
-<span class="nc" id="L454">    checkIfStudentIsAuthorizedOnTrace(loggedInStudent, trace);</span>
-<span class="nc bnc" id="L455" title="All 2 branches missed.">    if (trace.getLink().isPresent()) {</span>
-<span class="nc" id="L456">      throw new InvalidTraceTypeException();</span>
+<span class="nc" id="L453">    var loggedInStudent = loggedInUserService.getLoggedInStudent();</span>
+<span class="nc" id="L454">    var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);</span>
+<span class="nc" id="L455">    checkIfStudentIsAuthorizedOnTrace(loggedInStudent, trace);</span>
+<span class="nc bnc" id="L456" title="All 2 branches missed.">    if (trace.getLink().isPresent()) {</span>
+<span class="nc" id="L457">      throw new InvalidTraceTypeException();</span>
     }
-<span class="nc" id="L458">    var attachment = trace.getAttachment().orElseThrow(InvalidTraceTypeException::new);</span>
-<span class="nc" id="L459">    return fileResourceService.download(attachment.getId());</span>
+<span class="nc" id="L459">    var attachment = trace.getAttachment().orElseThrow(InvalidTraceTypeException::new);</span>
+<span class="nc" id="L460">    return fileResourceService.download(attachment.getId());</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

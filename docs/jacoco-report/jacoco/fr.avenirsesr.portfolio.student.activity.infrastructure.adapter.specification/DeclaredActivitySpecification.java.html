@@ -114,17 +114,18 @@ public final class DeclaredActivitySpecification {
   private static Predicate assessmentStatusPredicate(
       EDeclaredActivityStatus status, Root&lt;DeclaredActivityEntity&gt; root, CriteriaBuilder cb) {
 <span class="fc bfc" id="L116" title="All 2 branches covered.">    return switch (status) {</span>
-<span class="fc" id="L117">      case SUBMITTED -&gt; cb.isNotNull(root.get(&quot;submittedAt&quot;));</span>
-<span class="fc" id="L118">      case CONSULTED, SUBSCRIBED, IN_PROGRESS, COMPLETED, UNSUBSCRIBED -&gt; cb.disjunction();</span>
+<span class="fc" id="L117">      case SUBMITTED_FOR_ASSESSMENT -&gt; cb.isNotNull(root.get(&quot;submittedAt&quot;));</span>
+      case SUBMITTED_FOR_FEEDBACK, CONSULTED, SUBSCRIBED, IN_PROGRESS, COMPLETED, UNSUBSCRIBED -&gt;
+<span class="fc" id="L119">          cb.disjunction();</span>
     };
   }
 
   public static Specification&lt;DeclaredActivityEntity&gt; isValorized(Boolean isValorized) {
-<span class="fc" id="L123">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="fc bfc" id="L124" title="All 2 branches covered.">      if (isValorized == null) {</span>
-<span class="fc" id="L125">        return criteriaBuilder.conjunction();</span>
+<span class="fc" id="L124">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="fc bfc" id="L125" title="All 2 branches covered.">      if (isValorized == null) {</span>
+<span class="fc" id="L126">        return criteriaBuilder.conjunction();</span>
       }
-<span class="fc" id="L127">      return criteriaBuilder.equal(root.get(&quot;valorized&quot;), isValorized);</span>
+<span class="fc" id="L128">      return criteriaBuilder.equal(root.get(&quot;valorized&quot;), isValorized);</span>
     };
   }
 }
