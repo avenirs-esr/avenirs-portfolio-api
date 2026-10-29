@@ -19,6 +19,7 @@ import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorize
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.notification.domain.model.enums.ENotificationType;
 import fr.avenirsesr.portfolio.notification.domain.model.notification.AssessmentModifiedNotification;
+import fr.avenirsesr.portfolio.notification.domain.model.notification.AssessmentRequestNotification;
 import fr.avenirsesr.portfolio.notification.domain.model.notification.AssessmentSentNotification;
 import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
@@ -70,7 +71,6 @@ class DeclaredActivityServiceImplTest {
   @Mock private DeclaredActivityRepository declaredActivityRepository;
   @Mock private ActivityService activityService;
   @Mock private AssociationService associationService;
-
   @Mock private LoggedInUserService loggedInUserService;
   @Mock private FeedbackRepository feedbackRepository;
   @Mock private FeedbackService feedbackService;
@@ -927,10 +927,14 @@ class DeclaredActivityServiceImplTest {
   }
 
   @Test
-  void submitForAssessment_should_set_submittedAt_and_save_when_the_activity_is_assessable() {
+  void
+      submitForAssessment_should_set_submittedAt_save_and_notify_staff_evaluators_when_the_activity_is_assessable() {
     BddLogger.given("A logged-in student and his declared activity of an assessable activity");
     UUID declaredActivityId = UUID.randomUUID();
     DeclaredActivity declaredActivity = assessableDeclaredActivity();
+
+    Staff reviewer = StaffFixture.create().toModel();
+    Staff otherReviewer = StaffFixture.create().toModel();
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
@@ -938,11 +942,23 @@ class DeclaredActivityServiceImplTest {
     when(declaredActivityRepository.save(any(DeclaredActivity.class)))
         .thenAnswer(i -> i.getArguments()[0]);
 
+    when(activityAuthorizationService.getStaffsWithRight(
+            declaredActivity.getActivity().getId(), EActivityRight.EVALUATION))
+        .thenReturn(List.of(reviewer, otherReviewer));
+
     BddLogger.when("He submits it for assessment");
     service.submitForAssessment(declaredActivityId);
 
+    BddLogger.then("An notification is sent to each evaluators");
+    ArgumentCaptor<List<AssessmentRequestNotification>> captor = ArgumentCaptor.captor();
+    verify(notificationService).notifyAll(captor.capture());
+
     BddLogger.then("The submission date is set and the declared activity is saved");
     verify(declaredActivityRepository).save(activityCaptor.capture());
+    assertThat(captor.getValue()).hasSize(2);
+    assertThat(captor.getValue().stream().map(notification -> notification.build().getUser()))
+        .containsExactly(reviewer.getUser(), otherReviewer.getUser());
+
     assertThat(activityCaptor.getValue().getSubmittedAt()).isPresent();
   }
 
