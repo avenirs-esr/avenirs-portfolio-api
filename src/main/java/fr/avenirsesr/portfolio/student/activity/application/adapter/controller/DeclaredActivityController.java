@@ -12,6 +12,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.CreationResponse;
 import fr.avenirsesr.portfolio.shared.application.adapter.mapper.FileDTOMapper;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityContentDtoMapper;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.DeclaredActivityAssessmentDetailsDTO;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.DeclaredActivityAssessmentRequest;
@@ -25,7 +26,6 @@ import fr.avenirsesr.portfolio.student.activity.application.adapter.mapper.Decla
 import fr.avenirsesr.portfolio.student.activity.application.adapter.mapper.DeclaredActivityDetailsDTOMapper;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.mapper.DeclaredActivityViewDTOMapper;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
-import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -80,11 +80,9 @@ public class DeclaredActivityController {
           @RequestParam(required = false)
           List<EActivityThematic> thematics,
       @Parameter(
-              array =
-                  @ArraySchema(
-                      schema = @Schema(ref = "#/components/schemas/EDeclaredActivityStatus")))
+              array = @ArraySchema(schema = @Schema(ref = "#/components/schemas/EActivityStatus")))
           @RequestParam(required = false)
-          List<EDeclaredActivityStatus> statuses,
+          List<EActivityStatus> statuses,
       @Parameter(schema = @Schema(ref = "#/components/schemas/ESortField"))
           @RequestParam(required = false)
           ESortField sortField,
