@@ -23,8 +23,8 @@ public interface DeclaredActivityService {
   PagedResult<DeclaredActivity> getDeclaredActivities(
       PageCriteria pageCriteria,
       String keyword,
-      List<EActivityThematic> thematics,
-      List<EActivityStatus> statuses,
+      List<EActivityThematic> thematic,
+      List<EActivityStatus> status,
       SortCriteria sortCriterias,
       Boolean isValorized);
 
