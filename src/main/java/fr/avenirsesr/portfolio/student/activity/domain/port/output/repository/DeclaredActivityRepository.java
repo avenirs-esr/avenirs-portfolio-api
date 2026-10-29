@@ -32,8 +32,8 @@ public interface DeclaredActivityRepository extends GenericRepositoryPort<Declar
   PagedResult<DeclaredActivity> findStudentActivitiesByProgressAndDate(
       Student student,
       String keyword,
-      List<EActivityThematic> thematics,
-      List<EActivityStatus> statuses,
+      List<EActivityThematic> thematic,
+      List<EActivityStatus> status,
       SortCriteria sortCriterias,
       PageCriteria pageCriteria,
       Boolean isValorized,

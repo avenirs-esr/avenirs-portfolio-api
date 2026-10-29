@@ -87,8 +87,8 @@ public class DeclaredActivityDatabaseRepository
   public PagedResult<DeclaredActivity> findStudentActivitiesByProgressAndDate(
       Student student,
       String keyword,
-      List<EActivityThematic> thematics,
-      List<EActivityStatus> statuses,
+      List<EActivityThematic> thematic,
+      List<EActivityStatus> status,
       SortCriteria sortCriteria,
       PageCriteria pageCriteria,
       Boolean isValorized,
@@ -103,8 +103,8 @@ public class DeclaredActivityDatabaseRepository
             .and(
                 DeclaredActivitySpecification.isValorized(isValorized)
                     .and(DeclaredActivitySpecification.search(keyword))
-                    .and(DeclaredActivitySpecification.has("thematic", thematics))
-                    .and(has("status", statuses))),
+                    .and(DeclaredActivitySpecification.has("thematic", thematic))
+                    .and(has("status", status))),
         PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort),
         fetchGraph);
   }
