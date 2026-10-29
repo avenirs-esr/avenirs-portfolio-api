@@ -42,7 +42,7 @@ public class SelfKnowledgeElement extends AvenirsBaseModel {
     this.rating = rating;
     this.selfKnowledgeCategory = selfKnowledgeCategory;
     this.valorized = valorized;
-    this.files = files;
+    this.files = new ArrayList<>(files == null ? List.of() : files);
     this.links = new ArrayList<>(links == null ? List.of() : links);
   }
 
@@ -53,7 +53,6 @@ public class SelfKnowledgeElement extends AvenirsBaseModel {
       String description,
       Integer rating,
       ESelfKnowledgeCategory selfKnowledgeCategory,
-      List<File> files,
       List<String> links) {
     return new SelfKnowledgeElement(
         id,
@@ -65,7 +64,7 @@ public class SelfKnowledgeElement extends AvenirsBaseModel {
         false,
         Instant.now(),
         Instant.now(),
-        files,
+        List.of(),
         links);
   }
 
@@ -93,5 +92,9 @@ public class SelfKnowledgeElement extends AvenirsBaseModel {
         updatedAt,
         files,
         links);
+  }
+
+  public void addFile(File file) {
+    this.files.add(file);
   }
 }
