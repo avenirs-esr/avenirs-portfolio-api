@@ -215,13 +215,31 @@ public class SelfKnowledgeController {
   }
 
   @PreAuthorize(&quot;hasAuthority('self-knowledge:delete:own')&quot;)
+  @DeleteMapping(&quot;/{selfKnowledgeElementId}/attachments/{attachmentId}&quot;)
+  public ResponseEntity&lt;Void&gt; deleteSelfKnowledgeAttachment(
+      Principal principal,
+      @Valid @PathVariable UUID selfKnowledgeElementId,
+      @Valid @PathVariable UUID attachmentId) {
+
+<span class="fc" id="L224">    log.debug(</span>
+        &quot;Received request to delete attachment [{}] of selfKnowledgeElementId [{}] by user [{}]&quot;,
+        attachmentId,
+        selfKnowledgeElementId,
+<span class="fc" id="L228">        principal.getName());</span>
+
+<span class="fc" id="L230">    selfKnowledgeService.deleteAttachment(selfKnowledgeElementId, attachmentId);</span>
+
+<span class="fc" id="L232">    return ResponseEntity.noContent().build();</span>
+  }
+
+  @PreAuthorize(&quot;hasAuthority('self-knowledge:delete:own')&quot;)
   @DeleteMapping(&quot;/categories&quot;)
   public ResponseEntity&lt;String&gt; removeSelfKnowledgeCategories(
       @RequestBody
           @ArraySchema(schema = @Schema(ref = &quot;#/components/schemas/ESelfKnowledgeCategory&quot;))
           List&lt;ESelfKnowledgeCategory&gt; selfKnowledgeCategories) {
-<span class="nc" id="L223">    selfKnowledgeService.removeSelfKnowledgeCategories(selfKnowledgeCategories);</span>
-<span class="nc" id="L224">    return ResponseEntity.ok(&quot;Categories successfully deleted&quot;);</span>
+<span class="nc" id="L241">    selfKnowledgeService.removeSelfKnowledgeCategories(selfKnowledgeCategories);</span>
+<span class="nc" id="L242">    return ResponseEntity.ok(&quot;Categories successfully deleted&quot;);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
