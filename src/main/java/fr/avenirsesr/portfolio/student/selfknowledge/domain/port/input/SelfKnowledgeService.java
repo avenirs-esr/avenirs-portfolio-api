@@ -43,4 +43,6 @@ public interface SelfKnowledgeService {
 
   File uploadAttachment(
       UUID selfKnowledgeElementId, String fileName, String mimeType, long size, byte[] content);
+
+  void deleteAttachment(UUID selfKnowledgeElementId, UUID attachmentId);
 }

@@ -34,6 +34,7 @@ import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -41,8 +42,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -54,7 +54,7 @@ class SelfKnowledgeServiceImplTest {
   @Mock private FileResourceService fileResourceService;
 
   @InjectMocks private SelfKnowledgeServiceImpl selfKnowledgeService;
-
+  @Captor private ArgumentCaptor<SelfKnowledgeElement> selfKnowledgeElementArgumentCaptor;
   private Student student;
   private static final String FILE_NAME = "test-document.pdf";
   private static final String MIME_TYPE = "application/pdf";
@@ -1300,6 +1300,59 @@ class SelfKnowledgeServiceImplTest {
 
         verify(selfKnowledgeElementRepository).save(selfKnowledgeElement);
       }
+
+      @Test
+      void itShouldDeleteAttachmentOfSelfKnowledgeElement() {
+        BddLogger.given("an existing self knowledge element with files");
+
+        File fileToDelete = attachment();
+        File anotherFile = attachment();
+        SelfKnowledgeElement selfKnowledgeElementWithFiles =
+            selfKnowledgeElementWithFiles(
+                selfKnowledgeElementId, student, List.of(fileToDelete, anotherFile));
+
+        when(selfKnowledgeElementRepository.findById(selfKnowledgeElementId))
+            .thenReturn(Optional.of(selfKnowledgeElementWithFiles));
+
+        when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+        when(selfKnowledgeElementRepository.save(any(SelfKnowledgeElement.class)))
+            .thenAnswer(i -> i.getArguments()[0]);
+
+        BddLogger.when("deleteAttachment is called");
+        selfKnowledgeService.deleteAttachment(selfKnowledgeElementId, fileToDelete.getId());
+
+        InOrder inOrder = inOrder(selfKnowledgeElementRepository, fileResourceService);
+
+        inOrder
+            .verify(selfKnowledgeElementRepository)
+            .save(selfKnowledgeElementArgumentCaptor.capture());
+
+        inOrder.verify(fileResourceService).delete(fileToDelete.getId());
+
+        assertThat(selfKnowledgeElementArgumentCaptor.getValue().getFiles())
+            .containsExactly(anotherFile);
+      }
+    }
+
+    private SelfKnowledgeElement selfKnowledgeElementWithFiles(
+        UUID id, Student student, List<File> files) {
+      return selfKnowledgeElementOf(id, student, files);
+    }
+
+    private SelfKnowledgeElement selfKnowledgeElementOf(
+        UUID id, Student student, List<File> files) {
+      return SelfKnowledgeElement.toDomain(
+          id,
+          student,
+          "Test attachment",
+          "Description du test",
+          3,
+          ESelfKnowledgeCategory.INSPIRATIONS,
+          true,
+          Instant.now(),
+          Instant.now(),
+          files,
+          List.of());
     }
 
     private File attachment() {

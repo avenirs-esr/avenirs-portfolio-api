@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
@@ -96,5 +97,13 @@ public class SelfKnowledgeElement extends AvenirsBaseModel {
 
   public void addFile(File file) {
     this.files.add(file);
+  }
+
+  public void removeFile(UUID fileId) {
+    this.files.removeIf(file -> file.getId().equals(fileId));
+  }
+
+  public Optional<File> getFile(UUID fileId) {
+    return this.files.stream().filter(file -> file.getId().equals(fileId)).findFirst();
   }
 }
