@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityAssessmentDetailsData;
 import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityDetailsData;
@@ -23,7 +24,7 @@ public interface DeclaredActivityService {
       PageCriteria pageCriteria,
       String keyword,
       List<EActivityThematic> thematics,
-      List<EDeclaredActivityStatus> statuses,
+      List<EActivityStatus> statuses,
       SortCriteria sortCriterias,
       Boolean isValorized);
 

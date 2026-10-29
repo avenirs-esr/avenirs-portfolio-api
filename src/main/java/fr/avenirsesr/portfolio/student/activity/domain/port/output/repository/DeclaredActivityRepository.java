@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.port.output.repository.GenericRepositoryPort;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
@@ -32,7 +33,7 @@ public interface DeclaredActivityRepository extends GenericRepositoryPort<Declar
       Student student,
       String keyword,
       List<EActivityThematic> thematics,
-      List<EDeclaredActivityStatus> statuses,
+      List<EActivityStatus> statuses,
       SortCriteria sortCriterias,
       PageCriteria pageCriteria,
       Boolean isValorized,
