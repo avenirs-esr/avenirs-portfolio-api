@@ -739,7 +739,35 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .jsonPath("$.submittedAt")
         .exists()
         .jsonPath("$.status")
-        .isEqualTo("SUBMITTED_FOR_ASSESSMENT");
+        .isEqualTo("UNPROCESSED");
+  }
+
+  @Test
+  void shouldMarkTheAssessmentAsSentOnceTheStaffSendsIt() throws Exception {
+    BddLogger.given("a submission the staff already opened");
+    String assessableActivityId =
+        publishActivityAsStaff("Activité évaluable à envoyer", "{\"comment\": true}");
+    String id = subscribeAndGetId(assessableActivityId);
+    submitForAssessment(id).expectStatus().isNoContent();
+    getAssessmentDetails(id, staffPayload, staffSignature)
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.status")
+        .isEqualTo("UNPROCESSED");
+
+    BddLogger.when("the staff sends the assessment");
+    sendAssessment(id, "{\"comment\":\"Bon travail\"}", staffPayload, staffSignature)
+        .expectStatus()
+        .isNoContent();
+
+    BddLogger.then("the assessment details should be sent");
+    getAssessmentDetails(id, staffPayload, staffSignature)
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.status")
+        .isEqualTo("SENT");
   }
 
   @Test

@@ -333,6 +333,18 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
             });
   }
 
+  private DeclaredActivityAssessment openAssessment(DeclaredActivity declaredActivity) {
+    DeclaredActivityAssessment assessment = assessmentOf(declaredActivity);
+    if (assessment.isOpened()) {
+      return assessment;
+    }
+
+    DeclaredActivityAssessment openedAssessment = assessment.open(Instant.now());
+    declaredActivity.setAssessment(openedAssessment);
+    declaredActivityRepository.save(declaredActivity);
+    return openedAssessment;
+  }
+
   private DeclaredActivityAssessment assessmentOf(DeclaredActivity declaredActivity) {
     return declaredActivity
         .getAssessment()
@@ -426,10 +438,10 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
       throw new DeclaredActivityNotFoundException();
     }
 
+    DeclaredActivityAssessment assessment = openAssessment(declaredActivity);
+
     return new DeclaredActivityAssessmentDetailsData(
-        declaredActivity,
-        getAssociations(declaredActivityId),
-        getDeclaredActivityStatus(declaredActivity));
+        declaredActivity, getAssociations(declaredActivityId), assessment.status());
   }
 
   private DeclaredActivityAssociationsData getAssociations(UUID declaredActivityId) {

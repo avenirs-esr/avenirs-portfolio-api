@@ -46,4 +46,7 @@ public class DeclaredActivityAssessmentEmbeddable {
 
   @Column(name = "assessment_consulted_at")
   private Instant consultedAt;
+
+  @Column(name = "assessment_opened_at")
+  private Instant openedAt;
 }

@@ -37,6 +37,7 @@ import fr.avenirsesr.portfolio.student.activity.domain.exception.*;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivityAssessment;
 import fr.avenirsesr.portfolio.student.activity.domain.model.Feedback;
+import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EActivityAssessmentStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.FeedbackService;
@@ -1172,12 +1173,91 @@ class DeclaredActivityServiceImplTest {
 
     BddLogger.then("The submission, its associations and its status are returned");
     assertThat(details.declaredActivity()).isEqualTo(declaredActivity);
-    assertThat(details.status()).isEqualTo(EDeclaredActivityStatus.SUBMITTED_FOR_ASSESSMENT);
+    assertThat(details.status()).isEqualTo(EActivityAssessmentStatus.UNPROCESSED);
     assertThat(details.associations().traces()).isEmpty();
     assertThat(details.associations().skillProgresses()).isEmpty();
     assertThat(details.associations().declaredExperiences()).isEmpty();
     verify(activityAuthorizationService)
         .checkRight(staff, declaredActivity.getActivity().getId(), EActivityRight.EVALUATION);
+  }
+
+  @Test
+  void getAssessmentDetails_should_mark_a_new_assessment_as_opened() {
+    BddLogger.given("A submission whose assessment no staff has opened yet");
+    Instant requestedAt = Instant.now().minus(Duration.ofDays(1));
+    Staff staff = StaffFixture.create().toModel();
+    Activity activity =
+        ActivityFixture.create().withAssessment(new ActivityAssessment(true, null, null)).toModel();
+    DeclaredActivity declaredActivity =
+        declaredActivityWith(activity, DeclaredActivityAssessment.requested(requestedAt));
+    assertThat(declaredActivity.getAssessment())
+        .hasValueSatisfying(
+            assessment -> assertThat(assessment.status()).isEqualTo(EActivityAssessmentStatus.NEW));
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("A staff gets the assessment details");
+    var details = service.getAssessmentDetails(declaredActivityId);
+
+    BddLogger.then("The assessment is saved as opened and becomes unprocessed");
+    assertThat(details.status()).isEqualTo(EActivityAssessmentStatus.UNPROCESSED);
+    verify(declaredActivityRepository).save(activityCaptor.capture());
+    assertThat(activityCaptor.getValue().getAssessment())
+        .hasValueSatisfying(
+            assessment -> {
+              assertThat(assessment.openedAt()).isNotNull();
+              assertThat(assessment.requestedAt()).isEqualTo(requestedAt);
+            });
+  }
+
+  @Test
+  void getAssessmentDetails_should_not_open_an_already_opened_assessment_again() {
+    BddLogger.given("A submission whose assessment a staff already opened");
+    Instant openedAt = Instant.now().minus(Duration.ofDays(1));
+    Activity activity =
+        ActivityFixture.create().withAssessment(new ActivityAssessment(true, null, null)).toModel();
+    DeclaredActivity declaredActivity =
+        declaredActivityWith(
+            activity, DeclaredActivityAssessment.requested(Instant.now()).open(openedAt));
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(StaffFixture.create().toModel());
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("A staff gets the assessment details again");
+    var details = service.getAssessmentDetails(declaredActivityId);
+
+    BddLogger.then("The assessment stays unprocessed and the first opening date is kept");
+    assertThat(details.status()).isEqualTo(EActivityAssessmentStatus.UNPROCESSED);
+    assertThat(declaredActivity.getAssessment())
+        .hasValueSatisfying(assessment -> assertThat(assessment.openedAt()).isEqualTo(openedAt));
+    verify(declaredActivityRepository, never()).save(any());
+  }
+
+  @Test
+  void getAssessmentDetails_should_return_sent_once_the_assessment_is_sent() {
+    BddLogger.given("A submission whose assessment was opened then sent");
+    Activity activity =
+        ActivityFixture.create().withAssessment(new ActivityAssessment(true, null, null)).toModel();
+    DeclaredActivity declaredActivity =
+        declaredActivityWith(
+            activity,
+            DeclaredActivityAssessment.requested(Instant.now())
+                .open(Instant.now())
+                .send("Bon travail", null, null, Instant.now(), StaffFixture.create().toModel()));
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(StaffFixture.create().toModel());
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("A staff gets the assessment details");
+    var details = service.getAssessmentDetails(declaredActivityId);
+
+    BddLogger.then("The assessment is sent");
+    assertThat(details.status()).isEqualTo(EActivityAssessmentStatus.SENT);
+    verify(declaredActivityRepository, never()).save(any());
   }
 
   @Test

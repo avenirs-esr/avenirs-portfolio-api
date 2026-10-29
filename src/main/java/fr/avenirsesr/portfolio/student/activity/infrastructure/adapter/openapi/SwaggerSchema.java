@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.openapi;
 
+import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EActivityAssessmentStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import io.swagger.v3.oas.models.media.Schema;
@@ -20,4 +21,9 @@ public final class SwaggerSchema {
           .name("EFeedbackStatus")
           ._enum(Arrays.stream(EFeedbackStatus.values()).map(Enum::name).toList())
           .description("Enum for feedback status");
+
+  public static final Schema<String> activityAssessmentStatusSchema =
+      new StringSchema()
+          .name("EActivityAssessmentStatus")
+          ._enum(Arrays.stream(EActivityAssessmentStatus.values()).map(Enum::name).toList());
 }
