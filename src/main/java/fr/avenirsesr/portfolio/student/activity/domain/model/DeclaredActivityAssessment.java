@@ -32,7 +32,7 @@ public record DeclaredActivityAssessment(
     if (isSent()) {
       return EActivityAssessmentStatus.SENT;
     }
-    return isOpened() ? EActivityAssessmentStatus.UNPROCESSED : EActivityAssessmentStatus.NEW;
+    return isOpened() ? EActivityAssessmentStatus.OPENED : EActivityAssessmentStatus.NEW;
   }
 
   public DeclaredActivityAssessment send(
