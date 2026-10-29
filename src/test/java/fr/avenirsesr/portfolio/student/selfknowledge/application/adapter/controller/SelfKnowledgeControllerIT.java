@@ -457,6 +457,51 @@ class SelfKnowledgeControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
+  void shouldDeleteAttachmentOfSelfKnowledgeElement() throws Exception {
+    String categoryId = ESelfKnowledgeCategory.INSPIRATIONS.name();
+    String elementId = createElement(categoryId, "Test attachment", "Description du test", 3);
+    String attachmentId = uploadAttachmentAndGetId(elementId);
+
+    webTestClient
+        .delete()
+        .uri(attachmentsPath(elementId) + "/" + attachmentId)
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isNoContent();
+
+    String response =
+        webTestClient
+            .get()
+            .uri(BASE_PATH + "/element/{selfKnowledgeElementId}", elementId)
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Signature", studentSignature)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    JsonNode element = objectMapper.readTree(response);
+    JsonNode files = element.get("files");
+    assertThat(files).isNotNull();
+    assertThat(files.isArray()).isTrue();
+
+    boolean attachmentExists = false;
+
+    for (JsonNode file : files) {
+      if (attachmentId.equals(file.path("id").asText())) {
+        attachmentExists = true;
+        break;
+      }
+    }
+
+    assertThat(attachmentExists).isFalse();
+  }
+
+  @Test
   void shouldUploadAttachmentToSelfKnowledgeElement() throws Exception {
     String categoryId = ESelfKnowledgeCategory.INSPIRATIONS.name();
     String elementId = createElement(categoryId, "Test attachment", "Description du test", 3);

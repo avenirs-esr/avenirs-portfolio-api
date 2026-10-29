@@ -215,6 +215,24 @@ public class SelfKnowledgeController {
   }
 
   @PreAuthorize("hasAuthority('self-knowledge:delete:own')")
+  @DeleteMapping("/{selfKnowledgeElementId}/attachments/{attachmentId}")
+  public ResponseEntity<Void> deleteSelfKnowledgeAttachment(
+      Principal principal,
+      @Valid @PathVariable UUID selfKnowledgeElementId,
+      @Valid @PathVariable UUID attachmentId) {
+
+    log.debug(
+        "Received request to delete attachment [{}] of selfKnowledgeElementId [{}] by user [{}]",
+        attachmentId,
+        selfKnowledgeElementId,
+        principal.getName());
+
+    selfKnowledgeService.deleteAttachment(selfKnowledgeElementId, attachmentId);
+
+    return ResponseEntity.noContent().build();
+  }
+
+  @PreAuthorize("hasAuthority('self-knowledge:delete:own')")
   @DeleteMapping("/categories")
   public ResponseEntity<String> removeSelfKnowledgeCategories(
       @RequestBody
