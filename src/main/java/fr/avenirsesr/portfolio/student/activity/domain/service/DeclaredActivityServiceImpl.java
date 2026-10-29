@@ -15,6 +15,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.notification.domain.model.enums.ENotificationType;
 import fr.avenirsesr.portfolio.notification.domain.model.notification.AssessmentModifiedNotification;
+import fr.avenirsesr.portfolio.notification.domain.model.notification.AssessmentRequestNotification;
 import fr.avenirsesr.portfolio.notification.domain.model.notification.AssessmentSentNotification;
 import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
@@ -237,8 +238,14 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     var requestedAt = Instant.now();
     declaredActivity.setSubmittedAt(requestedAt);
     declaredActivity.setAssessment(DeclaredActivityAssessment.requested(requestedAt));
-
     declaredActivityRepository.save(declaredActivity);
+
+    notificationService.notifyAll(
+        activityAuthorizationService
+            .getStaffsWithRight(declaredActivity.getActivity().getId(), EActivityRight.EVALUATION)
+            .stream()
+            .map(staff -> new AssessmentRequestNotification(staff.getUser(), declaredActivity))
+            .toList());
   }
 
   @Override

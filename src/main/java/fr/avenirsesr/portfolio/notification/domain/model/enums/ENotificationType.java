@@ -1,9 +1,9 @@
 package fr.avenirsesr.portfolio.notification.domain.model.enums;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
+import fr.avenirsesr.portfolio.notification.domain.model.notification.parameters.*;
 import fr.avenirsesr.portfolio.notification.domain.model.notification.parameters.ActivityModifiedParameters;
 import fr.avenirsesr.portfolio.notification.domain.model.notification.parameters.AskForFeedbackParameters;
-import fr.avenirsesr.portfolio.notification.domain.model.notification.parameters.AssessmentModifiedParameters;
 import fr.avenirsesr.portfolio.notification.domain.model.notification.parameters.AssessmentSentParameters;
 import fr.avenirsesr.portfolio.notification.domain.model.notification.parameters.NotificationParameters;
 import java.util.List;
@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 public enum ENotificationType {
   ACTIVITY_MODIFIED(EUserCategory.STUDENT, ActivityModifiedParameters::fromStringList),
   ASK_FOR_FEEDBACK(EUserCategory.STAFF, AskForFeedbackParameters::fromStringList),
+  ASSESSMENT_REQUEST(EUserCategory.STAFF, AssessmentRequestNotificationParameters::fromStringList),
   ASSESSMENT_SENT(EUserCategory.STUDENT, AssessmentSentParameters::fromStringList),
   ASSESSMENT_MODIFIED(EUserCategory.STUDENT, AssessmentModifiedParameters::fromStringList);
 

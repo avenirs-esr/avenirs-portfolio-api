@@ -6,6 +6,7 @@ public sealed interface NotificationParameters
     permits AskForFeedbackParameters,
         ActivityModifiedParameters,
         AssessmentSentParameters,
+        AssessmentRequestNotificationParameters,
         AssessmentModifiedParameters {
 
   List<String> toStringList();
