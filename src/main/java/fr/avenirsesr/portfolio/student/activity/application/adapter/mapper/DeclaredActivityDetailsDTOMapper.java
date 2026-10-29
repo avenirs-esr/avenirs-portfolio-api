@@ -71,27 +71,33 @@ public interface DeclaredActivityDetailsDTOMapper {
 
   UserInfoDTO toUserInfoDTO(User user);
 
+  /**
+   * The assessment is exposed as soon as the student submits the activity for assessment, but its
+   * content stays hidden until the staff sends it.
+   */
   default ReceivedAssessmentDTO toReceivedAssessment(DeclaredActivity declaredActivity) {
     return declaredActivity
         .getAssessment()
-        .filter(DeclaredActivityAssessment::isSent)
         .map(
             assessment ->
-                new ReceivedAssessmentDTO(
-                    assessment.grade(),
-                    declaredActivity
-                        .getActivity()
-                        .getAssessment()
-                        .map(ActivityAssessment::grade)
-                        .orElse(null),
-                    assessment.validation(),
-                    assessment.comment(),
-                    assessment.assessedAt(),
-                    assessment.modifiedAt(),
-                    assessment.assessedBy() == null
-                        ? null
-                        : toUserInfoDTO(assessment.assessedBy().getUser())))
+                assessment.isSent()
+                    ? toSentAssessment(declaredActivity, assessment)
+                    : new ReceivedAssessmentDTO(
+                        null, null, null, null, assessment.requestedAt(), null, null, null))
         .orElse(null);
+  }
+
+  private ReceivedAssessmentDTO toSentAssessment(
+      DeclaredActivity declaredActivity, DeclaredActivityAssessment assessment) {
+    return new ReceivedAssessmentDTO(
+        assessment.grade(),
+        declaredActivity.getActivity().getAssessment().map(ActivityAssessment::grade).orElse(null),
+        assessment.validation(),
+        assessment.comment(),
+        assessment.requestedAt(),
+        assessment.assessedAt(),
+        assessment.modifiedAt(),
+        assessment.assessedBy() == null ? null : toUserInfoDTO(assessment.assessedBy().getUser()));
   }
 
   default Instant unwrap(Optional<Instant> value) {

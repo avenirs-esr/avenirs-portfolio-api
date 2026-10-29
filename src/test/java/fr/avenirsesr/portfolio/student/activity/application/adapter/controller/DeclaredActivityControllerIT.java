@@ -1284,6 +1284,53 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .isForbidden();
   }
 
+  @Test
+  void shouldExposeTheAssessmentRequestToTheStudentBeforeItIsSent() throws Exception {
+    BddLogger.given("a declared activity on an activity expecting a comment and a grade");
+    String assessableActivityId =
+        publishAssessableActivity("Activité évaluée en attente", "{\"comment\":true,\"grade\":20}");
+    String id = subscribeAndGetId(assessableActivityId);
+
+    BddLogger.when("the student submits it for assessment");
+    submitForAssessment(id).expectStatus().isNoContent();
+
+    BddLogger.then("the request date should be exposed without any assessment content");
+    getDeclaredActivityDetails(id)
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.assessment.requestedAt")
+        .exists()
+        .jsonPath("$.assessment.grade")
+        .doesNotExist()
+        .jsonPath("$.assessment.maxGrade")
+        .doesNotExist()
+        .jsonPath("$.assessment.comment")
+        .doesNotExist()
+        .jsonPath("$.assessment.sentAt")
+        .doesNotExist()
+        .jsonPath("$.assessment.assessedBy")
+        .doesNotExist();
+
+    BddLogger.and("once the evaluator sends it, the content should come with the request date");
+    sendAssessment(id, "{\"comment\":\"Bon travail\",\"grade\":15}", staffPayload, staffSignature)
+        .expectStatus()
+        .isNoContent();
+
+    getDeclaredActivityDetails(id)
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.assessment.requestedAt")
+        .exists()
+        .jsonPath("$.assessment.grade")
+        .isEqualTo(15)
+        .jsonPath("$.assessment.comment")
+        .isEqualTo("Bon travail")
+        .jsonPath("$.assessment.sentAt")
+        .exists();
+  }
+
   private ResponseSpec getDeclaredActivityDetails(String declaredActivityId) {
     return webTestClient
         .get()
