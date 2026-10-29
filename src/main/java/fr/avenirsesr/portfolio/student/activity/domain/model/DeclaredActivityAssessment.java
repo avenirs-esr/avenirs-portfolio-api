@@ -12,8 +12,8 @@ public record DeclaredActivityAssessment(
     Instant assessedAt,
     Staff assessedBy,
     Instant modifiedAt,
-    Instant consultedAt,
-    Instant openedAt) {
+    Instant studentConsultedAt,
+    Instant staffOpenedAt) {
 
   public static DeclaredActivityAssessment requested(Instant requestedAt) {
     return new DeclaredActivityAssessment(
@@ -24,15 +24,15 @@ public record DeclaredActivityAssessment(
     return assessedAt != null;
   }
 
-  public boolean isOpened() {
-    return openedAt != null;
+  public boolean isOpenedByStaff() {
+    return staffOpenedAt != null;
   }
 
   public EActivityAssessmentStatus status() {
     if (isSent()) {
       return EActivityAssessmentStatus.SENT;
     }
-    return isOpened() ? EActivityAssessmentStatus.OPENED : EActivityAssessmentStatus.NEW;
+    return isOpenedByStaff() ? EActivityAssessmentStatus.OPENED : EActivityAssessmentStatus.NEW;
   }
 
   public DeclaredActivityAssessment send(
@@ -45,8 +45,8 @@ public record DeclaredActivityAssessment(
         assessedAt,
         assessedBy,
         modifiedAt,
-        consultedAt,
-        openedAt);
+        studentConsultedAt,
+        staffOpenedAt);
   }
 
   public DeclaredActivityAssessment modify(
@@ -59,11 +59,11 @@ public record DeclaredActivityAssessment(
         assessedAt,
         assessedBy,
         modifiedAt,
-        consultedAt,
-        openedAt);
+        studentConsultedAt,
+        staffOpenedAt);
   }
 
-  public DeclaredActivityAssessment consult(Instant consultedAt) {
+  public DeclaredActivityAssessment consultByStudent(Instant studentConsultedAt) {
     return new DeclaredActivityAssessment(
         comment,
         grade,
@@ -72,11 +72,11 @@ public record DeclaredActivityAssessment(
         assessedAt,
         assessedBy,
         modifiedAt,
-        consultedAt,
-        openedAt);
+        studentConsultedAt,
+        staffOpenedAt);
   }
 
-  public DeclaredActivityAssessment open(Instant openedAt) {
+  public DeclaredActivityAssessment openByStaff(Instant staffOpenedAt) {
     return new DeclaredActivityAssessment(
         comment,
         grade,
@@ -85,7 +85,7 @@ public record DeclaredActivityAssessment(
         assessedAt,
         assessedBy,
         modifiedAt,
-        consultedAt,
-        openedAt);
+        studentConsultedAt,
+        staffOpenedAt);
   }
 }

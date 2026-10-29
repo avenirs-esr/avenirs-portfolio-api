@@ -9,13 +9,17 @@
         http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd
         http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <changeSet author="iamgreendev" id="add-assessment-opening-to-declared-activity">
-        <addColumn tableName="declared_activity">
-            <column name="assessment_opened_at" type="timestamp(6)"/>
-        </addColumn>
+    <changeSet author="iamgreendev" id="rename-assessment-consultation-to-student-consultation">
+        <renameColumn tableName="declared_activity"
+                      oldColumnName="assessment_consulted_at"
+                      newColumnName="assessment_student_consulted_at"
+                      columnDataType="timestamp(6)"/>
 
         <rollback>
-            <dropColumn tableName="declared_activity" columnName="assessment_opened_at"/>
+            <renameColumn tableName="declared_activity"
+                          oldColumnName="assessment_student_consulted_at"
+                          newColumnName="assessment_consulted_at"
+                          columnDataType="timestamp(6)"/>
         </rollback>
     </changeSet>
 

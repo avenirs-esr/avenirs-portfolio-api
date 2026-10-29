@@ -322,24 +322,24 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     return declaredActivity;
   }
 
-  private void consultSentAssessment(DeclaredActivity declaredActivity) {
+  private void consultSentAssessmentByStudent(DeclaredActivity declaredActivity) {
     declaredActivity
         .getAssessment()
         .filter(DeclaredActivityAssessment::isSent)
         .ifPresent(
             assessment -> {
-              declaredActivity.setAssessment(assessment.consult(Instant.now()));
+              declaredActivity.setAssessment(assessment.consultByStudent(Instant.now()));
               declaredActivityRepository.save(declaredActivity);
             });
   }
 
-  private DeclaredActivityAssessment openAssessment(DeclaredActivity declaredActivity) {
+  private DeclaredActivityAssessment openAssessmentByStaff(DeclaredActivity declaredActivity) {
     DeclaredActivityAssessment assessment = assessmentOf(declaredActivity);
-    if (assessment.isOpened()) {
+    if (assessment.isOpenedByStaff()) {
       return assessment;
     }
 
-    DeclaredActivityAssessment openedAssessment = assessment.open(Instant.now());
+    DeclaredActivityAssessment openedAssessment = assessment.openByStaff(Instant.now());
     declaredActivity.setAssessment(openedAssessment);
     declaredActivityRepository.save(declaredActivity);
     return openedAssessment;
@@ -402,7 +402,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     DeclaredActivity declaredActivity =
         fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
 
-    consultSentAssessment(declaredActivity);
+    consultSentAssessmentByStudent(declaredActivity);
 
     List<FeedbackData> feedbacks =
         feedbackRepository.findAllByDeclaredActivityId(declaredActivityId).stream()
@@ -438,7 +438,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
       throw new DeclaredActivityNotFoundException();
     }
 
-    DeclaredActivityAssessment assessment = openAssessment(declaredActivity);
+    DeclaredActivityAssessment assessment = openAssessmentByStaff(declaredActivity);
 
     return new DeclaredActivityAssessmentDetailsData(
         declaredActivity, getAssociations(declaredActivityId), assessment.status());

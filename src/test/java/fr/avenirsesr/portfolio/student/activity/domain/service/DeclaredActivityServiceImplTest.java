@@ -396,7 +396,7 @@ class DeclaredActivityServiceImplTest {
     BddLogger.given("An evaluator and a declared activity whose assessment was sent and consulted");
     Instant requestedAt = Instant.now().minus(Duration.ofDays(3));
     Instant sentAt = Instant.now().minus(Duration.ofDays(2));
-    Instant consultedAt = Instant.now().minus(Duration.ofDays(1));
+    Instant studentConsultedAt = Instant.now().minus(Duration.ofDays(1));
     Staff staff = StaffFixture.create().toModel();
     Activity activity =
         ActivityFixture.create().withAssessment(new ActivityAssessment(true, 20, null)).toModel();
@@ -405,7 +405,7 @@ class DeclaredActivityServiceImplTest {
             activity,
             DeclaredActivityAssessment.requested(requestedAt)
                 .send("Bon travail", 15, null, sentAt, StaffFixture.create().toModel())
-                .consult(consultedAt));
+                .consultByStudent(studentConsultedAt));
 
     when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
     when(declaredActivityRepository.findById(declaredActivityId))
@@ -426,7 +426,7 @@ class DeclaredActivityServiceImplTest {
               assertThat(modified.assessedAt()).isEqualTo(sentAt);
               assertThat(modified.assessedBy()).isEqualTo(staff);
               assertThat(modified.modifiedAt()).isAfter(sentAt);
-              assertThat(modified.consultedAt()).isEqualTo(consultedAt);
+              assertThat(modified.studentConsultedAt()).isEqualTo(studentConsultedAt);
             });
 
     ArgumentCaptor<AssessmentModifiedNotification> notificationCaptor = ArgumentCaptor.captor();
@@ -1207,7 +1207,7 @@ class DeclaredActivityServiceImplTest {
     assertThat(activityCaptor.getValue().getAssessment())
         .hasValueSatisfying(
             assessment -> {
-              assertThat(assessment.openedAt()).isNotNull();
+              assertThat(assessment.staffOpenedAt()).isNotNull();
               assertThat(assessment.requestedAt()).isEqualTo(requestedAt);
             });
   }
@@ -1215,12 +1215,13 @@ class DeclaredActivityServiceImplTest {
   @Test
   void getAssessmentDetails_should_not_open_an_already_opened_assessment_again() {
     BddLogger.given("A submission whose assessment a staff already opened");
-    Instant openedAt = Instant.now().minus(Duration.ofDays(1));
+    Instant staffOpenedAt = Instant.now().minus(Duration.ofDays(1));
     Activity activity =
         ActivityFixture.create().withAssessment(new ActivityAssessment(true, null, null)).toModel();
     DeclaredActivity declaredActivity =
         declaredActivityWith(
-            activity, DeclaredActivityAssessment.requested(Instant.now()).open(openedAt));
+            activity,
+            DeclaredActivityAssessment.requested(Instant.now()).openByStaff(staffOpenedAt));
 
     when(loggedInUserService.getLoggedInStaff()).thenReturn(StaffFixture.create().toModel());
     when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
@@ -1232,7 +1233,8 @@ class DeclaredActivityServiceImplTest {
     BddLogger.then("The assessment stays opened and the first opening date is kept");
     assertThat(details.status()).isEqualTo(EActivityAssessmentStatus.OPENED);
     assertThat(declaredActivity.getAssessment())
-        .hasValueSatisfying(assessment -> assertThat(assessment.openedAt()).isEqualTo(openedAt));
+        .hasValueSatisfying(
+            assessment -> assertThat(assessment.staffOpenedAt()).isEqualTo(staffOpenedAt));
     verify(declaredActivityRepository, never()).save(any());
   }
 
@@ -1245,7 +1247,7 @@ class DeclaredActivityServiceImplTest {
         declaredActivityWith(
             activity,
             DeclaredActivityAssessment.requested(Instant.now())
-                .open(Instant.now())
+                .openByStaff(Instant.now())
                 .send("Bon travail", null, null, Instant.now(), StaffFixture.create().toModel()));
 
     when(loggedInUserService.getLoggedInStaff()).thenReturn(StaffFixture.create().toModel());
@@ -1459,7 +1461,7 @@ class DeclaredActivityServiceImplTest {
             consulted -> {
               assertThat(consulted.comment()).isEqualTo("Bon travail");
               assertThat(consulted.grade()).isEqualTo(15);
-              assertThat(consulted.consultedAt()).isNotNull();
+              assertThat(consulted.studentConsultedAt()).isNotNull();
             });
   }
 
@@ -1474,7 +1476,7 @@ class DeclaredActivityServiceImplTest {
             activity,
             DeclaredActivityAssessment.requested(null)
                 .send("Bon travail", 15, null, Instant.now(), StaffFixture.create().toModel())
-                .consult(lastConsultedAt));
+                .consultByStudent(lastConsultedAt));
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
@@ -1489,7 +1491,7 @@ class DeclaredActivityServiceImplTest {
 
     assertThat(activityCaptor.getValue().getAssessment())
         .hasValueSatisfying(
-            consulted -> assertThat(consulted.consultedAt()).isAfter(lastConsultedAt));
+            consulted -> assertThat(consulted.studentConsultedAt()).isAfter(lastConsultedAt));
   }
 
   @Test
@@ -1510,7 +1512,7 @@ class DeclaredActivityServiceImplTest {
 
     BddLogger.then("No consultation date is set and nothing is saved");
     assertThat(declaredActivity.getAssessment())
-        .hasValueSatisfying(assessment -> assertThat(assessment.consultedAt()).isNull());
+        .hasValueSatisfying(assessment -> assertThat(assessment.studentConsultedAt()).isNull());
     verify(declaredActivityRepository, never()).save(any());
   }
 
