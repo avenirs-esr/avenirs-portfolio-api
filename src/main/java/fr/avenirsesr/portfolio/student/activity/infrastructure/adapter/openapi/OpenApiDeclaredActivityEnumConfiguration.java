@@ -12,6 +12,7 @@ public class OpenApiDeclaredActivityEnumConfiguration {
         openApi
             .getComponents()
             .addSchemas("EDeclaredActivityStatus", SwaggerSchema.declaredActivityStatusSchema)
-            .addSchemas("EFeedbackStatus", SwaggerSchema.feedbackStatusSchema);
+            .addSchemas("EFeedbackStatus", SwaggerSchema.feedbackStatusSchema)
+            .addSchemas("EActivityAssessmentStatus", SwaggerSchema.activityAssessmentStatusSchema);
   }
 }

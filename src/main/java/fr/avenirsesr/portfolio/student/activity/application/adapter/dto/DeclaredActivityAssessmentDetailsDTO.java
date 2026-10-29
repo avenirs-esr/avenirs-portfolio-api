@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.student.activity.application.adapter.dto;
 
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityContentDTO;
-import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
+import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EActivityAssessmentStatus;
 import fr.avenirsesr.portfolio.user.application.adapter.dto.UserInfoDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
@@ -24,4 +24,5 @@ public record DeclaredActivityAssessmentDetailsDTO(
     DeclaredActivityAssociationsDTO associations,
     DeclaredActivityAssessmentDTO assessment,
     Instant submittedAt,
-    @Schema(ref = "#/components/schemas/EDeclaredActivityStatus") EDeclaredActivityStatus status) {}
+    @Schema(ref = "#/components/schemas/EActivityAssessmentStatus")
+        EActivityAssessmentStatus status) {}

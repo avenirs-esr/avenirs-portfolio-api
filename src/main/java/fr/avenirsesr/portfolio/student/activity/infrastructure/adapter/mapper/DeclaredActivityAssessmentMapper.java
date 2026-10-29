@@ -20,7 +20,8 @@ public class DeclaredActivityAssessmentMapper
         domain.assessedAt(),
         domain.assessedBy() == null ? null : StaffMapper.INSTANCE.fromDomain(domain.assessedBy()),
         domain.modifiedAt(),
-        domain.consultedAt());
+        domain.consultedAt(),
+        domain.openedAt());
   }
 
   @Override
@@ -35,6 +36,7 @@ public class DeclaredActivityAssessmentMapper
             ? null
             : StaffMapper.INSTANCE.toDomain(entity.getAssessedBy()),
         entity.getModifiedAt(),
-        entity.getConsultedAt());
+        entity.getConsultedAt(),
+        entity.getOpenedAt());
   }
 }
