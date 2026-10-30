@@ -9,6 +9,7 @@ import fr.avenirsesr.portfolio.common.cgu.application.adapter.dto.CguDTO;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
+import fr.avenirsesr.portfolio.common.security.accesscontrol.domain.model.enums.EUniverse;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.common.user.application.adapter.dto.ExternalUserDTO;
@@ -738,6 +739,68 @@ class UserServiceImplTest {
       assertThat(profiles.getFirst().hasConnected()).isTrue();
       assertThat(profiles.getFirst().userId()).isEqualTo(user.getId());
       assertThat(profiles.getFirst().profilePictureId()).isEqualTo(pictureId);
+    }
+
+    @Test
+    void shouldReportWhetherAConnectedUserIsStaff() {
+      BddLogger.given("a connected user owning a staff record");
+      User user = UserFixture.create().toModel();
+      when(userPrincipalRepository.findAllByEppns(List.of(CONNECTED_EPPN)))
+          .thenReturn(Map.of(CONNECTED_EPPN, user));
+      when(staffService.findExistingIds(Set.of(user.getId()))).thenReturn(Set.of(user.getId()));
+
+      BddLogger.when("looking up its profile");
+      var profiles = userService.findProfilesByEppns(List.of(CONNECTED_EPPN));
+
+      BddLogger.then("it should be reported as staff");
+      assertThat(profiles.getFirst().universes()).containsExactly(EUniverse.STAFF);
+    }
+
+    @Test
+    void shouldReportBothUniversesOfAConnectedUserOwningBothRecords() {
+      BddLogger.given("a connected user owning a staff and a student record");
+      User user = UserFixture.create().toModel();
+      when(userPrincipalRepository.findAllByEppns(List.of(CONNECTED_EPPN)))
+          .thenReturn(Map.of(CONNECTED_EPPN, user));
+      when(staffService.findExistingIds(Set.of(user.getId()))).thenReturn(Set.of(user.getId()));
+      when(studentService.findExistingIds(Set.of(user.getId()))).thenReturn(Set.of(user.getId()));
+
+      BddLogger.when("looking up its profile");
+      var profiles = userService.findProfilesByEppns(List.of(CONNECTED_EPPN));
+
+      BddLogger.then("it should be reported in both universes");
+      assertThat(profiles.getFirst().universes())
+          .containsExactlyInAnyOrder(EUniverse.STAFF, EUniverse.STUDENT);
+    }
+
+    @Test
+    void shouldReportWhetherAConnectedUserIsStudent() {
+      BddLogger.given("a connected user owning a student record");
+      User user = UserFixture.create().toModel();
+      when(userPrincipalRepository.findAllByEppns(List.of(CONNECTED_EPPN)))
+          .thenReturn(Map.of(CONNECTED_EPPN, user));
+      when(studentService.findExistingIds(Set.of(user.getId()))).thenReturn(Set.of(user.getId()));
+
+      BddLogger.when("looking up its profile");
+      var profiles = userService.findProfilesByEppns(List.of(CONNECTED_EPPN));
+
+      BddLogger.then("it should be reported as student and not as staff");
+      assertThat(profiles.getFirst().universes()).containsExactly(EUniverse.STUDENT);
+    }
+
+    @Test
+    void shouldNotReportAsStaffAConnectedUserWithoutStaffRecord() {
+      BddLogger.given("a connected user without staff record");
+      User user = UserFixture.create().toModel();
+      when(userPrincipalRepository.findAllByEppns(List.of(CONNECTED_EPPN)))
+          .thenReturn(Map.of(CONNECTED_EPPN, user));
+
+      BddLogger.when("looking up its profile");
+      var profiles = userService.findProfilesByEppns(List.of(CONNECTED_EPPN));
+
+      BddLogger.then("it should be connected but not staff");
+      assertThat(profiles.getFirst().hasConnected()).isTrue();
+      assertThat(profiles.getFirst().universes()).doesNotContain(EUniverse.STAFF);
     }
 
     @Test

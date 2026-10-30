@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
+import fr.avenirsesr.portfolio.common.security.accesscontrol.domain.model.enums.EUniverse;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.user.application.adapter.dto.ExternalUserDTO;
 import fr.avenirsesr.portfolio.common.user.domain.exceptions.ExternalUserNotFoundException;
@@ -25,6 +26,7 @@ import fr.avenirsesr.portfolio.user.domain.port.output.client.ExternalUserClient
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.CguRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserPrincipalRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -76,6 +78,9 @@ public class UserServiceImpl implements UserService {
     Set<UUID> userIds = new LinkedHashSet<>();
     usersByEppn.values().forEach(user -> userIds.add(user.getId()));
 
+    Set<UUID> staffIds = staffService.findExistingIds(userIds);
+    Set<UUID> studentIds = studentService.findExistingIds(userIds);
+
     Map<UUID, UUID> pictureIdsByUserId =
         new HashMap<>(staffService.findProfilePictureIdsByIds(userIds));
     pictureIdsByUserId.putAll(studentService.findProfilePictureIdsByIds(userIds));
@@ -87,9 +92,23 @@ public class UserServiceImpl implements UserService {
               return user == null
                   ? UserProfileLookupData.neverConnected(eppn)
                   : new UserProfileLookupData(
-                      eppn, user.getId(), pictureIdsByUserId.get(user.getId()));
+                      eppn,
+                      user.getId(),
+                      pictureIdsByUserId.get(user.getId()),
+                      universesOf(user.getId(), staffIds, studentIds));
             })
         .toList();
+  }
+
+  private static Set<EUniverse> universesOf(UUID userId, Set<UUID> staffIds, Set<UUID> studentIds) {
+    Set<EUniverse> universes = EnumSet.noneOf(EUniverse.class);
+    if (staffIds.contains(userId)) {
+      universes.add(EUniverse.STAFF);
+    }
+    if (studentIds.contains(userId)) {
+      universes.add(EUniverse.STUDENT);
+    }
+    return universes;
   }
 
   @Override
