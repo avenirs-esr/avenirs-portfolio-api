@@ -1,5 +1,7 @@
 package fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.specification;
 
+import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityAuthorizationEntity;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityViewEntity;
@@ -15,15 +17,14 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.time.Instant;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import lombok.NoArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
 @NoArgsConstructor
 public final class DeclaredActivitySpecification {
+
   public static Specification<DeclaredActivityEntity> hasActivityIdIn(
       Collection<UUID> activityIds) {
     return (root, query, cb) -> root.get("activity").get("id").in(activityIds);
@@ -58,6 +59,27 @@ public final class DeclaredActivitySpecification {
       var activity = root.join("activity");
       return activity.get(field).in(values);
     };
+  }
+
+  public static Sort toSort(SortCriteria... sortCriterias) {
+    if (sortCriterias == null || sortCriterias.length == 0) {
+      return Sort.unsorted();
+    }
+    return Arrays.stream(sortCriterias)
+        .filter(Objects::nonNull)
+        .map(
+            sortCriteria -> {
+              Sort.Direction direction =
+                  sortCriteria.order() == ESortOrder.ASC ? Sort.Direction.ASC : Sort.Direction.DESC;
+
+              String sortField =
+                  switch (sortCriteria.field()) {
+                    case NAME -> "activity.title";
+                    case DATE -> "updatedAt";
+                  };
+              return Sort.by(direction, sortField);
+            })
+        .reduce(Sort.unsorted(), Sort::and);
   }
 
   public static Specification<DeclaredActivityEntity> isNotCompleted() {

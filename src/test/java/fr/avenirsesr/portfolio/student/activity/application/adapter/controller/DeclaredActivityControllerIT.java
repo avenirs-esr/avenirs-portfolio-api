@@ -21,6 +21,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.StreamSupport;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -428,6 +429,32 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
     String descendingResponse = getDeclaredActivityView(ESortField.DATE, ESortOrder.DESC);
 
     assertThat(defaultResponse).isEqualTo(descendingResponse);
+  }
+
+  @Test
+  @Transactional
+  void shouldUseAlphabeticalSortingByDefault() throws JsonProcessingException {
+    String defaultResponse = getDeclaredActivityView(null, null);
+
+    JsonNode defaultActivities = objectMapper.readTree(defaultResponse).get("data");
+
+    List<String> defaultTitles =
+        StreamSupport.stream(defaultActivities.spliterator(), false)
+            .map(activity -> activity.at("/activity/title").asText())
+            .toList();
+
+    String alphabeticalResponse = getDeclaredActivityView(ESortField.NAME, ESortOrder.ASC);
+
+    JsonNode alphabeticalActivities = objectMapper.readTree(alphabeticalResponse).get("data");
+
+    List<String> alphabeticalTitles =
+        StreamSupport.stream(alphabeticalActivities.spliterator(), false)
+            .map(activity -> activity.at("/activity/title").asText())
+            .toList();
+
+    assertThat(alphabeticalTitles).isSortedAccordingTo(String.CASE_INSENSITIVE_ORDER);
+
+    assertThat(defaultTitles).isEqualTo(alphabeticalTitles);
   }
 
   @Test

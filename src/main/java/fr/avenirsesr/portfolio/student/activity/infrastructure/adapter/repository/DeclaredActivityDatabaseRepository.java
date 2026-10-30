@@ -6,7 +6,6 @@ import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
-import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
@@ -93,10 +92,12 @@ public class DeclaredActivityDatabaseRepository
       Boolean isValorized,
       FetchGraph fetchGraph) {
 
-    Sort.Direction direction =
-        sortCriteria.order() == ESortOrder.ASC ? Sort.Direction.ASC : Sort.Direction.DESC;
-    var sort = Sort.by(Sort.Direction.ASC, "isFinishedOrder").and(Sort.by(direction, "updatedAt"));
-
+    PageRequest pageRequest =
+        PageRequest.of(
+            pageCriteria.page(),
+            pageCriteria.pageSize(),
+            Sort.by(Sort.Direction.ASC, "isFinishedOrder")
+                .and(DeclaredActivitySpecification.toSort(sortCriteria)));
     return findAll(
         hasStudent(student)
             .and(
@@ -104,7 +105,7 @@ public class DeclaredActivityDatabaseRepository
                     .and(DeclaredActivitySpecification.search(keyword))
                     .and(DeclaredActivitySpecification.has("thematic", thematics))
                     .and(DeclaredActivitySpecification.hasStatusIn(statuses))),
-        PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort),
+        pageRequest,
         fetchGraph);
   }
 
