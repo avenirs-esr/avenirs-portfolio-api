@@ -94,7 +94,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.student.selfknowledge.infrastructu
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.association.domain.port.output.strategy,AssociationStrategy,0,2,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.kit.application.adapter.controller,KitController,0,31,0,0,0,7,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.repository,TraceDatabaseRepository,22,157,5,11,6,43,5,12,1,8
-avenirs-portfolio-api,fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.specification,DeclaredActivitySpecification,18,502,4,23,3,82,8,47,4,35
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.specification,DeclaredActivitySpecification,18,529,4,24,3,85,8,48,4,35
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.specification,FeedbackSpecification,2,154,1,5,0,30,1,12,0,10
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.association.domain.utils,AssociationUtils,0,68,0,6,0,14,0,9,0,6
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.data,UserProfileOverviewData,0,24,0,0,0,1,0,1,0,1
