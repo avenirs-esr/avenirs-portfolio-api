@@ -741,6 +741,52 @@ class UserServiceImplTest {
     }
 
     @Test
+    void shouldReportWhetherAConnectedUserIsStaff() {
+      BddLogger.given("a connected user owning a staff record");
+      User user = UserFixture.create().toModel();
+      when(userPrincipalRepository.findAllByEppns(List.of(CONNECTED_EPPN)))
+          .thenReturn(Map.of(CONNECTED_EPPN, user));
+      when(staffService.findExistingIds(Set.of(user.getId()))).thenReturn(Set.of(user.getId()));
+
+      BddLogger.when("looking up its profile");
+      var profiles = userService.findProfilesByEppns(List.of(CONNECTED_EPPN));
+
+      BddLogger.then("it should be reported as staff");
+      assertThat(profiles.getFirst().staff()).isTrue();
+    }
+
+    @Test
+    void shouldReportWhetherAConnectedUserIsStudent() {
+      BddLogger.given("a connected user owning a student record");
+      User user = UserFixture.create().toModel();
+      when(userPrincipalRepository.findAllByEppns(List.of(CONNECTED_EPPN)))
+          .thenReturn(Map.of(CONNECTED_EPPN, user));
+      when(studentService.findExistingIds(Set.of(user.getId()))).thenReturn(Set.of(user.getId()));
+
+      BddLogger.when("looking up its profile");
+      var profiles = userService.findProfilesByEppns(List.of(CONNECTED_EPPN));
+
+      BddLogger.then("it should be reported as student and not as staff");
+      assertThat(profiles.getFirst().student()).isTrue();
+      assertThat(profiles.getFirst().staff()).isFalse();
+    }
+
+    @Test
+    void shouldNotReportAsStaffAConnectedUserWithoutStaffRecord() {
+      BddLogger.given("a connected user without staff record");
+      User user = UserFixture.create().toModel();
+      when(userPrincipalRepository.findAllByEppns(List.of(CONNECTED_EPPN)))
+          .thenReturn(Map.of(CONNECTED_EPPN, user));
+
+      BddLogger.when("looking up its profile");
+      var profiles = userService.findProfilesByEppns(List.of(CONNECTED_EPPN));
+
+      BddLogger.then("it should be connected but not staff");
+      assertThat(profiles.getFirst().hasConnected()).isTrue();
+      assertThat(profiles.getFirst().staff()).isFalse();
+    }
+
+    @Test
     void shouldReportTheConnectionWithoutPictureWhenTheUserUploadedNone() {
       BddLogger.given("a connected user who never uploaded a profile picture");
       User user = UserFixture.create().toModel();

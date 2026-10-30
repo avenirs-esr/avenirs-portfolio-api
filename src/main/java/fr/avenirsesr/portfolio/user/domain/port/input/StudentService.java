@@ -8,6 +8,7 @@ import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public interface StudentService {
@@ -17,6 +18,8 @@ public interface StudentService {
 
   /** Profile picture ids of the given users, keyed by user id. Users without one are absent. */
   Map<UUID, UUID> findProfilePictureIdsByIds(Collection<UUID> ids);
+
+  Set<UUID> findExistingIds(Collection<UUID> ids);
 
   UserProfileOverviewData getStudentProfile();
 

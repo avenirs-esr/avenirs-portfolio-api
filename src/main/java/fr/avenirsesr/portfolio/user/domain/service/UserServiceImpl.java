@@ -76,6 +76,9 @@ public class UserServiceImpl implements UserService {
     Set<UUID> userIds = new LinkedHashSet<>();
     usersByEppn.values().forEach(user -> userIds.add(user.getId()));
 
+    Set<UUID> staffIds = staffService.findExistingIds(userIds);
+    Set<UUID> studentIds = studentService.findExistingIds(userIds);
+
     Map<UUID, UUID> pictureIdsByUserId =
         new HashMap<>(staffService.findProfilePictureIdsByIds(userIds));
     pictureIdsByUserId.putAll(studentService.findProfilePictureIdsByIds(userIds));
@@ -87,7 +90,11 @@ public class UserServiceImpl implements UserService {
               return user == null
                   ? UserProfileLookupData.neverConnected(eppn)
                   : new UserProfileLookupData(
-                      eppn, user.getId(), pictureIdsByUserId.get(user.getId()));
+                      eppn,
+                      user.getId(),
+                      pictureIdsByUserId.get(user.getId()),
+                      staffIds.contains(user.getId()),
+                      studentIds.contains(user.getId()));
             })
         .toList();
   }
