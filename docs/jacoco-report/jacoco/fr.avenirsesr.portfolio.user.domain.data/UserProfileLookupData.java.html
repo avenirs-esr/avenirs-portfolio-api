@@ -5,15 +5,18 @@ import java.util.UUID;
 /**
  * Cofolio profile of a person identified by its eppn. A null {@code userId} means no account was
  * ever created for that eppn, which is how the back-office tells that the person never logged in.
+ * {@code staff} and {@code student} tell which universes the account really belongs to: an account
+ * may exist without belonging to any of them.
  */
-<span class="fc" id="L9">public record UserProfileLookupData(String eppn, UUID userId, UUID profilePictureId) {</span>
+<span class="fc" id="L11">public record UserProfileLookupData(</span>
+    String eppn, UUID userId, UUID profilePictureId, boolean staff, boolean student) {
 
   public static UserProfileLookupData neverConnected(String eppn) {
-<span class="fc" id="L12">    return new UserProfileLookupData(eppn, null, null);</span>
+<span class="fc" id="L15">    return new UserProfileLookupData(eppn, null, null, false, false);</span>
   }
 
   public boolean hasConnected() {
-<span class="fc bfc" id="L16" title="All 2 branches covered.">    return userId != null;</span>
+<span class="fc bfc" id="L19" title="All 2 branches covered.">    return userId != null;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
