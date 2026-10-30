@@ -30,7 +30,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.DeclaredActivityToAssessDTO;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.mapper.DeclaredActivityToAssessDTOMapper;
 import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityToAssessData;
-import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
+import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EActivityAssessmentStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -601,9 +601,9 @@ public class ActivityController {
       @Parameter(
               array =
                   @ArraySchema(
-                      schema = @Schema(ref = "#/components/schemas/EDeclaredActivityStatus")))
+                      schema = @Schema(ref = "#/components/schemas/EActivityAssessmentStatus")))
           @RequestParam(required = false)
-          List<EDeclaredActivityStatus> statuses,
+          List<EActivityAssessmentStatus> statuses,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize) {
     var pageCriteria = new PageCriteria(page, pageSize);
