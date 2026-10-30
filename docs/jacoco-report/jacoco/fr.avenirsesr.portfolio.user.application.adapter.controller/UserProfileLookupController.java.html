@@ -48,12 +48,7 @@ public class UserProfileLookupController {
 
   private static UserProfileDTO toDto(UserProfileLookupData profile) {
 <span class="nc" id="L50">    return new UserProfileDTO(</span>
-<span class="nc" id="L51">        profile.eppn(),</span>
-<span class="nc" id="L52">        profile.hasConnected(),</span>
-<span class="nc" id="L53">        profile.userId(),</span>
-<span class="nc" id="L54">        profile.profilePictureId(),</span>
-<span class="nc" id="L55">        profile.staff(),</span>
-<span class="nc" id="L56">        profile.student());</span>
+<span class="nc" id="L51">        profile.eppn(), profile.hasConnected(), profile.userId(), profile.profilePictureId());</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
