@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.specific
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityAuthorizationEntity;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityViewEntity;
+import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EActivityAssessmentStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.model.DeclaredActivityEntity;
@@ -118,7 +119,7 @@ public final class DeclaredActivitySpecification {
   }
 
   public static Specification<DeclaredActivityEntity> hasAssessmentStatusIn(
-      Collection<EDeclaredActivityStatus> statuses) {
+      Collection<EActivityAssessmentStatus> statuses) {
     return (root, query, cb) -> {
       if (statuses == null || statuses.isEmpty()) {
         return cb.conjunction();
@@ -192,11 +193,13 @@ public final class DeclaredActivitySpecification {
   }
 
   private static Predicate assessmentStatusPredicate(
-      EDeclaredActivityStatus status, Root<DeclaredActivityEntity> root, CriteriaBuilder cb) {
+      EActivityAssessmentStatus status, Root<DeclaredActivityEntity> root, CriteriaBuilder cb) {
+    var assessedAt = root.get("assessment").get("assessedAt");
+    var staffOpenedAt = root.get("assessment").get("staffOpenedAt");
     return switch (status) {
-      case SUBMITTED_FOR_ASSESSMENT -> isSubmittedForAssessment(root, cb);
-      case SUBMITTED_FOR_FEEDBACK, CONSULTED, SUBSCRIBED, IN_PROGRESS, COMPLETED, UNSUBSCRIBED ->
-          cb.disjunction();
+      case NEW -> cb.and(cb.isNull(assessedAt), cb.isNull(staffOpenedAt));
+      case OPENED -> cb.and(cb.isNull(assessedAt), cb.isNotNull(staffOpenedAt));
+      case SENT -> cb.isNotNull(assessedAt);
     };
   }
 
