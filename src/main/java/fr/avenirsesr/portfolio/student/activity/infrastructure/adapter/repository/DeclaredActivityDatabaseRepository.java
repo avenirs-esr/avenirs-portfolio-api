@@ -94,7 +94,12 @@ public class DeclaredActivityDatabaseRepository
 
     Sort.Direction direction =
         sortCriteria.order() == ESortOrder.ASC ? Sort.Direction.ASC : Sort.Direction.DESC;
-    var sort = Sort.by(Sort.Direction.ASC, "isFinishedOrder").and(Sort.by(direction, "updatedAt"));
+    String sortField =
+        switch (sortCriteria.field()) {
+          case NAME -> "activity.title";
+          case DATE -> "updatedAt";
+        };
+    var sort = Sort.by(Sort.Direction.ASC, "isFinishedOrder").and(Sort.by(direction, sortField));
 
     return findAll(
         hasStudent(student)
