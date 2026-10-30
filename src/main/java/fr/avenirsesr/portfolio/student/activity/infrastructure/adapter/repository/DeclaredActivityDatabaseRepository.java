@@ -11,6 +11,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
+import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EActivityAssessmentStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.mapper.DeclaredActivityMapper;
@@ -110,7 +111,7 @@ public class DeclaredActivityDatabaseRepository
   @Override
   public PagedResult<DeclaredActivity> findAllSubmittedForAssessmentBy(
       UUID staffId,
-      Collection<EDeclaredActivityStatus> statuses,
+      Collection<EActivityAssessmentStatus> statuses,
       PageCriteria pageCriteria,
       FetchGraph fetchGraph) {
     var specification =

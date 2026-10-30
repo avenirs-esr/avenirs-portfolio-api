@@ -18,7 +18,8 @@ import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.Activi
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.StaffAuthorizationRequest;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
-import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
+import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.DeclaredActivityAssessmentRequest;
+import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EActivityAssessmentStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.client.AccessClientStub;
 import java.time.LocalDate;
@@ -49,6 +50,10 @@ class ActivityControllerIT extends ContainerConfigurationTest {
   private static final String ASSESSMENTS_PATH = BASE_PATH + "/assessments";
   private static final String SUBMIT_FOR_ASSESSMENT_PATH =
       "/me/activity-progress/{declaredActivityId}/submit-for-assessment";
+  private static final String ASSESSMENT_DETAILS_PATH =
+      "/me/activity-progress/assessments/{declaredActivityId}";
+  private static final String SEND_ASSESSMENT_PATH =
+      "/me/activity-progress/{declaredActivityId}/assessment";
   private static final String PRESENTATION_PATH =
       BASE_PATH + "/PUBLISHED/{activityId}/presentation";
   private static final String DRAFT_PATH = BASE_PATH + "/draft";
@@ -349,19 +354,57 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       }
 
       @Test
-      void thenItShouldFilterByStatus() throws Exception {
-        BddLogger.given("an assessable activity of the staff a student submitted for assessment");
+      void thenItShouldFilterTheNewAssessments() throws Exception {
+        BddLogger.given("a submission the staff has not opened yet");
         UUID activityId =
             publishAssessableActivityAsStaff(
-                "Activité évaluable à filtrer", new ActivityAssessmentRequest(true, null, null));
+                "Activité évaluable à filtrer nouvelle",
+                new ActivityAssessmentRequest(true, null, null));
         UUID declaredActivityId = submitForAssessmentAsStudent(activityId);
 
-        BddLogger.then("the SUBMITTED_FOR_ASSESSMENT filter should keep it");
-        assertNotNull(
-            findSubmission(declaredActivityId, EDeclaredActivityStatus.SUBMITTED_FOR_ASSESSMENT));
+        BddLogger.then("the NEW filter should keep it");
+        assertNotNull(findSubmission(declaredActivityId, EActivityAssessmentStatus.NEW));
 
-        BddLogger.and("the CONSULTED filter should leave it out");
-        assertNull(findSubmission(declaredActivityId, EDeclaredActivityStatus.CONSULTED));
+        BddLogger.and("the OPENED and SENT filters should leave it out");
+        assertNull(findSubmission(declaredActivityId, EActivityAssessmentStatus.OPENED));
+        assertNull(findSubmission(declaredActivityId, EActivityAssessmentStatus.SENT));
+      }
+
+      @Test
+      void thenItShouldFilterTheOpenedAssessments() throws Exception {
+        BddLogger.given("a submission the staff opened without sending the assessment");
+        UUID activityId =
+            publishAssessableActivityAsStaff(
+                "Activité évaluable à filtrer ouverte",
+                new ActivityAssessmentRequest(true, null, null));
+        UUID declaredActivityId = submitForAssessmentAsStudent(activityId);
+        openAssessmentAsStaff(declaredActivityId);
+
+        BddLogger.then("the OPENED filter should keep it");
+        assertNotNull(findSubmission(declaredActivityId, EActivityAssessmentStatus.OPENED));
+
+        BddLogger.and("the NEW and SENT filters should leave it out");
+        assertNull(findSubmission(declaredActivityId, EActivityAssessmentStatus.NEW));
+        assertNull(findSubmission(declaredActivityId, EActivityAssessmentStatus.SENT));
+      }
+
+      @Test
+      void thenItShouldFilterTheSentAssessments() throws Exception {
+        BddLogger.given("a submission the staff sent the assessment of");
+        UUID activityId =
+            publishAssessableActivityAsStaff(
+                "Activité évaluable à filtrer envoyée",
+                new ActivityAssessmentRequest(true, null, null));
+        UUID declaredActivityId = submitForAssessmentAsStudent(activityId);
+        openAssessmentAsStaff(declaredActivityId);
+        sendAssessmentAsStaff(declaredActivityId);
+
+        BddLogger.then("the SENT filter should keep it");
+        assertNotNull(findSubmission(declaredActivityId, EActivityAssessmentStatus.SENT));
+
+        BddLogger.and("the NEW and OPENED filters should leave it out");
+        assertNull(findSubmission(declaredActivityId, EActivityAssessmentStatus.NEW));
+        assertNull(findSubmission(declaredActivityId, EActivityAssessmentStatus.OPENED));
       }
 
       @Test
@@ -403,7 +446,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             .isForbidden();
       }
 
-      private JsonNode findSubmission(UUID declaredActivityId, EDeclaredActivityStatus status)
+      private JsonNode findSubmission(UUID declaredActivityId, EActivityAssessmentStatus status)
           throws Exception {
         String body =
             webTestClient
@@ -4325,6 +4368,29 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         .isNoContent();
 
     return declaredActivityId;
+  }
+
+  private void openAssessmentAsStaff(UUID declaredActivityId) {
+    webTestClient
+        .get()
+        .uri(ASSESSMENT_DETAILS_PATH, declaredActivityId)
+        .headers(this::addStaffHeaders)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isOk();
+  }
+
+  private void sendAssessmentAsStaff(UUID declaredActivityId) {
+    webTestClient
+        .put()
+        .uri(SEND_ASSESSMENT_PATH, declaredActivityId)
+        .headers(this::addStaffHeaders)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(new DeclaredActivityAssessmentRequest("Bon travail", null, null))
+        .exchange()
+        .expectStatus()
+        .isNoContent();
   }
 
   private UUID publishNewActivity(String title) throws Exception {

@@ -36,6 +36,7 @@ import fr.avenirsesr.portfolio.student.activity.domain.exception.*;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivityAssessment;
 import fr.avenirsesr.portfolio.student.activity.domain.model.Feedback;
+import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EActivityAssessmentStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.FeedbackService;
@@ -101,7 +102,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
 
   @Override
   public PagedResult<DeclaredActivity> getDeclaredActivitiesToAssessBy(
-      Staff staff, List<EDeclaredActivityStatus> statuses, PageCriteria pageCriteria) {
+      Staff staff, List<EActivityAssessmentStatus> statuses, PageCriteria pageCriteria) {
     var graph =
         FetchGraph.init().add("student").fetch("user").root().add("activity").fetch("author");
 

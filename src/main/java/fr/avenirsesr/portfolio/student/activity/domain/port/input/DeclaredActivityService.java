@@ -8,6 +8,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThemat
 import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityAssessmentDetailsData;
 import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityDetailsData;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
+import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EActivityAssessmentStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
@@ -30,7 +31,7 @@ public interface DeclaredActivityService {
   List<DeclaredActivity> getAllDeclaredActivitiesOf(Student student);
 
   PagedResult<DeclaredActivity> getDeclaredActivitiesToAssessBy(
-      Staff staff, List<EDeclaredActivityStatus> statuses, PageCriteria pageCriteria);
+      Staff staff, List<EActivityAssessmentStatus> statuses, PageCriteria pageCriteria);
 
   Optional<DeclaredActivity> getByActivity(Activity activity);
 

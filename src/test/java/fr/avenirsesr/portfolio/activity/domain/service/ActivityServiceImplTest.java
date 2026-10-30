@@ -65,6 +65,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.Acti
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.StaffActivityOverviewRepository;
 import fr.avenirsesr.portfolio.staff.activity.domain.service.ActivityServiceImpl;
 import fr.avenirsesr.portfolio.student.activity.domain.model.DeclaredActivity;
+import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EActivityAssessmentStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.port.input.DeclaredActivityService;
@@ -2266,14 +2267,14 @@ class ActivityServiceImplTest {
         DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
         PageInfo pageInfo = new PageInfo(0, 10, 1);
         when(declaredActivityService.getDeclaredActivitiesToAssessBy(
-                staff, List.of(EDeclaredActivityStatus.SUBMITTED_FOR_ASSESSMENT), pageCriteria))
+                staff, List.of(EActivityAssessmentStatus.NEW), pageCriteria))
             .thenReturn(new PagedResult<>(List.of(declaredActivity), pageInfo));
         when(declaredActivityService.getDeclaredActivityStatus(List.of(declaredActivity)))
             .thenReturn(Map.of(declaredActivity, EDeclaredActivityStatus.SUBMITTED_FOR_ASSESSMENT));
 
         var result =
             activityService.getDeclaredActivitiesToAssess(
-                List.of(EDeclaredActivityStatus.SUBMITTED_FOR_ASSESSMENT), pageCriteria);
+                List.of(EActivityAssessmentStatus.NEW), pageCriteria);
 
         assertEquals(pageInfo, result.pageInfo());
         assertEquals(1, result.content().size());

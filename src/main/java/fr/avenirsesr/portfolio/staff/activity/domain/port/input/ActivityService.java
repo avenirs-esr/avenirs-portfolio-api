@@ -15,7 +15,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityDraft;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityToAssessData;
-import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
+import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EActivityAssessmentStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import java.time.LocalDate;
@@ -117,5 +117,5 @@ public interface ActivityService {
       List<EFeedbackStatus> statuses, PageCriteria pageCriteria);
 
   PagedResult<DeclaredActivityToAssessData> getDeclaredActivitiesToAssess(
-      List<EDeclaredActivityStatus> statuses, PageCriteria pageCriteria);
+      List<EActivityAssessmentStatus> statuses, PageCriteria pageCriteria);
 }
