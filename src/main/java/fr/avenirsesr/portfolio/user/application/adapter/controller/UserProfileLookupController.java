@@ -48,6 +48,10 @@ public class UserProfileLookupController {
 
   private static UserProfileDTO toDto(UserProfileLookupData profile) {
     return new UserProfileDTO(
-        profile.eppn(), profile.hasConnected(), profile.userId(), profile.profilePictureId());
+        profile.eppn(),
+        profile.hasConnected(),
+        profile.userId(),
+        profile.profilePictureId(),
+        profile.universes().stream().sorted().toList());
   }
 }

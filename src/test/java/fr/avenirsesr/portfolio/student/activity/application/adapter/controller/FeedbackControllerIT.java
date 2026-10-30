@@ -375,8 +375,8 @@ public class FeedbackControllerIT extends ContainerConfigurationTest {
     webTestClient
         .get()
         .uri(BASE_PATH)
-        .header("X-Signed-Context", staffPayload)
-        .header("X-Context-Signature", staffSignature)
+        .header("X-Signed-Context", anotherStaffPayload)
+        .header("X-Context-Signature", anotherStaffSignature)
         .exchange()
         .expectStatus()
         .isOk()
@@ -834,8 +834,8 @@ public class FeedbackControllerIT extends ContainerConfigurationTest {
     webTestClient
         .get()
         .uri(BASE_PATH + "/dashboard")
-        .header("X-Signed-Context", staffPayload)
-        .header("X-Context-Signature", staffSignature)
+        .header("X-Signed-Context", anotherStaffPayload)
+        .header("X-Context-Signature", anotherStaffSignature)
         .exchange()
         .expectStatus()
         .isOk()

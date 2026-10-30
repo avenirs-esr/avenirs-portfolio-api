@@ -19,7 +19,9 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -56,6 +58,17 @@ public class StaffServiceImpl implements StaffService {
     }
 
     return pictureIdsByUserId;
+  }
+
+  @Override
+  public Set<UUID> findExistingIds(Collection<UUID> ids) {
+    if (ids == null || ids.isEmpty()) {
+      return Set.of();
+    }
+
+    return staffRepository.findAllById(List.copyOf(ids)).stream()
+        .map(Staff::getId)
+        .collect(Collectors.toSet());
   }
 
   @Override
