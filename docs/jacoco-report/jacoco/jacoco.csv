@@ -68,7 +68,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.student.association.domain.filter,
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.program.application.adapter.controller,DeclaredProgramController,0,131,0,0,0,38,0,6,0,6
 avenirs-portfolio-api,fr.avenirsesr.portfolio.authorization.domain.service,UserAuthorizationQueryServiceImpl,0,107,2,8,0,24,2,8,0,5
 avenirs-portfolio-api,fr.avenirsesr.portfolio.authorization.domain.service,EntityAuthorizationServiceImpl,0,121,0,10,0,25,0,10,0,5
-avenirs-portfolio-api,fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.repository,DeclaredActivityDatabaseRepository,10,229,2,4,3,48,3,16,1,15
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.repository,DeclaredActivityDatabaseRepository,10,220,2,2,3,51,3,15,1,15
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.repository,FeedbackDatabaseRepository,51,329,1,5,8,80,6,18,5,16
 avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.application.adapter,Utils,0,42,0,6,0,10,0,4,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.domain.data,TraceLockedDeclaredActivitiesData,0,12,0,0,0,1,0,1,0,1
@@ -94,7 +94,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.student.selfknowledge.infrastructu
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.association.domain.port.output.strategy,AssociationStrategy,0,2,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.kit.application.adapter.controller,KitController,0,31,0,0,0,7,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.repository,TraceDatabaseRepository,22,157,5,11,6,43,5,12,1,8
-avenirs-portfolio-api,fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.specification,DeclaredActivitySpecification,18,529,4,24,3,85,8,48,4,35
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.specification,DeclaredActivitySpecification,20,572,6,30,4,96,10,52,4,37
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.specification,FeedbackSpecification,2,154,1,5,0,30,1,12,0,10
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.association.domain.utils,AssociationUtils,0,68,0,6,0,14,0,9,0,6
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.data,UserProfileOverviewData,0,24,0,0,0,1,0,1,0,1
