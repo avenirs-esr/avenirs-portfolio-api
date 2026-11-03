@@ -2280,7 +2280,8 @@ class ActivityServiceImplTest {
         assertEquals(1, result.content().size());
         assertEquals(declaredActivity, result.content().getFirst().declaredActivity());
         assertEquals(
-            EDeclaredActivityStatus.SUBMITTED_FOR_ASSESSMENT, result.content().getFirst().status());
+            EDeclaredActivityStatus.SUBMITTED_FOR_ASSESSMENT,
+            result.content().getFirst().declaredActivityStatus());
       }
 
       @Test
