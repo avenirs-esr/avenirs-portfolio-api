@@ -350,7 +350,8 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             submission.get("assessmentRequestedAt").asText());
         assertTrue(submission.get("assessedAt").isNull());
         assertTrue(submission.get("assessedBy").isNull());
-        assertEquals("SUBMITTED_FOR_ASSESSMENT", submission.get("status").asText());
+        assertEquals("SUBMITTED_FOR_ASSESSMENT", submission.get("declaredActivityStatus").asText());
+        assertEquals("NEW", submission.get("assessmentStatus").asText());
       }
 
       @Test
@@ -380,8 +381,10 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         UUID declaredActivityId = submitForAssessmentAsStudent(activityId);
         openAssessmentAsStaff(declaredActivityId);
 
-        BddLogger.then("the OPENED filter should keep it");
-        assertNotNull(findSubmission(declaredActivityId, EActivityAssessmentStatus.OPENED));
+        BddLogger.then("the OPENED filter should keep it with the OPENED assessment status");
+        JsonNode submission = findSubmission(declaredActivityId, EActivityAssessmentStatus.OPENED);
+        assertNotNull(submission);
+        assertEquals("OPENED", submission.get("assessmentStatus").asText());
 
         BddLogger.and("the NEW and SENT filters should leave it out");
         assertNull(findSubmission(declaredActivityId, EActivityAssessmentStatus.NEW));
@@ -399,8 +402,10 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         openAssessmentAsStaff(declaredActivityId);
         sendAssessmentAsStaff(declaredActivityId);
 
-        BddLogger.then("the SENT filter should keep it");
-        assertNotNull(findSubmission(declaredActivityId, EActivityAssessmentStatus.SENT));
+        BddLogger.then("the SENT filter should keep it with the SENT assessment status");
+        JsonNode submission = findSubmission(declaredActivityId, EActivityAssessmentStatus.SENT);
+        assertNotNull(submission);
+        assertEquals("SENT", submission.get("assessmentStatus").asText());
 
         BddLogger.and("the NEW and OPENED filters should leave it out");
         assertNull(findSubmission(declaredActivityId, EActivityAssessmentStatus.NEW));
