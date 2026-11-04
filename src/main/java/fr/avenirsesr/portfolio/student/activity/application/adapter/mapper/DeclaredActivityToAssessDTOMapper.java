@@ -5,10 +5,13 @@ import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityAs
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityPreviewDTO;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAssessment;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityAssessmentType;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.DeclaredActivityToAssessDTO;
 import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityToAssessData;
 import fr.avenirsesr.portfolio.user.application.adapter.dto.UserInfoDTO;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -20,6 +23,7 @@ public interface DeclaredActivityToAssessDTOMapper {
   @Mapping(source = "declaredActivity.student.user", target = "student")
   @Mapping(source = "declaredActivity.activity", target = "activity")
   @Mapping(source = "declaredActivity.activity.assessment", target = "assessment")
+  @Mapping(source = "declaredActivity.activity.assessment", target = "assessmentTypes")
   @Mapping(source = "declaredActivity.submittedAt", target = "submittedAt")
   @Mapping(
       target = "assessmentRequestedAt",
@@ -56,6 +60,23 @@ public interface DeclaredActivityToAssessDTOMapper {
                 value ->
                     new ActivityAssessmentDTO(value.comment(), value.grade(), value.validation()))
             .orElse(null);
+  }
+
+  default List<EActivityAssessmentType> toAssessmentTypes(Optional<ActivityAssessment> assessment) {
+    var types = new ArrayList<EActivityAssessmentType>();
+    if (assessment == null || assessment.isEmpty()) {
+      return types;
+    }
+    if (assessment.get().isCommentEnabled()) {
+      types.add(EActivityAssessmentType.COMMENT);
+    }
+    if (assessment.get().isGradeEnabled()) {
+      types.add(EActivityAssessmentType.GRADE);
+    }
+    if (assessment.get().isValidationEnabled()) {
+      types.add(EActivityAssessmentType.VALIDATION);
+    }
+    return types;
   }
 
   default Instant unwrap(Optional<Instant> value) {

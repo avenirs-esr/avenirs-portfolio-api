@@ -54,6 +54,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.exception.*;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAssessment;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityDraft;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityAssessmentType;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
@@ -2267,14 +2268,19 @@ class ActivityServiceImplTest {
         DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
         PageInfo pageInfo = new PageInfo(0, 10, 1);
         when(declaredActivityService.getDeclaredActivitiesToAssessBy(
-                staff, List.of(EActivityAssessmentStatus.NEW), pageCriteria))
+                staff,
+                List.of(EActivityAssessmentStatus.NEW),
+                List.of(EActivityAssessmentType.GRADE),
+                pageCriteria))
             .thenReturn(new PagedResult<>(List.of(declaredActivity), pageInfo));
         when(declaredActivityService.getDeclaredActivityStatus(List.of(declaredActivity)))
             .thenReturn(Map.of(declaredActivity, EDeclaredActivityStatus.SUBMITTED_FOR_ASSESSMENT));
 
         var result =
             activityService.getDeclaredActivitiesToAssess(
-                List.of(EActivityAssessmentStatus.NEW), pageCriteria);
+                List.of(EActivityAssessmentStatus.NEW),
+                List.of(EActivityAssessmentType.GRADE),
+                pageCriteria);
 
         assertEquals(pageInfo, result.pageInfo());
         assertEquals(1, result.content().size());
@@ -2295,7 +2301,7 @@ class ActivityServiceImplTest {
 
         assertThrows(
             UserNotAuthorizedException.class,
-            () -> activityService.getDeclaredActivitiesToAssess(null, pageCriteria));
+            () -> activityService.getDeclaredActivitiesToAssess(null, null, pageCriteria));
 
         verifyNoInteractions(declaredActivityService);
       }

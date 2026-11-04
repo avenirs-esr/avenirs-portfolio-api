@@ -16,6 +16,7 @@ import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.Activi
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDraftUpdateRequest;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDuplicationRequest;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.StaffAuthorizationRequest;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityAssessmentType;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.DeclaredActivityAssessmentRequest;
@@ -23,6 +24,7 @@ import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EActivityAsse
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.client.AccessClientStub;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -352,6 +354,50 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         assertTrue(submission.get("assessedBy").isNull());
         assertEquals("SUBMITTED_FOR_ASSESSMENT", submission.get("declaredActivityStatus").asText());
         assertEquals("NEW", submission.get("assessmentStatus").asText());
+        assertEquals(List.of("COMMENT"), assessmentTypesOf(submission));
+      }
+
+      @Test
+      void thenItShouldDeriveTheAssessmentTypesFromTheActivityAssessment() throws Exception {
+        BddLogger.given("a submission on an activity assessed by a comment and a grade");
+        UUID activityId =
+            publishAssessableActivityAsStaff(
+                "Activité évaluable commentaire et note",
+                new ActivityAssessmentRequest(true, 20, null));
+        UUID declaredActivityId = submitForAssessmentAsStudent(activityId);
+
+        BddLogger.then("it should expose the COMMENT and GRADE assessment types");
+        JsonNode submission = findSubmission(declaredActivityId, null);
+        assertNotNull(submission);
+        assertEquals(List.of("COMMENT", "GRADE"), assessmentTypesOf(submission));
+      }
+
+      @Test
+      void thenItShouldFilterByAssessmentType() throws Exception {
+        BddLogger.given("a submission on an activity assessed by a validation only");
+        UUID activityId =
+            publishAssessableActivityAsStaff(
+                "Activité évaluable à filtrer validation",
+                new ActivityAssessmentRequest(null, null, true));
+        UUID declaredActivityId = submitForAssessmentAsStudent(activityId);
+
+        BddLogger.then("the VALIDATION filter should keep it");
+        JsonNode submission =
+            findSubmission(declaredActivityId, null, EActivityAssessmentType.VALIDATION);
+        assertNotNull(submission);
+        assertEquals(List.of("VALIDATION"), assessmentTypesOf(submission));
+
+        BddLogger.and("the COMMENT and GRADE filters should leave it out");
+        assertNull(findSubmission(declaredActivityId, null, EActivityAssessmentType.COMMENT));
+        assertNull(findSubmission(declaredActivityId, null, EActivityAssessmentType.GRADE));
+
+        BddLogger.and("a filter on several types should keep it when one of them matches");
+        assertNotNull(
+            findSubmission(
+                declaredActivityId,
+                null,
+                EActivityAssessmentType.COMMENT,
+                EActivityAssessmentType.VALIDATION));
       }
 
       @Test
@@ -451,7 +497,16 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             .isForbidden();
       }
 
-      private JsonNode findSubmission(UUID declaredActivityId, EActivityAssessmentStatus status)
+      private List<String> assessmentTypesOf(JsonNode submission) {
+        var types = new ArrayList<String>();
+        submission.get("assessmentTypes").forEach(type -> types.add(type.asText()));
+        return types;
+      }
+
+      private JsonNode findSubmission(
+          UUID declaredActivityId,
+          EActivityAssessmentStatus status,
+          EActivityAssessmentType... types)
           throws Exception {
         String body =
             webTestClient
@@ -461,6 +516,9 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                       uriBuilder.path(ASSESSMENTS_PATH).queryParam("pageSize", 100);
                       if (status != null) {
                         uriBuilder.queryParam("statuses", status.name());
+                      }
+                      for (EActivityAssessmentType type : types) {
+                        uriBuilder.queryParam("types", type.name());
                       }
                       return uriBuilder.build();
                     })

@@ -23,6 +23,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityAssessmen
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityUnpublishedException;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAssessment;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityAssessmentType;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
@@ -102,12 +103,15 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
 
   @Override
   public PagedResult<DeclaredActivity> getDeclaredActivitiesToAssessBy(
-      Staff staff, List<EActivityAssessmentStatus> statuses, PageCriteria pageCriteria) {
+      Staff staff,
+      List<EActivityAssessmentStatus> statuses,
+      List<EActivityAssessmentType> types,
+      PageCriteria pageCriteria) {
     var graph =
         FetchGraph.init().add("student").fetch("user").root().add("activity").fetch("author");
 
     return declaredActivityRepository.findAllSubmittedForAssessmentBy(
-        staff.getId(), statuses, pageCriteria, graph);
+        staff.getId(), statuses, types, pageCriteria, graph);
   }
 
   @Override

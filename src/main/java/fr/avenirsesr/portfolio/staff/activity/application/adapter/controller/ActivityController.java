@@ -23,6 +23,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityStaffOverviewD
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityWithStudentStatusData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.InactiveStudentData;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityAssessmentType;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityAuthorizationService;
@@ -604,19 +605,26 @@ public class ActivityController {
                       schema = @Schema(ref = "#/components/schemas/EActivityAssessmentStatus")))
           @RequestParam(required = false)
           List<EActivityAssessmentStatus> statuses,
+      @Parameter(
+              array =
+                  @ArraySchema(
+                      schema = @Schema(ref = "#/components/schemas/EActivityAssessmentType")))
+          @RequestParam(required = false)
+          List<EActivityAssessmentType> types,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize) {
     var pageCriteria = new PageCriteria(page, pageSize);
     log.debug(
         "Received request to get the declared activities to assess by user [{}] (statuses={},"
-            + " page={}, pageSize={})",
+            + " types={}, page={}, pageSize={})",
         principal.getName(),
         statuses,
+        types,
         pageCriteria.page(),
         pageCriteria.pageSize());
 
     PagedResult<DeclaredActivityToAssessData> pagedResult =
-        activityService.getDeclaredActivitiesToAssess(statuses, pageCriteria);
+        activityService.getDeclaredActivitiesToAssess(statuses, types, pageCriteria);
 
     var response =
         new PagedResponse<>(
