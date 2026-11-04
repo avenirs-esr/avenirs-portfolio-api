@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper;
 
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.StaffCandidateDTO;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.StaffInfoDTO;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import org.mapstruct.Mapper;
@@ -12,5 +13,16 @@ public interface StaffInfoDtoMapper {
     }
     return new StaffInfoDTO(
         staff.getId(), staff.getUser().getFirstName(), staff.getUser().getLastName());
+  }
+
+  default StaffCandidateDTO toCandidateDTO(Staff staff) {
+    if (staff == null) {
+      return null;
+    }
+    return new StaffCandidateDTO(
+        staff.getId(),
+        staff.getUser().getFirstName(),
+        staff.getUser().getLastName(),
+        staff.getInstitutionEmail());
   }
 }

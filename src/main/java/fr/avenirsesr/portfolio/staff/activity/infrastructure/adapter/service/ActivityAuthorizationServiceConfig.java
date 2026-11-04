@@ -12,7 +12,9 @@ import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.Acti
 import fr.avenirsesr.portfolio.staff.activity.domain.service.ActivityAuthorizationServiceImpl;
 import fr.avenirsesr.portfolio.staff.activity.domain.service.ActivityEntityAuthorizationResolver;
 import fr.avenirsesr.portfolio.staff.activity.domain.service.ActivityUserEntityAuthorizationReader;
+import fr.avenirsesr.portfolio.user.domain.port.output.client.AccessClient;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StaffRepository;
+import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserPrincipalRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,6 +28,8 @@ public class ActivityAuthorizationServiceConfig {
   private final ActivityDraftRepository activityDraftRepository;
   private final StaffRepository staffRepository;
   private final LoggedInUserService loggedInUserService;
+  private final UserPrincipalRepository userPrincipalRepository;
+  private final AccessClient accessClient;
 
   @Bean
   public ActivityAuthorizationService activityAuthorizationService() {
@@ -35,7 +39,9 @@ public class ActivityAuthorizationServiceConfig {
         activityRepository,
         activityDraftRepository,
         staffRepository,
-        loggedInUserService);
+        loggedInUserService,
+        userPrincipalRepository,
+        accessClient);
   }
 
   @Bean

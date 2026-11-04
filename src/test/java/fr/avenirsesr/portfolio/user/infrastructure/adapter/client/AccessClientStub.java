@@ -1,5 +1,8 @@
 package fr.avenirsesr.portfolio.user.infrastructure.adapter.client;
 
+import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.user.domain.port.output.client.AccessClient;
 import fr.avenirsesr.portfolio.user.domain.port.output.client.StudentAccessScope;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserPrincipalRepository;
@@ -50,6 +53,23 @@ public class AccessClientStub implements AccessClient {
   @Override
   public StudentAccessScope getStudentScope(String eppn) {
     return studentScopeByEppn.getOrDefault(eppn, StudentAccessScope.empty());
+  }
+
+  @Override
+  public PagedResult<String> searchStaffEppns(
+      String eppn, String keyword, PageCriteria pageCriteria) {
+    List<String> matching =
+        staffAffiliationsByEppn.keySet().stream()
+            .filter(
+                candidate ->
+                    keyword == null || candidate.toLowerCase().contains(keyword.toLowerCase()))
+            .sorted()
+            .toList();
+    int from = Math.min(pageCriteria.page() * pageCriteria.pageSize(), matching.size());
+    int to = Math.min(from + pageCriteria.pageSize(), matching.size());
+    return new PagedResult<>(
+        matching.subList(from, to),
+        new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), matching.size()));
   }
 
   private String eppnOf(UUID userId) {

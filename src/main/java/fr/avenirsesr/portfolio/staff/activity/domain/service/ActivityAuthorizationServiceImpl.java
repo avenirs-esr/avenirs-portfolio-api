@@ -1,5 +1,8 @@
 package fr.avenirsesr.portfolio.staff.activity.domain.service;
 
+import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityAuthorizationDefinition;
@@ -16,13 +19,16 @@ import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.Acti
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.StaffAuthorizationRepository;
 import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStaffException;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
+import fr.avenirsesr.portfolio.user.domain.port.output.client.AccessClient;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StaffRepository;
+import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserPrincipalRepository;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -40,6 +46,8 @@ public class ActivityAuthorizationServiceImpl implements ActivityAuthorizationSe
   private final ActivityDraftRepository activityDraftRepository;
   private final StaffRepository staffRepository;
   private final LoggedInUserService loggedInUserService;
+  private final UserPrincipalRepository userPrincipalRepository;
+  private final AccessClient accessClient;
 
   // ── published activities ────────────────────────────────────────────
 
@@ -105,6 +113,15 @@ public class ActivityAuthorizationServiceImpl implements ActivityAuthorizationSe
         hasAny(
             activityAuthorizationRepository, loggedInUserService.getLoggedInStaff(), activityId));
     return activityAuthorizationRepository.findAllByActivityId(activityId);
+  }
+
+  @Override
+  public PagedResult<Staff> searchAuthorizationCandidates(
+      UUID activityId, String keyword, PageCriteria pageCriteria) {
+    requireActivity(activityId);
+    checkRight(
+        loggedInUserService.getLoggedInStaff(), activityId, EActivityRight.MANAGE_AUTHORIZATIONS);
+    return searchCandidates(keyword, pageCriteria);
   }
 
   @Override
@@ -188,6 +205,17 @@ public class ActivityAuthorizationServiceImpl implements ActivityAuthorizationSe
             loggedInUserService.getLoggedInStaff(),
             activityDraftId));
     return activityDraftAuthorizationRepository.findAllByActivityId(activityDraftId);
+  }
+
+  @Override
+  public PagedResult<Staff> searchDraftAuthorizationCandidates(
+      UUID activityDraftId, String keyword, PageCriteria pageCriteria) {
+    requireDraft(activityDraftId);
+    checkDraftRight(
+        loggedInUserService.getLoggedInStaff(),
+        activityDraftId,
+        EActivityRight.MANAGE_AUTHORIZATIONS);
+    return searchCandidates(keyword, pageCriteria);
   }
 
   @Override
@@ -419,6 +447,32 @@ public class ActivityAuthorizationServiceImpl implements ActivityAuthorizationSe
                         definition.staffId(), ignored -> EnumSet.noneOf(EActivityRight.class))
                     .addAll(definition.rights()));
     return rightsByStaffId;
+  }
+
+  private PagedResult<Staff> searchCandidates(String keyword, PageCriteria pageCriteria) {
+    var eppn =
+        userPrincipalRepository
+            .findEppnByUserId(loggedInUserService.getLoggedInStaff().getId())
+            .orElseThrow(UserNotAuthorizedException::new);
+    var eppns = accessClient.searchStaffEppns(eppn, keyword, pageCriteria);
+    if (eppns.content().isEmpty()) {
+      return new PagedResult<>(List.of(), eppns.pageInfo());
+    }
+
+    var usersByEppn = userPrincipalRepository.findAllByEppns(eppns.content());
+    var staffsById =
+        staffRepository
+            .findAllById(usersByEppn.values().stream().map(User::getId).toList())
+            .stream()
+            .collect(Collectors.toMap(Staff::getId, Function.identity()));
+    var candidates =
+        eppns.content().stream()
+            .map(usersByEppn::get)
+            .filter(Objects::nonNull)
+            .map(user -> staffsById.get(user.getId()))
+            .filter(Objects::nonNull)
+            .toList();
+    return new PagedResult<>(candidates, eppns.pageInfo());
   }
 
   private Map<UUID, Staff> findStaffsById(Set<UUID> staffIds) {
