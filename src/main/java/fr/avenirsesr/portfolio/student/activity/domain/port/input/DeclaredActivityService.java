@@ -65,7 +65,7 @@ public interface DeclaredActivityService {
 
   List<DeclaredActivity> findAllDeclaredActivitiesByIds(List<UUID> ids);
 
-  List<DeclaredActivity> findAllNotCompletedActivitiesByIds(List<UUID> ids);
+  List<DeclaredActivity> findAllEditableByIds(List<UUID> ids);
 
   boolean areDeclaredActivitiesUnlocked(List<UUID> declaredActivityIds);
 

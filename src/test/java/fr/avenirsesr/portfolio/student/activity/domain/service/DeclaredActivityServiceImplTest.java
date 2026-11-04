@@ -1138,12 +1138,12 @@ class DeclaredActivityServiceImplTest {
     UUID declaredActivityId = UUID.randomUUID();
     DeclaredActivity declaredActivity = assessableDeclaredActivity();
 
+    declaredActivity.setSubmittedAt(Instant.now());
+    declaredActivity.setAssessment(DeclaredActivityAssessment.requested(Instant.now()));
+
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
         .thenReturn(Optional.of(declaredActivity));
-    when(feedbackRepository.findDeclaredActivityIdsHavingActiveFeedbacks(
-            List.of(declaredActivity.getId())))
-        .thenReturn(List.of(declaredActivity.getId()));
 
     BddLogger.when("He submits it for assessment");
 
@@ -1151,6 +1151,8 @@ class DeclaredActivityServiceImplTest {
     assertThatThrownBy(() -> service.submitForAssessment(declaredActivityId))
         .isInstanceOf(DeclaredActivityLockedException.class);
     verify(declaredActivityRepository, never()).save(any());
+    verifyNoInteractions(notificationService);
+    verifyNoInteractions(activityAuthorizationService);
   }
 
   @Test
@@ -1347,9 +1349,16 @@ class DeclaredActivityServiceImplTest {
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(declaredActivity.getStudent()).thenReturn(student);
     when(declaredActivity.getActivity()).thenReturn(activity);
+
+    when(declaredActivity.getId()).thenReturn(activityId);
+    when(declaredActivity.isUnsubscribed()).thenReturn(false);
+    when(declaredActivity.getFinishedAt()).thenReturn(Optional.empty());
+    when(declaredActivity.getSubmittedAt()).thenReturn(Optional.empty());
     when(declaredActivity.getStartedAt()).thenReturn(Optional.empty());
 
     when(declaredActivityRepository.findById(activityId)).thenReturn(Optional.of(declaredActivity));
+    when(feedbackRepository.findDeclaredActivityIdsHavingActiveFeedbacks(List.of(activityId)))
+        .thenReturn(List.of());
 
     String reflection = "Nouvelle réflexion";
     BddLogger.and("Un body reflection contenant : " + reflection);
@@ -1583,12 +1592,14 @@ class DeclaredActivityServiceImplTest {
     UUID declaredActivityId = UUID.randomUUID();
     var student = mock(Student.class);
     var declaredActivity = mock(DeclaredActivity.class);
-
+    UUID activityId = UUID.randomUUID();
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(declaredActivityRepository.findById(declaredActivityId))
         .thenReturn(Optional.of(declaredActivity));
     when(declaredActivity.getStudent()).thenReturn(student);
     when(declaredActivity.getCreatedAt()).thenReturn(Instant.now());
+
+    mockDeclaredActivity(declaredActivity);
 
     LocalDate startDate = LocalDate.now().plusDays(1);
     LocalDate endDate = LocalDate.now().plusDays(10);
@@ -1611,11 +1622,13 @@ class DeclaredActivityServiceImplTest {
     UUID declaredActivityId = UUID.randomUUID();
     var student = mock(Student.class);
     var declaredActivity = mock(DeclaredActivity.class);
-
+    UUID activityId = UUID.randomUUID();
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(declaredActivityRepository.findById(declaredActivityId))
         .thenReturn(Optional.of(declaredActivity));
     when(declaredActivity.getStudent()).thenReturn(student);
+
+    mockDeclaredActivity(declaredActivity);
 
     BddLogger.when("The service is called without any period field");
     declaredActivityService.updateDeclaredActivity(declaredActivityId, null, null, null);
@@ -1624,6 +1637,15 @@ class DeclaredActivityServiceImplTest {
     verify(declaredActivity, never()).setStartDate(any());
     verify(declaredActivity, never()).setEndDate(any());
     verify(declaredActivityRepository).save(declaredActivity);
+  }
+
+  private void mockDeclaredActivity(DeclaredActivity declaredActivity) {
+    UUID activityId = UUID.randomUUID();
+    when(declaredActivity.getId()).thenReturn(activityId);
+    when(declaredActivity.isUnsubscribed()).thenReturn(false);
+    when(declaredActivity.getFinishedAt()).thenReturn(Optional.empty());
+    when(declaredActivity.getSubmittedAt()).thenReturn(Optional.empty());
+    when(declaredActivity.getStartedAt()).thenReturn(Optional.empty());
   }
 
   @Test
@@ -1637,6 +1659,8 @@ class DeclaredActivityServiceImplTest {
     when(declaredActivityRepository.findById(declaredActivityId))
         .thenReturn(Optional.of(declaredActivity));
     when(declaredActivity.getStudent()).thenReturn(student);
+
+    mockDeclaredActivity(declaredActivity);
 
     BddLogger.when("The service is called with valorized set to true");
     declaredActivityService.updateDeclaredActivity(declaredActivityId, null, null, true);
@@ -1652,11 +1676,14 @@ class DeclaredActivityServiceImplTest {
     UUID declaredActivityId = UUID.randomUUID();
     var student = mock(Student.class);
     var declaredActivity = mock(DeclaredActivity.class);
+    UUID activityId = UUID.randomUUID();
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(declaredActivityRepository.findById(declaredActivityId))
         .thenReturn(Optional.of(declaredActivity));
     when(declaredActivity.getStudent()).thenReturn(student);
+
+    mockDeclaredActivity(declaredActivity);
 
     BddLogger.when("The service is called without the valorized field");
     declaredActivityService.updateDeclaredActivity(declaredActivityId, null, null, null);
@@ -1671,12 +1698,14 @@ class DeclaredActivityServiceImplTest {
     UUID declaredActivityId = UUID.randomUUID();
     var student = mock(Student.class);
     var declaredActivity = mock(DeclaredActivity.class);
-
+    UUID activityId = UUID.randomUUID();
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(declaredActivityRepository.findById(declaredActivityId))
         .thenReturn(Optional.of(declaredActivity));
     when(declaredActivity.getStudent()).thenReturn(student);
     when(declaredActivity.getCreatedAt()).thenReturn(Instant.now());
+
+    mockDeclaredActivity(declaredActivity);
 
     LocalDate startDate = LocalDate.now().plusDays(10);
     LocalDate endDate = LocalDate.now().plusDays(1);
@@ -1696,12 +1725,14 @@ class DeclaredActivityServiceImplTest {
     UUID declaredActivityId = UUID.randomUUID();
     var student = mock(Student.class);
     var declaredActivity = mock(DeclaredActivity.class);
-
+    UUID activityId = UUID.randomUUID();
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(declaredActivityRepository.findById(declaredActivityId))
         .thenReturn(Optional.of(declaredActivity));
     when(declaredActivity.getStudent()).thenReturn(student);
     when(declaredActivity.getCreatedAt()).thenReturn(Instant.now());
+
+    mockDeclaredActivity(declaredActivity);
 
     LocalDate startDate = LocalDate.now().minusDays(1);
     LocalDate endDate = startDate.plusDays(5);
@@ -1766,6 +1797,27 @@ class DeclaredActivityServiceImplTest {
     BddLogger.then("A UserNotAuthorizedException is thrown and nothing is saved");
     assertThatThrownBy(() -> service.updateReflection(declaredActivityId, "Ma réflexion"))
         .isInstanceOf(UserNotAuthorizedException.class);
+
+    verify(declaredActivityRepository, never()).save(any());
+  }
+
+  @Test
+  void
+      updateReflection_should_throw_DeclaredActivityLockedException_when_reflection_is_submitted() {
+    BddLogger.given(
+        "A logged-in student and a declared activity where status is ask for submitted");
+
+    UUID declaredActivityId = UUID.randomUUID();
+    DeclaredActivity declaredActivity = assessableDeclaredActivity();
+    declaredActivity.setSubmittedAt(Instant.now());
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(declaredActivityId))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("He tries to update the reflection when declared activity is submitted");
+
+    assertThatThrownBy(() -> service.updateReflection(declaredActivityId, "Ma réflexion"))
+        .isInstanceOf(DeclaredActivityLockedException.class);
 
     verify(declaredActivityRepository, never()).save(any());
   }

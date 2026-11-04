@@ -260,7 +260,7 @@ class DeclaredActivityAssociationStrategyTest {
     var association =
         Association.create(declaredActivityId, traceId, EAssociationType.DECLARED_ACTIVITY_TRACE);
 
-    when(declaredActivityService.findAllNotCompletedActivitiesByIds(List.of(declaredActivityId)))
+    when(declaredActivityService.findAllEditableByIds(List.of(declaredActivityId)))
         .thenReturn(List.of(declaredActivity));
     when(declaredActivityService.getDeclaredActivityStatus(List.of(declaredActivity)))
         .thenReturn(Map.of(declaredActivity, EDeclaredActivityStatus.IN_PROGRESS));
