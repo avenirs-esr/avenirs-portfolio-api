@@ -13,8 +13,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 
-<span class="fc" id="L17">@Slf4j</span>
+<span class="fc" id="L18">@Slf4j</span>
 @Component
 public class AccessClientImpl implements AccessClient {
 
@@ -26,62 +27,62 @@ public class AccessClientImpl implements AccessClient {
   @Value(&quot;${avenirs.back-office.access.endpoint}&quot;)
   private String accessEndpoint;
 
-<span class="fc" id="L29">  public AccessClientImpl(WebClient webClient) {</span>
-<span class="fc" id="L30">    this.webClient = webClient;</span>
-<span class="fc" id="L31">  }</span>
+<span class="fc" id="L30">  public AccessClientImpl(WebClient webClient) {</span>
+<span class="fc" id="L31">    this.webClient = webClient;</span>
+<span class="fc" id="L32">  }</span>
 
   @Override
   public boolean staffHasAccess(
       String eppn, List&lt;UUID&gt; targetInstitutionIds, List&lt;UUID&gt; targetGroupIds) {
     try {
-<span class="fc" id="L37">      log.debug(</span>
+<span class="fc" id="L38">      log.debug(</span>
           &quot;Checking staff access for eppn {} to institutions {} / groups {} against back-office&quot;,
           eppn,
           targetInstitutionIds,
           targetGroupIds);
-<span class="fc" id="L42">      return webClient</span>
-<span class="fc" id="L43">          .post()</span>
-<span class="fc" id="L44">          .uri(accessEndpoint + &quot;/staff/check&quot;)</span>
-<span class="fc" id="L45">          .header(AvenirsSecurityHeaders.API_KEY, apiKey)</span>
-<span class="fc" id="L46">          .bodyValue(new StaffAccessCheckRequest(eppn, targetInstitutionIds, targetGroupIds))</span>
-<span class="fc" id="L47">          .retrieve()</span>
-<span class="fc" id="L48">          .bodyToMono(Boolean.class)</span>
-<span class="fc" id="L49">          .defaultIfEmpty(false)</span>
-<span class="fc" id="L50">          .block();</span>
-<span class="fc" id="L51">    } catch (Exception e) {</span>
-<span class="fc" id="L52">      log.error(</span>
+<span class="fc" id="L43">      return webClient</span>
+<span class="fc" id="L44">          .post()</span>
+<span class="fc" id="L45">          .uri(accessEndpoint + &quot;/staff/check&quot;)</span>
+<span class="fc" id="L46">          .header(AvenirsSecurityHeaders.API_KEY, apiKey)</span>
+<span class="fc" id="L47">          .bodyValue(new StaffAccessCheckRequest(eppn, targetInstitutionIds, targetGroupIds))</span>
+<span class="fc" id="L48">          .retrieve()</span>
+<span class="fc" id="L49">          .bodyToMono(Boolean.class)</span>
+<span class="fc" id="L50">          .defaultIfEmpty(false)</span>
+<span class="fc" id="L51">          .block();</span>
+<span class="fc" id="L52">    } catch (Exception e) {</span>
+<span class="fc" id="L53">      log.error(</span>
           &quot;Failed to check staff access for eppn {} at '{}'. Error: {}&quot;,
           eppn,
           accessEndpoint,
-<span class="fc" id="L56">          e.getMessage());</span>
-<span class="fc" id="L57">      log.debug(&quot;Full error details:&quot;, e);</span>
-<span class="fc" id="L58">      return false;</span>
+<span class="fc" id="L57">          e.getMessage());</span>
+<span class="fc" id="L58">      log.debug(&quot;Full error details:&quot;, e);</span>
+<span class="fc" id="L59">      return false;</span>
     }
   }
 
   @Override
   public StudentAccessScope getStudentScope(String eppn) {
     try {
-<span class="fc" id="L65">      log.debug(&quot;Resolving student scope for eppn {} from back-office&quot;, eppn);</span>
-<span class="fc" id="L66">      StudentScopeResponse response =</span>
+<span class="fc" id="L66">      log.debug(&quot;Resolving student scope for eppn {} from back-office&quot;, eppn);</span>
+<span class="fc" id="L67">      StudentScopeResponse response =</span>
           webClient
-<span class="fc" id="L68">              .get()</span>
-<span class="fc" id="L69">              .uri(accessEndpoint + &quot;/student/&quot; + eppn + &quot;/scope&quot;)</span>
-<span class="fc" id="L70">              .header(AvenirsSecurityHeaders.API_KEY, apiKey)</span>
-<span class="fc" id="L71">              .retrieve()</span>
-<span class="fc" id="L72">              .bodyToMono(StudentScopeResponse.class)</span>
-<span class="fc" id="L73">              .block();</span>
-<span class="pc bpc" id="L74" title="1 of 2 branches missed.">      return response == null</span>
-<span class="nc" id="L75">          ? StudentAccessScope.empty()</span>
-<span class="fc" id="L76">          : new StudentAccessScope(response.institutionIds(), response.groupIds());</span>
-<span class="fc" id="L77">    } catch (Exception e) {</span>
-<span class="fc" id="L78">      log.error(</span>
+<span class="fc" id="L69">              .get()</span>
+<span class="fc" id="L70">              .uri(accessEndpoint + &quot;/student/&quot; + eppn + &quot;/scope&quot;)</span>
+<span class="fc" id="L71">              .header(AvenirsSecurityHeaders.API_KEY, apiKey)</span>
+<span class="fc" id="L72">              .retrieve()</span>
+<span class="fc" id="L73">              .bodyToMono(StudentScopeResponse.class)</span>
+<span class="fc" id="L74">              .block();</span>
+<span class="pc bpc" id="L75" title="1 of 2 branches missed.">      return response == null</span>
+<span class="nc" id="L76">          ? StudentAccessScope.empty()</span>
+<span class="fc" id="L77">          : new StudentAccessScope(response.institutionIds(), response.groupIds());</span>
+<span class="fc" id="L78">    } catch (Exception e) {</span>
+<span class="fc" id="L79">      log.error(</span>
           &quot;Failed to resolve student scope for eppn {} at '{}'. Error: {}&quot;,
           eppn,
           accessEndpoint,
-<span class="fc" id="L82">          e.getMessage());</span>
-<span class="fc" id="L83">      log.debug(&quot;Full error details:&quot;, e);</span>
-<span class="fc" id="L84">      return StudentAccessScope.empty();</span>
+<span class="fc" id="L83">          e.getMessage());</span>
+<span class="fc" id="L84">      log.debug(&quot;Full error details:&quot;, e);</span>
+<span class="fc" id="L85">      return StudentAccessScope.empty();</span>
     }
   }
 
@@ -89,23 +90,22 @@ public class AccessClientImpl implements AccessClient {
   public PagedResult&lt;String&gt; searchStaffEppns(
       String eppn, String keyword, PageCriteria pageCriteria) {
     try {
-<span class="nc" id="L92">      log.debug(</span>
+<span class="nc" id="L93">      log.debug(</span>
           &quot;Searching staff reachable by eppn {} (keyword: {}) {} from back-office&quot;,
           eppn,
           keyword,
           pageCriteria);
-<span class="nc" id="L97">      StaffSearchResponse response =</span>
+<span class="nc" id="L98">      StaffSearchResponse response =</span>
           webClient
-<span class="nc" id="L99">              .get()</span>
-<span class="nc" id="L100">              .uri(</span>
-                  uriBuilder -&gt;
-<span class="nc" id="L102">                      uriBuilder</span>
-<span class="nc" id="L103">                          .path(accessEndpoint + &quot;/staff/search&quot;)</span>
-<span class="nc" id="L104">                          .queryParam(&quot;eppn&quot;, eppn)</span>
-<span class="nc" id="L105">                          .queryParamIfPresent(&quot;keyword&quot;, Optional.ofNullable(keyword))</span>
-<span class="nc" id="L106">                          .queryParam(&quot;page&quot;, pageCriteria.page())</span>
-<span class="nc" id="L107">                          .queryParam(&quot;pageSize&quot;, pageCriteria.pageSize())</span>
-<span class="nc" id="L108">                          .build())</span>
+<span class="nc" id="L100">              .get()</span>
+<span class="nc" id="L101">              .uri(</span>
+<span class="nc" id="L102">                  UriComponentsBuilder.fromUriString(accessEndpoint + &quot;/staff/search&quot;)</span>
+<span class="nc" id="L103">                      .queryParam(&quot;eppn&quot;, eppn)</span>
+<span class="nc" id="L104">                      .queryParamIfPresent(&quot;keyword&quot;, Optional.ofNullable(keyword))</span>
+<span class="nc" id="L105">                      .queryParam(&quot;page&quot;, pageCriteria.page())</span>
+<span class="nc" id="L106">                      .queryParam(&quot;pageSize&quot;, pageCriteria.pageSize())</span>
+<span class="nc" id="L107">                      .build()</span>
+<span class="nc" id="L108">                      .toUri())</span>
 <span class="nc" id="L109">              .header(AvenirsSecurityHeaders.API_KEY, apiKey)</span>
 <span class="nc" id="L110">              .retrieve()</span>
 <span class="nc" id="L111">              .bodyToMono(StaffSearchResponse.class)</span>
