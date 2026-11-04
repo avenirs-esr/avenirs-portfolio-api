@@ -2,6 +2,9 @@ package fr.avenirsesr.portfolio.user.infrastructure.adapter.client;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.AvenirsSecurityHeaders;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.user.domain.port.output.client.StudentAccessScope;
@@ -115,6 +118,63 @@ class AccessClientImplTest {
     assertThat(request.getPath()).isEqualTo("/back-office/access/student/" + EPPN + "/scope");
     assertThat(request.getMethod()).isEqualTo("GET");
     assertThat(request.getHeader(AvenirsSecurityHeaders.API_KEY)).isEqualTo("test-key");
+  }
+
+  @Test
+  void shouldReturnTheStaffEppnsSearchedByTheBackOffice() throws InterruptedException {
+    BddLogger.given("a back-office returning a page of the staffs reachable by the eppn");
+    mockWebServer.enqueue(
+        new MockResponse()
+            .setBody(
+                "{\"data\":[{\"eppn\":\"a@university.com\",\"firstName\":\"A\",\"lastName\":\"B\"},"
+                    + "{\"eppn\":\"c@university.com\",\"firstName\":\"C\",\"lastName\":\"D\"}],"
+                    + "\"page\":{\"page\":1,\"pageSize\":2,\"totalElements\":5}}")
+            .addHeader("Content-Type", "application/json"));
+
+    BddLogger.when("searching the staff eppns with a keyword");
+    PagedResult<String> result = client.searchStaffEppns(EPPN, "dupont", new PageCriteria(1, 2));
+
+    BddLogger.then("the eppns and the page are forwarded, with the search criteria sent");
+    assertThat(result.content()).containsExactly("a@university.com", "c@university.com");
+    assertThat(result.pageInfo()).isEqualTo(new PageInfo(1, 2, 5));
+
+    RecordedRequest request = mockWebServer.takeRequest();
+    assertThat(request.getMethod()).isEqualTo("GET");
+    assertThat(request.getRequestUrl().encodedPath()).isEqualTo("/back-office/access/staff/search");
+    assertThat(request.getRequestUrl().queryParameter("eppn")).isEqualTo(EPPN);
+    assertThat(request.getRequestUrl().queryParameter("keyword")).isEqualTo("dupont");
+    assertThat(request.getRequestUrl().queryParameter("page")).isEqualTo("1");
+    assertThat(request.getRequestUrl().queryParameter("pageSize")).isEqualTo("2");
+    assertThat(request.getHeader(AvenirsSecurityHeaders.API_KEY)).isEqualTo("test-key");
+  }
+
+  @Test
+  void shouldNotSendTheKeyword_whenSearchingStaffEppnsWithoutKeyword() throws InterruptedException {
+    BddLogger.given("a back-office returning an empty page");
+    mockWebServer.enqueue(
+        new MockResponse()
+            .setBody("{\"data\":[],\"page\":{\"page\":0,\"pageSize\":8,\"totalElements\":0}}")
+            .addHeader("Content-Type", "application/json"));
+
+    BddLogger.when("searching the staff eppns without keyword");
+    PagedResult<String> result = client.searchStaffEppns(EPPN, null, new PageCriteria(0, 8));
+
+    BddLogger.then("the keyword is not part of the request");
+    assertThat(result.content()).isEmpty();
+    assertThat(mockWebServer.takeRequest().getRequestUrl().queryParameter("keyword")).isNull();
+  }
+
+  @Test
+  void shouldReturnEmptyPage_whenSearchingStaffEppnsFails() {
+    BddLogger.given("a back-office answering 500 to the staff search");
+    mockWebServer.enqueue(new MockResponse().setResponseCode(500));
+
+    BddLogger.when("searching the staff eppns");
+    PagedResult<String> result = client.searchStaffEppns(EPPN, "dupont", new PageCriteria(2, 8));
+
+    BddLogger.then("an empty page is returned and keeps the requested paging");
+    assertThat(result.content()).isEmpty();
+    assertThat(result.pageInfo()).isEqualTo(new PageInfo(2, 8, 0));
   }
 
   @Test

@@ -9,6 +9,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
@@ -24,11 +27,15 @@ import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.Acti
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityRepository;
 import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStaffException;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
+import fr.avenirsesr.portfolio.user.domain.port.output.client.AccessClient;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StaffRepository;
+import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserPrincipalRepository;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StaffFixture;
+import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -50,6 +57,8 @@ class ActivityAuthorizationServiceImplTest {
   @Mock private ActivityDraftRepository activityDraftRepository;
   @Mock private StaffRepository staffRepository;
   @Mock private LoggedInUserService loggedInUserService;
+  @Mock private UserPrincipalRepository userPrincipalRepository;
+  @Mock private AccessClient accessClient;
 
   @InjectMocks private ActivityAuthorizationServiceImpl service;
 
@@ -325,6 +334,145 @@ class ActivityAuthorizationServiceImplTest {
 
       assertThatThrownBy(() -> service.getActivityAuthorizations(activityId))
           .isInstanceOf(UserNotAuthorizedException.class);
+    }
+  }
+
+  @Nested
+  class WhenSearchingTheAuthorizationCandidates {
+
+    private static final String EPPN = "manager@university.com";
+    private static final String KEYWORD = "dupont";
+
+    private final PageCriteria pageCriteria = new PageCriteria(0, 8);
+
+    @BeforeEach
+    void setupWhen() {
+      BddLogger.given("an activity authorization service");
+      BddLogger.when("searching the staffs that can be authorized on an activity or its draft");
+      lenient().when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+    }
+
+    private void givenSearchedEppns(List<String> eppns, PageInfo pageInfo) {
+      when(userPrincipalRepository.findEppnByUserId(staff.getId())).thenReturn(Optional.of(EPPN));
+      when(accessClient.searchStaffEppns(EPPN, KEYWORD, pageCriteria))
+          .thenReturn(new PagedResult<>(eppns, pageInfo));
+    }
+
+    @Test
+    void thenTheStaffsResolvedFromTheEppnsShouldBeReturnedInTheSearchOrder() {
+      BddLogger.then("unknown accounts and non staff users should be left out");
+      var first = StaffFixture.create().toModel();
+      var second = StaffFixture.create().toModel();
+      var notStaff = UserFixture.create().toModel();
+      var pageInfo = new PageInfo(0, 8, 4);
+      when(activityRepository.existsById(activityId)).thenReturn(true);
+      givenActivityAuthorization(authorizationOf(staff, EActivityRight.MANAGE_AUTHORIZATIONS));
+      var eppns = List.of("second", "unknown", "not-staff", "first");
+      givenSearchedEppns(eppns, pageInfo);
+      when(userPrincipalRepository.findAllByEppns(eppns))
+          .thenReturn(
+              Map.of(
+                  "first", first.getUser(),
+                  "second", second.getUser(),
+                  "not-staff", notStaff));
+      when(staffRepository.findAllById(anyList())).thenReturn(List.of(first, second));
+
+      var result = service.searchAuthorizationCandidates(activityId, KEYWORD, pageCriteria);
+
+      assertThat(result.content()).containsExactly(second, first);
+      assertThat(result.pageInfo()).isEqualTo(pageInfo);
+    }
+
+    @Test
+    void thenTheDraftCandidatesShouldBeReturnedToAStaffManagingTheAuthorizations() {
+      BddLogger.then("the staffs resolved from the eppns should be returned");
+      var candidate = StaffFixture.create().toModel();
+      var pageInfo = new PageInfo(0, 8, 1);
+      when(activityDraftRepository.existsById(activityId)).thenReturn(true);
+      givenDraftAuthorization(authorizationOf(staff, EActivityRight.MANAGE_AUTHORIZATIONS));
+      givenSearchedEppns(List.of("candidate"), pageInfo);
+      when(userPrincipalRepository.findAllByEppns(List.of("candidate")))
+          .thenReturn(Map.of("candidate", candidate.getUser()));
+      when(staffRepository.findAllById(anyList())).thenReturn(List.of(candidate));
+
+      var result = service.searchDraftAuthorizationCandidates(activityId, KEYWORD, pageCriteria);
+
+      assertThat(result.content()).containsExactly(candidate);
+      assertThat(result.pageInfo()).isEqualTo(pageInfo);
+      verify(activityRepository, never()).existsById(any());
+    }
+
+    @Test
+    void thenNothingShouldBeResolvedWhenTheSearchFindsNoEppn() {
+      BddLogger.then("an empty page should be returned without any account lookup");
+      var pageInfo = new PageInfo(0, 8, 0);
+      when(activityRepository.existsById(activityId)).thenReturn(true);
+      givenActivityAuthorization(authorizationOf(staff, EActivityRight.MANAGE_AUTHORIZATIONS));
+      givenSearchedEppns(List.of(), pageInfo);
+
+      var result = service.searchAuthorizationCandidates(activityId, KEYWORD, pageCriteria);
+
+      assertThat(result.content()).isEmpty();
+      assertThat(result.pageInfo()).isEqualTo(pageInfo);
+      verify(userPrincipalRepository, never()).findAllByEppns(any());
+      verify(staffRepository, never()).findAllById(any());
+    }
+
+    @Test
+    void thenItShouldThrowWhenTheLoggedInStaffHasNoEppn() {
+      BddLogger.then("a UserNotAuthorizedException should be thrown");
+      when(activityRepository.existsById(activityId)).thenReturn(true);
+      givenActivityAuthorization(authorizationOf(staff, EActivityRight.MANAGE_AUTHORIZATIONS));
+      when(userPrincipalRepository.findEppnByUserId(staff.getId())).thenReturn(Optional.empty());
+
+      assertThatThrownBy(
+              () -> service.searchAuthorizationCandidates(activityId, KEYWORD, pageCriteria))
+          .isInstanceOf(UserNotAuthorizedException.class);
+      verify(accessClient, never()).searchStaffEppns(any(), any(), any());
+    }
+
+    @Test
+    void thenItShouldThrowWhenTheActivityDoesNotExist() {
+      BddLogger.then("an ActivityNotFoundException should be thrown");
+      when(activityRepository.existsById(activityId)).thenReturn(false);
+
+      assertThatThrownBy(
+              () -> service.searchAuthorizationCandidates(activityId, KEYWORD, pageCriteria))
+          .isInstanceOf(ActivityNotFoundException.class);
+    }
+
+    @Test
+    void thenItShouldThrowWhenTheDraftDoesNotExist() {
+      BddLogger.then("an ActivityDraftNotFoundException should be thrown");
+      when(activityDraftRepository.existsById(activityId)).thenReturn(false);
+
+      assertThatThrownBy(
+              () -> service.searchDraftAuthorizationCandidates(activityId, KEYWORD, pageCriteria))
+          .isInstanceOf(ActivityDraftNotFoundException.class);
+    }
+
+    @Test
+    void thenItShouldThrowWhenTheStaffDoesNotManageTheActivityAuthorizations() {
+      BddLogger.then("a UserNotAuthorizedException should be thrown");
+      when(activityRepository.existsById(activityId)).thenReturn(true);
+      givenActivityAuthorization(authorizationOf(staff, EActivityRight.FEEDBACK));
+
+      assertThatThrownBy(
+              () -> service.searchAuthorizationCandidates(activityId, KEYWORD, pageCriteria))
+          .isInstanceOf(UserNotAuthorizedException.class);
+      verify(accessClient, never()).searchStaffEppns(any(), any(), any());
+    }
+
+    @Test
+    void thenItShouldThrowWhenTheStaffDoesNotManageTheDraftAuthorizations() {
+      BddLogger.then("a UserNotAuthorizedException should be thrown");
+      when(activityDraftRepository.existsById(activityId)).thenReturn(true);
+      givenDraftAuthorization(authorizationOf(staff, EActivityRight.FEEDBACK));
+
+      assertThatThrownBy(
+              () -> service.searchDraftAuthorizationCandidates(activityId, KEYWORD, pageCriteria))
+          .isInstanceOf(UserNotAuthorizedException.class);
+      verify(accessClient, never()).searchStaffEppns(any(), any(), any());
     }
   }
 

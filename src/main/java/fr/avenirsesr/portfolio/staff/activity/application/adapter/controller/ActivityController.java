@@ -33,6 +33,7 @@ import fr.avenirsesr.portfolio.student.activity.application.adapter.mapper.Decla
 import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityToAssessData;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EActivityAssessmentStatus;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
+import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -66,6 +67,7 @@ public class ActivityController {
   private final ActivityFeedbacksPreviewMapper activityFeedbacksPreviewMapper;
   private final InactiveStudentDtoMapper inactiveStudentDtoMapper;
   private final ActivityAuthorizationDtoMapper activityAuthorizationDtoMapper;
+  private final StaffInfoDtoMapper staffInfoDtoMapper;
   private final DeclaredActivityToAssessDTOMapper declaredActivityToAssessDTOMapper;
   private final FileDTOMapper fileDTOMapper;
 
@@ -535,6 +537,43 @@ public class ActivityController {
             ? activityAuthorizationService.getDraftAuthorizations(activityId)
             : activityAuthorizationService.getActivityAuthorizations(activityId);
     return ResponseEntity.ok(activityAuthorizationDtoMapper.toDTOs(authorizations));
+  }
+
+  @PreAuthorize("hasAuthority('activity:read:contextual')")
+  @GetMapping("/{activityStatus}/{activityId}/authorizations/candidates")
+  public ResponseEntity<PagedResponse<StaffCandidateDTO>> searchActivityAuthorizationCandidates(
+      Principal principal,
+      @PathVariable
+          @Parameter(
+              name = "activityStatus",
+              in = ParameterIn.PATH,
+              required = true,
+              schema = @Schema(ref = "#/components/schemas/EActivityStatus"))
+          EActivityStatus activityStatus,
+      @PathVariable UUID activityId,
+      @RequestParam(required = false) String keyword,
+      @RequestParam(required = false) Integer page,
+      @RequestParam(required = false) Integer pageSize) {
+    var pageCriteria = new PageCriteria(page, pageSize);
+    log.debug(
+        "Received request to search the {} authorization candidates of activity [{}] by user [{}]"
+            + " (page= {}, pageSize= {})",
+        activityStatus,
+        activityId,
+        principal.getName(),
+        pageCriteria.page(),
+        pageCriteria.pageSize());
+
+    PagedResult<Staff> candidates =
+        activityStatus == EActivityStatus.DRAFT
+            ? activityAuthorizationService.searchDraftAuthorizationCandidates(
+                activityId, keyword, pageCriteria)
+            : activityAuthorizationService.searchAuthorizationCandidates(
+                activityId, keyword, pageCriteria);
+    return ResponseEntity.ok(
+        new PagedResponse<>(
+            candidates.content().stream().map(staffInfoDtoMapper::toCandidateDTO).toList(),
+            PageInfoDTO.fromDomain(candidates.pageInfo())));
   }
 
   @PreAuthorize("hasAuthority('activity:update')")

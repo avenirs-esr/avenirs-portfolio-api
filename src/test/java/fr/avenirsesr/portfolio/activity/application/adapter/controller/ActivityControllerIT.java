@@ -27,6 +27,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
@@ -3460,6 +3461,107 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       }
 
       @Test
+      void thenAManagerShouldSearchTheCandidatesPageByPage() throws Exception {
+        BddLogger.and("given a draft created by the staff and two searchable staffs");
+        UUID draftId = createDraftAndGetId("Brouillon avec candidats");
+        accessClientStub.setStaffAffiliations(STAFF_ID, List.of(), List.of());
+        accessClientStub.setStaffAffiliations(ANOTHER_STAFF_ID, List.of(), List.of());
+
+        BddLogger.then(
+            "the first page should hold a single candidate and describe the whole result");
+        JsonNode firstPage = searchCandidatesAsStaff("DRAFT", draftId, null, 0, 1);
+
+        assertEquals(1, firstPage.get("data").size());
+        assertTrue(firstPage.get("data").get(0).hasNonNull("firstName"));
+        assertTrue(firstPage.get("data").get(0).hasNonNull("lastName"));
+        assertEquals(0, firstPage.get("page").get("page").asInt());
+        assertEquals(1, firstPage.get("page").get("pageSize").asInt());
+        long totalElements = firstPage.get("page").get("totalElements").asLong();
+        assertTrue(totalElements >= 2);
+        assertEquals(totalElements, firstPage.get("page").get("totalPages").asLong());
+
+        BddLogger.and("the second page should hold another candidate");
+        JsonNode secondPage = searchCandidatesAsStaff("DRAFT", draftId, null, 1, 1);
+
+        assertEquals(1, secondPage.get("data").size());
+        assertNotEquals(
+            firstPage.get("data").get(0).get("id").asText(),
+            secondPage.get("data").get(0).get("id").asText());
+        assertEquals(totalElements, secondPage.get("page").get("totalElements").asLong());
+      }
+
+      @Test
+      void thenTheCandidatesShouldBeSearchableOnAPublishedActivity() throws Exception {
+        BddLogger.and("given a published activity and a searchable staff");
+        UUID activityId = publishNewActivity("Activité avec candidats");
+        accessClientStub.setStaffAffiliations(ANOTHER_STAFF_ID, List.of(), List.of());
+
+        BddLogger.then("the other staff should be proposed to the manager");
+        JsonNode result = searchCandidatesAsStaff("PUBLISHED", activityId, null, null, null);
+
+        boolean proposed = false;
+        for (JsonNode candidate : result.get("data")) {
+          proposed |= ANOTHER_STAFF_ID.toString().equals(candidate.get("id").asText());
+        }
+        assertTrue(proposed);
+      }
+
+      @Test
+      void thenNoCandidateShouldBeReturnedWhenTheKeywordMatchesNobody() throws Exception {
+        BddLogger.and("given a draft created by the staff");
+        UUID draftId = createDraftAndGetId("Brouillon sans candidat");
+        accessClientStub.setStaffAffiliations(ANOTHER_STAFF_ID, List.of(), List.of());
+
+        BddLogger.then("an unmatched keyword should return an empty page");
+        JsonNode result = searchCandidatesAsStaff("DRAFT", draftId, "no-such-staff", null, null);
+
+        assertEquals(0, result.get("data").size());
+        assertEquals(0, result.get("page").get("totalElements").asLong());
+      }
+
+      @Test
+      void thenAStaffWithoutTheManageAuthorizationsRightShouldNotSearchCandidates()
+          throws Exception {
+        BddLogger.and("given a draft shared with another staff who can only give feedback");
+        UUID draftId = createDraftAndGetId("Brouillon partagé en lecture");
+        defineAuthorizationsAsStaff("DRAFT", draftId, leaderAndReviewer(EActivityRight.FEEDBACK));
+
+        BddLogger.then("that staff can read the authorizations but not search candidates");
+        webTestClient
+            .get()
+            .uri(AUTHORIZATIONS_PATH, "DRAFT", draftId)
+            .headers(ActivityControllerIT.this::addOtherStaffHeaders)
+            .exchange()
+            .expectStatus()
+            .isOk();
+        webTestClient
+            .get()
+            .uri(AUTHORIZATIONS_PATH + "/candidates", "DRAFT", draftId)
+            .headers(ActivityControllerIT.this::addOtherStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isForbidden();
+      }
+
+      @Test
+      void thenSearchingCandidatesShouldReturn404WhenTheDraftDoesNotExist() {
+        BddLogger.and("given an unknown draft id");
+        BddLogger.then("it should return 404 with the draft error code");
+        webTestClient
+            .get()
+            .uri(AUTHORIZATIONS_PATH + "/candidates", "DRAFT", UUID.randomUUID())
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isNotFound()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("ACTIVITY_DRAFT_NOT_FOUND");
+      }
+
+      @Test
       void thenItShouldReturn403WhenTheStaffHoldsNoRight() throws Exception {
         BddLogger.and("given a draft created by the staff");
         UUID draftId = createDraftAndGetId("Brouillon privé");
@@ -4729,6 +4831,31 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         webTestClient
             .get()
             .uri(AUTHORIZATIONS_PATH, activityStatus, activityId)
+            .headers(this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+    return objectMapper.readTree(body);
+  }
+
+  private JsonNode searchCandidatesAsStaff(
+      String activityStatus, UUID activityId, String keyword, Integer page, Integer pageSize)
+      throws Exception {
+    String body =
+        webTestClient
+            .get()
+            .uri(
+                uriBuilder ->
+                    uriBuilder
+                        .path(AUTHORIZATIONS_PATH + "/candidates")
+                        .queryParamIfPresent("keyword", Optional.ofNullable(keyword))
+                        .queryParamIfPresent("page", Optional.ofNullable(page))
+                        .queryParamIfPresent("pageSize", Optional.ofNullable(pageSize))
+                        .build(activityStatus, activityId))
             .headers(this::addStaffHeaders)
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
