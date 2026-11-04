@@ -30,16 +30,16 @@ public class UserPrincipalDatabaseRepository implements UserPrincipalRepository 
 
   @Override
   public Map&lt;String, User&gt; findAllByEppns(Collection&lt;String&gt; eppns) {
-<span class="nc bnc" id="L33" title="All 4 branches missed.">    if (eppns == null || eppns.isEmpty()) {</span>
+<span class="pc bpc" id="L33" title="2 of 4 branches missed.">    if (eppns == null || eppns.isEmpty()) {</span>
 <span class="nc" id="L34">      return Map.of();</span>
     }
 
-<span class="nc" id="L37">    Map&lt;String, User&gt; usersByEppn = new LinkedHashMap&lt;&gt;();</span>
-<span class="nc bnc" id="L38" title="All 2 branches missed.">    for (UserPrincipalEntity principal : jpaRepository.findAllByEppnIn(eppns)) {</span>
-<span class="nc" id="L39">      usersByEppn.put(principal.getEppn(), UserMapper.INSTANCE.toDomain(principal.getUser()));</span>
-<span class="nc" id="L40">    }</span>
+<span class="fc" id="L37">    Map&lt;String, User&gt; usersByEppn = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L38" title="All 2 branches covered.">    for (UserPrincipalEntity principal : jpaRepository.findAllByEppnIn(eppns)) {</span>
+<span class="fc" id="L39">      usersByEppn.put(principal.getEppn(), UserMapper.INSTANCE.toDomain(principal.getUser()));</span>
+<span class="fc" id="L40">    }</span>
 
-<span class="nc" id="L42">    return usersByEppn;</span>
+<span class="fc" id="L42">    return usersByEppn;</span>
   }
 
   @Override
