@@ -31,6 +31,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.mapper.ActivityPresentation
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAssessment;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityDraft;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityAssessmentType;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
@@ -954,7 +955,9 @@ public class ActivityServiceImpl implements ActivityService {
 
   @Override
   public PagedResult<DeclaredActivityToAssessData> getDeclaredActivitiesToAssess(
-      List<EActivityAssessmentStatus> statuses, PageCriteria pageCriteria) {
+      List<EActivityAssessmentStatus> statuses,
+      List<EActivityAssessmentType> types,
+      PageCriteria pageCriteria) {
     Staff staff = loggedInUserService.getLoggedInStaff();
 
     if (!activityAuthorizationService.hasLoggedInStaffAuthorizationOnAnyActivity(
@@ -963,7 +966,8 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     var pagedResult =
-        declaredActivityService.getDeclaredActivitiesToAssessBy(staff, statuses, pageCriteria);
+        declaredActivityService.getDeclaredActivitiesToAssessBy(
+            staff, statuses, types, pageCriteria);
     var statusByDeclaredActivity =
         declaredActivityService.getDeclaredActivityStatus(pagedResult.content());
 

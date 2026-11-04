@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.openapi;
 
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityAssessmentType;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
@@ -27,4 +28,9 @@ public final class SwaggerSchema {
           .name("EActivityRight")
           ._enum(Arrays.stream(EActivityRight.values()).map(Enum::name).toList())
           .description("Enum for activity right");
+
+  public static final Schema<String> activityAssessmentTypeSchema =
+      new StringSchema()
+          .name("EActivityAssessmentType")
+          ._enum(Arrays.stream(EActivityAssessmentType.values()).map(Enum::name).toList());
 }

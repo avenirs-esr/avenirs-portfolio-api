@@ -13,7 +13,8 @@ public class OpenApiActivityEnumConfiguration {
           .getComponents()
           .addSchemas("EActivityThematic", SwaggerSchema.activityThematicSchema)
           .addSchemas("EActivityStatus", SwaggerSchema.activityStatusSchema)
-          .addSchemas("EActivityRight", SwaggerSchema.activityRightSchema);
+          .addSchemas("EActivityRight", SwaggerSchema.activityRightSchema)
+          .addSchemas("EActivityAssessmentType", SwaggerSchema.activityAssessmentTypeSchema);
     };
   }
 }

@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.specific
 
 import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityAssessmentType;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityAuthorizationEntity;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityViewEntity;
@@ -153,6 +154,19 @@ public final class DeclaredActivitySpecification {
     };
   }
 
+  public static Specification<DeclaredActivityEntity> hasAssessmentTypeIn(
+      Collection<EActivityAssessmentType> types) {
+    return (root, query, cb) -> {
+      if (types == null || types.isEmpty()) {
+        return cb.conjunction();
+      }
+      return cb.or(
+          types.stream()
+              .map(type -> assessmentTypePredicate(type, root, cb))
+              .toArray(Predicate[]::new));
+    };
+  }
+
   private static Predicate isActive(Root<DeclaredActivityEntity> root, CriteriaBuilder cb) {
     return cb.and(cb.isNull(root.get("unsubscribedAt")), cb.isNull(root.get("finishedAt")));
   }
@@ -222,6 +236,16 @@ public final class DeclaredActivitySpecification {
       case NEW -> cb.and(cb.isNull(assessedAt), cb.isNull(staffOpenedAt));
       case OPENED -> cb.and(cb.isNull(assessedAt), cb.isNotNull(staffOpenedAt));
       case SENT -> cb.isNotNull(assessedAt);
+    };
+  }
+
+  private static Predicate assessmentTypePredicate(
+      EActivityAssessmentType type, Root<DeclaredActivityEntity> root, CriteriaBuilder cb) {
+    var assessment = root.get("activity").get("assessment");
+    return switch (type) {
+      case COMMENT -> cb.isTrue(assessment.get("comment"));
+      case GRADE -> cb.isNotNull(assessment.get("grade"));
+      case VALIDATION -> cb.isTrue(assessment.get("validation"));
     };
   }
 

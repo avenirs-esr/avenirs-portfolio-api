@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityAssessmentType;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityAssessmentDetailsData;
 import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityDetailsData;
@@ -46,8 +47,11 @@ public class TransactionalDeclaredActivityService implements DeclaredActivitySer
 
   @Override
   public PagedResult<DeclaredActivity> getDeclaredActivitiesToAssessBy(
-      Staff staff, List<EActivityAssessmentStatus> statuses, PageCriteria pageCriteria) {
-    return delegate.getDeclaredActivitiesToAssessBy(staff, statuses, pageCriteria);
+      Staff staff,
+      List<EActivityAssessmentStatus> statuses,
+      List<EActivityAssessmentType> types,
+      PageCriteria pageCriteria) {
+    return delegate.getDeclaredActivitiesToAssessBy(staff, statuses, types, pageCriteria);
   }
 
   @Override

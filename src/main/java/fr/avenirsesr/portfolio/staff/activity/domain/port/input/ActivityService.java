@@ -12,6 +12,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.data.InactiveStudentData;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAssessment;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityDraft;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityAssessmentType;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityToAssessData;
@@ -117,5 +118,7 @@ public interface ActivityService {
       List<EFeedbackStatus> statuses, PageCriteria pageCriteria);
 
   PagedResult<DeclaredActivityToAssessData> getDeclaredActivitiesToAssess(
-      List<EActivityAssessmentStatus> statuses, PageCriteria pageCriteria);
+      List<EActivityAssessmentStatus> statuses,
+      List<EActivityAssessmentType> types,
+      PageCriteria pageCriteria);
 }
