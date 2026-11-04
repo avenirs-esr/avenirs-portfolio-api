@@ -228,7 +228,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
       throw new DeclaredActivityUnsubscribedException();
     }
 
-    if (isSubmittedOrFinished(getDeclaredActivityStatus(declaredActivity))) {
+    if (!isEditable(getDeclaredActivityStatus(declaredActivity))) {
       throw new DeclaredActivityLockedException();
     }
 
@@ -272,6 +272,10 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     if (!declaredActivity.getActivity().isEnableReflection()) {
       throw new UserNotAuthorizedException();
     }
+    if (!isEditable(getDeclaredActivityStatus(declaredActivity))) {
+      throw new DeclaredActivityLockedException();
+    }
+
     validateOptionalEnrichedTextMaxLength("reflection", reflection, RICH_TEXT_LENGTH);
 
     declaredActivity.setReflection(reflection);
@@ -532,6 +536,10 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
       throw new DeclaredActivityUnsubscribedException();
     }
 
+    if (!isEditable(getDeclaredActivityStatus(declaredActivity))) {
+      throw new DeclaredActivityLockedException();
+    }
+
     if (startDate != null || endDate != null) {
       validateActivityDates(startDate, endDate, declaredActivity.getCreatedAt());
       declaredActivity.setStartDate(startDate);
@@ -559,9 +567,9 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   }
 
   @Override
-  public List<DeclaredActivity> findAllNotCompletedActivitiesByIds(List<UUID> ids) {
+  public List<DeclaredActivity> findAllEditableByIds(List<UUID> ids) {
     var graph = FetchGraph.init().fetch("activity");
-    return declaredActivityRepository.findAllNotCompletedActivitiesByIds(ids, graph);
+    return declaredActivityRepository.findAllEditableByIds(ids, graph);
   }
 
   @Override
@@ -782,5 +790,11 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     return status == EDeclaredActivityStatus.SUBMITTED_FOR_FEEDBACK
         || status == EDeclaredActivityStatus.SUBMITTED_FOR_ASSESSMENT
         || status == EDeclaredActivityStatus.COMPLETED;
+  }
+
+  private boolean isEditable(EDeclaredActivityStatus status) {
+    return status != EDeclaredActivityStatus.UNSUBSCRIBED
+        && status != EDeclaredActivityStatus.COMPLETED
+        && status != EDeclaredActivityStatus.SUBMITTED_FOR_ASSESSMENT;
   }
 }

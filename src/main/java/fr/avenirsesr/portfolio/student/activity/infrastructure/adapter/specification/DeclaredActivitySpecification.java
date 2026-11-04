@@ -126,6 +126,15 @@ public final class DeclaredActivitySpecification {
     return (root, query, cb) -> cb.isNotNull(root.get("submittedAt"));
   }
 
+  public static Specification<DeclaredActivityEntity> isOngoing() {
+    return Specification.not(
+        hasStatusIn(
+            EnumSet.of(
+                EDeclaredActivityStatus.UNSUBSCRIBED,
+                EDeclaredActivityStatus.COMPLETED,
+                EDeclaredActivityStatus.SUBMITTED_FOR_ASSESSMENT)));
+  }
+
   public static Specification<DeclaredActivityEntity> activityHasStaffRight(
       UUID staffId, EActivityRight right) {
     return (root, query, cb) -> {

@@ -128,8 +128,8 @@ public class TransactionalDeclaredActivityService implements DeclaredActivitySer
   }
 
   @Override
-  public List<DeclaredActivity> findAllNotCompletedActivitiesByIds(List<UUID> ids) {
-    return delegate.findAllNotCompletedActivitiesByIds(ids);
+  public List<DeclaredActivity> findAllEditableByIds(List<UUID> ids) {
+    return delegate.findAllEditableByIds(ids);
   }
 
   @Override

@@ -76,9 +76,9 @@ public class DeclaredActivityDatabaseRepository
   }
 
   @Override
-  public List<DeclaredActivity> findAllNotCompletedActivitiesByIds(
+  public List<DeclaredActivity> findAllEditableByIds(
       List<UUID> activityIds, FetchGraph fetchGraph) {
-    var specification = DeclaredActivitySpecification.isNotCompleted();
+    var specification = DeclaredActivitySpecification.isOngoing();
     return findAllById(activityIds, specification, fetchGraph);
   }
 
