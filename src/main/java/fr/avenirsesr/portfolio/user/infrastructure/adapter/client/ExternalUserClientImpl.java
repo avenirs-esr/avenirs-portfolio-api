@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.user.infrastructure.adapter.client;
 import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.AvenirsSecurityHeaders;
 import fr.avenirsesr.portfolio.common.user.application.adapter.dto.ExternalUserDTO;
 import fr.avenirsesr.portfolio.user.domain.port.output.client.ExternalUserClient;
+import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,7 +23,7 @@ public class ExternalUserClientImpl implements ExternalUserClient {
   private String getByEppnEndpoint;
 
   public ExternalUserClientImpl(WebClient webClient) {
-    this.webClient = webClient;
+    this.webClient = webClient.mutate().filters(List::clear).build();
   }
 
   @Override
