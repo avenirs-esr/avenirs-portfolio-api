@@ -90,12 +90,12 @@ public class DeclaredActivityAssociationStrategy implements AssociationStrategy 
 
   @Override
   public AssociatedElementsData toAssociatedElements(
-      List&lt;Association&gt; associations, Class&lt;?&gt; subjectClass, boolean onlyNotCompleted) {
+      List&lt;Association&gt; associations, Class&lt;?&gt; subjectClass, boolean isEditable) {
 <span class="fc" id="L94">    var ids =</span>
 <span class="fc" id="L95">        associations.stream().map(association -&gt; association.associatedIdOf(subjectClass)).toList();</span>
     var declaredActivities =
-<span class="fc bfc" id="L97" title="All 2 branches covered.">        onlyNotCompleted</span>
-<span class="fc" id="L98">            ? declaredActivityService.findAllNotCompletedActivitiesByIds(ids)</span>
+<span class="fc bfc" id="L97" title="All 2 branches covered.">        isEditable</span>
+<span class="fc" id="L98">            ? declaredActivityService.findAllEditableByIds(ids)</span>
 <span class="fc" id="L99">            : declaredActivityService.findAllDeclaredActivitiesByIds(ids);</span>
 <span class="fc" id="L100">    var statuses = declaredActivityService.getDeclaredActivityStatus(declaredActivities);</span>
 
