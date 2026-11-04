@@ -30,10 +30,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.test.context.TestPropertySource;
 
 @Transactional
-@TestPropertySource(properties = {"seeder.enabled=false"})
 class TraceSpecificationIT extends ContainerConfigurationTest {
 
   @Autowired private TraceJpaRepository traceJpaRepository;
