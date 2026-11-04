@@ -541,7 +541,7 @@ public class ActivityController {
 
   @PreAuthorize(&quot;hasAuthority('activity:read:contextual')&quot;)
   @GetMapping(&quot;/{activityStatus}/{activityId}/authorizations/candidates&quot;)
-  public ResponseEntity&lt;PagedResponse&lt;StaffInfoDTO&gt;&gt; searchActivityAuthorizationCandidates(
+  public ResponseEntity&lt;PagedResponse&lt;StaffCandidateDTO&gt;&gt; searchActivityAuthorizationCandidates(
       Principal principal,
       @PathVariable
           @Parameter(
@@ -572,7 +572,7 @@ public class ActivityController {
                 activityId, keyword, pageCriteria);
 <span class="fc" id="L573">    return ResponseEntity.ok(</span>
         new PagedResponse&lt;&gt;(
-<span class="fc" id="L575">            candidates.content().stream().map(staffInfoDtoMapper::toDTO).toList(),</span>
+<span class="fc" id="L575">            candidates.content().stream().map(staffInfoDtoMapper::toCandidateDTO).toList(),</span>
 <span class="fc" id="L576">            PageInfoDTO.fromDomain(candidates.pageInfo())));</span>
   }
 
