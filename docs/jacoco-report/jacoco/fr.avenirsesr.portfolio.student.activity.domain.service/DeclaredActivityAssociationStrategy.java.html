@@ -95,7 +95,7 @@ public class DeclaredActivityAssociationStrategy implements AssociationStrategy 
 <span class="fc" id="L95">        associations.stream().map(association -&gt; association.associatedIdOf(subjectClass)).toList();</span>
     var declaredActivities =
 <span class="fc bfc" id="L97" title="All 2 branches covered.">        onlyNotCompleted</span>
-<span class="fc" id="L98">            ? declaredActivityService.findAllNotCompletedActivitiesByIds(ids)</span>
+<span class="fc" id="L98">            ? declaredActivityService.findAllEditableByIds(ids)</span>
 <span class="fc" id="L99">            : declaredActivityService.findAllDeclaredActivitiesByIds(ids);</span>
 <span class="fc" id="L100">    var statuses = declaredActivityService.getDeclaredActivityStatus(declaredActivities);</span>
 
