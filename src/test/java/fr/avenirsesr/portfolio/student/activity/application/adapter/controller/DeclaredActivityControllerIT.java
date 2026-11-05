@@ -1132,7 +1132,7 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
     List<JsonNode> notifications = findStudentNotificationsOf(id);
     assertThat(notifications)
         .extracting(notification -> notification.get("type").asText())
-        .containsExactlyInAnyOrder("ASSESSMENT_SENT", "ASSESSMENT_MODIFIED");
+        .containsExactlyInAnyOrder("ASSESSMENT_SENT");
     notifications.forEach(
         notification ->
             assertEquals(title, notification.get("parameters").get("activityTitle").asText()));
