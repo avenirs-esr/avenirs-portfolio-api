@@ -314,14 +314,24 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     declaredActivityRepository.save(declaredActivity);
 
     User studentUser = declaredActivity.getStudent().getUser();
-    notificationService.notify(
-        alreadySent
-            ? new AssessmentModifiedNotification(studentUser, declaredActivity)
-            : new AssessmentSentNotification(studentUser, declaredActivity));
 
+    Instant lastVersionAt =
+        currentAssessment.modifiedAt() != null
+            ? currentAssessment.modifiedAt()
+            : currentAssessment.assessedAt();
+
+    Instant consultedAt = currentAssessment.studentConsultedAt();
+
+    boolean isConsulted = consultedAt != null && consultedAt.isAfter(lastVersionAt);
+
+    if (!alreadySent) {
+      notificationService.notify(new AssessmentSentNotification(studentUser, declaredActivity));
+    } else if (isConsulted) {
+      notificationService.notify(new AssessmentModifiedNotification(studentUser, declaredActivity));
+    }
     log.debug(
-        "Sent the {} of declared activity [{}] to student [{}]",
-        alreadySent ? "modified assessment" : "assessment",
+        "Assessment modified before student [{}] consulted previous version - no notification"
+            + " sent for declared activity [{}]",
         declaredActivityId,
         declaredActivity.getStudent().getId());
   }

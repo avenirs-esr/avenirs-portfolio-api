@@ -149,6 +149,45 @@ class DeclaredActivityServiceImplTest {
   }
 
   @Test
+  void
+      sendAssessment_should_overwrite_a_sent_assessment_without_notifying_when_previous_version_not_consulted() {
+    BddLogger.given(
+        "An evaluator and a declared activity whose assessment was sent but never consulted");
+    Instant requestedAt = Instant.now().minus(Duration.ofDays(3));
+    Instant sentAt = Instant.now().minus(Duration.ofDays(2));
+    Staff staff = StaffFixture.create().toModel();
+
+    Activity activity =
+        ActivityFixture.create().withAssessment(new ActivityAssessment(true, 20, null)).toModel();
+    DeclaredActivity declaredActivity =
+        declaredActivityWith(
+            activity,
+            DeclaredActivityAssessment.requested(requestedAt)
+                .send("Bon travail", 15, null, sentAt, staff));
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+    when(declaredActivityRepository.findById(declaredActivityId))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when(
+        "He sends another version of the assessment before the student consulted the first one");
+    service.sendAssessment(declaredActivityId, "Très bon travail", 17, null);
+
+    BddLogger.then(" The assessment is overwritten but no notification is sent");
+    verify(declaredActivityRepository).save(activityCaptor.capture());
+    assertThat(activityCaptor.getValue().getAssessment())
+        .hasValueSatisfying(
+            modified -> {
+              assertThat(modified.comment()).isEqualTo("Très bon travail");
+              assertThat(modified.grade()).isEqualTo(17);
+              assertThat(modified.modifiedAt()).isAfter(sentAt);
+              assertThat(modified.studentConsultedAt()).isNull();
+            });
+
+    verifyNoInteractions(notificationService);
+  }
+
+  @Test
   void sendAssessment_should_keep_the_date_at_which_the_assessment_was_requested() {
     BddLogger.given("An evaluator and a declared activity submitted for assessment a day ago");
     Instant requestedAt = Instant.now().minus(Duration.ofDays(1));
