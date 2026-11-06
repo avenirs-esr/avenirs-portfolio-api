@@ -87,8 +87,7 @@ class SubActivityControllerIT extends ContainerConfigurationTest {
     void thenTheStudentCatalogShouldOnlyListTheMainActivity() throws Exception {
       BddLogger.given("a published main activity with three sub-activities");
       BddLogger.when("a student browses the activity catalog");
-      var body =
-          get(uri -> uri.path(BASE_PATH).queryParam("pageSize", 100).build(), studentHeaders());
+      var body = getAllPages(BASE_PATH, studentHeaders());
 
       BddLogger.then("the main activity should be listed, not its sub-activities");
       assertThat(body).contains(MAIN_ACTIVITY_ID.toString());
@@ -98,10 +97,7 @@ class SubActivityControllerIT extends ContainerConfigurationTest {
     @Test
     void thenTheLatestActivitiesShouldNotListTheSubActivities() throws Exception {
       BddLogger.when("a student browses the latest activities");
-      var body =
-          get(
-              uri -> uri.path(BASE_PATH + "/latest").queryParam("pageSize", 100).build(),
-              studentHeaders());
+      var body = getAllPages(BASE_PATH + "/latest", studentHeaders());
 
       BddLogger.then("no sub-activity should be listed");
       SUB_ACTIVITY_IDS.forEach(id -> assertThat(body).doesNotContain(id.toString()));
@@ -120,10 +116,7 @@ class SubActivityControllerIT extends ContainerConfigurationTest {
     @Test
     void thenTheStaffLibraryShouldOnlyListTheMainActivity() throws Exception {
       BddLogger.when("a staff browses the activity library");
-      var body =
-          get(
-              uri -> uri.path(BASE_PATH + "/staff/library").queryParam("pageSize", 100).build(),
-              staffHeaders());
+      var body = getAllPages(BASE_PATH + "/staff/library", staffHeaders());
 
       BddLogger.then("the main activity should be listed, not its sub-activities");
       assertThat(body).contains(MAIN_ACTIVITY_ID.toString());
@@ -133,11 +126,7 @@ class SubActivityControllerIT extends ContainerConfigurationTest {
     @Test
     void thenTheWorkingSpaceShouldNotListTheSubActivities() throws Exception {
       BddLogger.when("the author of the main activity browses its working space");
-      var body =
-          get(
-              uri ->
-                  uri.path(BASE_PATH + "/staff/working-space").queryParam("pageSize", 100).build(),
-              studentHeaders());
+      var body = getAllPages(BASE_PATH + "/staff/working-space", studentHeaders());
 
       BddLogger.then("no sub-activity should be listed");
       SUB_ACTIVITY_IDS.forEach(id -> assertThat(body).doesNotContain(id.toString()));
@@ -447,6 +436,22 @@ class SubActivityControllerIT extends ContainerConfigurationTest {
         .expectBody(String.class)
         .returnResult()
         .getResponseBody();
+  }
+
+  private String getAllPages(String path, Consumer<HttpHeaders> headers) throws Exception {
+    var pages = new StringBuilder();
+    var totalPages = 1;
+    for (var page = 0; page < totalPages; page++) {
+      var pageNumber = page;
+      var body =
+          get(
+              uri ->
+                  uri.path(path).queryParam("page", pageNumber).queryParam("pageSize", 100).build(),
+              headers);
+      totalPages = readJson(body).get("page").get("totalPages").asInt();
+      pages.append(body);
+    }
+    return pages.toString();
   }
 
   private void expectSubActivityOperationNotAllowed(WebTestClient.RequestHeadersSpec<?> request) {
