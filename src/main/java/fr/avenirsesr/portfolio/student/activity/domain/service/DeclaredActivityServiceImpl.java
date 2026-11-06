@@ -21,6 +21,7 @@ import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationServic
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityAssessmentException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityUnpublishedException;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.SubActivityOperationNotAllowedException;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAssessment;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityAssessmentType;
@@ -130,6 +131,10 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
       UUID declaredActivityId, UUID activityId, LocalDate startDate, LocalDate endDate) {
     Student student = loggedInUserService.getLoggedInStudent();
     Activity activity = activityService.getActivityById(activityId);
+
+    if (activity.isSubActivity()) {
+      throw new SubActivityOperationNotAllowedException();
+    }
 
     if (activity.getStatus() == EActivityStatus.UNPUBLISHED) {
       throw new ActivityUnpublishedException();

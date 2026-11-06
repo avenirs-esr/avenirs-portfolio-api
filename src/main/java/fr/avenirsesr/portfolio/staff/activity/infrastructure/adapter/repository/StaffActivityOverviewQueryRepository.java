@@ -71,6 +71,7 @@ public class StaffActivityOverviewQueryRepository implements StaffActivityOvervi
           a.updated_at AS updated_at
       FROM activity a
       WHERE a.status = 'PUBLISHED'
+        AND a.main_activity_id IS NULL
         AND
       """
           + ANY_RIGHT_ON_ACTIVITY;
@@ -85,6 +86,7 @@ public class StaffActivityOverviewQueryRepository implements StaffActivityOvervi
           a.updated_at AS updated_at
       FROM activity a
       WHERE a.status = 'UNPUBLISHED'
+        AND a.main_activity_id IS NULL
         AND
       """
           + MANAGEMENT_RIGHT_ON_ACTIVITY;
@@ -98,7 +100,8 @@ public class StaffActivityOverviewQueryRepository implements StaffActivityOvervi
           'DRAFT'      AS status,
           d.updated_at AS updated_at
       FROM activity_draft d
-      WHERE
+      WHERE d.main_activity_id IS NULL
+        AND
       """
           + MANAGEMENT_RIGHT_ON_DRAFT;
 

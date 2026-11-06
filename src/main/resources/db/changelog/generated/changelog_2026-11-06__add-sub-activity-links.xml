@@ -1,0 +1,123 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+        http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet author="iamgreendev" id="add-sub-activity-links-to-activity">
+        <addColumn tableName="activity">
+            <column name="main_activity_id" type="UUID"/>
+            <column name="previous_activity_id" type="UUID"/>
+        </addColumn>
+
+        <dropNotNullConstraint tableName="activity" columnName="thematic" columnDataType="VARCHAR(255)"/>
+        <dropNotNullConstraint tableName="activity" columnName="summary" columnDataType="VARCHAR(400)"/>
+
+        <addForeignKeyConstraint baseTableName="activity"
+                                 baseColumnNames="main_activity_id"
+                                 constraintName="fk_activity_main_activity"
+                                 referencedTableName="activity"
+                                 referencedColumnNames="id"
+                                 deferrable="true"
+                                 initiallyDeferred="true"/>
+
+        <addForeignKeyConstraint baseTableName="activity"
+                                 baseColumnNames="previous_activity_id"
+                                 constraintName="fk_activity_previous_activity"
+                                 referencedTableName="activity"
+                                 referencedColumnNames="id"
+                                 deferrable="true"
+                                 initiallyDeferred="true"/>
+
+        <addUniqueConstraint tableName="activity"
+                             columnNames="previous_activity_id"
+                             constraintName="uk_activity_previous_activity"
+                             deferrable="true"
+                             initiallyDeferred="true"/>
+
+        <createIndex tableName="activity" indexName="idx_activity_main_activity">
+            <column name="main_activity_id"/>
+        </createIndex>
+
+        <sql>
+            ALTER TABLE activity ADD CONSTRAINT ck_activity_sub_activity_link
+                CHECK ((main_activity_id IS NULL) = (previous_activity_id IS NULL)
+                    AND (main_activity_id IS NULL OR main_activity_id &lt;&gt; id)
+                    AND (previous_activity_id IS NULL OR previous_activity_id &lt;&gt; id));
+            ALTER TABLE activity ADD CONSTRAINT ck_activity_main_activity_fields
+                CHECK (main_activity_id IS NOT NULL OR (thematic IS NOT NULL AND summary IS NOT NULL));
+        </sql>
+
+        <rollback>
+            <sql>
+                ALTER TABLE activity DROP CONSTRAINT ck_activity_main_activity_fields;
+                ALTER TABLE activity DROP CONSTRAINT ck_activity_sub_activity_link;
+            </sql>
+            <dropIndex tableName="activity" indexName="idx_activity_main_activity"/>
+            <dropUniqueConstraint tableName="activity" constraintName="uk_activity_previous_activity"/>
+            <dropForeignKeyConstraint baseTableName="activity" constraintName="fk_activity_previous_activity"/>
+            <dropForeignKeyConstraint baseTableName="activity" constraintName="fk_activity_main_activity"/>
+            <addNotNullConstraint tableName="activity" columnName="summary" columnDataType="VARCHAR(400)"/>
+            <addNotNullConstraint tableName="activity" columnName="thematic" columnDataType="VARCHAR(255)"/>
+            <dropColumn tableName="activity" columnName="previous_activity_id"/>
+            <dropColumn tableName="activity" columnName="main_activity_id"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="iamgreendev" id="add-sub-activity-links-to-activity-draft">
+        <addColumn tableName="activity_draft">
+            <column name="main_activity_id" type="UUID"/>
+            <column name="previous_activity_id" type="UUID"/>
+        </addColumn>
+
+        <addForeignKeyConstraint baseTableName="activity_draft"
+                                 baseColumnNames="main_activity_id"
+                                 constraintName="fk_activity_draft_main_activity"
+                                 referencedTableName="activity_draft"
+                                 referencedColumnNames="id"
+                                 deferrable="true"
+                                 initiallyDeferred="true"/>
+
+        <addForeignKeyConstraint baseTableName="activity_draft"
+                                 baseColumnNames="previous_activity_id"
+                                 constraintName="fk_activity_draft_previous_activity"
+                                 referencedTableName="activity_draft"
+                                 referencedColumnNames="id"
+                                 deferrable="true"
+                                 initiallyDeferred="true"/>
+
+        <addUniqueConstraint tableName="activity_draft"
+                             columnNames="previous_activity_id"
+                             constraintName="uk_activity_draft_previous_activity"
+                             deferrable="true"
+                             initiallyDeferred="true"/>
+
+        <createIndex tableName="activity_draft" indexName="idx_activity_draft_main_activity">
+            <column name="main_activity_id"/>
+        </createIndex>
+
+        <sql>
+            ALTER TABLE activity_draft ADD CONSTRAINT ck_activity_draft_sub_activity_link
+                CHECK ((main_activity_id IS NULL) = (previous_activity_id IS NULL)
+                    AND (main_activity_id IS NULL OR main_activity_id &lt;&gt; id)
+                    AND (previous_activity_id IS NULL OR previous_activity_id &lt;&gt; id));
+        </sql>
+
+        <rollback>
+            <sql>
+                ALTER TABLE activity_draft DROP CONSTRAINT ck_activity_draft_sub_activity_link;
+            </sql>
+            <dropIndex tableName="activity_draft" indexName="idx_activity_draft_main_activity"/>
+            <dropUniqueConstraint tableName="activity_draft" constraintName="uk_activity_draft_previous_activity"/>
+            <dropForeignKeyConstraint baseTableName="activity_draft" constraintName="fk_activity_draft_previous_activity"/>
+            <dropForeignKeyConstraint baseTableName="activity_draft" constraintName="fk_activity_draft_main_activity"/>
+            <dropColumn tableName="activity_draft" columnName="previous_activity_id"/>
+            <dropColumn tableName="activity_draft" columnName="main_activity_id"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

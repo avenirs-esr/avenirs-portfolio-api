@@ -143,19 +143,24 @@ public class ActivityController {
         switch (activityStatus) {
           case PUBLISHED, UNPUBLISHED -> {
             var activity = activityService.getActivityById(activityId);
+            var mainActivity = activityService.getMainActivityOf(activity);
             yield activityContentDtoMapper.toDTO(
                 activity,
-                activityService.hasDraftForActivity(activity.getId()),
-                activityAuthorizationService.getLoggedInStaffRights(activity.getId()),
-                fileDTOMapper.toFileDTOs(activity.getFiles(), baseUrl));
+                mainActivity.getStatus(),
+                activityService.hasDraftForActivity(mainActivity.getId()),
+                activityAuthorizationService.getLoggedInStaffRights(mainActivity.getId()),
+                fileDTOMapper.toFileDTOs(activity.getFiles(), baseUrl),
+                activityService.getSubActivityOverviews(activity.getId()));
           }
           case DRAFT -> {
             var draft = activityService.getActivityDraftById(activityId);
             yield activityContentDtoMapper.toDTO(
                 draft,
                 activityService.hasEnrolledStudents(draft),
-                activityAuthorizationService.getLoggedInStaffDraftRights(draft.getId()),
-                fileDTOMapper.toFileDTOs(draft.getFiles(), baseUrl));
+                activityAuthorizationService.getLoggedInStaffDraftRights(
+                    draft.getMainActivityId().orElse(draft.getId())),
+                fileDTOMapper.toFileDTOs(draft.getFiles(), baseUrl),
+                activityService.getDraftSubActivityOverviews(draft.getId()));
           }
         };
     return ResponseEntity.ok(dto);

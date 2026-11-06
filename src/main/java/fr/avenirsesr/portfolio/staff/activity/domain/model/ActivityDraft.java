@@ -8,13 +8,15 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
 @Setter
-public class ActivityDraft extends AvenirsBaseModel {
+public class ActivityDraft extends AvenirsBaseModel implements ActivityNode {
   @Getter private final Staff author;
   @Getter private String title;
 
@@ -34,6 +36,12 @@ public class ActivityDraft extends AvenirsBaseModel {
   @Getter private int feedbackAllowedIterations;
   @Getter private boolean enableReflection;
   private ActivityAssessment assessment;
+
+  @Setter(AccessLevel.NONE)
+  private UUID mainActivityId;
+
+  @Setter(AccessLevel.NONE)
+  private UUID previousActivityId;
 
   private static final int DEFAULT_TRACE_ALLOWED_ASSOCIATION = -1;
   private static final int DEFAULT_FEEDBACK_ALLOWED_ITERATIONS = -1;
@@ -183,6 +191,21 @@ public class ActivityDraft extends AvenirsBaseModel {
 
   public Optional<ActivityAssessment> getAssessment() {
     return Optional.ofNullable(assessment);
+  }
+
+  @Override
+  public Optional<UUID> getMainActivityId() {
+    return Optional.ofNullable(mainActivityId);
+  }
+
+  @Override
+  public Optional<UUID> getPreviousActivityId() {
+    return Optional.ofNullable(previousActivityId);
+  }
+
+  public void attachAsSubActivity(UUID mainActivityId, UUID previousActivityId) {
+    this.mainActivityId = Objects.requireNonNull(mainActivityId);
+    this.previousActivityId = Objects.requireNonNull(previousActivityId);
   }
 
   public void addLinks(List<String> links) {

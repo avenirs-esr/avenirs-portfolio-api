@@ -19,6 +19,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityAuthorizationD
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityDraftNotFoundException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityLeaderRequiredException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityNotFoundException;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.SubActivityOperationNotAllowedException;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAuthorization;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityAuthorizationRepository;
@@ -1107,5 +1108,80 @@ class ActivityAuthorizationServiceImplTest {
 
     service.deleteAllOfDraft(activityId);
     verify(activityDraftAuthorizationRepository).deleteAllByActivityId(activityId);
+  }
+
+  @Nested
+  class WhenTargetingASubActivity {
+
+    UUID subActivityId;
+
+    @BeforeEach
+    void setupWhen() {
+      BddLogger.given("a sub-activity attached to the activity");
+      subActivityId = UUID.randomUUID();
+    }
+
+    @Test
+    void thenTheAuthorizationsOfAPublishedSubActivityShouldNotBeManageable() {
+      BddLogger.when("managing the authorizations of the published sub-activity");
+      when(activityRepository.existsById(subActivityId)).thenReturn(true);
+      when(activityRepository.existsSubActivityById(subActivityId)).thenReturn(true);
+
+      BddLogger.then("the operation should be rejected");
+      assertThatThrownBy(() -> service.getActivityAuthorizations(subActivityId))
+          .isInstanceOf(SubActivityOperationNotAllowedException.class);
+      assertThatThrownBy(() -> service.defineActivityAuthorizations(subActivityId, List.of()))
+          .isInstanceOf(SubActivityOperationNotAllowedException.class);
+      verify(activityAuthorizationRepository, never()).findAllByActivityId(any());
+    }
+
+    @Test
+    void thenTheAuthorizationsOfASubActivityDraftShouldNotBeManageable() {
+      BddLogger.when("managing the authorizations of the sub-activity draft");
+      when(activityDraftRepository.existsById(subActivityId)).thenReturn(true);
+      when(activityDraftRepository.existsSubActivityById(subActivityId)).thenReturn(true);
+
+      BddLogger.then("the operation should be rejected");
+      assertThatThrownBy(() -> service.getDraftAuthorizations(subActivityId))
+          .isInstanceOf(SubActivityOperationNotAllowedException.class);
+      assertThatThrownBy(() -> service.defineDraftAuthorizations(subActivityId, List.of()))
+          .isInstanceOf(SubActivityOperationNotAllowedException.class);
+      verify(activityDraftAuthorizationRepository, never()).findAllByActivityId(any());
+    }
+
+    @Test
+    void thenTheRightsOnASubActivityShouldBeThoseOnItsMainActivity() {
+      BddLogger.when("getting the rights of the logged in staff on the sub-activity");
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+      var ids = List.of(subActivityId, activityId);
+      when(activityRepository.findMainActivityIdsOfSubActivities(ids))
+          .thenReturn(Map.of(subActivityId, activityId));
+      when(activityAuthorizationRepository.findAllByActivityIdsAndStaffId(
+              Set.of(activityId), staff.getId()))
+          .thenReturn(List.of(authorizationOf(staff, EActivityRight.EDIT)));
+
+      BddLogger.then("both ids should carry the rights held on the main activity");
+      assertThat(service.getLoggedInStaffRightsByActivityIds(ids))
+          .isEqualTo(
+              Map.of(
+                  subActivityId, Set.of(EActivityRight.EDIT),
+                  activityId, Set.of(EActivityRight.EDIT)));
+    }
+
+    @Test
+    void thenTheRightsOnASubActivityDraftShouldBeThoseOnItsMainDraft() {
+      BddLogger.when("getting the rights of the logged in staff on the sub-activity draft");
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+      var ids = List.of(subActivityId);
+      when(activityDraftRepository.findMainActivityIdsOfSubActivities(ids))
+          .thenReturn(Map.of(subActivityId, activityId));
+      when(activityDraftAuthorizationRepository.findAllByActivityIdsAndStaffId(
+              Set.of(activityId), staff.getId()))
+          .thenReturn(List.of(authorizationOf(staff, EActivityRight.PUBLISH)));
+
+      BddLogger.then("the sub-activity draft should carry the rights held on the main draft");
+      assertThat(service.getLoggedInStaffDraftRightsByDraftIds(ids))
+          .isEqualTo(Map.of(subActivityId, Set.of(EActivityRight.PUBLISH)));
+    }
   }
 }

@@ -9,6 +9,7 @@ import fr.avenirsesr.portfolio.notification.infrastructure.adapter.seeder.Notifi
 import fr.avenirsesr.portfolio.skill.infrastructure.adapter.seeder.SkillCatalogSeeder;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.seeder.ActivityDraftSeeder;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.seeder.ActivitySeeder;
+import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.seeder.SubActivitySeeder;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.seeder.SystemActivitySeeder;
 import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.seeder.DeclaredActivitySeeder;
 import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.seeder.FeedbackSeeder;
@@ -68,6 +69,7 @@ public class SeederOrchestrator {
   private final TraceSeeder traceSeeder;
   private final ActivityDraftSeeder activityDraftSeeder;
   private final ActivitySeeder activitySeeder;
+  private final SubActivitySeeder subActivitySeeder;
   private final SystemActivitySeeder systemActivitySeeder;
   private final DeclaredActivitySeeder declaredActivitySeeder;
   private final ActivityFileSeeder activityFileSeeder;
@@ -106,6 +108,7 @@ public class SeederOrchestrator {
 
       var savedActivityDrafts = activityDraftSeeder.seed(savedStaffs);
       var savedActivities = activitySeeder.seed(savedStaffs.getFirst());
+      subActivitySeeder.seed(savedStaffs.getFirst());
       var declaredActivities = declaredActivitySeeder.seed(savedStudents, savedActivities);
       associationSeeder.seed(
           declaredActivities,

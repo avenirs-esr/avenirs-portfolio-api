@@ -1,0 +1,57 @@
+[
+  {
+    "id": "b3e7a1c9-4f2d-4a8e-9c61-7d2e5f8a1b11",
+    "previousActivityId": "b3e7a1c9-4f2d-4a8e-9c61-7d2e5f8a1b01",
+    "title": "Faire le point sur ses envies",
+    "description": "<p>Listez les activités, les environnements et les valeurs qui comptent pour vous, puis classez-les par ordre de priorité.</p>",
+    "recommendedCompletionContexts": "À réaliser seul.e, au calme, avant le premier rendez-vous d'orientation.",
+    "startDate": "2026-06-01",
+    "endDate": "2027-06-30",
+    "links": ["https://www.example.com/faire-le-point-sur-ses-envies"],
+    "updatedAt": "2024-05-01T10:05:00Z"
+  },
+  {
+    "id": "b3e7a1c9-4f2d-4a8e-9c61-7d2e5f8a1b12",
+    "previousActivityId": "b3e7a1c9-4f2d-4a8e-9c61-7d2e5f8a1b11",
+    "title": "Explorer les métiers ciblés",
+    "description": "<p>Choisissez trois métiers en lien avec vos envies et recueillez pour chacun les missions, les conditions d'exercice et les formations d'accès.</p>",
+    "recommendedCompletionContexts": null,
+    "startDate": null,
+    "endDate": null,
+    "links": [],
+    "updatedAt": "2024-05-01T10:10:00Z"
+  },
+  {
+    "id": "b3e7a1c9-4f2d-4a8e-9c61-7d2e5f8a1b13",
+    "previousActivityId": "b3e7a1c9-4f2d-4a8e-9c61-7d2e5f8a1b12",
+    "title": "Formaliser son projet",
+    "description": "<p>Rédigez une synthèse d'une page présentant le projet retenu, les étapes pour y parvenir et les points de vigilance.</p>",
+    "recommendedCompletionContexts": "À partager avec un.e conseiller/ conseillère d'orientation.",
+    "startDate": "2027-07-01",
+    "endDate": "2028-06-30",
+    "links": [],
+    "updatedAt": "2024-05-01T10:15:00Z"
+  },
+  {
+    "id": "b3e7a1c9-4f2d-4a8e-9c61-7d2e5f8a1b21",
+    "previousActivityId": "b3e7a1c9-4f2d-4a8e-9c61-7d2e5f8a1b02",
+    "title": "Se renseigner sur la structure d'accueil",
+    "description": "<p>Recherchez l'activité, l'organisation et l'actualité récente de la structure d'accueil.</p>",
+    "recommendedCompletionContexts": null,
+    "startDate": null,
+    "endDate": null,
+    "links": [],
+    "updatedAt": "2024-05-01T11:05:00Z"
+  },
+  {
+    "id": "b3e7a1c9-4f2d-4a8e-9c61-7d2e5f8a1b22",
+    "previousActivityId": "b3e7a1c9-4f2d-4a8e-9c61-7d2e5f8a1b21",
+    "title": "S'entraîner à présenter son parcours",
+    "description": "<p>Préparez une présentation de deux minutes de votre parcours et entraînez-vous à l'oral.</p>",
+    "recommendedCompletionContexts": "À répéter devant une personne de confiance.",
+    "startDate": null,
+    "endDate": null,
+    "links": [],
+    "updatedAt": "2024-05-01T11:10:00Z"
+  }
+]
