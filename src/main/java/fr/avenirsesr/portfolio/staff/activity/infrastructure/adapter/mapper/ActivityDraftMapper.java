@@ -38,6 +38,8 @@ public class ActivityDraftMapper implements Mapper<ActivityDraftEntity, Activity
                 .orElse(null),
             activityDraft.getCreatedAt(),
             activityDraft.getUpdatedAt());
+    entity.setMainActivityId(activityDraft.getMainActivityId().orElse(null));
+    entity.setPreviousActivityId(activityDraft.getPreviousActivityId().orElse(null));
     return entity;
   }
 
@@ -68,6 +70,7 @@ public class ActivityDraftMapper implements Mapper<ActivityDraftEntity, Activity
             entity.getAssessment() == null
                 ? null
                 : ActivityAssessmentMapper.INSTANCE.toDomain(entity.getAssessment()));
+    attachSubActivityLink(entity, domain);
     return domain;
   }
 
@@ -103,6 +106,13 @@ public class ActivityDraftMapper implements Mapper<ActivityDraftEntity, Activity
             entity.getAssessment() == null
                 ? null
                 : ActivityAssessmentMapper.INSTANCE.toDomain(entity.getAssessment()));
+    attachSubActivityLink(entity, domain);
     return domain;
+  }
+
+  private static void attachSubActivityLink(ActivityDraftEntity entity, ActivityDraft domain) {
+    if (entity.getMainActivityId() != null) {
+      domain.attachAsSubActivity(entity.getMainActivityId(), entity.getPreviousActivityId());
+    }
   }
 }

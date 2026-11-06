@@ -26,11 +26,13 @@ import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityPresentationDa
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityStaffOverviewData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityWithStudentStatusData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.InactiveStudentData;
+import fr.avenirsesr.portfolio.staff.activity.domain.data.SubActivityOverviewData;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.*;
 import fr.avenirsesr.portfolio.staff.activity.domain.mapper.ActivityPresentationDataMapper;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAssessment;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityDraft;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityNode;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityAssessmentType;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
@@ -58,6 +60,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -148,12 +151,55 @@ public class ActivityServiceImpl implements ActivityService {
   }
 
   @Override
+  public Activity createSubActivity(
+      UUID id,
+      UUID previousActivityId,
+      String title,
+      String description,
+      String recommendedCompletionContexts,
+      LocalDate startDate,
+      LocalDate endDate,
+      List<String> links) {
+    requireNotBlankAndMaxLength("title", title, TITLE_LENGTH);
+    requireNotBlankAndEnrichedMaxLength("description", description, RICH_DESCRIPTION_LENGTH);
+    validateOptionalTextMaxLength(
+        "recommendedCompletionContexts",
+        recommendedCompletionContexts,
+        ACTIVITY_RECOMMENDED_COMPLETION_CONTEXTS);
+    if ((startDate == null) != (endDate == null)) {
+      throw new ActivityDatesException();
+    }
+    if (startDate != null) {
+      validateDateOrder(startDate, endDate);
+    }
+
+    var previousActivity =
+        activityRepository.findById(previousActivityId).orElseThrow(ActivityNotFoundException::new);
+    var mainActivity = getMainActivityOf(previousActivity);
+
+    return activityRepository.save(
+        Activity.createSubActivity(
+            id,
+            mainActivity.getAuthor(),
+            mainActivity.getId(),
+            previousActivity.getId(),
+            title,
+            description,
+            recommendedCompletionContexts,
+            startDate,
+            endDate,
+            links,
+            List.of()));
+  }
+
+  @Override
   public Activity publish(UUID activityDraftId) {
     var staff = loggedInUserService.getLoggedInStaff();
     var draft =
         activityDraftRepository
             .findById(activityDraftId)
             .orElseThrow(ActivityDraftNotFoundException::new);
+    requireMainActivity(draft);
     activityAuthorizationService.checkDraftRight(staff, activityDraftId, EActivityRight.PUBLISH);
 
     if (draft.getThematic().isEmpty()) {
@@ -306,6 +352,7 @@ public class ActivityServiceImpl implements ActivityService {
     var staff = loggedInUserService.getLoggedInStaff();
     var activity =
         activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);
+    requireMainActivity(activity);
     activityAuthorizationService.checkRight(staff, activityId, EActivityRight.PUBLISH);
     if (activity.getStatus() == EActivityStatus.UNPUBLISHED) {
       throw new ActivityUnpublishedException();
@@ -321,8 +368,10 @@ public class ActivityServiceImpl implements ActivityService {
         activityDraftRepository
             .findById(activityDraftId)
             .orElseThrow(ActivityDraftNotFoundException::new);
+    requireMainActivity(draft);
     activityAuthorizationService.checkDraftRight(staff, activityDraftId, EActivityRight.EDIT);
 
+    removeSubActivityDrafts(activityDraftRepository.findAllSubActivitiesOf(activityDraftId));
     activityDraftRepository.removeFromDatabase(draft);
     activityAuthorizationService.deleteAllOfDraft(activityDraftId);
     log.info("Deleted activity draft with id: {}", activityDraftId);
@@ -332,19 +381,36 @@ public class ActivityServiceImpl implements ActivityService {
   public void deleteActivityDefinitively(UUID activityId) {
     var activity =
         activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);
+    requireMainActivity(activity);
     var draft = activityDraftRepository.findById(activityId);
+    var subActivities = activityRepository.findAllSubActivitiesOf(activityId);
+    var subActivityDrafts = activityDraftRepository.findAllSubActivitiesOf(activityId);
     var fileIds =
-        Stream.concat(
+        Stream.of(
                 fileIdsOf(activity.getBanner().orElse(null), activity.getFiles()),
                 draft
                     .map(it -> fileIdsOf(it.getBanner().orElse(null), it.getFiles()))
-                    .orElseGet(Stream::empty))
+                    .orElseGet(Stream::empty),
+                subActivities.stream()
+                    .flatMap(it -> fileIdsOf(it.getBanner().orElse(null), it.getFiles())),
+                subActivityDrafts.stream()
+                    .flatMap(it -> fileIdsOf(it.getBanner().orElse(null), it.getFiles())))
+            .flatMap(ids -> ids)
+            .distinct()
+            .toList();
+    var subActivityIds =
+        Stream.concat(
+                subActivities.stream().map(Activity::getId),
+                subActivityDrafts.stream().map(ActivityDraft::getId))
             .distinct()
             .toList();
 
     declaredActivityService.deleteAllOfActivity(activity);
     activityViewRepository.deleteAllByActivityId(activityId);
+    subActivityIds.forEach(activityViewRepository::deleteAllByActivityId);
+    removeSubActivityDrafts(subActivityDrafts);
     draft.ifPresent(activityDraftRepository::removeFromDatabase);
+    removeSubActivities(subActivities);
     activityRepository.removeFromDatabase(activity);
     activityAuthorizationService.deleteAllOfActivity(activityId);
     activityAuthorizationService.deleteAllOfDraft(activityId);
@@ -355,6 +421,16 @@ public class ActivityServiceImpl implements ActivityService {
 
   private Stream<UUID> fileIdsOf(File banner, List<File> files) {
     return Stream.concat(Stream.ofNullable(banner), files.stream()).map(File::getId);
+  }
+
+  private static <T extends ActivityNode> List<T> tailFirst(List<T> orderedSubActivities) {
+    return orderedSubActivities.reversed();
+  }
+
+  private static void requireMainActivity(ActivityNode activity) {
+    if (activity.isSubActivity()) {
+      throw new SubActivityOperationNotAllowedException();
+    }
   }
 
   @Override
@@ -368,12 +444,41 @@ public class ActivityServiceImpl implements ActivityService {
   }
 
   @Override
+  public Activity getMainActivityOf(Activity activity) {
+    return activity
+        .getMainActivityId()
+        .map(
+            mainActivityId ->
+                activityRepository
+                    .findById(mainActivityId)
+                    .orElseThrow(ActivityNotFoundException::new))
+        .orElse(activity);
+  }
+
+  @Override
+  public List<SubActivityOverviewData> getSubActivityOverviews(UUID activityId) {
+    return activityRepository.findAllSubActivitiesOf(activityId).stream()
+        .map(
+            subActivity -> new SubActivityOverviewData(subActivity.getId(), subActivity.getTitle()))
+        .toList();
+  }
+
+  @Override
+  public List<SubActivityOverviewData> getDraftSubActivityOverviews(UUID activityDraftId) {
+    return activityDraftRepository.findAllSubActivitiesOf(activityDraftId).stream()
+        .map(
+            subActivity -> new SubActivityOverviewData(subActivity.getId(), subActivity.getTitle()))
+        .toList();
+  }
+
+  @Override
   public ActivityPresentationData getActivityPresentation(EActivityStatus activityStatus, UUID id) {
     return switch (activityStatus) {
       case PUBLISHED, UNPUBLISHED -> {
         Activity activity =
             activityRepository.findById(id).orElseThrow(ActivityNotFoundException::new);
-        var declaredActivity = declaredActivityService.getByActivity(activity);
+        var mainActivity = getMainActivityOf(activity);
+        var declaredActivity = declaredActivityService.getByActivity(mainActivity);
         var declaredActivityId = declaredActivity.map(DeclaredActivity::getId);
         var declaredActivityStatus =
             declaredActivity.map(declaredActivityService::getDeclaredActivityStatus);
@@ -381,10 +486,12 @@ public class ActivityServiceImpl implements ActivityService {
             activity.getId(), loggedInUserService.getLoggedInStudent().getId());
         yield ActivityPresentationDataMapper.toData(
             activity,
+            mainActivity.getStatus(),
             declaredActivityId.orElse(null),
             declaredActivityStatus.orElse(null),
             FileDataMapper.mapFileData(
-                activity.getBanner(), FileStorageConstants.DEFAULT_COVER_FILE_URL));
+                activity.getBanner(), FileStorageConstants.DEFAULT_COVER_FILE_URL),
+            getSubActivityOverviews(activity.getId()));
       }
       case DRAFT -> {
         var draft =
@@ -392,7 +499,8 @@ public class ActivityServiceImpl implements ActivityService {
         yield ActivityPresentationDataMapper.toData(
             draft,
             FileDataMapper.mapFileData(
-                draft.getBanner(), FileStorageConstants.DEFAULT_COVER_FILE_URL));
+                draft.getBanner(), FileStorageConstants.DEFAULT_COVER_FILE_URL),
+            getDraftSubActivityOverviews(draft.getId()));
       }
     };
   }
@@ -402,6 +510,7 @@ public class ActivityServiceImpl implements ActivityService {
     loggedInUserService.getLoggedInStaff();
     var activity =
         activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);
+    requireMainActivity(activity);
 
     return new ActivityDashboardData(
         activityViewRepository.countUniqueViews(activityId),
@@ -426,6 +535,7 @@ public class ActivityServiceImpl implements ActivityService {
     loggedInUserService.getLoggedInStaff();
     var activity =
         activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);
+    requireMainActivity(activity);
 
     var since = Instant.now().minus(DURATION_FOR_STUDENT_INACTIVITY);
     var inactiveDeclaredActivities =
@@ -454,6 +564,7 @@ public class ActivityServiceImpl implements ActivityService {
   @Override
   public Map<EActivityThematic, List<Activity>> getActivityNavigation() {
     return activityRepository.findAll().stream()
+        .filter(a -> !a.isSubActivity())
         .filter(a -> a.getStatus() != EActivityStatus.UNPUBLISHED)
         .collect(
             Collectors.groupingBy(
@@ -590,7 +701,20 @@ public class ActivityServiceImpl implements ActivityService {
     var loggedInStaff = loggedInUserService.getLoggedInStaff();
     var draft =
         activityDraftRepository.findById(id).orElseThrow(ActivityDraftNotFoundException::new);
-    activityAuthorizationService.checkDraftRight(loggedInStaff, id, EActivityRight.EDIT);
+    activityAuthorizationService.checkDraftRight(
+        loggedInStaff, draft.getMainActivityId().orElse(id), EActivityRight.EDIT);
+
+    if (draft.isSubActivity()) {
+      rejectIfProvided("thematic", thematic);
+      rejectIfProvided("summary", summary);
+      rejectIfProvided("traceAllowedAssociations", traceAllowedAssociations);
+      rejectIfProvided("feedbackAllowedIterations", feedbackAllowedIterations);
+      rejectIfProvided("enableReflection", enableReflection);
+      rejectIfProvided("targetInstitutionIds", targetInstitutionIds);
+      rejectIfProvided("targetGroupIds", targetGroupIds);
+      rejectIfProvided("national", national);
+      rejectIfProvided("assessment", assessment);
+    }
 
     validateTargetPerimeter(loggedInStaff, targetInstitutionIds, targetGroupIds);
     validateTargetingUpdate(id, targetInstitutionIds, targetGroupIds);
@@ -659,6 +783,12 @@ public class ActivityServiceImpl implements ActivityService {
     return updatedDraft;
   }
 
+  private static void rejectIfProvided(String fieldName, Object value) {
+    if (value != null) {
+      throw new SubActivityFieldNotAllowedException(fieldName);
+    }
+  }
+
   private void validateTargetPerimeter(
       Staff staff, List<UUID> targetInstitutionIds, List<UUID> targetGroupIds) {
     boolean hasInstitutionTargets = targetInstitutionIds != null && !targetInstitutionIds.isEmpty();
@@ -702,6 +832,7 @@ public class ActivityServiceImpl implements ActivityService {
     var staff = loggedInUserService.getLoggedInStaff();
     var activity =
         activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);
+    requireMainActivity(activity);
     activityAuthorizationService.checkRight(staff, activityId, EActivityRight.EDIT);
 
     var activityDraft = activityDraftRepository.findById(activityId);
@@ -710,9 +841,23 @@ public class ActivityServiceImpl implements ActivityService {
       return activityDraft.get();
     }
 
+    var savedDraft = activityDraftRepository.save(draftOf(activity));
+    var subActivities = activityRepository.findAllSubActivitiesOf(activityId);
+    if (!subActivities.isEmpty()) {
+      activityDraftRepository.saveAll(subActivities.stream().map(this::draftOf).toList());
+    }
+    activityAuthorizationService.copyActivityAuthorizationsToDraft(activityId);
+    if (!hasEnrolledStudents(activity)) {
+      removeSubActivities(subActivities);
+      activityRepository.removeFromDatabase(activity);
+    }
+    return savedDraft;
+  }
+
+  private ActivityDraft draftOf(Activity activity) {
     var draft =
         ActivityDraft.toDomain(
-            activityId,
+            activity.getId(),
             activity.getCreatedAt(),
             activity.getUpdatedAt(),
             activity.getTitle(),
@@ -733,13 +878,13 @@ public class ActivityServiceImpl implements ActivityService {
             activity.getTargetGroupIds(),
             activity.isNational(),
             activity.getAssessment().orElse(null));
-
-    var savedDraft = activityDraftRepository.save(draft);
-    activityAuthorizationService.copyActivityAuthorizationsToDraft(activityId);
-    if (!hasEnrolledStudents(activity)) {
-      activityRepository.removeFromDatabase(activity);
-    }
-    return savedDraft;
+    activity
+        .getMainActivityId()
+        .ifPresent(
+            mainActivityId ->
+                draft.attachAsSubActivity(
+                    mainActivityId, activity.getPreviousActivityId().orElseThrow()));
+    return draft;
   }
 
   @Override
@@ -751,71 +896,115 @@ public class ActivityServiceImpl implements ActivityService {
     var publishedSource = activityRepository.findById(activityId);
 
     if (publishedSource.isPresent()) {
-      return saveDuplicateFrom(publishedSource.get(), staff, title, now);
+      var source = publishedSource.get();
+      requireMainActivity(source);
+      var duplicate =
+          saveDuplicate(duplicateOf(source, UUID.randomUUID(), staff, title, now), staff);
+      saveDuplicatedSubActivities(
+          activityRepository.findAllSubActivitiesOf(activityId),
+          duplicate.getId(),
+          (subActivity, id) -> duplicateOf(subActivity, id, staff, subActivity.getTitle(), now));
+      return duplicate;
     }
 
     var draftSource =
         activityDraftRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);
-    return saveDuplicateFrom(draftSource, staff, title, now);
+    requireMainActivity(draftSource);
+    var duplicate =
+        saveDuplicate(duplicateOf(draftSource, UUID.randomUUID(), staff, title, now), staff);
+    saveDuplicatedSubActivities(
+        activityDraftRepository.findAllSubActivitiesOf(activityId),
+        duplicate.getId(),
+        (subActivity, id) -> duplicateOf(subActivity, id, staff, subActivity.getTitle(), now));
+    return duplicate;
   }
 
-  private ActivityDraft saveDuplicateFrom(Activity source, Staff staff, String title, Instant now) {
-    var duplicate =
-        ActivityDraft.toDomain(
-            UUID.randomUUID(),
-            now,
-            now,
-            title,
-            staff,
-            source.getThematic(),
-            source.getSummary(),
-            source.getDescription(),
-            source.getRecommendedCompletionContexts().orElse(null),
-            source.getStartDate().orElse(null),
-            source.getEndDate().orElse(null),
-            source.getTraceAllowedAssociations(),
-            source.getFeedbackAllowedIterations(),
-            source.isEnableReflection(),
-            source.getBanner().map(banner -> fileResourceService.copy(banner.getId())).orElse(null),
-            source.getLinks(),
-            source.getFiles().stream().map(file -> fileResourceService.copy(file.getId())).toList(),
-            source.getTargetInstitutionIds(),
-            source.getTargetGroupIds(),
-            source.isNational(),
-            source.getAssessment().orElse(null));
+  private ActivityDraft saveDuplicate(ActivityDraft duplicate, Staff staff) {
     var savedDuplicate = activityDraftRepository.save(duplicate);
     activityAuthorizationService.grantAllDraftRights(savedDuplicate.getId(), staff);
     return savedDuplicate;
   }
 
-  private ActivityDraft saveDuplicateFrom(
-      ActivityDraft source, Staff staff, String title, Instant now) {
-    var duplicate =
-        ActivityDraft.toDomain(
-            UUID.randomUUID(),
-            now,
-            now,
-            title,
-            staff,
-            source.getThematic().orElse(null),
-            source.getSummary().orElse(null),
-            source.getDescription().orElse(null),
-            source.getRecommendedCompletionContexts().orElse(null),
-            source.getStartDate().orElse(null),
-            source.getEndDate().orElse(null),
-            source.getTraceAllowedAssociations(),
-            source.getFeedbackAllowedIterations(),
-            source.isEnableReflection(),
-            source.getBanner().map(banner -> fileResourceService.copy(banner.getId())).orElse(null),
-            source.getLinks(),
-            source.getFiles().stream().map(file -> fileResourceService.copy(file.getId())).toList(),
-            source.getTargetInstitutionIds(),
-            source.getTargetGroupIds(),
-            source.isNational(),
-            source.getAssessment().orElse(null));
-    var savedDuplicate = activityDraftRepository.save(duplicate);
-    activityAuthorizationService.grantAllDraftRights(savedDuplicate.getId(), staff);
-    return savedDuplicate;
+  private <T extends ActivityNode> void saveDuplicatedSubActivities(
+      List<T> orderedSourceSubActivities,
+      UUID duplicateMainActivityId,
+      BiFunction<T, UUID, ActivityDraft> duplicator) {
+    if (orderedSourceSubActivities.isEmpty()) {
+      return;
+    }
+    var duplicates = new ArrayList<ActivityDraft>();
+    var previousActivityId = duplicateMainActivityId;
+    for (var sourceSubActivity : orderedSourceSubActivities) {
+      var duplicate = duplicator.apply(sourceSubActivity, UUID.randomUUID());
+      duplicate.attachAsSubActivity(duplicateMainActivityId, previousActivityId);
+      previousActivityId = duplicate.getId();
+      duplicates.add(duplicate);
+    }
+    activityDraftRepository.saveAll(duplicates);
+  }
+
+  private ActivityDraft duplicateOf(
+      Activity source, UUID id, Staff author, String title, Instant now) {
+    return ActivityDraft.toDomain(
+        id,
+        now,
+        now,
+        title,
+        author,
+        source.getThematic(),
+        source.getSummary(),
+        source.getDescription(),
+        source.getRecommendedCompletionContexts().orElse(null),
+        source.getStartDate().orElse(null),
+        source.getEndDate().orElse(null),
+        source.getTraceAllowedAssociations(),
+        source.getFeedbackAllowedIterations(),
+        source.isEnableReflection(),
+        source.getBanner().map(banner -> fileResourceService.copy(banner.getId())).orElse(null),
+        source.getLinks(),
+        source.getFiles().stream().map(file -> fileResourceService.copy(file.getId())).toList(),
+        source.getTargetInstitutionIds(),
+        source.getTargetGroupIds(),
+        source.isNational(),
+        source.getAssessment().orElse(null));
+  }
+
+  private ActivityDraft duplicateOf(
+      ActivityDraft source, UUID id, Staff author, String title, Instant now) {
+    return ActivityDraft.toDomain(
+        id,
+        now,
+        now,
+        title,
+        author,
+        source.getThematic().orElse(null),
+        source.getSummary().orElse(null),
+        source.getDescription().orElse(null),
+        source.getRecommendedCompletionContexts().orElse(null),
+        source.getStartDate().orElse(null),
+        source.getEndDate().orElse(null),
+        source.getTraceAllowedAssociations(),
+        source.getFeedbackAllowedIterations(),
+        source.isEnableReflection(),
+        source.getBanner().map(banner -> fileResourceService.copy(banner.getId())).orElse(null),
+        source.getLinks(),
+        source.getFiles().stream().map(file -> fileResourceService.copy(file.getId())).toList(),
+        source.getTargetInstitutionIds(),
+        source.getTargetGroupIds(),
+        source.isNational(),
+        source.getAssessment().orElse(null));
+  }
+
+  private void removeSubActivities(List<Activity> orderedSubActivities) {
+    if (!orderedSubActivities.isEmpty()) {
+      activityRepository.removeAllFromDatabase(tailFirst(orderedSubActivities));
+    }
+  }
+
+  private void removeSubActivityDrafts(List<ActivityDraft> orderedSubActivityDrafts) {
+    if (!orderedSubActivityDrafts.isEmpty()) {
+      activityDraftRepository.removeAllFromDatabase(tailFirst(orderedSubActivityDrafts));
+    }
   }
 
   private boolean hasEnrolledStudents(Activity activity) {
@@ -824,7 +1013,10 @@ public class ActivityServiceImpl implements ActivityService {
 
   @Override
   public Boolean hasEnrolledStudents(ActivityDraft draft) {
-    return activityRepository.findById(draft.getId()).map(this::hasEnrolledStudents).orElse(false);
+    return activityRepository
+        .findById(draft.getMainActivityId().orElse(draft.getId()))
+        .map(this::hasEnrolledStudents)
+        .orElse(false);
   }
 
   @Override
@@ -836,6 +1028,7 @@ public class ActivityServiceImpl implements ActivityService {
   public File uploadDraftBanner(
       UUID activityDraftId, String fileName, String mimeType, long size, byte[] content) {
     var draft = getDraftWithRight(activityDraftId, EActivityRight.EDIT);
+    requireMainActivity(draft);
     if (!EFileType.fromMimeType(mimeType).isImage()) {
       throw new FileTypeNotSupportedException();
     }
@@ -848,6 +1041,7 @@ public class ActivityServiceImpl implements ActivityService {
   @Override
   public void deleteDraftBanner(UUID activityDraftId) {
     var draft = getDraftWithRight(activityDraftId, EActivityRight.EDIT);
+    requireMainActivity(draft);
     draft.getBanner().ifPresent(banner -> fileResourceService.delete(banner.getId()));
     draft.setBanner(null);
     activityDraftRepository.save(draft);
@@ -906,7 +1100,7 @@ public class ActivityServiceImpl implements ActivityService {
     }
     return studentRepository
         .findById(loggedInUserService.getLoggedInUser().getId())
-        .map(student -> declaredActivityService.isEnrolled(activity, student))
+        .map(student -> declaredActivityService.isEnrolled(getMainActivityOf(activity), student))
         .orElse(false);
   }
 
@@ -930,7 +1124,8 @@ public class ActivityServiceImpl implements ActivityService {
         activityDraftRepository
             .findById(activityDraftId)
             .orElseThrow(ActivityDraftNotFoundException::new);
-    activityAuthorizationService.checkDraftRight(staff, activityDraftId, right);
+    activityAuthorizationService.checkDraftRight(
+        staff, draft.getMainActivityId().orElse(activityDraftId), right);
     return draft;
   }
 
@@ -940,7 +1135,8 @@ public class ActivityServiceImpl implements ActivityService {
         activityDraftRepository
             .findById(activityDraftId)
             .orElseThrow(ActivityDraftNotFoundException::new);
-    activityAuthorizationService.checkAnyDraftRight(staff, activityDraftId, rights);
+    activityAuthorizationService.checkAnyDraftRight(
+        staff, draft.getMainActivityId().orElse(activityDraftId), rights);
     return draft;
   }
 

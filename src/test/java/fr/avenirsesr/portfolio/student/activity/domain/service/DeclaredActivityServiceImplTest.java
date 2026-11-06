@@ -26,6 +26,7 @@ import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityAssessmentException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityNotFoundException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityUnpublishedException;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.SubActivityOperationNotAllowedException;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAssessment;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
@@ -622,6 +623,25 @@ class DeclaredActivityServiceImplTest {
     BddLogger.then("An ActivityUnpublishedException is thrown and nothing is saved");
     assertThatThrownBy(() -> service.subscribe(activityId, null, null))
         .isInstanceOf(ActivityUnpublishedException.class);
+
+    verify(declaredActivityRepository, never()).save(any());
+  }
+
+  @Test
+  void subscribe_should_throw_SubActivityOperationNotAllowedException_when_activity_is_a_sub() {
+    BddLogger.given("A logged-in student and a sub-activity");
+    Activity subActivity = mock(Activity.class);
+    UUID subActivityId = UUID.randomUUID();
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(activityService.getActivityById(subActivityId)).thenReturn(subActivity);
+    when(subActivity.isSubActivity()).thenReturn(true);
+
+    BddLogger.when("He tries to subscribe to the sub-activity");
+
+    BddLogger.then("A SubActivityOperationNotAllowedException is thrown and nothing is saved");
+    assertThatThrownBy(() -> service.subscribe(subActivityId, null, null))
+        .isInstanceOf(SubActivityOperationNotAllowedException.class);
 
     verify(declaredActivityRepository, never()).save(any());
   }

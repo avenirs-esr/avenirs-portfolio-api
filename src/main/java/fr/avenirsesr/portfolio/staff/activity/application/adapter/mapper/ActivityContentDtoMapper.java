@@ -4,10 +4,13 @@ import fr.avenirsesr.portfolio.shared.application.adapter.dto.FileDTO;
 import fr.avenirsesr.portfolio.shared.application.adapter.mapper.OptionalMapper;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityAssessmentDTO;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityContentDTO;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.SubActivityOverviewDTO;
+import fr.avenirsesr.portfolio.staff.activity.domain.data.SubActivityOverviewData;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAssessment;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityDraft;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -21,12 +24,14 @@ public interface ActivityContentDtoMapper {
   @Mapping(target = "hasEnrolledStudent", expression = "java(null)")
   @Mapping(target = "rights", expression = "java(java.util.List.of())")
   @Mapping(target = "files", source = "files")
+  @Mapping(target = "subActivities", expression = "java(java.util.List.of())")
   ActivityContentDTO toDTO(Activity activity, List<FileDTO> files);
 
   @Mapping(target = "activityStatus", source = "activity.status")
   @Mapping(target = "haveDraft", expression = "java(false)")
   @Mapping(target = "hasEnrolledStudent", expression = "java(null)")
   @Mapping(target = "rights", expression = "java(java.util.List.of())")
+  @Mapping(target = "subActivities", expression = "java(java.util.List.of())")
   ActivityContentDTO toDTO(Activity activity);
 
   @Mapping(target = "activityStatus", expression = "java(EActivityStatus.DRAFT)")
@@ -34,19 +39,29 @@ public interface ActivityContentDtoMapper {
   @Mapping(target = "hasEnrolledStudent", source = "hasEnrolledStudent")
   @Mapping(target = "rights", source = "rights")
   @Mapping(target = "files", source = "files")
+  @Mapping(target = "subActivities", source = "subActivities")
   ActivityContentDTO toDTO(
       ActivityDraft activity,
       Boolean hasEnrolledStudent,
       Set<EActivityRight> rights,
-      List<FileDTO> files);
+      List<FileDTO> files,
+      List<SubActivityOverviewData> subActivities);
 
-  @Mapping(target = "activityStatus", source = "activity.status")
+  @Mapping(target = "activityStatus", source = "activityStatus")
   @Mapping(target = "haveDraft", source = "haveDraft")
   @Mapping(target = "rights", source = "rights")
   @Mapping(target = "hasEnrolledStudent", expression = "java(null)")
   @Mapping(target = "files", source = "files")
+  @Mapping(target = "subActivities", source = "subActivities")
   ActivityContentDTO toDTO(
-      Activity activity, Boolean haveDraft, Set<EActivityRight> rights, List<FileDTO> files);
+      Activity activity,
+      EActivityStatus activityStatus,
+      Boolean haveDraft,
+      Set<EActivityRight> rights,
+      List<FileDTO> files,
+      List<SubActivityOverviewData> subActivities);
+
+  SubActivityOverviewDTO toSubActivityOverviewDTO(SubActivityOverviewData subActivity);
 
   default ActivityAssessmentDTO toAssessmentDTO(Optional<ActivityAssessment> assessment) {
     return assessment == null

@@ -10,6 +10,7 @@ import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.Activit
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityPresentationData;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -46,6 +47,8 @@ class ActivityPresentationDtoMapperTest {
             activity.getDescription(),
             activity.getRecommendedCompletionContexts().orElse(null),
             banner,
+            Optional.empty(),
+            List.of(),
             activity.getCreatedAt(),
             activity.getUpdatedAt());
 
@@ -95,6 +98,8 @@ class ActivityPresentationDtoMapperTest {
             activity.getDescription(),
             activity.getRecommendedCompletionContexts().orElse(null),
             banner,
+            Optional.empty(),
+            List.of(),
             activity.getCreatedAt(),
             activity.getUpdatedAt());
 

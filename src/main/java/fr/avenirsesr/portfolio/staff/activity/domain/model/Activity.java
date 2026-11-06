@@ -9,6 +9,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -17,7 +18,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class Activity extends AvenirsBaseModel {
+public class Activity extends AvenirsBaseModel implements ActivityNode {
   private final Staff author;
   private String title;
   private EActivityThematic thematic;
@@ -48,6 +49,14 @@ public class Activity extends AvenirsBaseModel {
 
   @Getter(AccessLevel.NONE)
   private ActivityAssessment assessment;
+
+  @Getter(AccessLevel.NONE)
+  @Setter(AccessLevel.NONE)
+  private UUID mainActivityId;
+
+  @Getter(AccessLevel.NONE)
+  @Setter(AccessLevel.NONE)
+  private UUID previousActivityId;
 
   private Activity(
       UUID id,
@@ -139,6 +148,47 @@ public class Activity extends AvenirsBaseModel {
         now);
   }
 
+  public static Activity createSubActivity(
+      UUID id,
+      Staff author,
+      UUID mainActivityId,
+      UUID previousActivityId,
+      String title,
+      String description,
+      String recommendedCompletionContexts,
+      LocalDate startDate,
+      LocalDate endDate,
+      List<String> links,
+      List<File> files) {
+    Instant now = Instant.now();
+    var subActivity =
+        new Activity(
+            id,
+            author,
+            title,
+            null,
+            null,
+            EActivityStatus.PUBLISHED,
+            description,
+            recommendedCompletionContexts,
+            startDate,
+            endDate,
+            false,
+            0,
+            0,
+            null,
+            links,
+            files,
+            List.of(),
+            List.of(),
+            false,
+            null,
+            now,
+            now);
+    subActivity.attachAsSubActivity(mainActivityId, previousActivityId);
+    return subActivity;
+  }
+
   public static Activity toDomain(
       UUID id,
       Staff author,
@@ -205,6 +255,21 @@ public class Activity extends AvenirsBaseModel {
 
   public Optional<ActivityAssessment> getAssessment() {
     return Optional.ofNullable(assessment);
+  }
+
+  @Override
+  public Optional<UUID> getMainActivityId() {
+    return Optional.ofNullable(mainActivityId);
+  }
+
+  @Override
+  public Optional<UUID> getPreviousActivityId() {
+    return Optional.ofNullable(previousActivityId);
+  }
+
+  public void attachAsSubActivity(UUID mainActivityId, UUID previousActivityId) {
+    this.mainActivityId = Objects.requireNonNull(mainActivityId);
+    this.previousActivityId = Objects.requireNonNull(previousActivityId);
   }
 
   public void addFile(File file) {

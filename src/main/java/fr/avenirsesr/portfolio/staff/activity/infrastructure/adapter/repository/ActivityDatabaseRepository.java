@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityStaffOverviewData;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityNode;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityRepository;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.mapper.ActivityMapper;
@@ -12,8 +13,11 @@ import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.Activ
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.specification.ActivitySpecification;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import java.time.Duration;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
@@ -21,13 +25,39 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class ActivityDatabaseRepository
     extends GenericJpaRepositoryAdapter<Activity, ActivityEntity> implements ActivityRepository {
+  private final ActivityJpaRepository activityJpaRepository;
+
   protected ActivityDatabaseRepository(ActivityJpaRepository jpaRepository) {
     super(jpaRepository, jpaRepository, ActivityEntity.class, ActivityMapper.INSTANCE);
+    this.activityJpaRepository = jpaRepository;
   }
 
   @Override
   public boolean existsById(UUID id) {
     return jpaRepository.existsById(id);
+  }
+
+  @Override
+  public boolean existsSubActivityById(UUID id) {
+    return activityJpaRepository.existsByIdAndMainActivityIdIsNotNull(id);
+  }
+
+  @Override
+  public List<Activity> findAllSubActivitiesOf(UUID mainActivityId) {
+    return ActivityNode.orderedFrom(
+        mainActivityId,
+        activityJpaRepository.findAllByMainActivityId(mainActivityId).stream()
+            .map(ActivityMapper.INSTANCE::toDomain)
+            .toList());
+  }
+
+  @Override
+  public Map<UUID, UUID> findMainActivityIdsOfSubActivities(Collection<UUID> ids) {
+    if (ids.isEmpty()) {
+      return Map.of();
+    }
+    return activityJpaRepository.findAllByIdInAndMainActivityIdIsNotNull(ids).stream()
+        .collect(Collectors.toMap(ActivityEntity::getId, ActivityEntity::getMainActivityId));
   }
 
   @Override
@@ -38,6 +68,7 @@ public class ActivityDatabaseRepository
       List<UUID> studentGroupIds) {
     var specification =
         ActivitySpecification.isPublished()
+            .and(ActivitySpecification.isMainActivity())
             .and(ActivitySpecification.visibleByInstitutions(studentInstitutionIds))
             .and(ActivitySpecification.visibleByGroups(studentGroupIds));
     if (thematic != null)
@@ -52,7 +83,11 @@ public class ActivityDatabaseRepository
   @Override
   public PagedResult<ActivityStaffOverviewData> findAllStaffOverview(
       EActivityThematic thematic, PageCriteria pageCriteria) {
-    var specification = thematic != null ? ActivitySpecification.withThematic(thematic) : null;
+    var specification =
+        thematic != null
+            ? ActivitySpecification.isMainActivity()
+                .and(ActivitySpecification.withThematic(thematic))
+            : ActivitySpecification.isMainActivity();
     var sort = Sort.by(Sort.Direction.DESC, "updatedAt");
     var pagedActivities =
         findAll(specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort));
@@ -81,6 +116,7 @@ public class ActivityDatabaseRepository
     var sort = Sort.by(Sort.Direction.DESC, "createdAt");
     var specification =
         ActivitySpecification.isPublished()
+            .and(ActivitySpecification.isMainActivity())
             .and(ActivitySpecification.latest(durationForLate))
             .and(ActivitySpecification.visibleByInstitutions(studentInstitutionIds))
             .and(ActivitySpecification.visibleByGroups(studentGroupIds))

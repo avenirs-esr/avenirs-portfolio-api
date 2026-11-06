@@ -9,6 +9,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityAuthorizationD
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityDraftNotFoundException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityLeaderRequiredException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityNotFoundException;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.SubActivityOperationNotAllowedException;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAuthorization;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityAuthorizationService;
@@ -91,7 +92,10 @@ public class ActivityAuthorizationServiceImpl implements ActivityAuthorizationSe
   @Override
   public Map<UUID, Set<EActivityRight>> getLoggedInStaffRightsByActivityIds(
       Collection<UUID> activityIds) {
-    return rightsByEntityId(activityAuthorizationRepository, activityIds);
+    return rightsByEntityId(
+        activityAuthorizationRepository,
+        activityIds,
+        activityRepository::findMainActivityIdsOfSubActivities);
   }
 
   @Override
@@ -188,7 +192,10 @@ public class ActivityAuthorizationServiceImpl implements ActivityAuthorizationSe
   @Override
   public Map<UUID, Set<EActivityRight>> getLoggedInStaffDraftRightsByDraftIds(
       Collection<UUID> activityDraftIds) {
-    return rightsByEntityId(activityDraftAuthorizationRepository, activityDraftIds);
+    return rightsByEntityId(
+        activityDraftAuthorizationRepository,
+        activityDraftIds,
+        activityDraftRepository::findMainActivityIdsOfSubActivities);
   }
 
   @Override
@@ -309,16 +316,39 @@ public class ActivityAuthorizationServiceImpl implements ActivityAuthorizationSe
   }
 
   private Map<UUID, Set<EActivityRight>> rightsByEntityId(
-      StaffAuthorizationRepository repository, Collection<UUID> entityIds) {
+      StaffAuthorizationRepository repository,
+      Collection<UUID> entityIds,
+      Function<Collection<UUID>, Map<UUID, UUID>> mainActivityIdsOfSubActivities) {
     var staff = loggedInStaff();
     if (staff.isEmpty() || entityIds.isEmpty()) {
       return Map.of();
     }
-    return repository.findAllByActivityIdsAndStaffId(entityIds, staff.get().getId()).stream()
-        .filter(authorization -> !authorization.getRights().isEmpty())
-        .collect(
-            Collectors.toMap(
-                ActivityAuthorization::getActivityId, ActivityAuthorization::getRights));
+    var mainActivityIdBySubActivityId = mainActivityIdsOfSubActivities.apply(entityIds);
+    Collection<UUID> authorizedEntityIds =
+        mainActivityIdBySubActivityId.isEmpty()
+            ? entityIds
+            : entityIds.stream()
+                .map(id -> mainActivityIdBySubActivityId.getOrDefault(id, id))
+                .collect(Collectors.toSet());
+    var rightsByAuthorizedEntityId =
+        repository.findAllByActivityIdsAndStaffId(authorizedEntityIds, staff.get().getId()).stream()
+            .filter(authorization -> !authorization.getRights().isEmpty())
+            .collect(
+                Collectors.toMap(
+                    ActivityAuthorization::getActivityId, ActivityAuthorization::getRights));
+    if (mainActivityIdBySubActivityId.isEmpty()) {
+      return rightsByAuthorizedEntityId;
+    }
+    var rightsByEntityId = new LinkedHashMap<UUID, Set<EActivityRight>>();
+    entityIds.forEach(
+        id -> {
+          var rights =
+              rightsByAuthorizedEntityId.get(mainActivityIdBySubActivityId.getOrDefault(id, id));
+          if (rights != null) {
+            rightsByEntityId.put(id, rights);
+          }
+        });
+    return rightsByEntityId;
   }
 
   private boolean hasAnyRightOnAnyEntity(StaffAuthorizationRepository repository) {
@@ -423,11 +453,17 @@ public class ActivityAuthorizationServiceImpl implements ActivityAuthorizationSe
     if (!activityRepository.existsById(activityId)) {
       throw new ActivityNotFoundException();
     }
+    if (activityRepository.existsSubActivityById(activityId)) {
+      throw new SubActivityOperationNotAllowedException();
+    }
   }
 
   private void requireDraft(UUID activityDraftId) {
     if (!activityDraftRepository.existsById(activityDraftId)) {
       throw new ActivityDraftNotFoundException();
+    }
+    if (activityDraftRepository.existsSubActivityById(activityDraftId)) {
+      throw new SubActivityOperationNotAllowedException();
     }
   }
 

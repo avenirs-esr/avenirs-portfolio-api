@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper;
 
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.FileDTO;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityPresentationDTO;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.SubActivityOverviewDTO;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityPresentationData;
 import org.mapstruct.Mapper;
 
@@ -20,6 +21,10 @@ public interface ActivityPresentationDtoMapper {
         activityData.summary(),
         activityData.description(),
         activityData.recommendedCompletionContexts(),
+        activityData.mainActivityId().orElse(null),
+        activityData.subActivities().stream()
+            .map(subActivity -> new SubActivityOverviewDTO(subActivity.id(), subActivity.title()))
+            .toList(),
         activityData.createdAt(),
         activityData.updatedAt());
   }
