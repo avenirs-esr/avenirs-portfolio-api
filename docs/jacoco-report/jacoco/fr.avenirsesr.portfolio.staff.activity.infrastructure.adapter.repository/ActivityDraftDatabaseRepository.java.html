@@ -2,23 +2,55 @@
 
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityDraft;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityNode;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityDraftRepository;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.mapper.ActivityDraftMapper;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityDraftEntity;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public class ActivityDraftDatabaseRepository
     extends GenericJpaRepositoryAdapter&lt;ActivityDraft, ActivityDraftEntity&gt;
     implements ActivityDraftRepository {
+  private final ActivityDraftJpaRepository activityDraftJpaRepository;
+
   protected ActivityDraftDatabaseRepository(ActivityDraftJpaRepository jpaRepository) {
-<span class="fc" id="L16">    super(jpaRepository, jpaRepository, ActivityDraftEntity.class, ActivityDraftMapper.INSTANCE);</span>
-<span class="fc" id="L17">  }</span>
+<span class="fc" id="L23">    super(jpaRepository, jpaRepository, ActivityDraftEntity.class, ActivityDraftMapper.INSTANCE);</span>
+<span class="fc" id="L24">    this.activityDraftJpaRepository = jpaRepository;</span>
+<span class="fc" id="L25">  }</span>
 
   @Override
   public boolean existsById(UUID id) {
-<span class="fc" id="L21">    return jpaRepository.existsById(id);</span>
+<span class="fc" id="L29">    return jpaRepository.existsById(id);</span>
+  }
+
+  @Override
+  public boolean existsSubActivityById(UUID id) {
+<span class="fc" id="L34">    return activityDraftJpaRepository.existsByIdAndMainActivityIdIsNotNull(id);</span>
+  }
+
+  @Override
+  public List&lt;ActivityDraft&gt; findAllSubActivitiesOf(UUID mainActivityId) {
+<span class="fc" id="L39">    return ActivityNode.orderedFrom(</span>
+        mainActivityId,
+<span class="fc" id="L41">        activityDraftJpaRepository.findAllByMainActivityId(mainActivityId).stream()</span>
+<span class="fc" id="L42">            .map(ActivityDraftMapper.INSTANCE::toDomain)</span>
+<span class="fc" id="L43">            .toList());</span>
+  }
+
+  @Override
+  public Map&lt;UUID, UUID&gt; findMainActivityIdsOfSubActivities(Collection&lt;UUID&gt; ids) {
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">    if (ids.isEmpty()) {</span>
+<span class="nc" id="L49">      return Map.of();</span>
+    }
+<span class="fc" id="L51">    return activityDraftJpaRepository.findAllByIdInAndMainActivityIdIsNotNull(ids).stream()</span>
+<span class="fc" id="L52">        .collect(</span>
+<span class="fc" id="L53">            Collectors.toMap(ActivityDraftEntity::getId, ActivityDraftEntity::getMainActivityId));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
