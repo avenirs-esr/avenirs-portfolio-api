@@ -27,6 +27,10 @@ public class ActivitySpecification {
         criteriaBuilder.equal(root.get("status"), EActivityStatus.PUBLISHED);
   }
 
+  public static Specification<ActivityEntity> isMainActivity() {
+    return (root, query, criteriaBuilder) -> criteriaBuilder.isNull(root.get("mainActivityId"));
+  }
+
   public static Specification<ActivityEntity> withThematic(EActivityThematic thematic) {
     return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("thematic"), thematic);
   }

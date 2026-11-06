@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThemat
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Schema(
@@ -16,6 +17,7 @@ import java.util.UUID;
       "activityStatus",
       "banner",
       "summary",
+      "subActivities",
     })
 public record ActivityPresentationDTO(
     UUID id,
@@ -29,5 +31,7 @@ public record ActivityPresentationDTO(
     String summary,
     String description,
     String recommendedCompletionContexts,
+    UUID mainActivityId,
+    List<SubActivityOverviewDTO> subActivities,
     Instant createdAt,
     Instant updatedAt) {}

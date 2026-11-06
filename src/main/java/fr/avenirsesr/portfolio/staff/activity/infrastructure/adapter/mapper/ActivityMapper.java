@@ -37,6 +37,8 @@ public class ActivityMapper implements Mapper<ActivityEntity, Activity> {
             domain.getAssessment().map(ActivityAssessmentMapper.INSTANCE::fromDomain).orElse(null),
             domain.getCreatedAt(),
             domain.getUpdatedAt());
+    entity.setMainActivityId(domain.getMainActivityId().orElse(null));
+    entity.setPreviousActivityId(domain.getPreviousActivityId().orElse(null));
     return entity;
   }
 
@@ -68,6 +70,7 @@ public class ActivityMapper implements Mapper<ActivityEntity, Activity> {
                 : ActivityAssessmentMapper.INSTANCE.toDomain(entity.getAssessment()),
             entity.getCreatedAt(),
             entity.getUpdatedAt());
+    attachSubActivityLink(entity, domain);
     return domain;
   }
 
@@ -106,6 +109,13 @@ public class ActivityMapper implements Mapper<ActivityEntity, Activity> {
                 : ActivityAssessmentMapper.INSTANCE.toDomain(entity.getAssessment()),
             entity.getCreatedAt(),
             entity.getUpdatedAt());
+    attachSubActivityLink(entity, domain);
     return domain;
+  }
+
+  private static void attachSubActivityLink(ActivityEntity entity, Activity domain) {
+    if (entity.getMainActivityId() != null) {
+      domain.attachAsSubActivity(entity.getMainActivityId(), entity.getPreviousActivityId());
+    }
   }
 }

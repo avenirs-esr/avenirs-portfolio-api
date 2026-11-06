@@ -614,5 +614,41 @@
     "links": ["https://www.example.com/renforcer-sa-communication-orale"],
     "createdAt": "2024-06-01T14:00:00Z",
     "updatedAt": "2024-06-01T14:00:00Z"
+  },
+  {
+    "id": "b3e7a1c9-4f2d-4a8e-9c61-7d2e5f8a1b01",
+    "title": "Construire son projet professionnel étape par étape",
+    "thematic": "FUTURE_PLANS",
+    "summary": "Activité structurée en plusieurs étapes. L'étudiant.e fait le point sur ses envies, explore les métiers qui l'attirent puis formalise un projet professionnel argumenté.",
+    "description": "<h3>Objectifs de l'activité</h3><ul><li>Identifier ses envies et ses priorités professionnelles.</li><li>Confronter ces envies à la réalité des métiers.</li><li>Formaliser un projet professionnel argumenté.</li></ul><h3>Déroulement de l'activité</h3><p>L'activité se réalise en trois sous-activités successives, chacune accompagnée de ses propres ressources.</p>",
+    "recommendedCompletionContexts": "À réaliser sur un semestre, en parallèle d'un accompagnement à l'orientation.",
+    "startDate": "2026-06-01",
+    "endDate": "2030-06-30",
+    "banner": null,
+    "authorStaffId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
+    "traceAllowedAssociations": -1,
+    "feedbackAllowedIterations": -1,
+    "enableReflection": true,
+    "links": [],
+    "createdAt": "2024-05-01T10:00:00Z",
+    "updatedAt": "2024-05-01T10:00:00Z"
+  },
+  {
+    "id": "b3e7a1c9-4f2d-4a8e-9c61-7d2e5f8a1b02",
+    "title": "Préparer un entretien de stage",
+    "thematic": "EXPERIENCES",
+    "summary": "Activité en deux étapes pour aborder sereinement un entretien de stage : se renseigner sur la structure d'accueil puis s'entraîner à présenter son parcours.",
+    "description": "<h3>Objectifs de l'activité</h3><ul><li>Connaître la structure d'accueil et ses attentes.</li><li>Savoir présenter son parcours de manière claire et convaincante.</li></ul>",
+    "recommendedCompletionContexts": "À réaliser dans les semaines qui précèdent un entretien.",
+    "startDate": null,
+    "endDate": null,
+    "banner": null,
+    "authorStaffId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
+    "traceAllowedAssociations": -1,
+    "feedbackAllowedIterations": -1,
+    "enableReflection": false,
+    "links": [],
+    "createdAt": "2024-05-01T11:00:00Z",
+    "updatedAt": "2024-05-01T11:00:00Z"
   }
 ]

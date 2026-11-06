@@ -8,11 +8,19 @@ import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import java.time.Duration;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public interface ActivityRepository extends GenericRepositoryPort<Activity> {
   boolean existsById(UUID id);
+
+  boolean existsSubActivityById(UUID id);
+
+  List<Activity> findAllSubActivitiesOf(UUID mainActivityId);
+
+  Map<UUID, UUID> findMainActivityIdsOfSubActivities(Collection<UUID> ids);
 
   PagedResult<Activity> findAll(
       EActivityThematic thematic,

@@ -144,6 +144,7 @@ public class ActivityAuthorizationDatabaseRepository
   private static Specification<ActivityEntity> visibleToStaff(
       UUID staffId, Collection<UUID> institutionIds) {
     return ActivitySpecification.withAuthorizationOfStaff(staffId)
+        .and(ActivitySpecification.isMainActivity())
         .and(ActivitySpecification.targetingAnyInstitution(institutionIds));
   }
 }

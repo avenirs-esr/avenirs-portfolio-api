@@ -1,7 +1,9 @@
 package fr.avenirsesr.portfolio.activity.infrastructure.adapter.mapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import fr.avenirsesr.portfolio.common.file.domain.model.enums.EFileType;
@@ -163,5 +165,38 @@ class ActivityMapperTest {
     assertEquals(assessment, mappedActivity.getAssessment().orElseThrow());
     assertEquals(createdAt, mappedActivity.getCreatedAt());
     assertEquals(updatedAt, mappedActivity.getUpdatedAt());
+  }
+
+  @Test
+  void shouldMapTheSubActivityLinkBothWays() {
+    BddLogger.given("a sub-activity linked to its main activity and to its previous activity");
+    UUID mainActivityId = UUID.randomUUID();
+    UUID previousActivityId = UUID.randomUUID();
+    activity.attachAsSubActivity(mainActivityId, previousActivityId);
+
+    BddLogger.when("mapping it to an entity and back");
+    ActivityEntity entity = ActivityMapper.INSTANCE.fromDomain(activity);
+    Activity mappedActivity = ActivityMapper.INSTANCE.toDomain(entity);
+
+    BddLogger.then("the link should be kept on both sides");
+    assertEquals(mainActivityId, entity.getMainActivityId());
+    assertEquals(previousActivityId, entity.getPreviousActivityId());
+    assertTrue(mappedActivity.isSubActivity());
+    assertEquals(mainActivityId, mappedActivity.getMainActivityId().orElseThrow());
+    assertEquals(previousActivityId, mappedActivity.getPreviousActivityId().orElseThrow());
+  }
+
+  @Test
+  void shouldMapAMainActivityWithoutLink() {
+    BddLogger.given("a main activity");
+
+    BddLogger.when("mapping it to an entity and back");
+    ActivityEntity entity = ActivityMapper.INSTANCE.fromDomain(activity);
+    Activity mappedActivity = ActivityMapper.INSTANCE.toDomain(entity);
+
+    BddLogger.then("no link should be set");
+    assertNull(entity.getMainActivityId());
+    assertNull(entity.getPreviousActivityId());
+    assertFalse(mappedActivity.isSubActivity());
   }
 }

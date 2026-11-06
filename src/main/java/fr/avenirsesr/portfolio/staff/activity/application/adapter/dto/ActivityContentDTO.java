@@ -22,6 +22,7 @@ import java.util.UUID;
       "feedbackAllowedIterations",
       "rights",
       "national",
+      "subActivities",
       "createdAt",
       "updatedAt"
     })
@@ -48,5 +49,7 @@ public record ActivityContentDTO(
     List<UUID> targetGroupIds,
     boolean national,
     ActivityAssessmentDTO assessment,
+    UUID mainActivityId,
+    List<SubActivityOverviewDTO> subActivities,
     Instant createdAt,
     Instant updatedAt) {}

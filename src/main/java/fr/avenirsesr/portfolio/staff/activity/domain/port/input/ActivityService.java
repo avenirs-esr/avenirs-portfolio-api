@@ -9,6 +9,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityPresentationDa
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityStaffOverviewData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityWithStudentStatusData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.InactiveStudentData;
+import fr.avenirsesr.portfolio.staff.activity.domain.data.SubActivityOverviewData;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAssessment;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityDraft;
@@ -40,6 +41,16 @@ public interface ActivityService {
       int feedbackAllowedIterations,
       List<String> links);
 
+  Activity createSubActivity(
+      UUID id,
+      UUID previousActivityId,
+      String title,
+      String description,
+      String recommendedCompletionContexts,
+      LocalDate startDate,
+      LocalDate endDate,
+      List<String> links);
+
   Activity publish(UUID activityDraftId);
 
   Activity unpublish(UUID activityId);
@@ -51,6 +62,12 @@ public interface ActivityService {
   Activity getActivityById(UUID id);
 
   ActivityDraft getActivityDraftById(UUID id);
+
+  Activity getMainActivityOf(Activity activity);
+
+  List<SubActivityOverviewData> getSubActivityOverviews(UUID activityId);
+
+  List<SubActivityOverviewData> getDraftSubActivityOverviews(UUID activityDraftId);
 
   ActivityPresentationData getActivityPresentation(EActivityStatus activityStatus, UUID id);
 

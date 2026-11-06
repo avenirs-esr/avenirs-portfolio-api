@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActivityStatus;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -19,5 +20,7 @@ public record ActivityPresentationData(
     String description,
     String recommendedCompletionContexts,
     FileData banner,
+    Optional<UUID> mainActivityId,
+    List<SubActivityOverviewData> subActivities,
     Instant createdAt,
     Instant updatedAt) {}

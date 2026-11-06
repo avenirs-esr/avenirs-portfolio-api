@@ -20,7 +20,10 @@ import lombok.Setter;
 @Entity
 @Table(
     name = "activity_draft",
-    indexes = {@Index(name = "idx_activity_draft_thematic", columnList = "thematic")})
+    indexes = {
+      @Index(name = "idx_activity_draft_thematic", columnList = "thematic"),
+      @Index(name = "idx_activity_draft_main_activity", columnList = "main_activity_id")
+    })
 @AttributeOverride(name = "endDate", column = @Column(name = "end_date", nullable = true))
 @AttributeOverride(name = "startDate", column = @Column(name = "start_date", nullable = true))
 @NoArgsConstructor
@@ -96,6 +99,12 @@ public class ActivityDraftEntity extends PeriodEntity<LocalDate> {
   private boolean national;
 
   @Embedded private ActivityAssessmentEmbeddable assessment;
+
+  @Column(name = "main_activity_id")
+  private UUID mainActivityId;
+
+  @Column(name = "previous_activity_id")
+  private UUID previousActivityId;
 
   public ActivityDraftEntity(
       UUID id,
