@@ -314,486 +314,496 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
 <span class="fc" id="L314">    declaredActivityRepository.save(declaredActivity);</span>
 
 <span class="fc" id="L316">    User studentUser = declaredActivity.getStudent().getUser();</span>
-<span class="fc" id="L317">    notificationService.notify(</span>
-<span class="fc bfc" id="L318" title="All 2 branches covered.">        alreadySent</span>
-<span class="fc" id="L319">            ? new AssessmentModifiedNotification(studentUser, declaredActivity)</span>
-<span class="fc" id="L320">            : new AssessmentSentNotification(studentUser, declaredActivity));</span>
 
-<span class="fc" id="L322">    log.debug(</span>
-        &quot;Sent the {} of declared activity [{}] to student [{}]&quot;,
-<span class="fc bfc" id="L324" title="All 2 branches covered.">        alreadySent ? &quot;modified assessment&quot; : &quot;assessment&quot;,</span>
+    Instant lastVersionAt =
+<span class="pc bpc" id="L319" title="1 of 2 branches missed.">        currentAssessment.modifiedAt() != null</span>
+<span class="nc" id="L320">            ? currentAssessment.modifiedAt()</span>
+<span class="fc" id="L321">            : currentAssessment.assessedAt();</span>
+
+<span class="fc" id="L323">    Instant consultedAt = currentAssessment.studentConsultedAt();</span>
+
+<span class="pc bpc" id="L325" title="1 of 4 branches missed.">    boolean isConsulted = consultedAt != null &amp;&amp; consultedAt.isAfter(lastVersionAt);</span>
+
+<span class="fc bfc" id="L327" title="All 2 branches covered.">    if (!alreadySent) {</span>
+<span class="fc" id="L328">      notificationService.notify(new AssessmentSentNotification(studentUser, declaredActivity));</span>
+<span class="fc bfc" id="L329" title="All 2 branches covered.">    } else if (isConsulted) {</span>
+<span class="fc" id="L330">      notificationService.notify(new AssessmentModifiedNotification(studentUser, declaredActivity));</span>
+    }
+<span class="fc" id="L332">    log.debug(</span>
+        &quot;Assessment modified before student [{}] consulted previous version - no notification&quot;
+            + &quot; sent for declared activity [{}]&quot;,
         declaredActivityId,
-<span class="fc" id="L326">        declaredActivity.getStudent().getId());</span>
-<span class="fc" id="L327">  }</span>
+<span class="fc" id="L336">        declaredActivity.getStudent().getId());</span>
+<span class="fc" id="L337">  }</span>
 
   private DeclaredActivity fetchDeclaredActivityAsEvaluator(Staff staff, UUID declaredActivityId) {
-<span class="fc" id="L330">    DeclaredActivity declaredActivity =</span>
+<span class="fc" id="L340">    DeclaredActivity declaredActivity =</span>
         declaredActivityRepository
-<span class="fc" id="L332">            .findById(declaredActivityId)</span>
-<span class="fc" id="L333">            .orElseThrow(DeclaredActivityNotFoundException::new);</span>
+<span class="fc" id="L342">            .findById(declaredActivityId)</span>
+<span class="fc" id="L343">            .orElseThrow(DeclaredActivityNotFoundException::new);</span>
 
-<span class="fc" id="L335">    activityAuthorizationService.checkRight(</span>
-<span class="fc" id="L336">        staff, declaredActivity.getActivity().getId(), EActivityRight.EVALUATION);</span>
+<span class="fc" id="L345">    activityAuthorizationService.checkRight(</span>
+<span class="fc" id="L346">        staff, declaredActivity.getActivity().getId(), EActivityRight.EVALUATION);</span>
 
-<span class="fc" id="L338">    return declaredActivity;</span>
+<span class="fc" id="L348">    return declaredActivity;</span>
   }
 
   private void consultSentAssessmentByStudent(DeclaredActivity declaredActivity) {
-<span class="fc" id="L342">    declaredActivity</span>
-<span class="fc" id="L343">        .getAssessment()</span>
-<span class="fc" id="L344">        .filter(DeclaredActivityAssessment::isSent)</span>
-<span class="fc" id="L345">        .ifPresent(</span>
+<span class="fc" id="L352">    declaredActivity</span>
+<span class="fc" id="L353">        .getAssessment()</span>
+<span class="fc" id="L354">        .filter(DeclaredActivityAssessment::isSent)</span>
+<span class="fc" id="L355">        .ifPresent(</span>
             assessment -&gt; {
-<span class="fc" id="L347">              declaredActivity.setAssessment(assessment.consultByStudent(Instant.now()));</span>
-<span class="fc" id="L348">              declaredActivityRepository.save(declaredActivity);</span>
-<span class="fc" id="L349">            });</span>
-<span class="fc" id="L350">  }</span>
+<span class="fc" id="L357">              declaredActivity.setAssessment(assessment.consultByStudent(Instant.now()));</span>
+<span class="fc" id="L358">              declaredActivityRepository.save(declaredActivity);</span>
+<span class="fc" id="L359">            });</span>
+<span class="fc" id="L360">  }</span>
 
   private DeclaredActivityAssessment openAssessmentByStaff(DeclaredActivity declaredActivity) {
-<span class="fc" id="L353">    DeclaredActivityAssessment assessment = assessmentOf(declaredActivity);</span>
-<span class="fc bfc" id="L354" title="All 2 branches covered.">    if (assessment.isOpenedByStaff()) {</span>
-<span class="fc" id="L355">      return assessment;</span>
+<span class="fc" id="L363">    DeclaredActivityAssessment assessment = assessmentOf(declaredActivity);</span>
+<span class="fc bfc" id="L364" title="All 2 branches covered.">    if (assessment.isOpenedByStaff()) {</span>
+<span class="fc" id="L365">      return assessment;</span>
     }
 
-<span class="fc" id="L358">    DeclaredActivityAssessment openedAssessment = assessment.openByStaff(Instant.now());</span>
-<span class="fc" id="L359">    declaredActivity.setAssessment(openedAssessment);</span>
-<span class="fc" id="L360">    declaredActivityRepository.save(declaredActivity);</span>
-<span class="fc" id="L361">    return openedAssessment;</span>
+<span class="fc" id="L368">    DeclaredActivityAssessment openedAssessment = assessment.openByStaff(Instant.now());</span>
+<span class="fc" id="L369">    declaredActivity.setAssessment(openedAssessment);</span>
+<span class="fc" id="L370">    declaredActivityRepository.save(declaredActivity);</span>
+<span class="fc" id="L371">    return openedAssessment;</span>
   }
 
   private DeclaredActivityAssessment assessmentOf(DeclaredActivity declaredActivity) {
-<span class="fc" id="L365">    return declaredActivity</span>
-<span class="fc" id="L366">        .getAssessment()</span>
-<span class="fc" id="L367">        .orElseGet(</span>
+<span class="fc" id="L375">    return declaredActivity</span>
+<span class="fc" id="L376">        .getAssessment()</span>
+<span class="fc" id="L377">        .orElseGet(</span>
             () -&gt;
-<span class="fc" id="L369">                DeclaredActivityAssessment.requested(</span>
-<span class="fc" id="L370">                    declaredActivity.getSubmittedAt().orElse(null)));</span>
+<span class="fc" id="L379">                DeclaredActivityAssessment.requested(</span>
+<span class="fc" id="L380">                    declaredActivity.getSubmittedAt().orElse(null)));</span>
   }
 
   private ActivityAssessment requireAssessmentSetup(Activity activity) {
-<span class="fc" id="L374">    return activity</span>
-<span class="fc" id="L375">        .getAssessment()</span>
-<span class="pc bpc" id="L376" title="1 of 2 branches missed.">        .filter(activityAssessment -&gt; !activityAssessment.isEmpty())</span>
-<span class="fc" id="L377">        .orElseThrow(</span>
-<span class="fc" id="L378">            () -&gt; new ActivityAssessmentException(&quot;This activity does not expect an assessment&quot;));</span>
+<span class="fc" id="L384">    return activity</span>
+<span class="fc" id="L385">        .getAssessment()</span>
+<span class="pc bpc" id="L386" title="1 of 2 branches missed.">        .filter(activityAssessment -&gt; !activityAssessment.isEmpty())</span>
+<span class="fc" id="L387">        .orElseThrow(</span>
+<span class="fc" id="L388">            () -&gt; new ActivityAssessmentException(&quot;This activity does not expect an assessment&quot;));</span>
   }
 
   private void requireCompleteAssessment(
       ActivityAssessment setup, DeclaredActivityAssessment assessment) {
-<span class="fc bfc" id="L383" title="All 2 branches covered.">    if (setup.isCommentRequired()) {</span>
-<span class="fc" id="L384">      requireNotBlankAndMaxLength(&quot;comment&quot;, assessment.comment(), RICH_TEXT_LENGTH);</span>
+<span class="fc bfc" id="L393" title="All 2 branches covered.">    if (setup.isCommentRequired()) {</span>
+<span class="fc" id="L394">      requireNotBlankAndMaxLength(&quot;comment&quot;, assessment.comment(), RICH_TEXT_LENGTH);</span>
     }
-<span class="fc bfc" id="L386" title="All 2 branches covered.">    if (setup.isGradeEnabled()) {</span>
-<span class="fc" id="L387">      requireNotNull(&quot;grade&quot;, assessment.grade());</span>
+<span class="fc bfc" id="L396" title="All 2 branches covered.">    if (setup.isGradeEnabled()) {</span>
+<span class="fc" id="L397">      requireNotNull(&quot;grade&quot;, assessment.grade());</span>
     }
-<span class="fc bfc" id="L389" title="All 2 branches covered.">    if (setup.isValidationEnabled()) {</span>
-<span class="fc" id="L390">      requireNotNull(&quot;validation&quot;, assessment.validation());</span>
+<span class="fc bfc" id="L399" title="All 2 branches covered.">    if (setup.isValidationEnabled()) {</span>
+<span class="fc" id="L400">      requireNotNull(&quot;validation&quot;, assessment.validation());</span>
     }
-<span class="fc" id="L392">  }</span>
+<span class="fc" id="L402">  }</span>
 
   private void validateAssessment(ActivityAssessment setup, DeclaredActivityAssessment assessment) {
-<span class="fc" id="L395">    validateOptionalTextMaxLength(&quot;comment&quot;, assessment.comment(), RICH_TEXT_LENGTH);</span>
+<span class="fc" id="L405">    validateOptionalTextMaxLength(&quot;comment&quot;, assessment.comment(), RICH_TEXT_LENGTH);</span>
 
-<span class="pc bpc" id="L397" title="1 of 4 branches missed.">    if (assessment.comment() != null &amp;&amp; !setup.isCommentEnabled()) {</span>
-<span class="nc" id="L398">      throw new ActivityAssessmentException(&quot;This activity does not expect an assessment comment&quot;);</span>
+<span class="pc bpc" id="L407" title="1 of 4 branches missed.">    if (assessment.comment() != null &amp;&amp; !setup.isCommentEnabled()) {</span>
+<span class="nc" id="L408">      throw new ActivityAssessmentException(&quot;This activity does not expect an assessment comment&quot;);</span>
     }
-<span class="pc bpc" id="L400" title="1 of 4 branches missed.">    if (assessment.validation() != null &amp;&amp; !setup.isValidationEnabled()) {</span>
-<span class="nc" id="L401">      throw new ActivityAssessmentException(</span>
+<span class="pc bpc" id="L410" title="1 of 4 branches missed.">    if (assessment.validation() != null &amp;&amp; !setup.isValidationEnabled()) {</span>
+<span class="nc" id="L411">      throw new ActivityAssessmentException(</span>
           &quot;This activity does not expect an assessment validation&quot;);
     }
-<span class="fc bfc" id="L404" title="All 2 branches covered.">    if (assessment.grade() != null) {</span>
-<span class="fc bfc" id="L405" title="All 2 branches covered.">      if (!setup.isGradeEnabled()) {</span>
-<span class="fc" id="L406">        throw new ActivityAssessmentException(&quot;This activity does not expect an assessment grade&quot;);</span>
+<span class="fc bfc" id="L414" title="All 2 branches covered.">    if (assessment.grade() != null) {</span>
+<span class="fc bfc" id="L415" title="All 2 branches covered.">      if (!setup.isGradeEnabled()) {</span>
+<span class="fc" id="L416">        throw new ActivityAssessmentException(&quot;This activity does not expect an assessment grade&quot;);</span>
       }
-<span class="pc bpc" id="L408" title="1 of 4 branches missed.">      if (assessment.grade() &lt; MIN_ASSESSMENT_GRADE || assessment.grade() &gt; setup.grade()) {</span>
-<span class="fc" id="L409">        throw new ActivityAssessmentException(</span>
+<span class="pc bpc" id="L418" title="1 of 4 branches missed.">      if (assessment.grade() &lt; MIN_ASSESSMENT_GRADE || assessment.grade() &gt; setup.grade()) {</span>
+<span class="fc" id="L419">        throw new ActivityAssessmentException(</span>
             &quot;The assessment grade must be between %d and %d&quot;
-<span class="fc" id="L411">                .formatted(MIN_ASSESSMENT_GRADE, setup.grade()));</span>
+<span class="fc" id="L421">                .formatted(MIN_ASSESSMENT_GRADE, setup.grade()));</span>
       }
     }
-<span class="fc" id="L414">  }</span>
+<span class="fc" id="L424">  }</span>
 
   @Override
   public DeclaredActivityDetailsData getDeclaredActivityDetails(UUID declaredActivityId) {
-<span class="fc" id="L418">    DeclaredActivity declaredActivity =</span>
-<span class="fc" id="L419">        fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);</span>
+<span class="fc" id="L428">    DeclaredActivity declaredActivity =</span>
+<span class="fc" id="L429">        fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);</span>
 
-<span class="fc" id="L421">    consultSentAssessmentByStudent(declaredActivity);</span>
+<span class="fc" id="L431">    consultSentAssessmentByStudent(declaredActivity);</span>
 
-<span class="fc" id="L423">    List&lt;FeedbackData&gt; feedbacks =</span>
-<span class="fc" id="L424">        feedbackRepository.findAllByDeclaredActivityId(declaredActivityId).stream()</span>
-<span class="fc" id="L425">            .map(</span>
+<span class="fc" id="L433">    List&lt;FeedbackData&gt; feedbacks =</span>
+<span class="fc" id="L434">        feedbackRepository.findAllByDeclaredActivityId(declaredActivityId).stream()</span>
+<span class="fc" id="L435">            .map(</span>
                 feedback -&gt;
-<span class="fc" id="L427">                    feedbackService.getStudentFeedbackDetails(</span>
-<span class="fc" id="L428">                        declaredActivity.getStudent().getUser(), feedback))</span>
-<span class="fc" id="L429">            .toList();</span>
-<span class="fc" id="L430">    return new DeclaredActivityDetailsData(declaredActivity, feedbacks);</span>
+<span class="fc" id="L437">                    feedbackService.getStudentFeedbackDetails(</span>
+<span class="fc" id="L438">                        declaredActivity.getStudent().getUser(), feedback))</span>
+<span class="fc" id="L439">            .toList();</span>
+<span class="fc" id="L440">    return new DeclaredActivityDetailsData(declaredActivity, feedbacks);</span>
   }
 
   @Override
   public DeclaredActivityAssessmentDetailsData getAssessmentDetails(UUID declaredActivityId) {
-<span class="fc" id="L435">    Staff staff = loggedInUserService.getLoggedInStaff();</span>
+<span class="fc" id="L445">    Staff staff = loggedInUserService.getLoggedInStaff();</span>
     var graph =
-<span class="fc" id="L437">        FetchGraph.init()</span>
-<span class="fc" id="L438">            .add(&quot;student&quot;)</span>
-<span class="fc" id="L439">            .fetch(&quot;user&quot;)</span>
-<span class="fc" id="L440">            .root()</span>
-<span class="fc" id="L441">            .add(&quot;activity&quot;)</span>
-<span class="fc" id="L442">            .fetch(&quot;author&quot;)</span>
-<span class="fc" id="L443">            .fetch(&quot;files&quot;);</span>
+<span class="fc" id="L447">        FetchGraph.init()</span>
+<span class="fc" id="L448">            .add(&quot;student&quot;)</span>
+<span class="fc" id="L449">            .fetch(&quot;user&quot;)</span>
+<span class="fc" id="L450">            .root()</span>
+<span class="fc" id="L451">            .add(&quot;activity&quot;)</span>
+<span class="fc" id="L452">            .fetch(&quot;author&quot;)</span>
+<span class="fc" id="L453">            .fetch(&quot;files&quot;);</span>
 
-<span class="fc" id="L445">    DeclaredActivity declaredActivity =</span>
+<span class="fc" id="L455">    DeclaredActivity declaredActivity =</span>
         declaredActivityRepository
-<span class="fc" id="L447">            .findById(declaredActivityId, graph)</span>
-<span class="fc" id="L448">            .orElseThrow(DeclaredActivityNotFoundException::new);</span>
+<span class="fc" id="L457">            .findById(declaredActivityId, graph)</span>
+<span class="fc" id="L458">            .orElseThrow(DeclaredActivityNotFoundException::new);</span>
 
-<span class="fc" id="L450">    activityAuthorizationService.checkRight(</span>
-<span class="fc" id="L451">        staff, declaredActivity.getActivity().getId(), EActivityRight.EVALUATION);</span>
+<span class="fc" id="L460">    activityAuthorizationService.checkRight(</span>
+<span class="fc" id="L461">        staff, declaredActivity.getActivity().getId(), EActivityRight.EVALUATION);</span>
 
-<span class="fc bfc" id="L453" title="All 2 branches covered.">    if (declaredActivity.getSubmittedAt().isEmpty()) {</span>
-<span class="fc" id="L454">      throw new DeclaredActivityNotFoundException();</span>
+<span class="fc bfc" id="L463" title="All 2 branches covered.">    if (declaredActivity.getSubmittedAt().isEmpty()) {</span>
+<span class="fc" id="L464">      throw new DeclaredActivityNotFoundException();</span>
     }
 
-<span class="fc" id="L457">    DeclaredActivityAssessment assessment = openAssessmentByStaff(declaredActivity);</span>
+<span class="fc" id="L467">    DeclaredActivityAssessment assessment = openAssessmentByStaff(declaredActivity);</span>
 
-<span class="fc" id="L459">    return new DeclaredActivityAssessmentDetailsData(</span>
-<span class="fc" id="L460">        declaredActivity, getAssociations(declaredActivityId), assessment.status());</span>
+<span class="fc" id="L469">    return new DeclaredActivityAssessmentDetailsData(</span>
+<span class="fc" id="L470">        declaredActivity, getAssociations(declaredActivityId), assessment.status());</span>
   }
 
   private DeclaredActivityAssociationsData getAssociations(UUID declaredActivityId) {
-<span class="fc" id="L464">    var associations =</span>
-<span class="fc" id="L465">        associationService.getAllOf(</span>
+<span class="fc" id="L474">    var associations =</span>
+<span class="fc" id="L475">        associationService.getAllOf(</span>
             declaredActivityId,
             DeclaredActivity.class,
-<span class="fc" id="L468">            List.of(</span>
+<span class="fc" id="L478">            List.of(</span>
                 EAssociationType.DECLARED_ACTIVITY_TRACE,
                 EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL,
                 EAssociationType.DECLARED_ACTIVITY_DECLARED_EXPERIENCE));
 
-<span class="fc" id="L473">    List&lt;Trace&gt; traces =</span>
-<span class="fc" id="L474">        traceService.findAllTracesById(</span>
-<span class="fc" id="L475">            AssociationUtils.getIdsOf(</span>
+<span class="fc" id="L483">    List&lt;Trace&gt; traces =</span>
+<span class="fc" id="L484">        traceService.findAllTracesById(</span>
+<span class="fc" id="L485">            AssociationUtils.getIdsOf(</span>
                 associations, EAssociationType.DECLARED_ACTIVITY_TRACE, Trace.class));
-<span class="fc" id="L477">    List&lt;SkillProgress&gt; skillProgresses =</span>
-<span class="fc" id="L478">        skillProgressService.findAllSkillProgressesByIds(</span>
-<span class="fc" id="L479">            AssociationUtils.getIdsOf(</span>
+<span class="fc" id="L487">    List&lt;SkillProgress&gt; skillProgresses =</span>
+<span class="fc" id="L488">        skillProgressService.findAllSkillProgressesByIds(</span>
+<span class="fc" id="L489">            AssociationUtils.getIdsOf(</span>
                 associations,
                 EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL,
                 SkillProgress.class));
-<span class="fc" id="L483">    List&lt;DeclaredExperience&gt; declaredExperiences =</span>
-<span class="fc" id="L484">        declaredExperienceService.findAllByIds(</span>
-<span class="fc" id="L485">            AssociationUtils.getIdsOf(</span>
+<span class="fc" id="L493">    List&lt;DeclaredExperience&gt; declaredExperiences =</span>
+<span class="fc" id="L494">        declaredExperienceService.findAllByIds(</span>
+<span class="fc" id="L495">            AssociationUtils.getIdsOf(</span>
                 associations,
                 EAssociationType.DECLARED_ACTIVITY_DECLARED_EXPERIENCE,
                 DeclaredExperience.class));
 
-<span class="fc" id="L490">    return new DeclaredActivityAssociationsData(</span>
+<span class="fc" id="L500">    return new DeclaredActivityAssociationsData(</span>
         traces,
-<span class="pc bpc" id="L492" title="1 of 2 branches missed.">        skillProgresses.isEmpty()</span>
-<span class="fc" id="L493">            ? List.of()</span>
-<span class="pc" id="L494">            : skillProgressService.getSkillProgressDetails(skillProgresses),</span>
+<span class="pc bpc" id="L502" title="1 of 2 branches missed.">        skillProgresses.isEmpty()</span>
+<span class="fc" id="L503">            ? List.of()</span>
+<span class="pc" id="L504">            : skillProgressService.getSkillProgressDetails(skillProgresses),</span>
         declaredExperiences);
   }
 
   private void validateActivityDates(LocalDate startDate, LocalDate endDate, Instant subscribedAt) {
 
-<span class="fc bfc" id="L500" title="All 6 branches covered.">    if ((startDate == null) != (endDate == null)) {</span>
-<span class="fc" id="L501">      throw new DeclaredActivityDatesException();</span>
+<span class="fc bfc" id="L510" title="All 6 branches covered.">    if ((startDate == null) != (endDate == null)) {</span>
+<span class="fc" id="L511">      throw new DeclaredActivityDatesException();</span>
     }
 
-<span class="fc bfc" id="L504" title="All 2 branches covered.">    if (startDate != null) {</span>
+<span class="fc bfc" id="L514" title="All 2 branches covered.">    if (startDate != null) {</span>
 
-<span class="fc" id="L506">      validateDateOrder(startDate, endDate);</span>
+<span class="fc" id="L516">      validateDateOrder(startDate, endDate);</span>
 
-<span class="fc" id="L508">      LocalDate subscriptionDate = subscribedAt.atZone(ZoneId.systemDefault()).toLocalDate();</span>
+<span class="fc" id="L518">      LocalDate subscriptionDate = subscribedAt.atZone(ZoneId.systemDefault()).toLocalDate();</span>
 
-<span class="fc bfc" id="L510" title="All 2 branches covered.">      if (startDate.isBefore(subscriptionDate)) {</span>
-<span class="fc" id="L511">        throw new DeclaredActivityStartDateBeforeSubscriptionException();</span>
+<span class="fc bfc" id="L520" title="All 2 branches covered.">      if (startDate.isBefore(subscriptionDate)) {</span>
+<span class="fc" id="L521">        throw new DeclaredActivityStartDateBeforeSubscriptionException();</span>
       }
     }
-<span class="fc" id="L514">  }</span>
+<span class="fc" id="L524">  }</span>
 
   @Override
   public void updateDeclaredActivity(
       UUID declaredActivityId, LocalDate startDate, LocalDate endDate, Boolean valorized) {
 
-<span class="fc" id="L520">    var student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L521">    log.debug(&quot;Authenticated student id: {}&quot;, student.getId());</span>
+<span class="fc" id="L530">    var student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L531">    log.debug(&quot;Authenticated student id: {}&quot;, student.getId());</span>
 
-<span class="fc" id="L523">    log.debug(&quot;Fetching DeclaredActivity with id: {}&quot;, declaredActivityId);</span>
-<span class="fc" id="L524">    var declaredActivity =</span>
+<span class="fc" id="L533">    log.debug(&quot;Fetching DeclaredActivity with id: {}&quot;, declaredActivityId);</span>
+<span class="fc" id="L534">    var declaredActivity =</span>
         declaredActivityRepository
-<span class="fc" id="L526">            .findById(declaredActivityId)</span>
-<span class="fc" id="L527">            .orElseThrow(</span>
+<span class="fc" id="L536">            .findById(declaredActivityId)</span>
+<span class="fc" id="L537">            .orElseThrow(</span>
                 () -&gt;
-<span class="nc" id="L529">                    new DeclaredActivityNotFoundException(</span>
+<span class="nc" id="L539">                    new DeclaredActivityNotFoundException(</span>
                         &quot;DeclaredActivity not found with id: &quot; + declaredActivityId));
-<span class="pc bpc" id="L531" title="1 of 2 branches missed.">    if (!declaredActivity.getStudent().equals(student)) {</span>
-<span class="nc" id="L532">      throw new UserNotAuthorizedException();</span>
+<span class="pc bpc" id="L541" title="1 of 2 branches missed.">    if (!declaredActivity.getStudent().equals(student)) {</span>
+<span class="nc" id="L542">      throw new UserNotAuthorizedException();</span>
     }
 
-<span class="fc bfc" id="L535" title="All 2 branches covered.">    if (declaredActivity.isUnsubscribed()) {</span>
-<span class="fc" id="L536">      throw new DeclaredActivityUnsubscribedException();</span>
+<span class="fc bfc" id="L545" title="All 2 branches covered.">    if (declaredActivity.isUnsubscribed()) {</span>
+<span class="fc" id="L546">      throw new DeclaredActivityUnsubscribedException();</span>
     }
 
-<span class="pc bpc" id="L539" title="1 of 2 branches missed.">    if (!isEditable(getDeclaredActivityStatus(declaredActivity))) {</span>
-<span class="nc" id="L540">      throw new DeclaredActivityLockedException();</span>
+<span class="pc bpc" id="L549" title="1 of 2 branches missed.">    if (!isEditable(getDeclaredActivityStatus(declaredActivity))) {</span>
+<span class="nc" id="L550">      throw new DeclaredActivityLockedException();</span>
     }
 
-<span class="pc bpc" id="L543" title="1 of 4 branches missed.">    if (startDate != null || endDate != null) {</span>
-<span class="fc" id="L544">      validateActivityDates(startDate, endDate, declaredActivity.getCreatedAt());</span>
-<span class="fc" id="L545">      declaredActivity.setStartDate(startDate);</span>
-<span class="fc" id="L546">      declaredActivity.setEndDate(endDate);</span>
+<span class="pc bpc" id="L553" title="1 of 4 branches missed.">    if (startDate != null || endDate != null) {</span>
+<span class="fc" id="L554">      validateActivityDates(startDate, endDate, declaredActivity.getCreatedAt());</span>
+<span class="fc" id="L555">      declaredActivity.setStartDate(startDate);</span>
+<span class="fc" id="L556">      declaredActivity.setEndDate(endDate);</span>
     }
 
-<span class="fc bfc" id="L549" title="All 2 branches covered.">    if (valorized != null) {</span>
-<span class="fc" id="L550">      declaredActivity.setValorized(valorized);</span>
+<span class="fc bfc" id="L559" title="All 2 branches covered.">    if (valorized != null) {</span>
+<span class="fc" id="L560">      declaredActivity.setValorized(valorized);</span>
     }
 
-<span class="fc" id="L553">    declaredActivityRepository.save(declaredActivity);</span>
-<span class="fc" id="L554">  }</span>
+<span class="fc" id="L563">    declaredActivityRepository.save(declaredActivity);</span>
+<span class="fc" id="L564">  }</span>
 
   @Override
   public PagedResult&lt;DeclaredActivity&gt; searchDeclaredActivity(
       String keyword, PageCriteria pageCriteria) {
-<span class="fc" id="L559">    var student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L560">    var graph = FetchGraph.init().fetch(&quot;activity&quot;);</span>
-<span class="fc" id="L561">    return declaredActivityRepository.findAllByStudent(student, keyword, pageCriteria, graph);</span>
+<span class="fc" id="L569">    var student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L570">    var graph = FetchGraph.init().fetch(&quot;activity&quot;);</span>
+<span class="fc" id="L571">    return declaredActivityRepository.findAllByStudent(student, keyword, pageCriteria, graph);</span>
   }
 
   @Override
   public List&lt;DeclaredActivity&gt; findAllDeclaredActivitiesByIds(List&lt;UUID&gt; ids) {
-<span class="fc" id="L566">    return declaredActivityRepository.findAllById(ids);</span>
+<span class="fc" id="L576">    return declaredActivityRepository.findAllById(ids);</span>
   }
 
   @Override
   public List&lt;DeclaredActivity&gt; findAllEditableByIds(List&lt;UUID&gt; ids) {
-<span class="nc" id="L571">    var graph = FetchGraph.init().fetch(&quot;activity&quot;);</span>
-<span class="nc" id="L572">    return declaredActivityRepository.findAllEditableByIds(ids, graph);</span>
+<span class="nc" id="L581">    var graph = FetchGraph.init().fetch(&quot;activity&quot;);</span>
+<span class="nc" id="L582">    return declaredActivityRepository.findAllEditableByIds(ids, graph);</span>
   }
 
   @Override
   public DeclaredActivity fetchActivityAndCheckLoggedInStudentAuthorization(
       UUID declaredActivityId) {
-<span class="fc" id="L578">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L588">    Student student = loggedInUserService.getLoggedInStudent();</span>
     var graph =
-<span class="fc" id="L580">        FetchGraph.init()</span>
-<span class="fc" id="L581">            .add(&quot;student&quot;)</span>
-<span class="fc" id="L582">            .fetch(&quot;user&quot;)</span>
-<span class="fc" id="L583">            .root()</span>
-<span class="fc" id="L584">            .add(&quot;activity&quot;)</span>
-<span class="fc" id="L585">            .fetch(&quot;author&quot;)</span>
-<span class="fc" id="L586">            .fetch(&quot;files&quot;);</span>
+<span class="fc" id="L590">        FetchGraph.init()</span>
+<span class="fc" id="L591">            .add(&quot;student&quot;)</span>
+<span class="fc" id="L592">            .fetch(&quot;user&quot;)</span>
+<span class="fc" id="L593">            .root()</span>
+<span class="fc" id="L594">            .add(&quot;activity&quot;)</span>
+<span class="fc" id="L595">            .fetch(&quot;author&quot;)</span>
+<span class="fc" id="L596">            .fetch(&quot;files&quot;);</span>
 
-<span class="fc" id="L588">    DeclaredActivity declaredActivity =</span>
+<span class="fc" id="L598">    DeclaredActivity declaredActivity =</span>
         declaredActivityRepository
-<span class="fc" id="L590">            .findById(declaredActivityId, graph)</span>
-<span class="fc" id="L591">            .orElseThrow(DeclaredActivityNotFoundException::new);</span>
+<span class="fc" id="L600">            .findById(declaredActivityId, graph)</span>
+<span class="fc" id="L601">            .orElseThrow(DeclaredActivityNotFoundException::new);</span>
 
-<span class="fc bfc" id="L593" title="All 2 branches covered.">    if (!declaredActivity.getStudent().equals(student)) {</span>
-<span class="fc" id="L594">      throw new UserNotAuthorizedException();</span>
+<span class="fc bfc" id="L603" title="All 2 branches covered.">    if (!declaredActivity.getStudent().equals(student)) {</span>
+<span class="fc" id="L604">      throw new UserNotAuthorizedException();</span>
     }
-<span class="fc" id="L596">    return declaredActivity;</span>
+<span class="fc" id="L606">    return declaredActivity;</span>
   }
 
   @Override
   public boolean areDeclaredActivitiesUnlocked(List&lt;UUID&gt; declaredActivityIds) {
-<span class="fc bfc" id="L601" title="All 2 branches covered.">    if (declaredActivityIds.isEmpty()) {</span>
-<span class="fc" id="L602">      return true;</span>
+<span class="fc bfc" id="L611" title="All 2 branches covered.">    if (declaredActivityIds.isEmpty()) {</span>
+<span class="fc" id="L612">      return true;</span>
     }
 
-<span class="fc" id="L605">    var declaredActivities = findAllDeclaredActivitiesByIds(declaredActivityIds);</span>
-<span class="fc" id="L606">    var declaredActivityIdsWithFeedback =</span>
-<span class="fc" id="L607">        findFeedbackPresenceByDeclaredActivityId(declaredActivityIds);</span>
+<span class="fc" id="L615">    var declaredActivities = findAllDeclaredActivitiesByIds(declaredActivityIds);</span>
+<span class="fc" id="L616">    var declaredActivityIdsWithFeedback =</span>
+<span class="fc" id="L617">        findFeedbackPresenceByDeclaredActivityId(declaredActivityIds);</span>
 
-<span class="fc" id="L609">    return declaredActivities.stream()</span>
-<span class="fc" id="L610">        .noneMatch(</span>
+<span class="fc" id="L619">    return declaredActivities.stream()</span>
+<span class="fc" id="L620">        .noneMatch(</span>
             declaredActivity -&gt;
-<span class="fc" id="L612">                isSubmittedOrFinished(</span>
+<span class="fc" id="L622">                isSubmittedOrFinished(</span>
                     declaredActivity,
-<span class="fc" id="L614">                    declaredActivityIdsWithFeedback.contains(declaredActivity.getId())));</span>
+<span class="fc" id="L624">                    declaredActivityIdsWithFeedback.contains(declaredActivity.getId())));</span>
   }
 
   @Override
   public void checkDeclaredActivitiesUnlocked(List&lt;UUID&gt; declaredActivityIds) {
-<span class="fc bfc" id="L619" title="All 2 branches covered.">    if (!areDeclaredActivitiesUnlocked(declaredActivityIds)) {</span>
-<span class="fc" id="L620">      throw new DeclaredActivityLockedException();</span>
+<span class="fc bfc" id="L629" title="All 2 branches covered.">    if (!areDeclaredActivitiesUnlocked(declaredActivityIds)) {</span>
+<span class="fc" id="L630">      throw new DeclaredActivityLockedException();</span>
     }
-<span class="fc" id="L622">  }</span>
+<span class="fc" id="L632">  }</span>
 
   @Override
   public EDeclaredActivityStatus getDeclaredActivityStatus(DeclaredActivity declaredActivity) {
-<span class="fc" id="L626">    boolean hasActiveFeedback =</span>
+<span class="fc" id="L636">    boolean hasActiveFeedback =</span>
         feedbackRepository
-<span class="fc" id="L628">            .findDeclaredActivityIdsHavingActiveFeedbacks(List.of(declaredActivity.getId()))</span>
-<span class="fc" id="L629">            .contains(declaredActivity.getId());</span>
+<span class="fc" id="L638">            .findDeclaredActivityIdsHavingActiveFeedbacks(List.of(declaredActivity.getId()))</span>
+<span class="fc" id="L639">            .contains(declaredActivity.getId());</span>
 
-<span class="fc" id="L631">    return getDeclaredActivityStatus(declaredActivity, hasActiveFeedback);</span>
+<span class="fc" id="L641">    return getDeclaredActivityStatus(declaredActivity, hasActiveFeedback);</span>
   }
 
   @Override
   public Map&lt;DeclaredActivity, EDeclaredActivityStatus&gt; getDeclaredActivityStatus(
       List&lt;DeclaredActivity&gt; declaredActivities) {
-<span class="fc" id="L637">    var declaredActivityIds = declaredActivities.stream().map(DeclaredActivity::getId).toList();</span>
+<span class="fc" id="L647">    var declaredActivityIds = declaredActivities.stream().map(DeclaredActivity::getId).toList();</span>
 
-<span class="fc" id="L639">    var idsWithFeedback =</span>
-<span class="fc" id="L640">        new HashSet&lt;&gt;(findFeedbackPresenceByDeclaredActivityId(declaredActivityIds));</span>
+<span class="fc" id="L649">    var idsWithFeedback =</span>
+<span class="fc" id="L650">        new HashSet&lt;&gt;(findFeedbackPresenceByDeclaredActivityId(declaredActivityIds));</span>
 
-<span class="fc" id="L642">    return declaredActivities.stream()</span>
-<span class="fc" id="L643">        .collect(</span>
-<span class="fc" id="L644">            Collectors.toMap(</span>
-<span class="fc" id="L645">                Function.identity(),</span>
+<span class="fc" id="L652">    return declaredActivities.stream()</span>
+<span class="fc" id="L653">        .collect(</span>
+<span class="fc" id="L654">            Collectors.toMap(</span>
+<span class="fc" id="L655">                Function.identity(),</span>
                 declaredActivity -&gt;
-<span class="fc" id="L647">                    getDeclaredActivityStatus(</span>
-<span class="fc" id="L648">                        declaredActivity, idsWithFeedback.contains(declaredActivity.getId()))));</span>
+<span class="fc" id="L657">                    getDeclaredActivityStatus(</span>
+<span class="fc" id="L658">                        declaredActivity, idsWithFeedback.contains(declaredActivity.getId()))));</span>
   }
 
   private EDeclaredActivityStatus getDeclaredActivityStatus(
       DeclaredActivity declaredActivity, boolean hasActiveFeedback) {
-<span class="fc bfc" id="L653" title="All 2 branches covered.">    if (declaredActivity.isUnsubscribed()) {</span>
-<span class="fc" id="L654">      return EDeclaredActivityStatus.UNSUBSCRIBED;</span>
+<span class="fc bfc" id="L663" title="All 2 branches covered.">    if (declaredActivity.isUnsubscribed()) {</span>
+<span class="fc" id="L664">      return EDeclaredActivityStatus.UNSUBSCRIBED;</span>
     }
 
-<span class="fc bfc" id="L657" title="All 2 branches covered.">    if (declaredActivity.getFinishedAt().isPresent()) {</span>
-<span class="fc" id="L658">      return EDeclaredActivityStatus.COMPLETED;</span>
+<span class="fc bfc" id="L667" title="All 2 branches covered.">    if (declaredActivity.getFinishedAt().isPresent()) {</span>
+<span class="fc" id="L668">      return EDeclaredActivityStatus.COMPLETED;</span>
     }
 
-<span class="fc bfc" id="L661" title="All 2 branches covered.">    if (declaredActivity.getSubmittedAt().isPresent()) {</span>
-<span class="fc" id="L662">      return EDeclaredActivityStatus.SUBMITTED_FOR_ASSESSMENT;</span>
+<span class="fc bfc" id="L671" title="All 2 branches covered.">    if (declaredActivity.getSubmittedAt().isPresent()) {</span>
+<span class="fc" id="L672">      return EDeclaredActivityStatus.SUBMITTED_FOR_ASSESSMENT;</span>
     }
 
-<span class="fc bfc" id="L665" title="All 2 branches covered.">    if (hasActiveFeedback) {</span>
-<span class="fc" id="L666">      return EDeclaredActivityStatus.SUBMITTED_FOR_FEEDBACK;</span>
+<span class="fc bfc" id="L675" title="All 2 branches covered.">    if (hasActiveFeedback) {</span>
+<span class="fc" id="L676">      return EDeclaredActivityStatus.SUBMITTED_FOR_FEEDBACK;</span>
     }
 
-<span class="fc bfc" id="L669" title="All 2 branches covered.">    if (declaredActivity.getStartedAt().isPresent()</span>
-<span class="pc bpc" id="L670" title="1 of 2 branches missed.">        &amp;&amp; declaredActivity.getStartedAt().get().isBefore(Instant.now())) {</span>
-<span class="fc" id="L671">      return EDeclaredActivityStatus.IN_PROGRESS;</span>
+<span class="fc bfc" id="L679" title="All 2 branches covered.">    if (declaredActivity.getStartedAt().isPresent()</span>
+<span class="pc bpc" id="L680" title="1 of 2 branches missed.">        &amp;&amp; declaredActivity.getStartedAt().get().isBefore(Instant.now())) {</span>
+<span class="fc" id="L681">      return EDeclaredActivityStatus.IN_PROGRESS;</span>
     }
 
-<span class="fc" id="L674">    return EDeclaredActivityStatus.SUBSCRIBED;</span>
+<span class="fc" id="L684">    return EDeclaredActivityStatus.SUBSCRIBED;</span>
   }
 
   private List&lt;UUID&gt; findFeedbackPresenceByDeclaredActivityId(List&lt;UUID&gt; declaredActivityIds) {
-<span class="pc bpc" id="L678" title="1 of 2 branches missed.">    if (declaredActivityIds.isEmpty()) {</span>
-<span class="nc" id="L679">      return List.of();</span>
+<span class="pc bpc" id="L688" title="1 of 2 branches missed.">    if (declaredActivityIds.isEmpty()) {</span>
+<span class="nc" id="L689">      return List.of();</span>
     }
 
-<span class="fc" id="L682">    return feedbackRepository.findDeclaredActivityIdsHavingActiveFeedbacks(declaredActivityIds);</span>
+<span class="fc" id="L692">    return feedbackRepository.findDeclaredActivityIdsHavingActiveFeedbacks(declaredActivityIds);</span>
   }
 
   @Override
   public int countEnrolledStudents(Activity activity) {
-<span class="fc" id="L687">    return declaredActivityRepository.countEnrolledByActivity(activity);</span>
+<span class="fc" id="L697">    return declaredActivityRepository.countEnrolledByActivity(activity);</span>
   }
 
   @Override
   public int countUnsubscriptionsSince(Activity activity, Instant since) {
-<span class="fc" id="L692">    return declaredActivityRepository.countUnsubscribedByActivitySince(activity, since);</span>
+<span class="fc" id="L702">    return declaredActivityRepository.countUnsubscribedByActivitySince(activity, since);</span>
   }
 
   @Override
   public List&lt;DeclaredActivity&gt; getEnrolledStudents(Activity activity) {
-<span class="fc" id="L697">    return declaredActivityRepository.findAllEnrolledByActivity(activity, enrolledStudentGraph());</span>
+<span class="fc" id="L707">    return declaredActivityRepository.findAllEnrolledByActivity(activity, enrolledStudentGraph());</span>
   }
 
   @Override
   public List&lt;DeclaredActivity&gt; getEnrolledStudentsNotViewedSince(
       Activity activity, Instant since) {
-<span class="fc" id="L703">    return declaredActivityRepository.findAllEnrolledNotViewedSince(</span>
-<span class="fc" id="L704">        activity, since, enrolledStudentGraph());</span>
+<span class="fc" id="L713">    return declaredActivityRepository.findAllEnrolledNotViewedSince(</span>
+<span class="fc" id="L714">        activity, since, enrolledStudentGraph());</span>
   }
 
   private static FetchGraph enrolledStudentGraph() {
-<span class="fc" id="L708">    return FetchGraph.init().add(&quot;student&quot;).fetch(&quot;user&quot;).root().add(&quot;activity&quot;).fetch(&quot;author&quot;);</span>
+<span class="fc" id="L718">    return FetchGraph.init().add(&quot;student&quot;).fetch(&quot;user&quot;).root().add(&quot;activity&quot;).fetch(&quot;author&quot;);</span>
   }
 
   @Override
   public List&lt;UUID&gt; getEnrolledStudentIds(Activity activity) {
-<span class="fc" id="L713">    return declaredActivityRepository.findEnrolledStudentIdsByActivity(activity);</span>
+<span class="fc" id="L723">    return declaredActivityRepository.findEnrolledStudentIdsByActivity(activity);</span>
   }
 
   @Override
   public boolean isEnrolled(Activity activity, Student student) {
-<span class="fc" id="L718">    return declaredActivityRepository</span>
-<span class="fc" id="L719">        .findByActivity(student, activity)</span>
-<span class="fc bfc" id="L720" title="All 2 branches covered.">        .filter(declaredActivity -&gt; !declaredActivity.isUnsubscribed())</span>
-<span class="fc" id="L721">        .isPresent();</span>
+<span class="fc" id="L728">    return declaredActivityRepository</span>
+<span class="fc" id="L729">        .findByActivity(student, activity)</span>
+<span class="fc bfc" id="L730" title="All 2 branches covered.">        .filter(declaredActivity -&gt; !declaredActivity.isUnsubscribed())</span>
+<span class="fc" id="L731">        .isPresent();</span>
   }
 
   @Override
   public void delete(UUID declaredActivityId) {
-<span class="fc" id="L726">    DeclaredActivity declaredActivity =</span>
-<span class="fc" id="L727">        fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);</span>
+<span class="fc" id="L736">    DeclaredActivity declaredActivity =</span>
+<span class="fc" id="L737">        fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);</span>
 
-<span class="fc bfc" id="L729" title="All 2 branches covered.">    if (!declaredActivity.isUnsubscribed()) {</span>
-<span class="fc" id="L730">      throw new DeclaredActivityNotUnsubscribedException();</span>
+<span class="fc bfc" id="L739" title="All 2 branches covered.">    if (!declaredActivity.isUnsubscribed()) {</span>
+<span class="fc" id="L740">      throw new DeclaredActivityNotUnsubscribedException();</span>
     }
 
-<span class="fc" id="L733">    var feedbackIds =</span>
-<span class="fc" id="L734">        feedbackRepository.findAllByDeclaredActivityId(declaredActivityId).stream()</span>
-<span class="fc" id="L735">            .map(Feedback::getId)</span>
-<span class="fc" id="L736">            .toList();</span>
+<span class="fc" id="L743">    var feedbackIds =</span>
+<span class="fc" id="L744">        feedbackRepository.findAllByDeclaredActivityId(declaredActivityId).stream()</span>
+<span class="fc" id="L745">            .map(Feedback::getId)</span>
+<span class="fc" id="L746">            .toList();</span>
 
-<span class="fc" id="L738">    associationService.deleteAllOf(List.of(declaredActivityId), DeclaredActivity.class);</span>
-<span class="fc" id="L739">    notificationService.deleteNotificationsOf(ENotificationType.ASK_FOR_FEEDBACK, feedbackIds);</span>
-<span class="fc" id="L740">    notificationService.deleteNotificationsOf(</span>
-<span class="fc" id="L741">        ENotificationType.ASSESSMENT_SENT, List.of(declaredActivityId));</span>
-<span class="fc" id="L742">    notificationService.deleteNotificationsOf(</span>
-<span class="fc" id="L743">        ENotificationType.ASSESSMENT_MODIFIED, List.of(declaredActivityId));</span>
-<span class="fc" id="L744">    feedbackService.deleteByDeclaredActivityId(declaredActivity);</span>
-<span class="fc" id="L745">    declaredActivityRepository.removeFromDatabase(declaredActivity);</span>
+<span class="fc" id="L748">    associationService.deleteAllOf(List.of(declaredActivityId), DeclaredActivity.class);</span>
+<span class="fc" id="L749">    notificationService.deleteNotificationsOf(ENotificationType.ASK_FOR_FEEDBACK, feedbackIds);</span>
+<span class="fc" id="L750">    notificationService.deleteNotificationsOf(</span>
+<span class="fc" id="L751">        ENotificationType.ASSESSMENT_SENT, List.of(declaredActivityId));</span>
+<span class="fc" id="L752">    notificationService.deleteNotificationsOf(</span>
+<span class="fc" id="L753">        ENotificationType.ASSESSMENT_MODIFIED, List.of(declaredActivityId));</span>
+<span class="fc" id="L754">    feedbackService.deleteByDeclaredActivityId(declaredActivity);</span>
+<span class="fc" id="L755">    declaredActivityRepository.removeFromDatabase(declaredActivity);</span>
 
-<span class="fc" id="L747">    log.debug(</span>
+<span class="fc" id="L757">    log.debug(</span>
         &quot;Deleted the declared activity {} of student {} with its associations, notifications&quot;
             + &quot; and feedbacks&quot;,
         declaredActivityId,
-<span class="fc" id="L751">        declaredActivity.getStudent().getId());</span>
-<span class="fc" id="L752">  }</span>
+<span class="fc" id="L761">        declaredActivity.getStudent().getId());</span>
+<span class="fc" id="L762">  }</span>
 
   @Override
   public void deleteAllOfActivity(Activity activity) {
     var graph =
-<span class="fc" id="L757">        FetchGraph.init().add(&quot;student&quot;).fetch(&quot;user&quot;).root().add(&quot;activity&quot;).fetch(&quot;author&quot;);</span>
-<span class="fc" id="L758">    var declaredActivities = declaredActivityRepository.findAllByActivity(activity, graph);</span>
+<span class="fc" id="L767">        FetchGraph.init().add(&quot;student&quot;).fetch(&quot;user&quot;).root().add(&quot;activity&quot;).fetch(&quot;author&quot;);</span>
+<span class="fc" id="L768">    var declaredActivities = declaredActivityRepository.findAllByActivity(activity, graph);</span>
 
-<span class="pc bpc" id="L760" title="1 of 2 branches missed.">    if (declaredActivities.isEmpty()) {</span>
-<span class="nc" id="L761">      return;</span>
+<span class="pc bpc" id="L770" title="1 of 2 branches missed.">    if (declaredActivities.isEmpty()) {</span>
+<span class="nc" id="L771">      return;</span>
     }
 
-<span class="fc" id="L764">    var declaredActivityIds = declaredActivities.stream().map(DeclaredActivity::getId).toList();</span>
-<span class="fc" id="L765">    var feedbackIds = feedbackService.deleteAllOfDeclaredActivities(declaredActivityIds);</span>
+<span class="fc" id="L774">    var declaredActivityIds = declaredActivities.stream().map(DeclaredActivity::getId).toList();</span>
+<span class="fc" id="L775">    var feedbackIds = feedbackService.deleteAllOfDeclaredActivities(declaredActivityIds);</span>
 
-<span class="fc" id="L767">    associationService.deleteAllOf(declaredActivityIds, DeclaredActivity.class);</span>
-<span class="fc" id="L768">    notificationService.deleteNotificationsOf(ENotificationType.ASK_FOR_FEEDBACK, feedbackIds);</span>
-<span class="fc" id="L769">    notificationService.deleteNotificationsOf(</span>
+<span class="fc" id="L777">    associationService.deleteAllOf(declaredActivityIds, DeclaredActivity.class);</span>
+<span class="fc" id="L778">    notificationService.deleteNotificationsOf(ENotificationType.ASK_FOR_FEEDBACK, feedbackIds);</span>
+<span class="fc" id="L779">    notificationService.deleteNotificationsOf(</span>
         ENotificationType.ACTIVITY_MODIFIED, declaredActivityIds);
-<span class="fc" id="L771">    notificationService.deleteNotificationsOf(</span>
+<span class="fc" id="L781">    notificationService.deleteNotificationsOf(</span>
         ENotificationType.ASSESSMENT_SENT, declaredActivityIds);
-<span class="fc" id="L773">    notificationService.deleteNotificationsOf(</span>
+<span class="fc" id="L783">    notificationService.deleteNotificationsOf(</span>
         ENotificationType.ASSESSMENT_MODIFIED, declaredActivityIds);
-<span class="fc" id="L775">    declaredActivityRepository.removeAllFromDatabase(declaredActivities);</span>
+<span class="fc" id="L785">    declaredActivityRepository.removeAllFromDatabase(declaredActivities);</span>
 
-<span class="fc" id="L777">    log.debug(</span>
+<span class="fc" id="L787">    log.debug(</span>
         &quot;Deleted the {} declared activities of activity {} with their associations, notifications&quot;
             + &quot; and feedbacks&quot;,
-<span class="fc" id="L780">        declaredActivities.size(),</span>
-<span class="fc" id="L781">        activity.getId());</span>
-<span class="fc" id="L782">  }</span>
+<span class="fc" id="L790">        declaredActivities.size(),</span>
+<span class="fc" id="L791">        activity.getId());</span>
+<span class="fc" id="L792">  }</span>
 
   private boolean isSubmittedOrFinished(
       DeclaredActivity declaredActivity, boolean hasActiveFeedback) {
-<span class="fc" id="L786">    return isSubmittedOrFinished(getDeclaredActivityStatus(declaredActivity, hasActiveFeedback));</span>
+<span class="fc" id="L796">    return isSubmittedOrFinished(getDeclaredActivityStatus(declaredActivity, hasActiveFeedback));</span>
   }
 
   private boolean isSubmittedOrFinished(EDeclaredActivityStatus status) {
-<span class="pc bpc" id="L790" title="1 of 6 branches missed.">    return status == EDeclaredActivityStatus.SUBMITTED_FOR_FEEDBACK</span>
+<span class="pc bpc" id="L800" title="1 of 6 branches missed.">    return status == EDeclaredActivityStatus.SUBMITTED_FOR_FEEDBACK</span>
         || status == EDeclaredActivityStatus.SUBMITTED_FOR_ASSESSMENT
         || status == EDeclaredActivityStatus.COMPLETED;
   }
 
   private boolean isEditable(EDeclaredActivityStatus status) {
-<span class="pc bpc" id="L796" title="2 of 6 branches missed.">    return status != EDeclaredActivityStatus.UNSUBSCRIBED</span>
+<span class="pc bpc" id="L806" title="2 of 6 branches missed.">    return status != EDeclaredActivityStatus.UNSUBSCRIBED</span>
         &amp;&amp; status != EDeclaredActivityStatus.COMPLETED
         &amp;&amp; status != EDeclaredActivityStatus.SUBMITTED_FOR_ASSESSMENT;
   }
