@@ -90,6 +90,8 @@ public interface ActivityService {
 
   ActivityDraft createActivityDraft(String title);
 
+  ActivityDraft createSubActivityDraft(UUID activityDraftId, String title);
+
   ActivityDraft updateActivityDraft(
       UUID id,
       String title,

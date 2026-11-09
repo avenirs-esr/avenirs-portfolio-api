@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -18,6 +19,8 @@ import static org.mockito.Mockito.when;
 
 import fr.avenirsesr.portfolio.activity.infrastructure.fixture.ActivityFixture;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
+import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
+import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.file.domain.model.FileDownload;
@@ -25,8 +28,12 @@ import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.SubActivityOverviewData;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityDraftNotFoundException;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityPeriodExcludesSubActivitiesException;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.SubActivityAdditionNotAllowedException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.SubActivityFieldNotAllowedException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.SubActivityOperationNotAllowedException;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.SubActivityPeriodOutsideMainActivityException;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAssessment;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityDraft;
@@ -133,6 +140,39 @@ class ActivityServiceImplSubActivityTest {
     for (var draft : drafts) {
       when(activityDraftRepository.findById(draft.getId())).thenReturn(Optional.of(draft));
     }
+  }
+
+  private void updateDraft(UUID draftId, Consumer<UpdateRequest> customizer) {
+    var request = new UpdateRequest();
+    customizer.accept(request);
+    activityService.updateActivityDraft(
+        draftId,
+        request.title,
+        request.thematic,
+        request.summary,
+        request.description,
+        request.recommendedCompletionContexts,
+        request.startDate,
+        request.endDate,
+        request.traceAllowedAssociations,
+        request.feedbackAllowedIterations,
+        request.enableReflection,
+        request.links,
+        request.enableCompletionPeriod,
+        request.targetInstitutionIds,
+        request.targetGroupIds,
+        request.national,
+        request.assessment);
+  }
+
+  private void updateDraftPeriod(UUID draftId, String startDate, String endDate) {
+    updateDraft(
+        draftId,
+        request -> {
+          request.enableCompletionPeriod = true;
+          request.startDate = LocalDate.parse(startDate);
+          request.endDate = LocalDate.parse(endDate);
+        });
   }
 
   @Nested
@@ -246,26 +286,62 @@ class ActivityServiceImplSubActivityTest {
     }
 
     private void update(Consumer<UpdateRequest> customizer) {
-      var request = new UpdateRequest();
-      customizer.accept(request);
-      activityService.updateActivityDraft(
-          firstSubActivityDraft.getId(),
-          request.title,
-          request.thematic,
-          request.summary,
-          request.description,
-          request.recommendedCompletionContexts,
-          request.startDate,
-          request.endDate,
-          request.traceAllowedAssociations,
-          request.feedbackAllowedIterations,
-          request.enableReflection,
-          request.links,
-          request.enableCompletionPeriod,
-          request.targetInstitutionIds,
-          request.targetGroupIds,
-          request.national,
-          request.assessment);
+      updateDraft(firstSubActivityDraft.getId(), customizer);
+    }
+
+    private void updatePeriod(String startDate, String endDate) {
+      updateDraftPeriod(firstSubActivityDraft.getId(), startDate, endDate);
+    }
+
+    private void givenMainDraftPeriod() {
+      mainDraft.setStartDate(LocalDate.parse("2026-09-01"));
+      mainDraft.setEndDate(LocalDate.parse("2026-12-31"));
+    }
+
+    @Test
+    void thenAPeriodWithinTheOneOfTheMainDraftShouldBeAccepted() {
+      BddLogger.given("a main draft with a period");
+      givenMainDraftPeriod();
+
+      BddLogger.when("setting a period matching the bounds of the main draft");
+      updatePeriod("2026-09-01", "2026-12-31");
+
+      BddLogger.then("the period should be saved");
+      assertEquals(LocalDate.parse("2026-12-31"), firstSubActivityDraft.getEndDate().orElseThrow());
+      verify(activityDraftRepository).save(firstSubActivityDraft);
+    }
+
+    @Test
+    void thenAPeriodStartingBeforeTheMainDraftShouldBeRejected() {
+      BddLogger.given("a main draft with a period");
+      givenMainDraftPeriod();
+
+      BddLogger.then("a period starting before the main draft should be rejected");
+      assertThrows(
+          SubActivityPeriodOutsideMainActivityException.class,
+          () -> updatePeriod("2026-08-31", "2026-10-01"));
+      verify(activityDraftRepository, never()).save(any());
+    }
+
+    @Test
+    void thenAPeriodEndingAfterTheMainDraftShouldBeRejected() {
+      BddLogger.given("a main draft with a period");
+      givenMainDraftPeriod();
+
+      BddLogger.then("a period ending after the main draft should be rejected");
+      assertThrows(
+          SubActivityPeriodOutsideMainActivityException.class,
+          () -> updatePeriod("2026-10-01", "2027-01-01"));
+      verify(activityDraftRepository, never()).save(any());
+    }
+
+    @Test
+    void thenAnyPeriodShouldBeAcceptedWhenTheMainDraftHasNone() {
+      BddLogger.when("setting a period while the main draft has none");
+      updatePeriod("2030-01-01", "2030-12-31");
+
+      BddLogger.then("the period should be saved");
+      verify(activityDraftRepository).save(firstSubActivityDraft);
     }
 
     @Test
@@ -704,6 +780,344 @@ class ActivityServiceImplSubActivityTest {
       assertEquals(0, subActivity.getFeedbackAllowedIterations());
       assertTrue(subActivity.getAssessment().isEmpty());
       verify(activityAuthorizationService, never()).grantAllRights(any(), any());
+    }
+  }
+
+  @Nested
+  class WhenCreatingASubActivityDraft {
+
+    @BeforeEach
+    void setupWhen() {
+      BddLogger.given("a main draft and a sub-activity draft");
+      givenDrafts(mainDraft, firstSubActivityDraft);
+      when(activityDraftRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+    }
+
+    @Test
+    void thenTheFirstSubActivityShouldFollowTheMainDraft() {
+      BddLogger.given("a main draft without sub-activity");
+      when(activityDraftRepository.findAllSubActivitiesOf(mainDraft.getId())).thenReturn(List.of());
+
+      BddLogger.when("adding a sub-activity");
+      var subActivity = activityService.createSubActivityDraft(mainDraft.getId(), "First step");
+
+      BddLogger.then("it should be attached right after the main draft");
+      assertEquals(mainDraft.getId(), subActivity.getMainActivityId().orElseThrow());
+      assertEquals(mainDraft.getId(), subActivity.getPreviousActivityId().orElseThrow());
+      assertEquals("First step", subActivity.getTitle());
+    }
+
+    @Test
+    void thenANewSubActivityShouldBeAddedAfterTheLastOne() {
+      BddLogger.given("a main draft with two sub-activities");
+      when(activityDraftRepository.findAllSubActivitiesOf(mainDraft.getId()))
+          .thenReturn(List.of(firstSubActivityDraft, secondSubActivityDraft));
+
+      BddLogger.when("adding a sub-activity");
+      var subActivity = activityService.createSubActivityDraft(mainDraft.getId(), "Third step");
+
+      BddLogger.then("it should be attached after the last sub-activity");
+      assertEquals(mainDraft.getId(), subActivity.getMainActivityId().orElseThrow());
+      assertEquals(
+          secondSubActivityDraft.getId(), subActivity.getPreviousActivityId().orElseThrow());
+    }
+
+    @Test
+    void thenItShouldBeANeutralSubActivityOwnedByTheAuthorOfTheMainDraft() {
+      BddLogger.given("a main draft created by another staff");
+      var author = StaffFixture.create().toModel();
+      var authoredDraft = ActivityDraft.create("Authored draft", author);
+      givenDrafts(authoredDraft);
+      when(activityDraftRepository.findAllSubActivitiesOf(authoredDraft.getId()))
+          .thenReturn(List.of());
+
+      BddLogger.when("adding a sub-activity");
+      var subActivity = activityService.createSubActivityDraft(authoredDraft.getId(), "Step");
+
+      BddLogger.then("it should carry only its title and belong to the author of the main draft");
+      assertEquals(author, subActivity.getAuthor());
+      assertTrue(subActivity.getThematic().isEmpty());
+      assertTrue(subActivity.getSummary().isEmpty());
+      assertTrue(subActivity.getDescription().isEmpty());
+      assertFalse(subActivity.isEnableReflection());
+      assertEquals(0, subActivity.getTraceAllowedAssociations());
+      assertEquals(0, subActivity.getFeedbackAllowedIterations());
+      verify(activityAuthorizationService, never()).grantAllDraftRights(any(), any());
+    }
+
+    @Test
+    void thenItShouldCheckTheEditRightOnTheMainDraft() {
+      when(activityDraftRepository.findAllSubActivitiesOf(mainDraft.getId())).thenReturn(List.of());
+
+      BddLogger.when("adding a sub-activity");
+      activityService.createSubActivityDraft(mainDraft.getId(), "First step");
+
+      BddLogger.then("the edit right should be checked on the main draft");
+      verify(activityAuthorizationService)
+          .checkDraftRight(staff, mainDraft.getId(), EActivityRight.EDIT);
+    }
+
+    @Test
+    void thenAStaffWithoutTheEditRightShouldBeRejected() {
+      BddLogger.given("a staff without the edit right on the main draft");
+      doThrow(new UserNotAuthorizedException())
+          .when(activityAuthorizationService)
+          .checkDraftRight(staff, mainDraft.getId(), EActivityRight.EDIT);
+
+      BddLogger.then("adding a sub-activity should be rejected");
+      assertThrows(
+          UserNotAuthorizedException.class,
+          () -> activityService.createSubActivityDraft(mainDraft.getId(), "First step"));
+      verify(activityDraftRepository, never()).save(any());
+    }
+
+    @Test
+    void thenAddingASubActivityToAnActivityWithEnrolledStudentsShouldBeRejected() {
+      BddLogger.given("a main draft whose published activity has enrolled students");
+      var published =
+          ActivityFixture.create().withId(mainDraft.getId()).withAuthor(staff).toModel();
+      givenPublished(published);
+      when(declaredActivityService.countEnrolledStudents(published)).thenReturn(1);
+
+      BddLogger.then("adding a sub-activity should be rejected");
+      assertThrows(
+          SubActivityAdditionNotAllowedException.class,
+          () -> activityService.createSubActivityDraft(mainDraft.getId(), "First step"));
+      verify(activityDraftRepository, never()).save(any());
+    }
+
+    @Test
+    void thenAddingASubActivityToASubActivityDraftShouldBeRejected() {
+      BddLogger.then("adding a sub-activity to a sub-activity draft should be rejected");
+      assertThrows(
+          SubActivityOperationNotAllowedException.class,
+          () -> activityService.createSubActivityDraft(firstSubActivityDraft.getId(), "Nested"));
+      verify(activityDraftRepository, never()).save(any());
+    }
+
+    @Test
+    void thenABlankTitleShouldBeRejected() {
+      BddLogger.then("adding a sub-activity without title should be rejected");
+      assertThrows(
+          FieldValidationException.class,
+          () -> activityService.createSubActivityDraft(mainDraft.getId(), " "));
+      verify(activityDraftRepository, never()).save(any());
+    }
+
+    @Test
+    void thenAnUnknownMainDraftShouldBeRejected() {
+      BddLogger.given("a main draft that does not exist");
+      var unknownId = UUID.randomUUID();
+      when(activityDraftRepository.findById(unknownId)).thenReturn(Optional.empty());
+
+      BddLogger.then("adding a sub-activity should be rejected");
+      assertThrows(
+          ActivityDraftNotFoundException.class,
+          () -> activityService.createSubActivityDraft(unknownId, "First step"));
+      verify(activityDraftRepository, never()).save(any());
+    }
+  }
+
+  @Nested
+  class WhenUpdatingThePeriodOfAMainDraft {
+
+    @BeforeEach
+    void setupWhen() {
+      BddLogger.given("a main draft with a sub-activity holding a period and another without");
+      firstSubActivityDraft.setStartDate(LocalDate.parse("2026-10-01"));
+      firstSubActivityDraft.setEndDate(LocalDate.parse("2026-10-31"));
+      givenDrafts(mainDraft);
+      when(activityDraftRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+      when(activityDraftRepository.findAllSubActivitiesOf(mainDraft.getId()))
+          .thenReturn(List.of(firstSubActivityDraft, secondSubActivityDraft));
+    }
+
+    @Test
+    void thenAPeriodCoveringTheSubActivitiesShouldBeAccepted() {
+      BddLogger.when("setting a period matching the bounds of the sub-activity");
+      updateDraftPeriod(mainDraft.getId(), "2026-10-01", "2026-10-31");
+
+      BddLogger.then("the period should be saved");
+      assertEquals(LocalDate.parse("2026-10-01"), mainDraft.getStartDate().orElseThrow());
+      verify(activityDraftRepository).save(mainDraft);
+    }
+
+    @Test
+    void thenAPeriodStartingAfterASubActivityShouldBeRejected() {
+      BddLogger.then("a period starting after the sub-activity should be rejected");
+      assertThrows(
+          ActivityPeriodExcludesSubActivitiesException.class,
+          () -> updateDraftPeriod(mainDraft.getId(), "2026-10-02", "2026-12-31"));
+      verify(activityDraftRepository, never()).save(any());
+    }
+
+    @Test
+    void thenAPeriodEndingBeforeASubActivityShouldBeRejected() {
+      BddLogger.then("a period ending before the sub-activity should be rejected");
+      assertThrows(
+          ActivityPeriodExcludesSubActivitiesException.class,
+          () -> updateDraftPeriod(mainDraft.getId(), "2026-09-01", "2026-10-30"));
+      verify(activityDraftRepository, never()).save(any());
+    }
+
+    @Test
+    void thenRemovingThePeriodShouldBeAccepted() {
+      BddLogger.given("a main draft with a period");
+      mainDraft.setStartDate(LocalDate.parse("2026-09-01"));
+      mainDraft.setEndDate(LocalDate.parse("2026-12-31"));
+
+      BddLogger.when("disabling its period");
+      updateDraft(mainDraft.getId(), request -> request.enableCompletionPeriod = false);
+
+      BddLogger.then("the period should be removed");
+      assertTrue(mainDraft.getStartDate().isEmpty());
+      verify(activityDraftRepository).save(mainDraft);
+    }
+
+    @Test
+    void thenSubActivitiesWithoutPeriodShouldNotConstrainIt() {
+      BddLogger.given("a main draft whose sub-activities have no period");
+      firstSubActivityDraft.setStartDate(null);
+      firstSubActivityDraft.setEndDate(null);
+
+      BddLogger.when("setting any period");
+      updateDraftPeriod(mainDraft.getId(), "2030-01-01", "2030-12-31");
+
+      BddLogger.then("the period should be saved");
+      verify(activityDraftRepository).save(mainDraft);
+    }
+  }
+
+  @Nested
+  class WhenPublishingAMainDraft {
+
+    @BeforeEach
+    void setupWhen() {
+      BddLogger.given("a main draft ready to be published");
+      mainDraft.setThematic(EActivityThematic.OTHER);
+      mainDraft.setSummary("Summary");
+      mainDraft.setDescription("<p>Description</p>");
+      firstSubActivityDraft.setDescription("<p>First</p>");
+      secondSubActivityDraft.setDescription("<p>Second</p>");
+      givenDrafts(mainDraft);
+      when(activityRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+    }
+
+    private void givenSubActivityDrafts(ActivityDraft... subActivityDrafts) {
+      when(activityDraftRepository.findAllSubActivitiesOf(mainDraft.getId()))
+          .thenReturn(List.of(subActivityDrafts));
+    }
+
+    private List<Activity> savedSubActivities() {
+      @SuppressWarnings("unchecked")
+      ArgumentCaptor<List<Activity>> savedSubActivities = ArgumentCaptor.forClass(List.class);
+      verify(activityRepository).saveAll(savedSubActivities.capture());
+      return savedSubActivities.getValue();
+    }
+
+    @Test
+    void thenTheSubActivitiesShouldBePublishedWithTheirIdsAndTheirLinks() {
+      givenSubActivityDrafts(firstSubActivityDraft, secondSubActivityDraft);
+
+      BddLogger.when("publishing the main draft");
+      activityService.publish(mainDraft.getId());
+
+      BddLogger.then("each sub-activity should keep the id and the links of its draft");
+      var subActivities = savedSubActivities();
+      assertEquals(
+          List.of(firstSubActivityDraft.getId(), secondSubActivityDraft.getId()),
+          subActivities.stream().map(Activity::getId).toList());
+      assertEquals(
+          List.of(mainDraft.getId(), firstSubActivityDraft.getId()),
+          subActivities.stream()
+              .map(subActivity -> subActivity.getPreviousActivityId().orElseThrow())
+              .toList());
+      assertTrue(
+          subActivities.stream()
+              .allMatch(
+                  subActivity ->
+                      subActivity.getMainActivityId().orElseThrow().equals(mainDraft.getId())));
+      assertEquals("<p>First</p>", subActivities.getFirst().getDescription());
+    }
+
+    @Test
+    void thenTheDraftsShouldBeRemovedOnceEverythingIsPublished() {
+      givenSubActivityDrafts(firstSubActivityDraft, secondSubActivityDraft);
+
+      BddLogger.when("publishing the main draft");
+      activityService.publish(mainDraft.getId());
+
+      BddLogger.then("the sub-activity drafts should be removed before the main draft");
+      var order = inOrder(activityRepository, activityDraftRepository);
+      order.verify(activityRepository).save(any());
+      order.verify(activityRepository).saveAll(any());
+      order
+          .verify(activityDraftRepository)
+          .removeAllFromDatabase(List.of(secondSubActivityDraft, firstSubActivityDraft));
+      order.verify(activityDraftRepository).removeFromDatabase(mainDraft);
+    }
+
+    @Test
+    void thenASubActivityWithoutDescriptionShouldBlockThePublication() {
+      BddLogger.given("a sub-activity draft without description");
+      firstSubActivityDraft.setDescription(null);
+      givenSubActivityDrafts(firstSubActivityDraft, secondSubActivityDraft);
+
+      BddLogger.then("publishing the main draft should be rejected before any write");
+      assertThrows(
+          FieldValidationException.class, () -> activityService.publish(mainDraft.getId()));
+      verify(activityRepository, never()).save(any());
+      verify(activityDraftRepository, never()).removeFromDatabase(any());
+    }
+
+    @Test
+    void thenAnAlreadyPublishedSubActivityShouldBeUpdatedAndANewOneCreated() {
+      BddLogger.given("a published activity whose sub-activity holds a file removed in its draft");
+      var removedFile = mock(File.class);
+      var removedFileId = UUID.randomUUID();
+      when(removedFile.getId()).thenReturn(removedFileId);
+      givenPublished(
+          ActivityFixture.create().withId(mainDraft.getId()).withAuthor(staff).toModel());
+      var publishedFirstSubActivity =
+          Activity.createSubActivity(
+              firstSubActivityDraft.getId(),
+              staff,
+              mainDraft.getId(),
+              mainDraft.getId(),
+              "Old title",
+              "<p>Old</p>",
+              null,
+              null,
+              null,
+              List.of(),
+              List.of(removedFile));
+      when(activityRepository.findAllSubActivitiesOf(mainDraft.getId()))
+          .thenReturn(List.of(publishedFirstSubActivity));
+      givenSubActivityDrafts(firstSubActivityDraft, secondSubActivityDraft);
+
+      BddLogger.when("publishing the main draft");
+      activityService.publish(mainDraft.getId());
+
+      BddLogger.then("the existing sub-activity should be updated and the new one created");
+      var subActivities = savedSubActivities();
+      assertSame(publishedFirstSubActivity, subActivities.getFirst());
+      assertEquals("First draft step", publishedFirstSubActivity.getTitle());
+      assertEquals("<p>First</p>", publishedFirstSubActivity.getDescription());
+      assertEquals(secondSubActivityDraft.getId(), subActivities.getLast().getId());
+
+      BddLogger.and("the file removed from the sub-activity should be deleted");
+      verify(fileResourceService).delete(removedFileId);
+    }
+
+    @Test
+    void thenAMainDraftWithoutSubActivityShouldNotTouchTheSubActivityStorage() {
+      BddLogger.when("publishing a main draft without sub-activity");
+      activityService.publish(mainDraft.getId());
+
+      BddLogger.then("no sub-activity should be saved or removed");
+      verify(activityRepository, never()).saveAll(any());
+      verify(activityDraftRepository, never()).removeAllFromDatabase(any());
+      verify(activityDraftRepository).removeFromDatabase(mainDraft);
     }
   }
 

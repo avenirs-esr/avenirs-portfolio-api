@@ -37,6 +37,7 @@ import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.Activit
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityOverviewDtoMapper;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityStaffOverviewDtoMapper;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityAuthorizationsRequest;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDraftCreationRequest;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDuplicationRequest;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.StaffAuthorizationRequest;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.response.ActivityDraftCreationResponse;
@@ -969,6 +970,27 @@ class ActivityControllerTest {
     assertEquals(200, response.getStatusCode().value());
     assertNotNull(response.getBody());
     assertEquals(draftId, response.getBody().draftId());
+  }
+
+  @Test
+  void shouldCreateSubActivityDraftAndReturnItsId() {
+    BddLogger.given("an existing activity draft and a title for the sub-activity");
+    UUID activityDraftId = UUID.randomUUID();
+    UUID subActivityId = UUID.randomUUID();
+    String title = "Première étape";
+    ActivityDraft subActivity = mock(ActivityDraft.class);
+    when(subActivity.getId()).thenReturn(subActivityId);
+    when(activityService.createSubActivityDraft(activityDraftId, title)).thenReturn(subActivity);
+
+    BddLogger.when("adding a sub-activity to that draft");
+    ResponseEntity<ActivityDraftCreationResponse> response =
+        controller.createSubActivityDraft(
+            principal, activityDraftId, new ActivityDraftCreationRequest(title));
+
+    BddLogger.then("it should return 201 with the id of the sub-activity");
+    assertEquals(201, response.getStatusCode().value());
+    assertNotNull(response.getBody());
+    assertEquals(subActivityId, response.getBody().draftId());
   }
 
   @Test

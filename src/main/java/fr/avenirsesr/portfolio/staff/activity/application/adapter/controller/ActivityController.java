@@ -320,6 +320,23 @@ public class ActivityController {
     return ResponseEntity.ok(new ActivityDraftCreationResponse(draft.getId()));
   }
 
+  @PreAuthorize("hasAuthority('activity:update')")
+  @PostMapping("/draft/{activityDraftId}/sub-activities")
+  public ResponseEntity<ActivityDraftCreationResponse> createSubActivityDraft(
+      Principal principal,
+      @PathVariable UUID activityDraftId,
+      @RequestBody ActivityDraftCreationRequest body) {
+    log.debug(
+        "Received request to add a sub-activity to activity draft [{}] by user [{}] body : {}",
+        activityDraftId,
+        principal.getName(),
+        body);
+
+    var subActivity = activityService.createSubActivityDraft(activityDraftId, body.title());
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(new ActivityDraftCreationResponse(subActivity.getId()));
+  }
+
   @PreAuthorize("hasAuthority('activity:create')")
   @PostMapping("/publish/{activityDraftId}")
   public ResponseEntity<CreationResponse> publishActivityDraft(

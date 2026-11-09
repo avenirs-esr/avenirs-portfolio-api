@@ -115,6 +115,36 @@ public class ActivityDraft extends AvenirsBaseModel implements ActivityNode {
         null);
   }
 
+  public static ActivityDraft createSubActivity(
+      String title, Staff author, UUID mainActivityId, UUID previousActivityId) {
+    Instant now = Instant.now();
+    var subActivity =
+        new ActivityDraft(
+            UUID.randomUUID(),
+            now,
+            now,
+            title,
+            author,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            0,
+            0,
+            false,
+            null,
+            List.of(),
+            List.of(),
+            List.of(),
+            List.of(),
+            false,
+            null);
+    subActivity.attachAsSubActivity(mainActivityId, previousActivityId);
+    return subActivity;
+  }
+
   public static ActivityDraft toDomain(
       UUID id,
       Instant createdAt,
