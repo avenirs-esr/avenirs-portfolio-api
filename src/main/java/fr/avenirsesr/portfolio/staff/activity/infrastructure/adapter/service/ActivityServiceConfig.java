@@ -36,18 +36,19 @@ public class ActivityServiceConfig {
 
   @Bean
   public ActivityService activityService() {
-    return new ActivityServiceImpl(
-        activityRepository,
-        activityDraftRepository,
-        declaredActivityService,
-        loggedInUserService,
-        staffActivityOverviewRepository,
-        notificationService,
-        fileResourceService,
-        studentRepository,
-        activityViewRepository,
-        accessClient,
-        userPrincipalRepository,
-        activityAuthorizationService);
+    return new TransactionalActivityService(
+        new ActivityServiceImpl(
+            activityRepository,
+            activityDraftRepository,
+            declaredActivityService,
+            loggedInUserService,
+            staffActivityOverviewRepository,
+            notificationService,
+            fileResourceService,
+            studentRepository,
+            activityViewRepository,
+            accessClient,
+            userPrincipalRepository,
+            activityAuthorizationService));
   }
 }

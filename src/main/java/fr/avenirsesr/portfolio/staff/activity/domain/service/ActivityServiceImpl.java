@@ -62,6 +62,7 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
@@ -219,6 +220,13 @@ public class ActivityServiceImpl implements ActivityService {
 
     draft.getAssessment().ifPresent(ActivityAssessment::validate);
 
+    var subActivityDrafts = activityDraftRepository.findAllSubActivitiesOf(activityDraftId);
+    if (subActivityDrafts.stream()
+        .anyMatch(subActivityDraft -> subActivityDraft.getDescription().isEmpty())) {
+      throw new FieldValidationException(
+          EErrorCode.NOT_BLANK, "description must be defined to publish a sub-activity");
+    }
+
     var publishedActivity = activityRepository.findById(activityDraftId);
 
     Activity activity =
@@ -246,11 +254,7 @@ public class ActivityServiceImpl implements ActivityService {
 
     var removedFileIds = new ArrayList<UUID>();
     if (publishedActivity.isPresent()) {
-      var draftFileIds = draft.getFiles().stream().map(File::getId).collect(Collectors.toSet());
-      activity.getFiles().stream()
-          .map(File::getId)
-          .filter(id -> !draftFileIds.contains(id))
-          .forEach(removedFileIds::add);
+      removedFileIds.addAll(removedFileIdsOf(activity, draft));
       var enrolledDeclaredActivities = declaredActivityService.getEnrolledStudents(activity);
       var updatedFields = updateActivity(activity, draft, !enrolledDeclaredActivities.isEmpty());
       activity.setStatus(EActivityStatus.PUBLISHED);
@@ -259,10 +263,62 @@ public class ActivityServiceImpl implements ActivityService {
 
     var savedActivity = activityRepository.save(activity);
     activityAuthorizationService.applyDraftAuthorizationsToActivity(savedActivity.getId());
+    removedFileIds.addAll(publishSubActivities(activityDraftId, subActivityDrafts));
 
+    removeSubActivityDrafts(subActivityDrafts);
     activityDraftRepository.removeFromDatabase(draft);
     removedFileIds.forEach(fileResourceService::delete);
     return savedActivity;
+  }
+
+  private List<UUID> publishSubActivities(UUID activityId, List<ActivityDraft> subActivityDrafts) {
+    if (subActivityDrafts.isEmpty()) {
+      return List.of();
+    }
+    var publishedById =
+        activityRepository.findAllSubActivitiesOf(activityId).stream()
+            .collect(Collectors.toMap(Activity::getId, Function.identity()));
+
+    var removedFileIds = new ArrayList<UUID>();
+    var subActivities = new ArrayList<Activity>();
+    for (var subActivityDraft : subActivityDrafts) {
+      var published = publishedById.get(subActivityDraft.getId());
+      if (published == null) {
+        subActivities.add(subActivityOf(subActivityDraft));
+        continue;
+      }
+      removedFileIds.addAll(removedFileIdsOf(published, subActivityDraft));
+      updateActivity(published, subActivityDraft, true);
+      published.attachAsSubActivity(
+          subActivityDraft.getMainActivityId().orElseThrow(),
+          subActivityDraft.getPreviousActivityId().orElseThrow());
+      subActivities.add(published);
+    }
+    activityRepository.saveAll(subActivities);
+    return removedFileIds;
+  }
+
+  private Activity subActivityOf(ActivityDraft subActivityDraft) {
+    return Activity.createSubActivity(
+        subActivityDraft.getId(),
+        subActivityDraft.getAuthor(),
+        subActivityDraft.getMainActivityId().orElseThrow(),
+        subActivityDraft.getPreviousActivityId().orElseThrow(),
+        subActivityDraft.getTitle(),
+        subActivityDraft.getDescription().orElseThrow(),
+        subActivityDraft.getRecommendedCompletionContexts().orElse(null),
+        subActivityDraft.getStartDate().orElse(null),
+        subActivityDraft.getEndDate().orElse(null),
+        subActivityDraft.getLinks(),
+        subActivityDraft.getFiles());
+  }
+
+  private List<UUID> removedFileIdsOf(Activity activity, ActivityDraft draft) {
+    var draftFileIds = draft.getFiles().stream().map(File::getId).collect(Collectors.toSet());
+    return activity.getFiles().stream()
+        .map(File::getId)
+        .filter(id -> !draftFileIds.contains(id))
+        .toList();
   }
 
   private record FieldSync<T>(
@@ -680,6 +736,24 @@ public class ActivityServiceImpl implements ActivityService {
   }
 
   @Override
+  public ActivityDraft createSubActivityDraft(UUID activityDraftId, String title) {
+    var mainDraft = getDraftWithRight(activityDraftId, EActivityRight.EDIT);
+    requireMainActivity(mainDraft);
+    if (hasEnrolledStudents(mainDraft)) {
+      throw new SubActivityAdditionNotAllowedException();
+    }
+    requireNotBlankAndMaxLength("title", title, TITLE_LENGTH);
+
+    var subActivities = activityDraftRepository.findAllSubActivitiesOf(activityDraftId);
+    var previousActivityId =
+        subActivities.isEmpty() ? activityDraftId : subActivities.getLast().getId();
+
+    return activityDraftRepository.save(
+        ActivityDraft.createSubActivity(
+            title, mainDraft.getAuthor(), activityDraftId, previousActivityId));
+  }
+
+  @Override
   public ActivityDraft updateActivityDraft(
       UUID id,
       String title,
@@ -731,6 +805,9 @@ public class ActivityServiceImpl implements ActivityService {
     if ((startDate == null) != (endDate == null)
         || (Boolean.TRUE.equals(enableCompletionPeriod) && startDate == null)) {
       throw new ActivityDatesException();
+    }
+    if (Boolean.TRUE.equals(enableCompletionPeriod)) {
+      validatePeriodAgainstRelatedActivities(draft, startDate, endDate);
     }
     if (assessment != null) {
       assessment.validate();
@@ -787,6 +864,44 @@ public class ActivityServiceImpl implements ActivityService {
     if (value != null) {
       throw new SubActivityFieldNotAllowedException(fieldName);
     }
+  }
+
+  private void validatePeriodAgainstRelatedActivities(
+      ActivityDraft draft, LocalDate startDate, LocalDate endDate) {
+    if (draft.isSubActivity()) {
+      var mainDraft =
+          activityDraftRepository
+              .findById(draft.getMainActivityId().orElseThrow())
+              .orElseThrow(ActivityDraftNotFoundException::new);
+      if (mainDraft.getStartDate().isPresent()
+          && !isWithinPeriod(
+              startDate,
+              endDate,
+              mainDraft.getStartDate().orElseThrow(),
+              mainDraft.getEndDate().orElseThrow())) {
+        throw new SubActivityPeriodOutsideMainActivityException();
+      }
+      return;
+    }
+
+    var coversSubActivities =
+        activityDraftRepository.findAllSubActivitiesOf(draft.getId()).stream()
+            .filter(subActivityDraft -> subActivityDraft.getStartDate().isPresent())
+            .allMatch(
+                subActivityDraft ->
+                    isWithinPeriod(
+                        subActivityDraft.getStartDate().orElseThrow(),
+                        subActivityDraft.getEndDate().orElseThrow(),
+                        startDate,
+                        endDate));
+    if (!coversSubActivities) {
+      throw new ActivityPeriodExcludesSubActivitiesException();
+    }
+  }
+
+  private static boolean isWithinPeriod(
+      LocalDate startDate, LocalDate endDate, LocalDate periodStart, LocalDate periodEnd) {
+    return !startDate.isBefore(periodStart) && !endDate.isAfter(periodEnd);
   }
 
   private void validateTargetPerimeter(

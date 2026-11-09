@@ -10,20 +10,26 @@ import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.StreamSupport;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.util.UriBuilder;
 
 class SubActivityControllerIT extends ContainerConfigurationTest {
@@ -32,6 +38,7 @@ class SubActivityControllerIT extends ContainerConfigurationTest {
   private static final String CONTENT_PATH = BASE_PATH + "/{activityStatus}/{activityId}/content";
   private static final String PRESENTATION_PATH =
       BASE_PATH + "/PUBLISHED/{activityId}/presentation";
+  private static final String SUB_ACTIVITIES_PATH = BASE_PATH + "/draft/{draftId}/sub-activities";
 
   private static final UUID MAIN_ACTIVITY_ID =
       UUID.fromString("b3e7a1c9-4f2d-4a8e-9c61-7d2e5f8a1b01");
@@ -51,6 +58,10 @@ class SubActivityControllerIT extends ContainerConfigurationTest {
           UUID.fromString("b3e7a1c9-4f2d-4a8e-9c61-7d2e5f8a1b21"),
           UUID.fromString("b3e7a1c9-4f2d-4a8e-9c61-7d2e5f8a1b22"));
 
+  private static final UUID STAFF_ID = UUID.fromString("57ff122f-ff76-4d95-b6c1-61a4efeabd80");
+  private static final UUID ANOTHER_STAFF_ID =
+      UUID.fromString("5fcd76c5-017c-4d61-99d2-62a6f199c94e");
+
   private static final String SUB_ACTIVITY_OPERATION_NOT_ALLOWED =
       "SUB_ACTIVITY_OPERATION_NOT_ALLOWED";
 
@@ -68,6 +79,12 @@ class SubActivityControllerIT extends ContainerConfigurationTest {
 
   @Value("${user.staff.signature}")
   private String staffSignature;
+
+  @Value("${user.anotherStaff.payload}")
+  private String anotherStaffPayload;
+
+  @Value("${user.anotherStaff.signature}")
+  private String anotherStaffSignature;
 
   @Value("${user.super-admin.payload}")
   private String superAdminPayload;
@@ -397,6 +414,525 @@ class SubActivityControllerIT extends ContainerConfigurationTest {
     }
   }
 
+  @Nested
+  class GivenAMainDraft {
+
+    private UUID mainDraftId;
+
+    @BeforeEach
+    void createMainDraft() throws Exception {
+      BddLogger.given("a staff owning a main draft");
+      mainDraftId = createDraft("Projet avec sous-activités");
+    }
+
+    @AfterEach
+    void deleteMainDraft() {
+      webTestClient
+          .delete()
+          .uri(BASE_PATH + "/draft/{draftId}", mainDraftId)
+          .headers(staffHeaders())
+          .exchange()
+          .expectStatus()
+          .is2xxSuccessful();
+    }
+
+    @Test
+    void thenNewSubActivitiesShouldBeAddedLastAndBeEditable() throws Exception {
+      BddLogger.when("adding four sub-activities");
+      var firstId = createSubActivity(mainDraftId, "Première étape");
+      var secondId = createSubActivity(mainDraftId, "Deuxième étape");
+      var thirdId = createSubActivity(mainDraftId, "Troisième étape");
+      var lastId = createSubActivity(mainDraftId, "Dernière étape");
+
+      BddLogger.then("they should be listed in their order of creation");
+      var content =
+          readJson(get(uri -> uri.path(CONTENT_PATH).build("DRAFT", mainDraftId), staffHeaders()));
+      assertThat(idsOf(content.get("subActivities")))
+          .containsExactly(firstId, secondId, thirdId, lastId);
+
+      BddLogger.and("the last one should point to its main draft and carry its rights");
+      var subActivityContent =
+          readJson(get(uri -> uri.path(CONTENT_PATH).build("DRAFT", lastId), staffHeaders()));
+      assertThat(subActivityContent.get("mainActivityId").asText())
+          .isEqualTo(mainDraftId.toString());
+      assertThat(subActivityContent.get("title").asText()).isEqualTo("Dernière étape");
+      assertThat(subActivityContent.get("rights")).isNotEmpty();
+
+      BddLogger.and("it should be editable through the draft update endpoint");
+      patchDraft(lastId, Map.of("description", "<p>Consigne</p>")).expectStatus().isOk();
+    }
+
+    @Test
+    void thenAddingASubActivityToASubActivityDraftShouldBeRejected() throws Exception {
+      var subActivityId = createSubActivity(mainDraftId, "Première étape");
+
+      BddLogger.then("adding a sub-activity to a sub-activity draft should be rejected with 409");
+      expectSubActivityOperationNotAllowed(
+          webTestClient
+              .post()
+              .uri(SUB_ACTIVITIES_PATH, subActivityId)
+              .headers(staffHeaders())
+              .contentType(MediaType.APPLICATION_JSON)
+              .bodyValue(Map.of("title", "Étape imbriquée")));
+    }
+
+    @Test
+    void thenAStaffWithoutRightOnTheMainDraftShouldBeRejected() {
+      BddLogger.when("another staff adds a sub-activity to the main draft");
+      BddLogger.then("it should be rejected with 403");
+      postSubActivity(mainDraftId, Map.of("title", "Étape"), anotherStaffHeaders())
+          .expectStatus()
+          .isForbidden();
+    }
+
+    @Test
+    void thenABlankTitleShouldBeRejected() {
+      BddLogger.when("adding a sub-activity with a blank title");
+      BddLogger.then("it should be rejected with 400");
+      postSubActivity(mainDraftId, Map.of("title", " "), staffHeaders())
+          .expectStatus()
+          .isBadRequest();
+    }
+
+    @Test
+    void thenTheTitleShouldBeLimitedToEightyCharacters() throws Exception {
+      BddLogger.then("a title of 81 characters should be rejected with 400");
+      postSubActivity(mainDraftId, Map.of("title", "a".repeat(81)), staffHeaders())
+          .expectStatus()
+          .isBadRequest();
+
+      BddLogger.and("a title of 80 characters should be accepted");
+      createSubActivity(mainDraftId, "a".repeat(80));
+    }
+
+    @Test
+    void thenTheRightsOnASubActivityShouldFollowThoseOfTheMainDraft() throws Exception {
+      var subActivityId = createSubActivity(mainDraftId, "Première étape");
+
+      BddLogger.then("another staff without right should not edit the sub-activity");
+      patchDraft(subActivityId, Map.of("title", "Titre revu"), anotherStaffHeaders())
+          .expectStatus()
+          .isForbidden();
+
+      BddLogger.when("the edit right on the main draft is granted to that staff");
+      webTestClient
+          .put()
+          .uri(BASE_PATH + "/DRAFT/{draftId}/authorizations", mainDraftId)
+          .headers(staffHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .bodyValue(
+              Map.of(
+                  "authorizations",
+                  List.of(
+                      Map.of(
+                          "staffId",
+                          STAFF_ID,
+                          "rights",
+                          List.of(
+                              "LEADER",
+                              "EDIT",
+                              "MANAGE_AUTHORIZATIONS",
+                              "FEEDBACK",
+                              "EVALUATION",
+                              "PUBLISH")),
+                      Map.of("staffId", ANOTHER_STAFF_ID, "rights", List.of("EDIT")))))
+          .exchange()
+          .expectStatus()
+          .isOk();
+
+      BddLogger.then("that staff should edit the sub-activity and add a new one");
+      patchDraft(subActivityId, Map.of("title", "Titre revu"), anotherStaffHeaders())
+          .expectStatus()
+          .isOk();
+      postSubActivity(mainDraftId, Map.of("title", "Deuxième étape"), anotherStaffHeaders())
+          .expectStatus()
+          .isCreated();
+    }
+  }
+
+  @Nested
+  class GivenAnUnknownMainDraft {
+
+    @Test
+    void thenAddingASubActivityShouldReturnNotFound() {
+      BddLogger.when("adding a sub-activity to a draft that does not exist");
+      BddLogger.then("it should return 404");
+      postSubActivity(UUID.randomUUID(), Map.of("title", "Étape"), staffHeaders())
+          .expectStatus()
+          .isNotFound();
+    }
+
+    @Test
+    void thenAddingASubActivityToAPublishedActivityWithoutDraftShouldReturnNotFound() {
+      BddLogger.when("adding a sub-activity to a published activity that has no draft");
+      BddLogger.then("it should return 404");
+      postSubActivity(MAIN_ACTIVITY_ID, Map.of("title", "Étape"), staffHeaders())
+          .expectStatus()
+          .isNotFound();
+    }
+  }
+
+  @Nested
+  class GivenAMainDraftReadyToBePublished {
+
+    private UUID mainDraftId;
+
+    @BeforeEach
+    void createMainDraft() throws Exception {
+      BddLogger.given("a staff owning a main draft ready to be published");
+      mainDraftId = createDraft("Projet à publier");
+      patchDraft(
+              mainDraftId,
+              Map.of("thematic", "OTHER", "summary", "Résumé", "description", "<p>Description</p>"))
+          .expectStatus()
+          .isOk();
+    }
+
+    @Test
+    void thenPublishingItShouldPublishItsSubActivitiesInOrder() throws Exception {
+      var firstId = createPublishableSubActivity("Première étape");
+      var secondId = createPublishableSubActivity("Deuxième étape");
+      var lastId = createPublishableSubActivity("Dernière étape");
+
+      BddLogger.when("publishing the main draft");
+      publish(mainDraftId).expectStatus().isOk();
+
+      BddLogger.then("the published activity should list its sub-activities in order");
+      assertThat(publishedSubActivityIds(mainDraftId)).containsExactly(firstId, secondId, lastId);
+
+      BddLogger.and("a published sub-activity should point to its main activity");
+      var subActivityContent =
+          readJson(get(uri -> uri.path(CONTENT_PATH).build("PUBLISHED", lastId), staffHeaders()));
+      assertThat(subActivityContent.get("mainActivityId").asText())
+          .isEqualTo(mainDraftId.toString());
+      assertThat(subActivityContent.get("title").asText()).isEqualTo("Dernière étape");
+      assertThat(subActivityContent.get("description").asText()).contains("Consigne");
+
+      BddLogger.and("the main draft and its sub-activity drafts should be gone");
+      List.of(mainDraftId, firstId, secondId, lastId).forEach(this::expectNoDraft);
+    }
+
+    @Test
+    void thenASubActivityWithoutDescriptionShouldBlockThePublication() throws Exception {
+      createSubActivity(mainDraftId, "Étape sans consigne");
+
+      BddLogger.when("publishing the main draft");
+      BddLogger.then("it should be rejected with 400");
+      publish(mainDraftId)
+          .expectStatus()
+          .isBadRequest()
+          .expectBody()
+          .jsonPath("$.code")
+          .isEqualTo("NOT_BLANK");
+
+      BddLogger.and("the main draft should remain and nothing should be published");
+      get(uri -> uri.path(CONTENT_PATH).build("DRAFT", mainDraftId), staffHeaders());
+      webTestClient
+          .get()
+          .uri(CONTENT_PATH, "PUBLISHED", mainDraftId)
+          .headers(staffHeaders())
+          .exchange()
+          .expectStatus()
+          .isNotFound();
+
+      deleteMainDraft();
+    }
+
+    @Test
+    void thenEditingAPublishedActivityWithoutStudentShouldKeepItsSubActivities() throws Exception {
+      var firstId = createPublishableSubActivity("Première étape");
+      publish(mainDraftId).expectStatus().isOk();
+
+      BddLogger.when("editing the published activity and adding a sub-activity");
+      createDraftFromPublishedActivity();
+      var secondId = createPublishableSubActivity("Deuxième étape");
+      publish(mainDraftId).expectStatus().isOk();
+
+      BddLogger.then("both sub-activities should be published in order");
+      assertThat(publishedSubActivityIds(mainDraftId)).containsExactly(firstId, secondId);
+    }
+
+    @Test
+    void thenEditingAPublishedActivityWithEnrolledStudentsShouldUpdateItsSubActivities()
+        throws Exception {
+      var firstId = createPublishableSubActivity("Première étape");
+      publish(mainDraftId).expectStatus().isOk();
+
+      BddLogger.and("a student enrolled in the published activity");
+      webTestClient
+          .post()
+          .uri("/me/activity-progress/subscribe/{activityId}", mainDraftId)
+          .headers(studentHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .bodyValue(Map.of())
+          .exchange()
+          .expectStatus()
+          .isCreated();
+
+      BddLogger.when("editing a sub-activity of the published activity");
+      createDraftFromPublishedActivity();
+      patchDraft(firstId, Map.of("title", "Première étape revue")).expectStatus().isOk();
+
+      BddLogger.then("adding a new sub-activity should be rejected with 409");
+      postSubActivity(mainDraftId, Map.of("title", "Étape en trop"), staffHeaders())
+          .expectStatus()
+          .isEqualTo(409)
+          .expectBody()
+          .jsonPath("$.code")
+          .isEqualTo("SUB_ACTIVITY_ADDITION_NOT_ALLOWED");
+
+      BddLogger.when("publishing the main draft");
+      publish(mainDraftId).expectStatus().isOk();
+
+      BddLogger.then("the published sub-activity should reflect its draft");
+      assertThat(publishedSubActivityIds(mainDraftId)).containsExactly(firstId);
+      var subActivityContent =
+          readJson(get(uri -> uri.path(CONTENT_PATH).build("PUBLISHED", firstId), staffHeaders()));
+      assertThat(subActivityContent.get("title").asText()).isEqualTo("Première étape revue");
+    }
+
+    @Test
+    void thenASubActivityShouldBeConfigurableThroughTheDraftEndpointsAndPublished()
+        throws Exception {
+      BddLogger.when("adding a sub-activity with only a title");
+      var subActivityId = createSubActivity(mainDraftId, "Étape à compléter");
+
+      BddLogger.then("its detail should be readable before being completed");
+      var initialContent =
+          readJson(
+              get(uri -> uri.path(CONTENT_PATH).build("DRAFT", subActivityId), staffHeaders()));
+      assertThat(initialContent.get("title").asText()).isEqualTo("Étape à compléter");
+      assertThat(initialContent.get("description").isNull()).isTrue();
+      get(
+          uri -> uri.path(BASE_PATH + "/DRAFT/{activityId}/presentation").build(subActivityId),
+          staffHeaders());
+
+      BddLogger.when("completing it through the draft update and file endpoints");
+      patchDraft(
+              subActivityId,
+              Map.of(
+                  "title", "Étape complétée",
+                  "description", "<p>Consigne</p>",
+                  "recommendedCompletionContexts", "En groupe",
+                  "links", List.of("https://example.com/ressource"),
+                  "enableCompletionPeriod", true,
+                  "startDate", "2027-03-01",
+                  "endDate", "2027-03-31"))
+          .expectStatus()
+          .isOk();
+      uploadFile(subActivityId);
+
+      BddLogger.then("the draft should hold its whole configuration");
+      assertConfigured(
+          readJson(
+              get(uri -> uri.path(CONTENT_PATH).build("DRAFT", subActivityId), staffHeaders())));
+
+      BddLogger.when("publishing the main draft");
+      publish(mainDraftId).expectStatus().isOk();
+
+      BddLogger.then("the published sub-activity should hold its whole configuration");
+      assertConfigured(
+          readJson(
+              get(
+                  uri -> uri.path(CONTENT_PATH).build("PUBLISHED", subActivityId),
+                  staffHeaders())));
+    }
+
+    @Test
+    void thenTheFieldsOfAMainActivityShouldBeRejectedOnASubActivity() throws Exception {
+      var subActivityId = createSubActivity(mainDraftId, "Première étape");
+
+      BddLogger.then("the out-of-scope settings should be rejected with 400");
+      Map.<String, Object>of(
+              "thematic",
+              "OTHER",
+              "summary",
+              "Résumé",
+              "traceAllowedAssociations",
+              1,
+              "feedbackAllowedIterations",
+              1,
+              "enableReflection",
+              true,
+              "national",
+              true)
+          .forEach(
+              (field, value) ->
+                  patchDraft(subActivityId, Map.of(field, value))
+                      .expectStatus()
+                      .isBadRequest()
+                      .expectBody()
+                      .jsonPath("$.code")
+                      .isEqualTo("SUB_ACTIVITY_FIELD_NOT_ALLOWED"));
+
+      deleteMainDraft();
+    }
+
+    @Test
+    void thenThePeriodOfASubActivityShouldStayWithinTheOneOfItsMainDraft() throws Exception {
+      BddLogger.given("a main draft with a period and a sub-activity");
+      patchPeriod(mainDraftId, "2027-03-01", "2027-03-31").expectStatus().isOk();
+      var subActivityId = createSubActivity(mainDraftId, "Première étape");
+
+      BddLogger.then("a period outside the one of the main draft should be rejected with 400");
+      patchPeriod(subActivityId, "2027-02-28", "2027-03-15")
+          .expectStatus()
+          .isBadRequest()
+          .expectBody()
+          .jsonPath("$.code")
+          .isEqualTo("SUB_ACTIVITY_PERIOD_OUTSIDE_MAIN_ACTIVITY");
+
+      BddLogger.and("a period matching the bounds of the main draft should be accepted");
+      patchPeriod(subActivityId, "2027-03-01", "2027-03-31").expectStatus().isOk();
+
+      deleteMainDraft();
+    }
+
+    @Test
+    void thenThePeriodOfAMainDraftShouldCoverTheOnesOfItsSubActivities() throws Exception {
+      BddLogger.given("a sub-activity with a period");
+      var subActivityId = createSubActivity(mainDraftId, "Première étape");
+      patchPeriod(subActivityId, "2027-03-10", "2027-03-20").expectStatus().isOk();
+
+      BddLogger.then("a main period not covering it should be rejected with 400");
+      patchPeriod(mainDraftId, "2027-03-15", "2027-03-31")
+          .expectStatus()
+          .isBadRequest()
+          .expectBody()
+          .jsonPath("$.code")
+          .isEqualTo("ACTIVITY_PERIOD_EXCLUDES_SUB_ACTIVITIES");
+
+      BddLogger.and("a main period covering it should be accepted");
+      patchPeriod(mainDraftId, "2027-03-10", "2027-03-20").expectStatus().isOk();
+
+      deleteMainDraft();
+    }
+
+    private void assertConfigured(JsonNode content) {
+      assertThat(content.get("title").asText()).isEqualTo("Étape complétée");
+      assertThat(content.get("description").asText()).contains("Consigne");
+      assertThat(content.get("recommendedCompletionContexts").asText()).isEqualTo("En groupe");
+      assertThat(content.get("startDate").asText()).isEqualTo("2027-03-01");
+      assertThat(content.get("endDate").asText()).isEqualTo("2027-03-31");
+      assertThat(content.get("links").get(0).asText()).isEqualTo("https://example.com/ressource");
+      assertThat(content.get("files")).hasSize(1);
+      assertThat(content.get("rights")).isNotEmpty();
+    }
+
+    private WebTestClient.ResponseSpec patchPeriod(UUID draftId, String startDate, String endDate) {
+      return patchDraft(
+          draftId,
+          Map.of("enableCompletionPeriod", true, "startDate", startDate, "endDate", endDate));
+    }
+
+    private void uploadFile(UUID draftId) {
+      var multipart = new MultipartBodyBuilder();
+      multipart
+          .part("file", new ByteArrayResource("contenu".getBytes(StandardCharsets.UTF_8)))
+          .filename("consigne.pdf")
+          .contentType(MediaType.APPLICATION_PDF);
+      webTestClient
+          .post()
+          .uri(BASE_PATH + "/draft/{draftId}/files", draftId)
+          .headers(staffHeaders())
+          .contentType(MediaType.MULTIPART_FORM_DATA)
+          .body(BodyInserters.fromMultipartData(multipart.build()))
+          .exchange()
+          .expectStatus()
+          .isCreated();
+    }
+
+    private void deleteMainDraft() {
+      webTestClient
+          .delete()
+          .uri(BASE_PATH + "/draft/{draftId}", mainDraftId)
+          .headers(staffHeaders())
+          .exchange()
+          .expectStatus()
+          .is2xxSuccessful();
+    }
+
+    private UUID createPublishableSubActivity(String title) throws Exception {
+      var subActivityId = createSubActivity(mainDraftId, title);
+      patchDraft(subActivityId, Map.of("description", "<p>Consigne</p>")).expectStatus().isOk();
+      return subActivityId;
+    }
+
+    private void createDraftFromPublishedActivity() {
+      webTestClient
+          .post()
+          .uri(BASE_PATH + "/create-draft/{activityId}", mainDraftId)
+          .headers(staffHeaders())
+          .exchange()
+          .expectStatus()
+          .isOk();
+    }
+
+    private WebTestClient.ResponseSpec publish(UUID draftId) {
+      return webTestClient
+          .post()
+          .uri(BASE_PATH + "/publish/{draftId}", draftId)
+          .headers(staffHeaders())
+          .exchange();
+    }
+
+    private List<UUID> publishedSubActivityIds(UUID activityId) throws Exception {
+      return idsOf(
+          readJson(
+                  get(uri -> uri.path(CONTENT_PATH).build("PUBLISHED", activityId), staffHeaders()))
+              .get("subActivities"));
+    }
+
+    private void expectNoDraft(UUID draftId) {
+      webTestClient
+          .get()
+          .uri(CONTENT_PATH, "DRAFT", draftId)
+          .headers(staffHeaders())
+          .exchange()
+          .expectStatus()
+          .isNotFound();
+    }
+  }
+
+  private UUID createDraft(String title) throws Exception {
+    var body =
+        webTestClient
+            .post()
+            .uri(BASE_PATH + "/draft")
+            .headers(staffHeaders())
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(Map.of("title", title))
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+    return UUID.fromString(readJson(body).get("draftId").asText());
+  }
+
+  private UUID createSubActivity(UUID draftId, String title) throws Exception {
+    var body =
+        postSubActivity(draftId, Map.of("title", title), staffHeaders())
+            .expectStatus()
+            .isCreated()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+    return UUID.fromString(readJson(body).get("draftId").asText());
+  }
+
+  private WebTestClient.ResponseSpec postSubActivity(
+      UUID draftId, Map<String, Object> body, Consumer<HttpHeaders> headers) {
+    return webTestClient
+        .post()
+        .uri(SUB_ACTIVITIES_PATH, draftId)
+        .headers(headers)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(body)
+        .exchange();
+  }
+
   private UUID duplicate(UUID activityId, String title) throws Exception {
     var body =
         webTestClient
@@ -415,10 +951,15 @@ class SubActivityControllerIT extends ContainerConfigurationTest {
   }
 
   private WebTestClient.ResponseSpec patchDraft(UUID draftId, Map<String, Object> body) {
+    return patchDraft(draftId, body, staffHeaders());
+  }
+
+  private WebTestClient.ResponseSpec patchDraft(
+      UUID draftId, Map<String, Object> body, Consumer<HttpHeaders> headers) {
     return webTestClient
         .patch()
         .uri(BASE_PATH + "/{draftId}", draftId)
-        .headers(staffHeaders())
+        .headers(headers)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(body)
         .exchange();
@@ -480,6 +1021,10 @@ class SubActivityControllerIT extends ContainerConfigurationTest {
 
   private Consumer<HttpHeaders> staffHeaders() {
     return headers -> withContext(headers, staffPayload, staffSignature);
+  }
+
+  private Consumer<HttpHeaders> anotherStaffHeaders() {
+    return headers -> withContext(headers, anotherStaffPayload, anotherStaffSignature);
   }
 
   private Consumer<HttpHeaders> superAdminHeaders() {
