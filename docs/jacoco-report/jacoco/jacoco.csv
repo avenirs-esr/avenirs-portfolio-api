@@ -26,7 +26,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.reposi
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.repository,GenericUserJpaRepositoryAdapter,0,10,0,0,0,3,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.repository,StaffDatabaseRepository,0,10,0,0,0,3,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.repository,UserDatabaseRepository,0,11,0,0,0,3,0,2,0,2
-avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.application.adapter.controller,ActivityController,81,1010,0,10,16,219,3,33,3,28
+avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.application.adapter.controller,ActivityController,81,950,0,10,16,210,3,31,3,26
 avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.infrastructure.context,CustomDateTimeProvider,0,11,0,0,0,4,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.infrastructure.context,PrometheusLogFilter,5,11,3,3,1,3,2,3,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.application.adapter.controller,UserController,76,126,0,2,22,31,4,9,4,8
@@ -53,7 +53,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.domain.data,Activit
 avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.domain.data,ActivityStaffOverviewData,0,36,0,0,0,2,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.domain.data,ActivityAuthorizationDefinition,0,9,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.domain.data,InactiveStudentData,0,12,0,0,0,1,0,1,0,1
-avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.domain.service,ActivityServiceImpl,87,2932,7,199,19,714,10,200,4,103
+avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.domain.service,ActivityServiceImpl,94,2549,8,162,19,620,11,171,5,92
 avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.domain.service,ActivityServiceImpl.FieldSync,0,30,0,2,0,5,0,3,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.domain.service,ActivityAuthorizationServiceImpl,1,972,3,49,0,221,3,100,0,77
 avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.domain.service,ActivityEntityAuthorizationResolver,0,46,0,0,0,13,0,6,0,6
