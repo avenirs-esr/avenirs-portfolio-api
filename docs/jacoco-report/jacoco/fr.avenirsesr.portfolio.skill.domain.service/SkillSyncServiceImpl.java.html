@@ -43,151 +43,142 @@ public class SkillSyncServiceImpl implements SkillSyncService {
   private final NationalSkillDetailsRepository nationalSkillDetailsRepository;
 
   @Override
-  public List&lt;ESkillReferentialType&gt; syncNationalCatalogs() {
-<span class="pc bpc" id="L47" title="1 of 2 branches missed.">    return NATIONAL_TYPES.stream().filter(type -&gt; !syncNationalCatalog(type)).toList();</span>
-  }
+  public void syncNationalCatalogs() {
+<span class="fc" id="L47">    NATIONAL_TYPES.forEach(this::syncNationalCatalog);</span>
+<span class="fc" id="L48">  }</span>
 
   @Override
-  public boolean syncNationalCatalog(ESkillReferentialType type) {
+  public void syncNationalCatalog(ESkillReferentialType type) {
 <span class="fc" id="L52">    Optional&lt;SkillCatalogDTO&gt; catalog = skillCatalogClient.fetchNationalCatalog(type);</span>
 
-<span class="fc bfc" id="L54" title="All 2 branches covered.">    if (catalog.isEmpty()) {</span>
+<span class="pc bpc" id="L54" title="1 of 2 branches missed.">    if (catalog.isEmpty()) {</span>
 <span class="fc" id="L55">      log.warn(&quot;No {} skill catalog available, synchronization skipped&quot;, type);</span>
-<span class="fc" id="L56">      return false;</span>
+<span class="fc" id="L56">      return;</span>
     }
 
-<span class="pc bpc" id="L59" title="2 of 4 branches missed.">    if (catalog.get().nodes() == null || catalog.get().nodes().isEmpty()) {</span>
-<span class="fc" id="L60">      log.warn(</span>
-          &quot;The {} skill catalog is empty (source not ready?), synchronization skipped to keep&quot;
-              + &quot; existing skills&quot;,
-          type);
-<span class="fc" id="L64">      return false;</span>
-    }
-
-<span class="nc" id="L67">    applyCatalog(catalog.get());</span>
-<span class="nc" id="L68">    return true;</span>
-  }
+<span class="nc" id="L59">    applyCatalog(catalog.get());</span>
+<span class="nc" id="L60">  }</span>
 
   @Override
   public List&lt;Skill&gt; applyCatalog(SkillCatalogDTO catalog) {
-<span class="fc" id="L73">    SkillReferential referential = upsertReferential(catalog);</span>
+<span class="fc" id="L64">    SkillReferential referential = upsertReferential(catalog);</span>
 
-<span class="fc" id="L75">    Map&lt;UUID, Skill&gt; existingById =</span>
-<span class="fc" id="L76">        skillRepository.findAllByReferential(referential).stream()</span>
-<span class="fc" id="L77">            .collect(Collectors.toMap(Skill::getId, Function.identity()));</span>
+<span class="fc" id="L66">    Map&lt;UUID, Skill&gt; existingById =</span>
+<span class="fc" id="L67">        skillRepository.findAllByReferential(referential).stream()</span>
+<span class="fc" id="L68">            .collect(Collectors.toMap(Skill::getId, Function.identity()));</span>
 
-<span class="fc" id="L79">    Map&lt;UUID, Skill&gt; syncedById = new LinkedHashMap&lt;&gt;();</span>
-<span class="fc" id="L80">    List&lt;Skill&gt; toSave = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L70">    Map&lt;UUID, Skill&gt; syncedById = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L71">    List&lt;Skill&gt; toSave = new ArrayList&lt;&gt;();</span>
 
-<span class="fc bfc" id="L82" title="All 2 branches covered.">    for (SkillNodeDTO node : orderByHierarchy(catalog.nodes())) {</span>
-<span class="fc bfc" id="L83" title="All 2 branches covered.">      Skill parent = node.parentId() == null ? null : syncedById.get(node.parentId());</span>
-<span class="fc" id="L84">      Skill skill = merge(existingById.get(node.id()), node, referential, parent);</span>
-<span class="fc" id="L85">      syncedById.put(node.id(), skill);</span>
-<span class="fc" id="L86">      toSave.add(skill);</span>
-<span class="fc" id="L87">    }</span>
+<span class="fc bfc" id="L73" title="All 2 branches covered.">    for (SkillNodeDTO node : orderByHierarchy(catalog.nodes())) {</span>
+<span class="fc bfc" id="L74" title="All 2 branches covered.">      Skill parent = node.parentId() == null ? null : syncedById.get(node.parentId());</span>
+<span class="fc" id="L75">      Skill skill = merge(existingById.get(node.id()), node, referential, parent);</span>
+<span class="fc" id="L76">      syncedById.put(node.id(), skill);</span>
+<span class="fc" id="L77">      toSave.add(skill);</span>
+<span class="fc" id="L78">    }</span>
 
-<span class="fc" id="L89">    saveSkillsInChunks(toSave);</span>
+<span class="fc" id="L80">    saveSkillsInChunks(toSave);</span>
 
-<span class="fc" id="L91">    List&lt;UUID&gt; obsoleteIds =</span>
-<span class="fc bfc" id="L92" title="All 2 branches covered.">        existingById.keySet().stream().filter(id -&gt; !syncedById.containsKey(id)).toList();</span>
-<span class="fc" id="L93">    skillRepository.archiveAll(obsoleteIds);</span>
+<span class="fc" id="L82">    List&lt;UUID&gt; obsoleteIds =</span>
+<span class="fc bfc" id="L83" title="All 2 branches covered.">        existingById.keySet().stream().filter(id -&gt; !syncedById.containsKey(id)).toList();</span>
+<span class="fc" id="L84">    skillRepository.archiveAll(obsoleteIds);</span>
 
-<span class="fc" id="L95">    replaceNationalDetails(catalog, syncedById, existingById.keySet());</span>
+<span class="fc" id="L86">    replaceNationalDetails(catalog, syncedById, existingById.keySet());</span>
 
-<span class="fc" id="L97">    log.info(</span>
+<span class="fc" id="L88">    log.info(</span>
         &quot;✔ {} skill catalog synchronized: {} skills, {} archived&quot;,
-<span class="fc" id="L99">        catalog.type(),</span>
-<span class="fc" id="L100">        syncedById.size(),</span>
-<span class="fc" id="L101">        obsoleteIds.size());</span>
+<span class="fc" id="L90">        catalog.type(),</span>
+<span class="fc" id="L91">        syncedById.size(),</span>
+<span class="fc" id="L92">        obsoleteIds.size());</span>
 
-<span class="fc" id="L103">    return List.copyOf(syncedById.values());</span>
+<span class="fc" id="L94">    return List.copyOf(syncedById.values());</span>
   }
 
   private SkillReferential upsertReferential(SkillCatalogDTO catalog) {
-<span class="fc" id="L107">    return skillReferentialRepository</span>
-<span class="fc" id="L108">        .findNationalByType(catalog.type())</span>
-<span class="fc" id="L109">        .map(</span>
+<span class="fc" id="L98">    return skillReferentialRepository</span>
+<span class="fc" id="L99">        .findNationalByType(catalog.type())</span>
+<span class="fc" id="L100">        .map(</span>
             existing -&gt; {
-<span class="fc" id="L111">              existing.setExternalId(catalog.externalId());</span>
-<span class="fc" id="L112">              existing.setTitle(catalog.title());</span>
-<span class="fc" id="L113">              return skillReferentialRepository.save(existing);</span>
+<span class="fc" id="L102">              existing.setExternalId(catalog.externalId());</span>
+<span class="fc" id="L103">              existing.setTitle(catalog.title());</span>
+<span class="fc" id="L104">              return skillReferentialRepository.save(existing);</span>
             })
-<span class="fc" id="L115">        .orElseGet(</span>
+<span class="fc" id="L106">        .orElseGet(</span>
             () -&gt;
-<span class="fc" id="L117">                skillReferentialRepository.save(</span>
-<span class="fc" id="L118">                    SkillReferential.create(</span>
-<span class="fc" id="L119">                        catalog.type(), catalog.externalId(), catalog.title(), null)));</span>
+<span class="fc" id="L108">                skillReferentialRepository.save(</span>
+<span class="fc" id="L109">                    SkillReferential.create(</span>
+<span class="fc" id="L110">                        catalog.type(), catalog.externalId(), catalog.title(), null)));</span>
   }
 
   private Skill merge(
       Skill existing, SkillNodeDTO node, SkillReferential referential, Skill parent) {
-<span class="fc bfc" id="L124" title="All 2 branches covered.">    if (existing == null) {</span>
-<span class="fc" id="L125">      return Skill.create(</span>
-<span class="fc" id="L126">          node.id(),</span>
+<span class="fc bfc" id="L115" title="All 2 branches covered.">    if (existing == null) {</span>
+<span class="fc" id="L116">      return Skill.create(</span>
+<span class="fc" id="L117">          node.id(),</span>
           referential,
-<span class="fc" id="L128">          node.externalCode(),</span>
-<span class="fc" id="L129">          node.title(),</span>
-<span class="fc" id="L130">          node.description(),</span>
+<span class="fc" id="L119">          node.externalCode(),</span>
+<span class="fc" id="L120">          node.title(),</span>
+<span class="fc" id="L121">          node.description(),</span>
           parent,
-<span class="fc" id="L132">          node.assessable());</span>
+<span class="fc" id="L123">          node.assessable());</span>
     }
 
-<span class="fc" id="L135">    existing.setReferential(referential);</span>
-<span class="fc" id="L136">    existing.setExternalCode(node.externalCode());</span>
-<span class="fc" id="L137">    existing.setTitle(node.title());</span>
-<span class="fc" id="L138">    existing.setDescription(node.description());</span>
-<span class="fc" id="L139">    existing.setParent(parent);</span>
-<span class="fc" id="L140">    existing.setAssessable(node.assessable());</span>
-<span class="fc" id="L141">    existing.setArchived(false);</span>
-<span class="fc" id="L142">    return existing;</span>
+<span class="fc" id="L126">    existing.setReferential(referential);</span>
+<span class="fc" id="L127">    existing.setExternalCode(node.externalCode());</span>
+<span class="fc" id="L128">    existing.setTitle(node.title());</span>
+<span class="fc" id="L129">    existing.setDescription(node.description());</span>
+<span class="fc" id="L130">    existing.setParent(parent);</span>
+<span class="fc" id="L131">    existing.setAssessable(node.assessable());</span>
+<span class="fc" id="L132">    existing.setArchived(false);</span>
+<span class="fc" id="L133">    return existing;</span>
   }
 
   private void replaceNationalDetails(
       SkillCatalogDTO catalog, Map&lt;UUID, Skill&gt; syncedById, Set&lt;UUID&gt; previousIds) {
-<span class="fc" id="L147">    Set&lt;UUID&gt; impactedIds = new LinkedHashSet&lt;&gt;(syncedById.keySet());</span>
-<span class="fc" id="L148">    impactedIds.addAll(previousIds);</span>
-<span class="fc" id="L149">    nationalSkillDetailsRepository.deleteAllBySkillIds(List.copyOf(impactedIds));</span>
+<span class="fc" id="L138">    Set&lt;UUID&gt; impactedIds = new LinkedHashSet&lt;&gt;(syncedById.keySet());</span>
+<span class="fc" id="L139">    impactedIds.addAll(previousIds);</span>
+<span class="fc" id="L140">    nationalSkillDetailsRepository.deleteAllBySkillIds(List.copyOf(impactedIds));</span>
 
-<span class="fc" id="L151">    List&lt;NationalSkillDetails&gt; details =</span>
-<span class="fc" id="L152">        catalog.nodes().stream()</span>
-<span class="fc bfc" id="L153" title="All 2 branches covered.">            .filter(node -&gt; node.kind() != null)</span>
-<span class="fc" id="L154">            .map(</span>
+<span class="fc" id="L142">    List&lt;NationalSkillDetails&gt; details =</span>
+<span class="fc" id="L143">        catalog.nodes().stream()</span>
+<span class="fc bfc" id="L144" title="All 2 branches covered.">            .filter(node -&gt; node.kind() != null)</span>
+<span class="fc" id="L145">            .map(</span>
                 node -&gt;
-<span class="fc" id="L156">                    Optional.ofNullable(syncedById.get(node.id()))</span>
-<span class="fc" id="L157">                        .map(skill -&gt; NationalSkillDetails.create(skill, node.kind()))</span>
-<span class="fc" id="L158">                        .orElse(null))</span>
-<span class="fc" id="L159">            .filter(Objects::nonNull)</span>
-<span class="fc" id="L160">            .toList();</span>
+<span class="fc" id="L147">                    Optional.ofNullable(syncedById.get(node.id()))</span>
+<span class="fc" id="L148">                        .map(skill -&gt; NationalSkillDetails.create(skill, node.kind()))</span>
+<span class="fc" id="L149">                        .orElse(null))</span>
+<span class="fc" id="L150">            .filter(Objects::nonNull)</span>
+<span class="fc" id="L151">            .toList();</span>
 
-<span class="fc bfc" id="L162" title="All 2 branches covered.">    for (int start = 0; start &lt; details.size(); start += SAVE_CHUNK_SIZE) {</span>
-<span class="fc" id="L163">      nationalSkillDetailsRepository.saveAll(</span>
-<span class="fc" id="L164">          details.subList(start, Math.min(start + SAVE_CHUNK_SIZE, details.size())));</span>
+<span class="fc bfc" id="L153" title="All 2 branches covered.">    for (int start = 0; start &lt; details.size(); start += SAVE_CHUNK_SIZE) {</span>
+<span class="fc" id="L154">      nationalSkillDetailsRepository.saveAll(</span>
+<span class="fc" id="L155">          details.subList(start, Math.min(start + SAVE_CHUNK_SIZE, details.size())));</span>
     }
-<span class="fc" id="L166">  }</span>
+<span class="fc" id="L157">  }</span>
 
   private void saveSkillsInChunks(List&lt;Skill&gt; skills) {
-<span class="fc bfc" id="L169" title="All 2 branches covered.">    for (int start = 0; start &lt; skills.size(); start += SAVE_CHUNK_SIZE) {</span>
-<span class="fc" id="L170">      skillRepository.saveAll(</span>
-<span class="fc" id="L171">          skills.subList(start, Math.min(start + SAVE_CHUNK_SIZE, skills.size())));</span>
+<span class="fc bfc" id="L160" title="All 2 branches covered.">    for (int start = 0; start &lt; skills.size(); start += SAVE_CHUNK_SIZE) {</span>
+<span class="fc" id="L161">      skillRepository.saveAll(</span>
+<span class="fc" id="L162">          skills.subList(start, Math.min(start + SAVE_CHUNK_SIZE, skills.size())));</span>
     }
-<span class="fc" id="L173">  }</span>
+<span class="fc" id="L164">  }</span>
 
   private List&lt;SkillNodeDTO&gt; orderByHierarchy(List&lt;SkillNodeDTO&gt; nodes) {
-<span class="fc" id="L176">    Map&lt;UUID, SkillNodeDTO&gt; nodeById =</span>
-<span class="fc" id="L177">        nodes.stream()</span>
-<span class="pc bpc" id="L178" title="1 of 2 branches missed.">            .filter(node -&gt; node.id() != null)</span>
-<span class="fc" id="L179">            .collect(</span>
-<span class="fc" id="L180">                Collectors.toMap(</span>
-<span class="pc" id="L181">                    SkillNodeDTO::id, Function.identity(), (first, second) -&gt; first, HashMap::new));</span>
+<span class="fc" id="L167">    Map&lt;UUID, SkillNodeDTO&gt; nodeById =</span>
+<span class="fc" id="L168">        nodes.stream()</span>
+<span class="pc bpc" id="L169" title="1 of 2 branches missed.">            .filter(node -&gt; node.id() != null)</span>
+<span class="fc" id="L170">            .collect(</span>
+<span class="fc" id="L171">                Collectors.toMap(</span>
+<span class="pc" id="L172">                    SkillNodeDTO::id, Function.identity(), (first, second) -&gt; first, HashMap::new));</span>
 
-<span class="fc" id="L183">    List&lt;SkillNodeDTO&gt; ordered = new ArrayList&lt;&gt;(nodeById.size());</span>
-<span class="fc" id="L184">    Set&lt;UUID&gt; emitted = new LinkedHashSet&lt;&gt;();</span>
+<span class="fc" id="L174">    List&lt;SkillNodeDTO&gt; ordered = new ArrayList&lt;&gt;(nodeById.size());</span>
+<span class="fc" id="L175">    Set&lt;UUID&gt; emitted = new LinkedHashSet&lt;&gt;();</span>
 
-<span class="fc bfc" id="L186" title="All 2 branches covered.">    for (SkillNodeDTO node : nodes) {</span>
-<span class="fc" id="L187">      emitWithAncestors(node, nodeById, emitted, ordered);</span>
-<span class="fc" id="L188">    }</span>
+<span class="fc bfc" id="L177" title="All 2 branches covered.">    for (SkillNodeDTO node : nodes) {</span>
+<span class="fc" id="L178">      emitWithAncestors(node, nodeById, emitted, ordered);</span>
+<span class="fc" id="L179">    }</span>
 
-<span class="fc" id="L190">    return ordered;</span>
+<span class="fc" id="L181">    return ordered;</span>
   }
 
   private void emitWithAncestors(
@@ -195,25 +186,25 @@ public class SkillSyncServiceImpl implements SkillSyncService {
       Map&lt;UUID, SkillNodeDTO&gt; nodeById,
       Set&lt;UUID&gt; emitted,
       List&lt;SkillNodeDTO&gt; ordered) {
-<span class="pc bpc" id="L198" title="2 of 6 branches missed.">    if (node == null || node.id() == null || emitted.contains(node.id())) {</span>
-<span class="fc" id="L199">      return;</span>
+<span class="pc bpc" id="L189" title="2 of 6 branches missed.">    if (node == null || node.id() == null || emitted.contains(node.id())) {</span>
+<span class="fc" id="L190">      return;</span>
     }
 
-<span class="fc" id="L202">    List&lt;SkillNodeDTO&gt; branch = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L203">    Set&lt;UUID&gt; visited = new LinkedHashSet&lt;&gt;();</span>
-<span class="fc" id="L204">    SkillNodeDTO current = node;</span>
+<span class="fc" id="L193">    List&lt;SkillNodeDTO&gt; branch = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L194">    Set&lt;UUID&gt; visited = new LinkedHashSet&lt;&gt;();</span>
+<span class="fc" id="L195">    SkillNodeDTO current = node;</span>
 
-<span class="pc bpc" id="L206" title="1 of 6 branches missed.">    while (current != null &amp;&amp; !emitted.contains(current.id()) &amp;&amp; visited.add(current.id())) {</span>
-<span class="fc" id="L207">      branch.add(current);</span>
-<span class="fc bfc" id="L208" title="All 2 branches covered.">      current = current.parentId() == null ? null : nodeById.get(current.parentId());</span>
+<span class="pc bpc" id="L197" title="1 of 6 branches missed.">    while (current != null &amp;&amp; !emitted.contains(current.id()) &amp;&amp; visited.add(current.id())) {</span>
+<span class="fc" id="L198">      branch.add(current);</span>
+<span class="fc bfc" id="L199" title="All 2 branches covered.">      current = current.parentId() == null ? null : nodeById.get(current.parentId());</span>
     }
 
-<span class="fc bfc" id="L211" title="All 2 branches covered.">    for (int index = branch.size() - 1; index &gt;= 0; index--) {</span>
-<span class="fc" id="L212">      SkillNodeDTO branchNode = branch.get(index);</span>
-<span class="pc bpc" id="L213" title="1 of 2 branches missed.">      if (emitted.add(branchNode.id())) {</span>
-<span class="fc" id="L214">        ordered.add(branchNode);</span>
+<span class="fc bfc" id="L202" title="All 2 branches covered.">    for (int index = branch.size() - 1; index &gt;= 0; index--) {</span>
+<span class="fc" id="L203">      SkillNodeDTO branchNode = branch.get(index);</span>
+<span class="pc bpc" id="L204" title="1 of 2 branches missed.">      if (emitted.add(branchNode.id())) {</span>
+<span class="fc" id="L205">        ordered.add(branchNode);</span>
       }
     }
-<span class="fc" id="L217">  }</span>
+<span class="fc" id="L208">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
