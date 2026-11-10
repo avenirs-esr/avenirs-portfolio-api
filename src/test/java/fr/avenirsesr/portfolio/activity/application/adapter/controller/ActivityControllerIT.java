@@ -460,6 +460,49 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       }
 
       @Test
+      void thenItShouldOrderTheOpenedAssessmentsFirstThenTheNewOnesThenTheSentOnes()
+          throws Exception {
+        BddLogger.given("an opened, a new and a sent submission, submitted in this order");
+        var assessment = new ActivityAssessmentRequest(true, null, null);
+        UUID openedId =
+            submitForAssessmentAsStudent(
+                publishAssessableActivityAsStaff("Activité évaluable ordre ouverte", assessment));
+        openAssessmentAsStaff(openedId);
+        UUID newId =
+            submitForAssessmentAsStudent(
+                publishAssessableActivityAsStaff("Activité évaluable ordre nouvelle", assessment));
+        UUID sentId =
+            submitForAssessmentAsStudent(
+                publishAssessableActivityAsStaff("Activité évaluable ordre envoyée", assessment));
+        openAssessmentAsStaff(sentId);
+        sendAssessmentAsStaff(sentId);
+
+        BddLogger.then("the opened one should come first, then the new one, then the sent one");
+        String body =
+            webTestClient
+                .get()
+                .uri(
+                    uriBuilder ->
+                        uriBuilder.path(ASSESSMENTS_PATH).queryParam("pageSize", 100).build())
+                .headers(ActivityControllerIT.this::addStaffHeaders)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(String.class)
+                .returnResult()
+                .getResponseBody();
+        var returnedIds = new ArrayList<String>();
+        objectMapper
+            .readTree(body)
+            .get("data")
+            .forEach(item -> returnedIds.add(item.get("id").asText()));
+        var expectedIds = List.of(openedId.toString(), newId.toString(), sentId.toString());
+
+        assertEquals(expectedIds, returnedIds.stream().filter(expectedIds::contains).toList());
+      }
+
+      @Test
       void thenItShouldNotReturnADeclaredActivityThatWasNotSubmitted() throws Exception {
         BddLogger.given("an assessable activity of the staff a student only subscribed to");
         UUID activityId =

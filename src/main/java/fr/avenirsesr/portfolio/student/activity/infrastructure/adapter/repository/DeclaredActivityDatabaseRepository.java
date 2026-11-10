@@ -125,7 +125,9 @@ public class DeclaredActivityDatabaseRepository
                     staffId, EActivityRight.EVALUATION))
             .and(DeclaredActivitySpecification.hasAssessmentStatusIn(statuses))
             .and(DeclaredActivitySpecification.hasAssessmentTypeIn(types));
-    var sort = Sort.by(Sort.Direction.DESC, "submittedAt");
+    var sort =
+        Sort.by(Sort.Direction.ASC, "assessmentStatusOrder")
+            .and(Sort.by(Sort.Direction.DESC, "submittedAt"));
     return findAll(
         specification,
         PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort),
