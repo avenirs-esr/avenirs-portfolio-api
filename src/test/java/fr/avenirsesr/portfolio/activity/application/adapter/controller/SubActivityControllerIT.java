@@ -39,6 +39,7 @@ class SubActivityControllerIT extends ContainerConfigurationTest {
   private static final String PRESENTATION_PATH =
       BASE_PATH + "/PUBLISHED/{activityId}/presentation";
   private static final String SUB_ACTIVITIES_PATH = BASE_PATH + "/draft/{draftId}/sub-activities";
+  private static final String SUB_ACTIVITIES_ORDER_PATH = SUB_ACTIVITIES_PATH + "/order";
 
   private static final UUID MAIN_ACTIVITY_ID =
       UUID.fromString("b3e7a1c9-4f2d-4a8e-9c61-7d2e5f8a1b01");
@@ -548,6 +549,81 @@ class SubActivityControllerIT extends ContainerConfigurationTest {
           .expectStatus()
           .isCreated();
     }
+
+    @Test
+    void thenTheSubActivitiesShouldBeReordered() throws Exception {
+      var firstId = createSubActivity(mainDraftId, "Première étape");
+      var secondId = createSubActivity(mainDraftId, "Deuxième étape");
+      var thirdId = createSubActivity(mainDraftId, "Troisième étape");
+
+      BddLogger.when("reordering the sub-activities");
+      putSubActivitiesOrder(mainDraftId, List.of(thirdId, firstId, secondId), staffHeaders())
+          .expectStatus()
+          .isNoContent();
+
+      BddLogger.then("they should be listed in the new order");
+      var content =
+          readJson(get(uri -> uri.path(CONTENT_PATH).build("DRAFT", mainDraftId), staffHeaders()));
+      assertThat(idsOf(content.get("subActivities"))).containsExactly(thirdId, firstId, secondId);
+
+      BddLogger.and("a sub-activity added afterwards should be added last");
+      var lastId = createSubActivity(mainDraftId, "Dernière étape");
+      var updatedContent =
+          readJson(get(uri -> uri.path(CONTENT_PATH).build("DRAFT", mainDraftId), staffHeaders()));
+      assertThat(idsOf(updatedContent.get("subActivities")))
+          .containsExactly(thirdId, firstId, secondId, lastId);
+    }
+
+    @Test
+    void thenAnOrderNotMatchingTheSubActivitiesShouldBeRejected() throws Exception {
+      var firstId = createSubActivity(mainDraftId, "Première étape");
+      var secondId = createSubActivity(mainDraftId, "Deuxième étape");
+
+      BddLogger.then("a missing, unknown or duplicated sub-activity should be rejected with 400");
+      for (var order :
+          List.of(
+              List.of(secondId),
+              List.of(secondId, firstId, UUID.randomUUID()),
+              List.of(secondId, UUID.randomUUID()),
+              List.of(secondId, secondId))) {
+        putSubActivitiesOrder(mainDraftId, order, staffHeaders())
+            .expectStatus()
+            .isBadRequest()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("SUB_ACTIVITY_ORDER_MISMATCH");
+      }
+
+      BddLogger.and("the order should be left unchanged");
+      var content =
+          readJson(get(uri -> uri.path(CONTENT_PATH).build("DRAFT", mainDraftId), staffHeaders()));
+      assertThat(idsOf(content.get("subActivities"))).containsExactly(firstId, secondId);
+    }
+
+    @Test
+    void thenReorderingWithoutRightOnTheMainDraftShouldBeRejected() throws Exception {
+      var firstId = createSubActivity(mainDraftId, "Première étape");
+      var secondId = createSubActivity(mainDraftId, "Deuxième étape");
+
+      BddLogger.when("another staff reorders the sub-activities of the main draft");
+      BddLogger.then("it should be rejected with 403");
+      putSubActivitiesOrder(mainDraftId, List.of(secondId, firstId), anotherStaffHeaders())
+          .expectStatus()
+          .isForbidden();
+    }
+
+    @Test
+    void thenReorderingTheSubActivitiesOfASubActivityDraftShouldBeRejected() throws Exception {
+      var subActivityId = createSubActivity(mainDraftId, "Première étape");
+
+      BddLogger.then("reordering from a sub-activity draft should be rejected with 409");
+      putSubActivitiesOrder(subActivityId, List.of(), staffHeaders())
+          .expectStatus()
+          .isEqualTo(409)
+          .expectBody()
+          .jsonPath("$.code")
+          .isEqualTo(SUB_ACTIVITY_OPERATION_NOT_ALLOWED);
+    }
   }
 
   @Nested
@@ -567,6 +643,15 @@ class SubActivityControllerIT extends ContainerConfigurationTest {
       BddLogger.when("adding a sub-activity to a published activity that has no draft");
       BddLogger.then("it should return 404");
       postSubActivity(MAIN_ACTIVITY_ID, Map.of("title", "Étape"), staffHeaders())
+          .expectStatus()
+          .isNotFound();
+    }
+
+    @Test
+    void thenReorderingItsSubActivitiesShouldReturnNotFound() {
+      BddLogger.when("reordering the sub-activities of a draft that does not exist");
+      BddLogger.then("it should return 404");
+      putSubActivitiesOrder(UUID.randomUUID(), List.of(), staffHeaders())
           .expectStatus()
           .isNotFound();
     }
@@ -650,6 +735,24 @@ class SubActivityControllerIT extends ContainerConfigurationTest {
 
       BddLogger.then("both sub-activities should be published in order");
       assertThat(publishedSubActivityIds(mainDraftId)).containsExactly(firstId, secondId);
+    }
+
+    @Test
+    void thenReorderingThePublishedSubActivitiesShouldPublishTheNewOrder() throws Exception {
+      var firstId = createPublishableSubActivity("Première étape");
+      var secondId = createPublishableSubActivity("Deuxième étape");
+      var lastId = createPublishableSubActivity("Dernière étape");
+      publish(mainDraftId).expectStatus().isOk();
+
+      BddLogger.when("editing the published activity and reordering its sub-activities");
+      createDraftFromPublishedActivity();
+      putSubActivitiesOrder(mainDraftId, List.of(lastId, firstId, secondId), staffHeaders())
+          .expectStatus()
+          .isNoContent();
+      publish(mainDraftId).expectStatus().isOk();
+
+      BddLogger.then("the published activity should list its sub-activities in the new order");
+      assertThat(publishedSubActivityIds(mainDraftId)).containsExactly(lastId, firstId, secondId);
     }
 
     @Test
@@ -930,6 +1033,17 @@ class SubActivityControllerIT extends ContainerConfigurationTest {
         .headers(headers)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(body)
+        .exchange();
+  }
+
+  private WebTestClient.ResponseSpec putSubActivitiesOrder(
+      UUID draftId, List<UUID> subActivityIds, Consumer<HttpHeaders> headers) {
+    return webTestClient
+        .put()
+        .uri(SUB_ACTIVITIES_ORDER_PATH, draftId)
+        .headers(headers)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(subActivityIds)
         .exchange();
   }
 

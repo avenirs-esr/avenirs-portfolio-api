@@ -337,6 +337,23 @@ public class ActivityController {
         .body(new ActivityDraftCreationResponse(subActivity.getId()));
   }
 
+  @PreAuthorize("hasAuthority('activity:update')")
+  @PutMapping("/draft/{activityDraftId}/sub-activities/order")
+  public ResponseEntity<Void> updateSubActivityDraftsOrder(
+      Principal principal,
+      @PathVariable UUID activityDraftId,
+      @RequestBody List<UUID> subActivityIds) {
+    log.debug(
+        "Received request to reorder the sub-activities of activity draft [{}] by user [{}] body :"
+            + " {}",
+        activityDraftId,
+        principal.getName(),
+        subActivityIds);
+
+    activityService.updateSubActivityDraftsOrder(activityDraftId, subActivityIds);
+    return ResponseEntity.noContent().build();
+  }
+
   @PreAuthorize("hasAuthority('activity:create')")
   @PostMapping("/publish/{activityDraftId}")
   public ResponseEntity<CreationResponse> publishActivityDraft(

@@ -33,6 +33,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityPeriodExc
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.SubActivityAdditionNotAllowedException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.SubActivityFieldNotAllowedException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.SubActivityOperationNotAllowedException;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.SubActivityOrderMismatchException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.SubActivityPeriodOutsideMainActivityException;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAssessment;
@@ -915,6 +916,161 @@ class ActivityServiceImplSubActivityTest {
           ActivityDraftNotFoundException.class,
           () -> activityService.createSubActivityDraft(unknownId, "First step"));
       verify(activityDraftRepository, never()).save(any());
+    }
+  }
+
+  @Nested
+  class WhenReorderingTheSubActivityDrafts {
+
+    private ActivityDraft thirdSubActivityDraft;
+
+    @BeforeEach
+    void setupWhen() {
+      BddLogger.given("a main draft with three sub-activities");
+      thirdSubActivityDraft = subActivityDraft(secondSubActivityDraft.getId(), "Third draft step");
+      givenDrafts(mainDraft, firstSubActivityDraft);
+      when(activityDraftRepository.findAllSubActivitiesOf(mainDraft.getId()))
+          .thenReturn(
+              List.of(firstSubActivityDraft, secondSubActivityDraft, thirdSubActivityDraft));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void thenTheSubActivitiesShouldBeRelinkedInTheGivenOrder() {
+      BddLogger.when("reordering the sub-activities");
+      activityService.updateSubActivityDraftsOrder(
+          mainDraft.getId(),
+          List.of(
+              thirdSubActivityDraft.getId(),
+              firstSubActivityDraft.getId(),
+              secondSubActivityDraft.getId()));
+
+      BddLogger.then("each sub-activity should follow the previous one in the given order");
+      ArgumentCaptor<List<ActivityDraft>> captor = ArgumentCaptor.forClass(List.class);
+      verify(activityDraftRepository).saveAll(captor.capture());
+      assertThat(captor.getValue())
+          .containsExactly(thirdSubActivityDraft, firstSubActivityDraft, secondSubActivityDraft);
+      assertEquals(mainDraft.getId(), thirdSubActivityDraft.getPreviousActivityId().orElseThrow());
+      assertEquals(
+          thirdSubActivityDraft.getId(),
+          firstSubActivityDraft.getPreviousActivityId().orElseThrow());
+      assertEquals(
+          firstSubActivityDraft.getId(),
+          secondSubActivityDraft.getPreviousActivityId().orElseThrow());
+      assertThat(captor.getValue())
+          .allSatisfy(
+              subActivity ->
+                  assertEquals(mainDraft.getId(), subActivity.getMainActivityId().orElseThrow()));
+    }
+
+    @Test
+    void thenItShouldCheckTheEditRightOnTheMainDraft() {
+      BddLogger.when("reordering the sub-activities");
+      activityService.updateSubActivityDraftsOrder(
+          mainDraft.getId(),
+          List.of(
+              firstSubActivityDraft.getId(),
+              secondSubActivityDraft.getId(),
+              thirdSubActivityDraft.getId()));
+
+      BddLogger.then("the edit right should be checked on the main draft");
+      verify(activityAuthorizationService)
+          .checkDraftRight(staff, mainDraft.getId(), EActivityRight.EDIT);
+    }
+
+    @Test
+    void thenAStaffWithoutTheEditRightShouldBeRejected() {
+      BddLogger.given("a staff without the edit right on the main draft");
+      doThrow(new UserNotAuthorizedException())
+          .when(activityAuthorizationService)
+          .checkDraftRight(staff, mainDraft.getId(), EActivityRight.EDIT);
+
+      BddLogger.then("reordering the sub-activities should be rejected");
+      assertThrows(
+          UserNotAuthorizedException.class,
+          () ->
+              activityService.updateSubActivityDraftsOrder(
+                  mainDraft.getId(),
+                  List.of(
+                      thirdSubActivityDraft.getId(),
+                      firstSubActivityDraft.getId(),
+                      secondSubActivityDraft.getId())));
+      verify(activityDraftRepository, never()).saveAll(any());
+    }
+
+    @Test
+    void thenAnOrderMissingASubActivityShouldBeRejected() {
+      BddLogger.then("an order without every sub-activity should be rejected");
+      assertOrderMismatch(List.of(thirdSubActivityDraft.getId(), firstSubActivityDraft.getId()));
+    }
+
+    @Test
+    void thenAnOrderWithAnUnknownSubActivityShouldBeRejected() {
+      BddLogger.then("an order with a sub-activity of another activity should be rejected");
+      assertOrderMismatch(
+          List.of(thirdSubActivityDraft.getId(), firstSubActivityDraft.getId(), UUID.randomUUID()));
+    }
+
+    @Test
+    void thenAnOrderWithADuplicatedSubActivityShouldBeRejected() {
+      BddLogger.then("an order with a duplicated sub-activity should be rejected");
+      assertOrderMismatch(
+          List.of(
+              thirdSubActivityDraft.getId(),
+              firstSubActivityDraft.getId(),
+              firstSubActivityDraft.getId()));
+    }
+
+    @Test
+    void thenAMissingOrderShouldBeRejected() {
+      BddLogger.then("an order without any list should be rejected");
+      assertOrderMismatch(null);
+    }
+
+    @Test
+    void thenAnEmptyOrderOfAMainDraftWithoutSubActivityShouldBeAccepted() {
+      BddLogger.given("a main draft without sub-activity");
+      when(activityDraftRepository.findAllSubActivitiesOf(mainDraft.getId())).thenReturn(List.of());
+
+      BddLogger.when("reordering with an empty list");
+      activityService.updateSubActivityDraftsOrder(mainDraft.getId(), List.of());
+
+      BddLogger.then("nothing should be saved");
+      verify(activityDraftRepository, never()).saveAll(any());
+    }
+
+    @Test
+    void thenReorderingFromASubActivityDraftShouldBeRejected() {
+      BddLogger.then("reordering from a sub-activity draft should be rejected");
+      assertThrows(
+          SubActivityOperationNotAllowedException.class,
+          () ->
+              activityService.updateSubActivityDraftsOrder(
+                  firstSubActivityDraft.getId(), List.of()));
+      verify(activityDraftRepository, never()).saveAll(any());
+    }
+
+    @Test
+    void thenAnUnknownMainDraftShouldBeRejected() {
+      BddLogger.given("a main draft that does not exist");
+      var unknownId = UUID.randomUUID();
+      when(activityDraftRepository.findById(unknownId)).thenReturn(Optional.empty());
+
+      BddLogger.then("reordering the sub-activities should be rejected");
+      assertThrows(
+          ActivityDraftNotFoundException.class,
+          () -> activityService.updateSubActivityDraftsOrder(unknownId, List.of()));
+      verify(activityDraftRepository, never()).saveAll(any());
+    }
+
+    private void assertOrderMismatch(List<UUID> orderedSubActivityIds) {
+      assertThrows(
+          SubActivityOrderMismatchException.class,
+          () ->
+              activityService.updateSubActivityDraftsOrder(
+                  mainDraft.getId(), orderedSubActivityIds));
+      verify(activityDraftRepository, never()).saveAll(any());
+      assertEquals(mainDraft.getId(), firstSubActivityDraft.getPreviousActivityId().orElseThrow());
     }
   }
 
