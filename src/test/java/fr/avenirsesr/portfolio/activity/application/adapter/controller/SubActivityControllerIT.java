@@ -795,6 +795,44 @@ class SubActivityControllerIT extends ContainerConfigurationTest {
     }
 
     @Test
+    void thenModifiedSubActivitiesShouldBeNotifiedOnceAsPartOfTheirMainActivity() throws Exception {
+      var firstId = createPublishableSubActivity("Première étape");
+      var secondId = createPublishableSubActivity("Deuxième étape");
+      createPublishableSubActivity("Dernière étape");
+      publish(mainDraftId).expectStatus().isOk();
+
+      BddLogger.and("a student enrolled in the published activity with notifications enabled");
+      var declaredActivityId = subscribe(mainDraftId);
+      enableStudentNotifications();
+
+      BddLogger.when("modifying the main activity and two of its sub-activities in a draft");
+      createDraftFromPublishedActivity();
+      patchDraft(mainDraftId, Map.of("title", "Projet à publier revu")).expectStatus().isOk();
+      patchDraft(firstId, Map.of("title", "Première étape revue")).expectStatus().isOk();
+      patchDraft(secondId, Map.of("description", "<p>Nouvelle consigne</p>")).expectStatus().isOk();
+
+      BddLogger.then("saving the draft should not notify the student");
+      assertThat(studentNotificationsOf(declaredActivityId)).isEmpty();
+
+      BddLogger.when("publishing the main draft");
+      publish(mainDraftId).expectStatus().isOk();
+
+      BddLogger.then("the student should get a single notification about the main activity");
+      var notifications = studentNotificationsOf(declaredActivityId);
+      assertThat(notifications).hasSize(1);
+      var notification = notifications.getFirst();
+      assertThat(notification.get("type").asText()).isEqualTo("ACTIVITY_MODIFIED");
+
+      BddLogger.and("it should mention the current title and the modified sub-activities");
+      var parameters = notification.get("parameters");
+      assertThat(parameters.get("activityTitle").asText()).isEqualTo("Projet à publier revu");
+      assertThat(textsOf(parameters.get("updatedFields")))
+          .containsExactly("ACTIVITY_TITLE", "SUB_ACTIVITIES");
+      assertThat(textsOf(parameters.get("updatedSubActivityTitles")))
+          .containsExactly("Première étape revue", "Deuxième étape");
+    }
+
+    @Test
     void thenASubActivityShouldBeConfigurableThroughTheDraftEndpointsAndPublished()
         throws Exception {
       BddLogger.when("adding a sub-activity with only a title");
@@ -977,6 +1015,53 @@ class SubActivityControllerIT extends ContainerConfigurationTest {
           .uri(BASE_PATH + "/publish/{draftId}", draftId)
           .headers(staffHeaders())
           .exchange();
+    }
+
+    private UUID subscribe(UUID activityId) throws Exception {
+      var body =
+          webTestClient
+              .post()
+              .uri("/me/activity-progress/subscribe/{activityId}", activityId)
+              .headers(studentHeaders())
+              .contentType(MediaType.APPLICATION_JSON)
+              .bodyValue(Map.of())
+              .exchange()
+              .expectStatus()
+              .isCreated()
+              .expectBody(String.class)
+              .returnResult()
+              .getResponseBody();
+      return UUID.fromString(readJson(body).get("createdItemId").asText());
+    }
+
+    private void enableStudentNotifications() {
+      webTestClient
+          .patch()
+          .uri("/me/preferences/notification")
+          .headers(studentHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .bodyValue(Map.of("notificationEnabled", true))
+          .exchange()
+          .expectStatus()
+          .isNoContent();
+    }
+
+    private List<JsonNode> studentNotificationsOf(UUID elementId) throws Exception {
+      var notifications =
+          readJson(
+                  get(
+                      uri ->
+                          uri.path("/me/notifications/STUDENT").queryParam("pageSize", 100).build(),
+                      studentHeaders()))
+              .get("data");
+      return StreamSupport.stream(notifications.spliterator(), false)
+          .filter(
+              notification -> elementId.toString().equals(notification.get("elementId").asText()))
+          .toList();
+    }
+
+    private List<String> textsOf(JsonNode values) {
+      return StreamSupport.stream(values.spliterator(), false).map(JsonNode::asText).toList();
     }
 
     private List<UUID> publishedSubActivityIds(UUID activityId) throws Exception {
