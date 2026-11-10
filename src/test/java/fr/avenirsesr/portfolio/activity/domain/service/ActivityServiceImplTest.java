@@ -2291,17 +2291,17 @@ class ActivityServiceImplTest {
       }
 
       @Test
-      void thenItShouldThrowWhenTheStaffHasNoEvaluationRight() {
-        BddLogger.then("a staff without any evaluation right should not be allowed");
+      void thenItShouldReturnAnEmptyPageWhenTheStaffHasNoEvaluationRight() {
+        BddLogger.then("a staff without any evaluation right should get an empty page");
 
-        when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
         when(activityAuthorizationService.hasLoggedInStaffAuthorizationOnAnyActivity(
                 EActivityRight.EVALUATION))
             .thenReturn(false);
 
-        assertThrows(
-            UserNotAuthorizedException.class,
-            () -> activityService.getDeclaredActivitiesToAssess(null, null, pageCriteria));
+        var result = activityService.getDeclaredActivitiesToAssess(null, null, pageCriteria);
+
+        assertTrue(result.content().isEmpty());
+        assertEquals(0, result.pageInfo().totalElements());
 
         verifyNoInteractions(declaredActivityService);
       }

@@ -5,6 +5,7 @@ import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValida
 import static fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityUpdatableField.*;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
@@ -1297,13 +1298,13 @@ public class ActivityServiceImpl implements ActivityService {
       List<EActivityAssessmentStatus> statuses,
       List<EActivityAssessmentType> types,
       PageCriteria pageCriteria) {
-    Staff staff = loggedInUserService.getLoggedInStaff();
-
     if (!activityAuthorizationService.hasLoggedInStaffAuthorizationOnAnyActivity(
         EActivityRight.EVALUATION)) {
-      throw new UserNotAuthorizedException();
+      return new PagedResult<>(
+          List.of(), new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), 0));
     }
 
+    Staff staff = loggedInUserService.getLoggedInStaff();
     var pagedResult =
         declaredActivityService.getDeclaredActivitiesToAssessBy(
             staff, statuses, types, pageCriteria);
