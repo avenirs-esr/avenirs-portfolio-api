@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SkillCatalogSyncRunner.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.skill.infrastructure.adapter.scheduler</a> &gt; <span class="el_source">SkillCatalogSyncRunner.java</span></div><h1>SkillCatalogSyncRunner.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.skill.infrastructure.adapter.scheduler;
 
+import fr.avenirsesr.portfolio.common.skill.domain.model.enums.ESkillReferentialType;
 import fr.avenirsesr.portfolio.skill.domain.port.input.SkillSyncService;
+import java.time.Duration;
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,7 +15,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-<span class="nc" id="L12">@Slf4j</span>
+<span class="nc" id="L18">@Slf4j</span>
 @Component
 @Profile(&quot;!test&quot;)
 @Order(0)
@@ -20,20 +26,45 @@ public class SkillCatalogSyncRunner implements CommandLineRunner {
   @Value(&quot;${skill.catalog.sync.on-startup:true}&quot;)
   private boolean syncOnStartup;
 
+  @Value(&quot;${skill.catalog.sync.retry.max-attempts:20}&quot;)
+  private int maxAttempts;
+
+  @Value(&quot;${skill.catalog.sync.retry.delay:30s}&quot;)
+  private Duration retryDelay;
+
+  private final ScheduledExecutorService retryExecutor =
+      Executors.newSingleThreadScheduledExecutor(
+          runnable -&gt; {
+<span class="nc" id="L38">            Thread thread = new Thread(runnable, &quot;skill-catalog-sync-retry&quot;);</span>
+<span class="nc" id="L39">            thread.setDaemon(true);</span>
+<span class="nc" id="L40">            return thread;</span>
+          });
+
   @Override
   public void run(String... args) {
-<span class="nc bnc" id="L25" title="All 2 branches missed.">    if (!syncOnStartup) {</span>
-<span class="nc" id="L26">      log.info(&quot;National skill catalog synchronization on startup disabled: skipped&quot;);</span>
-<span class="nc" id="L27">      return;</span>
+<span class="nc bnc" id="L45" title="All 2 branches missed.">    if (!syncOnStartup) {</span>
+<span class="nc" id="L46">      log.info(&quot;Skill catalog synchronization on startup is disabled&quot;);</span>
+<span class="nc" id="L47">      return;</span>
     }
 
+<span class="nc" id="L50">    synchronize(1);</span>
+<span class="nc" id="L51">  }</span>
+
+  private void synchronize(int attempt) {
+<span class="nc" id="L54">    log.info(&quot;Synchronizing the national skill catalogs from interoperability&quot;);</span>
+<span class="nc" id="L55">    List&lt;ESkillReferentialType&gt; pending = List.of();</span>
     try {
-<span class="nc" id="L31">      log.info(&quot;Synchronizing the national skill catalogs from interoperability&quot;);</span>
-<span class="nc" id="L32">      skillSyncService.syncNationalCatalogs();</span>
-<span class="nc" id="L33">    } catch (Exception e) {</span>
-<span class="nc" id="L34">      log.error(&quot;National skill catalog synchronization on startup failed: {}&quot;, e.getMessage());</span>
-<span class="nc" id="L35">      log.debug(&quot;Full error details:&quot;, e);</span>
-<span class="nc" id="L36">    }</span>
-<span class="nc" id="L37">  }</span>
+<span class="nc" id="L57">      pending = skillSyncService.syncNationalCatalogs();</span>
+<span class="nc" id="L58">    } catch (Exception e) {</span>
+<span class="nc" id="L59">      log.error(&quot;National skill catalog synchronization on startup failed: {}&quot;, e.getMessage());</span>
+<span class="nc" id="L60">      log.debug(&quot;Full error details:&quot;, e);</span>
+<span class="nc" id="L61">    }</span>
+
+<span class="nc bnc" id="L63" title="All 4 branches missed.">    if (!pending.isEmpty() &amp;&amp; attempt &lt; maxAttempts) {</span>
+<span class="nc" id="L64">      log.warn(&quot;National skill catalogs {} not synchronized, retrying in {}&quot;, pending, retryDelay);</span>
+<span class="nc" id="L65">      retryExecutor.schedule(</span>
+<span class="nc" id="L66">          () -&gt; synchronize(attempt + 1), retryDelay.toMillis(), TimeUnit.MILLISECONDS);</span>
+    }
+<span class="nc" id="L68">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
