@@ -14,14 +14,14 @@ public class TransactionalSkillSyncService implements SkillSyncService {
 
   @Override
   @Transactional
-  public void syncNationalCatalogs() {
-    delegate.syncNationalCatalogs();
+  public List<ESkillReferentialType> syncNationalCatalogs() {
+    return delegate.syncNationalCatalogs();
   }
 
   @Override
   @Transactional
-  public void syncNationalCatalog(ESkillReferentialType type) {
-    delegate.syncNationalCatalog(type);
+  public boolean syncNationalCatalog(ESkillReferentialType type) {
+    return delegate.syncNationalCatalog(type);
   }
 
   @Override

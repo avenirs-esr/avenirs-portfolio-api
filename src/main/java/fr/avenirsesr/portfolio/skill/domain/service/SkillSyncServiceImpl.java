@@ -43,20 +43,29 @@ public class SkillSyncServiceImpl implements SkillSyncService {
   private final NationalSkillDetailsRepository nationalSkillDetailsRepository;
 
   @Override
-  public void syncNationalCatalogs() {
-    NATIONAL_TYPES.forEach(this::syncNationalCatalog);
+  public List<ESkillReferentialType> syncNationalCatalogs() {
+    return NATIONAL_TYPES.stream().filter(type -> !syncNationalCatalog(type)).toList();
   }
 
   @Override
-  public void syncNationalCatalog(ESkillReferentialType type) {
+  public boolean syncNationalCatalog(ESkillReferentialType type) {
     Optional<SkillCatalogDTO> catalog = skillCatalogClient.fetchNationalCatalog(type);
 
     if (catalog.isEmpty()) {
       log.warn("No {} skill catalog available, synchronization skipped", type);
-      return;
+      return false;
+    }
+
+    if (catalog.get().nodes() == null || catalog.get().nodes().isEmpty()) {
+      log.warn(
+          "The {} skill catalog is empty (source not ready?), synchronization skipped to keep"
+              + " existing skills",
+          type);
+      return false;
     }
 
     applyCatalog(catalog.get());
+    return true;
   }
 
   @Override

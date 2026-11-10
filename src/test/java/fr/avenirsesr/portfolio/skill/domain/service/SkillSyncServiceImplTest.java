@@ -246,4 +246,36 @@ class SkillSyncServiceImplTest {
     verify(skillCatalogClient).fetchNationalCatalog(ESkillReferentialType.CASOC);
     verify(skillCatalogClient).fetchNationalCatalog(ESkillReferentialType.CASOL);
   }
+
+  @Test
+  void shouldNotArchiveAnythingWhenTheCatalogIsEmpty() {
+    BddLogger.given("a catalog served empty because the source is not ready yet");
+    when(skillCatalogClient.fetchNationalCatalog(ESkillReferentialType.ROME4))
+        .thenReturn(Optional.of(catalogOf(List.of())));
+
+    BddLogger.when("synchronizing");
+    boolean synchronizedCatalog = service.syncNationalCatalog(ESkillReferentialType.ROME4);
+
+    BddLogger.then("the existing skills are left untouched and the sync is reported as pending");
+    assertThat(synchronizedCatalog).isFalse();
+    verifyNoInteractions(
+        skillRepository, skillReferentialRepository, nationalSkillDetailsRepository);
+  }
+
+  @Test
+  void shouldReportTheCatalogsThatCouldNotBeSynchronized() {
+    BddLogger.given("no reachable catalog");
+    when(skillCatalogClient.fetchNationalCatalog(any())).thenReturn(Optional.empty());
+
+    BddLogger.when("synchronizing all the national catalogs");
+    List<ESkillReferentialType> pending = service.syncNationalCatalogs();
+
+    BddLogger.then("every catalog is reported as pending");
+    assertThat(pending)
+        .containsExactly(
+            ESkillReferentialType.ROME4,
+            ESkillReferentialType.XXI,
+            ESkillReferentialType.CASOC,
+            ESkillReferentialType.CASOL);
+  }
 }

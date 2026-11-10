@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 @Slf4j
 @Component
@@ -39,6 +40,9 @@ public class SkillCatalogClientImpl implements SkillCatalogClient {
               .retrieve()
               .bodyToMono(SkillCatalogDTO.class)
               .block());
+    } catch (WebClientResponseException.ServiceUnavailable e) {
+      log.warn("The {} skill catalog is not ready yet on interoperability (503)", type);
+      return Optional.empty();
     } catch (Exception e) {
       log.error(
           "Failed to fetch the {} skill catalog from interoperability at '{}'. Error: {}",
