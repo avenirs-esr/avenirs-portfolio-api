@@ -6,9 +6,9 @@ import fr.avenirsesr.portfolio.skill.domain.model.Skill;
 import java.util.List;
 
 public interface SkillSyncService {
-  void syncNationalCatalogs();
+  List<ESkillReferentialType> syncNationalCatalogs();
 
-  void syncNationalCatalog(ESkillReferentialType type);
+  boolean syncNationalCatalog(ESkillReferentialType type);
 
   List<Skill> applyCatalog(SkillCatalogDTO catalog);
 }
