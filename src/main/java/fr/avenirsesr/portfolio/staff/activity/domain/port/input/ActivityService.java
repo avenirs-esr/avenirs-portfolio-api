@@ -92,6 +92,8 @@ public interface ActivityService {
 
   ActivityDraft createSubActivityDraft(UUID activityDraftId, String title);
 
+  void updateSubActivityDraftsOrder(UUID activityDraftId, List<UUID> orderedSubActivityIds);
+
   ActivityDraft updateActivityDraft(
       UUID id,
       String title,

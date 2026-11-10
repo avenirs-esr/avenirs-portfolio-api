@@ -754,6 +754,34 @@ public class ActivityServiceImpl implements ActivityService {
   }
 
   @Override
+  public void updateSubActivityDraftsOrder(UUID activityDraftId, List<UUID> orderedSubActivityIds) {
+    var mainDraft = getDraftWithRight(activityDraftId, EActivityRight.EDIT);
+    requireMainActivity(mainDraft);
+
+    var subActivitiesById =
+        activityDraftRepository.findAllSubActivitiesOf(activityDraftId).stream()
+            .collect(Collectors.toMap(ActivityDraft::getId, Function.identity()));
+    if (orderedSubActivityIds == null
+        || orderedSubActivityIds.size() != subActivitiesById.size()
+        || !subActivitiesById.keySet().equals(new HashSet<>(orderedSubActivityIds))) {
+      throw new SubActivityOrderMismatchException();
+    }
+
+    var reordered = new ArrayList<ActivityDraft>();
+    var previousActivityId = activityDraftId;
+    for (var subActivityId : orderedSubActivityIds) {
+      var subActivity = subActivitiesById.get(subActivityId);
+      subActivity.attachAsSubActivity(activityDraftId, previousActivityId);
+      reordered.add(subActivity);
+      previousActivityId = subActivityId;
+    }
+    if (!reordered.isEmpty()) {
+      activityDraftRepository.saveAll(reordered);
+    }
+    log.info("Reordered the sub-activities of activity draft with id: {}", activityDraftId);
+  }
+
+  @Override
   public ActivityDraft updateActivityDraft(
       UUID id,
       String title,

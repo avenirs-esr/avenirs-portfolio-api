@@ -994,6 +994,21 @@ class ActivityControllerTest {
   }
 
   @Test
+  void shouldUpdateTheOrderOfTheSubActivityDraftsAndReturnNoContent() {
+    BddLogger.given("an existing activity draft and the ordered ids of its sub-activities");
+    UUID activityDraftId = UUID.randomUUID();
+    List<UUID> subActivityIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+
+    BddLogger.when("reordering the sub-activities of that draft");
+    ResponseEntity<Void> response =
+        controller.updateSubActivityDraftsOrder(principal, activityDraftId, subActivityIds);
+
+    BddLogger.then("it should delegate to the service and return 204");
+    verify(activityService).updateSubActivityDraftsOrder(activityDraftId, subActivityIds);
+    assertEquals(204, response.getStatusCode().value());
+  }
+
+  @Test
   void shouldDuplicateActivityAndReturnTheNewDraftId() {
     BddLogger.given("an existing activity and a title for the duplicate");
     UUID activityId = UUID.randomUUID();
