@@ -78,7 +78,7 @@ class NotificationResponseMapperTest {
   void toDTO_should_map_activity_modified_parameters_with_empty_updated_fields() {
     BddLogger.given("A Notification whose parameters have an empty updated fields list");
     NotificationParameters activityModifiedParameters =
-        new ActivityModifiedParameters("Activité de test", List.of());
+        new ActivityModifiedParameters("Activité de test", List.of(), List.of());
     Notification notification =
         Notification.toDomain(
             id,

@@ -134,9 +134,9 @@ public class NotificationSeeder {
             links =
                 Stream.concat(draft.getLinks().stream(), Stream.of("https://example.com/modifie"))
                     .toList();
-        case BANNER ->
+        case BANNER, SUB_ACTIVITIES ->
             throw new UnsupportedOperationException(
-                "BANNER updates are not supported by the notification seeder");
+                field + " updates are not supported by the notification seeder");
       }
     }
 

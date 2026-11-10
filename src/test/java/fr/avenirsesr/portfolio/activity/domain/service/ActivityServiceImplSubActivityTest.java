@@ -25,6 +25,8 @@ import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.file.domain.model.FileDownload;
 import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
+import fr.avenirsesr.portfolio.notification.domain.model.notification.ActivityUpdatedNotification;
+import fr.avenirsesr.portfolio.notification.domain.model.notification.parameters.ActivityModifiedParameters;
 import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.SubActivityOverviewData;
@@ -41,6 +43,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityDraft;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityUpdatableField;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityAuthorizationService;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityDraftRepository;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityRepository;
@@ -1274,6 +1277,171 @@ class ActivityServiceImplSubActivityTest {
       verify(activityRepository, never()).saveAll(any());
       verify(activityDraftRepository, never()).removeAllFromDatabase(any());
       verify(activityDraftRepository).removeFromDatabase(mainDraft);
+    }
+
+    @Nested
+    class AndThePublishedActivityHasEnrolledStudents {
+
+      private User firstStudentUser;
+      private User secondStudentUser;
+
+      @BeforeEach
+      void setupAnd() {
+        BddLogger.and("an unchanged published activity with two sub-activities and two students");
+        var publishedMainActivity =
+            ActivityFixture.create()
+                .withId(mainDraft.getId())
+                .withAuthor(staff)
+                .withTitle(mainDraft.getTitle())
+                .withThematic(EActivityThematic.OTHER)
+                .withSummary("Summary")
+                .withDescription("<p>Description</p>")
+                .withRecommendedCompletionContexts(null)
+                .withLinks(List.of())
+                .toModel();
+        publishedMainActivity.setBanner(null);
+        givenPublished(publishedMainActivity);
+        when(activityRepository.findAllSubActivitiesOf(mainDraft.getId()))
+            .thenReturn(
+                List.of(
+                    publishedCopyOf(firstSubActivityDraft),
+                    publishedCopyOf(secondSubActivityDraft)));
+        givenSubActivityDrafts(firstSubActivityDraft, secondSubActivityDraft);
+
+        firstStudentUser = mock(User.class);
+        secondStudentUser = mock(User.class);
+        var enrolledDeclaredActivities =
+            List.of(declaredActivityOf(firstStudentUser), declaredActivityOf(secondStudentUser));
+        when(declaredActivityService.getEnrolledStudents(publishedMainActivity))
+            .thenReturn(enrolledDeclaredActivities);
+      }
+
+      private Activity publishedCopyOf(ActivityDraft subActivityDraft) {
+        return Activity.createSubActivity(
+            subActivityDraft.getId(),
+            staff,
+            mainDraft.getId(),
+            subActivityDraft.getPreviousActivityId().orElseThrow(),
+            subActivityDraft.getTitle(),
+            subActivityDraft.getDescription().orElseThrow(),
+            subActivityDraft.getRecommendedCompletionContexts().orElse(null),
+            subActivityDraft.getStartDate().orElse(null),
+            subActivityDraft.getEndDate().orElse(null),
+            subActivityDraft.getLinks(),
+            subActivityDraft.getFiles());
+      }
+
+      private DeclaredActivity declaredActivityOf(User user) {
+        var student = mock(Student.class);
+        when(student.getUser()).thenReturn(user);
+        var declaredActivity = mock(DeclaredActivity.class);
+        when(declaredActivity.getId()).thenReturn(UUID.randomUUID());
+        when(declaredActivity.getStudent()).thenReturn(student);
+        return declaredActivity;
+      }
+
+      private List<ActivityUpdatedNotification> sentNotifications() {
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<List<ActivityUpdatedNotification>> notifications =
+            ArgumentCaptor.forClass(List.class);
+        verify(notificationService).notifyAll(notifications.capture());
+        return notifications.getValue();
+      }
+
+      private ActivityModifiedParameters sentParameters() {
+        return (ActivityModifiedParameters) sentNotifications().getFirst().build().getParameters();
+      }
+
+      @Test
+      void thenAModifiedSubActivityShouldBeMentionedInTheNotificationOfTheMainActivity() {
+        BddLogger.given("a sub-activity whose title was modified");
+        secondSubActivityDraft.setTitle("Second draft step revised");
+
+        BddLogger.when("publishing the main draft");
+        activityService.publish(mainDraft.getId());
+
+        BddLogger.then("the main activity should be notified with the modified sub-activity");
+        var parameters = sentParameters();
+        assertEquals(mainDraft.getTitle(), parameters.activityTitle());
+        assertEquals(List.of(EActivityUpdatableField.SUB_ACTIVITIES), parameters.updatedFields());
+        assertEquals(List.of("Second draft step revised"), parameters.updatedSubActivityTitles());
+      }
+
+      @Test
+      void thenSeveralModifiedSubActivitiesShouldBeListedInASingleNotificationPerStudent() {
+        BddLogger.given("two sub-activities modified on different fields");
+        firstSubActivityDraft.setDescription("<p>First revised</p>");
+        secondSubActivityDraft.setLinks(List.of("https://example.com/ressource"));
+
+        BddLogger.when("publishing the main draft");
+        activityService.publish(mainDraft.getId());
+
+        BddLogger.then("each student should get one notification listing both sub-activities");
+        var notifications = sentNotifications();
+        assertEquals(
+            List.of(firstStudentUser, secondStudentUser),
+            notifications.stream().map(notification -> notification.build().getUser()).toList());
+        assertEquals(
+            List.of("First draft step", "Second draft step"),
+            sentParameters().updatedSubActivityTitles());
+      }
+
+      @Test
+      void thenAModifiedPeriodShouldMarkTheSubActivityAsModified() {
+        BddLogger.given("a sub-activity whose period was modified");
+        firstSubActivityDraft.setStartDate(LocalDate.parse("2027-03-01"));
+        firstSubActivityDraft.setEndDate(LocalDate.parse("2027-03-31"));
+
+        BddLogger.when("publishing the main draft");
+        activityService.publish(mainDraft.getId());
+
+        BddLogger.then("the sub-activity should be mentioned as modified");
+        assertEquals(List.of("First draft step"), sentParameters().updatedSubActivityTitles());
+      }
+
+      @Test
+      void thenAModifiedOrderShouldMarkTheMovedSubActivitiesAsModified() {
+        BddLogger.given("sub-activities swapped in the draft");
+        secondSubActivityDraft.attachAsSubActivity(mainDraft.getId(), mainDraft.getId());
+        firstSubActivityDraft.attachAsSubActivity(
+            mainDraft.getId(), secondSubActivityDraft.getId());
+        givenSubActivityDrafts(secondSubActivityDraft, firstSubActivityDraft);
+
+        BddLogger.when("publishing the main draft");
+        activityService.publish(mainDraft.getId());
+
+        BddLogger.then("both moved sub-activities should be mentioned in their new order");
+        assertEquals(
+            List.of("Second draft step", "First draft step"),
+            sentParameters().updatedSubActivityTitles());
+      }
+
+      @Test
+      void thenTheModifiedFieldsOfTheMainActivityShouldComeWithTheModifiedSubActivities() {
+        BddLogger.given("a main draft and a sub-activity whose titles were modified");
+        mainDraft.setTitle("Main draft revised");
+        firstSubActivityDraft.setTitle("First draft step revised");
+
+        BddLogger.when("publishing the main draft");
+        activityService.publish(mainDraft.getId());
+
+        BddLogger.then("the notification should hold the current title and both modifications");
+        var parameters = sentParameters();
+        assertEquals("Main draft revised", parameters.activityTitle());
+        assertEquals(
+            List.of(EActivityUpdatableField.ACTIVITY_TITLE, EActivityUpdatableField.SUB_ACTIVITIES),
+            parameters.updatedFields());
+        assertEquals(List.of("First draft step revised"), parameters.updatedSubActivityTitles());
+      }
+
+      @Test
+      void thenUnchangedSubActivitiesShouldNotNotifyTheStudents() {
+        BddLogger.when("publishing the main draft without any modification");
+        activityService.publish(mainDraft.getId());
+
+        BddLogger.then("no notification should be sent");
+        verify(notificationService, never()).notifyAll(any());
+      }
     }
   }
 

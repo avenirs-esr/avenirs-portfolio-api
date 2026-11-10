@@ -20,6 +20,7 @@ import fr.avenirsesr.portfolio.file.domain.model.FileDownload;
 import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
 import fr.avenirsesr.portfolio.notification.domain.model.notification.ActivityUpdatedNotification;
+import fr.avenirsesr.portfolio.notification.domain.model.notification.parameters.ActivityModifiedParameters;
 import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityDashboardData;
@@ -254,17 +255,26 @@ public class ActivityServiceImpl implements ActivityService {
     activity.setAssessment(draft.getAssessment().orElse(null));
 
     var removedFileIds = new ArrayList<UUID>();
+    var enrolledDeclaredActivities = List.<DeclaredActivity>of();
+    var updatedFields = new ArrayList<EActivityUpdatableField>();
     if (publishedActivity.isPresent()) {
       removedFileIds.addAll(removedFileIdsOf(activity, draft));
-      var enrolledDeclaredActivities = declaredActivityService.getEnrolledStudents(activity);
-      var updatedFields = updateActivity(activity, draft, !enrolledDeclaredActivities.isEmpty());
+      enrolledDeclaredActivities = declaredActivityService.getEnrolledStudents(activity);
+      updatedFields.addAll(updateActivity(activity, draft, !enrolledDeclaredActivities.isEmpty()));
       activity.setStatus(EActivityStatus.PUBLISHED);
-      notifyActivityUpdated(updatedFields, enrolledDeclaredActivities);
     }
 
     var savedActivity = activityRepository.save(activity);
     activityAuthorizationService.applyDraftAuthorizationsToActivity(savedActivity.getId());
-    removedFileIds.addAll(publishSubActivities(activityDraftId, subActivityDrafts));
+    var subActivitiesPublication = publishSubActivities(activityDraftId, subActivityDrafts);
+    removedFileIds.addAll(subActivitiesPublication.removedFileIds());
+    if (!subActivitiesPublication.updatedTitles().isEmpty()) {
+      updatedFields.add(SUB_ACTIVITIES);
+    }
+    notifyActivityUpdated(
+        new ActivityModifiedParameters(
+            activity.getTitle(), updatedFields, subActivitiesPublication.updatedTitles()),
+        enrolledDeclaredActivities);
 
     removeSubActivityDrafts(subActivityDrafts);
     activityDraftRepository.removeFromDatabase(draft);
@@ -272,31 +282,48 @@ public class ActivityServiceImpl implements ActivityService {
     return savedActivity;
   }
 
-  private List<UUID> publishSubActivities(UUID activityId, List<ActivityDraft> subActivityDrafts) {
+  private record SubActivitiesPublication(List<UUID> removedFileIds, List<String> updatedTitles) {}
+
+  private SubActivitiesPublication publishSubActivities(
+      UUID activityId, List<ActivityDraft> subActivityDrafts) {
     if (subActivityDrafts.isEmpty()) {
-      return List.of();
+      return new SubActivitiesPublication(List.of(), List.of());
     }
+    var publishedSubActivities = activityRepository.findAllSubActivitiesOf(activityId);
     var publishedById =
-        activityRepository.findAllSubActivitiesOf(activityId).stream()
+        publishedSubActivities.stream()
             .collect(Collectors.toMap(Activity::getId, Function.identity()));
 
     var removedFileIds = new ArrayList<UUID>();
+    var updatedTitles = new ArrayList<String>();
     var subActivities = new ArrayList<Activity>();
-    for (var subActivityDraft : subActivityDrafts) {
+    for (var position = 0; position < subActivityDrafts.size(); position++) {
+      var subActivityDraft = subActivityDrafts.get(position);
       var published = publishedById.get(subActivityDraft.getId());
       if (published == null) {
+        updatedTitles.add(subActivityDraft.getTitle());
         subActivities.add(subActivityOf(subActivityDraft));
         continue;
       }
       removedFileIds.addAll(removedFileIdsOf(published, subActivityDraft));
-      updateActivity(published, subActivityDraft, true);
+      var moved = publishedSubActivities.indexOf(published) != position;
+      var periodChanged = !hasSamePeriod(published, subActivityDraft);
+      var fieldsChanged = !updateActivity(published, subActivityDraft, true).isEmpty();
       published.attachAsSubActivity(
           subActivityDraft.getMainActivityId().orElseThrow(),
           subActivityDraft.getPreviousActivityId().orElseThrow());
+      if (moved || periodChanged || fieldsChanged) {
+        updatedTitles.add(published.getTitle());
+      }
       subActivities.add(published);
     }
     activityRepository.saveAll(subActivities);
-    return removedFileIds;
+    return new SubActivitiesPublication(removedFileIds, updatedTitles);
+  }
+
+  private static boolean hasSamePeriod(Activity activity, ActivityDraft draft) {
+    return activity.getStartDate().equals(draft.getStartDate())
+        && activity.getEndDate().equals(draft.getEndDate());
   }
 
   private Activity subActivityOf(ActivityDraft subActivityDraft) {
@@ -391,8 +418,8 @@ public class ActivityServiceImpl implements ActivityService {
   }
 
   private void notifyActivityUpdated(
-      List<EActivityUpdatableField> updatedFields, List<DeclaredActivity> declaredActivities) {
-    if (declaredActivities.isEmpty() || updatedFields.isEmpty()) {
+      ActivityModifiedParameters parameters, List<DeclaredActivity> declaredActivities) {
+    if (declaredActivities.isEmpty() || parameters.updatedFields().isEmpty()) {
       return;
     }
     notificationService.notifyAll(
@@ -400,7 +427,7 @@ public class ActivityServiceImpl implements ActivityService {
             .map(
                 declaredActivity ->
                     new ActivityUpdatedNotification(
-                        declaredActivity.getStudent().getUser(), declaredActivity, updatedFields))
+                        declaredActivity.getStudent().getUser(), declaredActivity, parameters))
             .toList());
   }
 
