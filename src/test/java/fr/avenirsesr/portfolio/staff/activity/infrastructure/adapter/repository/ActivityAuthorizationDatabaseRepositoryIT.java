@@ -48,7 +48,9 @@ class ActivityAuthorizationDatabaseRepositoryIT extends ContainerConfigurationTe
   void givenThreeActivitiesAndTheirAuthorizations() {
     List<ActivityEntity> activities =
         entityManager
-            .createQuery("select a from ActivityEntity a order by a.id", ActivityEntity.class)
+            .createQuery(
+                "select a from ActivityEntity a where a.mainActivityId is null order by a.id",
+                ActivityEntity.class)
             .setMaxResults(3)
             .getResultList();
     assertThat(activities).hasSize(3);
