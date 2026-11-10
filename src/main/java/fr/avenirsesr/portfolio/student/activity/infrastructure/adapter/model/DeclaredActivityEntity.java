@@ -49,6 +49,11 @@ public class DeclaredActivityEntity extends PeriodEntity<LocalDate> {
   @Formula("CASE WHEN finished_at IS NULL THEN 0 ELSE 1 END")
   private Integer isFinishedOrder;
 
+  @Formula(
+      "CASE WHEN assessment_assessed_at IS NOT NULL THEN 2"
+          + " WHEN assessment_staff_opened_at IS NULL THEN 1 ELSE 0 END")
+  private Integer assessmentStatusOrder;
+
   @Column(name = "submitted_at")
   private Instant submittedAt;
 
