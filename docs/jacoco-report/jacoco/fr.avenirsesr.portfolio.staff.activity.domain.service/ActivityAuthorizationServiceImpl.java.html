@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityAuthorizationDefinition;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityAuthorizationChangeNotAllowedException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityDraftNotFoundException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityLeaderRequiredException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityNotFoundException;
@@ -26,6 +27,7 @@ import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserPrincipalR
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +40,7 @@ import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-<span class="fc" id="L41">@Slf4j</span>
+<span class="fc" id="L43">@Slf4j</span>
 @AllArgsConstructor
 public class ActivityAuthorizationServiceImpl implements ActivityAuthorizationService {
   private final ActivityAuthorizationRepository activityAuthorizationRepository;
@@ -54,242 +56,242 @@ public class ActivityAuthorizationServiceImpl implements ActivityAuthorizationSe
 
   @Override
   public boolean hasRight(Staff staff, UUID activityId, EActivityRight right) {
-<span class="fc" id="L57">    return has(activityAuthorizationRepository, staff, activityId, right);</span>
+<span class="fc" id="L59">    return has(activityAuthorizationRepository, staff, activityId, right);</span>
   }
 
   @Override
   public boolean hasAnyRight(Staff staff, UUID activityId, Set&lt;EActivityRight&gt; rights) {
-<span class="fc" id="L62">    return hasAny(activityAuthorizationRepository, staff, activityId, rights);</span>
+<span class="fc" id="L64">    return hasAny(activityAuthorizationRepository, staff, activityId, rights);</span>
   }
 
   @Override
   public boolean hasAnyRight(Staff staff, UUID activityId) {
-<span class="fc" id="L67">    return hasAny(activityAuthorizationRepository, staff, activityId);</span>
+<span class="fc" id="L69">    return hasAny(activityAuthorizationRepository, staff, activityId);</span>
   }
 
   @Override
   public void checkRight(Staff staff, UUID activityId, EActivityRight right) {
-<span class="fc" id="L72">    requireGranted(has(activityAuthorizationRepository, staff, activityId, right));</span>
-<span class="fc" id="L73">  }</span>
+<span class="fc" id="L74">    requireGranted(has(activityAuthorizationRepository, staff, activityId, right));</span>
+<span class="fc" id="L75">  }</span>
 
   @Override
   public void checkAnyRight(Staff staff, UUID activityId, Set&lt;EActivityRight&gt; rights) {
-<span class="fc" id="L77">    requireGranted(hasAny(activityAuthorizationRepository, staff, activityId, rights));</span>
-<span class="fc" id="L78">  }</span>
+<span class="fc" id="L79">    requireGranted(hasAny(activityAuthorizationRepository, staff, activityId, rights));</span>
+<span class="fc" id="L80">  }</span>
 
   @Override
   public Set&lt;EActivityRight&gt; getRights(Staff staff, UUID activityId) {
-<span class="fc" id="L82">    return rightsOf(activityAuthorizationRepository, staff, activityId);</span>
+<span class="fc" id="L84">    return rightsOf(activityAuthorizationRepository, staff, activityId);</span>
   }
 
   @Override
   public Set&lt;EActivityRight&gt; getLoggedInStaffRights(UUID activityId) {
-<span class="fc" id="L87">    return loggedInStaff()</span>
-<span class="fc" id="L88">        .map(staff -&gt; rightsOf(activityAuthorizationRepository, staff, activityId))</span>
-<span class="fc" id="L89">        .orElseGet(() -&gt; EnumSet.noneOf(EActivityRight.class));</span>
+<span class="fc" id="L89">    return loggedInStaff()</span>
+<span class="fc" id="L90">        .map(staff -&gt; rightsOf(activityAuthorizationRepository, staff, activityId))</span>
+<span class="fc" id="L91">        .orElseGet(() -&gt; EnumSet.noneOf(EActivityRight.class));</span>
   }
 
   @Override
   public Map&lt;UUID, Set&lt;EActivityRight&gt;&gt; getLoggedInStaffRightsByActivityIds(
       Collection&lt;UUID&gt; activityIds) {
-<span class="fc" id="L95">    return rightsByEntityId(</span>
+<span class="fc" id="L97">    return rightsByEntityId(</span>
         activityAuthorizationRepository,
         activityIds,
-<span class="fc" id="L98">        activityRepository::findMainActivityIdsOfSubActivities);</span>
+<span class="fc" id="L100">        activityRepository::findMainActivityIdsOfSubActivities);</span>
   }
 
   @Override
   public boolean hasLoggedInStaffAnyRight() {
-<span class="fc" id="L103">    return hasAnyRightOnAnyEntity(activityAuthorizationRepository);</span>
+<span class="fc" id="L105">    return hasAnyRightOnAnyEntity(activityAuthorizationRepository);</span>
   }
 
   @Override
   public boolean hasLoggedInStaffAuthorizationOnAnyActivity(EActivityRight right) {
-<span class="fc" id="L108">    return loggedInStaff()</span>
-<span class="fc" id="L109">        .map(staff -&gt; activityAuthorizationRepository.existsByStaffIdAndRight(staff.getId(), right))</span>
-<span class="fc" id="L110">        .orElse(false);</span>
+<span class="fc" id="L110">    return loggedInStaff()</span>
+<span class="fc" id="L111">        .map(staff -&gt; activityAuthorizationRepository.existsByStaffIdAndRight(staff.getId(), right))</span>
+<span class="fc" id="L112">        .orElse(false);</span>
   }
 
   @Override
   public List&lt;ActivityAuthorization&gt; getActivityAuthorizations(UUID activityId) {
-<span class="fc" id="L115">    requireActivity(activityId);</span>
-<span class="fc" id="L116">    requireGranted(</span>
-<span class="fc" id="L117">        hasAny(</span>
-<span class="fc" id="L118">            activityAuthorizationRepository, loggedInUserService.getLoggedInStaff(), activityId));</span>
-<span class="fc" id="L119">    return activityAuthorizationRepository.findAllByActivityId(activityId);</span>
+<span class="fc" id="L117">    requireActivity(activityId);</span>
+<span class="fc" id="L118">    requireGranted(</span>
+<span class="fc" id="L119">        hasAny(</span>
+<span class="fc" id="L120">            activityAuthorizationRepository, loggedInUserService.getLoggedInStaff(), activityId));</span>
+<span class="fc" id="L121">    return activityAuthorizationRepository.findAllByActivityId(activityId);</span>
   }
 
   @Override
   public PagedResult&lt;Staff&gt; searchAuthorizationCandidates(
       UUID activityId, String keyword, PageCriteria pageCriteria) {
-<span class="fc" id="L125">    requireActivity(activityId);</span>
-<span class="fc" id="L126">    checkRight(</span>
-<span class="fc" id="L127">        loggedInUserService.getLoggedInStaff(), activityId, EActivityRight.MANAGE_AUTHORIZATIONS);</span>
-<span class="fc" id="L128">    return searchCandidates(keyword, pageCriteria);</span>
+<span class="fc" id="L127">    requireActivity(activityId);</span>
+<span class="fc" id="L128">    checkRight(</span>
+<span class="fc" id="L129">        loggedInUserService.getLoggedInStaff(), activityId, EActivityRight.MANAGE_AUTHORIZATIONS);</span>
+<span class="fc" id="L130">    return searchCandidates(keyword, pageCriteria);</span>
   }
 
   @Override
   public List&lt;ActivityAuthorization&gt; defineActivityAuthorizations(
       UUID activityId, List&lt;ActivityAuthorizationDefinition&gt; definitions) {
-<span class="fc" id="L134">    requireActivity(activityId);</span>
-<span class="fc" id="L135">    checkRight(</span>
-<span class="fc" id="L136">        loggedInUserService.getLoggedInStaff(), activityId, EActivityRight.MANAGE_AUTHORIZATIONS);</span>
-<span class="fc" id="L137">    return define(activityAuthorizationRepository, activityId, definitions);</span>
+<span class="fc" id="L136">    requireActivity(activityId);</span>
+<span class="fc" id="L137">    checkRight(</span>
+<span class="fc" id="L138">        loggedInUserService.getLoggedInStaff(), activityId, EActivityRight.MANAGE_AUTHORIZATIONS);</span>
+<span class="fc" id="L139">    return define(activityAuthorizationRepository, activityId, definitions);</span>
   }
 
   @Override
   public void grantAllRights(UUID activityId, Staff staff) {
-<span class="fc" id="L142">    grantAll(activityAuthorizationRepository, activityId, staff);</span>
-<span class="fc" id="L143">  }</span>
+<span class="fc" id="L144">    grantAll(activityAuthorizationRepository, activityId, staff);</span>
+<span class="fc" id="L145">  }</span>
 
   @Override
   public List&lt;Staff&gt; getStaffsWithRight(UUID activityId, EActivityRight right) {
-<span class="fc" id="L147">    return activityAuthorizationRepository.findAllByActivityId(activityId).stream()</span>
-<span class="fc" id="L148">        .filter(authorization -&gt; authorization.has(right))</span>
-<span class="fc" id="L149">        .map(ActivityAuthorization::getStaff)</span>
-<span class="fc" id="L150">        .toList();</span>
+<span class="fc" id="L149">    return activityAuthorizationRepository.findAllByActivityId(activityId).stream()</span>
+<span class="fc" id="L150">        .filter(authorization -&gt; authorization.has(right))</span>
+<span class="fc" id="L151">        .map(ActivityAuthorization::getStaff)</span>
+<span class="fc" id="L152">        .toList();</span>
   }
 
   @Override
   public Map&lt;UUID, List&lt;Staff&gt;&gt; getLeadersByActivityIds(Collection&lt;UUID&gt; activityIds) {
-<span class="fc" id="L155">    return leadersOf(activityAuthorizationRepository, activityIds);</span>
+<span class="fc" id="L157">    return leadersOf(activityAuthorizationRepository, activityIds);</span>
   }
 
   @Override
   public void deleteAllOfActivity(UUID activityId) {
-<span class="fc" id="L160">    activityAuthorizationRepository.deleteAllByActivityId(activityId);</span>
-<span class="fc" id="L161">  }</span>
+<span class="fc" id="L162">    activityAuthorizationRepository.deleteAllByActivityId(activityId);</span>
+<span class="fc" id="L163">  }</span>
 
   // ── drafts ──────────────────────────────────────────────────────────
 
   @Override
   public boolean hasDraftRight(Staff staff, UUID activityDraftId, EActivityRight right) {
-<span class="fc" id="L167">    return has(activityDraftAuthorizationRepository, staff, activityDraftId, right);</span>
+<span class="fc" id="L169">    return has(activityDraftAuthorizationRepository, staff, activityDraftId, right);</span>
   }
 
   @Override
   public boolean hasAnyDraftRight(Staff staff, UUID activityDraftId, Set&lt;EActivityRight&gt; rights) {
-<span class="fc" id="L172">    return hasAny(activityDraftAuthorizationRepository, staff, activityDraftId, rights);</span>
+<span class="fc" id="L174">    return hasAny(activityDraftAuthorizationRepository, staff, activityDraftId, rights);</span>
   }
 
   @Override
   public void checkDraftRight(Staff staff, UUID activityDraftId, EActivityRight right) {
-<span class="fc" id="L177">    requireGranted(has(activityDraftAuthorizationRepository, staff, activityDraftId, right));</span>
-<span class="fc" id="L178">  }</span>
+<span class="fc" id="L179">    requireGranted(has(activityDraftAuthorizationRepository, staff, activityDraftId, right));</span>
+<span class="fc" id="L180">  }</span>
 
   @Override
   public void checkAnyDraftRight(Staff staff, UUID activityDraftId, Set&lt;EActivityRight&gt; rights) {
-<span class="fc" id="L182">    requireGranted(hasAny(activityDraftAuthorizationRepository, staff, activityDraftId, rights));</span>
-<span class="fc" id="L183">  }</span>
+<span class="fc" id="L184">    requireGranted(hasAny(activityDraftAuthorizationRepository, staff, activityDraftId, rights));</span>
+<span class="fc" id="L185">  }</span>
 
   @Override
   public Set&lt;EActivityRight&gt; getLoggedInStaffDraftRights(UUID activityDraftId) {
-<span class="fc" id="L187">    return loggedInStaff()</span>
-<span class="fc" id="L188">        .map(staff -&gt; rightsOf(activityDraftAuthorizationRepository, staff, activityDraftId))</span>
-<span class="fc" id="L189">        .orElseGet(() -&gt; EnumSet.noneOf(EActivityRight.class));</span>
+<span class="fc" id="L189">    return loggedInStaff()</span>
+<span class="fc" id="L190">        .map(staff -&gt; rightsOf(activityDraftAuthorizationRepository, staff, activityDraftId))</span>
+<span class="fc" id="L191">        .orElseGet(() -&gt; EnumSet.noneOf(EActivityRight.class));</span>
   }
 
   @Override
   public Map&lt;UUID, Set&lt;EActivityRight&gt;&gt; getLoggedInStaffDraftRightsByDraftIds(
       Collection&lt;UUID&gt; activityDraftIds) {
-<span class="fc" id="L195">    return rightsByEntityId(</span>
+<span class="fc" id="L197">    return rightsByEntityId(</span>
         activityDraftAuthorizationRepository,
         activityDraftIds,
-<span class="fc" id="L198">        activityDraftRepository::findMainActivityIdsOfSubActivities);</span>
+<span class="fc" id="L200">        activityDraftRepository::findMainActivityIdsOfSubActivities);</span>
   }
 
   @Override
   public boolean hasLoggedInStaffAnyDraftRight() {
-<span class="fc" id="L203">    return hasAnyRightOnAnyEntity(activityDraftAuthorizationRepository);</span>
+<span class="fc" id="L205">    return hasAnyRightOnAnyEntity(activityDraftAuthorizationRepository);</span>
   }
 
   @Override
   public List&lt;ActivityAuthorization&gt; getDraftAuthorizations(UUID activityDraftId) {
-<span class="fc" id="L208">    requireDraft(activityDraftId);</span>
-<span class="fc" id="L209">    requireGranted(</span>
-<span class="fc" id="L210">        hasAny(</span>
+<span class="fc" id="L210">    requireDraft(activityDraftId);</span>
+<span class="fc" id="L211">    requireGranted(</span>
+<span class="fc" id="L212">        hasAny(</span>
             activityDraftAuthorizationRepository,
-<span class="fc" id="L212">            loggedInUserService.getLoggedInStaff(),</span>
+<span class="fc" id="L214">            loggedInUserService.getLoggedInStaff(),</span>
             activityDraftId));
-<span class="fc" id="L214">    return activityDraftAuthorizationRepository.findAllByActivityId(activityDraftId);</span>
+<span class="fc" id="L216">    return activityDraftAuthorizationRepository.findAllByActivityId(activityDraftId);</span>
   }
 
   @Override
   public PagedResult&lt;Staff&gt; searchDraftAuthorizationCandidates(
       UUID activityDraftId, String keyword, PageCriteria pageCriteria) {
-<span class="fc" id="L220">    requireDraft(activityDraftId);</span>
-<span class="fc" id="L221">    checkDraftRight(</span>
-<span class="fc" id="L222">        loggedInUserService.getLoggedInStaff(),</span>
+<span class="fc" id="L222">    requireDraft(activityDraftId);</span>
+<span class="fc" id="L223">    checkDraftRight(</span>
+<span class="fc" id="L224">        loggedInUserService.getLoggedInStaff(),</span>
         activityDraftId,
         EActivityRight.MANAGE_AUTHORIZATIONS);
-<span class="fc" id="L225">    return searchCandidates(keyword, pageCriteria);</span>
+<span class="fc" id="L227">    return searchCandidates(keyword, pageCriteria);</span>
   }
 
   @Override
   public List&lt;ActivityAuthorization&gt; defineDraftAuthorizations(
       UUID activityDraftId, List&lt;ActivityAuthorizationDefinition&gt; definitions) {
-<span class="fc" id="L231">    requireDraft(activityDraftId);</span>
-<span class="fc" id="L232">    checkDraftRight(</span>
-<span class="fc" id="L233">        loggedInUserService.getLoggedInStaff(),</span>
+<span class="fc" id="L233">    requireDraft(activityDraftId);</span>
+<span class="fc" id="L234">    checkDraftRight(</span>
+<span class="fc" id="L235">        loggedInUserService.getLoggedInStaff(),</span>
         activityDraftId,
         EActivityRight.MANAGE_AUTHORIZATIONS);
-<span class="fc" id="L236">    return define(activityDraftAuthorizationRepository, activityDraftId, definitions);</span>
+<span class="fc" id="L238">    return define(activityDraftAuthorizationRepository, activityDraftId, definitions);</span>
   }
 
   @Override
   public void grantAllDraftRights(UUID activityDraftId, Staff staff) {
-<span class="fc" id="L241">    grantAll(activityDraftAuthorizationRepository, activityDraftId, staff);</span>
-<span class="fc" id="L242">  }</span>
+<span class="fc" id="L243">    grantAll(activityDraftAuthorizationRepository, activityDraftId, staff);</span>
+<span class="fc" id="L244">  }</span>
 
   @Override
   public Map&lt;UUID, List&lt;Staff&gt;&gt; getLeadersByDraftIds(Collection&lt;UUID&gt; activityDraftIds) {
-<span class="fc" id="L246">    return leadersOf(activityDraftAuthorizationRepository, activityDraftIds);</span>
+<span class="fc" id="L248">    return leadersOf(activityDraftAuthorizationRepository, activityDraftIds);</span>
   }
 
   @Override
   public void deleteAllOfDraft(UUID activityDraftId) {
-<span class="fc" id="L251">    activityDraftAuthorizationRepository.deleteAllByActivityId(activityDraftId);</span>
-<span class="fc" id="L252">  }</span>
+<span class="fc" id="L253">    activityDraftAuthorizationRepository.deleteAllByActivityId(activityDraftId);</span>
+<span class="fc" id="L254">  }</span>
 
   // ── transitions between an activity and its draft ───────────────────
 
   @Override
   public void copyActivityAuthorizationsToDraft(UUID activityId) {
-<span class="fc" id="L258">    copy(activityAuthorizationRepository, activityDraftAuthorizationRepository, activityId);</span>
-<span class="fc" id="L259">  }</span>
+<span class="fc" id="L260">    copy(activityAuthorizationRepository, activityDraftAuthorizationRepository, activityId);</span>
+<span class="fc" id="L261">  }</span>
 
   @Override
   public void applyDraftAuthorizationsToActivity(UUID activityId) {
-<span class="fc" id="L263">    copy(activityDraftAuthorizationRepository, activityAuthorizationRepository, activityId);</span>
-<span class="fc" id="L264">    deleteAllOfDraft(activityId);</span>
-<span class="fc" id="L265">  }</span>
+<span class="fc" id="L265">    copy(activityDraftAuthorizationRepository, activityAuthorizationRepository, activityId);</span>
+<span class="fc" id="L266">    deleteAllOfDraft(activityId);</span>
+<span class="fc" id="L267">  }</span>
 
   private void copy(
       StaffAuthorizationRepository source, StaffAuthorizationRepository target, UUID activityId) {
-<span class="fc" id="L269">    var authorizations = source.findAllByActivityId(activityId);</span>
-<span class="fc bfc" id="L270" title="All 2 branches covered.">    if (authorizations.isEmpty()) {</span>
-<span class="fc" id="L271">      return;</span>
+<span class="fc" id="L271">    var authorizations = source.findAllByActivityId(activityId);</span>
+<span class="fc bfc" id="L272" title="All 2 branches covered.">    if (authorizations.isEmpty()) {</span>
+<span class="fc" id="L273">      return;</span>
     }
 
-<span class="fc" id="L274">    var rightsByStaffId = new LinkedHashMap&lt;UUID, Set&lt;EActivityRight&gt;&gt;();</span>
-<span class="fc" id="L275">    var staffsById = new LinkedHashMap&lt;UUID, Staff&gt;();</span>
-<span class="fc" id="L276">    authorizations.forEach(</span>
+<span class="fc" id="L276">    var rightsByStaffId = new LinkedHashMap&lt;UUID, Set&lt;EActivityRight&gt;&gt;();</span>
+<span class="fc" id="L277">    var staffsById = new LinkedHashMap&lt;UUID, Staff&gt;();</span>
+<span class="fc" id="L278">    authorizations.forEach(</span>
         authorization -&gt; {
-<span class="fc" id="L278">          rightsByStaffId.put(authorization.getStaff().getId(), authorization.getRights());</span>
-<span class="fc" id="L279">          staffsById.put(authorization.getStaff().getId(), authorization.getStaff());</span>
-<span class="fc" id="L280">        });</span>
+<span class="fc" id="L280">          rightsByStaffId.put(authorization.getStaff().getId(), authorization.getRights());</span>
+<span class="fc" id="L281">          staffsById.put(authorization.getStaff().getId(), authorization.getStaff());</span>
+<span class="fc" id="L282">        });</span>
 
-<span class="fc" id="L282">    replace(target, activityId, rightsByStaffId, staffsById);</span>
-<span class="fc" id="L283">    log.info(&quot;Copied {} authorizations of activity {}&quot;, authorizations.size(), activityId);</span>
-<span class="fc" id="L284">  }</span>
+<span class="fc" id="L284">    replace(target, activityId, rightsByStaffId, staffsById);</span>
+<span class="fc" id="L285">    log.info(&quot;Copied {} authorizations of activity {}&quot;, authorizations.size(), activityId);</span>
+<span class="fc" id="L286">  }</span>
 
   // ── shared implementation ───────────────────────────────────────────
 
   private boolean has(
       StaffAuthorizationRepository repository, Staff staff, UUID activityId, EActivityRight right) {
-<span class="fc" id="L290">    return find(repository, staff, activityId)</span>
-<span class="fc" id="L291">        .map(authorization -&gt; authorization.has(right))</span>
-<span class="fc" id="L292">        .orElse(false);</span>
+<span class="fc" id="L292">    return find(repository, staff, activityId)</span>
+<span class="fc" id="L293">        .map(authorization -&gt; authorization.has(right))</span>
+<span class="fc" id="L294">        .orElse(false);</span>
   }
 
   private boolean hasAny(
@@ -297,86 +299,126 @@ public class ActivityAuthorizationServiceImpl implements ActivityAuthorizationSe
       Staff staff,
       UUID activityId,
       Set&lt;EActivityRight&gt; rights) {
-<span class="fc" id="L300">    return find(repository, staff, activityId)</span>
-<span class="fc" id="L301">        .map(authorization -&gt; authorization.hasAnyOf(rights))</span>
-<span class="fc" id="L302">        .orElse(false);</span>
+<span class="fc" id="L302">    return find(repository, staff, activityId)</span>
+<span class="fc" id="L303">        .map(authorization -&gt; authorization.hasAnyOf(rights))</span>
+<span class="fc" id="L304">        .orElse(false);</span>
   }
 
   private boolean hasAny(StaffAuthorizationRepository repository, Staff staff, UUID activityId) {
-<span class="fc" id="L306">    return find(repository, staff, activityId)</span>
-<span class="pc bpc" id="L307" title="1 of 2 branches missed.">        .map(authorization -&gt; !authorization.getRights().isEmpty())</span>
-<span class="fc" id="L308">        .orElse(false);</span>
+<span class="fc" id="L308">    return find(repository, staff, activityId)</span>
+<span class="pc bpc" id="L309" title="1 of 2 branches missed.">        .map(authorization -&gt; !authorization.getRights().isEmpty())</span>
+<span class="fc" id="L310">        .orElse(false);</span>
   }
 
   private Set&lt;EActivityRight&gt; rightsOf(
       StaffAuthorizationRepository repository, Staff staff, UUID activityId) {
-<span class="fc" id="L313">    return find(repository, staff, activityId)</span>
-<span class="fc" id="L314">        .map(ActivityAuthorization::getRights)</span>
-<span class="fc" id="L315">        .orElseGet(() -&gt; EnumSet.noneOf(EActivityRight.class));</span>
+<span class="fc" id="L315">    return find(repository, staff, activityId)</span>
+<span class="fc" id="L316">        .map(ActivityAuthorization::getRights)</span>
+<span class="fc" id="L317">        .orElseGet(() -&gt; EnumSet.noneOf(EActivityRight.class));</span>
   }
 
   private Map&lt;UUID, Set&lt;EActivityRight&gt;&gt; rightsByEntityId(
       StaffAuthorizationRepository repository,
       Collection&lt;UUID&gt; entityIds,
       Function&lt;Collection&lt;UUID&gt;, Map&lt;UUID, UUID&gt;&gt; mainActivityIdsOfSubActivities) {
-<span class="fc" id="L322">    var staff = loggedInStaff();</span>
-<span class="fc bfc" id="L323" title="All 4 branches covered.">    if (staff.isEmpty() || entityIds.isEmpty()) {</span>
-<span class="fc" id="L324">      return Map.of();</span>
+<span class="fc" id="L324">    var staff = loggedInStaff();</span>
+<span class="fc bfc" id="L325" title="All 4 branches covered.">    if (staff.isEmpty() || entityIds.isEmpty()) {</span>
+<span class="fc" id="L326">      return Map.of();</span>
     }
-<span class="fc" id="L326">    var mainActivityIdBySubActivityId = mainActivityIdsOfSubActivities.apply(entityIds);</span>
+<span class="fc" id="L328">    var mainActivityIdBySubActivityId = mainActivityIdsOfSubActivities.apply(entityIds);</span>
     Collection&lt;UUID&gt; authorizedEntityIds =
-<span class="fc bfc" id="L328" title="All 2 branches covered.">        mainActivityIdBySubActivityId.isEmpty()</span>
-<span class="fc" id="L329">            ? entityIds</span>
-<span class="fc" id="L330">            : entityIds.stream()</span>
-<span class="fc" id="L331">                .map(id -&gt; mainActivityIdBySubActivityId.getOrDefault(id, id))</span>
-<span class="fc" id="L332">                .collect(Collectors.toSet());</span>
-<span class="fc" id="L333">    var rightsByAuthorizedEntityId =</span>
-<span class="fc" id="L334">        repository.findAllByActivityIdsAndStaffId(authorizedEntityIds, staff.get().getId()).stream()</span>
-<span class="fc bfc" id="L335" title="All 2 branches covered.">            .filter(authorization -&gt; !authorization.getRights().isEmpty())</span>
-<span class="fc" id="L336">            .collect(</span>
-<span class="fc" id="L337">                Collectors.toMap(</span>
+<span class="fc bfc" id="L330" title="All 2 branches covered.">        mainActivityIdBySubActivityId.isEmpty()</span>
+<span class="fc" id="L331">            ? entityIds</span>
+<span class="fc" id="L332">            : entityIds.stream()</span>
+<span class="fc" id="L333">                .map(id -&gt; mainActivityIdBySubActivityId.getOrDefault(id, id))</span>
+<span class="fc" id="L334">                .collect(Collectors.toSet());</span>
+<span class="fc" id="L335">    var rightsByAuthorizedEntityId =</span>
+<span class="fc" id="L336">        repository.findAllByActivityIdsAndStaffId(authorizedEntityIds, staff.get().getId()).stream()</span>
+<span class="fc bfc" id="L337" title="All 2 branches covered.">            .filter(authorization -&gt; !authorization.getRights().isEmpty())</span>
+<span class="fc" id="L338">            .collect(</span>
+<span class="fc" id="L339">                Collectors.toMap(</span>
                     ActivityAuthorization::getActivityId, ActivityAuthorization::getRights));
-<span class="fc bfc" id="L339" title="All 2 branches covered.">    if (mainActivityIdBySubActivityId.isEmpty()) {</span>
-<span class="fc" id="L340">      return rightsByAuthorizedEntityId;</span>
+<span class="fc bfc" id="L341" title="All 2 branches covered.">    if (mainActivityIdBySubActivityId.isEmpty()) {</span>
+<span class="fc" id="L342">      return rightsByAuthorizedEntityId;</span>
     }
-<span class="fc" id="L342">    var rightsByEntityId = new LinkedHashMap&lt;UUID, Set&lt;EActivityRight&gt;&gt;();</span>
-<span class="fc" id="L343">    entityIds.forEach(</span>
+<span class="fc" id="L344">    var rightsByEntityId = new LinkedHashMap&lt;UUID, Set&lt;EActivityRight&gt;&gt;();</span>
+<span class="fc" id="L345">    entityIds.forEach(</span>
         id -&gt; {
-<span class="fc" id="L345">          var rights =</span>
-<span class="fc" id="L346">              rightsByAuthorizedEntityId.get(mainActivityIdBySubActivityId.getOrDefault(id, id));</span>
-<span class="pc bpc" id="L347" title="1 of 2 branches missed.">          if (rights != null) {</span>
-<span class="fc" id="L348">            rightsByEntityId.put(id, rights);</span>
+<span class="fc" id="L347">          var rights =</span>
+<span class="fc" id="L348">              rightsByAuthorizedEntityId.get(mainActivityIdBySubActivityId.getOrDefault(id, id));</span>
+<span class="pc bpc" id="L349" title="1 of 2 branches missed.">          if (rights != null) {</span>
+<span class="fc" id="L350">            rightsByEntityId.put(id, rights);</span>
           }
-<span class="fc" id="L350">        });</span>
-<span class="fc" id="L351">    return rightsByEntityId;</span>
+<span class="fc" id="L352">        });</span>
+<span class="fc" id="L353">    return rightsByEntityId;</span>
   }
 
   private boolean hasAnyRightOnAnyEntity(StaffAuthorizationRepository repository) {
-<span class="fc" id="L355">    return loggedInStaff().map(staff -&gt; repository.existsByStaffId(staff.getId())).orElse(false);</span>
+<span class="fc" id="L357">    return loggedInStaff().map(staff -&gt; repository.existsByStaffId(staff.getId())).orElse(false);</span>
   }
 
   private Optional&lt;ActivityAuthorization&gt; find(
       StaffAuthorizationRepository repository, Staff staff, UUID activityId) {
-<span class="fc bfc" id="L360" title="All 4 branches covered.">    if (staff == null || activityId == null) {</span>
-<span class="fc" id="L361">      return Optional.empty();</span>
+<span class="fc bfc" id="L362" title="All 4 branches covered.">    if (staff == null || activityId == null) {</span>
+<span class="fc" id="L363">      return Optional.empty();</span>
     }
-<span class="fc" id="L363">    return repository.findByActivityIdAndStaffId(activityId, staff.getId());</span>
+<span class="fc" id="L365">    return repository.findByActivityIdAndStaffId(activityId, staff.getId());</span>
   }
 
   private List&lt;ActivityAuthorization&gt; define(
       StaffAuthorizationRepository repository,
       UUID activityId,
       List&lt;ActivityAuthorizationDefinition&gt; definitions) {
-<span class="fc" id="L370">    var rightsByStaffId = mergeRightsByStaffId(definitions);</span>
-<span class="fc" id="L371">    if (rightsByStaffId.values().stream()</span>
-<span class="fc bfc" id="L372" title="All 2 branches covered.">        .noneMatch(rights -&gt; rights.containsAll(EActivityRight.MANAGEMENT_RIGHTS))) {</span>
-<span class="fc" id="L373">      throw new ActivityLeaderRequiredException();</span>
+<span class="fc" id="L372">    var rightsByStaffId = mergeRightsByStaffId(definitions);</span>
+<span class="fc" id="L373">    requireAllowedChanges(repository, activityId, rightsByStaffId);</span>
+<span class="fc" id="L374">    if (rightsByStaffId.values().stream()</span>
+<span class="fc bfc" id="L375" title="All 2 branches covered.">        .noneMatch(rights -&gt; rights.containsAll(EActivityRight.MANAGEMENT_RIGHTS))) {</span>
+<span class="fc" id="L376">      throw new ActivityLeaderRequiredException();</span>
     }
 
-<span class="fc" id="L376">    var saved =</span>
-<span class="fc" id="L377">        replace(repository, activityId, rightsByStaffId, findStaffsById(rightsByStaffId.keySet()));</span>
-<span class="fc" id="L378">    log.info(&quot;Defined {} authorizations on activity {}&quot;, saved.size(), activityId);</span>
-<span class="fc" id="L379">    return saved;</span>
+<span class="fc" id="L379">    var saved =</span>
+<span class="fc" id="L380">        replace(repository, activityId, rightsByStaffId, findStaffsById(rightsByStaffId.keySet()));</span>
+<span class="fc" id="L381">    log.info(&quot;Defined {} authorizations on activity {}&quot;, saved.size(), activityId);</span>
+<span class="fc" id="L382">    return saved;</span>
+  }
+
+  private void requireAllowedChanges(
+      StaffAuthorizationRepository repository,
+      UUID activityId,
+      Map&lt;UUID, Set&lt;EActivityRight&gt;&gt; rightsByStaffId) {
+<span class="fc" id="L389">    var existingRightsByStaffId =</span>
+<span class="fc" id="L390">        repository.findAllByActivityId(activityId).stream()</span>
+<span class="fc" id="L391">            .collect(</span>
+<span class="fc" id="L392">                Collectors.toMap(</span>
+<span class="fc" id="L393">                    authorization -&gt; authorization.getStaff().getId(),</span>
+                    ActivityAuthorization::getRights));
+<span class="fc" id="L395">    var existingLeaderIds = leaderIdsOf(existingRightsByStaffId);</span>
+<span class="fc" id="L396">    var requestedLeaderIds = leaderIdsOf(rightsByStaffId);</span>
+
+<span class="fc" id="L398">    var leaderReplaced =</span>
+<span class="fc bfc" id="L399" title="All 2 branches covered.">        requestedLeaderIds.size() &gt; 1</span>
+<span class="fc bfc" id="L400" title="All 4 branches covered.">            || (!existingLeaderIds.isEmpty() &amp;&amp; !existingLeaderIds.equals(requestedLeaderIds));</span>
+
+<span class="fc" id="L402">    var protectedStaffIds = new HashSet&lt;&gt;(existingLeaderIds);</span>
+<span class="fc" id="L403">    protectedStaffIds.add(loggedInUserService.getLoggedInStaff().getId());</span>
+<span class="fc" id="L404">    var protectedRightsChanged =</span>
+<span class="fc" id="L405">        protectedStaffIds.stream()</span>
+<span class="fc" id="L406">            .anyMatch(</span>
+                staffId -&gt;
+<span class="fc" id="L408">                    !existingRightsByStaffId</span>
+<span class="fc" id="L409">                        .getOrDefault(staffId, Set.of())</span>
+<span class="fc bfc" id="L410" title="All 2 branches covered.">                        .equals(rightsByStaffId.getOrDefault(staffId, Set.of())));</span>
+
+<span class="fc bfc" id="L412" title="All 4 branches covered.">    if (leaderReplaced || protectedRightsChanged) {</span>
+<span class="fc" id="L413">      throw new ActivityAuthorizationChangeNotAllowedException();</span>
+    }
+<span class="fc" id="L415">  }</span>
+
+  private Set&lt;UUID&gt; leaderIdsOf(Map&lt;UUID, Set&lt;EActivityRight&gt;&gt; rightsByStaffId) {
+<span class="fc" id="L418">    return rightsByStaffId.entrySet().stream()</span>
+<span class="fc" id="L419">        .filter(entry -&gt; entry.getValue().contains(EActivityRight.LEADER))</span>
+<span class="fc" id="L420">        .map(Map.Entry::getKey)</span>
+<span class="fc" id="L421">        .collect(Collectors.toSet());</span>
   }
 
   private List&lt;ActivityAuthorization&gt; replace(
@@ -384,141 +426,141 @@ public class ActivityAuthorizationServiceImpl implements ActivityAuthorizationSe
       UUID activityId,
       Map&lt;UUID, Set&lt;EActivityRight&gt;&gt; rightsByStaffId,
       Map&lt;UUID, Staff&gt; staffsById) {
-<span class="fc" id="L387">    var existingByStaffId =</span>
-<span class="fc" id="L388">        repository.findAllByActivityId(activityId).stream()</span>
-<span class="fc" id="L389">            .collect(</span>
-<span class="fc" id="L390">                Collectors.toMap(</span>
-<span class="fc" id="L391">                    authorization -&gt; authorization.getStaff().getId(), Function.identity()));</span>
+<span class="fc" id="L429">    var existingByStaffId =</span>
+<span class="fc" id="L430">        repository.findAllByActivityId(activityId).stream()</span>
+<span class="fc" id="L431">            .collect(</span>
+<span class="fc" id="L432">                Collectors.toMap(</span>
+<span class="fc" id="L433">                    authorization -&gt; authorization.getStaff().getId(), Function.identity()));</span>
 
-<span class="fc" id="L393">    var removed =</span>
-<span class="fc" id="L394">        existingByStaffId.entrySet().stream()</span>
-<span class="fc bfc" id="L395" title="All 2 branches covered.">            .filter(entry -&gt; !rightsByStaffId.containsKey(entry.getKey()))</span>
-<span class="fc" id="L396">            .map(Map.Entry::getValue)</span>
-<span class="fc" id="L397">            .toList();</span>
-<span class="fc bfc" id="L398" title="All 2 branches covered.">    if (!removed.isEmpty()) {</span>
-<span class="fc" id="L399">      repository.removeAllFromDatabase(removed);</span>
+<span class="fc" id="L435">    var removed =</span>
+<span class="fc" id="L436">        existingByStaffId.entrySet().stream()</span>
+<span class="fc bfc" id="L437" title="All 2 branches covered.">            .filter(entry -&gt; !rightsByStaffId.containsKey(entry.getKey()))</span>
+<span class="fc" id="L438">            .map(Map.Entry::getValue)</span>
+<span class="fc" id="L439">            .toList();</span>
+<span class="fc bfc" id="L440" title="All 2 branches covered.">    if (!removed.isEmpty()) {</span>
+<span class="fc" id="L441">      repository.removeAllFromDatabase(removed);</span>
     }
 
-<span class="fc" id="L402">    var toSave = new ArrayList&lt;ActivityAuthorization&gt;();</span>
-<span class="fc" id="L403">    rightsByStaffId.forEach(</span>
+<span class="fc" id="L444">    var toSave = new ArrayList&lt;ActivityAuthorization&gt;();</span>
+<span class="fc" id="L445">    rightsByStaffId.forEach(</span>
         (staffId, rights) -&gt; {
-<span class="fc" id="L405">          var existing = existingByStaffId.get(staffId);</span>
-<span class="fc bfc" id="L406" title="All 2 branches covered.">          if (existing == null) {</span>
-<span class="fc" id="L407">            toSave.add(ActivityAuthorization.create(activityId, staffsById.get(staffId), rights));</span>
+<span class="fc" id="L447">          var existing = existingByStaffId.get(staffId);</span>
+<span class="fc bfc" id="L448" title="All 2 branches covered.">          if (existing == null) {</span>
+<span class="fc" id="L449">            toSave.add(ActivityAuthorization.create(activityId, staffsById.get(staffId), rights));</span>
           } else {
-<span class="fc" id="L409">            existing.setRights(rights);</span>
-<span class="fc" id="L410">            toSave.add(existing);</span>
+<span class="fc" id="L451">            existing.setRights(rights);</span>
+<span class="fc" id="L452">            toSave.add(existing);</span>
           }
-<span class="fc" id="L412">        });</span>
+<span class="fc" id="L454">        });</span>
 
-<span class="fc" id="L414">    return repository.saveAll(toSave);</span>
+<span class="fc" id="L456">    return repository.saveAll(toSave);</span>
   }
 
   private void grantAll(StaffAuthorizationRepository repository, UUID activityId, Staff staff) {
-<span class="fc" id="L418">    var authorization =</span>
-<span class="fc" id="L419">        find(repository, staff, activityId)</span>
-<span class="fc" id="L420">            .orElseGet(() -&gt; ActivityAuthorization.create(activityId, staff, Set.of()));</span>
-<span class="fc" id="L421">    authorization.setRights(EActivityRight.all());</span>
-<span class="fc" id="L422">    repository.save(authorization);</span>
-<span class="fc" id="L423">  }</span>
+<span class="fc" id="L460">    var authorization =</span>
+<span class="fc" id="L461">        find(repository, staff, activityId)</span>
+<span class="fc" id="L462">            .orElseGet(() -&gt; ActivityAuthorization.create(activityId, staff, Set.of()));</span>
+<span class="fc" id="L463">    authorization.setRights(EActivityRight.all());</span>
+<span class="fc" id="L464">    repository.save(authorization);</span>
+<span class="fc" id="L465">  }</span>
 
   private Map&lt;UUID, List&lt;Staff&gt;&gt; leadersOf(
       StaffAuthorizationRepository repository, Collection&lt;UUID&gt; activityIds) {
-<span class="fc bfc" id="L427" title="All 2 branches covered.">    if (activityIds.isEmpty()) {</span>
-<span class="fc" id="L428">      return Map.of();</span>
+<span class="fc bfc" id="L469" title="All 2 branches covered.">    if (activityIds.isEmpty()) {</span>
+<span class="fc" id="L470">      return Map.of();</span>
     }
-<span class="fc" id="L430">    return repository.findAllByActivityIds(activityIds).stream()</span>
-<span class="fc" id="L431">        .filter(ActivityAuthorization::isLeader)</span>
-<span class="fc" id="L432">        .collect(</span>
-<span class="fc" id="L433">            Collectors.groupingBy(</span>
+<span class="fc" id="L472">    return repository.findAllByActivityIds(activityIds).stream()</span>
+<span class="fc" id="L473">        .filter(ActivityAuthorization::isLeader)</span>
+<span class="fc" id="L474">        .collect(</span>
+<span class="fc" id="L475">            Collectors.groupingBy(</span>
                 ActivityAuthorization::getActivityId,
-<span class="fc" id="L435">                Collectors.mapping(ActivityAuthorization::getStaff, Collectors.toList())));</span>
+<span class="fc" id="L477">                Collectors.mapping(ActivityAuthorization::getStaff, Collectors.toList())));</span>
   }
 
   private Optional&lt;Staff&gt; loggedInStaff() {
     try {
-<span class="fc" id="L440">      return Optional.of(loggedInUserService.getLoggedInStaff());</span>
-<span class="fc" id="L441">    } catch (UserIsNotStaffException e) {</span>
-<span class="fc" id="L442">      return Optional.empty();</span>
+<span class="fc" id="L482">      return Optional.of(loggedInUserService.getLoggedInStaff());</span>
+<span class="fc" id="L483">    } catch (UserIsNotStaffException e) {</span>
+<span class="fc" id="L484">      return Optional.empty();</span>
     }
   }
 
   private void requireGranted(boolean granted) {
-<span class="fc bfc" id="L447" title="All 2 branches covered.">    if (!granted) {</span>
-<span class="fc" id="L448">      throw new UserNotAuthorizedException();</span>
+<span class="fc bfc" id="L489" title="All 2 branches covered.">    if (!granted) {</span>
+<span class="fc" id="L490">      throw new UserNotAuthorizedException();</span>
     }
-<span class="fc" id="L450">  }</span>
+<span class="fc" id="L492">  }</span>
 
   private void requireActivity(UUID activityId) {
-<span class="fc bfc" id="L453" title="All 2 branches covered.">    if (!activityRepository.existsById(activityId)) {</span>
-<span class="fc" id="L454">      throw new ActivityNotFoundException();</span>
+<span class="fc bfc" id="L495" title="All 2 branches covered.">    if (!activityRepository.existsById(activityId)) {</span>
+<span class="fc" id="L496">      throw new ActivityNotFoundException();</span>
     }
-<span class="fc bfc" id="L456" title="All 2 branches covered.">    if (activityRepository.existsSubActivityById(activityId)) {</span>
-<span class="fc" id="L457">      throw new SubActivityOperationNotAllowedException();</span>
+<span class="fc bfc" id="L498" title="All 2 branches covered.">    if (activityRepository.existsSubActivityById(activityId)) {</span>
+<span class="fc" id="L499">      throw new SubActivityOperationNotAllowedException();</span>
     }
-<span class="fc" id="L459">  }</span>
+<span class="fc" id="L501">  }</span>
 
   private void requireDraft(UUID activityDraftId) {
-<span class="fc bfc" id="L462" title="All 2 branches covered.">    if (!activityDraftRepository.existsById(activityDraftId)) {</span>
-<span class="fc" id="L463">      throw new ActivityDraftNotFoundException();</span>
+<span class="fc bfc" id="L504" title="All 2 branches covered.">    if (!activityDraftRepository.existsById(activityDraftId)) {</span>
+<span class="fc" id="L505">      throw new ActivityDraftNotFoundException();</span>
     }
-<span class="fc bfc" id="L465" title="All 2 branches covered.">    if (activityDraftRepository.existsSubActivityById(activityDraftId)) {</span>
-<span class="fc" id="L466">      throw new SubActivityOperationNotAllowedException();</span>
+<span class="fc bfc" id="L507" title="All 2 branches covered.">    if (activityDraftRepository.existsSubActivityById(activityDraftId)) {</span>
+<span class="fc" id="L508">      throw new SubActivityOperationNotAllowedException();</span>
     }
-<span class="fc" id="L468">  }</span>
+<span class="fc" id="L510">  }</span>
 
   private Map&lt;UUID, Set&lt;EActivityRight&gt;&gt; mergeRightsByStaffId(
       List&lt;ActivityAuthorizationDefinition&gt; definitions) {
-<span class="fc" id="L472">    var rightsByStaffId = new LinkedHashMap&lt;UUID, Set&lt;EActivityRight&gt;&gt;();</span>
-<span class="fc bfc" id="L473" title="All 2 branches covered.">    if (definitions == null) {</span>
-<span class="fc" id="L474">      return rightsByStaffId;</span>
+<span class="fc" id="L514">    var rightsByStaffId = new LinkedHashMap&lt;UUID, Set&lt;EActivityRight&gt;&gt;();</span>
+<span class="fc bfc" id="L515" title="All 2 branches covered.">    if (definitions == null) {</span>
+<span class="fc" id="L516">      return rightsByStaffId;</span>
     }
-<span class="fc" id="L476">    definitions.stream()</span>
-<span class="fc bfc" id="L477" title="All 2 branches covered.">        .filter(definition -&gt; definition.staffId() != null)</span>
-<span class="pc bpc" id="L478" title="1 of 4 branches missed.">        .filter(definition -&gt; definition.rights() != null &amp;&amp; !definition.rights().isEmpty())</span>
-<span class="fc" id="L479">        .forEach(</span>
+<span class="fc" id="L518">    definitions.stream()</span>
+<span class="fc bfc" id="L519" title="All 2 branches covered.">        .filter(definition -&gt; definition.staffId() != null)</span>
+<span class="pc bpc" id="L520" title="1 of 4 branches missed.">        .filter(definition -&gt; definition.rights() != null &amp;&amp; !definition.rights().isEmpty())</span>
+<span class="fc" id="L521">        .forEach(</span>
             definition -&gt;
                 rightsByStaffId
-<span class="fc" id="L482">                    .computeIfAbsent(</span>
-<span class="fc" id="L483">                        definition.staffId(), ignored -&gt; EnumSet.noneOf(EActivityRight.class))</span>
-<span class="fc" id="L484">                    .addAll(definition.rights()));</span>
-<span class="fc" id="L485">    return rightsByStaffId;</span>
+<span class="fc" id="L524">                    .computeIfAbsent(</span>
+<span class="fc" id="L525">                        definition.staffId(), ignored -&gt; EnumSet.noneOf(EActivityRight.class))</span>
+<span class="fc" id="L526">                    .addAll(definition.rights()));</span>
+<span class="fc" id="L527">    return rightsByStaffId;</span>
   }
 
   private PagedResult&lt;Staff&gt; searchCandidates(String keyword, PageCriteria pageCriteria) {
-<span class="fc" id="L489">    var eppn =</span>
+<span class="fc" id="L531">    var eppn =</span>
         userPrincipalRepository
-<span class="fc" id="L491">            .findEppnByUserId(loggedInUserService.getLoggedInStaff().getId())</span>
-<span class="fc" id="L492">            .orElseThrow(UserNotAuthorizedException::new);</span>
-<span class="fc" id="L493">    var eppns = accessClient.searchStaffEppns(eppn, keyword, pageCriteria);</span>
-<span class="fc bfc" id="L494" title="All 2 branches covered.">    if (eppns.content().isEmpty()) {</span>
-<span class="fc" id="L495">      return new PagedResult&lt;&gt;(List.of(), eppns.pageInfo());</span>
+<span class="fc" id="L533">            .findEppnByUserId(loggedInUserService.getLoggedInStaff().getId())</span>
+<span class="fc" id="L534">            .orElseThrow(UserNotAuthorizedException::new);</span>
+<span class="fc" id="L535">    var eppns = accessClient.searchStaffEppns(eppn, keyword, pageCriteria);</span>
+<span class="fc bfc" id="L536" title="All 2 branches covered.">    if (eppns.content().isEmpty()) {</span>
+<span class="fc" id="L537">      return new PagedResult&lt;&gt;(List.of(), eppns.pageInfo());</span>
     }
 
-<span class="fc" id="L498">    var usersByEppn = userPrincipalRepository.findAllByEppns(eppns.content());</span>
-<span class="fc" id="L499">    var staffsById =</span>
+<span class="fc" id="L540">    var usersByEppn = userPrincipalRepository.findAllByEppns(eppns.content());</span>
+<span class="fc" id="L541">    var staffsById =</span>
         staffRepository
-<span class="fc" id="L501">            .findAllById(usersByEppn.values().stream().map(User::getId).toList())</span>
-<span class="fc" id="L502">            .stream()</span>
-<span class="fc" id="L503">            .collect(Collectors.toMap(Staff::getId, Function.identity()));</span>
-<span class="fc" id="L504">    var candidates =</span>
-<span class="fc" id="L505">        eppns.content().stream()</span>
-<span class="fc" id="L506">            .map(usersByEppn::get)</span>
-<span class="fc" id="L507">            .filter(Objects::nonNull)</span>
-<span class="fc" id="L508">            .map(user -&gt; staffsById.get(user.getId()))</span>
-<span class="fc" id="L509">            .filter(Objects::nonNull)</span>
-<span class="fc" id="L510">            .toList();</span>
-<span class="fc" id="L511">    return new PagedResult&lt;&gt;(candidates, eppns.pageInfo());</span>
+<span class="fc" id="L543">            .findAllById(usersByEppn.values().stream().map(User::getId).toList())</span>
+<span class="fc" id="L544">            .stream()</span>
+<span class="fc" id="L545">            .collect(Collectors.toMap(Staff::getId, Function.identity()));</span>
+<span class="fc" id="L546">    var candidates =</span>
+<span class="fc" id="L547">        eppns.content().stream()</span>
+<span class="fc" id="L548">            .map(usersByEppn::get)</span>
+<span class="fc" id="L549">            .filter(Objects::nonNull)</span>
+<span class="fc" id="L550">            .map(user -&gt; staffsById.get(user.getId()))</span>
+<span class="fc" id="L551">            .filter(Objects::nonNull)</span>
+<span class="fc" id="L552">            .toList();</span>
+<span class="fc" id="L553">    return new PagedResult&lt;&gt;(candidates, eppns.pageInfo());</span>
   }
 
   private Map&lt;UUID, Staff&gt; findStaffsById(Set&lt;UUID&gt; staffIds) {
-<span class="fc" id="L515">    var staffsById =</span>
-<span class="fc" id="L516">        staffRepository.findAllById(List.copyOf(staffIds)).stream()</span>
-<span class="fc" id="L517">            .collect(Collectors.toMap(Staff::getId, Function.identity()));</span>
-<span class="fc bfc" id="L518" title="All 2 branches covered.">    if (!staffsById.keySet().containsAll(staffIds)) {</span>
-<span class="fc" id="L519">      throw new UserIsNotStaffException();</span>
+<span class="fc" id="L557">    var staffsById =</span>
+<span class="fc" id="L558">        staffRepository.findAllById(List.copyOf(staffIds)).stream()</span>
+<span class="fc" id="L559">            .collect(Collectors.toMap(Staff::getId, Function.identity()));</span>
+<span class="fc bfc" id="L560" title="All 2 branches covered.">    if (!staffsById.keySet().containsAll(staffIds)) {</span>
+<span class="fc" id="L561">      throw new UserIsNotStaffException();</span>
     }
-<span class="fc" id="L521">    return staffsById;</span>
+<span class="fc" id="L563">    return staffsById;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
