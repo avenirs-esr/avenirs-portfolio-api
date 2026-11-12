@@ -442,7 +442,10 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
                     feedbackService.getStudentFeedbackDetails(
                         declaredActivity.getStudent().getUser(), feedback))
             .toList();
-    return new DeclaredActivityDetailsData(declaredActivity, feedbacks);
+    return new DeclaredActivityDetailsData(
+        declaredActivity,
+        activityService.getSubActivityOverviews(declaredActivity.getActivity().getId()),
+        feedbacks);
   }
 
   @Override
