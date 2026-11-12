@@ -1672,6 +1672,103 @@ class DeclaredActivityServiceImplTest {
   }
 
   @Test
+  void getSubActivityDetails_should_return_the_sub_activity_of_the_declared_activity() {
+    BddLogger.given("A logged-in student and his declared activity on an activity with a step");
+    Activity activity = ActivityFixture.create().toModel();
+    Activity subActivity = subActivityOf(activity);
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(UUID.randomUUID(), student, activity, null, null, null, null, null);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+    when(activityService.getActivityById(subActivity.getId())).thenReturn(subActivity);
+
+    BddLogger.when("He requests the details of the step");
+    Activity result = service.getSubActivityDetails(declaredActivityId, subActivity.getId());
+
+    BddLogger.then("The step is returned");
+    assertThat(result).isSameAs(subActivity);
+  }
+
+  @Test
+  void
+      getSubActivityDetails_should_throw_ActivityNotFoundException_for_a_step_of_another_activity() {
+    BddLogger.given("A logged-in student, his declared activity and a step of another activity");
+    Activity activity = ActivityFixture.create().toModel();
+    Activity foreignSubActivity = subActivityOf(ActivityFixture.create().toModel());
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(UUID.randomUUID(), student, activity, null, null, null, null, null);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+    when(activityService.getActivityById(foreignSubActivity.getId()))
+        .thenReturn(foreignSubActivity);
+
+    BddLogger.when("He requests the details of the step of the other activity");
+
+    BddLogger.then("An ActivityNotFoundException is thrown");
+    assertThatThrownBy(
+            () -> service.getSubActivityDetails(declaredActivityId, foreignSubActivity.getId()))
+        .isInstanceOf(ActivityNotFoundException.class);
+  }
+
+  @Test
+  void getSubActivityDetails_should_throw_ActivityNotFoundException_for_a_main_activity() {
+    BddLogger.given("A logged-in student and his declared activity");
+    Activity activity = ActivityFixture.create().toModel();
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(UUID.randomUUID(), student, activity, null, null, null, null, null);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+    when(activityService.getActivityById(activity.getId())).thenReturn(activity);
+
+    BddLogger.when("He requests the main activity as a step");
+
+    BddLogger.then("An ActivityNotFoundException is thrown");
+    assertThatThrownBy(() -> service.getSubActivityDetails(declaredActivityId, activity.getId()))
+        .isInstanceOf(ActivityNotFoundException.class);
+  }
+
+  @Test
+  void
+      getSubActivityDetails_should_throw_UserNotAuthorizedException_when_belonging_to_another_student() {
+    BddLogger.given("A logged-in student and a declared activity belonging to another student");
+    Activity activity = ActivityFixture.create().toModel();
+    Activity subActivity = subActivityOf(activity);
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(
+            UUID.randomUUID(),
+            StudentFixture.create().toModel(),
+            activity,
+            null,
+            null,
+            null,
+            null,
+            null);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("He requests the details of a step of this declared activity");
+
+    BddLogger.then("A UserNotAuthorizedException is thrown and the step is not read");
+    assertThatThrownBy(() -> service.getSubActivityDetails(declaredActivityId, subActivity.getId()))
+        .isInstanceOf(UserNotAuthorizedException.class);
+    verify(activityService, never()).getActivityById(any());
+  }
+
+  private Activity subActivityOf(Activity mainActivity) {
+    Activity subActivity = ActivityFixture.create().toModel();
+    subActivity.attachAsSubActivity(mainActivity.getId(), mainActivity.getId());
+    return subActivity;
+  }
+
+  @Test
   void shouldUpdatePeriodSuccessfully() {
     // Given
     UUID declaredActivityId = UUID.randomUUID();

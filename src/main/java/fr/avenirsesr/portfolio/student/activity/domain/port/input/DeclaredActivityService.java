@@ -56,6 +56,8 @@ public interface DeclaredActivityService {
 
   DeclaredActivityDetailsData getDeclaredActivityDetails(UUID declaredActivityId);
 
+  Activity getSubActivityDetails(UUID declaredActivityId, UUID subActivityId);
+
   DeclaredActivityAssessmentDetailsData getAssessmentDetails(UUID declaredActivityId);
 
   void updateDeclaredActivity(

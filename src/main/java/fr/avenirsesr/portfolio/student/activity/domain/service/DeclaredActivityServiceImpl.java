@@ -20,6 +20,7 @@ import fr.avenirsesr.portfolio.notification.domain.model.notification.Assessment
 import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityAssessmentException;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityNotFoundException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityUnpublishedException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.SubActivityOperationNotAllowedException;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
@@ -446,6 +447,17 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
         declaredActivity,
         activityService.getSubActivityOverviews(declaredActivity.getActivity().getId()),
         feedbacks);
+  }
+
+  @Override
+  public Activity getSubActivityDetails(UUID declaredActivityId, UUID subActivityId) {
+    var declaredActivity = fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
+    var subActivity = activityService.getActivityById(subActivityId);
+    var mainActivityId = declaredActivity.getActivity().getId();
+    if (subActivity.getMainActivityId().filter(mainActivityId::equals).isEmpty()) {
+      throw new ActivityNotFoundException();
+    }
+    return subActivity;
   }
 
   @Override
