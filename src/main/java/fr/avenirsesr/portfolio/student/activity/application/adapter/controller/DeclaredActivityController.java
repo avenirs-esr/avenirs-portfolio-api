@@ -11,6 +11,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortField;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.CreationResponse;
 import fr.avenirsesr.portfolio.shared.application.adapter.mapper.FileDTOMapper;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityContentDTO;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityContentDtoMapper;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.DeclaredActivityAssessmentDetailsDTO;
@@ -231,6 +232,27 @@ public class DeclaredActivityController {
             status,
             fileDTOMapper.toFileDTOs(
                 details.declaredActivity().getActivity().getFiles(), baseUrl)));
+  }
+
+  @PreAuthorize("hasAuthority('activity:read:contextual')")
+  @GetMapping("/{declaredActivityId}/sub-activities/{subActivityId}")
+  public ResponseEntity<ActivityContentDTO> getSubActivityDetails(
+      HttpServletRequest request,
+      Principal principal,
+      @Valid @PathVariable UUID declaredActivityId,
+      @Valid @PathVariable UUID subActivityId) {
+    log.debug(
+        "Received request to get sub-activity [{}] of declared activity [{}] for student [{}]",
+        subActivityId,
+        declaredActivityId,
+        principal.getName());
+    String baseUrl = extractOrigin(request);
+    var subActivity =
+        declaredActivityService.getSubActivityDetails(declaredActivityId, subActivityId);
+
+    return ResponseEntity.ok(
+        activityContentDtoMapper.toDTO(
+            subActivity, fileDTOMapper.toFileDTOs(subActivity.getFiles(), baseUrl)));
   }
 
   @PreAuthorize("hasAuthority('activity:read:contextual')")

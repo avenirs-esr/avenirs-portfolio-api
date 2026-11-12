@@ -40,6 +40,8 @@ class SubActivityControllerIT extends ContainerConfigurationTest {
       BASE_PATH + "/PUBLISHED/{activityId}/presentation";
   private static final String SUB_ACTIVITIES_PATH = BASE_PATH + "/draft/{draftId}/sub-activities";
   private static final String SUB_ACTIVITIES_ORDER_PATH = SUB_ACTIVITIES_PATH + "/order";
+  private static final String SUB_ACTIVITY_DETAILS_PATH =
+      "/me/activity-progress/{declaredActivityId}/sub-activities/{subActivityId}";
 
   private static final UUID MAIN_ACTIVITY_ID =
       UUID.fromString("b3e7a1c9-4f2d-4a8e-9c61-7d2e5f8a1b01");
@@ -74,6 +76,12 @@ class SubActivityControllerIT extends ContainerConfigurationTest {
 
   @Value("${user.student.signature}")
   private String studentSignature;
+
+  @Value("${user.second.student.payload}")
+  private String secondStudentPayload;
+
+  @Value("${user.second.student.signature}")
+  private String secondStudentSignature;
 
   @Value("${user.staff.payload}")
   private String staffPayload;
@@ -859,6 +867,91 @@ class SubActivityControllerIT extends ContainerConfigurationTest {
     }
 
     @Test
+    void thenTheStudentShouldReadTheDetailsOfASubActivityOfItsDeclaredActivity() throws Exception {
+      BddLogger.given("a fully configured sub-activity of the main draft");
+      var subActivityId = createSubActivity(mainDraftId, "Étape à consulter");
+      patchDraft(
+              subActivityId,
+              Map.of(
+                  "description", "<p>Consigne</p>",
+                  "recommendedCompletionContexts", "En groupe",
+                  "links", List.of("https://example.com/ressource"),
+                  "enableCompletionPeriod", true,
+                  "startDate", "2027-03-01",
+                  "endDate", "2027-03-31"))
+          .expectStatus()
+          .isOk();
+      uploadFile(subActivityId);
+      publish(mainDraftId).expectStatus().isOk();
+
+      BddLogger.and("a student enrolled in the published activity");
+      var declaredActivityId = subscribe(mainDraftId);
+
+      BddLogger.when("the student reads the details of the sub-activity");
+      var details =
+          readJson(
+              get(
+                  uri ->
+                      uri.path(SUB_ACTIVITY_DETAILS_PATH).build(declaredActivityId, subActivityId),
+                  studentHeaders()));
+
+      BddLogger.then("the content of the sub-activity should be returned");
+      assertThat(details.get("id").asText()).isEqualTo(subActivityId.toString());
+      assertThat(details.get("mainActivityId").asText()).isEqualTo(mainDraftId.toString());
+      assertThat(details.get("title").asText()).isEqualTo("Étape à consulter");
+      assertThat(details.get("description").asText()).contains("Consigne");
+      assertThat(details.get("recommendedCompletionContexts").asText()).isEqualTo("En groupe");
+      assertThat(details.get("startDate").asText()).isEqualTo("2027-03-01");
+      assertThat(details.get("endDate").asText()).isEqualTo("2027-03-31");
+      assertThat(textsOf(details.get("links"))).containsExactly("https://example.com/ressource");
+      assertThat(details.get("files")).hasSize(1);
+      assertThat(details.get("rights")).isEmpty();
+    }
+
+    @Test
+    void thenASubActivityOfAnotherActivityShouldNotBeFoundFromTheDeclaredActivity()
+        throws Exception {
+      createPublishableSubActivity("Première étape");
+      publish(mainDraftId).expectStatus().isOk();
+
+      BddLogger.and("a student enrolled in the published activity");
+      var declaredActivityId = subscribe(mainDraftId);
+
+      BddLogger.when("the student reads a sub-activity of another activity through it");
+      BddLogger.then("it should return 404");
+      webTestClient
+          .get()
+          .uri(SUB_ACTIVITY_DETAILS_PATH, declaredActivityId, FIRST_SUB_ACTIVITY_ID)
+          .headers(studentHeaders())
+          .exchange()
+          .expectStatus()
+          .isNotFound()
+          .expectBody()
+          .jsonPath("$.code")
+          .isEqualTo("ACTIVITY_NOT_FOUND");
+    }
+
+    @Test
+    void thenAnotherStudentShouldNotReadTheSubActivityThroughTheDeclaredActivity()
+        throws Exception {
+      var subActivityId = createPublishableSubActivity("Première étape");
+      publish(mainDraftId).expectStatus().isOk();
+
+      BddLogger.and("a student enrolled in the published activity");
+      var declaredActivityId = subscribe(mainDraftId);
+
+      BddLogger.when("another student reads the sub-activity through this declared activity");
+      BddLogger.then("it should return 403");
+      webTestClient
+          .get()
+          .uri(SUB_ACTIVITY_DETAILS_PATH, declaredActivityId, subActivityId)
+          .headers(secondStudentHeaders())
+          .exchange()
+          .expectStatus()
+          .isForbidden();
+    }
+
+    @Test
     void thenASubActivityShouldBeConfigurableThroughTheDraftEndpointsAndPublished()
         throws Exception {
       BddLogger.when("adding a sub-activity with only a title");
@@ -1242,6 +1335,10 @@ class SubActivityControllerIT extends ContainerConfigurationTest {
 
   private Consumer<HttpHeaders> studentHeaders() {
     return headers -> withContext(headers, studentPayload, studentSignature);
+  }
+
+  private Consumer<HttpHeaders> secondStudentHeaders() {
+    return headers -> withContext(headers, secondStudentPayload, secondStudentSignature);
   }
 
   private Consumer<HttpHeaders> staffHeaders() {

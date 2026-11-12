@@ -106,6 +106,12 @@ public class TransactionalDeclaredActivityService implements DeclaredActivitySer
 
   @Transactional
   @Override
+  public Activity getSubActivityDetails(UUID declaredActivityId, UUID subActivityId) {
+    return delegate.getSubActivityDetails(declaredActivityId, subActivityId);
+  }
+
+  @Transactional
+  @Override
   public DeclaredActivityAssessmentDetailsData getAssessmentDetails(UUID declaredActivityId) {
     return delegate.getAssessmentDetails(declaredActivityId);
   }
