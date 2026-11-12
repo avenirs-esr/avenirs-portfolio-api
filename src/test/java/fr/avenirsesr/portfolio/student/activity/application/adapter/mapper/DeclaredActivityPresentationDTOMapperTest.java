@@ -1,13 +1,16 @@
 package fr.avenirsesr.portfolio.student.activity.application.adapter.mapper;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import fr.avenirsesr.portfolio.activity.infrastructure.fixture.ActivityFixture;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.application.adapter.mapper.OptionalMapper;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityContentDTO;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.SubActivityOverviewDTO;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityContentDtoMapper;
+import fr.avenirsesr.portfolio.staff.activity.domain.data.SubActivityOverviewData;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.student.activity.application.adapter.dto.DeclaredActivityDetailsDTO;
 import fr.avenirsesr.portfolio.student.activity.domain.data.DeclaredActivityAssociationsData;
@@ -66,7 +69,7 @@ class DeclaredActivityPresentationDTOMapperTest {
 
     DeclaredActivityDetailsDTO dto =
         mapper.toDTO(
-            new DeclaredActivityDetailsData(declaredActivity, List.of()),
+            new DeclaredActivityDetailsData(declaredActivity, List.of(), List.of()),
             EDeclaredActivityStatus.SUBSCRIBED);
 
     BddLogger.then("it should map activity via ActivityDtoMapper and include status");
@@ -78,6 +81,47 @@ class DeclaredActivityPresentationDTOMapperTest {
     assertEquals(activity.getTitle(), dto.activity().title());
     assertEquals(EDeclaredActivityStatus.SUBSCRIBED, dto.status());
     assertFalse(dto.valorized());
+    assertNotNull(dto.subActivities());
+    assertTrue(dto.subActivities().isEmpty());
+  }
+
+  @Test
+  void shouldMapSubActivitiesFromDetailsDataInOrder() {
+    BddLogger.given("a declared activity whose activity holds 2 sub-activities");
+
+    Student student = StudentFixture.create().toModel();
+    Activity activity = ActivityFixture.create().toModel();
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(UUID.randomUUID(), student, activity, null, null, null, null, null);
+
+    SubActivityOverviewData firstSubActivity =
+        new SubActivityOverviewData(UUID.randomUUID(), "Première étape");
+    SubActivityOverviewData secondSubActivity =
+        new SubActivityOverviewData(UUID.randomUUID(), "Deuxième étape");
+
+    when(activityContentDtoMapper.toDTO(activity)).thenReturn(toActivityContentDTO(activity));
+    when(activityContentDtoMapper.toSubActivityOverviewDTO(any(SubActivityOverviewData.class)))
+        .thenAnswer(
+            invocation -> {
+              SubActivityOverviewData subActivity = invocation.getArgument(0);
+              return new SubActivityOverviewDTO(subActivity.id(), subActivity.title());
+            });
+
+    BddLogger.when("mapping DeclaredActivityDetailsData with sub-activities");
+
+    DeclaredActivityDetailsDTO dto =
+        mapper.toDTO(
+            new DeclaredActivityDetailsData(
+                declaredActivity, List.of(firstSubActivity, secondSubActivity), List.of()),
+            EDeclaredActivityStatus.SUBSCRIBED);
+
+    BddLogger.then("the sub-activities are listed with their id and title, in the same order");
+
+    assertEquals(
+        List.of(
+            new SubActivityOverviewDTO(firstSubActivity.id(), "Première étape"),
+            new SubActivityOverviewDTO(secondSubActivity.id(), "Deuxième étape")),
+        dto.subActivities());
   }
 
   @Test
@@ -125,7 +169,7 @@ class DeclaredActivityPresentationDTOMapperTest {
     DeclaredActivityDetailsDTO dto =
         mapper.toDTO(
             new DeclaredActivityDetailsData(
-                declaredActivity, List.of(feedbackData1, feedbackData2)),
+                declaredActivity, List.of(), List.of(feedbackData1, feedbackData2)),
             EDeclaredActivityStatus.SUBMITTED_FOR_ASSESSMENT);
 
     BddLogger.then("the feedbacks list is mapped and contains 2 FeedbackOverviewDTOs");
@@ -154,7 +198,7 @@ class DeclaredActivityPresentationDTOMapperTest {
 
     DeclaredActivityDetailsDTO dto =
         mapper.toDTO(
-            new DeclaredActivityDetailsData(declaredActivity, List.of()),
+            new DeclaredActivityDetailsData(declaredActivity, List.of(), List.of()),
             EDeclaredActivityStatus.SUBSCRIBED);
 
     BddLogger.then("the feedbacks list is empty");

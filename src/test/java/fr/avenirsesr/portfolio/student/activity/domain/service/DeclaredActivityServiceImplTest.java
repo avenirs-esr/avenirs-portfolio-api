@@ -23,6 +23,7 @@ import fr.avenirsesr.portfolio.notification.domain.model.notification.Assessment
 import fr.avenirsesr.portfolio.notification.domain.model.notification.AssessmentSentNotification;
 import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.staff.activity.domain.data.SubActivityOverviewData;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityAssessmentException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityNotFoundException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityUnpublishedException;
@@ -1456,6 +1457,31 @@ class DeclaredActivityServiceImplTest {
     assertThat(result.feedbacks()).isEmpty();
     verify(declaredActivityRepository).findById(eq(declaredActivityId), any(FetchGraph.class));
     verify(declaredActivityRepository, never()).save(any());
+  }
+
+  @Test
+  void getDeclaredActivityDetails_should_include_the_sub_activities_of_the_activity() {
+    BddLogger.given("A logged-in student and his declared activity on an activity with 2 steps");
+    UUID declaredActivityId = UUID.randomUUID();
+    Activity activity = ActivityFixture.create().toModel();
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(UUID.randomUUID(), student, activity, null, null, null, null, null);
+    List<SubActivityOverviewData> subActivities =
+        List.of(
+            new SubActivityOverviewData(UUID.randomUUID(), "Première étape"),
+            new SubActivityOverviewData(UUID.randomUUID(), "Deuxième étape"));
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+    when(feedbackRepository.findAllByDeclaredActivityId(declaredActivityId)).thenReturn(List.of());
+    when(activityService.getSubActivityOverviews(activity.getId())).thenReturn(subActivities);
+
+    BddLogger.when("He requests declared activity details");
+    DeclaredActivityDetailsData result = service.getDeclaredActivityDetails(declaredActivityId);
+
+    BddLogger.then("The sub-activities of the activity are returned in order");
+    assertThat(result.subActivities()).containsExactlyElementsOf(subActivities);
   }
 
   @Test

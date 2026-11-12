@@ -833,6 +833,32 @@ class SubActivityControllerIT extends ContainerConfigurationTest {
     }
 
     @Test
+    void thenTheDeclaredActivityDetailsShouldListTheSubActivitiesInOrder() throws Exception {
+      var firstId = createPublishableSubActivity("Première étape");
+      var secondId = createPublishableSubActivity("Deuxième étape");
+      var lastId = createPublishableSubActivity("Dernière étape");
+      publish(mainDraftId).expectStatus().isOk();
+
+      BddLogger.and("a student enrolled in the published activity");
+      var declaredActivityId = subscribe(mainDraftId);
+
+      BddLogger.when("the student reads the details of its declared activity");
+      var details =
+          readJson(
+              get(
+                  uri ->
+                      uri.path("/me/activity-progress/{declaredActivityId}")
+                          .build(declaredActivityId),
+                  studentHeaders()));
+
+      BddLogger.then("the sub-activities should be listed with their id and title, in order");
+      var subActivities = details.get("subActivities");
+      assertThat(idsOf(subActivities)).containsExactly(firstId, secondId, lastId);
+      assertThat(subActivities.findValuesAsText("title"))
+          .containsExactly("Première étape", "Deuxième étape", "Dernière étape");
+    }
+
+    @Test
     void thenASubActivityShouldBeConfigurableThroughTheDraftEndpointsAndPublished()
         throws Exception {
       BddLogger.when("adding a sub-activity with only a title");

@@ -65,6 +65,7 @@ public interface DeclaredActivityDetailsDTOMapper {
   @Mapping(source = "activity", target = "activity")
   @Mapping(source = "valorized", target = "valorized")
   @Mapping(target = "status", ignore = true)
+  @Mapping(target = "subActivities", ignore = true)
   @Mapping(target = "feedbacks", ignore = true)
   @Mapping(target = "assessment", ignore = true)
   DeclaredActivityDetailsDTO toDTO(DeclaredActivity declaredActivity);
