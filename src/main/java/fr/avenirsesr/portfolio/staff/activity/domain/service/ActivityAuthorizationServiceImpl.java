@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityAuthorizationDefinition;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityAuthorizationChangeNotAllowedException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityDraftNotFoundException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityLeaderRequiredException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityNotFoundException;
@@ -26,6 +27,7 @@ import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserPrincipalR
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -368,6 +370,7 @@ public class ActivityAuthorizationServiceImpl implements ActivityAuthorizationSe
       UUID activityId,
       List<ActivityAuthorizationDefinition> definitions) {
     var rightsByStaffId = mergeRightsByStaffId(definitions);
+    requireAllowedChanges(repository, activityId, rightsByStaffId);
     if (rightsByStaffId.values().stream()
         .noneMatch(rights -> rights.containsAll(EActivityRight.MANAGEMENT_RIGHTS))) {
       throw new ActivityLeaderRequiredException();
@@ -377,6 +380,45 @@ public class ActivityAuthorizationServiceImpl implements ActivityAuthorizationSe
         replace(repository, activityId, rightsByStaffId, findStaffsById(rightsByStaffId.keySet()));
     log.info("Defined {} authorizations on activity {}", saved.size(), activityId);
     return saved;
+  }
+
+  private void requireAllowedChanges(
+      StaffAuthorizationRepository repository,
+      UUID activityId,
+      Map<UUID, Set<EActivityRight>> rightsByStaffId) {
+    var existingRightsByStaffId =
+        repository.findAllByActivityId(activityId).stream()
+            .collect(
+                Collectors.toMap(
+                    authorization -> authorization.getStaff().getId(),
+                    ActivityAuthorization::getRights));
+    var existingLeaderIds = leaderIdsOf(existingRightsByStaffId);
+    var requestedLeaderIds = leaderIdsOf(rightsByStaffId);
+
+    var leaderReplaced =
+        requestedLeaderIds.size() > 1
+            || (!existingLeaderIds.isEmpty() && !existingLeaderIds.equals(requestedLeaderIds));
+
+    var protectedStaffIds = new HashSet<>(existingLeaderIds);
+    protectedStaffIds.add(loggedInUserService.getLoggedInStaff().getId());
+    var protectedRightsChanged =
+        protectedStaffIds.stream()
+            .anyMatch(
+                staffId ->
+                    !existingRightsByStaffId
+                        .getOrDefault(staffId, Set.of())
+                        .equals(rightsByStaffId.getOrDefault(staffId, Set.of())));
+
+    if (leaderReplaced || protectedRightsChanged) {
+      throw new ActivityAuthorizationChangeNotAllowedException();
+    }
+  }
+
+  private Set<UUID> leaderIdsOf(Map<UUID, Set<EActivityRight>> rightsByStaffId) {
+    return rightsByStaffId.entrySet().stream()
+        .filter(entry -> entry.getValue().contains(EActivityRight.LEADER))
+        .map(Map.Entry::getKey)
+        .collect(Collectors.toSet());
   }
 
   private List<ActivityAuthorization> replace(

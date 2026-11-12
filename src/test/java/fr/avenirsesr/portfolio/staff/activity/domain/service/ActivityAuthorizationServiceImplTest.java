@@ -16,6 +16,7 @@ import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorize
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityAuthorizationDefinition;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityAuthorizationChangeNotAllowedException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityDraftNotFoundException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityLeaderRequiredException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityNotFoundException;
@@ -668,6 +669,181 @@ class ActivityAuthorizationServiceImplTest {
                               reviewer.getId(), EnumSet.of(EActivityRight.FEEDBACK)))))
           .isInstanceOf(UserIsNotStaffException.class);
       verify(activityAuthorizationRepository, never()).saveAll(anyList());
+    }
+
+    private void givenLeaderAndManager() {
+      givenActivityAuthorization(authorizationOf(staff, EActivityRight.MANAGE_AUTHORIZATIONS));
+      when(activityAuthorizationRepository.findAllByActivityId(activityId))
+          .thenReturn(
+              List.of(
+                  authorizationOf(leader, EActivityRight.all().toArray(EActivityRight[]::new)),
+                  authorizationOf(staff, EActivityRight.MANAGE_AUTHORIZATIONS)));
+    }
+
+    private ActivityAuthorizationDefinition managerDefinition() {
+      return new ActivityAuthorizationDefinition(
+          staff.getId(), EnumSet.of(EActivityRight.MANAGE_AUTHORIZATIONS));
+    }
+
+    @Test
+    void thenItShouldRefuseToGrantTheLeaderRightToAnotherStaff() {
+      BddLogger.then("an ActivityAuthorizationChangeNotAllowedException should be thrown");
+      givenLeaderAndManager();
+
+      assertThatThrownBy(
+              () ->
+                  service.defineActivityAuthorizations(
+                      activityId,
+                      List.of(
+                          leaderDefinition(leader),
+                          managerDefinition(),
+                          new ActivityAuthorizationDefinition(
+                              reviewer.getId(), EnumSet.of(EActivityRight.LEADER)))))
+          .isInstanceOf(ActivityAuthorizationChangeNotAllowedException.class);
+      verify(activityAuthorizationRepository, never()).saveAll(anyList());
+    }
+
+    @Test
+    void thenItShouldRefuseToModifyTheRightsOfTheLeader() {
+      BddLogger.then("an ActivityAuthorizationChangeNotAllowedException should be thrown");
+      givenLeaderAndManager();
+
+      assertThatThrownBy(
+              () ->
+                  service.defineActivityAuthorizations(
+                      activityId,
+                      List.of(
+                          new ActivityAuthorizationDefinition(
+                              leader.getId(), EnumSet.of(EActivityRight.LEADER)),
+                          managerDefinition())))
+          .isInstanceOf(ActivityAuthorizationChangeNotAllowedException.class);
+      verify(activityAuthorizationRepository, never()).saveAll(anyList());
+    }
+
+    @Test
+    void thenItShouldRefuseToRemoveTheLeader() {
+      BddLogger.then("an ActivityAuthorizationChangeNotAllowedException should be thrown");
+      givenLeaderAndManager();
+
+      assertThatThrownBy(
+              () -> service.defineActivityAuthorizations(activityId, List.of(managerDefinition())))
+          .isInstanceOf(ActivityAuthorizationChangeNotAllowedException.class);
+      verify(activityAuthorizationRepository, never()).removeAllFromDatabase(anyList());
+    }
+
+    @Test
+    void thenItShouldRefuseToModifyTheOwnRights() {
+      BddLogger.then("an ActivityAuthorizationChangeNotAllowedException should be thrown");
+      givenLeaderAndManager();
+
+      assertThatThrownBy(
+              () ->
+                  service.defineActivityAuthorizations(
+                      activityId,
+                      List.of(
+                          leaderDefinition(leader),
+                          new ActivityAuthorizationDefinition(
+                              staff.getId(),
+                              EnumSet.of(
+                                  EActivityRight.MANAGE_AUTHORIZATIONS, EActivityRight.EDIT)))))
+          .isInstanceOf(ActivityAuthorizationChangeNotAllowedException.class);
+      verify(activityAuthorizationRepository, never()).saveAll(anyList());
+    }
+
+    @Test
+    void thenItShouldRefuseToRemoveOneself() {
+      BddLogger.then("an ActivityAuthorizationChangeNotAllowedException should be thrown");
+      givenLeaderAndManager();
+
+      assertThatThrownBy(
+              () ->
+                  service.defineActivityAuthorizations(
+                      activityId, List.of(leaderDefinition(leader))))
+          .isInstanceOf(ActivityAuthorizationChangeNotAllowedException.class);
+      verify(activityAuthorizationRepository, never()).removeAllFromDatabase(anyList());
+    }
+
+    @Test
+    void thenTheDraftShouldApplyTheSameRules() {
+      BddLogger.then("an ActivityAuthorizationChangeNotAllowedException should be thrown");
+      givenDraftAuthorization(authorizationOf(staff, EActivityRight.MANAGE_AUTHORIZATIONS));
+      when(activityDraftAuthorizationRepository.findAllByActivityId(activityId))
+          .thenReturn(
+              List.of(
+                  authorizationOf(leader, EActivityRight.all().toArray(EActivityRight[]::new)),
+                  authorizationOf(staff, EActivityRight.MANAGE_AUTHORIZATIONS)));
+
+      assertThatThrownBy(
+              () ->
+                  service.defineDraftAuthorizations(
+                      activityId,
+                      List.of(
+                          leaderDefinition(leader),
+                          managerDefinition(),
+                          new ActivityAuthorizationDefinition(
+                              reviewer.getId(), EnumSet.of(EActivityRight.LEADER)))))
+          .isInstanceOf(ActivityAuthorizationChangeNotAllowedException.class);
+      verify(activityDraftAuthorizationRepository, never()).saveAll(anyList());
+    }
+
+    @Test
+    void thenAManagerShouldBeAbleToGrantManageAuthorizationsToAnotherStaff() {
+      BddLogger.then("the manage authorizations right should be granted to the other staff");
+      givenLeaderAndManager();
+      when(staffRepository.findAllById(anyList())).thenReturn(List.of(leader, staff, reviewer));
+      when(activityAuthorizationRepository.saveAll(anyList()))
+          .thenAnswer(invocation -> invocation.getArgument(0));
+
+      var result =
+          service.defineActivityAuthorizations(
+              activityId,
+              List.of(
+                  leaderDefinition(leader),
+                  managerDefinition(),
+                  new ActivityAuthorizationDefinition(
+                      reviewer.getId(), EnumSet.of(EActivityRight.MANAGE_AUTHORIZATIONS))));
+
+      assertThat(result).hasSize(3);
+    }
+
+    @Test
+    void thenDefiningThePublishedAuthorizationsShouldNeitherCreateADraftNorChangeTheActivity() {
+      BddLogger.then("only the authorizations should be written, with no draft nor status change");
+      givenLeaderAndManager();
+      when(staffRepository.findAllById(anyList())).thenReturn(List.of(leader, staff, reviewer));
+      when(activityAuthorizationRepository.saveAll(anyList()))
+          .thenAnswer(invocation -> invocation.getArgument(0));
+
+      service.defineActivityAuthorizations(
+          activityId,
+          List.of(
+              leaderDefinition(leader),
+              managerDefinition(),
+              new ActivityAuthorizationDefinition(
+                  reviewer.getId(), EnumSet.of(EActivityRight.FEEDBACK))));
+
+      verify(activityAuthorizationRepository).saveAll(anyList());
+      verify(activityRepository, never()).save(any());
+      verify(activityRepository, never()).saveAll(anyList());
+      verify(activityDraftRepository, never()).save(any());
+      verify(activityDraftRepository, never()).saveAll(anyList());
+      verify(activityDraftAuthorizationRepository, never()).saveAll(anyList());
+    }
+
+    @Test
+    void thenDefiningAuthorizationsShouldNotRequireTheEditRight() {
+      BddLogger.then(
+          "the manage authorizations right alone should be enough, independently of edit");
+      givenLeaderAndManager();
+      when(staffRepository.findAllById(anyList())).thenReturn(List.of(leader, staff));
+      when(activityAuthorizationRepository.saveAll(anyList()))
+          .thenAnswer(invocation -> invocation.getArgument(0));
+
+      var result =
+          service.defineActivityAuthorizations(
+              activityId, List.of(leaderDefinition(leader), managerDefinition()));
+
+      assertThat(result).hasSize(2);
     }
 
     @Test
