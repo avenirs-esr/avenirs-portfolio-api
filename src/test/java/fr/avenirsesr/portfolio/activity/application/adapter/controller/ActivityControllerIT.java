@@ -3094,17 +3094,17 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       }
 
       @Test
-      void thenEveryLeaderShouldBeListed() throws Exception {
-        BddLogger.and("given a published activity with two leaders");
-        UUID activityId = publishNewActivity("Activité à deux responsables");
-        shareWith("PUBLISHED", activityId, EActivityRight.values());
+      void thenTheLeaderShouldBeListed() throws Exception {
+        BddLogger.and("given a published activity shared with another staff");
+        UUID activityId = publishNewActivity("Activité partagée avec un seul responsable");
+        shareWith("PUBLISHED", activityId, EActivityRight.FEEDBACK);
 
-        BddLogger.then("both leaders are listed on the item");
+        BddLogger.then("only the leader is listed on the item");
         JsonNode item = findInOtherStaffWorkingSpace(activityId, null);
         assertNotNull(item);
         Set<String> leaderIds = new HashSet<>();
         item.get("leaders").forEach(r -> leaderIds.add(r.get("id").asText()));
-        assertEquals(Set.of(STAFF_ID.toString(), ANOTHER_STAFF_ID.toString()), leaderIds);
+        assertEquals(Set.of(STAFF_ID.toString()), leaderIds);
       }
     }
 
@@ -3455,11 +3455,11 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       }
 
       @Test
-      void thenItShouldReturn400WhenNoLeaderHoldsEveryManagementRight() throws Exception {
+      void thenItShouldReturn403WhenTheRightsOfTheLeaderAreModified() throws Exception {
         BddLogger.and("given a draft created by the staff");
-        UUID draftId = createDraftAndGetId("Brouillon sans responsable");
+        UUID draftId = createDraftAndGetId("Brouillon au responsable intouchable");
 
-        BddLogger.then("a definition without a full leader should be rejected");
+        BddLogger.then("a definition reducing the rights of the leader should be rejected");
         webTestClient
             .put()
             .uri(AUTHORIZATIONS_PATH, "DRAFT", draftId)
@@ -3473,7 +3473,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                                 STAFF_ID, List.of(EActivityRight.LEADER))))))
             .exchange()
             .expectStatus()
-            .isBadRequest();
+            .isForbidden();
 
         assertEquals(
             EActivityRight.values().length,
@@ -3858,33 +3858,27 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       }
 
       @Test
-      void thenTheAuthorShouldNoLongerHaveAnyAuthorityOnceRevoked() throws Exception {
-        BddLogger.and("given a draft whose author handed every right over to another staff");
-        UUID draftId = createDraftAndGetId("Brouillon cédé");
-        defineAuthorizationsAsStaff(
-            "DRAFT",
-            draftId,
-            List.of(
-                new StaffAuthorizationRequest(ANOTHER_STAFF_ID, List.of(EActivityRight.values()))));
+      void thenTheAuthorShouldNotBeAbleToHandEveryRightOver() throws Exception {
+        BddLogger.and("given a draft created by the staff");
+        UUID draftId = createDraftAndGetId("Brouillon non cédable");
 
-        BddLogger.then("the author can no longer update nor delete the draft");
+        BddLogger.then("handing every right over to another staff should be rejected with 403");
         webTestClient
-            .patch()
-            .uri(DRAFT_UPDATE_PATH, draftId)
+            .put()
+            .uri(AUTHORIZATIONS_PATH, "DRAFT", draftId)
             .headers(ActivityControllerIT.this::addStaffHeaders)
             .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(updateTitleRequest("Tentative de l'auteur"))
+            .bodyValue(
+                objectMapper.writeValueAsString(
+                    new ActivityAuthorizationsRequest(
+                        List.of(
+                            new StaffAuthorizationRequest(
+                                ANOTHER_STAFF_ID, List.of(EActivityRight.values()))))))
             .exchange()
             .expectStatus()
             .isForbidden();
 
-        webTestClient
-            .delete()
-            .uri(DRAFT_PATH + "/{draftId}", draftId)
-            .headers(ActivityControllerIT.this::addStaffHeaders)
-            .exchange()
-            .expectStatus()
-            .isForbidden();
+        assertEquals(1, getAuthorizationsAsStaff("DRAFT", draftId).size());
       }
 
       @Test
