@@ -212,7 +212,9 @@ public class UserControllerIT extends ContainerConfigurationTest {
         .isNotFound()
         .expectBody()
         .jsonPath("$.code")
-        .isEqualTo("EXTERNAL_USER_NOT_FOUND");
+        .isEqualTo("EXTERNAL_USER_NOT_FOUND")
+        .jsonPath("$.details.uniqueSecurityName")
+        .isEqualTo("test.test@university.com");
   }
 
   @Test
@@ -391,7 +393,9 @@ public class UserControllerIT extends ContainerConfigurationTest {
           .isNotFound()
           .expectBody()
           .jsonPath("$.code")
-          .isEqualTo("EXTERNAL_USER_NOT_FOUND");
+          .isEqualTo("EXTERNAL_USER_NOT_FOUND")
+          .jsonPath("$.details.uniqueSecurityName")
+          .isEqualTo("test.test@university.com");
     }
   }
 
@@ -458,7 +462,9 @@ public class UserControllerIT extends ContainerConfigurationTest {
           .isNotFound()
           .expectBody()
           .jsonPath("$.code")
-          .isEqualTo("EXTERNAL_USER_NOT_FOUND");
+          .isEqualTo("EXTERNAL_USER_NOT_FOUND")
+          .jsonPath("$.details.uniqueSecurityName")
+          .isEqualTo("test.test@university.com");
     }
   }
 
