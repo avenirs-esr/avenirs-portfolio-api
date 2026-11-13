@@ -33,6 +33,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.data.SubActivityOverviewDat
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityDraftNotFoundException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityPeriodExcludesSubActivitiesException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.SubActivityAdditionNotAllowedException;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.SubActivityDeletionNotAllowedException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.SubActivityFieldNotAllowedException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.SubActivityOperationNotAllowedException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.SubActivityOrderMismatchException;
@@ -1078,6 +1079,190 @@ class ActivityServiceImplSubActivityTest {
   }
 
   @Nested
+  class WhenDeletingASubActivityDraft {
+
+    private ActivityDraft thirdSubActivityDraft;
+
+    @BeforeEach
+    void setupWhen() {
+      BddLogger.given("a main draft with three sub-activities");
+      thirdSubActivityDraft = subActivityDraft(secondSubActivityDraft.getId(), "Third draft step");
+      givenDrafts(mainDraft, firstSubActivityDraft);
+      when(activityDraftRepository.findAllSubActivitiesOf(mainDraft.getId()))
+          .thenReturn(
+              List.of(firstSubActivityDraft, secondSubActivityDraft, thirdSubActivityDraft));
+    }
+
+    @Test
+    void thenTheFollowingSubActivityShouldBeRelinkedToThePreviousOne() {
+      BddLogger.when("deleting the second sub-activity");
+      activityService.deleteSubActivityDraft(mainDraft.getId(), secondSubActivityDraft.getId());
+
+      BddLogger.then("the third one should follow the first one");
+      assertEquals(
+          firstSubActivityDraft.getId(),
+          thirdSubActivityDraft.getPreviousActivityId().orElseThrow());
+      assertEquals(mainDraft.getId(), thirdSubActivityDraft.getMainActivityId().orElseThrow());
+      verify(activityDraftRepository).save(thirdSubActivityDraft);
+
+      BddLogger.and("the second one should be removed");
+      verify(activityDraftRepository).removeFromDatabase(secondSubActivityDraft);
+    }
+
+    @Test
+    void thenDeletingTheFirstSubActivityShouldAttachTheNextOneToTheMainDraft() {
+      BddLogger.when("deleting the first sub-activity");
+      activityService.deleteSubActivityDraft(mainDraft.getId(), firstSubActivityDraft.getId());
+
+      BddLogger.then("the second one should follow the main draft");
+      assertEquals(mainDraft.getId(), secondSubActivityDraft.getPreviousActivityId().orElseThrow());
+      verify(activityDraftRepository).save(secondSubActivityDraft);
+      verify(activityDraftRepository).removeFromDatabase(firstSubActivityDraft);
+    }
+
+    @Test
+    void thenDeletingTheLastSubActivityShouldNotRelinkAnyOther() {
+      BddLogger.when("deleting the last sub-activity");
+      activityService.deleteSubActivityDraft(mainDraft.getId(), thirdSubActivityDraft.getId());
+
+      BddLogger.then("only the last one should be removed");
+      verify(activityDraftRepository, never()).save(any());
+      verify(activityDraftRepository).removeFromDatabase(thirdSubActivityDraft);
+      assertEquals(
+          firstSubActivityDraft.getId(),
+          secondSubActivityDraft.getPreviousActivityId().orElseThrow());
+    }
+
+    @Test
+    void thenItsFilesShouldBeDeletedExceptThoseStillUsedByThePublishedSubActivity() {
+      BddLogger.given("a sub-activity draft sharing one of its two files with its published copy");
+      var sharedFile = fileWithId();
+      var draftOnlyFile = fileWithId();
+      secondSubActivityDraft.addFile(sharedFile);
+      secondSubActivityDraft.addFile(draftOnlyFile);
+      givenPublished(
+          Activity.createSubActivity(
+              secondSubActivityDraft.getId(),
+              staff,
+              mainDraft.getId(),
+              firstSubActivityDraft.getId(),
+              secondSubActivityDraft.getTitle(),
+              "<p>Consigne</p>",
+              null,
+              null,
+              null,
+              List.of(),
+              List.of(sharedFile)));
+
+      BddLogger.when("deleting that sub-activity");
+      activityService.deleteSubActivityDraft(mainDraft.getId(), secondSubActivityDraft.getId());
+
+      BddLogger.then("only the file used by the draft alone should be deleted");
+      verify(fileResourceService).delete(draftOnlyFile.getId());
+      verify(fileResourceService, never()).delete(sharedFile.getId());
+    }
+
+    @Test
+    void thenItShouldCheckTheEditRightOnTheMainDraft() {
+      BddLogger.when("deleting a sub-activity");
+      activityService.deleteSubActivityDraft(mainDraft.getId(), secondSubActivityDraft.getId());
+
+      BddLogger.then("the edit right should be checked on the main draft");
+      verify(activityAuthorizationService)
+          .checkDraftRight(staff, mainDraft.getId(), EActivityRight.EDIT);
+    }
+
+    @Test
+    void thenAStaffWithoutTheEditRightShouldBeRejected() {
+      BddLogger.given("a staff without the edit right on the main draft");
+      doThrow(new UserNotAuthorizedException())
+          .when(activityAuthorizationService)
+          .checkDraftRight(staff, mainDraft.getId(), EActivityRight.EDIT);
+
+      BddLogger.then("deleting a sub-activity should be rejected");
+      assertThrows(
+          UserNotAuthorizedException.class,
+          () ->
+              activityService.deleteSubActivityDraft(
+                  mainDraft.getId(), secondSubActivityDraft.getId()));
+      verify(activityDraftRepository, never()).removeFromDatabase(any());
+    }
+
+    @Test
+    void thenDeletingASubActivityOfAnActivityWithEnrolledStudentsShouldBeRejected() {
+      BddLogger.given("a main draft whose published activity has enrolled students");
+      var published =
+          ActivityFixture.create().withId(mainDraft.getId()).withAuthor(staff).toModel();
+      givenPublished(published);
+      when(declaredActivityService.countEnrolledStudents(published)).thenReturn(1);
+
+      BddLogger.then("deleting a sub-activity should be rejected");
+      assertThrows(
+          SubActivityDeletionNotAllowedException.class,
+          () ->
+              activityService.deleteSubActivityDraft(
+                  mainDraft.getId(), secondSubActivityDraft.getId()));
+      verify(activityDraftRepository, never()).save(any());
+      verify(activityDraftRepository, never()).removeFromDatabase(any());
+    }
+
+    @Test
+    void thenDeletingASubActivityOfAnActivityWithoutEnrolledStudentShouldBeAccepted() {
+      BddLogger.given("a main draft whose published activity has no enrolled student anymore");
+      var published =
+          ActivityFixture.create().withId(mainDraft.getId()).withAuthor(staff).toModel();
+      givenPublished(published);
+      when(declaredActivityService.countEnrolledStudents(published)).thenReturn(0);
+
+      BddLogger.when("deleting a sub-activity");
+      activityService.deleteSubActivityDraft(mainDraft.getId(), secondSubActivityDraft.getId());
+
+      BddLogger.then("the sub-activity should be removed");
+      verify(activityDraftRepository).removeFromDatabase(secondSubActivityDraft);
+    }
+
+    @Test
+    void thenDeletingFromASubActivityDraftShouldBeRejected() {
+      BddLogger.then("deleting from a sub-activity draft should be rejected");
+      assertThrows(
+          SubActivityOperationNotAllowedException.class,
+          () ->
+              activityService.deleteSubActivityDraft(
+                  firstSubActivityDraft.getId(), secondSubActivityDraft.getId()));
+      verify(activityDraftRepository, never()).removeFromDatabase(any());
+    }
+
+    @Test
+    void thenASubActivityOfAnotherDraftShouldBeRejected() {
+      BddLogger.then("deleting a sub-activity not attached to the main draft should be rejected");
+      assertThrows(
+          ActivityDraftNotFoundException.class,
+          () -> activityService.deleteSubActivityDraft(mainDraft.getId(), UUID.randomUUID()));
+      verify(activityDraftRepository, never()).save(any());
+      verify(activityDraftRepository, never()).removeFromDatabase(any());
+    }
+
+    @Test
+    void thenAnUnknownMainDraftShouldBeRejected() {
+      BddLogger.given("a main draft that does not exist");
+      var unknownId = UUID.randomUUID();
+      when(activityDraftRepository.findById(unknownId)).thenReturn(Optional.empty());
+
+      BddLogger.then("deleting a sub-activity should be rejected");
+      assertThrows(
+          ActivityDraftNotFoundException.class,
+          () -> activityService.deleteSubActivityDraft(unknownId, secondSubActivityDraft.getId()));
+      verify(activityDraftRepository, never()).removeFromDatabase(any());
+    }
+
+    private File fileWithId() {
+      var file = mock(File.class);
+      when(file.getId()).thenReturn(UUID.randomUUID());
+      return file;
+    }
+  }
+
+  @Nested
   class WhenUpdatingThePeriodOfAMainDraft {
 
     @BeforeEach
@@ -1275,8 +1460,76 @@ class ActivityServiceImplSubActivityTest {
 
       BddLogger.then("no sub-activity should be saved or removed");
       verify(activityRepository, never()).saveAll(any());
+      verify(activityRepository, never()).removeAllFromDatabase(any());
       verify(activityDraftRepository, never()).removeAllFromDatabase(any());
       verify(activityDraftRepository).removeFromDatabase(mainDraft);
+    }
+
+    @Test
+    void thenAPublishedSubActivityDeletedFromTheDraftShouldBeRemovedWithItsFiles() {
+      BddLogger.given("a published activity whose second sub-activity was deleted from its draft");
+      var deletedFile = mock(File.class);
+      var deletedFileId = UUID.randomUUID();
+      when(deletedFile.getId()).thenReturn(deletedFileId);
+      givenPublished(
+          ActivityFixture.create().withId(mainDraft.getId()).withAuthor(staff).toModel());
+      var publishedFirstSubActivity =
+          publishedSubActivityOf(firstSubActivityDraft, mainDraft.getId(), List.of());
+      var publishedSecondSubActivity =
+          publishedSubActivityOf(
+              secondSubActivityDraft, firstSubActivityDraft.getId(), List.of(deletedFile));
+      when(activityRepository.findAllSubActivitiesOf(mainDraft.getId()))
+          .thenReturn(List.of(publishedFirstSubActivity, publishedSecondSubActivity));
+      givenSubActivityDrafts(firstSubActivityDraft);
+
+      BddLogger.when("publishing the main draft");
+      activityService.publish(mainDraft.getId());
+
+      BddLogger.then("the deleted sub-activity should be removed with its views");
+      verify(activityRepository).removeAllFromDatabase(List.of(publishedSecondSubActivity));
+      verify(activityViewRepository).deleteAllByActivityId(publishedSecondSubActivity.getId());
+      verify(activityViewRepository, never())
+          .deleteAllByActivityId(publishedFirstSubActivity.getId());
+
+      BddLogger.and("the remaining sub-activity should be kept");
+      assertEquals(List.of(publishedFirstSubActivity), savedSubActivities());
+
+      BddLogger.and("the file of the deleted sub-activity should be deleted");
+      verify(fileResourceService).delete(deletedFileId);
+    }
+
+    @Test
+    void thenDeletingEveryPublishedSubActivityShouldRemoveThemAll() {
+      BddLogger.given("a published activity whose only sub-activity was deleted from its draft");
+      givenPublished(
+          ActivityFixture.create().withId(mainDraft.getId()).withAuthor(staff).toModel());
+      var publishedFirstSubActivity =
+          publishedSubActivityOf(firstSubActivityDraft, mainDraft.getId(), List.of());
+      when(activityRepository.findAllSubActivitiesOf(mainDraft.getId()))
+          .thenReturn(List.of(publishedFirstSubActivity));
+
+      BddLogger.when("publishing the main draft");
+      activityService.publish(mainDraft.getId());
+
+      BddLogger.then("the published sub-activity should be removed and nothing saved");
+      verify(activityRepository).removeAllFromDatabase(List.of(publishedFirstSubActivity));
+      verify(activityRepository, never()).saveAll(any());
+    }
+
+    private Activity publishedSubActivityOf(
+        ActivityDraft subActivityDraft, UUID previousActivityId, List<File> files) {
+      return Activity.createSubActivity(
+          subActivityDraft.getId(),
+          staff,
+          mainDraft.getId(),
+          previousActivityId,
+          subActivityDraft.getTitle(),
+          "<p>Consigne</p>",
+          null,
+          null,
+          null,
+          List.of(),
+          files);
     }
 
     @Nested
@@ -1432,6 +1685,19 @@ class ActivityServiceImplSubActivityTest {
             List.of(EActivityUpdatableField.ACTIVITY_TITLE, EActivityUpdatableField.SUB_ACTIVITIES),
             parameters.updatedFields());
         assertEquals(List.of("First draft step revised"), parameters.updatedSubActivityTitles());
+      }
+
+      @Test
+      void thenASubActivityFollowingADeletedOneShouldNotBeMarkedAsModified() {
+        BddLogger.given("the first sub-activity deleted from the draft");
+        secondSubActivityDraft.attachAsSubActivity(mainDraft.getId(), mainDraft.getId());
+        givenSubActivityDrafts(secondSubActivityDraft);
+
+        BddLogger.when("publishing the main draft");
+        activityService.publish(mainDraft.getId());
+
+        BddLogger.then("the remaining sub-activity should not be notified as modified");
+        verify(notificationService, never()).notifyAll(any());
       }
 
       @Test

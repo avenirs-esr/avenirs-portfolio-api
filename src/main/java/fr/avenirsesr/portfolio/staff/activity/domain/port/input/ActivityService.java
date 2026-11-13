@@ -94,6 +94,8 @@ public interface ActivityService {
 
   void updateSubActivityDraftsOrder(UUID activityDraftId, List<UUID> orderedSubActivityIds);
 
+  void deleteSubActivityDraft(UUID activityDraftId, UUID subActivityId);
+
   ActivityDraft updateActivityDraft(
       UUID id,
       String title,

@@ -1009,6 +1009,21 @@ class ActivityControllerTest {
   }
 
   @Test
+  void shouldDeleteTheSubActivityDraftAndReturnNoContent() {
+    BddLogger.given("an existing activity draft and one of its sub-activities");
+    UUID activityDraftId = UUID.randomUUID();
+    UUID subActivityId = UUID.randomUUID();
+
+    BddLogger.when("deleting that sub-activity");
+    ResponseEntity<Void> response =
+        controller.deleteSubActivityDraft(principal, activityDraftId, subActivityId);
+
+    BddLogger.then("it should delegate to the service and return 204");
+    verify(activityService).deleteSubActivityDraft(activityDraftId, subActivityId);
+    assertEquals(204, response.getStatusCode().value());
+  }
+
+  @Test
   void shouldDuplicateActivityAndReturnTheNewDraftId() {
     BddLogger.given("an existing activity and a title for the duplicate");
     UUID activityId = UUID.randomUUID();

@@ -354,6 +354,20 @@ public class ActivityController {
     return ResponseEntity.noContent().build();
   }
 
+  @PreAuthorize("hasAuthority('activity:update')")
+  @DeleteMapping("/draft/{activityDraftId}/sub-activities/{subActivityId}")
+  public ResponseEntity<Void> deleteSubActivityDraft(
+      Principal principal, @PathVariable UUID activityDraftId, @PathVariable UUID subActivityId) {
+    log.debug(
+        "Received request to delete sub-activity [{}] of activity draft [{}] by user [{}]",
+        subActivityId,
+        activityDraftId,
+        principal.getName());
+
+    activityService.deleteSubActivityDraft(activityDraftId, subActivityId);
+    return ResponseEntity.noContent().build();
+  }
+
   @PreAuthorize("hasAuthority('activity:create')")
   @PostMapping("/publish/{activityDraftId}")
   public ResponseEntity<CreationResponse> publishActivityDraft(

@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -40,6 +41,7 @@ class SubActivityControllerIT extends ContainerConfigurationTest {
       BASE_PATH + "/PUBLISHED/{activityId}/presentation";
   private static final String SUB_ACTIVITIES_PATH = BASE_PATH + "/draft/{draftId}/sub-activities";
   private static final String SUB_ACTIVITIES_ORDER_PATH = SUB_ACTIVITIES_PATH + "/order";
+  private static final String SUB_ACTIVITY_PATH = SUB_ACTIVITIES_PATH + "/{subActivityId}";
 
   private static final UUID MAIN_ACTIVITY_ID =
       UUID.fromString("b3e7a1c9-4f2d-4a8e-9c61-7d2e5f8a1b01");
@@ -624,6 +626,71 @@ class SubActivityControllerIT extends ContainerConfigurationTest {
           .jsonPath("$.code")
           .isEqualTo(SUB_ACTIVITY_OPERATION_NOT_ALLOWED);
     }
+
+    @Test
+    void thenASubActivityShouldBeDeletedAndTheFollowingOnesRelinked() throws Exception {
+      var firstId = createSubActivity(mainDraftId, "Première étape");
+      var secondId = createSubActivity(mainDraftId, "Deuxième étape");
+      var thirdId = createSubActivity(mainDraftId, "Troisième étape");
+
+      BddLogger.when("deleting the second sub-activity");
+      deleteSubActivity(mainDraftId, secondId, staffHeaders()).expectStatus().isNoContent();
+
+      BddLogger.then("the remaining sub-activities should keep their order");
+      var content =
+          readJson(get(uri -> uri.path(CONTENT_PATH).build("DRAFT", mainDraftId), staffHeaders()));
+      assertThat(idsOf(content.get("subActivities"))).containsExactly(firstId, thirdId);
+
+      BddLogger.and("the deleted sub-activity should be gone");
+      webTestClient
+          .get()
+          .uri(CONTENT_PATH, "DRAFT", secondId)
+          .headers(staffHeaders())
+          .exchange()
+          .expectStatus()
+          .isNotFound();
+
+      BddLogger.and("a sub-activity added afterwards should be added last");
+      var lastId = createSubActivity(mainDraftId, "Dernière étape");
+      var updatedContent =
+          readJson(get(uri -> uri.path(CONTENT_PATH).build("DRAFT", mainDraftId), staffHeaders()));
+      assertThat(idsOf(updatedContent.get("subActivities")))
+          .containsExactly(firstId, thirdId, lastId);
+    }
+
+    @Test
+    void thenDeletingWithoutRightOnTheMainDraftShouldBeRejected() throws Exception {
+      var subActivityId = createSubActivity(mainDraftId, "Première étape");
+
+      BddLogger.when("another staff deletes a sub-activity of the main draft");
+      BddLogger.then("it should be rejected with 403");
+      deleteSubActivity(mainDraftId, subActivityId, anotherStaffHeaders())
+          .expectStatus()
+          .isForbidden();
+    }
+
+    @Test
+    void thenDeletingFromASubActivityDraftShouldBeRejected() throws Exception {
+      var firstId = createSubActivity(mainDraftId, "Première étape");
+      var secondId = createSubActivity(mainDraftId, "Deuxième étape");
+
+      BddLogger.then("deleting from a sub-activity draft should be rejected with 409");
+      deleteSubActivity(firstId, secondId, staffHeaders())
+          .expectStatus()
+          .isEqualTo(409)
+          .expectBody()
+          .jsonPath("$.code")
+          .isEqualTo(SUB_ACTIVITY_OPERATION_NOT_ALLOWED);
+    }
+
+    @Test
+    void thenDeletingASubActivityOfAnotherDraftShouldReturnNotFound() throws Exception {
+      createSubActivity(mainDraftId, "Première étape");
+
+      BddLogger.when("deleting a sub-activity that is not attached to the main draft");
+      BddLogger.then("it should return 404");
+      deleteSubActivity(mainDraftId, UUID.randomUUID(), staffHeaders()).expectStatus().isNotFound();
+    }
   }
 
   @Nested
@@ -652,6 +719,15 @@ class SubActivityControllerIT extends ContainerConfigurationTest {
       BddLogger.when("reordering the sub-activities of a draft that does not exist");
       BddLogger.then("it should return 404");
       putSubActivitiesOrder(UUID.randomUUID(), List.of(), staffHeaders())
+          .expectStatus()
+          .isNotFound();
+    }
+
+    @Test
+    void thenDeletingOneOfItsSubActivitiesShouldReturnNotFound() {
+      BddLogger.when("deleting a sub-activity of a draft that does not exist");
+      BddLogger.then("it should return 404");
+      deleteSubActivity(UUID.randomUUID(), UUID.randomUUID(), staffHeaders())
           .expectStatus()
           .isNotFound();
     }
@@ -792,6 +868,48 @@ class SubActivityControllerIT extends ContainerConfigurationTest {
       var subActivityContent =
           readJson(get(uri -> uri.path(CONTENT_PATH).build("PUBLISHED", firstId), staffHeaders()));
       assertThat(subActivityContent.get("title").asText()).isEqualTo("Première étape revue");
+    }
+
+    @Test
+    void thenASubActivityShouldOnlyBeDeletedOnceNoStudentIsEnrolledAndThenUnpublished()
+        throws Exception {
+      var firstId = createPublishableSubActivity("Première étape");
+      var secondId = createPublishableSubActivity("Deuxième étape");
+      var lastId = createPublishableSubActivity("Dernière étape");
+      publish(mainDraftId).expectStatus().isOk();
+
+      BddLogger.and("a student enrolled in the published activity");
+      subscribe(mainDraftId);
+
+      BddLogger.when("editing the published activity and deleting a sub-activity");
+      createDraftFromPublishedActivity();
+
+      BddLogger.then("it should be rejected with 409");
+      deleteSubActivity(mainDraftId, secondId, staffHeaders())
+          .expectStatus()
+          .isEqualTo(409)
+          .expectBody()
+          .jsonPath("$.code")
+          .isEqualTo("SUB_ACTIVITY_DELETION_NOT_ALLOWED");
+
+      BddLogger.when("the student unsubscribes from the activity");
+      unsubscribe(mainDraftId);
+
+      BddLogger.then("deleting the sub-activity should be accepted");
+      deleteSubActivity(mainDraftId, secondId, staffHeaders()).expectStatus().isNoContent();
+
+      BddLogger.when("publishing the main draft");
+      publish(mainDraftId).expectStatus().isOk();
+
+      BddLogger.then("the deleted sub-activity should no longer be published");
+      assertThat(publishedSubActivityIds(mainDraftId)).containsExactly(firstId, lastId);
+      webTestClient
+          .get()
+          .uri(CONTENT_PATH, "PUBLISHED", secondId)
+          .headers(staffHeaders())
+          .exchange()
+          .expectStatus()
+          .isNotFound();
     }
 
     @Test
@@ -1034,6 +1152,18 @@ class SubActivityControllerIT extends ContainerConfigurationTest {
       return UUID.fromString(readJson(body).get("createdItemId").asText());
     }
 
+    private void unsubscribe(UUID activityId) {
+      webTestClient
+          .method(HttpMethod.DELETE)
+          .uri("/me/activity-progress/unsubscribe")
+          .headers(studentHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .bodyValue(List.of(activityId))
+          .exchange()
+          .expectStatus()
+          .isOk();
+    }
+
     private void enableStudentNotifications() {
       webTestClient
           .patch()
@@ -1129,6 +1259,15 @@ class SubActivityControllerIT extends ContainerConfigurationTest {
         .headers(headers)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(subActivityIds)
+        .exchange();
+  }
+
+  private WebTestClient.ResponseSpec deleteSubActivity(
+      UUID draftId, UUID subActivityId, Consumer<HttpHeaders> headers) {
+    return webTestClient
+        .delete()
+        .uri(SUB_ACTIVITY_PATH, draftId, subActivityId)
+        .headers(headers)
         .exchange();
   }
 

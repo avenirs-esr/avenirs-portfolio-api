@@ -191,6 +191,12 @@ public class TransactionalActivityService implements ActivityService {
     delegate.updateSubActivityDraftsOrder(activityDraftId, orderedSubActivityIds);
   }
 
+  @Transactional
+  @Override
+  public void deleteSubActivityDraft(UUID activityDraftId, UUID subActivityId) {
+    delegate.deleteSubActivityDraft(activityDraftId, subActivityId);
+  }
+
   @Override
   public ActivityDraft updateActivityDraft(
       UUID id,

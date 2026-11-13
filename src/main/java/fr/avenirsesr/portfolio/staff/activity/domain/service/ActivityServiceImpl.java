@@ -286,15 +286,29 @@ public class ActivityServiceImpl implements ActivityService {
 
   private SubActivitiesPublication publishSubActivities(
       UUID activityId, List<ActivityDraft> subActivityDrafts) {
-    if (subActivityDrafts.isEmpty()) {
-      return new SubActivitiesPublication(List.of(), List.of());
-    }
     var publishedSubActivities = activityRepository.findAllSubActivitiesOf(activityId);
-    var publishedById =
+    var draftIds = subActivityDrafts.stream().map(ActivityDraft::getId).collect(Collectors.toSet());
+    var deletedSubActivities =
         publishedSubActivities.stream()
-            .collect(Collectors.toMap(Activity::getId, Function.identity()));
+            .filter(subActivity -> !draftIds.contains(subActivity.getId()))
+            .toList();
+    var keptSubActivities =
+        publishedSubActivities.stream()
+            .filter(subActivity -> draftIds.contains(subActivity.getId()))
+            .toList();
+    var publishedById =
+        keptSubActivities.stream().collect(Collectors.toMap(Activity::getId, Function.identity()));
 
-    var removedFileIds = new ArrayList<UUID>();
+    var removedFileIds =
+        deletedSubActivities.stream()
+            .flatMap(
+                subActivity ->
+                    fileIdsOf(subActivity.getBanner().orElse(null), subActivity.getFiles()))
+            .collect(Collectors.toCollection(ArrayList::new));
+    deletedSubActivities.forEach(
+        subActivity -> activityViewRepository.deleteAllByActivityId(subActivity.getId()));
+    removeSubActivities(deletedSubActivities);
+
     var updatedTitles = new ArrayList<String>();
     var subActivities = new ArrayList<Activity>();
     for (var position = 0; position < subActivityDrafts.size(); position++) {
@@ -306,7 +320,7 @@ public class ActivityServiceImpl implements ActivityService {
         continue;
       }
       removedFileIds.addAll(removedFileIdsOf(published, subActivityDraft));
-      var moved = publishedSubActivities.indexOf(published) != position;
+      var moved = keptSubActivities.indexOf(published) != position;
       var periodChanged = !hasSamePeriod(published, subActivityDraft);
       var fieldsChanged = !updateActivity(published, subActivityDraft, true).isEmpty();
       published.attachAsSubActivity(
@@ -317,7 +331,9 @@ public class ActivityServiceImpl implements ActivityService {
       }
       subActivities.add(published);
     }
-    activityRepository.saveAll(subActivities);
+    if (!subActivities.isEmpty()) {
+      activityRepository.saveAll(subActivities);
+    }
     return new SubActivitiesPublication(removedFileIds, updatedTitles);
   }
 
@@ -807,6 +823,46 @@ public class ActivityServiceImpl implements ActivityService {
       activityDraftRepository.saveAll(reordered);
     }
     log.info("Reordered the sub-activities of activity draft with id: {}", activityDraftId);
+  }
+
+  @Override
+  public void deleteSubActivityDraft(UUID activityDraftId, UUID subActivityId) {
+    var mainDraft = getDraftWithRight(activityDraftId, EActivityRight.EDIT);
+    requireMainActivity(mainDraft);
+    if (hasEnrolledStudents(mainDraft)) {
+      throw new SubActivityDeletionNotAllowedException();
+    }
+
+    var subActivities = activityDraftRepository.findAllSubActivitiesOf(activityDraftId);
+    var subActivity =
+        subActivities.stream()
+            .filter(candidate -> candidate.getId().equals(subActivityId))
+            .findFirst()
+            .orElseThrow(ActivityDraftNotFoundException::new);
+    var previousActivityId = subActivity.getPreviousActivityId().orElseThrow();
+    subActivities.stream()
+        .filter(candidate -> candidate.getPreviousActivityId().orElseThrow().equals(subActivityId))
+        .findFirst()
+        .ifPresent(
+            next -> {
+              next.attachAsSubActivity(activityDraftId, previousActivityId);
+              activityDraftRepository.save(next);
+            });
+
+    var publishedFileIds =
+        activityRepository
+            .findById(subActivityId)
+            .map(published -> fileIdsOf(published.getBanner().orElse(null), published.getFiles()))
+            .orElseGet(Stream::empty)
+            .collect(Collectors.toSet());
+    activityDraftRepository.removeFromDatabase(subActivity);
+    fileIdsOf(subActivity.getBanner().orElse(null), subActivity.getFiles())
+        .filter(fileId -> !publishedFileIds.contains(fileId))
+        .forEach(fileResourceService::delete);
+    log.info(
+        "Deleted sub-activity draft with id: {} from activity draft with id: {}",
+        subActivityId,
+        activityDraftId);
   }
 
   @Override
