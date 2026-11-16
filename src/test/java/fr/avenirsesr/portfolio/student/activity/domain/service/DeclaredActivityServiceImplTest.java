@@ -1468,8 +1468,8 @@ class DeclaredActivityServiceImplTest {
         DeclaredActivity.create(UUID.randomUUID(), student, activity, null, null, null, null, null);
     List<SubActivityOverviewData> subActivities =
         List.of(
-            new SubActivityOverviewData(UUID.randomUUID(), "Première étape"),
-            new SubActivityOverviewData(UUID.randomUUID(), "Deuxième étape"));
+            new SubActivityOverviewData(UUID.randomUUID(), "Première étape", true),
+            new SubActivityOverviewData(UUID.randomUUID(), "Deuxième étape", true));
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))

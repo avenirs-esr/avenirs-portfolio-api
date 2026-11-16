@@ -168,7 +168,7 @@ class ActivityContentDtoMapperTest {
     BddLogger.given("a main activity with a sub-activity, and a sub-activity draft");
     Activity activity = ActivityFixture.create().toModel();
     UUID subActivityId = UUID.randomUUID();
-    var subActivities = List.of(new SubActivityOverviewData(subActivityId, "First step"));
+    var subActivities = List.of(new SubActivityOverviewData(subActivityId, "First step", true));
     ActivityDraft subActivityDraft =
         ActivityDraft.create("First step", StaffFixture.create().toModel());
     subActivityDraft.attachAsSubActivity(activity.getId(), activity.getId());
@@ -182,7 +182,7 @@ class ActivityContentDtoMapperTest {
 
     BddLogger.then("the main activity should list its sub-activities and the status given");
     assertEquals(
-        List.of(new SubActivityOverviewDTO(subActivityId, "First step")),
+        List.of(new SubActivityOverviewDTO(subActivityId, "First step", true)),
         activityDto.subActivities());
     assertEquals(EActivityStatus.UNPUBLISHED, activityDto.activityStatus());
     assertNull(activityDto.mainActivityId());

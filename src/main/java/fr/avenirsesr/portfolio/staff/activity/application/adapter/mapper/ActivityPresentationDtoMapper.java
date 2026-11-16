@@ -23,7 +23,10 @@ public interface ActivityPresentationDtoMapper {
         activityData.recommendedCompletionContexts(),
         activityData.mainActivityId().orElse(null),
         activityData.subActivities().stream()
-            .map(subActivity -> new SubActivityOverviewDTO(subActivity.id(), subActivity.title()))
+            .map(
+                subActivity ->
+                    new SubActivityOverviewDTO(
+                        subActivity.id(), subActivity.title(), subActivity.publishable()))
             .toList(),
         activityData.createdAt(),
         activityData.updatedAt());

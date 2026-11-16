@@ -716,7 +716,7 @@ class SubActivityControllerIT extends ContainerConfigurationTest {
           .isBadRequest()
           .expectBody()
           .jsonPath("$.code")
-          .isEqualTo("NOT_BLANK");
+          .isEqualTo("SUB_ACTIVITY_NOT_PUBLISHABLE");
 
       BddLogger.and("the main draft should remain and nothing should be published");
       get(uri -> uri.path(CONTENT_PATH).build("DRAFT", mainDraftId), staffHeaders());
