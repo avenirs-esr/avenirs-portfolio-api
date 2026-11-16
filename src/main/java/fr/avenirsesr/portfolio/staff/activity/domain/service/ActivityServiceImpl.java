@@ -290,29 +290,36 @@ public class ActivityServiceImpl implements ActivityService {
 
   private SubActivitiesPublication publishSubActivities(
       UUID activityId, List<ActivityDraft> subActivityDrafts) {
-    var publishedSubActivities = activityRepository.findAllSubActivitiesOf(activityId);
     var draftIds = subActivityDrafts.stream().map(ActivityDraft::getId).collect(Collectors.toSet());
-    var deletedSubActivities =
-        publishedSubActivities.stream()
-            .filter(subActivity -> !draftIds.contains(subActivity.getId()))
-            .toList();
-    var keptSubActivities =
-        publishedSubActivities.stream()
-            .filter(subActivity -> draftIds.contains(subActivity.getId()))
-            .toList();
-    var publishedById =
-        keptSubActivities.stream().collect(Collectors.toMap(Activity::getId, Function.identity()));
+    var keptInDraft =
+        activityRepository.findAllSubActivitiesOf(activityId).stream()
+            .collect(
+                Collectors.partitioningBy(subActivity -> draftIds.contains(subActivity.getId())));
+    var deletedFileIds = deleteSubActivities(keptInDraft.get(false));
+    var publication = saveSubActivities(keptInDraft.get(true), subActivityDrafts);
+    return new SubActivitiesPublication(
+        Stream.concat(deletedFileIds.stream(), publication.removedFileIds().stream()).toList(),
+        publication.updatedTitles());
+  }
 
-    var removedFileIds =
+  private List<UUID> deleteSubActivities(List<Activity> deletedSubActivities) {
+    var fileIds =
         deletedSubActivities.stream()
             .flatMap(
                 subActivity ->
                     fileIdsOf(subActivity.getBanner().orElse(null), subActivity.getFiles()))
-            .collect(Collectors.toCollection(ArrayList::new));
+            .toList();
     deletedSubActivities.forEach(
         subActivity -> activityViewRepository.deleteAllByActivityId(subActivity.getId()));
     removeSubActivities(deletedSubActivities);
+    return fileIds;
+  }
 
+  private SubActivitiesPublication saveSubActivities(
+      List<Activity> keptSubActivities, List<ActivityDraft> subActivityDrafts) {
+    var publishedById =
+        keptSubActivities.stream().collect(Collectors.toMap(Activity::getId, Function.identity()));
+    var removedFileIds = new ArrayList<UUID>();
     var updatedTitles = new ArrayList<String>();
     var subActivities = new ArrayList<Activity>();
     for (var position = 0; position < subActivityDrafts.size(); position++) {
@@ -325,12 +332,8 @@ public class ActivityServiceImpl implements ActivityService {
       }
       removedFileIds.addAll(removedFileIdsOf(published, subActivityDraft));
       var moved = keptSubActivities.indexOf(published) != position;
-      var periodChanged = !hasSamePeriod(published, subActivityDraft);
-      var fieldsChanged = !updateActivity(published, subActivityDraft, true).isEmpty();
-      published.attachAsSubActivity(
-          subActivityDraft.getMainActivityId().orElseThrow(),
-          subActivityDraft.getPreviousActivityId().orElseThrow());
-      if (moved || periodChanged || fieldsChanged) {
+      var changed = updateSubActivity(published, subActivityDraft);
+      if (moved || changed) {
         updatedTitles.add(published.getTitle());
       }
       subActivities.add(published);
@@ -339,6 +342,15 @@ public class ActivityServiceImpl implements ActivityService {
       activityRepository.saveAll(subActivities);
     }
     return new SubActivitiesPublication(removedFileIds, updatedTitles);
+  }
+
+  private boolean updateSubActivity(Activity subActivity, ActivityDraft subActivityDraft) {
+    var periodChanged = !hasSamePeriod(subActivity, subActivityDraft);
+    var fieldsChanged = !updateActivity(subActivity, subActivityDraft, true).isEmpty();
+    subActivity.attachAsSubActivity(
+        subActivityDraft.getMainActivityId().orElseThrow(),
+        subActivityDraft.getPreviousActivityId().orElseThrow());
+    return periodChanged || fieldsChanged;
   }
 
   private static boolean hasSamePeriod(Activity activity, ActivityDraft draft) {
