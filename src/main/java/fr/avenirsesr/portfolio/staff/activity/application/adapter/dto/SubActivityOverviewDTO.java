@@ -3,5 +3,5 @@ package fr.avenirsesr.portfolio.staff.activity.application.adapter.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.UUID;
 
-@Schema(requiredProperties = {"id", "title"})
-public record SubActivityOverviewDTO(UUID id, String title) {}
+@Schema(requiredProperties = {"id", "title", "publishable"})
+public record SubActivityOverviewDTO(UUID id, String title, boolean publishable) {}

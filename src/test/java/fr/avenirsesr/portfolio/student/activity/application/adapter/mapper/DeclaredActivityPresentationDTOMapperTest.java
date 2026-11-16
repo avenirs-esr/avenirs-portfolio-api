@@ -95,16 +95,16 @@ class DeclaredActivityPresentationDTOMapperTest {
         DeclaredActivity.create(UUID.randomUUID(), student, activity, null, null, null, null, null);
 
     SubActivityOverviewData firstSubActivity =
-        new SubActivityOverviewData(UUID.randomUUID(), "Première étape");
+        new SubActivityOverviewData(UUID.randomUUID(), "Première étape", true);
     SubActivityOverviewData secondSubActivity =
-        new SubActivityOverviewData(UUID.randomUUID(), "Deuxième étape");
+        new SubActivityOverviewData(UUID.randomUUID(), "Deuxième étape", true);
 
     when(activityContentDtoMapper.toDTO(activity)).thenReturn(toActivityContentDTO(activity));
     when(activityContentDtoMapper.toSubActivityOverviewDTO(any(SubActivityOverviewData.class)))
         .thenAnswer(
             invocation -> {
               SubActivityOverviewData subActivity = invocation.getArgument(0);
-              return new SubActivityOverviewDTO(subActivity.id(), subActivity.title());
+              return new SubActivityOverviewDTO(subActivity.id(), subActivity.title(), true);
             });
 
     BddLogger.when("mapping DeclaredActivityDetailsData with sub-activities");
@@ -119,8 +119,8 @@ class DeclaredActivityPresentationDTOMapperTest {
 
     assertEquals(
         List.of(
-            new SubActivityOverviewDTO(firstSubActivity.id(), "Première étape"),
-            new SubActivityOverviewDTO(secondSubActivity.id(), "Deuxième étape")),
+            new SubActivityOverviewDTO(firstSubActivity.id(), "Première étape", true),
+            new SubActivityOverviewDTO(secondSubActivity.id(), "Deuxième étape", true)),
         dto.subActivities());
   }
 

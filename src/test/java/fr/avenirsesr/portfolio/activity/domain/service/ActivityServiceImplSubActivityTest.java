@@ -20,6 +20,7 @@ import static org.mockito.Mockito.when;
 import fr.avenirsesr.portfolio.activity.infrastructure.fixture.ActivityFixture;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
+import fr.avenirsesr.portfolio.common.error.domain.exception.SubActivityNotPublishableException;
 import fr.avenirsesr.portfolio.common.file.domain.model.File;
 import fr.avenirsesr.portfolio.common.file.domain.model.FileContent;
 import fr.avenirsesr.portfolio.common.file.domain.model.FileDownload;
@@ -110,8 +111,11 @@ class ActivityServiceImplSubActivityTest {
     secondSubActivity = publishedSubActivity(firstSubActivity.getId(), "Second step", List.of());
 
     mainDraft = ActivityDraft.create("Main draft", staff);
-    firstSubActivityDraft = subActivityDraft(mainDraft.getId(), "First draft step");
-    secondSubActivityDraft = subActivityDraft(firstSubActivityDraft.getId(), "Second draft step");
+
+    firstSubActivityDraft = publishableSubActivityDraft(mainDraft.getId(), "First draft step");
+
+    secondSubActivityDraft =
+        publishableSubActivityDraft(firstSubActivityDraft.getId(), "Second draft step");
   }
 
   private Activity publishedSubActivity(UUID previousActivityId, String title, List<File> files) {
@@ -129,10 +133,20 @@ class ActivityServiceImplSubActivityTest {
         files);
   }
 
-  private ActivityDraft subActivityDraft(UUID previousActivityId, String title) {
+  private ActivityDraft subActivityDraft(
+      UUID previousActivityId, String title, String description) {
     var draft = ActivityDraft.create(title, staff);
     draft.attachAsSubActivity(mainDraft.getId(), previousActivityId);
+    draft.setDescription(description);
     return draft;
+  }
+
+  private ActivityDraft publishableSubActivityDraft(UUID previousActivityId, String title) {
+    return subActivityDraft(previousActivityId, title, "a description");
+  }
+
+  private ActivityDraft nonPublishableSubActivityDraft(UUID previousActivityId, String title) {
+    return subActivityDraft(previousActivityId, title, null);
   }
 
   private void givenPublished(Activity... activities) {
@@ -472,14 +486,95 @@ class ActivityServiceImplSubActivityTest {
       BddLogger.then("the overviews should expose the id and the title of each sub-activity");
       assertEquals(
           List.of(
-              new SubActivityOverviewData(firstSubActivity.getId(), "First step"),
-              new SubActivityOverviewData(secondSubActivity.getId(), "Second step")),
+              new SubActivityOverviewData(firstSubActivity.getId(), "First step", true),
+              new SubActivityOverviewData(secondSubActivity.getId(), "Second step", true)),
           activityService.getSubActivityOverviews(mainActivity.getId()));
       assertEquals(
           List.of(
-              new SubActivityOverviewData(firstSubActivityDraft.getId(), "First draft step"),
-              new SubActivityOverviewData(secondSubActivityDraft.getId(), "Second draft step")),
+              new SubActivityOverviewData(firstSubActivityDraft.getId(), "First draft step", true),
+              new SubActivityOverviewData(
+                  secondSubActivityDraft.getId(), "Second draft step", true)),
           activityService.getDraftSubActivityOverviews(mainDraft.getId()));
+    }
+
+    @Test
+    void thenPublishedSubActivityOverviewsShouldAlwaysBePublishable() {
+      BddLogger.given("a main activity with two published sub-activities");
+
+      when(activityRepository.findAllSubActivitiesOf(mainActivity.getId()))
+          .thenReturn(List.of(firstSubActivity, secondSubActivity));
+
+      BddLogger.then("each overview is publishable, regardless of its content");
+      assertEquals(
+          List.of(
+              new SubActivityOverviewData(firstSubActivity.getId(), "First step", true),
+              new SubActivityOverviewData(secondSubActivity.getId(), "Second step", true)),
+          activityService.getSubActivityOverviews(mainActivity.getId()));
+    }
+
+    @Test
+    void thenDraftSubActivityOverviewsShouldBePublishableWhenComplete() {
+      BddLogger.given("two publishable draft sub-activities");
+      var first = publishableSubActivityDraft(mainDraft.getId(), "First draft step");
+      var second = publishableSubActivityDraft(first.getId(), "Second draft step");
+      when(activityDraftRepository.findAllSubActivitiesOf(mainDraft.getId()))
+          .thenReturn(List.of(first, second));
+
+      BddLogger.then("each overview is marked publishable");
+      assertEquals(
+          List.of(
+              new SubActivityOverviewData(first.getId(), "First draft step", true),
+              new SubActivityOverviewData(second.getId(), "Second draft step", true)),
+          activityService.getDraftSubActivityOverviews(mainDraft.getId()));
+    }
+
+    @Test
+    void thenDraftSubActivityOverviewsShouldNotBePublishableWhenIncomplete() {
+      BddLogger.given("two non-publishable draft sub-activities");
+      var first = nonPublishableSubActivityDraft(mainDraft.getId(), "First draft step");
+      var second = nonPublishableSubActivityDraft(first.getId(), "Second draft step");
+
+      when(activityDraftRepository.findAllSubActivitiesOf(mainDraft.getId()))
+          .thenReturn(List.of(first, second));
+
+      BddLogger.then("each overview is marked not publishable");
+      assertEquals(
+          List.of(
+              new SubActivityOverviewData(first.getId(), "First draft step", false),
+              new SubActivityOverviewData(second.getId(), "Second draft step", false)),
+          activityService.getDraftSubActivityOverviews(mainDraft.getId()));
+    }
+
+    @Test
+    void thenDraftSubActivityOverviewsShouldReflectEachPublishabilityIndependently() {
+      BddLogger.given("one publishable draft and one that is not");
+      var publishable = publishableSubActivityDraft(mainDraft.getId(), "First draft step");
+      var notPublishable = nonPublishableSubActivityDraft(publishable.getId(), "Second draft step");
+      when(activityDraftRepository.findAllSubActivitiesOf(mainDraft.getId()))
+          .thenReturn(List.of(publishable, notPublishable));
+
+      BddLogger.then("publishability is surfaced per sub-activity");
+      assertEquals(
+          List.of(
+              new SubActivityOverviewData(publishable.getId(), "First draft step", true),
+              new SubActivityOverviewData(notPublishable.getId(), "Second draft step", false)),
+          activityService.getDraftSubActivityOverviews(mainDraft.getId()));
+    }
+
+    @Test
+    void thenADraftSubActivityShouldBePublishableWhenItHasADescription() {
+      BddLogger.given("a draft with a description and a draft without one");
+      var withDescription =
+          subActivityDraft(mainDraft.getId(), "With description", "a description");
+      var withoutDescription =
+          subActivityDraft(withDescription.getId(), "Without description", null);
+      when(activityDraftRepository.findAllSubActivitiesOf(mainDraft.getId()))
+          .thenReturn(List.of(withDescription, withoutDescription));
+
+      BddLogger.then("only the draft with a description is publishable");
+      var overviews = activityService.getDraftSubActivityOverviews(mainDraft.getId());
+      assertTrue(overviews.get(0).publishable());
+      assertFalse(overviews.get(1).publishable());
     }
 
     @Test
@@ -935,7 +1030,8 @@ class ActivityServiceImplSubActivityTest {
     @BeforeEach
     void setupWhen() {
       BddLogger.given("a main draft with three sub-activities");
-      thirdSubActivityDraft = subActivityDraft(secondSubActivityDraft.getId(), "Third draft step");
+      thirdSubActivityDraft =
+          subActivityDraft(secondSubActivityDraft.getId(), "Third draft step", "a description");
       givenDrafts(mainDraft, firstSubActivityDraft);
       when(activityDraftRepository.findAllSubActivitiesOf(mainDraft.getId()))
           .thenReturn(
@@ -1229,7 +1325,8 @@ class ActivityServiceImplSubActivityTest {
 
       BddLogger.then("publishing the main draft should be rejected before any write");
       assertThrows(
-          FieldValidationException.class, () -> activityService.publish(mainDraft.getId()));
+          SubActivityNotPublishableException.class,
+          () -> activityService.publish(mainDraft.getId()));
       verify(activityRepository, never()).save(any());
       verify(activityDraftRepository, never()).removeFromDatabase(any());
     }

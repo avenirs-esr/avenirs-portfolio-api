@@ -8,6 +8,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
+import fr.avenirsesr.portfolio.common.error.domain.exception.SubActivityNotPublishableException;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.file.domain.exception.FileNotFoundException;
@@ -196,6 +197,10 @@ public class ActivityServiceImpl implements ActivityService {
             List.of()));
   }
 
+  private boolean isPublishable(ActivityDraft subActivity) {
+    return subActivity.getDescription().isPresent();
+  }
+
   @Override
   public Activity publish(UUID activityDraftId) {
     var staff = loggedInUserService.getLoggedInStaff();
@@ -224,10 +229,8 @@ public class ActivityServiceImpl implements ActivityService {
     draft.getAssessment().ifPresent(ActivityAssessment::validate);
 
     var subActivityDrafts = activityDraftRepository.findAllSubActivitiesOf(activityDraftId);
-    if (subActivityDrafts.stream()
-        .anyMatch(subActivityDraft -> subActivityDraft.getDescription().isEmpty())) {
-      throw new FieldValidationException(
-          EErrorCode.NOT_BLANK, "description must be defined to publish a sub-activity");
+    if (subActivityDrafts.stream().anyMatch(subActivityDraft -> !isPublishable(subActivityDraft))) {
+      throw new SubActivityNotPublishableException();
     }
 
     var publishedActivity = activityRepository.findById(activityDraftId);
@@ -544,7 +547,8 @@ public class ActivityServiceImpl implements ActivityService {
   public List<SubActivityOverviewData> getSubActivityOverviews(UUID activityId) {
     return activityRepository.findAllSubActivitiesOf(activityId).stream()
         .map(
-            subActivity -> new SubActivityOverviewData(subActivity.getId(), subActivity.getTitle()))
+            subActivity ->
+                new SubActivityOverviewData(subActivity.getId(), subActivity.getTitle(), true))
         .toList();
   }
 
@@ -552,7 +556,9 @@ public class ActivityServiceImpl implements ActivityService {
   public List<SubActivityOverviewData> getDraftSubActivityOverviews(UUID activityDraftId) {
     return activityDraftRepository.findAllSubActivitiesOf(activityDraftId).stream()
         .map(
-            subActivity -> new SubActivityOverviewData(subActivity.getId(), subActivity.getTitle()))
+            subActivity ->
+                new SubActivityOverviewData(
+                    subActivity.getId(), subActivity.getTitle(), isPublishable(subActivity)))
         .toList();
   }
 
