@@ -3337,6 +3337,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
 
     @Nested
     class WhenManagingActivityAuthorizations {
+      private static final UUID TARGET_INSTITUTION_ID = UUID.randomUUID();
 
       @BeforeEach
       void setupWhen() {
@@ -3506,8 +3507,10 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       void thenAManagerShouldSearchTheCandidatesPageByPage() throws Exception {
         BddLogger.and("given a draft created by the staff and two searchable staffs");
         UUID draftId = createDraftAndGetId("Brouillon avec candidats");
-        accessClientStub.setStaffAffiliations(STAFF_ID, List.of(), List.of());
-        accessClientStub.setStaffAffiliations(ANOTHER_STAFF_ID, List.of(), List.of());
+
+        accessClientStub.setStaffAffiliations(STAFF_ID, List.of(TARGET_INSTITUTION_ID), List.of());
+        accessClientStub.setStaffAffiliations(
+            ANOTHER_STAFF_ID, List.of(TARGET_INSTITUTION_ID), List.of());
 
         BddLogger.then(
             "the first page should hold a single candidate and describe the whole result");
@@ -3536,7 +3539,8 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       void thenTheCandidatesShouldBeSearchableOnAPublishedActivity() throws Exception {
         BddLogger.and("given a published activity and a searchable staff");
         UUID activityId = publishNewActivity("Activité avec candidats");
-        accessClientStub.setStaffAffiliations(ANOTHER_STAFF_ID, List.of(), List.of());
+        accessClientStub.setStaffAffiliations(
+            ANOTHER_STAFF_ID, List.of(TARGET_INSTITUTION_ID), List.of());
 
         BddLogger.then("the other staff should be proposed to the manager");
         JsonNode result = searchCandidatesAsStaff("PUBLISHED", activityId, null, null, null);

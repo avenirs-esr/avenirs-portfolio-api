@@ -6,12 +6,15 @@ import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityAuthorizationDefinition;
+import fr.avenirsesr.portfolio.staff.activity.domain.data.CandidateSearchCriteria;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityAuthorizationChangeNotAllowedException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityDraftNotFoundException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityLeaderRequiredException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityNotFoundException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.SubActivityOperationNotAllowedException;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAuthorization;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityDraft;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.input.ActivityAuthorizationService;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityAuthorizationRepository;
@@ -127,7 +130,16 @@ public class ActivityAuthorizationServiceImpl implements ActivityAuthorizationSe
     requireActivity(activityId);
     checkRight(
         loggedInUserService.getLoggedInStaff(), activityId, EActivityRight.MANAGE_AUTHORIZATIONS);
-    return searchCandidates(keyword, pageCriteria);
+    Activity activity =
+        activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);
+
+    CandidateSearchCriteria criteria =
+        buildSearchCriteria(
+            activity.isNational(),
+            activity.getTargetInstitutionIds(),
+            activity.getTargetGroupIds());
+
+    return searchCandidates(keyword, criteria.institutionIds(), criteria.groupIds(), pageCriteria);
   }
 
   @Override
@@ -224,7 +236,19 @@ public class ActivityAuthorizationServiceImpl implements ActivityAuthorizationSe
         loggedInUserService.getLoggedInStaff(),
         activityDraftId,
         EActivityRight.MANAGE_AUTHORIZATIONS);
-    return searchCandidates(keyword, pageCriteria);
+
+    ActivityDraft activityDraft =
+        activityDraftRepository
+            .findById(activityDraftId)
+            .orElseThrow(ActivityDraftNotFoundException::new);
+
+    CandidateSearchCriteria criteria =
+        buildSearchCriteria(
+            activityDraft.isNational(),
+            activityDraft.getTargetInstitutionIds(),
+            activityDraft.getTargetGroupIds());
+
+    return searchCandidates(keyword, criteria.institutionIds(), criteria.groupIds(), pageCriteria);
   }
 
   @Override
@@ -495,6 +519,7 @@ public class ActivityAuthorizationServiceImpl implements ActivityAuthorizationSe
     if (!activityRepository.existsById(activityId)) {
       throw new ActivityNotFoundException();
     }
+
     if (activityRepository.existsSubActivityById(activityId)) {
       throw new SubActivityOperationNotAllowedException();
     }
@@ -504,6 +529,7 @@ public class ActivityAuthorizationServiceImpl implements ActivityAuthorizationSe
     if (!activityDraftRepository.existsById(activityDraftId)) {
       throw new ActivityDraftNotFoundException();
     }
+
     if (activityDraftRepository.existsSubActivityById(activityDraftId)) {
       throw new SubActivityOperationNotAllowedException();
     }
@@ -527,12 +553,12 @@ public class ActivityAuthorizationServiceImpl implements ActivityAuthorizationSe
     return rightsByStaffId;
   }
 
-  private PagedResult<Staff> searchCandidates(String keyword, PageCriteria pageCriteria) {
-    var eppn =
-        userPrincipalRepository
-            .findEppnByUserId(loggedInUserService.getLoggedInStaff().getId())
-            .orElseThrow(UserNotAuthorizedException::new);
-    var eppns = accessClient.searchStaffEppns(eppn, keyword, pageCriteria);
+  private PagedResult<Staff> searchCandidates(
+      String keyword, List<UUID> institutionIds, List<UUID> groupIds, PageCriteria pageCriteria) {
+    userPrincipalRepository
+        .findEppnByUserId(loggedInUserService.getLoggedInStaff().getId())
+        .orElseThrow(UserNotAuthorizedException::new);
+    var eppns = accessClient.searchStaffEppns(keyword, institutionIds, groupIds, pageCriteria);
     if (eppns.content().isEmpty()) {
       return new PagedResult<>(List.of(), eppns.pageInfo());
     }
@@ -551,6 +577,14 @@ public class ActivityAuthorizationServiceImpl implements ActivityAuthorizationSe
             .filter(Objects::nonNull)
             .toList();
     return new PagedResult<>(candidates, eppns.pageInfo());
+  }
+
+  private CandidateSearchCriteria buildSearchCriteria(
+      boolean national, List<UUID> targetInstitutionIds, List<UUID> targetGroupIds) {
+    return new CandidateSearchCriteria(
+        national,
+        national ? List.of() : targetInstitutionIds,
+        national ? List.of() : targetGroupIds);
   }
 
   private Map<UUID, Staff> findStaffsById(Set<UUID> staffIds) {

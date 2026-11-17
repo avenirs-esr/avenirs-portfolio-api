@@ -2,12 +2,8 @@ package fr.avenirsesr.portfolio.staff.activity.domain.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
@@ -21,7 +17,9 @@ import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityDraftNotF
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityLeaderRequiredException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityNotFoundException;
 import fr.avenirsesr.portfolio.staff.activity.domain.exception.SubActivityOperationNotAllowedException;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAuthorization;
+import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityDraft;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityAuthorizationRepository;
 import fr.avenirsesr.portfolio.staff.activity.domain.port.output.repository.ActivityDraftAuthorizationRepository;
@@ -98,6 +96,38 @@ class ActivityAuthorizationServiceImplTest {
     when(activityDraftAuthorizationRepository.findByActivityIdAndStaffId(
             activityId, holder.getId()))
         .thenReturn(Optional.empty());
+  }
+
+  private ActivityDraft givenNationalActivityDraft() {
+    ActivityDraft draft = mock(ActivityDraft.class);
+    lenient().when(draft.isNational()).thenReturn(true);
+    when(activityDraftRepository.findById(activityId)).thenReturn(Optional.of(draft));
+    return draft;
+  }
+
+  private ActivityDraft givenTargetedActivityDraft(List<UUID> institutionIds, List<UUID> groupIds) {
+    ActivityDraft draft = mock(ActivityDraft.class);
+    lenient().when(draft.isNational()).thenReturn(false);
+    lenient().when(draft.getTargetInstitutionIds()).thenReturn(institutionIds);
+    lenient().when(draft.getTargetGroupIds()).thenReturn(groupIds);
+    when(activityDraftRepository.findById(activityId)).thenReturn(Optional.of(draft));
+    return draft;
+  }
+
+  private Activity givenNationalActivity() {
+    Activity activity = mock(Activity.class);
+    when(activity.isNational()).thenReturn(true);
+    when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
+    return activity;
+  }
+
+  private Activity givenTargetedActivity(List<UUID> institutionIds, List<UUID> groupIds) {
+    Activity activity = mock(Activity.class);
+    lenient().when(activity.isNational()).thenReturn(false);
+    lenient().when(activity.getTargetInstitutionIds()).thenReturn(institutionIds);
+    lenient().when(activity.getTargetGroupIds()).thenReturn(groupIds);
+    when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
+    return activity;
   }
 
   @Nested
@@ -354,9 +384,10 @@ class ActivityAuthorizationServiceImplTest {
       lenient().when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
     }
 
-    private void givenSearchedEppns(List<String> eppns, PageInfo pageInfo) {
+    private void givenSearchedEppns(
+        List<String> eppns, PageInfo pageInfo, List<UUID> institutionIds, List<UUID> groupIds) {
       when(userPrincipalRepository.findEppnByUserId(staff.getId())).thenReturn(Optional.of(EPPN));
-      when(accessClient.searchStaffEppns(EPPN, KEYWORD, pageCriteria))
+      when(accessClient.searchStaffEppns(KEYWORD, institutionIds, groupIds, pageCriteria))
           .thenReturn(new PagedResult<>(eppns, pageInfo));
     }
 
@@ -368,9 +399,11 @@ class ActivityAuthorizationServiceImplTest {
       var notStaff = UserFixture.create().toModel();
       var pageInfo = new PageInfo(0, 8, 4);
       when(activityRepository.existsById(activityId)).thenReturn(true);
+      UUID inst = UUID.randomUUID();
+      givenTargetedActivity(List.of(inst), List.of());
       givenActivityAuthorization(authorizationOf(staff, EActivityRight.MANAGE_AUTHORIZATIONS));
       var eppns = List.of("second", "unknown", "not-staff", "first");
-      givenSearchedEppns(eppns, pageInfo);
+      givenSearchedEppns(eppns, pageInfo, List.of(inst), List.of());
       when(userPrincipalRepository.findAllByEppns(eppns))
           .thenReturn(
               Map.of(
@@ -391,8 +424,10 @@ class ActivityAuthorizationServiceImplTest {
       var candidate = StaffFixture.create().toModel();
       var pageInfo = new PageInfo(0, 8, 1);
       when(activityDraftRepository.existsById(activityId)).thenReturn(true);
+      UUID inst = UUID.randomUUID();
+      givenTargetedActivityDraft(List.of(inst), List.of());
       givenDraftAuthorization(authorizationOf(staff, EActivityRight.MANAGE_AUTHORIZATIONS));
-      givenSearchedEppns(List.of("candidate"), pageInfo);
+      givenSearchedEppns(List.of("candidate"), pageInfo, List.of(inst), List.of());
       when(userPrincipalRepository.findAllByEppns(List.of("candidate")))
           .thenReturn(Map.of("candidate", candidate.getUser()));
       when(staffRepository.findAllById(anyList())).thenReturn(List.of(candidate));
@@ -405,12 +440,51 @@ class ActivityAuthorizationServiceImplTest {
     }
 
     @Test
+    void thenANationalActivityShouldSearchInAllInstitutionsAndGroups() {
+      BddLogger.then("a national activity searches without any perimeter filter");
+      var candidate = StaffFixture.create().toModel();
+      var pageInfo = new PageInfo(0, 8, 1);
+      when(activityRepository.existsById(activityId)).thenReturn(true);
+      givenNationalActivity();
+      givenActivityAuthorization(authorizationOf(staff, EActivityRight.MANAGE_AUTHORIZATIONS));
+      givenSearchedEppns(List.of("candidate"), pageInfo, List.of(), List.of());
+      when(userPrincipalRepository.findAllByEppns(List.of("candidate")))
+          .thenReturn(Map.of("candidate", candidate.getUser()));
+      when(staffRepository.findAllById(anyList())).thenReturn(List.of(candidate));
+
+      var result = service.searchAuthorizationCandidates(activityId, KEYWORD, pageCriteria);
+
+      assertThat(result.content()).containsExactly(candidate);
+      assertThat(result.pageInfo()).isEqualTo(pageInfo);
+    }
+
+    @Test
+    void thenANationalDraftShouldSearchInAllInstitutionsAndGroups() {
+      BddLogger.then("a national draft searches without any perimeter filter");
+      var candidate = StaffFixture.create().toModel();
+      var pageInfo = new PageInfo(0, 8, 1);
+      when(activityDraftRepository.existsById(activityId)).thenReturn(true);
+      givenNationalActivityDraft();
+      givenDraftAuthorization(authorizationOf(staff, EActivityRight.MANAGE_AUTHORIZATIONS));
+      givenSearchedEppns(List.of("candidate"), pageInfo, List.of(), List.of());
+      when(userPrincipalRepository.findAllByEppns(List.of("candidate")))
+          .thenReturn(Map.of("candidate", candidate.getUser()));
+      when(staffRepository.findAllById(anyList())).thenReturn(List.of(candidate));
+
+      var result = service.searchDraftAuthorizationCandidates(activityId, KEYWORD, pageCriteria);
+
+      assertThat(result.content()).containsExactly(candidate);
+      assertThat(result.pageInfo()).isEqualTo(pageInfo);
+    }
+
+    @Test
     void thenNothingShouldBeResolvedWhenTheSearchFindsNoEppn() {
       BddLogger.then("an empty page should be returned without any account lookup");
       var pageInfo = new PageInfo(0, 8, 0);
       when(activityRepository.existsById(activityId)).thenReturn(true);
+      givenNationalActivity();
       givenActivityAuthorization(authorizationOf(staff, EActivityRight.MANAGE_AUTHORIZATIONS));
-      givenSearchedEppns(List.of(), pageInfo);
+      givenSearchedEppns(List.of(), pageInfo, List.of(), List.of());
 
       var result = service.searchAuthorizationCandidates(activityId, KEYWORD, pageCriteria);
 
@@ -424,13 +498,15 @@ class ActivityAuthorizationServiceImplTest {
     void thenItShouldThrowWhenTheLoggedInStaffHasNoEppn() {
       BddLogger.then("a UserNotAuthorizedException should be thrown");
       when(activityRepository.existsById(activityId)).thenReturn(true);
+      UUID inst = UUID.randomUUID();
+      givenTargetedActivity(List.of(inst), List.of());
       givenActivityAuthorization(authorizationOf(staff, EActivityRight.MANAGE_AUTHORIZATIONS));
       when(userPrincipalRepository.findEppnByUserId(staff.getId())).thenReturn(Optional.empty());
 
       assertThatThrownBy(
               () -> service.searchAuthorizationCandidates(activityId, KEYWORD, pageCriteria))
           .isInstanceOf(UserNotAuthorizedException.class);
-      verify(accessClient, never()).searchStaffEppns(any(), any(), any());
+      verify(accessClient, never()).searchStaffEppns(any(), anyList(), anyList(), any());
     }
 
     @Test
@@ -462,7 +538,7 @@ class ActivityAuthorizationServiceImplTest {
       assertThatThrownBy(
               () -> service.searchAuthorizationCandidates(activityId, KEYWORD, pageCriteria))
           .isInstanceOf(UserNotAuthorizedException.class);
-      verify(accessClient, never()).searchStaffEppns(any(), any(), any());
+      verify(accessClient, never()).searchStaffEppns(any(), anyList(), anyList(), any());
     }
 
     @Test
@@ -474,7 +550,7 @@ class ActivityAuthorizationServiceImplTest {
       assertThatThrownBy(
               () -> service.searchDraftAuthorizationCandidates(activityId, KEYWORD, pageCriteria))
           .isInstanceOf(UserNotAuthorizedException.class);
-      verify(accessClient, never()).searchStaffEppns(any(), any(), any());
+      verify(accessClient, never()).searchStaffEppns(any(), anyList(), anyList(), any());
     }
   }
 

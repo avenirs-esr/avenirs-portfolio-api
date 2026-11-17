@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.AvenirsSecurityHeaders;
 import fr.avenirsesr.portfolio.user.domain.port.output.client.AccessClient;
 import fr.avenirsesr.portfolio.user.domain.port.output.client.StudentAccessScope;
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -88,24 +89,37 @@ public class AccessClientImpl implements AccessClient {
 
   @Override
   public PagedResult<String> searchStaffEppns(
-      String eppn, String keyword, PageCriteria pageCriteria) {
+      String keyword, List<UUID> institutionIds, List<UUID> groupIds, PageCriteria pageCriteria) {
     try {
       log.debug(
-          "Searching staff reachable by eppn {} (keyword: {}) {} from back-office",
-          eppn,
+          "Searching staff reachable by (keyword: {},institutionIds{}, groupIds{}) {}"
+              + " from back-office",
           keyword,
+          institutionIds,
+          groupIds,
           pageCriteria);
+
+      UriComponentsBuilder builder =
+          UriComponentsBuilder.fromUriString(accessEndpoint + "/staff/search")
+              .queryParamIfPresent("keyword", Optional.ofNullable(keyword));
+
+      if (!institutionIds.isEmpty()) {
+        builder.queryParam("institutionIds", institutionIds);
+      }
+      if (!groupIds.isEmpty()) {
+        builder.queryParam("groupIds", groupIds);
+      }
+      URI uri =
+          builder
+              .queryParam("page", pageCriteria.page())
+              .queryParam("pageSize", pageCriteria.pageSize())
+              .build()
+              .toUri();
+
       StaffSearchResponse response =
           webClient
               .get()
-              .uri(
-                  UriComponentsBuilder.fromUriString(accessEndpoint + "/staff/search")
-                      .queryParam("eppn", eppn)
-                      .queryParamIfPresent("keyword", Optional.ofNullable(keyword))
-                      .queryParam("page", pageCriteria.page())
-                      .queryParam("pageSize", pageCriteria.pageSize())
-                      .build()
-                      .toUri())
+              .uri(uri)
               .header(AvenirsSecurityHeaders.API_KEY, apiKey)
               .retrieve()
               .bodyToMono(StaffSearchResponse.class)
@@ -120,10 +134,7 @@ public class AccessClientImpl implements AccessClient {
                   response.page().totalElements()));
     } catch (Exception e) {
       log.error(
-          "Failed to search staff for eppn {} at '{}'. Error: {}",
-          eppn,
-          accessEndpoint,
-          e.getMessage());
+          "Failed to search staff for eppn {} at '{}'. Error: {}", accessEndpoint, e.getMessage());
       log.debug("Full error details:", e);
       return emptySearch(pageCriteria);
     }

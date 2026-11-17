@@ -11,5 +11,6 @@ public interface AccessClient {
 
   StudentAccessScope getStudentScope(String eppn);
 
-  PagedResult<String> searchStaffEppns(String eppn, String keyword, PageCriteria pageCriteria);
+  PagedResult<String> searchStaffEppns(
+      String keyword, List<UUID> institutionIds, List<UUID> groupIds, PageCriteria pageCriteria);
 }
