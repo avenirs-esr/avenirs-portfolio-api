@@ -282,44 +282,47 @@ public class UserServiceImpl implements UserService {
 
   private User createUserFromExternalUser(String eppn) {
 <span class="fc" id="L284">    var externalUser =</span>
-<span class="fc" id="L285">        externalUserClient.getByEppn(eppn).orElseThrow(ExternalUserNotFoundException::new);</span>
+        externalUserClient
+<span class="fc" id="L286">            .getByEppn(eppn)</span>
+<span class="fc" id="L287">            .orElseThrow(</span>
+<span class="fc" id="L288">                () -&gt; new ExternalUserNotFoundException(eppn, EErrorCode.EXTERNAL_USER_NOT_FOUND));</span>
 
-<span class="fc bfc" id="L287" title="All 2 branches covered.">    if (externalUser.status() == EUserStatus.BLOCKED) {</span>
-<span class="fc" id="L288">      throw new ExternalUserNotFoundException(EErrorCode.EXTERNAL_USER_BLOCKED);</span>
+<span class="fc bfc" id="L290" title="All 2 branches covered.">    if (externalUser.status() == EUserStatus.BLOCKED) {</span>
+<span class="fc" id="L291">      throw new ExternalUserNotFoundException(eppn, EErrorCode.EXTERNAL_USER_BLOCKED);</span>
     }
 
-<span class="fc bfc" id="L291" title="All 2 branches covered.">    if (externalUser.status() == EUserStatus.REMOVED) {</span>
-<span class="fc" id="L292">      throw new ExternalUserNotFoundException(EErrorCode.EXTERNAL_USER_REMOVED);</span>
+<span class="fc bfc" id="L294" title="All 2 branches covered.">    if (externalUser.status() == EUserStatus.REMOVED) {</span>
+<span class="fc" id="L295">      throw new ExternalUserNotFoundException(eppn, EErrorCode.EXTERNAL_USER_REMOVED);</span>
     }
 
-<span class="fc" id="L295">    var user =</span>
-<span class="fc" id="L296">        createUser(</span>
-<span class="fc" id="L297">            UUID.randomUUID(),</span>
-<span class="fc" id="L298">            externalUser.firstName(),</span>
-<span class="fc" id="L299">            externalUser.lastName(),</span>
-<span class="fc" id="L300">            externalUser.email(),</span>
-<span class="fc" id="L301">            externalUser.eppn());</span>
+<span class="fc" id="L298">    var user =</span>
+<span class="fc" id="L299">        createUser(</span>
+<span class="fc" id="L300">            UUID.randomUUID(),</span>
+<span class="fc" id="L301">            externalUser.firstName(),</span>
+<span class="fc" id="L302">            externalUser.lastName(),</span>
+<span class="fc" id="L303">            externalUser.email(),</span>
+<span class="fc" id="L304">            externalUser.eppn());</span>
 
-<span class="fc" id="L303">    provisionCategoryRecord(user.getId(), externalUser);</span>
+<span class="fc" id="L306">    provisionCategoryRecord(user.getId(), externalUser);</span>
 
-<span class="fc" id="L305">    externalUserClient.activateByEppn(externalUser.eppn());</span>
+<span class="fc" id="L308">    externalUserClient.activateByEppn(externalUser.eppn());</span>
 
-<span class="fc" id="L307">    return user;</span>
+<span class="fc" id="L310">    return user;</span>
   }
 
   private void provisionCategoryRecord(UUID userId, ExternalUserDTO externalUser) {
-<span class="fc" id="L311">    externalUser</span>
-<span class="fc" id="L312">        .categories()</span>
-<span class="fc" id="L313">        .forEach(</span>
+<span class="fc" id="L314">    externalUser</span>
+<span class="fc" id="L315">        .categories()</span>
+<span class="fc" id="L316">        .forEach(</span>
             category -&gt; {
-<span class="pc bpc" id="L315" title="1 of 3 branches missed.">              switch (category) {</span>
-<span class="fc" id="L316">                case STUDENT -&gt; studentService.createStudent(userId, externalUser.email(), null);</span>
-<span class="fc" id="L317">                case STAFF -&gt; staffService.createStaff(userId, externalUser.email(), null);</span>
+<span class="pc bpc" id="L318" title="1 of 3 branches missed.">              switch (category) {</span>
+<span class="fc" id="L319">                case STUDENT -&gt; studentService.createStudent(userId, externalUser.email(), null);</span>
+<span class="fc" id="L320">                case STAFF -&gt; staffService.createStaff(userId, externalUser.email(), null);</span>
               }
-<span class="fc" id="L319">            });</span>
-<span class="fc" id="L320">  }</span>
+<span class="fc" id="L322">            });</span>
+<span class="fc" id="L323">  }</span>
 
   /** Carries the user and its unseen-notification flag out of the category switch. */
-<span class="fc" id="L323">  private record NotificationState(User user, boolean hasUnseenNotification) {}</span>
+<span class="fc" id="L326">  private record NotificationState(User user, boolean hasUnseenNotification) {}</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
