@@ -1068,6 +1068,38 @@ class SubActivityControllerIT extends ContainerConfigurationTest {
       deleteMainDraft();
     }
 
+    @Test
+    void thenThePeriodOfEachSubActivityShouldBeListedWithItsMainActivity() throws Exception {
+      BddLogger.given("a sub-activity with a period, followed by one without");
+      var datedSubActivityId = createPublishableSubActivity("Étape datée");
+      patchPeriod(datedSubActivityId, "2027-03-01", "2027-03-31").expectStatus().isOk();
+      createPublishableSubActivity("Étape sans période");
+
+      BddLogger.then("the content of the main draft should list the period of each sub-activity");
+      assertListedPeriods(
+          readJson(get(uri -> uri.path(CONTENT_PATH).build("DRAFT", mainDraftId), staffHeaders())));
+
+      BddLogger.when("publishing the main draft");
+      publish(mainDraftId).expectStatus().isOk();
+
+      BddLogger.then("the content and the presentation of the activity should list them too");
+      assertListedPeriods(
+          readJson(
+              get(uri -> uri.path(CONTENT_PATH).build("PUBLISHED", mainDraftId), staffHeaders())));
+      assertListedPeriods(
+          readJson(get(uri -> uri.path(PRESENTATION_PATH).build(mainDraftId), studentHeaders())));
+
+      BddLogger.and("so should the details of the declared activity of an enrolled student");
+      var declaredActivityId = subscribe(mainDraftId);
+      assertListedPeriods(
+          readJson(
+              get(
+                  uri ->
+                      uri.path("/me/activity-progress/{declaredActivityId}")
+                          .build(declaredActivityId),
+                  studentHeaders())));
+    }
+
     private void assertConfigured(JsonNode content) {
       assertThat(content.get("title").asText()).isEqualTo("Étape complétée");
       assertThat(content.get("description").asText()).contains("Consigne");
@@ -1077,6 +1109,15 @@ class SubActivityControllerIT extends ContainerConfigurationTest {
       assertThat(content.get("links").get(0).asText()).isEqualTo("https://example.com/ressource");
       assertThat(content.get("files")).hasSize(1);
       assertThat(content.get("rights")).isNotEmpty();
+    }
+
+    private void assertListedPeriods(JsonNode activity) {
+      var subActivities = activity.get("subActivities");
+      assertThat(subActivities).hasSize(2);
+      assertThat(subActivities.get(0).get("startDate").asText()).isEqualTo("2027-03-01");
+      assertThat(subActivities.get(0).get("endDate").asText()).isEqualTo("2027-03-31");
+      assertThat(subActivities.get(1).hasNonNull("startDate")).isFalse();
+      assertThat(subActivities.get(1).hasNonNull("endDate")).isFalse();
     }
 
     private WebTestClient.ResponseSpec patchPeriod(UUID draftId, String startDate, String endDate) {

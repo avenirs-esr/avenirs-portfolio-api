@@ -1,7 +1,9 @@
 package fr.avenirsesr.portfolio.staff.activity.application.adapter.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Schema(requiredProperties = {"id", "title", "publishable"})
-public record SubActivityOverviewDTO(UUID id, String title, boolean publishable) {}
+public record SubActivityOverviewDTO(
+    UUID id, String title, LocalDate startDate, LocalDate endDate, boolean publishable) {}

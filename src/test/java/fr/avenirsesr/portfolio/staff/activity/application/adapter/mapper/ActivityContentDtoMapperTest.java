@@ -15,6 +15,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityDraft;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StaffFixture;
+import java.time.LocalDate;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -168,7 +169,16 @@ class ActivityContentDtoMapperTest {
     BddLogger.given("a main activity with a sub-activity, and a sub-activity draft");
     Activity activity = ActivityFixture.create().toModel();
     UUID subActivityId = UUID.randomUUID();
-    var subActivities = List.of(new SubActivityOverviewData(subActivityId, "First step", true));
+    UUID datedSubActivityId = UUID.randomUUID();
+    var subActivities =
+        List.of(
+            new SubActivityOverviewData(subActivityId, "First step", null, null, true),
+            new SubActivityOverviewData(
+                datedSubActivityId,
+                "Dated step",
+                LocalDate.parse("2026-10-01"),
+                LocalDate.parse("2026-10-31"),
+                false));
     ActivityDraft subActivityDraft =
         ActivityDraft.create("First step", StaffFixture.create().toModel());
     subActivityDraft.attachAsSubActivity(activity.getId(), activity.getId());
@@ -180,9 +190,16 @@ class ActivityContentDtoMapperTest {
     ActivityContentDTO subActivityDto =
         mapper.toDTO(subActivityDraft, false, Set.of(), List.of(), List.of());
 
-    BddLogger.then("the main activity should list its sub-activities and the status given");
+    BddLogger.then("the main activity should list its sub-activities, their period and status");
     assertEquals(
-        List.of(new SubActivityOverviewDTO(subActivityId, "First step", true)),
+        List.of(
+            new SubActivityOverviewDTO(subActivityId, "First step", null, null, true),
+            new SubActivityOverviewDTO(
+                datedSubActivityId,
+                "Dated step",
+                LocalDate.parse("2026-10-01"),
+                LocalDate.parse("2026-10-31"),
+                false)),
         activityDto.subActivities());
     assertEquals(EActivityStatus.UNPUBLISHED, activityDto.activityStatus());
     assertNull(activityDto.mainActivityId());
