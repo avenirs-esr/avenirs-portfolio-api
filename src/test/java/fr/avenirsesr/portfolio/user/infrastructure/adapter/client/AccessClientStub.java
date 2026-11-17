@@ -6,10 +6,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.user.domain.port.output.client.AccessClient;
 import fr.avenirsesr.portfolio.user.domain.port.output.client.StudentAccessScope;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserPrincipalRepository;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
@@ -57,12 +54,21 @@ public class AccessClientStub implements AccessClient {
 
   @Override
   public PagedResult<String> searchStaffEppns(
-      String eppn, String keyword, PageCriteria pageCriteria) {
+      String keyword, List<UUID> institutionIds, List<UUID> groupIds, PageCriteria pageCriteria) {
+
     List<String> matching =
-        staffAffiliationsByEppn.keySet().stream()
+        staffAffiliationsByEppn.entrySet().stream()
             .filter(
                 candidate ->
-                    keyword == null || candidate.toLowerCase().contains(keyword.toLowerCase()))
+                    keyword == null
+                        || candidate.getKey().toLowerCase().contains(keyword.toLowerCase()))
+            .filter(
+                candidat ->
+                    ((institutionIds.isEmpty()
+                        || !Collections.disjoint(candidat.getValue().institutionIds, institutionIds)
+                            && (groupIds.isEmpty()
+                                || !Collections.disjoint(candidat.getValue().groupIds, groupIds)))))
+            .map(Map.Entry::getKey)
             .sorted()
             .toList();
     int from = Math.min(pageCriteria.page() * pageCriteria.pageSize(), matching.size());

@@ -26,7 +26,6 @@ class AccessClientImplTest {
   private static final UUID INSTITUTION_ID =
       UUID.fromString("6b1b1f8e-3f0a-4f4b-8f9e-6c9a0c0f1a11");
   private static final UUID GROUP_ID = UUID.fromString("4a1b1f8e-3f0a-4f4b-8f9e-6c9a0c0f1a33");
-
   private MockWebServer mockWebServer;
   private AccessClientImpl client;
 
@@ -132,7 +131,9 @@ class AccessClientImplTest {
             .addHeader("Content-Type", "application/json"));
 
     BddLogger.when("searching the staff eppns with a keyword");
-    PagedResult<String> result = client.searchStaffEppns(EPPN, "dupont", new PageCriteria(1, 2));
+    PagedResult<String> result =
+        client.searchStaffEppns(
+            "dupont", List.of(INSTITUTION_ID), List.of(GROUP_ID), new PageCriteria(1, 2));
 
     BddLogger.then("the eppns and the page are forwarded, with the search criteria sent");
     assertThat(result.content()).containsExactly("a@university.com", "c@university.com");
@@ -140,9 +141,13 @@ class AccessClientImplTest {
 
     RecordedRequest request = mockWebServer.takeRequest();
     assertThat(request.getMethod()).isEqualTo("GET");
+    assert request.getRequestUrl() != null;
     assertThat(request.getRequestUrl().encodedPath()).isEqualTo("/back-office/access/staff/search");
-    assertThat(request.getRequestUrl().queryParameter("eppn")).isEqualTo(EPPN);
     assertThat(request.getRequestUrl().queryParameter("keyword")).isEqualTo("dupont");
+    assertThat(request.getRequestUrl().queryParameterValues("institutionIds"))
+        .containsExactly(String.valueOf(INSTITUTION_ID));
+    assertThat(request.getRequestUrl().queryParameterValues("groupIds"))
+        .containsExactly(String.valueOf(GROUP_ID));
     assertThat(request.getRequestUrl().queryParameter("page")).isEqualTo("1");
     assertThat(request.getRequestUrl().queryParameter("pageSize")).isEqualTo("2");
     assertThat(request.getHeader(AvenirsSecurityHeaders.API_KEY)).isEqualTo("test-key");
@@ -157,7 +162,8 @@ class AccessClientImplTest {
             .addHeader("Content-Type", "application/json"));
 
     BddLogger.when("searching the staff eppns without keyword");
-    PagedResult<String> result = client.searchStaffEppns(EPPN, null, new PageCriteria(0, 8));
+    PagedResult<String> result =
+        client.searchStaffEppns(null, List.of(), List.of(), new PageCriteria(0, 8));
 
     BddLogger.then("the keyword is not part of the request");
     assertThat(result.content()).isEmpty();
@@ -170,7 +176,8 @@ class AccessClientImplTest {
     mockWebServer.enqueue(new MockResponse().setResponseCode(500));
 
     BddLogger.when("searching the staff eppns");
-    PagedResult<String> result = client.searchStaffEppns(EPPN, "dupont", new PageCriteria(2, 8));
+    PagedResult<String> result =
+        client.searchStaffEppns("dupont", List.of(), List.of(), new PageCriteria(2, 8));
 
     BddLogger.then("an empty page is returned and keeps the requested paging");
     assertThat(result.content()).isEmpty();
