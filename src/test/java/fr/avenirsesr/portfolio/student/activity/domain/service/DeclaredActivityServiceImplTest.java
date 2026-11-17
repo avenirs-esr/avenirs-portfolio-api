@@ -1468,8 +1468,8 @@ class DeclaredActivityServiceImplTest {
         DeclaredActivity.create(UUID.randomUUID(), student, activity, null, null, null, null, null);
     List<SubActivityOverviewData> subActivities =
         List.of(
-            new SubActivityOverviewData(UUID.randomUUID(), "Première étape", true),
-            new SubActivityOverviewData(UUID.randomUUID(), "Deuxième étape", true));
+            new SubActivityOverviewData(UUID.randomUUID(), "Première étape", null, null, true),
+            new SubActivityOverviewData(UUID.randomUUID(), "Deuxième étape", null, null, true));
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
@@ -1774,7 +1774,6 @@ class DeclaredActivityServiceImplTest {
     UUID declaredActivityId = UUID.randomUUID();
     var student = mock(Student.class);
     var declaredActivity = mock(DeclaredActivity.class);
-    UUID activityId = UUID.randomUUID();
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(declaredActivityRepository.findById(declaredActivityId))
         .thenReturn(Optional.of(declaredActivity));
@@ -1804,7 +1803,6 @@ class DeclaredActivityServiceImplTest {
     UUID declaredActivityId = UUID.randomUUID();
     var student = mock(Student.class);
     var declaredActivity = mock(DeclaredActivity.class);
-    UUID activityId = UUID.randomUUID();
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(declaredActivityRepository.findById(declaredActivityId))
         .thenReturn(Optional.of(declaredActivity));
@@ -1858,7 +1856,6 @@ class DeclaredActivityServiceImplTest {
     UUID declaredActivityId = UUID.randomUUID();
     var student = mock(Student.class);
     var declaredActivity = mock(DeclaredActivity.class);
-    UUID activityId = UUID.randomUUID();
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(declaredActivityRepository.findById(declaredActivityId))
@@ -1880,7 +1877,6 @@ class DeclaredActivityServiceImplTest {
     UUID declaredActivityId = UUID.randomUUID();
     var student = mock(Student.class);
     var declaredActivity = mock(DeclaredActivity.class);
-    UUID activityId = UUID.randomUUID();
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(declaredActivityRepository.findById(declaredActivityId))
         .thenReturn(Optional.of(declaredActivity));
@@ -1907,7 +1903,6 @@ class DeclaredActivityServiceImplTest {
     UUID declaredActivityId = UUID.randomUUID();
     var student = mock(Student.class);
     var declaredActivity = mock(DeclaredActivity.class);
-    UUID activityId = UUID.randomUUID();
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(declaredActivityRepository.findById(declaredActivityId))
         .thenReturn(Optional.of(declaredActivity));

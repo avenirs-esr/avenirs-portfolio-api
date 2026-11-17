@@ -548,7 +548,12 @@ public class ActivityServiceImpl implements ActivityService {
     return activityRepository.findAllSubActivitiesOf(activityId).stream()
         .map(
             subActivity ->
-                new SubActivityOverviewData(subActivity.getId(), subActivity.getTitle(), true))
+                new SubActivityOverviewData(
+                    subActivity.getId(),
+                    subActivity.getTitle(),
+                    subActivity.getStartDate().orElse(null),
+                    subActivity.getEndDate().orElse(null),
+                    true))
         .toList();
   }
 
@@ -558,7 +563,11 @@ public class ActivityServiceImpl implements ActivityService {
         .map(
             subActivity ->
                 new SubActivityOverviewData(
-                    subActivity.getId(), subActivity.getTitle(), isPublishable(subActivity)))
+                    subActivity.getId(),
+                    subActivity.getTitle(),
+                    subActivity.getStartDate().orElse(null),
+                    subActivity.getEndDate().orElse(null),
+                    isPublishable(subActivity)))
         .toList();
   }
 

@@ -486,14 +486,64 @@ class ActivityServiceImplSubActivityTest {
       BddLogger.then("the overviews should expose the id and the title of each sub-activity");
       assertEquals(
           List.of(
-              new SubActivityOverviewData(firstSubActivity.getId(), "First step", true),
-              new SubActivityOverviewData(secondSubActivity.getId(), "Second step", true)),
+              new SubActivityOverviewData(firstSubActivity.getId(), "First step", null, null, true),
+              new SubActivityOverviewData(
+                  secondSubActivity.getId(), "Second step", null, null, true)),
           activityService.getSubActivityOverviews(mainActivity.getId()));
       assertEquals(
           List.of(
-              new SubActivityOverviewData(firstSubActivityDraft.getId(), "First draft step", true),
               new SubActivityOverviewData(
-                  secondSubActivityDraft.getId(), "Second draft step", true)),
+                  firstSubActivityDraft.getId(), "First draft step", null, null, true),
+              new SubActivityOverviewData(
+                  secondSubActivityDraft.getId(), "Second draft step", null, null, true)),
+          activityService.getDraftSubActivityOverviews(mainDraft.getId()));
+    }
+
+    @Test
+    void thenTheSubActivityOverviewsShouldCarryThePeriodOfEachSubActivity() {
+      BddLogger.given("a dated sub-activity followed by one without period, published and draft");
+      var datedSubActivity =
+          Activity.createSubActivity(
+              UUID.randomUUID(),
+              staff,
+              mainActivity.getId(),
+              mainActivity.getId(),
+              "Dated step",
+              "<p>Consigne</p>",
+              null,
+              LocalDate.parse("2026-10-01"),
+              LocalDate.parse("2026-10-31"),
+              List.of(),
+              List.of());
+      firstSubActivityDraft.setStartDate(LocalDate.parse("2026-10-01"));
+      firstSubActivityDraft.setEndDate(LocalDate.parse("2026-10-31"));
+      when(activityRepository.findAllSubActivitiesOf(mainActivity.getId()))
+          .thenReturn(List.of(datedSubActivity, secondSubActivity));
+      when(activityDraftRepository.findAllSubActivitiesOf(mainDraft.getId()))
+          .thenReturn(List.of(firstSubActivityDraft, secondSubActivityDraft));
+
+      BddLogger.then("each overview should expose the period of its sub-activity, if any");
+      assertEquals(
+          List.of(
+              new SubActivityOverviewData(
+                  datedSubActivity.getId(),
+                  "Dated step",
+                  LocalDate.parse("2026-10-01"),
+                  LocalDate.parse("2026-10-31"),
+                  true),
+              new SubActivityOverviewData(
+                  secondSubActivity.getId(), "Second step", null, null, true)),
+          activityService.getSubActivityOverviews(mainActivity.getId()));
+      assertEquals(
+          List.of(
+              new SubActivityOverviewData(
+                  firstSubActivityDraft.getId(),
+                  "First draft step",
+                  LocalDate.parse("2026-10-01"),
+                  LocalDate.parse("2026-10-31"),
+                  true),
+              new SubActivityOverviewData(
+                  secondSubActivityDraft.getId(), "Second draft step", null, null, true)),
           activityService.getDraftSubActivityOverviews(mainDraft.getId()));
     }
 
@@ -507,8 +557,9 @@ class ActivityServiceImplSubActivityTest {
       BddLogger.then("each overview is publishable, regardless of its content");
       assertEquals(
           List.of(
-              new SubActivityOverviewData(firstSubActivity.getId(), "First step", true),
-              new SubActivityOverviewData(secondSubActivity.getId(), "Second step", true)),
+              new SubActivityOverviewData(firstSubActivity.getId(), "First step", null, null, true),
+              new SubActivityOverviewData(
+                  secondSubActivity.getId(), "Second step", null, null, true)),
           activityService.getSubActivityOverviews(mainActivity.getId()));
     }
 
@@ -523,8 +574,8 @@ class ActivityServiceImplSubActivityTest {
       BddLogger.then("each overview is marked publishable");
       assertEquals(
           List.of(
-              new SubActivityOverviewData(first.getId(), "First draft step", true),
-              new SubActivityOverviewData(second.getId(), "Second draft step", true)),
+              new SubActivityOverviewData(first.getId(), "First draft step", null, null, true),
+              new SubActivityOverviewData(second.getId(), "Second draft step", null, null, true)),
           activityService.getDraftSubActivityOverviews(mainDraft.getId()));
     }
 
@@ -540,8 +591,8 @@ class ActivityServiceImplSubActivityTest {
       BddLogger.then("each overview is marked not publishable");
       assertEquals(
           List.of(
-              new SubActivityOverviewData(first.getId(), "First draft step", false),
-              new SubActivityOverviewData(second.getId(), "Second draft step", false)),
+              new SubActivityOverviewData(first.getId(), "First draft step", null, null, false),
+              new SubActivityOverviewData(second.getId(), "Second draft step", null, null, false)),
           activityService.getDraftSubActivityOverviews(mainDraft.getId()));
     }
 
@@ -556,8 +607,10 @@ class ActivityServiceImplSubActivityTest {
       BddLogger.then("publishability is surfaced per sub-activity");
       assertEquals(
           List.of(
-              new SubActivityOverviewData(publishable.getId(), "First draft step", true),
-              new SubActivityOverviewData(notPublishable.getId(), "Second draft step", false)),
+              new SubActivityOverviewData(
+                  publishable.getId(), "First draft step", null, null, true),
+              new SubActivityOverviewData(
+                  notPublishable.getId(), "Second draft step", null, null, false)),
           activityService.getDraftSubActivityOverviews(mainDraft.getId()));
     }
 

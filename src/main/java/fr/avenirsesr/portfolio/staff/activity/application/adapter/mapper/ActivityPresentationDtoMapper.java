@@ -26,7 +26,11 @@ public interface ActivityPresentationDtoMapper {
             .map(
                 subActivity ->
                     new SubActivityOverviewDTO(
-                        subActivity.id(), subActivity.title(), subActivity.publishable()))
+                        subActivity.id(),
+                        subActivity.title(),
+                        subActivity.startDate(),
+                        subActivity.endDate(),
+                        subActivity.publishable()))
             .toList(),
         activityData.createdAt(),
         activityData.updatedAt());
