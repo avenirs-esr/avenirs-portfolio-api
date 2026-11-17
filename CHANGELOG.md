@@ -6,6 +6,25 @@ and [Conventional Commits](https://www.conventionalcommits.org/) standard.
 
 ---
 
+## [1.4.17] - 2026-11-17
+
+- **File registry moved to the common library**
+    - The domain model, the JPA entity, the repository and the three storage backends of the file
+      feature now come from `avenirs-portfolio-common`, which every service can embed to own its
+      files. The `/files` and `/storage` endpoints, the default profile and cover pictures and the
+      seeders stay in this service.
+    - The uploader of a file is held as a plain identifier: `file.uploaded_by` no longer references
+      the `user` table.
+    - File contents travel as streams. An upload hands the multipart part over, a download writes
+      the stream of the storage backend to the response with its length announced, and the zip of a
+      kit copies each media through instead of gathering it in memory.
+- **Update process**
+    - New property `file.registry.enabled=true`. Without it the service fails at startup with a
+      missing bean.
+    - The migration drops the foreign key `FKj9th1p06bn6hnlwbtafeowlch` on `file.uploaded_by` and
+      creates the index `idx_file_uploaded_by` in its place. The column keeps its name, its type and
+      its `NOT NULL` constraint.
+
 ## [1.4.16] - 2026-10-15
 
 - **Activity authorizations**
