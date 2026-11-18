@@ -10,8 +10,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-<span class="fc" id="L14">@Slf4j</span>
+<span class="fc" id="L15">@Slf4j</span>
 @Component
 public class SkillCatalogClientImpl implements SkillCatalogClient {
 
@@ -23,30 +24,33 @@ public class SkillCatalogClientImpl implements SkillCatalogClient {
   @Value(&quot;${avenirs.interoperability.skill-catalog.endpoint}&quot;)
   private String skillCatalogEndpoint;
 
-<span class="fc" id="L26">  public SkillCatalogClientImpl(@Qualifier(&quot;skillCatalogWebClient&quot;) WebClient webClient) {</span>
-<span class="fc" id="L27">    this.webClient = webClient;</span>
-<span class="fc" id="L28">  }</span>
+<span class="fc" id="L27">  public SkillCatalogClientImpl(@Qualifier(&quot;skillCatalogWebClient&quot;) WebClient webClient) {</span>
+<span class="fc" id="L28">    this.webClient = webClient;</span>
+<span class="fc" id="L29">  }</span>
 
   @Override
   public Optional&lt;SkillCatalogDTO&gt; fetchNationalCatalog(ESkillReferentialType type) {
     try {
-<span class="nc" id="L33">      log.info(&quot;Fetching the {} skill catalog from interoperability&quot;, type);</span>
-<span class="nc" id="L34">      return Optional.ofNullable(</span>
+<span class="nc" id="L34">      log.info(&quot;Fetching the {} skill catalog from interoperability&quot;, type);</span>
+<span class="nc" id="L35">      return Optional.ofNullable(</span>
           webClient
-<span class="nc" id="L36">              .get()</span>
-<span class="nc" id="L37">              .uri(skillCatalogEndpoint + &quot;/&quot; + type.name())</span>
-<span class="nc" id="L38">              .header(AvenirsSecurityHeaders.API_KEY, apiKey)</span>
-<span class="nc" id="L39">              .retrieve()</span>
-<span class="nc" id="L40">              .bodyToMono(SkillCatalogDTO.class)</span>
-<span class="nc" id="L41">              .block());</span>
-<span class="nc" id="L42">    } catch (Exception e) {</span>
-<span class="nc" id="L43">      log.error(</span>
+<span class="nc" id="L37">              .get()</span>
+<span class="nc" id="L38">              .uri(skillCatalogEndpoint + &quot;/&quot; + type.name())</span>
+<span class="nc" id="L39">              .header(AvenirsSecurityHeaders.API_KEY, apiKey)</span>
+<span class="nc" id="L40">              .retrieve()</span>
+<span class="nc" id="L41">              .bodyToMono(SkillCatalogDTO.class)</span>
+<span class="nc" id="L42">              .block());</span>
+<span class="nc" id="L43">    } catch (WebClientResponseException.ServiceUnavailable e) {</span>
+<span class="nc" id="L44">      log.warn(&quot;The {} skill catalog is not ready yet on interoperability (503)&quot;, type);</span>
+<span class="nc" id="L45">      return Optional.empty();</span>
+<span class="nc" id="L46">    } catch (Exception e) {</span>
+<span class="nc" id="L47">      log.error(</span>
           &quot;Failed to fetch the {} skill catalog from interoperability at '{}'. Error: {}&quot;,
           type,
           skillCatalogEndpoint,
-<span class="nc" id="L47">          e.getMessage());</span>
-<span class="nc" id="L48">      log.debug(&quot;Full error details:&quot;, e);</span>
-<span class="nc" id="L49">      return Optional.empty();</span>
+<span class="nc" id="L51">          e.getMessage());</span>
+<span class="nc" id="L52">      log.debug(&quot;Full error details:&quot;, e);</span>
+<span class="nc" id="L53">      return Optional.empty();</span>
     }
   }
 }

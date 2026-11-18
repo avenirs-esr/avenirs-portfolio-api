@@ -71,6 +71,7 @@ import org.springframework.stereotype.Repository;
           a.updated_at AS updated_at
       FROM activity a
       WHERE a.status = 'PUBLISHED'
+        AND a.main_activity_id IS NULL
         AND
       &quot;&quot;&quot;
           + ANY_RIGHT_ON_ACTIVITY;
@@ -85,6 +86,7 @@ import org.springframework.stereotype.Repository;
           a.updated_at AS updated_at
       FROM activity a
       WHERE a.status = 'UNPUBLISHED'
+        AND a.main_activity_id IS NULL
         AND
       &quot;&quot;&quot;
           + MANAGEMENT_RIGHT_ON_ACTIVITY;
@@ -98,7 +100,8 @@ import org.springframework.stereotype.Repository;
           'DRAFT'      AS status,
           d.updated_at AS updated_at
       FROM activity_draft d
-      WHERE
+      WHERE d.main_activity_id IS NULL
+        AND
       &quot;&quot;&quot;
           + MANAGEMENT_RIGHT_ON_DRAFT;
 
@@ -109,87 +112,87 @@ import org.springframework.stereotype.Repository;
       Staff staff, EActivityStatus activityStatus, PageCriteria pageCriteria) {
 
     String unified =
-<span class="fc bfc" id="L112" title="All 4 branches covered.">        switch (activityStatus) {</span>
-<span class="fc" id="L113">          case PUBLISHED -&gt; PUBLISHED_SELECT;</span>
-<span class="fc" id="L114">          case UNPUBLISHED -&gt; UNPUBLISHED_SELECT;</span>
-<span class="fc" id="L115">          case DRAFT -&gt; DRAFT_SELECT;</span>
+<span class="fc bfc" id="L115" title="All 4 branches covered.">        switch (activityStatus) {</span>
+<span class="fc" id="L116">          case PUBLISHED -&gt; PUBLISHED_SELECT;</span>
+<span class="fc" id="L117">          case UNPUBLISHED -&gt; UNPUBLISHED_SELECT;</span>
+<span class="fc" id="L118">          case DRAFT -&gt; DRAFT_SELECT;</span>
           case null -&gt;
-<span class="fc" id="L117">              String.join(&quot; UNION ALL &quot;, PUBLISHED_SELECT, UNPUBLISHED_SELECT, DRAFT_SELECT);</span>
-<span class="fc" id="L118">        };</span>
+<span class="fc" id="L120">              String.join(&quot; UNION ALL &quot;, PUBLISHED_SELECT, UNPUBLISHED_SELECT, DRAFT_SELECT);</span>
+<span class="fc" id="L121">        };</span>
 
-<span class="fc" id="L120">    String dataSql = &quot;SELECT * FROM (&quot; + unified + &quot;) AS unified ORDER BY updated_at DESC&quot;;</span>
-<span class="fc" id="L121">    String countSql = &quot;SELECT COUNT(*) FROM (&quot; + unified + &quot;) AS total&quot;;</span>
+<span class="fc" id="L123">    String dataSql = &quot;SELECT * FROM (&quot; + unified + &quot;) AS unified ORDER BY updated_at DESC&quot;;</span>
+<span class="fc" id="L124">    String countSql = &quot;SELECT COUNT(*) FROM (&quot; + unified + &quot;) AS total&quot;;</span>
 
-<span class="fc" id="L123">    Query dataQuery =</span>
-<span class="fc" id="L124">        bindParameters(em.createNativeQuery(dataSql), staff, activityStatus)</span>
-<span class="fc" id="L125">            .setFirstResult(pageCriteria.page() * pageCriteria.pageSize())</span>
-<span class="fc" id="L126">            .setMaxResults(pageCriteria.pageSize());</span>
-<span class="fc" id="L127">    Query countQuery = bindParameters(em.createNativeQuery(countSql), staff, activityStatus);</span>
+<span class="fc" id="L126">    Query dataQuery =</span>
+<span class="fc" id="L127">        bindParameters(em.createNativeQuery(dataSql), staff, activityStatus)</span>
+<span class="fc" id="L128">            .setFirstResult(pageCriteria.page() * pageCriteria.pageSize())</span>
+<span class="fc" id="L129">            .setMaxResults(pageCriteria.pageSize());</span>
+<span class="fc" id="L130">    Query countQuery = bindParameters(em.createNativeQuery(countSql), staff, activityStatus);</span>
 
-<span class="fc" id="L129">    List&lt;Object[]&gt; rows = dataQuery.getResultList();</span>
-<span class="fc" id="L130">    long total = ((Number) countQuery.getSingleResult()).longValue();</span>
+<span class="fc" id="L132">    List&lt;Object[]&gt; rows = dataQuery.getResultList();</span>
+<span class="fc" id="L133">    long total = ((Number) countQuery.getSingleResult()).longValue();</span>
 
-<span class="fc" id="L132">    List&lt;ActivityStaffOverviewData&gt; content = rows.stream().map(this::mapRow).toList();</span>
+<span class="fc" id="L135">    List&lt;ActivityStaffOverviewData&gt; content = rows.stream().map(this::mapRow).toList();</span>
 
-<span class="fc" id="L134">    return new PagedResult&lt;&gt;(</span>
-<span class="fc" id="L135">        content, new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), total));</span>
+<span class="fc" id="L137">    return new PagedResult&lt;&gt;(</span>
+<span class="fc" id="L138">        content, new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), total));</span>
   }
 
   private Query bindParameters(Query query, Staff staff, EActivityStatus activityStatus) {
-<span class="fc" id="L139">    query.setParameter(&quot;staffId&quot;, staff.getId());</span>
-<span class="fc bfc" id="L140" title="All 2 branches covered.">    if (activityStatus != EActivityStatus.PUBLISHED) {</span>
-<span class="fc" id="L141">      query.setParameter(</span>
-<span class="fc" id="L142">          &quot;managementRights&quot;, EActivityRight.MANAGEMENT_RIGHTS.stream().map(Enum::name).toList());</span>
+<span class="fc" id="L142">    query.setParameter(&quot;staffId&quot;, staff.getId());</span>
+<span class="fc bfc" id="L143" title="All 2 branches covered.">    if (activityStatus != EActivityStatus.PUBLISHED) {</span>
+<span class="fc" id="L144">      query.setParameter(</span>
+<span class="fc" id="L145">          &quot;managementRights&quot;, EActivityRight.MANAGEMENT_RIGHTS.stream().map(Enum::name).toList());</span>
     }
-<span class="fc" id="L144">    return query;</span>
+<span class="fc" id="L147">    return query;</span>
   }
 
   private ActivityStaffOverviewData mapRow(Object[] row) {
-<span class="fc" id="L148">    String thematic = toNullableString(row[2]);</span>
-<span class="fc" id="L149">    return new ActivityStaffOverviewData(</span>
-<span class="fc" id="L150">        toUUID(row[0]),</span>
-<span class="fc" id="L151">        toString(row[1]),</span>
-<span class="fc bfc" id="L152" title="All 2 branches covered.">        thematic == null ? null : EActivityThematic.valueOf(thematic),</span>
-<span class="fc" id="L153">        List.of(),</span>
-<span class="fc" id="L154">        EActivityStatus.valueOf(toString(row[3])),</span>
-<span class="fc" id="L155">        toInstant(row[4]));</span>
+<span class="fc" id="L151">    String thematic = toNullableString(row[2]);</span>
+<span class="fc" id="L152">    return new ActivityStaffOverviewData(</span>
+<span class="fc" id="L153">        toUUID(row[0]),</span>
+<span class="fc" id="L154">        toString(row[1]),</span>
+<span class="fc bfc" id="L155" title="All 2 branches covered.">        thematic == null ? null : EActivityThematic.valueOf(thematic),</span>
+<span class="fc" id="L156">        List.of(),</span>
+<span class="fc" id="L157">        EActivityStatus.valueOf(toString(row[3])),</span>
+<span class="fc" id="L158">        toInstant(row[4]));</span>
   }
 
   private String toString(Object value) {
-<span class="pc bpc" id="L159" title="2 of 3 branches missed.">    return switch (value) {</span>
-<span class="fc" id="L160">      case String s -&gt; s;</span>
-<span class="nc" id="L161">      case byte[] b -&gt; new String(b, StandardCharsets.UTF_8);</span>
+<span class="pc bpc" id="L162" title="2 of 3 branches missed.">    return switch (value) {</span>
+<span class="fc" id="L163">      case String s -&gt; s;</span>
+<span class="nc" id="L164">      case byte[] b -&gt; new String(b, StandardCharsets.UTF_8);</span>
       default -&gt;
-<span class="nc" id="L163">          throw new IllegalArgumentException(&quot;Type inattendu pour String : &quot; + value.getClass());</span>
+<span class="nc" id="L166">          throw new IllegalArgumentException(&quot;Type inattendu pour String : &quot; + value.getClass());</span>
     };
   }
 
   private String toNullableString(Object value) {
-<span class="fc bfc" id="L168" title="All 2 branches covered.">    return value == null ? null : toString(value);</span>
+<span class="fc bfc" id="L171" title="All 2 branches covered.">    return value == null ? null : toString(value);</span>
   }
 
   private UUID toUUID(Object value) {
-<span class="pc bpc" id="L172" title="3 of 4 branches missed.">    return switch (value) {</span>
-<span class="nc" id="L173">      case UUID u -&gt; u;</span>
-<span class="nc" id="L174">      case String s -&gt; UUID.fromString(s);</span>
-<span class="fc" id="L175">      case byte[] b -&gt; {</span>
-<span class="fc" id="L176">        ByteBuffer bb = ByteBuffer.wrap(b);</span>
-<span class="fc" id="L177">        yield new UUID(bb.getLong(), bb.getLong());</span>
+<span class="pc bpc" id="L175" title="3 of 4 branches missed.">    return switch (value) {</span>
+<span class="nc" id="L176">      case UUID u -&gt; u;</span>
+<span class="nc" id="L177">      case String s -&gt; UUID.fromString(s);</span>
+<span class="fc" id="L178">      case byte[] b -&gt; {</span>
+<span class="fc" id="L179">        ByteBuffer bb = ByteBuffer.wrap(b);</span>
+<span class="fc" id="L180">        yield new UUID(bb.getLong(), bb.getLong());</span>
       }
       default -&gt;
-<span class="nc" id="L180">          throw new IllegalArgumentException(&quot;Type inattendu pour UUID : &quot; + value.getClass());</span>
+<span class="nc" id="L183">          throw new IllegalArgumentException(&quot;Type inattendu pour UUID : &quot; + value.getClass());</span>
     };
   }
 
   private Instant toInstant(Object value) {
-<span class="pc bpc" id="L185" title="5 of 6 branches missed.">    return switch (value) {</span>
-<span class="nc" id="L186">      case Instant i -&gt; i;</span>
-<span class="nc" id="L187">      case Timestamp ts -&gt; ts.getTimestamp().toInstant();</span>
-<span class="fc" id="L188">      case OffsetDateTime odt -&gt; odt.toInstant();</span>
-<span class="nc" id="L189">      case LocalDateTime ldt -&gt; ldt.toInstant(ZoneOffset.UTC);</span>
-<span class="nc" id="L190">      case byte[] b -&gt; Instant.parse(new String(b, StandardCharsets.UTF_8));</span>
+<span class="pc bpc" id="L188" title="5 of 6 branches missed.">    return switch (value) {</span>
+<span class="nc" id="L189">      case Instant i -&gt; i;</span>
+<span class="nc" id="L190">      case Timestamp ts -&gt; ts.getTimestamp().toInstant();</span>
+<span class="fc" id="L191">      case OffsetDateTime odt -&gt; odt.toInstant();</span>
+<span class="nc" id="L192">      case LocalDateTime ldt -&gt; ldt.toInstant(ZoneOffset.UTC);</span>
+<span class="nc" id="L193">      case byte[] b -&gt; Instant.parse(new String(b, StandardCharsets.UTF_8));</span>
       default -&gt;
-<span class="nc" id="L192">          throw new IllegalArgumentException(&quot;Type inattendu pour Instant : &quot; + value.getClass());</span>
+<span class="nc" id="L195">          throw new IllegalArgumentException(&quot;Type inattendu pour Instant : &quot; + value.getClass());</span>
     };
   }
 }

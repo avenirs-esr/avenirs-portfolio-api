@@ -144,7 +144,8 @@ public class ActivityAuthorizationDatabaseRepository
   private static Specification&lt;ActivityEntity&gt; visibleToStaff(
       UUID staffId, Collection&lt;UUID&gt; institutionIds) {
 <span class="fc" id="L146">    return ActivitySpecification.withAuthorizationOfStaff(staffId)</span>
-<span class="fc" id="L147">        .and(ActivitySpecification.targetingAnyInstitution(institutionIds));</span>
+<span class="fc" id="L147">        .and(ActivitySpecification.isMainActivity())</span>
+<span class="fc" id="L148">        .and(ActivitySpecification.targetingAnyInstitution(institutionIds));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
