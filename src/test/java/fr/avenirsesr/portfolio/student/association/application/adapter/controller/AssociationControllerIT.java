@@ -19,6 +19,9 @@ import fr.avenirsesr.portfolio.student.association.domain.data.AssociationData;
 import fr.avenirsesr.portfolio.student.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.student.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.client.TraceConfigurationClient;
+import jakarta.persistence.EntityManager;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -80,6 +83,7 @@ class AssociationControllerIT extends ContainerConfigurationTest {
   @Autowired private ObjectMapper objectMapper;
   @Autowired private SkillRepository skillRepository;
   @Autowired private AssociationService associationService;
+  @Autowired private EntityManager entityManager;
 
   @Value("${user.student.payload}")
   private String studentPayload;
@@ -2243,6 +2247,17 @@ class AssociationControllerIT extends ContainerConfigurationTest {
         "No assessable skill available for the logged-in student in the seeded catalog");
   }
 
+  private void makeAssociationsOlder(UUID associatedId) {
+    entityManager.flush();
+    entityManager
+        .createQuery(
+            "update AssociationEntity a set a.createdAt = :createdAt"
+                + " where a.id1 = :id or a.id2 = :id")
+        .setParameter("createdAt", Instant.now().minus(1, ChronoUnit.DAYS))
+        .setParameter("id", associatedId)
+        .executeUpdate();
+  }
+
   private UUID createDeclaredExperience(
       String title, String experienceType, String startDate, String endDate) throws Exception {
     var body = new java.util.HashMap<String, Object>();
@@ -2795,6 +2810,7 @@ class AssociationControllerIT extends ContainerConfigurationTest {
                 personalExperienceId,
                 skillProgressId,
                 EAssociationType.DECLARED_EXPERIENCE_DECLARED_SKILL)));
+    makeAssociationsOlder(professionalExperienceId);
 
     // The skill progress, the experiences and the associations above are created on the
     // test thread's transaction; committing it here makes them visible to the embedded server's
