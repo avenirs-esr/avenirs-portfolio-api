@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.AvenirsSecurityHeaders;
 import fr.avenirsesr.portfolio.user.domain.port.output.client.AccessClient;
 import fr.avenirsesr.portfolio.user.domain.port.output.client.StudentAccessScope;
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -15,7 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
-<span class="fc" id="L18">@Slf4j</span>
+<span class="fc" id="L19">@Slf4j</span>
 @Component
 public class AccessClientImpl implements AccessClient {
 
@@ -27,123 +28,140 @@ public class AccessClientImpl implements AccessClient {
   @Value(&quot;${avenirs.back-office.access.endpoint}&quot;)
   private String accessEndpoint;
 
-<span class="fc" id="L30">  public AccessClientImpl(WebClient webClient) {</span>
-<span class="fc" id="L31">    this.webClient = webClient;</span>
-<span class="fc" id="L32">  }</span>
+<span class="fc" id="L31">  public AccessClientImpl(WebClient webClient) {</span>
+<span class="fc" id="L32">    this.webClient = webClient;</span>
+<span class="fc" id="L33">  }</span>
 
   @Override
   public boolean staffHasAccess(
       String eppn, List&lt;UUID&gt; targetInstitutionIds, List&lt;UUID&gt; targetGroupIds) {
     try {
-<span class="fc" id="L38">      log.debug(</span>
+<span class="fc" id="L39">      log.debug(</span>
           &quot;Checking staff access for eppn {} to institutions {} / groups {} against back-office&quot;,
           eppn,
           targetInstitutionIds,
           targetGroupIds);
-<span class="fc" id="L43">      return webClient</span>
-<span class="fc" id="L44">          .post()</span>
-<span class="fc" id="L45">          .uri(accessEndpoint + &quot;/staff/check&quot;)</span>
-<span class="fc" id="L46">          .header(AvenirsSecurityHeaders.API_KEY, apiKey)</span>
-<span class="fc" id="L47">          .bodyValue(new StaffAccessCheckRequest(eppn, targetInstitutionIds, targetGroupIds))</span>
-<span class="fc" id="L48">          .retrieve()</span>
-<span class="fc" id="L49">          .bodyToMono(Boolean.class)</span>
-<span class="fc" id="L50">          .defaultIfEmpty(false)</span>
-<span class="fc" id="L51">          .block();</span>
-<span class="fc" id="L52">    } catch (Exception e) {</span>
-<span class="fc" id="L53">      log.error(</span>
+<span class="fc" id="L44">      return webClient</span>
+<span class="fc" id="L45">          .post()</span>
+<span class="fc" id="L46">          .uri(accessEndpoint + &quot;/staff/check&quot;)</span>
+<span class="fc" id="L47">          .header(AvenirsSecurityHeaders.API_KEY, apiKey)</span>
+<span class="fc" id="L48">          .bodyValue(new StaffAccessCheckRequest(eppn, targetInstitutionIds, targetGroupIds))</span>
+<span class="fc" id="L49">          .retrieve()</span>
+<span class="fc" id="L50">          .bodyToMono(Boolean.class)</span>
+<span class="fc" id="L51">          .defaultIfEmpty(false)</span>
+<span class="fc" id="L52">          .block();</span>
+<span class="fc" id="L53">    } catch (Exception e) {</span>
+<span class="fc" id="L54">      log.error(</span>
           &quot;Failed to check staff access for eppn {} at '{}'. Error: {}&quot;,
           eppn,
           accessEndpoint,
-<span class="fc" id="L57">          e.getMessage());</span>
-<span class="fc" id="L58">      log.debug(&quot;Full error details:&quot;, e);</span>
-<span class="fc" id="L59">      return false;</span>
+<span class="fc" id="L58">          e.getMessage());</span>
+<span class="fc" id="L59">      log.debug(&quot;Full error details:&quot;, e);</span>
+<span class="fc" id="L60">      return false;</span>
     }
   }
 
   @Override
   public StudentAccessScope getStudentScope(String eppn) {
     try {
-<span class="fc" id="L66">      log.debug(&quot;Resolving student scope for eppn {} from back-office&quot;, eppn);</span>
-<span class="fc" id="L67">      StudentScopeResponse response =</span>
+<span class="fc" id="L67">      log.debug(&quot;Resolving student scope for eppn {} from back-office&quot;, eppn);</span>
+<span class="fc" id="L68">      StudentScopeResponse response =</span>
           webClient
-<span class="fc" id="L69">              .get()</span>
-<span class="fc" id="L70">              .uri(accessEndpoint + &quot;/student/&quot; + eppn + &quot;/scope&quot;)</span>
-<span class="fc" id="L71">              .header(AvenirsSecurityHeaders.API_KEY, apiKey)</span>
-<span class="fc" id="L72">              .retrieve()</span>
-<span class="fc" id="L73">              .bodyToMono(StudentScopeResponse.class)</span>
-<span class="fc" id="L74">              .block();</span>
-<span class="pc bpc" id="L75" title="1 of 2 branches missed.">      return response == null</span>
-<span class="nc" id="L76">          ? StudentAccessScope.empty()</span>
-<span class="fc" id="L77">          : new StudentAccessScope(response.institutionIds(), response.groupIds());</span>
-<span class="fc" id="L78">    } catch (Exception e) {</span>
-<span class="fc" id="L79">      log.error(</span>
+<span class="fc" id="L70">              .get()</span>
+<span class="fc" id="L71">              .uri(accessEndpoint + &quot;/student/&quot; + eppn + &quot;/scope&quot;)</span>
+<span class="fc" id="L72">              .header(AvenirsSecurityHeaders.API_KEY, apiKey)</span>
+<span class="fc" id="L73">              .retrieve()</span>
+<span class="fc" id="L74">              .bodyToMono(StudentScopeResponse.class)</span>
+<span class="fc" id="L75">              .block();</span>
+<span class="pc bpc" id="L76" title="1 of 2 branches missed.">      return response == null</span>
+<span class="nc" id="L77">          ? StudentAccessScope.empty()</span>
+<span class="fc" id="L78">          : new StudentAccessScope(response.institutionIds(), response.groupIds());</span>
+<span class="fc" id="L79">    } catch (Exception e) {</span>
+<span class="fc" id="L80">      log.error(</span>
           &quot;Failed to resolve student scope for eppn {} at '{}'. Error: {}&quot;,
           eppn,
           accessEndpoint,
-<span class="fc" id="L83">          e.getMessage());</span>
-<span class="fc" id="L84">      log.debug(&quot;Full error details:&quot;, e);</span>
-<span class="fc" id="L85">      return StudentAccessScope.empty();</span>
+<span class="fc" id="L84">          e.getMessage());</span>
+<span class="fc" id="L85">      log.debug(&quot;Full error details:&quot;, e);</span>
+<span class="fc" id="L86">      return StudentAccessScope.empty();</span>
     }
   }
 
   @Override
   public PagedResult&lt;String&gt; searchStaffEppns(
-      String eppn, String keyword, boolean national, PageCriteria pageCriteria) {
+      String eppn,
+      String keyword,
+      boolean national,
+      List&lt;UUID&gt; institutionIds,
+      List&lt;UUID&gt; groupIds,
+      PageCriteria pageCriteria) {
     try {
-<span class="fc" id="L93">      log.debug(</span>
+<span class="fc" id="L99">      log.debug(</span>
           &quot;Searching staff reachable by eppn {} (keyword: {}) {} from back-office&quot;,
           eppn,
           keyword,
           pageCriteria);
-<span class="fc" id="L98">      StaffSearchResponse response =</span>
+
+<span class="fc" id="L105">      UriComponentsBuilder builder =</span>
+<span class="fc" id="L106">          UriComponentsBuilder.fromUriString(accessEndpoint + &quot;/staff/search&quot;)</span>
+<span class="fc" id="L107">              .queryParam(&quot;eppn&quot;, eppn)</span>
+<span class="fc" id="L108">              .queryParamIfPresent(&quot;keyword&quot;, Optional.ofNullable(keyword))</span>
+<span class="fc" id="L109">              .queryParam(&quot;national&quot;, national);</span>
+
+<span class="fc bfc" id="L111" title="All 2 branches covered.">      if (!institutionIds.isEmpty()) {</span>
+<span class="fc" id="L112">        builder.queryParam(&quot;institutionIds&quot;, institutionIds);</span>
+      }
+<span class="fc bfc" id="L114" title="All 2 branches covered.">      if (!groupIds.isEmpty()) {</span>
+<span class="fc" id="L115">        builder.queryParam(&quot;groupIds&quot;, groupIds);</span>
+      }
+<span class="fc" id="L117">      URI uri =</span>
+          builder
+<span class="fc" id="L119">              .queryParam(&quot;page&quot;, pageCriteria.page())</span>
+<span class="fc" id="L120">              .queryParam(&quot;pageSize&quot;, pageCriteria.pageSize())</span>
+<span class="fc" id="L121">              .build()</span>
+<span class="fc" id="L122">              .toUri();</span>
+
+<span class="fc" id="L124">      StaffSearchResponse response =</span>
           webClient
-<span class="fc" id="L100">              .get()</span>
-<span class="fc" id="L101">              .uri(</span>
-<span class="fc" id="L102">                  UriComponentsBuilder.fromUriString(accessEndpoint + &quot;/staff/search&quot;)</span>
-<span class="fc" id="L103">                      .queryParam(&quot;eppn&quot;, eppn)</span>
-<span class="fc" id="L104">                      .queryParamIfPresent(&quot;keyword&quot;, Optional.ofNullable(keyword))</span>
-<span class="fc" id="L105">                      .queryParam(&quot;national&quot;, national)</span>
-<span class="fc" id="L106">                      .queryParam(&quot;page&quot;, pageCriteria.page())</span>
-<span class="fc" id="L107">                      .queryParam(&quot;pageSize&quot;, pageCriteria.pageSize())</span>
-<span class="fc" id="L108">                      .build()</span>
-<span class="fc" id="L109">                      .toUri())</span>
-<span class="fc" id="L110">              .header(AvenirsSecurityHeaders.API_KEY, apiKey)</span>
-<span class="fc" id="L111">              .retrieve()</span>
-<span class="fc" id="L112">              .bodyToMono(StaffSearchResponse.class)</span>
-<span class="fc" id="L113">              .block();</span>
-<span class="pc bpc" id="L114" title="1 of 2 branches missed.">      return response == null</span>
-<span class="nc" id="L115">          ? emptySearch(pageCriteria)</span>
-<span class="fc" id="L116">          : new PagedResult&lt;&gt;(</span>
-<span class="fc" id="L117">              response.data().stream().map(StaffSearchItemResponse::eppn).toList(),</span>
+<span class="fc" id="L126">              .get()</span>
+<span class="fc" id="L127">              .uri(uri)</span>
+<span class="fc" id="L128">              .header(AvenirsSecurityHeaders.API_KEY, apiKey)</span>
+<span class="fc" id="L129">              .retrieve()</span>
+<span class="fc" id="L130">              .bodyToMono(StaffSearchResponse.class)</span>
+<span class="fc" id="L131">              .block();</span>
+<span class="pc bpc" id="L132" title="1 of 2 branches missed.">      return response == null</span>
+<span class="nc" id="L133">          ? emptySearch(pageCriteria)</span>
+<span class="fc" id="L134">          : new PagedResult&lt;&gt;(</span>
+<span class="fc" id="L135">              response.data().stream().map(StaffSearchItemResponse::eppn).toList(),</span>
               new PageInfo(
-<span class="fc" id="L119">                  response.page().page(),</span>
-<span class="fc" id="L120">                  response.page().pageSize(),</span>
-<span class="fc" id="L121">                  response.page().totalElements()));</span>
-<span class="fc" id="L122">    } catch (Exception e) {</span>
-<span class="fc" id="L123">      log.error(</span>
+<span class="fc" id="L137">                  response.page().page(),</span>
+<span class="fc" id="L138">                  response.page().pageSize(),</span>
+<span class="fc" id="L139">                  response.page().totalElements()));</span>
+<span class="fc" id="L140">    } catch (Exception e) {</span>
+<span class="fc" id="L141">      log.error(</span>
           &quot;Failed to search staff for eppn {} at '{}'. Error: {}&quot;,
           eppn,
           accessEndpoint,
-<span class="fc" id="L127">          e.getMessage());</span>
-<span class="fc" id="L128">      log.debug(&quot;Full error details:&quot;, e);</span>
-<span class="fc" id="L129">      return emptySearch(pageCriteria);</span>
+<span class="fc" id="L145">          e.getMessage());</span>
+<span class="fc" id="L146">      log.debug(&quot;Full error details:&quot;, e);</span>
+<span class="fc" id="L147">      return emptySearch(pageCriteria);</span>
     }
   }
 
   private static PagedResult&lt;String&gt; emptySearch(PageCriteria pageCriteria) {
-<span class="fc" id="L134">    return new PagedResult&lt;&gt;(</span>
-<span class="fc" id="L135">        List.of(), new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), 0));</span>
+<span class="fc" id="L152">    return new PagedResult&lt;&gt;(</span>
+<span class="fc" id="L153">        List.of(), new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), 0));</span>
   }
 
-<span class="fc" id="L138">  private record StaffSearchResponse(List&lt;StaffSearchItemResponse&gt; data, StaffSearchPage page) {}</span>
+<span class="fc" id="L156">  private record StaffSearchResponse(List&lt;StaffSearchItemResponse&gt; data, StaffSearchPage page) {}</span>
 
-<span class="fc" id="L140">  private record StaffSearchPage(int page, int pageSize, long totalElements) {}</span>
+<span class="fc" id="L158">  private record StaffSearchPage(int page, int pageSize, long totalElements) {}</span>
 
-<span class="fc" id="L142">  private record StaffSearchItemResponse(String eppn) {}</span>
+<span class="fc" id="L160">  private record StaffSearchItemResponse(String eppn) {}</span>
 
-<span class="fc" id="L144">  private record StaffAccessCheckRequest(</span>
+<span class="fc" id="L162">  private record StaffAccessCheckRequest(</span>
       String eppn, List&lt;UUID&gt; targetInstitutionIds, List&lt;UUID&gt; targetGroupIds) {}
 
-<span class="fc" id="L147">  private record StudentScopeResponse(List&lt;UUID&gt; institutionIds, List&lt;UUID&gt; groupIds) {}</span>
+<span class="fc" id="L165">  private record StudentScopeResponse(List&lt;UUID&gt; institutionIds, List&lt;UUID&gt; groupIds) {}</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
