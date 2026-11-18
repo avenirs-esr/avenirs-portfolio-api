@@ -1,0 +1,93 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+        http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet author="nathp" id="rename-trace-author-type-in-feedback-associations-traces">
+        <comment>
+            Rename legacy traceAuthorType field to authorType in trace snapshots stored in feedback.associations JSON.
+        </comment>
+
+        <sql dbms="postgresql"><![CDATA[
+            UPDATE feedback
+            SET associations = jsonb_set(
+                    associations::jsonb,
+                    '{traces}',
+                    (
+                        SELECT jsonb_agg(
+                                   CASE
+                                       WHEN jsonb_exists(trace_element, 'traceAuthorType')
+                                           THEN (trace_element - 'traceAuthorType')
+                                           || jsonb_build_object('authorType', trace_element -> 'traceAuthorType')
+                                       ELSE trace_element
+                                       END
+                               )
+                        FROM jsonb_array_elements(associations::jsonb -> 'traces') AS trace_element
+                    )
+                               )
+            WHERE associations IS NOT NULL
+              AND jsonb_exists(associations::jsonb, 'traces')
+              AND EXISTS (
+                SELECT 1
+                FROM jsonb_array_elements(associations::jsonb -> 'traces') AS trace_element
+                WHERE jsonb_exists(trace_element, 'traceAuthorType')
+            );
+            ]]></sql>
+
+        <rollback>
+            <comment>
+                No rollback needed: authorType is the current field name read by the application.
+            </comment>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="nathp" id="convert-boolean-trace-author-type-in-feedback-associations-traces">
+        <comment>
+            Between the isGroupe revert and its re-application, trace snapshots stored in feedback.associations JSON
+            carried a boolean author type. Convert it to the ETraceAuthorType enum, with the same mapping as the
+            trace.author_type migration (true: COLLECTIVE, false: PERSONAL).
+        </comment>
+
+        <sql dbms="postgresql"><![CDATA[
+            UPDATE feedback
+            SET associations = jsonb_set(
+                    associations::jsonb,
+                    '{traces}',
+                    (
+                        SELECT jsonb_agg(
+                                   CASE
+                                       WHEN jsonb_typeof(trace_element -> 'authorType') = 'boolean'
+                                           THEN trace_element || jsonb_build_object(
+                                               'authorType',
+                                               CASE WHEN (trace_element ->> 'authorType')::boolean
+                                                        THEN 'COLLECTIVE'
+                                                    ELSE 'PERSONAL' END)
+                                       ELSE trace_element
+                                       END
+                               )
+                        FROM jsonb_array_elements(associations::jsonb -> 'traces') AS trace_element
+                    )
+                               )
+            WHERE associations IS NOT NULL
+              AND jsonb_exists(associations::jsonb, 'traces')
+              AND EXISTS (
+                SELECT 1
+                FROM jsonb_array_elements(associations::jsonb -> 'traces') AS trace_element
+                WHERE jsonb_typeof(trace_element -> 'authorType') = 'boolean'
+            );
+            ]]></sql>
+
+        <rollback>
+            <comment>
+                No rollback needed: the enum value is the format read by the application.
+            </comment>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
