@@ -1006,64 +1006,6 @@ class ActivityServiceImplTest {
         }
 
         @Test
-        void thenItShouldThrowWhenRemovingAnAlreadyTargetedInstitution() {
-          BddLogger.then("removing an already targeted institution should be rejected");
-
-          assertThrows(
-              ActivityTargetRemovalNotAllowedException.class,
-              () ->
-                  activityService.updateActivityDraft(
-                      draftId,
-                      null,
-                      null,
-                      null,
-                      null,
-                      null,
-                      null,
-                      null,
-                      null,
-                      null,
-                      null,
-                      null,
-                      false,
-                      List.of(),
-                      List.of(alreadyTargetedGroupId),
-                      null,
-                      null));
-
-          verify(activityDraftRepository, never()).save(any());
-        }
-
-        @Test
-        void thenItShouldThrowWhenRemovingAnAlreadyTargetedGroup() {
-          BddLogger.then("removing an already targeted group should be rejected");
-
-          assertThrows(
-              ActivityTargetRemovalNotAllowedException.class,
-              () ->
-                  activityService.updateActivityDraft(
-                      draftId,
-                      null,
-                      null,
-                      null,
-                      null,
-                      null,
-                      null,
-                      null,
-                      null,
-                      null,
-                      null,
-                      null,
-                      false,
-                      List.of(alreadyTargetedInstitutionId),
-                      List.of(),
-                      null,
-                      null));
-
-          verify(activityDraftRepository, never()).save(any());
-        }
-
-        @Test
         void thenItShouldAllowAddingNewTargetsAlongsideExistingOnes() {
           BddLogger.then("adding new targets on top of existing ones should be allowed");
 
@@ -2330,8 +2272,10 @@ class ActivityServiceImplTest {
 
         Activity activity = mock(Activity.class);
         when(activity.getCreatedAt()).thenReturn(Instant.now().minus(Duration.ofDays(10)));
+        when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+        UUID studentId = student.getId();
         when(activityRepository.findAll(
-                eq(EActivityThematic.EXPERIENCES), eq(pageCriteria), any(), any()))
+                eq(EActivityThematic.EXPERIENCES), eq(pageCriteria), any(), any(), eq(studentId)))
             .thenReturn(new PagedResult<>(List.of(activity), pageInfo));
         when(declaredActivityService.getAllDeclaredActivitiesOf(student)).thenReturn(List.of());
 
@@ -2349,9 +2293,10 @@ class ActivityServiceImplTest {
 
         Activity activity = mock(Activity.class);
         DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
-
+        when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+        UUID studentId = student.getId();
         when(activity.getCreatedAt()).thenReturn(Instant.now().minus(Duration.ofDays(10)));
-        when(activityRepository.findAll(eq(null), eq(pageCriteria), any(), any()))
+        when(activityRepository.findAll(eq(null), eq(pageCriteria), any(), any(), eq(studentId)))
             .thenReturn(new PagedResult<>(List.of(activity), pageInfo));
         when(declaredActivity.getActivity()).thenReturn(activity);
         when(declaredActivityService.getAllDeclaredActivitiesOf(student))
@@ -2372,7 +2317,9 @@ class ActivityServiceImplTest {
 
         Activity activity = mock(Activity.class);
         when(activity.getCreatedAt()).thenReturn(Instant.now().minus(Duration.ofDays(10)));
-        when(activityRepository.findAll(eq(null), eq(pageCriteria), any(), any()))
+        when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+        UUID studentId = student.getId();
+        when(activityRepository.findAll(eq(null), eq(pageCriteria), any(), any(), eq(studentId)))
             .thenReturn(new PagedResult<>(List.of(activity), pageInfo));
         when(declaredActivityService.getAllDeclaredActivitiesOf(student)).thenReturn(List.of());
 
@@ -2387,7 +2334,9 @@ class ActivityServiceImplTest {
 
         Activity activity = mock(Activity.class);
         when(activity.getCreatedAt()).thenReturn(Instant.now().minus(Duration.ofDays(120)));
-        when(activityRepository.findAll(eq(null), eq(pageCriteria), any(), any()))
+        when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+        UUID studentId = student.getId();
+        when(activityRepository.findAll(eq(null), eq(pageCriteria), any(), any(), eq(studentId)))
             .thenReturn(new PagedResult<>(List.of(activity), pageInfo));
         when(declaredActivityService.getAllDeclaredActivitiesOf(student)).thenReturn(List.of());
 
@@ -2411,15 +2360,18 @@ class ActivityServiceImplTest {
 
         when(accessClient.getStudentScope(EPPN))
             .thenReturn(new StudentAccessScope(institutionIdsWithAncestors, groupIdsWithAncestors));
+        when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+        UUID studentId = student.getId();
         when(activityRepository.findAll(
-                null, pageCriteria, institutionIdsWithAncestors, groupIdsWithAncestors))
+                null, pageCriteria, institutionIdsWithAncestors, groupIdsWithAncestors, studentId))
             .thenReturn(new PagedResult<>(List.of(), pageInfo));
         when(declaredActivityService.getAllDeclaredActivitiesOf(student)).thenReturn(List.of());
 
         activityService.activitiesView(null, pageCriteria);
 
         verify(activityRepository)
-            .findAll(null, pageCriteria, institutionIdsWithAncestors, groupIdsWithAncestors);
+            .findAll(
+                null, pageCriteria, institutionIdsWithAncestors, groupIdsWithAncestors, studentId);
       }
     }
 

@@ -99,6 +99,23 @@ public class ActivitySpecification {
     };
   }
 
+  public static Specification<ActivityEntity> isEnrolledBy(UUID studentId) {
+    return (root, query, cb) -> {
+      var subquery = query.subquery(UUID.class);
+      var declared = subquery.from(DeclaredActivityEntity.class);
+
+      var isNotUnsubscribed = cb.isNull(declared.get("unsubscribedAt"));
+      var sameStudent = cb.equal(declared.get("student").get("id"), studentId);
+      var sameActivity = cb.equal(declared.get("activity").get("id"), root.get("id"));
+
+      subquery
+          .select(declared.get("id"))
+          .where(cb.and(sameActivity, sameStudent, isNotUnsubscribed));
+
+      return cb.exists(subquery);
+    };
+  }
+
   public static Specification<ActivityEntity> staffHasRight(UUID staffId, EActivityRight right) {
     return (root, query, cb) -> {
       Subquery<Integer> subquery = query.subquery(Integer.class);

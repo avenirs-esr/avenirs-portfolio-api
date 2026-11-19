@@ -65,12 +65,18 @@ public class ActivityDatabaseRepository
       EActivityThematic thematic,
       PageCriteria pageCriteria,
       List<UUID> studentInstitutionIds,
-      List<UUID> studentGroupIds) {
+      List<UUID> studentGroupIds,
+      UUID studentId) {
+
+    var targetingOrEnrolled =
+        ActivitySpecification.visibleByInstitutions(studentInstitutionIds)
+            .and(ActivitySpecification.visibleByGroups(studentGroupIds))
+            .or(ActivitySpecification.isEnrolledBy(studentId));
     var specification =
         ActivitySpecification.isPublished()
             .and(ActivitySpecification.isMainActivity())
-            .and(ActivitySpecification.visibleByInstitutions(studentInstitutionIds))
-            .and(ActivitySpecification.visibleByGroups(studentGroupIds));
+            .and(targetingOrEnrolled);
+
     if (thematic != null)
       specification = specification.and(ActivitySpecification.withThematic(thematic));
 
