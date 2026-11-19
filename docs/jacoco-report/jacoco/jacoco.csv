@@ -48,6 +48,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.domain.data,Activit
 avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.domain.data,SubActivityOverviewData,0,18,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.domain.data,ActivityDashboardData,0,15,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.domain.data,ActivityWithStudentStatusData,0,12,0,0,0,1,0,1,0,1
+avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.domain.data,CandidateSearchCriteria,0,12,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.domain.data,ActivityStaffOverviewData,0,36,0,0,0,2,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.domain.data,ActivityAuthorizationDefinition,0,9,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.domain.data,InactiveStudentData,0,12,0,0,0,1,0,1,0,1
@@ -56,7 +57,6 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.domain.service,Acti
 avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.domain.service,ActivityServiceImpl.FieldSync,0,30,0,2,0,5,0,3,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.domain.service,ActivityAuthorizationServiceImpl,1,1131,3,65,0,265,3,114,0,83
 avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.domain.service,ActivityEntityAuthorizationResolver,0,46,0,0,0,13,0,6,0,6
-avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.domain.service,ActivityAuthorizationServiceImpl.CandidateSearchCriteria,0,12,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.domain.service,ActivityUserEntityAuthorizationReader,45,2,0,0,14,1,4,1,4,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.activity.domain.service,DeclaredActivityAssociationStrategy,0,177,0,10,0,47,0,19,0,14
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.activity.domain.service,FeedbackServiceImpl,32,806,4,64,9,210,5,58,1,27
