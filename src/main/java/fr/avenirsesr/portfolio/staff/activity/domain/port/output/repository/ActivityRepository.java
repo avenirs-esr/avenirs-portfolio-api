@@ -26,7 +26,8 @@ public interface ActivityRepository extends GenericRepositoryPort<Activity> {
       EActivityThematic thematic,
       PageCriteria pageCriteria,
       List<UUID> studentInstitutionIds,
-      List<UUID> studentGroupIds);
+      List<UUID> studentGroupIds,
+      UUID studentId);
 
   PagedResult<ActivityStaffOverviewData> findAllStaffOverview(
       EActivityThematic thematic, PageCriteria pageCriteria);

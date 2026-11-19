@@ -2144,7 +2144,8 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       }
 
       @Test
-      void thenItShouldReturn409WhenRemovingATargetFromAPublishedActivity() throws Exception {
+      void thenItShouldAllowRemovingATargetFromAPublishedActivityWithEnrolledStudent()
+          throws Exception {
         BddLogger.and(
             "given a published activity with an enrolled student targeting an institution");
         UUID activityId = createDraftAndGetId("Activité publiée ciblage protégé");
@@ -2161,7 +2162,8 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             .expectStatus()
             .isOk();
 
-        BddLogger.then("removing the already targeted institution should return 409");
+        BddLogger.then(
+            "removing the already targeted institution should be allowed and return 200");
 
         webTestClient
             .patch()
@@ -2172,10 +2174,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus()
-            .isEqualTo(409)
-            .expectBody()
-            .jsonPath("$.code")
-            .isEqualTo("ACTIVITY_TARGET_REMOVAL_NOT_ALLOWED");
+            .isOk();
       }
 
       @Test

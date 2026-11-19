@@ -753,7 +753,7 @@ public class ActivityServiceImpl implements ActivityService {
     var scope = studentScope(student);
     var pagedActivities =
         activityRepository.findAll(
-            thematic, pageCriteria, scope.institutionIds(), scope.groupIds());
+            thematic, pageCriteria, scope.institutionIds(), scope.groupIds(), student.getId());
     var subscribedActivities = declaredActivityService.getAllDeclaredActivitiesOf(student);
     var statusByDeclaredActivity =
         declaredActivityService.getDeclaredActivityStatus(subscribedActivities);
@@ -930,8 +930,6 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     validateTargetPerimeter(loggedInStaff, targetInstitutionIds, targetGroupIds);
-    validateTargetingUpdate(id, targetInstitutionIds, targetGroupIds);
-
     validateOptionalTextMaxLength("summary", summary, SUMMARY_LENGTH);
     validateOptionalTextMaxLength("description", description, RICH_DESCRIPTION_LENGTH);
     validateOptionalTextMaxLength(
@@ -1061,24 +1059,6 @@ public class ActivityServiceImpl implements ActivityService {
 
   private String eppnOf(UUID userId) {
     return userPrincipalRepository.findEppnByUserId(userId).orElseThrow(UserNotFoundException::new);
-  }
-
-  private void validateTargetingUpdate(
-      UUID activityId, List<UUID> targetInstitutionIds, List<UUID> targetGroupIds) {
-    var publishedActivity =
-        activityRepository
-            .findById(activityId)
-            .filter(activity -> activity.getStatus() == EActivityStatus.PUBLISHED);
-    if (publishedActivity.isEmpty()) {
-      return;
-    }
-
-    var activity = publishedActivity.get();
-    if (targetInstitutionIds != null
-            && !targetInstitutionIds.containsAll(activity.getTargetInstitutionIds())
-        || targetGroupIds != null && !targetGroupIds.containsAll(activity.getTargetGroupIds())) {
-      throw new ActivityTargetRemovalNotAllowedException();
-    }
   }
 
   @Override
