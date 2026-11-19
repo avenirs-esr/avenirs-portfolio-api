@@ -99,60 +99,43 @@ import org.springframework.data.jpa.domain.Specification;
     };
   }
 
-  public static Specification&lt;ActivityEntity&gt; isEnrolledBy(UUID studentId) {
-<span class="fc" id="L103">    return (root, query, cb) -&gt; {</span>
-<span class="fc" id="L104">      var subquery = query.subquery(UUID.class);</span>
-<span class="fc" id="L105">      var declared = subquery.from(DeclaredActivityEntity.class);</span>
-
-<span class="fc" id="L107">      var isNotUnsubscribed = cb.isNull(declared.get(&quot;unsubscribedAt&quot;));</span>
-<span class="fc" id="L108">      var sameStudent = cb.equal(declared.get(&quot;student&quot;).get(&quot;id&quot;), studentId);</span>
-<span class="fc" id="L109">      var sameActivity = cb.equal(declared.get(&quot;activity&quot;).get(&quot;id&quot;), root.get(&quot;id&quot;));</span>
-
-<span class="fc" id="L111">      subquery</span>
-<span class="fc" id="L112">          .select(declared.get(&quot;id&quot;))</span>
-<span class="fc" id="L113">          .where(cb.and(sameActivity, sameStudent, isNotUnsubscribed));</span>
-
-<span class="fc" id="L115">      return cb.exists(subquery);</span>
-    };
-  }
-
   public static Specification&lt;ActivityEntity&gt; staffHasRight(UUID staffId, EActivityRight right) {
-<span class="fc" id="L120">    return (root, query, cb) -&gt; {</span>
-<span class="fc" id="L121">      Subquery&lt;Integer&gt; subquery = query.subquery(Integer.class);</span>
-<span class="fc" id="L122">      Root&lt;ActivityAuthorizationEntity&gt; authorization =</span>
-<span class="fc" id="L123">          subquery.from(ActivityAuthorizationEntity.class);</span>
-<span class="fc" id="L124">      subquery</span>
-<span class="fc" id="L125">          .select(cb.literal(1))</span>
-<span class="fc" id="L126">          .where(</span>
-<span class="fc" id="L127">              cb.equal(authorization.get(&quot;activityId&quot;), root.get(&quot;id&quot;)),</span>
-<span class="fc" id="L128">              cb.equal(authorization.get(&quot;staff&quot;).get(&quot;id&quot;), staffId),</span>
-<span class="fc" id="L129">              cb.isMember(right, authorization.&lt;Set&lt;EActivityRight&gt;&gt;get(&quot;rights&quot;)));</span>
-<span class="fc" id="L130">      return cb.exists(subquery);</span>
+<span class="fc" id="L103">    return (root, query, cb) -&gt; {</span>
+<span class="fc" id="L104">      Subquery&lt;Integer&gt; subquery = query.subquery(Integer.class);</span>
+<span class="fc" id="L105">      Root&lt;ActivityAuthorizationEntity&gt; authorization =</span>
+<span class="fc" id="L106">          subquery.from(ActivityAuthorizationEntity.class);</span>
+<span class="fc" id="L107">      subquery</span>
+<span class="fc" id="L108">          .select(cb.literal(1))</span>
+<span class="fc" id="L109">          .where(</span>
+<span class="fc" id="L110">              cb.equal(authorization.get(&quot;activityId&quot;), root.get(&quot;id&quot;)),</span>
+<span class="fc" id="L111">              cb.equal(authorization.get(&quot;staff&quot;).get(&quot;id&quot;), staffId),</span>
+<span class="fc" id="L112">              cb.isMember(right, authorization.&lt;Set&lt;EActivityRight&gt;&gt;get(&quot;rights&quot;)));</span>
+<span class="fc" id="L113">      return cb.exists(subquery);</span>
     };
   }
 
   public static Specification&lt;ActivityEntity&gt; targetingAnyInstitution(
       Collection&lt;UUID&gt; institutionIds) {
-<span class="fc" id="L136">    return (root, query, cb) -&gt; {</span>
-<span class="fc" id="L137">      Subquery&lt;UUID&gt; subquery = query.subquery(UUID.class);</span>
-<span class="fc" id="L138">      Root&lt;ActivityEntity&gt; subRoot = subquery.from(ActivityEntity.class);</span>
-<span class="fc" id="L139">      Join&lt;ActivityEntity, UUID&gt; targetJoin = subRoot.join(&quot;targetInstitutionIds&quot;);</span>
-<span class="fc" id="L140">      subquery.select(targetJoin).where(cb.equal(subRoot, root), targetJoin.in(institutionIds));</span>
-<span class="fc" id="L141">      return cb.exists(subquery);</span>
+<span class="fc" id="L119">    return (root, query, cb) -&gt; {</span>
+<span class="fc" id="L120">      Subquery&lt;UUID&gt; subquery = query.subquery(UUID.class);</span>
+<span class="fc" id="L121">      Root&lt;ActivityEntity&gt; subRoot = subquery.from(ActivityEntity.class);</span>
+<span class="fc" id="L122">      Join&lt;ActivityEntity, UUID&gt; targetJoin = subRoot.join(&quot;targetInstitutionIds&quot;);</span>
+<span class="fc" id="L123">      subquery.select(targetJoin).where(cb.equal(subRoot, root), targetJoin.in(institutionIds));</span>
+<span class="fc" id="L124">      return cb.exists(subquery);</span>
     };
   }
 
   public static Specification&lt;ActivityEntity&gt; withAuthorizationOfStaff(UUID staffId) {
-<span class="fc" id="L146">    return (root, query, cb) -&gt; {</span>
-<span class="fc" id="L147">      Subquery&lt;Integer&gt; subquery = query.subquery(Integer.class);</span>
-<span class="fc" id="L148">      Root&lt;ActivityAuthorizationEntity&gt; authorization =</span>
-<span class="fc" id="L149">          subquery.from(ActivityAuthorizationEntity.class);</span>
-<span class="fc" id="L150">      subquery</span>
-<span class="fc" id="L151">          .select(cb.literal(1))</span>
-<span class="fc" id="L152">          .where(</span>
-<span class="fc" id="L153">              cb.equal(authorization.get(&quot;activityId&quot;), root.get(&quot;id&quot;)),</span>
-<span class="fc" id="L154">              cb.equal(authorization.get(&quot;staff&quot;).get(&quot;id&quot;), staffId));</span>
-<span class="fc" id="L155">      return cb.exists(subquery);</span>
+<span class="fc" id="L129">    return (root, query, cb) -&gt; {</span>
+<span class="fc" id="L130">      Subquery&lt;Integer&gt; subquery = query.subquery(Integer.class);</span>
+<span class="fc" id="L131">      Root&lt;ActivityAuthorizationEntity&gt; authorization =</span>
+<span class="fc" id="L132">          subquery.from(ActivityAuthorizationEntity.class);</span>
+<span class="fc" id="L133">      subquery</span>
+<span class="fc" id="L134">          .select(cb.literal(1))</span>
+<span class="fc" id="L135">          .where(</span>
+<span class="fc" id="L136">              cb.equal(authorization.get(&quot;activityId&quot;), root.get(&quot;id&quot;)),</span>
+<span class="fc" id="L137">              cb.equal(authorization.get(&quot;staff&quot;).get(&quot;id&quot;), staffId));</span>
+<span class="fc" id="L138">      return cb.exists(subquery);</span>
     };
   }
 }
