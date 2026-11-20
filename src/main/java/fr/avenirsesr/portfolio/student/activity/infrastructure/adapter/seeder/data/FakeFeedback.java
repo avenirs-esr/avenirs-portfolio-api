@@ -25,7 +25,8 @@ public class FakeFeedback {
             EFeedbackStatus.NEW,
             1,
             AssociationsJson.empty(),
-            new ArrayList<>());
+            new ArrayList<>(),
+            null);
     entity.setId(UUID.fromString(faker.internet().uuid()));
     return new FakeFeedback(entity);
   }

@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityAuthorizationEntity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.model.FeedbackEntity;
+import jakarta.persistence.criteria.JoinType;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
@@ -63,6 +64,13 @@ public final class FeedbackSpecification {
           cb.equal(
               subRoot.get("declaredActivity").get("id"), root.get("declaredActivity").get("id")));
       return cb.equal(root.<Instant>get("createdAt"), subquery);
+    };
+  }
+
+  public static Specification<FeedbackEntity> isSubmittedByStaff(UUID staffId) {
+    return (root, query, cb) -> {
+      var contributor = root.join("contributor", JoinType.LEFT);
+      return cb.equal(contributor.get("id"), staffId);
     };
   }
 }

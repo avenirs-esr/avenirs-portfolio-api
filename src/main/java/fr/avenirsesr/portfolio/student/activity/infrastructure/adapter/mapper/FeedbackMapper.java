@@ -14,6 +14,7 @@ import fr.avenirsesr.portfolio.student.program.domain.model.DeclaredProgram;
 import fr.avenirsesr.portfolio.student.skill.domain.model.SkillProgress;
 import fr.avenirsesr.portfolio.student.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StaffMapper;
 import java.util.Map;
 import java.util.UUID;
 
@@ -199,7 +200,10 @@ public class FeedbackMapper implements Mapper<FeedbackEntity, Feedback> {
             feedback.getStatus(),
             feedback.getIteration(),
             associationsToSnapshots(feedback.getAssociations()),
-            feedback.getAttachments().stream().map(FileMapper.INSTANCE::fromDomain).toList());
+            feedback.getAttachments().stream().map(FileMapper.INSTANCE::fromDomain).toList(),
+            feedback.getContributor() != null
+                ? StaffMapper.INSTANCE.fromDomain(feedback.getContributor())
+                : null);
 
     entity.setId(feedback.getId());
     return entity;
