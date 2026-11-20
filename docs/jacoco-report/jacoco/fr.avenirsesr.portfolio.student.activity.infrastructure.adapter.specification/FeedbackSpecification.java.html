@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityRight;
 import fr.avenirsesr.portfolio.staff.activity.infrastructure.adapter.model.ActivityAuthorizationEntity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.activity.infrastructure.adapter.model.FeedbackEntity;
+import jakarta.persistence.criteria.JoinType;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
@@ -17,53 +18,64 @@ public final class FeedbackSpecification {
   private FeedbackSpecification() {}
 
   public static Specification&lt;FeedbackEntity&gt; isAssignedToStaff(UUID staffId) {
-<span class="fc" id="L20">    return (root, query, cb) -&gt; {</span>
-<span class="fc" id="L21">      var subquery = query.subquery(Integer.class);</span>
-<span class="fc" id="L22">      var authorization = subquery.from(ActivityAuthorizationEntity.class);</span>
-<span class="fc" id="L23">      subquery</span>
-<span class="fc" id="L24">          .select(cb.literal(1))</span>
-<span class="fc" id="L25">          .where(</span>
-<span class="fc" id="L26">              cb.equal(</span>
-<span class="fc" id="L27">                  authorization.get(&quot;activityId&quot;),</span>
-<span class="fc" id="L28">                  root.get(&quot;declaredActivity&quot;).get(&quot;activity&quot;).get(&quot;id&quot;)),</span>
-<span class="fc" id="L29">              cb.equal(authorization.get(&quot;staff&quot;).get(&quot;id&quot;), staffId),</span>
-<span class="fc" id="L30">              cb.isMember(</span>
-<span class="fc" id="L31">                  EActivityRight.FEEDBACK, authorization.&lt;Set&lt;EActivityRight&gt;&gt;get(&quot;rights&quot;)));</span>
-<span class="fc" id="L32">      return cb.exists(subquery);</span>
+<span class="fc" id="L21">    return (root, query, cb) -&gt; {</span>
+<span class="fc" id="L22">      var subquery = query.subquery(Integer.class);</span>
+<span class="fc" id="L23">      var authorization = subquery.from(ActivityAuthorizationEntity.class);</span>
+<span class="fc" id="L24">      subquery</span>
+<span class="fc" id="L25">          .select(cb.literal(1))</span>
+<span class="fc" id="L26">          .where(</span>
+<span class="fc" id="L27">              cb.equal(</span>
+<span class="fc" id="L28">                  authorization.get(&quot;activityId&quot;),</span>
+<span class="fc" id="L29">                  root.get(&quot;declaredActivity&quot;).get(&quot;activity&quot;).get(&quot;id&quot;)),</span>
+<span class="fc" id="L30">              cb.equal(authorization.get(&quot;staff&quot;).get(&quot;id&quot;), staffId),</span>
+<span class="fc" id="L31">              cb.isMember(</span>
+<span class="fc" id="L32">                  EActivityRight.FEEDBACK, authorization.&lt;Set&lt;EActivityRight&gt;&gt;get(&quot;rights&quot;)));</span>
+<span class="fc" id="L33">      return cb.exists(subquery);</span>
     };
   }
 
   public static Specification&lt;FeedbackEntity&gt; hasStatus(EFeedbackStatus... status) {
     List&lt;EFeedbackStatus&gt; statuses =
-<span class="pc bpc" id="L38" title="1 of 2 branches missed.">        status == null ? List.of() : Arrays.stream(status).filter(Objects::nonNull).toList();</span>
-<span class="fc" id="L39">    return (root, query, cb) -&gt; {</span>
-<span class="fc bfc" id="L40" title="All 2 branches covered.">      if (statuses.isEmpty()) return cb.conjunction();</span>
-<span class="fc" id="L41">      return root.get(&quot;status&quot;).in(statuses);</span>
+<span class="pc bpc" id="L39" title="1 of 2 branches missed.">        status == null ? List.of() : Arrays.stream(status).filter(Objects::nonNull).toList();</span>
+<span class="fc" id="L40">    return (root, query, cb) -&gt; {</span>
+<span class="fc bfc" id="L41" title="All 2 branches covered.">      if (statuses.isEmpty()) return cb.conjunction();</span>
+<span class="fc" id="L42">      return root.get(&quot;status&quot;).in(statuses);</span>
     };
   }
 
   public static Specification&lt;FeedbackEntity&gt; hasActivityId(UUID activityId) {
-<span class="fc" id="L46">    return (root, query, cb) -&gt; {</span>
-<span class="fc bfc" id="L47" title="All 2 branches covered.">      if (activityId == null) return cb.conjunction();</span>
-<span class="fc" id="L48">      return cb.equal(root.get(&quot;declaredActivity&quot;).get(&quot;activity&quot;).get(&quot;id&quot;), activityId);</span>
+<span class="fc" id="L47">    return (root, query, cb) -&gt; {</span>
+<span class="fc bfc" id="L48" title="All 2 branches covered.">      if (activityId == null) return cb.conjunction();</span>
+<span class="fc" id="L49">      return cb.equal(root.get(&quot;declaredActivity&quot;).get(&quot;activity&quot;).get(&quot;id&quot;), activityId);</span>
     };
   }
 
   public static Specification&lt;FeedbackEntity&gt; hasDeclaredActivityId(UUID declaredActivityId) {
-<span class="fc" id="L53">    return (root, query, cb) -&gt;</span>
-<span class="fc" id="L54">        cb.equal(root.get(&quot;declaredActivity&quot;).get(&quot;id&quot;), declaredActivityId);</span>
+<span class="fc" id="L54">    return (root, query, cb) -&gt;</span>
+<span class="fc" id="L55">        cb.equal(root.get(&quot;declaredActivity&quot;).get(&quot;id&quot;), declaredActivityId);</span>
   }
 
   public static Specification&lt;FeedbackEntity&gt; isLatestOfItsDeclaredActivity() {
-<span class="fc" id="L58">    return (root, query, cb) -&gt; {</span>
-<span class="fc" id="L59">      var subquery = query.subquery(Instant.class);</span>
-<span class="fc" id="L60">      var subRoot = subquery.from(FeedbackEntity.class);</span>
-<span class="fc" id="L61">      subquery.select(cb.greatest(subRoot.&lt;Instant&gt;get(&quot;createdAt&quot;)));</span>
-<span class="fc" id="L62">      subquery.where(</span>
-<span class="fc" id="L63">          cb.equal(</span>
-<span class="fc" id="L64">              subRoot.get(&quot;declaredActivity&quot;).get(&quot;id&quot;), root.get(&quot;declaredActivity&quot;).get(&quot;id&quot;)));</span>
-<span class="fc" id="L65">      return cb.equal(root.&lt;Instant&gt;get(&quot;createdAt&quot;), subquery);</span>
+<span class="fc" id="L59">    return (root, query, cb) -&gt; {</span>
+<span class="fc" id="L60">      var subquery = query.subquery(Instant.class);</span>
+<span class="fc" id="L61">      var subRoot = subquery.from(FeedbackEntity.class);</span>
+<span class="fc" id="L62">      subquery.select(cb.greatest(subRoot.&lt;Instant&gt;get(&quot;createdAt&quot;)));</span>
+<span class="fc" id="L63">      subquery.where(</span>
+<span class="fc" id="L64">          cb.equal(</span>
+<span class="fc" id="L65">              subRoot.get(&quot;declaredActivity&quot;).get(&quot;id&quot;), root.get(&quot;declaredActivity&quot;).get(&quot;id&quot;)));</span>
+<span class="fc" id="L66">      return cb.equal(root.&lt;Instant&gt;get(&quot;createdAt&quot;), subquery);</span>
     };
+  }
+
+  public static Specification&lt;FeedbackEntity&gt; isSubmittedByStaff(UUID staffId) {
+<span class="fc" id="L71">    return (root, query, cb) -&gt; {</span>
+<span class="fc" id="L72">      var contributor = root.join(&quot;contributor&quot;, JoinType.LEFT);</span>
+<span class="fc" id="L73">      return cb.equal(contributor.get(&quot;id&quot;), staffId);</span>
+    };
+  }
+
+  public static Specification&lt;FeedbackEntity&gt; isPickableByStaff(UUID staffId) {
+<span class="fc" id="L78">    return isAssignedToStaff(staffId).and(FeedbackSpecification.hasStatus(EFeedbackStatus.NEW));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
