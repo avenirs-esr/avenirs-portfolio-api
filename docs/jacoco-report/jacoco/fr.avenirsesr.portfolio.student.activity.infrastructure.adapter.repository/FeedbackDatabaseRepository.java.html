@@ -109,7 +109,7 @@ public class FeedbackDatabaseRepository
       UUID staffId, UUID activityId, PageCriteria pageCriteria, EFeedbackStatus... status) {
 <span class="fc" id="L110">    var staffScope =</span>
 <span class="fc" id="L111">        FeedbackSpecification.isSubmittedByStaff(staffId)</span>
-<span class="fc" id="L112">            .or(FeedbackSpecification.isPickableByStaff(staffId));</span>
+<span class="fc" id="L112">            .or(FeedbackSpecification.isAssignedToStaff(staffId));</span>
 
 <span class="fc" id="L114">    var specification =</span>
 <span class="fc" id="L115">        Specification.allOf(</span>
@@ -142,7 +142,7 @@ public class FeedbackDatabaseRepository
       UUID staffId, UUID activityId) {
 <span class="fc" id="L143">    var staffScope =</span>
 <span class="fc" id="L144">        FeedbackSpecification.isSubmittedByStaff(staffId)</span>
-<span class="fc" id="L145">            .or(FeedbackSpecification.isPickableByStaff(staffId));</span>
+<span class="fc" id="L145">            .or(FeedbackSpecification.isAssignedToStaff(staffId));</span>
 
 <span class="fc" id="L147">    var specification = staffScope.and(FeedbackSpecification.hasActivityId(activityId));</span>
 

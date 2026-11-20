@@ -73,9 +73,5 @@ public final class FeedbackSpecification {
 <span class="fc" id="L73">      return cb.equal(contributor.get(&quot;id&quot;), staffId);</span>
     };
   }
-
-  public static Specification&lt;FeedbackEntity&gt; isPickableByStaff(UUID staffId) {
-<span class="fc" id="L78">    return isAssignedToStaff(staffId).and(FeedbackSpecification.hasStatus(EFeedbackStatus.NEW));</span>
-  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
