@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.student.activity.domain.model;
 import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.common.file.domain.model.File;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
+import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +28,8 @@ public class Feedback extends AvenirsBaseModel {
   private int iteration;
   private FeedbackAssociations associations;
   private List<File> attachments;
+
+  private Staff contributor;
 
   private Feedback(
       UUID id,

@@ -32,6 +32,7 @@ import java.util.stream.Stream;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -106,11 +107,16 @@ public class FeedbackDatabaseRepository
   @Override
   public PagedResult<Feedback> findByStaff(
       UUID staffId, UUID activityId, PageCriteria pageCriteria, EFeedbackStatus... status) {
+    var staffScope =
+        FeedbackSpecification.isSubmittedByStaff(staffId)
+            .or(FeedbackSpecification.isAssignedToStaff(staffId));
+
     var specification =
-        FeedbackSpecification.isAssignedToStaff(staffId)
-            .and(FeedbackSpecification.hasStatus(status))
-            .and(FeedbackSpecification.hasActivityId(activityId))
-            .and(FeedbackSpecification.isLatestOfItsDeclaredActivity());
+        Specification.allOf(
+            staffScope,
+            FeedbackSpecification.hasStatus(status),
+            FeedbackSpecification.hasActivityId(activityId),
+            FeedbackSpecification.isLatestOfItsDeclaredActivity());
     // Status strings sort alphabetically in the required priority order:
     // "IN_PROCESS" < "NEW" < "SUBMITTED"
     var sort = Sort.by("status").ascending().and(Sort.by("createdAt").ascending());
@@ -134,9 +140,11 @@ public class FeedbackDatabaseRepository
   @Override
   public List<Feedback> findLatestFeedbacksByStaffAndActivityForEachStudent(
       UUID staffId, UUID activityId) {
-    var specification =
-        FeedbackSpecification.isAssignedToStaff(staffId)
-            .and(FeedbackSpecification.hasActivityId(activityId));
+    var staffScope =
+        FeedbackSpecification.isSubmittedByStaff(staffId)
+            .or(FeedbackSpecification.isAssignedToStaff(staffId));
+
+    var specification = staffScope.and(FeedbackSpecification.hasActivityId(activityId));
 
     var sort = Sort.by("createdAt").descending();
 

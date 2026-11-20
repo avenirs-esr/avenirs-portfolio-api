@@ -367,6 +367,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     Feedback feedback =
         feedbackRepository.findById(feedbackId).orElseThrow(FeedbackNotFoundException::new);
     requireFeedbackRight(feedback);
+    feedback.setContributor(loggedInUserService.getLoggedInStaff());
     return feedback;
   }
 

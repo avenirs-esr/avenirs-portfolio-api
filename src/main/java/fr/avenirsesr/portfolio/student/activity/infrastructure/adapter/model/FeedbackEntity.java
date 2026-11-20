@@ -5,6 +5,7 @@ import static fr.avenirsesr.portfolio.common.validation.domain.constraints.Field
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
 import fr.avenirsesr.portfolio.common.file.infrastructure.adapter.model.FileEntity;
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StaffEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import java.util.ArrayList;
@@ -58,4 +59,8 @@ public class FeedbackEntity extends AvenirsBaseEntity {
       inverseJoinColumns = @JoinColumn(name = "file_id"))
   @OrderBy("createdAt")
   private List<FileEntity> attachments = new ArrayList<>();
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "contributor_staff_id")
+  private StaffEntity contributor;
 }

@@ -1651,6 +1651,72 @@ public class FeedbackControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
+  void aRevokedStaffStillSeesTheFeedbacksItSubmitted() throws Exception {
+    BddLogger.given("une activité publiée, un feedback demandé par un étudiant");
+
+    UUID activityId = publishActivityAsStaff("Activité feedback délégué");
+    String feedbackId = askForFeedbackAndGetId(subscribeStudentTo(activityId));
+
+    BddLogger.given("l'autre staff reçoit le droit FEEDBACK, répond et soumet");
+
+    defineAuthorizationsAsStaff(
+        activityId,
+        List.of(
+            new StaffAuthorizationRequest(STAFF_ID, List.of(EActivityRight.values())),
+            new StaffAuthorizationRequest(ANOTHER_STAFF_ID, List.of(EActivityRight.FEEDBACK))));
+
+    webTestClient
+        .put()
+        .uri(BASE_PATH + "/" + feedbackId)
+        .header("X-Signed-Context", anotherStaffPayload)
+        .header("X-Context-Signature", anotherStaffSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue("{\"feedback\": \"Retour délégué.\"}")
+        .exchange()
+        .expectStatus()
+        .isNoContent();
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + feedbackId + "/submit")
+        .header("X-Signed-Context", anotherStaffPayload)
+        .header("X-Context-Signature", anotherStaffSignature)
+        .exchange()
+        .expectStatus()
+        .isNoContent();
+
+    BddLogger.when("l'auteur révoque entièrement l'autre staff");
+
+    defineAuthorizationsAsStaff(
+        activityId,
+        List.of(new StaffAuthorizationRequest(STAFF_ID, List.of(EActivityRight.values()))));
+
+    BddLogger.then("le feedback déjà soumis reste présent dans sa liste (historique)");
+
+    webTestClient
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(BASE_PATH)
+                    .queryParam("activityId", activityId)
+                    .queryParam("pageSize", 100)
+                    .build())
+        .header("X-Signed-Context", anotherStaffPayload)
+        .header("X-Context-Signature", anotherStaffSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.data[?(@.id == '" + feedbackId + "')]")
+        .exists()
+        .jsonPath("$.data[?(@.id == '" + feedbackId + "')].status")
+        .isEqualTo("SUBMITTED")
+        .jsonPath("$.page.totalElements")
+        .isEqualTo(1);
+  }
+
+  @Test
   void shouldScopeTheFeedbackDashboardToTheFeedbackRight() throws Exception {
     BddLogger.given("an activity published by a staff, with a feedback asked by a student");
     UUID activityId = publishActivityAsStaff("Activité avec dashboard délégué");
