@@ -1,7 +1,11 @@
 package fr.avenirsesr.portfolio.activity.application.adapter.controller;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -3239,11 +3243,12 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       }
 
       @Test
-      void thenItShouldReturnNullHasEnrolledStudentForPublishedActivity() throws Exception {
-        BddLogger.and("given a published activity");
+      void thenItShouldReturnFalseHasEnrolledStudentForPublishedActivityWithoutEnrolledStudent()
+          throws Exception {
+        BddLogger.and("given a published activity without enrolled student");
         UUID activityId = publishNewActivity("Activité contenu publiée");
 
-        BddLogger.then("it should return 200 with hasEnrolledStudent equal to null");
+        BddLogger.then("it should return 200 with hasEnrolledStudent equal to false");
 
         webTestClient
             .get()
@@ -3257,11 +3262,33 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             .jsonPath("$.id")
             .isEqualTo(activityId.toString())
             .jsonPath("$.hasEnrolledStudent")
-            .doesNotExist()
+            .isEqualTo(false)
             .jsonPath("$.files")
             .isArray()
             .jsonPath("$.links")
             .isArray();
+      }
+
+      @Test
+      void thenItShouldReturnTrueHasEnrolledStudentForPublishedActivityWhenStudentIsEnrolled()
+          throws Exception {
+        BddLogger.and("given a published activity with an enrolled student");
+        UUID activityId = publishNewActivity("Activité contenu publiée avec inscrit");
+        subscribeStudentToActivity(activityId);
+
+        BddLogger.then("it should return 200 with hasEnrolledStudent equal to true");
+
+        webTestClient
+            .get()
+            .uri(CONTENT_PATH, "PUBLISHED", activityId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.hasEnrolledStudent")
+            .isEqualTo(true);
       }
 
       @Test

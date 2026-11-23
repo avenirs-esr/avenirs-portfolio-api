@@ -248,8 +248,8 @@ public class TransactionalActivityService implements ActivityService {
   }
 
   @Override
-  public Boolean hasEnrolledStudents(ActivityDraft draft) {
-    return delegate.hasEnrolledStudents(draft);
+  public Boolean hasEnrolledStudents(UUID activityId) {
+    return delegate.hasEnrolledStudents(activityId);
   }
 
   @Override

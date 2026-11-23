@@ -49,14 +49,15 @@ public interface ActivityContentDtoMapper {
 
   @Mapping(target = "activityStatus", source = "activityStatus")
   @Mapping(target = "haveDraft", source = "haveDraft")
+  @Mapping(target = "hasEnrolledStudent", source = "hasEnrolledStudent")
   @Mapping(target = "rights", source = "rights")
-  @Mapping(target = "hasEnrolledStudent", expression = "java(null)")
   @Mapping(target = "files", source = "files")
   @Mapping(target = "subActivities", source = "subActivities")
   ActivityContentDTO toDTO(
       Activity activity,
       EActivityStatus activityStatus,
       Boolean haveDraft,
+      Boolean hasEnrolledStudent,
       Set<EActivityRight> rights,
       List<FileDTO> files,
       List<SubActivityOverviewData> subActivities);

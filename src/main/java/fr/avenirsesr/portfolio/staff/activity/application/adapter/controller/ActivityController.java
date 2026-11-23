@@ -9,8 +9,25 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.CreationResponse;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.FileDTO;
 import fr.avenirsesr.portfolio.shared.application.adapter.mapper.FileDTOMapper;
-import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.*;
-import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.*;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityAuthorizationDTO;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityContentDTO;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityDashboardDTO;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityFeedbacksPreviewDTO;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityNavigationDTO;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityOverviewDTO;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityPresentationDTO;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.ActivityStaffOverviewDTO;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.InactiveStudentDTO;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.dto.StaffCandidateDTO;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityAuthorizationDtoMapper;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityContentDtoMapper;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityFeedbacksPreviewMapper;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityNavigationMapper;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityOverviewDtoMapper;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityPresentationDtoMapper;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.ActivityStaffOverviewDtoMapper;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.InactiveStudentDtoMapper;
+import fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper.StaffInfoDtoMapper;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityAuthorizationsRequest;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDraftCreationRequest;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.request.ActivityDraftUpdateRequest;
@@ -51,7 +68,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
@@ -150,17 +176,18 @@ public class ActivityController {
                 activity,
                 mainActivity.getStatus(),
                 activityService.hasDraftForActivity(mainActivity.getId()),
+                activityService.hasEnrolledStudents(mainActivity.getId()),
                 activityAuthorizationService.getLoggedInStaffRights(mainActivity.getId()),
                 fileDTOMapper.toFileDTOs(activity.getFiles(), baseUrl),
                 activityService.getSubActivityOverviews(activity.getId()));
           }
           case DRAFT -> {
             var draft = activityService.getActivityDraftById(activityId);
+            var mainActivityId = draft.getMainActivityId().orElse(draft.getId());
             yield activityContentDtoMapper.toDTO(
                 draft,
-                activityService.hasEnrolledStudents(draft),
-                activityAuthorizationService.getLoggedInStaffDraftRights(
-                    draft.getMainActivityId().orElse(draft.getId())),
+                activityService.hasEnrolledStudents(mainActivityId),
+                activityAuthorizationService.getLoggedInStaffDraftRights(mainActivityId),
                 fileDTOMapper.toFileDTOs(draft.getFiles(), baseUrl),
                 activityService.getDraftSubActivityOverviews(draft.getId()));
           }

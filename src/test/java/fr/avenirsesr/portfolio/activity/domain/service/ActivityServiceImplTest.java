@@ -51,7 +51,12 @@ import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityDashboardData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityPresentationData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityStaffOverviewData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.InactiveStudentData;
-import fr.avenirsesr.portfolio.staff.activity.domain.exception.*;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityAssessmentException;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityDatesException;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityDraftNotFoundException;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityNotFoundException;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityTargetNotAccessibleException;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityUnpublishedException;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAssessment;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityDraft;
@@ -2751,6 +2756,47 @@ class ActivityServiceImplTest {
         assertThrows(
             ActivityNotFoundException.class,
             () -> activityService.getActivityDashboard(activityId));
+      }
+    }
+
+    @Nested
+    class WhenCheckingTheEnrolledStudentsOfAnActivity {
+
+      UUID activityId;
+      Activity activity;
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("checking whether an activity has enrolled students");
+        activityId = UUID.randomUUID();
+        activity = mock(Activity.class);
+      }
+
+      @Test
+      void thenItShouldBeTrueWhenAtLeastOneStudentIsEnrolled() {
+        BddLogger.then("it should return true");
+        when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
+        when(declaredActivityService.countEnrolledStudents(activity)).thenReturn(1);
+
+        assertTrue(activityService.hasEnrolledStudents(activityId));
+      }
+
+      @Test
+      void thenItShouldBeFalseWhenNobodyIsEnrolled() {
+        BddLogger.then("it should return false");
+        when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
+        when(declaredActivityService.countEnrolledStudents(activity)).thenReturn(0);
+
+        assertFalse(activityService.hasEnrolledStudents(activityId));
+      }
+
+      @Test
+      void thenItShouldBeFalseWhenTheActivityDoesNotExist() {
+        BddLogger.then("it should return false without counting anything");
+        when(activityRepository.findById(activityId)).thenReturn(Optional.empty());
+
+        assertFalse(activityService.hasEnrolledStudents(activityId));
+        verifyNoInteractions(declaredActivityService);
       }
     }
 
