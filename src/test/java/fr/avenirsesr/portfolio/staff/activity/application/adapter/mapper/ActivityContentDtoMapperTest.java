@@ -1,6 +1,9 @@
 package fr.avenirsesr.portfolio.staff.activity.application.adapter.mapper;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import fr.avenirsesr.portfolio.activity.infrastructure.fixture.ActivityFixture;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
@@ -124,6 +127,19 @@ class ActivityContentDtoMapperTest {
   }
 
   @Test
+  void shouldMapHasEnrolledStudentOfAPublishedActivityWhenProvided() {
+    BddLogger.given("a published activity and a computed hasEnrolledStudent value");
+    Activity activity = ActivityFixture.create().toModel();
+
+    BddLogger.when("mapping to ActivityContentDTO with hasEnrolledStudent = true");
+    ActivityContentDTO dto =
+        mapper.toDTO(activity, activity.getStatus(), false, true, Set.of(), List.of(), List.of());
+
+    BddLogger.then("hasEnrolledStudent should be true");
+    assertEquals(Boolean.TRUE, dto.hasEnrolledStudent());
+  }
+
+  @Test
   void shouldMapDraftActivityStatusToDraft() {
     BddLogger.given("an activity draft");
     ActivityDraft draft = ActivityDraft.create("draft title", StaffFixture.create().toModel());
@@ -186,7 +202,13 @@ class ActivityContentDtoMapperTest {
     BddLogger.when("mapping both to ActivityContentDTO");
     ActivityContentDTO activityDto =
         mapper.toDTO(
-            activity, EActivityStatus.UNPUBLISHED, false, Set.of(), List.of(), subActivities);
+            activity,
+            EActivityStatus.UNPUBLISHED,
+            false,
+            false,
+            Set.of(),
+            List.of(),
+            subActivities);
     ActivityContentDTO subActivityDto =
         mapper.toDTO(subActivityDraft, false, Set.of(), List.of(), List.of());
 
@@ -218,7 +240,7 @@ class ActivityContentDtoMapperTest {
 
     BddLogger.when("mapping to ActivityContentDTO with the rights");
     ActivityContentDTO activityDto =
-        mapper.toDTO(activity, activity.getStatus(), true, rights, List.of(), List.of());
+        mapper.toDTO(activity, activity.getStatus(), true, false, rights, List.of(), List.of());
     ActivityContentDTO draftDto = mapper.toDTO(draft, null, rights, List.of(), List.of());
 
     BddLogger.then("the rights should be carried by both DTOs");

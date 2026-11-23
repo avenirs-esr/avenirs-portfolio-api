@@ -1,8 +1,24 @@
 package fr.avenirsesr.portfolio.staff.activity.domain.service;
 
-import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.*;
-import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.*;
-import static fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityUpdatableField.*;
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.ACTIVITY_RECOMMENDED_COMPLETION_CONTEXTS;
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.LINK_LENGTH;
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.RICH_DESCRIPTION_LENGTH;
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.SUMMARY_LENGTH;
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.TITLE_LENGTH;
+import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.requireNotBlankAndEnrichedMaxLength;
+import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.requireNotBlankAndMaxLength;
+import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.requireNotNull;
+import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateDateOrder;
+import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateOptionalTextMaxLength;
+import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateUrl;
+import static fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityUpdatableField.ACTIVITY_TITLE;
+import static fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityUpdatableField.BANNER;
+import static fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityUpdatableField.DESCRIPTION;
+import static fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityUpdatableField.FILES_AND_LINKS;
+import static fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityUpdatableField.RECOMMENDED_COMPLETION_CONTEXTS;
+import static fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityUpdatableField.SUB_ACTIVITIES;
+import static fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityUpdatableField.SUMMARY;
+import static fr.avenirsesr.portfolio.staff.activity.domain.model.enums.EActivityUpdatableField.THEMATIC;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
@@ -30,7 +46,18 @@ import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityStaffOverviewD
 import fr.avenirsesr.portfolio.staff.activity.domain.data.ActivityWithStudentStatusData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.InactiveStudentData;
 import fr.avenirsesr.portfolio.staff.activity.domain.data.SubActivityOverviewData;
-import fr.avenirsesr.portfolio.staff.activity.domain.exception.*;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityDatesException;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityDraftNotFoundException;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityNotFoundException;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityPeriodExcludesSubActivitiesException;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityTargetNotAccessibleException;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.ActivityUnpublishedException;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.SubActivityAdditionNotAllowedException;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.SubActivityDeletionNotAllowedException;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.SubActivityFieldNotAllowedException;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.SubActivityOperationNotAllowedException;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.SubActivityOrderMismatchException;
+import fr.avenirsesr.portfolio.staff.activity.domain.exception.SubActivityPeriodOutsideMainActivityException;
 import fr.avenirsesr.portfolio.staff.activity.domain.mapper.ActivityPresentationDataMapper;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.staff.activity.domain.model.ActivityAssessment;
@@ -63,7 +90,15 @@ import fr.avenirsesr.portfolio.user.infrastructure.configuration.UserPhotoDefaul
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -810,7 +845,7 @@ public class ActivityServiceImpl implements ActivityService {
   public ActivityDraft createSubActivityDraft(UUID activityDraftId, String title) {
     var mainDraft = getDraftWithRight(activityDraftId, EActivityRight.EDIT);
     requireMainActivity(mainDraft);
-    if (hasEnrolledStudents(mainDraft)) {
+    if (hasEnrolledStudents(activityDraftId)) {
       throw new SubActivityAdditionNotAllowedException();
     }
     requireNotBlankAndMaxLength("title", title, TITLE_LENGTH);
@@ -856,7 +891,7 @@ public class ActivityServiceImpl implements ActivityService {
   public void deleteSubActivityDraft(UUID activityDraftId, UUID subActivityId) {
     var mainDraft = getDraftWithRight(activityDraftId, EActivityRight.EDIT);
     requireMainActivity(mainDraft);
-    if (hasEnrolledStudents(mainDraft)) {
+    if (hasEnrolledStudents(activityDraftId)) {
       throw new SubActivityDeletionNotAllowedException();
     }
 
@@ -967,7 +1002,7 @@ public class ActivityServiceImpl implements ActivityService {
       draft.setEndDate(null);
     }
 
-    if (!hasEnrolledStudents(draft)) {
+    if (!hasEnrolledStudents(draft.getMainActivityId().orElse(id))) {
       if (traceAllowedAssociations != null)
         draft.setTraceAllowedAssociations(traceAllowedAssociations);
       if (feedbackAllowedIterations != null)
@@ -1081,7 +1116,7 @@ public class ActivityServiceImpl implements ActivityService {
       activityDraftRepository.saveAll(subActivities.stream().map(this::draftOf).toList());
     }
     activityAuthorizationService.copyActivityAuthorizationsToDraft(activityId);
-    if (!hasEnrolledStudents(activity)) {
+    if (!hasEnrolledStudents(activityId)) {
       removeSubActivities(subActivities);
       activityRepository.removeFromDatabase(activity);
     }
@@ -1246,10 +1281,10 @@ public class ActivityServiceImpl implements ActivityService {
   }
 
   @Override
-  public Boolean hasEnrolledStudents(ActivityDraft draft) {
+  public Boolean hasEnrolledStudents(UUID activityId) {
     return activityRepository
-        .findById(draft.getMainActivityId().orElse(draft.getId()))
-        .map(this::hasEnrolledStudents)
+        .findById(activityId)
+        .map(activity -> declaredActivityService.countEnrolledStudents(activity) > 0)
         .orElse(false);
   }
 

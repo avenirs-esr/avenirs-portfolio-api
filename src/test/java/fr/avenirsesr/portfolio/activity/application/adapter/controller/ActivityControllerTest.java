@@ -21,7 +21,6 @@ import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedRes
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.application.adapter.mapper.FileDTOMapper;
 import fr.avenirsesr.portfolio.staff.activity.application.adapter.controller.ActivityController;
@@ -56,11 +55,14 @@ import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EDeclaredActi
 import fr.avenirsesr.portfolio.student.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StaffFixture;
-import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import jakarta.servlet.http.HttpServletRequest;
 import java.security.Principal;
 import java.time.Instant;
-import java.util.*;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -83,16 +85,13 @@ class ActivityControllerTest {
 
   @InjectMocks private ActivityController controller;
 
-  private UUID userId;
-  private User user;
   private Activity activity;
   private Principal principal;
   private static StaffInfoDTO AUTHOR;
 
   @BeforeEach
   void setUp() {
-    userId = UUID.randomUUID();
-    user = UserFixture.create().withId(userId).toModel();
+    var userId = UUID.randomUUID();
     AUTHOR = new StaffInfoDTO(userId, "staff firstname", "staff lastname");
     activity = ActivityFixture.create().toModel();
     principal = () -> userId.toString();
@@ -766,11 +765,9 @@ class ActivityControllerTest {
   }
 
   @Test
-  void shouldReturnContentForPublishedActivityWithoutComputingHasEnrolledStudent() {
-    BddLogger.given("a published activity");
+  void shouldReturnContentForPublishedActivityWithTheEnrolledStudentsOfTheMainActivity() {
+    BddLogger.given("a published activity with enrolled students");
     UUID activityId = activity.getId();
-    userId = UUID.randomUUID();
-    user = UserFixture.create().withId(userId).toModel();
     ActivityContentDTO dto =
         new ActivityContentDTO(
             activityId,
@@ -785,7 +782,7 @@ class ActivityControllerTest {
             true,
             0,
             0,
-            null,
+            true,
             false,
             List.of(),
             List.of(),
@@ -801,11 +798,13 @@ class ActivityControllerTest {
 
     when(activityService.getActivityById(activityId)).thenReturn(activity);
     when(activityService.getMainActivityOf(activity)).thenReturn(activity);
+    when(activityService.hasEnrolledStudents(activityId)).thenReturn(true);
     when(fileDTOMapper.toFileDTOs(activity.getFiles(), null)).thenReturn(List.of());
     when(activityContentDtoMapper.toDTO(
             activity,
             activity.getStatus(),
             false,
+            true,
             Set.of(EActivityRight.EDIT),
             List.of(),
             List.of()))
@@ -817,7 +816,7 @@ class ActivityControllerTest {
     var request = createMockRequest();
     var response = controller.getActivityContent(request, EActivityStatus.PUBLISHED, activityId);
 
-    BddLogger.then("it should return the DTO without calling hasEnrolledStudents");
+    BddLogger.then("it should pass the enrolled students of the main activity to the mapper");
     assertEquals(200, response.getStatusCode().value());
     assertEquals(dto, response.getBody());
     verify(activityContentDtoMapper)
@@ -825,18 +824,16 @@ class ActivityControllerTest {
             activity,
             activity.getStatus(),
             false,
+            true,
             Set.of(EActivityRight.EDIT),
             List.of(),
             List.of());
-    verify(activityService, never()).hasEnrolledStudents(any(ActivityDraft.class));
   }
 
   @Test
-  void shouldReturnContentForUnpublishedActivityWithoutComputingHasEnrolledStudent() {
-    BddLogger.given("an unpublished activity");
+  void shouldReturnContentForUnpublishedActivityWithTheEnrolledStudentsOfTheMainActivity() {
+    BddLogger.given("an unpublished activity without enrolled student");
     UUID activityId = activity.getId();
-    userId = UUID.randomUUID();
-    user = UserFixture.create().withId(userId).toModel();
     ActivityContentDTO dto =
         new ActivityContentDTO(
             activityId,
@@ -851,7 +848,7 @@ class ActivityControllerTest {
             true,
             0,
             0,
-            null,
+            false,
             false,
             List.of(),
             List.of(),
@@ -867,10 +864,12 @@ class ActivityControllerTest {
 
     when(activityService.getActivityById(activityId)).thenReturn(activity);
     when(activityService.getMainActivityOf(activity)).thenReturn(activity);
+    when(activityService.hasEnrolledStudents(activityId)).thenReturn(false);
     when(fileDTOMapper.toFileDTOs(activity.getFiles(), null)).thenReturn(List.of());
     when(activityContentDtoMapper.toDTO(
             activity,
             activity.getStatus(),
+            false,
             false,
             Set.of(EActivityRight.EDIT),
             List.of(),
@@ -883,7 +882,7 @@ class ActivityControllerTest {
     var request = createMockRequest();
     var response = controller.getActivityContent(request, EActivityStatus.UNPUBLISHED, activityId);
 
-    BddLogger.then("it should return the DTO without calling hasEnrolledStudents");
+    BddLogger.then("it should pass the enrolled students of the main activity to the mapper");
     assertEquals(200, response.getStatusCode().value());
     assertEquals(dto, response.getBody());
     verify(activityContentDtoMapper)
@@ -891,10 +890,29 @@ class ActivityControllerTest {
             activity,
             activity.getStatus(),
             false,
+            false,
             Set.of(EActivityRight.EDIT),
             List.of(),
             List.of());
-    verify(activityService, never()).hasEnrolledStudents(any(ActivityDraft.class));
+  }
+
+  @Test
+  void shouldPassTheEnrolledStudentsOfTheMainActivityWhenGettingASubActivityContent() {
+    BddLogger.given("a published sub-activity whose main activity has enrolled students");
+    Activity mainActivity = ActivityFixture.create().toModel();
+    UUID subActivityId = activity.getId();
+    when(activityService.getActivityById(subActivityId)).thenReturn(activity);
+    when(activityService.getMainActivityOf(activity)).thenReturn(mainActivity);
+    when(activityService.hasEnrolledStudents(mainActivity.getId())).thenReturn(true);
+
+    BddLogger.when("getting the content of the sub-activity");
+    controller.getActivityContent(createMockRequest(), EActivityStatus.PUBLISHED, subActivityId);
+
+    BddLogger.then("hasEnrolledStudent should be computed on the main activity");
+    verify(activityContentDtoMapper)
+        .toDTO(
+            eq(activity), eq(mainActivity.getStatus()), eq(false), eq(true), any(), any(), any());
+    verify(activityService, never()).hasEnrolledStudents(subActivityId);
   }
 
   @Test
@@ -902,8 +920,6 @@ class ActivityControllerTest {
     BddLogger.given("an activity draft");
     UUID draftId = UUID.randomUUID();
     ActivityDraft draft = mock(ActivityDraft.class);
-    userId = UUID.randomUUID();
-    user = UserFixture.create().withId(userId).toModel();
     ActivityContentDTO dto =
         new ActivityContentDTO(
             draftId,
@@ -933,7 +949,8 @@ class ActivityControllerTest {
             Instant.now());
 
     when(activityService.getActivityDraftById(draftId)).thenReturn(draft);
-    when(activityService.hasEnrolledStudents(draft)).thenReturn(true);
+    when(draft.getId()).thenReturn(draftId);
+    when(activityService.hasEnrolledStudents(draftId)).thenReturn(true);
     when(draft.getFiles()).thenReturn(List.of());
     when(fileDTOMapper.toFileDTOs(List.of(), null)).thenReturn(List.of());
     when(activityAuthorizationService.getLoggedInStaffDraftRights(any())).thenReturn(Set.of());
@@ -949,8 +966,26 @@ class ActivityControllerTest {
     BddLogger.then("it should return the DTO built from the computed hasEnrolledStudents value");
     assertEquals(200, response.getStatusCode().value());
     assertEquals(dto, response.getBody());
-    verify(activityService).hasEnrolledStudents(draft);
+    verify(activityService).hasEnrolledStudents(draftId);
     verify(activityContentDtoMapper).toDTO(draft, true, Set.of(), List.of(), List.of());
+  }
+
+  @Test
+  void shouldPassTheEnrolledStudentsOfTheMainActivityWhenGettingASubActivityDraftContent() {
+    BddLogger.given("a sub-activity draft whose main activity has enrolled students");
+    UUID subActivityDraftId = UUID.randomUUID();
+    UUID mainActivityId = UUID.randomUUID();
+    ActivityDraft subActivityDraft = mock(ActivityDraft.class);
+    when(activityService.getActivityDraftById(subActivityDraftId)).thenReturn(subActivityDraft);
+    when(subActivityDraft.getMainActivityId()).thenReturn(Optional.of(mainActivityId));
+    when(activityService.hasEnrolledStudents(mainActivityId)).thenReturn(true);
+
+    BddLogger.when("getting the content of the sub-activity draft");
+    controller.getActivityContent(createMockRequest(), EActivityStatus.DRAFT, subActivityDraftId);
+
+    BddLogger.then("hasEnrolledStudent should be computed on the main activity");
+    verify(activityContentDtoMapper).toDTO(eq(subActivityDraft), eq(true), any(), any(), any());
+    verify(activityService, never()).hasEnrolledStudents(subActivityDraftId);
   }
 
   @Test
@@ -1089,6 +1124,7 @@ class ActivityControllerTest {
             activity,
             activity.getStatus(),
             true,
+            false,
             Set.of(EActivityRight.EDIT),
             List.of(),
             List.of());

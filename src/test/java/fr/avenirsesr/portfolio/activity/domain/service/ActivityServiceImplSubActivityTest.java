@@ -453,20 +453,6 @@ class ActivityServiceImplSubActivityTest {
   class WhenReadingASubActivity {
 
     @Test
-    void thenTheEnrolledStudentsOfASubActivityDraftShouldBeThoseOfTheMainActivity() {
-      BddLogger.given("a sub-activity draft whose main activity has enrolled students");
-      var publishedSubActivity = mock(Activity.class);
-      when(activityRepository.findById(mainDraft.getId())).thenReturn(Optional.of(mainActivity));
-      when(activityRepository.findById(firstSubActivityDraft.getId()))
-          .thenReturn(Optional.of(publishedSubActivity));
-      when(declaredActivityService.countEnrolledStudents(mainActivity)).thenReturn(2);
-
-      BddLogger.then("the sub-activity draft should report the enrolled students of the main");
-      assertTrue(activityService.hasEnrolledStudents(firstSubActivityDraft));
-      verify(declaredActivityService, never()).countEnrolledStudents(publishedSubActivity);
-    }
-
-    @Test
     void thenTheMainActivityOfASubActivityShouldBeResolved() {
       BddLogger.given("a published sub-activity");
       givenPublished(mainActivity);

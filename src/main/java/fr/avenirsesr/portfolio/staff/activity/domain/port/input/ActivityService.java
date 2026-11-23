@@ -120,7 +120,7 @@ public interface ActivityService {
 
   ActivityDraft duplicateActivity(UUID activityId, String title);
 
-  Boolean hasEnrolledStudents(ActivityDraft draft);
+  Boolean hasEnrolledStudents(UUID activityId);
 
   Boolean hasDraftForActivity(UUID activityId);
 
