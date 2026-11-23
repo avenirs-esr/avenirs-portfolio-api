@@ -32,7 +32,6 @@ import java.util.stream.Stream;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -49,195 +48,188 @@ public class FeedbackDatabaseRepository
       FileJpaRepository fileJpaRepository,
       StudentJpaRepository studentJpaRepository,
       SkillJpaRepository skillJpaRepository) {
-<span class="fc" id="L52">    super(jpaRepository, jpaRepository, FeedbackEntity.class, FeedbackMapper.INSTANCE);</span>
-<span class="fc" id="L53">    this.jpaRepository = jpaRepository;</span>
-<span class="fc" id="L54">    this.fileJpaRepository = fileJpaRepository;</span>
-<span class="fc" id="L55">    this.studentJpaRepository = studentJpaRepository;</span>
-<span class="fc" id="L56">    this.skillJpaRepository = skillJpaRepository;</span>
-<span class="fc" id="L57">  }</span>
+<span class="fc" id="L51">    super(jpaRepository, jpaRepository, FeedbackEntity.class, FeedbackMapper.INSTANCE);</span>
+<span class="fc" id="L52">    this.jpaRepository = jpaRepository;</span>
+<span class="fc" id="L53">    this.fileJpaRepository = fileJpaRepository;</span>
+<span class="fc" id="L54">    this.studentJpaRepository = studentJpaRepository;</span>
+<span class="fc" id="L55">    this.skillJpaRepository = skillJpaRepository;</span>
+<span class="fc" id="L56">  }</span>
 
   // ── save ────────────────────────────────────────────────────────────
 
   @Override
   public Feedback save(Feedback domain) {
-<span class="fc" id="L63">    FeedbackEntity saved = jpaRepository.save(FeedbackMapper.INSTANCE.fromDomain(domain));</span>
-<span class="fc" id="L64">    return toDomainWithDependencies(saved);</span>
+<span class="fc" id="L62">    FeedbackEntity saved = jpaRepository.save(FeedbackMapper.INSTANCE.fromDomain(domain));</span>
+<span class="fc" id="L63">    return toDomainWithDependencies(saved);</span>
   }
 
   @Override
   public List&lt;Feedback&gt; saveAll(List&lt;Feedback&gt; domains) {
-<span class="nc" id="L69">    List&lt;FeedbackEntity&gt; saved =</span>
-<span class="nc" id="L70">        jpaRepository.saveAll(domains.stream().map(FeedbackMapper.INSTANCE::fromDomain).toList());</span>
-<span class="nc" id="L71">    return saved.stream().map(this::toDomainWithDependencies).toList();</span>
+<span class="nc" id="L68">    List&lt;FeedbackEntity&gt; saved =</span>
+<span class="nc" id="L69">        jpaRepository.saveAll(domains.stream().map(FeedbackMapper.INSTANCE::fromDomain).toList());</span>
+<span class="nc" id="L70">    return saved.stream().map(this::toDomainWithDependencies).toList();</span>
   }
 
   // ── find ────────────────────────────────────────────────────────────
 
   @Override
   public Optional&lt;Feedback&gt; findById(UUID id) {
-<span class="fc" id="L78">    return jpaRepository.findById(id).map(this::toDomainWithDependencies);</span>
+<span class="fc" id="L77">    return jpaRepository.findById(id).map(this::toDomainWithDependencies);</span>
   }
 
   @Override
   public Optional&lt;Feedback&gt; findById(UUID id, FetchGraph fetchGraph) {
-<span class="nc" id="L83">    return findById(id);</span>
+<span class="nc" id="L82">    return findById(id);</span>
   }
 
   @Override
   public List&lt;Feedback&gt; findAllById(List&lt;UUID&gt; ids) {
-<span class="nc" id="L88">    return jpaRepository.findAllById(ids).stream().map(this::toDomainWithDependencies).toList();</span>
+<span class="nc" id="L87">    return jpaRepository.findAllById(ids).stream().map(this::toDomainWithDependencies).toList();</span>
   }
 
   @Override
   public List&lt;Feedback&gt; findAll() {
-<span class="nc" id="L93">    return jpaRepository.findAll().stream().map(this::toDomainWithDependencies).toList();</span>
+<span class="nc" id="L92">    return jpaRepository.findAll().stream().map(this::toDomainWithDependencies).toList();</span>
   }
 
   @Override
   public List&lt;Feedback&gt; findAllByDeclaredActivityId(
       UUID declaredActivityId, EFeedbackStatus... status) {
-<span class="fc" id="L99">    var spec =</span>
-<span class="fc" id="L100">        FeedbackSpecification.hasDeclaredActivityId(declaredActivityId)</span>
-<span class="fc" id="L101">            .and(FeedbackSpecification.hasStatus(status));</span>
+<span class="fc" id="L98">    var spec =</span>
+<span class="fc" id="L99">        FeedbackSpecification.hasDeclaredActivityId(declaredActivityId)</span>
+<span class="fc" id="L100">            .and(FeedbackSpecification.hasStatus(status));</span>
 
-<span class="fc" id="L103">    var sort = Sort.by(&quot;createdAt&quot;).descending();</span>
-<span class="fc" id="L104">    return jpaRepository.findAll(spec, sort).stream().map(this::toDomainWithDependencies).toList();</span>
+<span class="fc" id="L102">    var sort = Sort.by(&quot;createdAt&quot;).descending();</span>
+<span class="fc" id="L103">    return jpaRepository.findAll(spec, sort).stream().map(this::toDomainWithDependencies).toList();</span>
   }
 
   @Override
   public PagedResult&lt;Feedback&gt; findByStaff(
       UUID staffId, UUID activityId, PageCriteria pageCriteria, EFeedbackStatus... status) {
-<span class="fc" id="L110">    var staffScope =</span>
-<span class="fc" id="L111">        FeedbackSpecification.isSubmittedByStaff(staffId)</span>
-<span class="fc" id="L112">            .or(FeedbackSpecification.isAssignedToStaff(staffId));</span>
-
-<span class="fc" id="L114">    var specification =</span>
-<span class="fc" id="L115">        Specification.allOf(</span>
-            staffScope,
-<span class="fc" id="L117">            FeedbackSpecification.hasStatus(status),</span>
-<span class="fc" id="L118">            FeedbackSpecification.hasActivityId(activityId),</span>
-<span class="fc" id="L119">            FeedbackSpecification.isLatestOfItsDeclaredActivity());</span>
+<span class="fc" id="L109">    var specification =</span>
+<span class="fc" id="L110">        FeedbackSpecification.isAssignedToStaff(staffId)</span>
+<span class="fc" id="L111">            .and(FeedbackSpecification.hasStatus(status))</span>
+<span class="fc" id="L112">            .and(FeedbackSpecification.hasActivityId(activityId))</span>
+<span class="fc" id="L113">            .and(FeedbackSpecification.isLatestOfItsDeclaredActivity());</span>
     // Status strings sort alphabetically in the required priority order:
     // &quot;IN_PROCESS&quot; &lt; &quot;NEW&quot; &lt; &quot;SUBMITTED&quot;
-<span class="fc" id="L122">    var sort = Sort.by(&quot;status&quot;).ascending().and(Sort.by(&quot;createdAt&quot;).ascending());</span>
-<span class="fc" id="L123">    return findAll(</span>
-<span class="fc" id="L124">        specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort));</span>
+<span class="fc" id="L116">    var sort = Sort.by(&quot;status&quot;).ascending().and(Sort.by(&quot;createdAt&quot;).ascending());</span>
+<span class="fc" id="L117">    return findAll(</span>
+<span class="fc" id="L118">        specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort));</span>
   }
 
   // ── pagination ──────────────────────────────────────────────────────
 
   @Override
   protected PagedResult&lt;Feedback&gt; toPagedResult(Page&lt;FeedbackEntity&gt; page) {
-<span class="fc" id="L131">    var content = page.getContent().stream().map(this::toDomainWithDependencies).toList();</span>
-<span class="fc" id="L132">    return new PagedResult&lt;&gt;(</span>
+<span class="fc" id="L125">    var content = page.getContent().stream().map(this::toDomainWithDependencies).toList();</span>
+<span class="fc" id="L126">    return new PagedResult&lt;&gt;(</span>
         content,
         new PageInfo(
-<span class="fc" id="L135">            page.getPageable().getPageNumber(),</span>
-<span class="fc" id="L136">            page.getPageable().getPageSize(),</span>
-<span class="fc" id="L137">            page.getTotalElements()));</span>
+<span class="fc" id="L129">            page.getPageable().getPageNumber(),</span>
+<span class="fc" id="L130">            page.getPageable().getPageSize(),</span>
+<span class="fc" id="L131">            page.getTotalElements()));</span>
   }
 
   @Override
   public List&lt;Feedback&gt; findLatestFeedbacksByStaffAndActivityForEachStudent(
       UUID staffId, UUID activityId) {
-<span class="fc" id="L143">    var staffScope =</span>
-<span class="fc" id="L144">        FeedbackSpecification.isSubmittedByStaff(staffId)</span>
-<span class="fc" id="L145">            .or(FeedbackSpecification.isAssignedToStaff(staffId));</span>
+<span class="fc" id="L137">    var specification =</span>
+<span class="fc" id="L138">        FeedbackSpecification.isAssignedToStaff(staffId)</span>
+<span class="fc" id="L139">            .and(FeedbackSpecification.hasActivityId(activityId));</span>
 
-<span class="fc" id="L147">    var specification = staffScope.and(FeedbackSpecification.hasActivityId(activityId));</span>
+<span class="fc" id="L141">    var sort = Sort.by(&quot;createdAt&quot;).descending();</span>
 
-<span class="fc" id="L149">    var sort = Sort.by(&quot;createdAt&quot;).descending();</span>
-
-<span class="fc" id="L151">    return jpaRepository.findAll(specification, sort).stream()</span>
-<span class="fc" id="L152">        .map(this::toDomainWithDependencies)</span>
-<span class="fc" id="L153">        .collect(</span>
-<span class="fc" id="L154">            Collectors.toMap(</span>
-<span class="fc" id="L155">                feedback -&gt; feedback.getDeclaredActivity().getStudent().getId(),</span>
-<span class="fc" id="L156">                Function.identity(),</span>
-<span class="fc" id="L157">                (existing, ignored) -&gt; existing,</span>
+<span class="fc" id="L143">    return jpaRepository.findAll(specification, sort).stream()</span>
+<span class="fc" id="L144">        .map(this::toDomainWithDependencies)</span>
+<span class="fc" id="L145">        .collect(</span>
+<span class="fc" id="L146">            Collectors.toMap(</span>
+<span class="fc" id="L147">                feedback -&gt; feedback.getDeclaredActivity().getStudent().getId(),</span>
+<span class="fc" id="L148">                Function.identity(),</span>
+<span class="fc" id="L149">                (existing, ignored) -&gt; existing,</span>
                 LinkedHashMap::new))
-<span class="fc" id="L159">        .values()</span>
-<span class="fc" id="L160">        .stream()</span>
-<span class="fc" id="L161">        .toList();</span>
+<span class="fc" id="L151">        .values()</span>
+<span class="fc" id="L152">        .stream()</span>
+<span class="fc" id="L153">        .toList();</span>
   }
 
   @Override
   public List&lt;UUID&gt; findDeclaredActivityIdsHavingActiveFeedbacks(List&lt;UUID&gt; declaredActivityIds) {
-<span class="pc bpc" id="L166" title="1 of 2 branches missed.">    if (declaredActivityIds.isEmpty()) {</span>
-<span class="nc" id="L167">      return List.of();</span>
+<span class="pc bpc" id="L158" title="1 of 2 branches missed.">    if (declaredActivityIds.isEmpty()) {</span>
+<span class="nc" id="L159">      return List.of();</span>
     }
 
-<span class="fc" id="L170">    return jpaRepository.findDeclaredActivityIdsWithActiveFeedbacks(declaredActivityIds);</span>
+<span class="fc" id="L162">    return jpaRepository.findDeclaredActivityIdsWithActiveFeedbacks(declaredActivityIds);</span>
   }
 
   @Override
   public Set&lt;UUID&gt; findAttachmentIdsUsedByTraceSnapshots(
       List&lt;UUID&gt; declaredActivityIds, List&lt;UUID&gt; traceIds) {
-<span class="nc" id="L176">    return jpaRepository.findAttachmentIdsUsedByTraceSnapshots(declaredActivityIds, traceIds);</span>
+<span class="nc" id="L168">    return jpaRepository.findAttachmentIdsUsedByTraceSnapshots(declaredActivityIds, traceIds);</span>
   }
 
   @Override
   public int countByStatus(Staff staff, Activity activity, EFeedbackStatus status) {
-<span class="fc" id="L181">    var spec =</span>
-<span class="fc" id="L182">        FeedbackSpecification.isAssignedToStaff(staff.getId())</span>
-<span class="fc bfc" id="L183" title="All 2 branches covered.">            .and(FeedbackSpecification.hasActivityId(activity != null ? activity.getId() : null))</span>
-<span class="fc" id="L184">            .and(FeedbackSpecification.hasStatus(status))</span>
-<span class="fc" id="L185">            .and(FeedbackSpecification.isLatestOfItsDeclaredActivity());</span>
-<span class="fc" id="L186">    return (int) jpaRepository.count(spec);</span>
+<span class="fc" id="L173">    var spec =</span>
+<span class="fc" id="L174">        FeedbackSpecification.isAssignedToStaff(staff.getId())</span>
+<span class="fc bfc" id="L175" title="All 2 branches covered.">            .and(FeedbackSpecification.hasActivityId(activity != null ? activity.getId() : null))</span>
+<span class="fc" id="L176">            .and(FeedbackSpecification.hasStatus(status))</span>
+<span class="fc" id="L177">            .and(FeedbackSpecification.isLatestOfItsDeclaredActivity());</span>
+<span class="fc" id="L178">    return (int) jpaRepository.count(spec);</span>
   }
 
   @Override
   public void deleteByDeclaredActivityId(DeclaredActivity declaredActivity) {
-<span class="fc" id="L191">    var spec = FeedbackSpecification.hasDeclaredActivityId(declaredActivity.getId());</span>
-<span class="fc" id="L192">    var feedbacks = jpaRepository.findAll(spec);</span>
-<span class="fc" id="L193">    jpaRepository.deleteAll(feedbacks);</span>
-<span class="fc" id="L194">  }</span>
+<span class="fc" id="L183">    var spec = FeedbackSpecification.hasDeclaredActivityId(declaredActivity.getId());</span>
+<span class="fc" id="L184">    var feedbacks = jpaRepository.findAll(spec);</span>
+<span class="fc" id="L185">    jpaRepository.deleteAll(feedbacks);</span>
+<span class="fc" id="L186">  }</span>
 
   // ── private helpers ─────────────────────────────────────────────────
 
   private Feedback toDomainWithDependencies(FeedbackEntity entity) {
-<span class="fc" id="L199">    AssociationsJson associations = entity.getAssociations();</span>
+<span class="fc" id="L191">    AssociationsJson associations = entity.getAssociations();</span>
 
-<span class="fc" id="L201">    Map&lt;UUID, File&gt; files = resolveFiles(associations);</span>
-<span class="fc" id="L202">    Map&lt;UUID, Student&gt; students = resolveStudents(associations);</span>
-<span class="fc" id="L203">    Map&lt;UUID, Skill&gt; skills = resolveSkills(associations);</span>
+<span class="fc" id="L193">    Map&lt;UUID, File&gt; files = resolveFiles(associations);</span>
+<span class="fc" id="L194">    Map&lt;UUID, Student&gt; students = resolveStudents(associations);</span>
+<span class="fc" id="L195">    Map&lt;UUID, Skill&gt; skills = resolveSkills(associations);</span>
 
-<span class="fc" id="L205">    return FeedbackMapper.INSTANCE.toDomain(entity, files, students, skills);</span>
+<span class="fc" id="L197">    return FeedbackMapper.INSTANCE.toDomain(entity, files, students, skills);</span>
   }
 
   private Map&lt;UUID, File&gt; resolveFiles(AssociationsJson associations) {
-<span class="fc" id="L209">    Set&lt;UUID&gt; ids =</span>
-<span class="fc" id="L210">        associations.traces().stream()</span>
-<span class="fc" id="L211">            .map(AssociationsJson.TraceSnapshot::attachmentId)</span>
-<span class="fc" id="L212">            .filter(Objects::nonNull)</span>
-<span class="fc" id="L213">            .collect(Collectors.toSet());</span>
+<span class="fc" id="L201">    Set&lt;UUID&gt; ids =</span>
+<span class="fc" id="L202">        associations.traces().stream()</span>
+<span class="fc" id="L203">            .map(AssociationsJson.TraceSnapshot::attachmentId)</span>
+<span class="fc" id="L204">            .filter(Objects::nonNull)</span>
+<span class="fc" id="L205">            .collect(Collectors.toSet());</span>
 
-<span class="fc bfc" id="L215" title="All 2 branches covered.">    if (ids.isEmpty()) return Map.of();</span>
+<span class="fc bfc" id="L207" title="All 2 branches covered.">    if (ids.isEmpty()) return Map.of();</span>
 
-<span class="fc" id="L217">    return fileJpaRepository.findAllById(ids).stream()</span>
-<span class="fc" id="L218">        .collect(Collectors.toMap(AvenirsBaseEntity::getId, FileMapper.INSTANCE::toDomain));</span>
+<span class="fc" id="L209">    return fileJpaRepository.findAllById(ids).stream()</span>
+<span class="fc" id="L210">        .collect(Collectors.toMap(AvenirsBaseEntity::getId, FileMapper.INSTANCE::toDomain));</span>
   }
 
   private Map&lt;UUID, Student&gt; resolveStudents(AssociationsJson associations) {
-<span class="fc" id="L222">    Set&lt;UUID&gt; ids =</span>
-<span class="fc" id="L223">        Stream.concat(</span>
-<span class="fc" id="L224">                associations.traces().stream().map(AssociationsJson.TraceSnapshot::studentId),</span>
-<span class="fc" id="L225">                associations.skillProgresses().stream()</span>
-<span class="fc" id="L226">                    .map(AssociationsJson.SkillProgressSnapshot::studentId))</span>
-<span class="fc" id="L227">            .collect(Collectors.toSet());</span>
+<span class="fc" id="L214">    Set&lt;UUID&gt; ids =</span>
+<span class="fc" id="L215">        Stream.concat(</span>
+<span class="fc" id="L216">                associations.traces().stream().map(AssociationsJson.TraceSnapshot::studentId),</span>
+<span class="fc" id="L217">                associations.skillProgresses().stream()</span>
+<span class="fc" id="L218">                    .map(AssociationsJson.SkillProgressSnapshot::studentId))</span>
+<span class="fc" id="L219">            .collect(Collectors.toSet());</span>
 
-<span class="fc" id="L229">    return studentJpaRepository.findAllById(ids).stream()</span>
-<span class="fc" id="L230">        .collect(Collectors.toMap(AvenirsBaseEntity::getId, StudentMapper.INSTANCE::toDomain));</span>
+<span class="fc" id="L221">    return studentJpaRepository.findAllById(ids).stream()</span>
+<span class="fc" id="L222">        .collect(Collectors.toMap(AvenirsBaseEntity::getId, StudentMapper.INSTANCE::toDomain));</span>
   }
 
   private Map&lt;UUID, Skill&gt; resolveSkills(AssociationsJson associations) {
-<span class="fc" id="L234">    Set&lt;UUID&gt; ids =</span>
-<span class="fc" id="L235">        associations.skillProgresses().stream()</span>
-<span class="fc" id="L236">            .map(AssociationsJson.SkillProgressSnapshot::skillId)</span>
-<span class="fc" id="L237">            .collect(Collectors.toSet());</span>
+<span class="fc" id="L226">    Set&lt;UUID&gt; ids =</span>
+<span class="fc" id="L227">        associations.skillProgresses().stream()</span>
+<span class="fc" id="L228">            .map(AssociationsJson.SkillProgressSnapshot::skillId)</span>
+<span class="fc" id="L229">            .collect(Collectors.toSet());</span>
 
-<span class="fc" id="L239">    return skillJpaRepository.findAllById(ids).stream()</span>
-<span class="fc" id="L240">        .collect(Collectors.toMap(AvenirsBaseEntity::getId, SkillMapper.INSTANCE::toDomain));</span>
+<span class="fc" id="L231">    return skillJpaRepository.findAllById(ids).stream()</span>
+<span class="fc" id="L232">        .collect(Collectors.toMap(AvenirsBaseEntity::getId, SkillMapper.INSTANCE::toDomain));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
