@@ -233,7 +233,8 @@ public class ActivityServiceImpl implements ActivityService {
   }
 
   private boolean isPublishable(ActivityDraft subActivity) {
-    return subActivity.getDescription().isPresent();
+    return subActivity.getDescription().isPresent()
+        && subActivity.getRecommendedCompletionContexts().isPresent();
   }
 
   @Override
@@ -401,7 +402,7 @@ public class ActivityServiceImpl implements ActivityService {
         subActivityDraft.getPreviousActivityId().orElseThrow(),
         subActivityDraft.getTitle(),
         subActivityDraft.getDescription().orElseThrow(),
-        subActivityDraft.getRecommendedCompletionContexts().orElse(null),
+        subActivityDraft.getRecommendedCompletionContexts().orElseThrow(),
         subActivityDraft.getStartDate().orElse(null),
         subActivityDraft.getEndDate().orElse(null),
         subActivityDraft.getLinks(),
