@@ -135,19 +135,23 @@ class ActivityServiceImplSubActivityTest {
   }
 
   private ActivityDraft subActivityDraft(
-      UUID previousActivityId, String title, String description) {
+      UUID previousActivityId,
+      String title,
+      String description,
+      String recommendedCompletionContexts) {
     var draft = ActivityDraft.create(title, staff);
     draft.attachAsSubActivity(mainDraft.getId(), previousActivityId);
     draft.setDescription(description);
+    draft.setRecommendedCompletionContexts(recommendedCompletionContexts);
     return draft;
   }
 
   private ActivityDraft publishableSubActivityDraft(UUID previousActivityId, String title) {
-    return subActivityDraft(previousActivityId, title, "a description");
+    return subActivityDraft(previousActivityId, title, "a description", "context");
   }
 
   private ActivityDraft nonPublishableSubActivityDraft(UUID previousActivityId, String title) {
-    return subActivityDraft(previousActivityId, title, null);
+    return subActivityDraft(previousActivityId, title, null, null);
   }
 
   private void givenPublished(Activity... activities) {
@@ -605,9 +609,13 @@ class ActivityServiceImplSubActivityTest {
     void thenADraftSubActivityShouldBePublishableWhenItHasADescription() {
       BddLogger.given("a draft with a description and a draft without one");
       var withDescription =
-          subActivityDraft(mainDraft.getId(), "With description", "a description");
+          subActivityDraft(
+              mainDraft.getId(),
+              "With description",
+              "a description",
+              "recommendedCompletionContexts");
       var withoutDescription =
-          subActivityDraft(withDescription.getId(), "Without description", null);
+          subActivityDraft(withDescription.getId(), "Without description", null, null);
       when(activityDraftRepository.findAllSubActivitiesOf(mainDraft.getId()))
           .thenReturn(List.of(withDescription, withoutDescription));
 
@@ -1071,7 +1079,11 @@ class ActivityServiceImplSubActivityTest {
     void setupWhen() {
       BddLogger.given("a main draft with three sub-activities");
       thirdSubActivityDraft =
-          subActivityDraft(secondSubActivityDraft.getId(), "Third draft step", "a description");
+          subActivityDraft(
+              secondSubActivityDraft.getId(),
+              "Third draft step",
+              "a description",
+              "recommendedCompletionContexts");
       givenDrafts(mainDraft, firstSubActivityDraft);
       when(activityDraftRepository.findAllSubActivitiesOf(mainDraft.getId()))
           .thenReturn(

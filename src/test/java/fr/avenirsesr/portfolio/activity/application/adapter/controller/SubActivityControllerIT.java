@@ -1273,7 +1273,15 @@ class SubActivityControllerIT extends ContainerConfigurationTest {
 
     private UUID createPublishableSubActivity(String title) throws Exception {
       var subActivityId = createSubActivity(mainDraftId, title);
-      patchDraft(subActivityId, Map.of("description", "<p>Consigne</p>")).expectStatus().isOk();
+      patchDraft(
+              subActivityId,
+              Map.of(
+                  "description",
+                  "<p>Consigne</p>",
+                  "recommendedCompletionContexts",
+                  "<p>Ma consigne</p>"))
+          .expectStatus()
+          .isOk();
       return subActivityId;
     }
 
