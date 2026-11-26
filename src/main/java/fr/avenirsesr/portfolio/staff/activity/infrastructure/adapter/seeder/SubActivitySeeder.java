@@ -73,6 +73,7 @@ public class SubActivitySeeder {
                     data.recommendedCompletionContexts(),
                     data.startDate().orElse(null),
                     data.endDate().orElse(null),
+                    data.traceAllowedAssociations(),
                     data.links()));
           } finally {
             clockService.clear();

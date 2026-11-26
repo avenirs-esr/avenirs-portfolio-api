@@ -14,5 +14,6 @@ public record SubActivityCreationData(
     String recommendedCompletionContexts,
     Optional<LocalDate> startDate,
     Optional<LocalDate> endDate,
+    int traceAllowedAssociations,
     List<String> links,
     Instant updatedAt) {}

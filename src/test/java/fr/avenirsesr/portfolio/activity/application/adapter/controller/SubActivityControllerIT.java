@@ -70,6 +70,8 @@ class SubActivityControllerIT extends ContainerConfigurationTest {
   private static final String SUB_ACTIVITY_OPERATION_NOT_ALLOWED =
       "SUB_ACTIVITY_OPERATION_NOT_ALLOWED";
 
+  private static final int TRACE_UNLIMITED_ITERATIONS = -1;
+
   @Autowired private WebTestClient webTestClient;
   @Autowired private ObjectMapper objectMapper;
 
@@ -921,6 +923,31 @@ class SubActivityControllerIT extends ContainerConfigurationTest {
     }
 
     @Test
+    void thenTheTraceAllowanceOfASubActivityShouldOnlyChangeWithoutEnrolledStudent()
+        throws Exception {
+      var subActivityId = createPublishableSubActivity("Première étape");
+      publish(mainDraftId).expectStatus().isOk();
+
+      BddLogger.and("a student enrolled in the published activity");
+      subscribe(mainDraftId);
+
+      BddLogger.when("changing the trace allowance of the sub-activity");
+      createDraftFromPublishedActivity();
+      patchDraft(subActivityId, Map.of("traceAllowedAssociations", 3)).expectStatus().isOk();
+
+      BddLogger.then("the change should be ignored while the student is enrolled");
+      assertThat(traceAllowedAssociationsOf("DRAFT", subActivityId)).isEqualTo(-1);
+
+      BddLogger.when("the student unsubscribes and the change is made again");
+      unsubscribe(mainDraftId);
+      patchDraft(subActivityId, Map.of("traceAllowedAssociations", 3)).expectStatus().isOk();
+      publish(mainDraftId).expectStatus().isOk();
+
+      BddLogger.then("the published sub-activity should take the new trace allowance");
+      assertThat(traceAllowedAssociationsOf("PUBLISHED", subActivityId)).isEqualTo(3);
+    }
+
+    @Test
     void thenModifiedSubActivitiesShouldBeNotifiedOnceAsPartOfTheirMainActivity() throws Exception {
       var firstId = createPublishableSubActivity("Première étape");
       var secondId = createPublishableSubActivity("Deuxième étape");
@@ -1081,6 +1108,8 @@ class SubActivityControllerIT extends ContainerConfigurationTest {
               get(uri -> uri.path(CONTENT_PATH).build("DRAFT", subActivityId), staffHeaders()));
       assertThat(initialContent.get("title").asText()).isEqualTo("Étape à compléter");
       assertThat(initialContent.get("description").isNull()).isTrue();
+      assertThat(initialContent.get("traceAllowedAssociations").asInt())
+          .isEqualTo(TRACE_UNLIMITED_ITERATIONS);
       get(
           uri -> uri.path(BASE_PATH + "/DRAFT/{activityId}/presentation").build(subActivityId),
           staffHeaders());
@@ -1092,6 +1121,7 @@ class SubActivityControllerIT extends ContainerConfigurationTest {
                   "title", "Étape complétée",
                   "description", "<p>Consigne</p>",
                   "recommendedCompletionContexts", "En groupe",
+                  "traceAllowedAssociations", 3,
                   "links", List.of("https://example.com/ressource"),
                   "enableCompletionPeriod", true,
                   "startDate", "2027-03-01",
@@ -1126,8 +1156,6 @@ class SubActivityControllerIT extends ContainerConfigurationTest {
               "OTHER",
               "summary",
               "Résumé",
-              "traceAllowedAssociations",
-              1,
               "feedbackAllowedIterations",
               1,
               "enableReflection",
@@ -1224,6 +1252,7 @@ class SubActivityControllerIT extends ContainerConfigurationTest {
       assertThat(content.get("recommendedCompletionContexts").asText()).isEqualTo("En groupe");
       assertThat(content.get("startDate").asText()).isEqualTo("2027-03-01");
       assertThat(content.get("endDate").asText()).isEqualTo("2027-03-31");
+      assertThat(content.get("traceAllowedAssociations").asInt()).isEqualTo(3);
       assertThat(content.get("links").get(0).asText()).isEqualTo("https://example.com/ressource");
       assertThat(content.get("files")).hasSize(1);
       assertThat(content.get("rights")).isNotEmpty();
@@ -1367,6 +1396,11 @@ class SubActivityControllerIT extends ContainerConfigurationTest {
           readJson(
                   get(uri -> uri.path(CONTENT_PATH).build("PUBLISHED", activityId), staffHeaders()))
               .get("subActivities"));
+    }
+
+    private int traceAllowedAssociationsOf(String status, UUID id) throws Exception {
+      var body = get(uri -> uri.path(CONTENT_PATH).build(status, id), staffHeaders());
+      return readJson(body).get("traceAllowedAssociations").asInt();
     }
 
     private void expectNoDraft(UUID draftId) {

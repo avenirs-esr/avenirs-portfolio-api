@@ -199,6 +199,7 @@ public class ActivityServiceImpl implements ActivityService {
       String recommendedCompletionContexts,
       LocalDate startDate,
       LocalDate endDate,
+      int traceAllowedAssociations,
       List<String> links) {
     requireNotBlankAndMaxLength("title", title, TITLE_LENGTH);
     requireNotBlankAndEnrichedMaxLength("description", description, RICH_DESCRIPTION_LENGTH);
@@ -228,6 +229,7 @@ public class ActivityServiceImpl implements ActivityService {
             recommendedCompletionContexts,
             startDate,
             endDate,
+            traceAllowedAssociations,
             links,
             List.of()));
   }
@@ -306,7 +308,9 @@ public class ActivityServiceImpl implements ActivityService {
 
     var savedActivity = activityRepository.save(activity);
     activityAuthorizationService.applyDraftAuthorizationsToActivity(savedActivity.getId());
-    var subActivitiesPublication = publishSubActivities(activityDraftId, subActivityDrafts);
+    var subActivitiesPublication =
+        publishSubActivities(
+            activityDraftId, subActivityDrafts, !enrolledDeclaredActivities.isEmpty());
     removedFileIds.addAll(subActivitiesPublication.removedFileIds());
     if (!subActivitiesPublication.updatedTitles().isEmpty()) {
       updatedFields.add(SUB_ACTIVITIES);
@@ -325,14 +329,15 @@ public class ActivityServiceImpl implements ActivityService {
   private record SubActivitiesPublication(List<UUID> removedFileIds, List<String> updatedTitles) {}
 
   private SubActivitiesPublication publishSubActivities(
-      UUID activityId, List<ActivityDraft> subActivityDrafts) {
+      UUID activityId, List<ActivityDraft> subActivityDrafts, boolean hasEnrolledStudents) {
     var draftIds = subActivityDrafts.stream().map(ActivityDraft::getId).collect(Collectors.toSet());
     var keptInDraft =
         activityRepository.findAllSubActivitiesOf(activityId).stream()
             .collect(
                 Collectors.partitioningBy(subActivity -> draftIds.contains(subActivity.getId())));
     var deletedFileIds = deleteSubActivities(keptInDraft.get(false));
-    var publication = saveSubActivities(keptInDraft.get(true), subActivityDrafts);
+    var publication =
+        saveSubActivities(keptInDraft.get(true), subActivityDrafts, hasEnrolledStudents);
     return new SubActivitiesPublication(
         Stream.concat(deletedFileIds.stream(), publication.removedFileIds().stream()).toList(),
         publication.updatedTitles());
@@ -352,7 +357,9 @@ public class ActivityServiceImpl implements ActivityService {
   }
 
   private SubActivitiesPublication saveSubActivities(
-      List<Activity> keptSubActivities, List<ActivityDraft> subActivityDrafts) {
+      List<Activity> keptSubActivities,
+      List<ActivityDraft> subActivityDrafts,
+      boolean hasEnrolledStudents) {
     var publishedById =
         keptSubActivities.stream().collect(Collectors.toMap(Activity::getId, Function.identity()));
     var removedFileIds = new ArrayList<UUID>();
@@ -368,7 +375,7 @@ public class ActivityServiceImpl implements ActivityService {
       }
       removedFileIds.addAll(removedFileIdsOf(published, subActivityDraft));
       var moved = keptSubActivities.indexOf(published) != position;
-      var changed = updateSubActivity(published, subActivityDraft);
+      var changed = updateSubActivity(published, subActivityDraft, hasEnrolledStudents);
       if (moved || changed) {
         updatedTitles.add(published.getTitle());
       }
@@ -380,9 +387,11 @@ public class ActivityServiceImpl implements ActivityService {
     return new SubActivitiesPublication(removedFileIds, updatedTitles);
   }
 
-  private boolean updateSubActivity(Activity subActivity, ActivityDraft subActivityDraft) {
+  private boolean updateSubActivity(
+      Activity subActivity, ActivityDraft subActivityDraft, boolean hasEnrolledStudents) {
     var periodChanged = !hasSamePeriod(subActivity, subActivityDraft);
-    var fieldsChanged = !updateActivity(subActivity, subActivityDraft, true).isEmpty();
+    var fieldsChanged =
+        !updateActivity(subActivity, subActivityDraft, hasEnrolledStudents).isEmpty();
     subActivity.attachAsSubActivity(
         subActivityDraft.getMainActivityId().orElseThrow(),
         subActivityDraft.getPreviousActivityId().orElseThrow());
@@ -405,6 +414,7 @@ public class ActivityServiceImpl implements ActivityService {
         subActivityDraft.getRecommendedCompletionContexts().orElseThrow(),
         subActivityDraft.getStartDate().orElse(null),
         subActivityDraft.getEndDate().orElse(null),
+        subActivityDraft.getTraceAllowedAssociations(),
         subActivityDraft.getLinks(),
         subActivityDraft.getFiles());
   }
@@ -956,7 +966,6 @@ public class ActivityServiceImpl implements ActivityService {
     if (draft.isSubActivity()) {
       rejectIfProvided("thematic", thematic);
       rejectIfProvided("summary", summary);
-      rejectIfProvided("traceAllowedAssociations", traceAllowedAssociations);
       rejectIfProvided("feedbackAllowedIterations", feedbackAllowedIterations);
       rejectIfProvided("enableReflection", enableReflection);
       rejectIfProvided("targetInstitutionIds", targetInstitutionIds);
@@ -1275,10 +1284,6 @@ public class ActivityServiceImpl implements ActivityService {
     if (!orderedSubActivityDrafts.isEmpty()) {
       activityDraftRepository.removeAllFromDatabase(tailFirst(orderedSubActivityDrafts));
     }
-  }
-
-  private boolean hasEnrolledStudents(Activity activity) {
-    return declaredActivityService.countEnrolledStudents(activity) > 0;
   }
 
   @Override

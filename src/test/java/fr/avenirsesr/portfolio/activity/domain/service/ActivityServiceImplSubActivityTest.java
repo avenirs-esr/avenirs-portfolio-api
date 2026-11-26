@@ -93,6 +93,8 @@ class ActivityServiceImplSubActivityTest {
 
   @InjectMocks private ActivityServiceImpl activityService;
 
+  private static final int TRACE_UNLIMITED_ITERATIONS = -1;
+
   private Staff staff;
   private Activity mainActivity;
   private Activity firstSubActivity;
@@ -130,6 +132,7 @@ class ActivityServiceImplSubActivityTest {
         null,
         null,
         null,
+        TRACE_UNLIMITED_ITERATIONS,
         List.of(),
         files);
   }
@@ -405,6 +408,33 @@ class ActivityServiceImplSubActivityTest {
     }
 
     @Test
+    void thenTheTraceAllowedAssociationsShouldBeUpdated() {
+      BddLogger.when("setting the trace allowance of the sub-activity");
+      update(request -> request.traceAllowedAssociations = 3);
+
+      BddLogger.then("it should be saved");
+      assertEquals(3, firstSubActivityDraft.getTraceAllowedAssociations());
+      verify(activityDraftRepository).save(firstSubActivityDraft);
+    }
+
+    @Test
+    void thenTheTraceAllowedAssociationsShouldBeIgnoredWithEnrolledStudents() {
+      BddLogger.given("a main activity with an enrolled student");
+      var published =
+          ActivityFixture.create().withId(mainDraft.getId()).withAuthor(staff).toModel();
+      givenPublished(published);
+      when(declaredActivityService.countEnrolledStudents(published)).thenReturn(1);
+      var initialLimit = firstSubActivityDraft.getTraceAllowedAssociations();
+
+      BddLogger.when("setting the trace allowance of the sub-activity");
+      update(request -> request.traceAllowedAssociations = 3);
+
+      BddLogger.then("it should be left unchanged");
+      assertEquals(initialLimit, firstSubActivityDraft.getTraceAllowedAssociations());
+      verify(activityDraftRepository).save(firstSubActivityDraft);
+    }
+
+    @Test
     void thenSettingTheThematicShouldBeRejected() {
       assertRejected(request -> request.thematic = EActivityThematic.OTHER, "thematic");
     }
@@ -412,11 +442,6 @@ class ActivityServiceImplSubActivityTest {
     @Test
     void thenSettingTheSummaryShouldBeRejected() {
       assertRejected(request -> request.summary = "Summary", "summary");
-    }
-
-    @Test
-    void thenSettingTheTraceAllowedAssociationsShouldBeRejected() {
-      assertRejected(request -> request.traceAllowedAssociations = 3, "traceAllowedAssociations");
     }
 
     @Test
@@ -504,6 +529,7 @@ class ActivityServiceImplSubActivityTest {
               null,
               LocalDate.parse("2026-10-01"),
               LocalDate.parse("2026-10-31"),
+              TRACE_UNLIMITED_ITERATIONS,
               List.of(),
               List.of());
       firstSubActivityDraft.setStartDate(LocalDate.parse("2026-10-01"));
@@ -920,6 +946,7 @@ class ActivityServiceImplSubActivityTest {
               null,
               null,
               null,
+              3,
               List.of());
 
       BddLogger.then("it should be a neutral sub-activity of the main activity");
@@ -928,7 +955,7 @@ class ActivityServiceImplSubActivityTest {
       assertEquals(firstSubActivity.getId(), subActivity.getPreviousActivityId().orElseThrow());
       assertEquals(staff, subActivity.getAuthor());
       assertFalse(subActivity.isEnableReflection());
-      assertEquals(0, subActivity.getTraceAllowedAssociations());
+      assertEquals(3, subActivity.getTraceAllowedAssociations());
       assertEquals(0, subActivity.getFeedbackAllowedIterations());
       assertTrue(subActivity.getAssessment().isEmpty());
       verify(activityAuthorizationService, never()).grantAllRights(any(), any());
@@ -992,7 +1019,7 @@ class ActivityServiceImplSubActivityTest {
       assertTrue(subActivity.getSummary().isEmpty());
       assertTrue(subActivity.getDescription().isEmpty());
       assertFalse(subActivity.isEnableReflection());
-      assertEquals(0, subActivity.getTraceAllowedAssociations());
+      assertEquals(TRACE_UNLIMITED_ITERATIONS, subActivity.getTraceAllowedAssociations());
       assertEquals(0, subActivity.getFeedbackAllowedIterations());
       verify(activityAuthorizationService, never()).grantAllDraftRights(any(), any());
     }
@@ -1304,6 +1331,7 @@ class ActivityServiceImplSubActivityTest {
               null,
               null,
               null,
+              TRACE_UNLIMITED_ITERATIONS,
               List.of(),
               List.of(sharedFile)));
 
@@ -1538,6 +1566,19 @@ class ActivityServiceImplSubActivityTest {
     }
 
     @Test
+    void thenANewSubActivityShouldTakeTheTraceAllowedAssociationsOfItsDraft() {
+      BddLogger.given("a new sub-activity draft with a trace allowance");
+      firstSubActivityDraft.setTraceAllowedAssociations(3);
+      givenSubActivityDrafts(firstSubActivityDraft, secondSubActivityDraft);
+
+      BddLogger.when("publishing the main draft");
+      activityService.publish(mainDraft.getId());
+
+      BddLogger.then("the sub-activity should be published with that allowance");
+      assertEquals(3, savedSubActivities().getFirst().getTraceAllowedAssociations());
+    }
+
+    @Test
     void thenTheDraftsShouldBeRemovedOnceEverythingIsPublished() {
       givenSubActivityDrafts(firstSubActivityDraft, secondSubActivityDraft);
 
@@ -1587,6 +1628,7 @@ class ActivityServiceImplSubActivityTest {
               null,
               null,
               null,
+              TRACE_UNLIMITED_ITERATIONS,
               List.of(),
               List.of(removedFile));
       when(activityRepository.findAllSubActivitiesOf(mainDraft.getId()))
@@ -1605,6 +1647,25 @@ class ActivityServiceImplSubActivityTest {
 
       BddLogger.and("the file removed from the sub-activity should be deleted");
       verify(fileResourceService).delete(removedFileId);
+    }
+
+    @Test
+    void thenAPublishedSubActivityShouldTakeTheTraceAllowedAssociationsOfItsDraft() {
+      BddLogger.given("a published sub-activity whose draft changed the trace allowance");
+      givenPublished(
+          ActivityFixture.create().withId(mainDraft.getId()).withAuthor(staff).toModel());
+      var publishedFirstSubActivity =
+          publishedSubActivityOf(firstSubActivityDraft, mainDraft.getId(), List.of());
+      when(activityRepository.findAllSubActivitiesOf(mainDraft.getId()))
+          .thenReturn(List.of(publishedFirstSubActivity));
+      firstSubActivityDraft.setTraceAllowedAssociations(3);
+      givenSubActivityDrafts(firstSubActivityDraft);
+
+      BddLogger.when("publishing the main draft while no student is enrolled");
+      activityService.publish(mainDraft.getId());
+
+      BddLogger.then("the published sub-activity should take the allowance of its draft");
+      assertEquals(3, publishedFirstSubActivity.getTraceAllowedAssociations());
     }
 
     @Test
@@ -1682,6 +1743,7 @@ class ActivityServiceImplSubActivityTest {
           null,
           null,
           null,
+          TRACE_UNLIMITED_ITERATIONS,
           List.of(),
           files);
     }
@@ -1734,6 +1796,7 @@ class ActivityServiceImplSubActivityTest {
             subActivityDraft.getRecommendedCompletionContexts().orElse(null),
             subActivityDraft.getStartDate().orElse(null),
             subActivityDraft.getEndDate().orElse(null),
+            subActivityDraft.getTraceAllowedAssociations(),
             subActivityDraft.getLinks(),
             subActivityDraft.getFiles());
       }
@@ -1861,6 +1924,19 @@ class ActivityServiceImplSubActivityTest {
 
         BddLogger.then("no notification should be sent");
         verify(notificationService, never()).notifyAll(any());
+      }
+
+      @Test
+      void thenThePublishedSubActivityShouldKeepItsTraceAllowedAssociations() {
+        BddLogger.given("a sub-activity draft whose trace allowance was changed");
+        var initialLimit = firstSubActivityDraft.getTraceAllowedAssociations();
+        firstSubActivityDraft.setTraceAllowedAssociations(3);
+
+        BddLogger.when("publishing the main draft");
+        activityService.publish(mainDraft.getId());
+
+        BddLogger.then("the published sub-activity should keep its allowance");
+        assertEquals(initialLimit, savedSubActivities().getFirst().getTraceAllowedAssociations());
       }
     }
   }
