@@ -158,6 +158,7 @@ public class Activity extends AvenirsBaseModel implements ActivityNode {
       String recommendedCompletionContexts,
       LocalDate startDate,
       LocalDate endDate,
+      int traceAllowedAssociations,
       List<String> links,
       List<File> files) {
     Instant now = Instant.now();
@@ -174,7 +175,7 @@ public class Activity extends AvenirsBaseModel implements ActivityNode {
             startDate,
             endDate,
             false,
-            0,
+            traceAllowedAssociations,
             0,
             null,
             links,

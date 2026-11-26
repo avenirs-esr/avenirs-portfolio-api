@@ -74,6 +74,7 @@ public class TransactionalActivityService implements ActivityService {
       String recommendedCompletionContexts,
       LocalDate startDate,
       LocalDate endDate,
+      int traceAllowedAssociations,
       List<String> links) {
     return delegate.createSubActivity(
         id,
@@ -83,6 +84,7 @@ public class TransactionalActivityService implements ActivityService {
         recommendedCompletionContexts,
         startDate,
         endDate,
+        traceAllowedAssociations,
         links);
   }
 

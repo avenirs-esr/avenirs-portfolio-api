@@ -7,6 +7,7 @@
     "recommendedCompletionContexts": "À réaliser seul.e, au calme, avant le premier rendez-vous d'orientation.",
     "startDate": "2026-06-01",
     "endDate": "2027-06-30",
+    "traceAllowedAssociations": 2,
     "links": ["https://www.example.com/faire-le-point-sur-ses-envies"],
     "updatedAt": "2024-05-01T10:05:00Z"
   },
@@ -18,6 +19,7 @@
     "recommendedCompletionContexts": null,
     "startDate": null,
     "endDate": null,
+    "traceAllowedAssociations": -1,
     "links": [],
     "updatedAt": "2024-05-01T10:10:00Z"
   },
@@ -29,6 +31,7 @@
     "recommendedCompletionContexts": "À partager avec un.e conseiller/ conseillère d'orientation.",
     "startDate": "2027-07-01",
     "endDate": "2028-06-30",
+    "traceAllowedAssociations": -1,
     "links": [],
     "updatedAt": "2024-05-01T10:15:00Z"
   },
@@ -40,6 +43,7 @@
     "recommendedCompletionContexts": null,
     "startDate": null,
     "endDate": null,
+    "traceAllowedAssociations": 1,
     "links": [],
     "updatedAt": "2024-05-01T11:05:00Z"
   },
@@ -51,6 +55,7 @@
     "recommendedCompletionContexts": "À répéter devant une personne de confiance.",
     "startDate": null,
     "endDate": null,
+    "traceAllowedAssociations": 0,
     "links": [],
     "updatedAt": "2024-05-01T11:10:00Z"
   }

@@ -131,7 +131,7 @@ public class ActivityDraft extends AvenirsBaseModel implements ActivityNode {
             null,
             null,
             null,
-            0,
+            DEFAULT_TRACE_ALLOWED_ASSOCIATION,
             0,
             false,
             null,

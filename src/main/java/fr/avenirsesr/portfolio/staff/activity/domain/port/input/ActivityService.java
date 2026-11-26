@@ -50,6 +50,7 @@ public interface ActivityService {
       String recommendedCompletionContexts,
       LocalDate startDate,
       LocalDate endDate,
+      int traceAllowedAssociations,
       List<String> links);
 
   Activity publish(UUID activityDraftId);
