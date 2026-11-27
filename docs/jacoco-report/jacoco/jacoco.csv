@@ -60,7 +60,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.domain.service,Acti
 avenirs-portfolio-api,fr.avenirsesr.portfolio.staff.activity.domain.service,ActivityUserEntityAuthorizationReader,45,2,0,0,14,1,4,1,4,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.activity.domain.service,DeclaredActivityAssociationStrategy,0,177,0,10,0,47,0,19,0,14
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.activity.domain.service,FeedbackServiceImpl,32,806,4,64,9,210,5,58,1,27
-avenirs-portfolio-api,fr.avenirsesr.portfolio.student.activity.domain.service,DeclaredActivityServiceImpl,53,1398,18,130,11,364,20,116,2,60
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.activity.domain.service,DeclaredActivityServiceImpl,51,1400,17,131,10,365,19,117,2,60
 avenirs-portfolio-api,fr.avenirsesr.portfolio.file.domain.data,FileData,0,12,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.port.output.client,StudentAccessScope,0,15,0,0,0,2,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.trace.infrastructure.adapter.kit,TraceKitDownloadAdapter,0,71,0,6,0,12,0,8,0,5
