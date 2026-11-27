@@ -1,0 +1,14 @@
+.git
+**/.git
+.github
+.idea
+*.iml
+target
+**/target
+logs
+cover
+photo
+node_modules
+**/node_modules
+Dockerfile
+.dockerignore

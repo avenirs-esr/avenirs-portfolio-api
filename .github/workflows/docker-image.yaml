@@ -1,0 +1,16 @@
+name: Docker image
+
+on:
+  push:
+    branches: [ develop ]
+    tags: [ '*' ]
+  pull_request:
+    branches: [ develop ]
+  workflow_dispatch:
+
+jobs:
+  call-docker-image:
+    uses: avenirs-esr/avenirs-workflows/.github/workflows/docker-image-workflow.yaml@main
+    permissions:
+      contents: read
+      packages: write
